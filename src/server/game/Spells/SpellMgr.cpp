@@ -3035,11 +3035,23 @@ void SpellMgr::LoadDbcDataCorrections()
             case 62136: // Energize Cores
             case 54069: // Energize Cores
             case 56251: // Energize Cores
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENTRY;
                 break;
             case 50785: // Energize Cores
             case 59372: // Energize Cores
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
+                break;
+            case 49346: // Emerald Drake Saddle
+            case 49460: // Amber Drake Saddle
+            case 49464: // Ruby Drake Saddle
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
+                break;
+            case 66667: // Gear Scaling
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ANY;
+                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ANY;
                 break;
             case 8494: // Mana Shield (rank 2)
                 // because of bug in dbc

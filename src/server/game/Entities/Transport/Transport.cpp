@@ -558,10 +558,13 @@ void Transport::Update(uint32 p_diff)
         else
         {
             Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z, GetAngle(m_next->second.x, m_next->second.y) + float(M_PI));
-            UpdateNPCPositions(); // COME BACK MARKER
         }
 
         sScriptMgr->OnRelocate(this, m_curr->first, m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
+
+        // Esto obliga al server a actualizar posiciones en el transporte para players y npcs.
+        UpdateNPCPositions();
+        UpdatePlayerPositions();
 
         m_nextNodeTime = m_curr->first;
 
@@ -737,6 +740,7 @@ void Transport::UpdatePosition(MovementInfo* mi)
 
     Relocate(transport_x, transport_y, transport_z, transport_o);
     UpdateNPCPositions();
+    UpdatePlayerPositions();
 }
 
 void Transport::UpdateNPCPositions()
@@ -752,5 +756,24 @@ void Transport::UpdateNPCPositions()
         z = GetPositionZ() + npc->m_movementInfo.t_pos.m_positionZ;
         npc->SetHomePosition(x, y, z, o);
         GetMap()->CreatureRelocation(npc, x, y, z, o, false);
+    }
+}
+
+void Transport::UpdatePlayerPositions()
+{
+    for (PlayerSet::iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
+    {
+        Player* plr = *itr;
+
+        float x, y, z, o;
+        o = GetOrientation() + plr->m_movementInfo.t_pos.m_orientation;
+        x = GetPositionX() + (plr->m_movementInfo.t_pos.m_positionX * cos(GetOrientation()) + plr->m_movementInfo.t_pos.m_positionY * sin(GetOrientation() + M_PI));
+        y = GetPositionY() + (plr->m_movementInfo.t_pos.m_positionY * cos(GetOrientation()) + plr->m_movementInfo.t_pos.m_positionX * sin(GetOrientation()));
+        z = GetPositionZ() + plr->m_movementInfo.t_pos.m_positionZ;
+        plr->Relocate(x, y, z, o);
+        UpdateData transData;
+        WorldPacket packet;
+        transData.BuildPacket(&packet);
+        plr->SendDirectMessage(&packet);
     }
 }

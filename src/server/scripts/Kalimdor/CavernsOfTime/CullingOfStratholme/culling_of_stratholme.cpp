@@ -269,7 +269,7 @@ public:
                 break;
         }
         player->CLOSE_GOSSIP_MENU();
-        ai->SetDespawnAtFar(true);
+        ai->SetDespawnAtFar(false);
         creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         return true;
     }
@@ -1054,7 +1054,7 @@ public:
                                 if (uiStep == 76) DoScriptText(SAY_PHASE310, me);
                                 SetHoldState(false);
                                 bStepping = false;
-                                SetRun(true);
+                                SetRun(false);
                                 JumpToNextStep(2000);
                             }
                             break;

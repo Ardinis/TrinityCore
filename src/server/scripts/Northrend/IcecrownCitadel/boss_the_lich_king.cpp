@@ -483,12 +483,13 @@ class boss_the_lich_king : public CreatureScript
         {
             boss_the_lich_kingAI(Creature* creature) : BossAI(creature, DATA_THE_LICH_KING)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
             {
                 _Reset();
-                me->SetReactState(REACT_PASSIVE);
                 events.SetPhase(PHASE_INTRO);
                 _necroticPlagueStack = 0;
                 _vileSpiritExplosions = 0;
@@ -647,6 +648,7 @@ class boss_the_lich_king : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_ONE && !HealthAbovePct(70))
                 {
                     events.SetPhase(PHASE_TRANSITION);
+                    SetImmuneToTaunt(true);
                     me->GetMotionMaster()->MovePoint(POINT_CENTER_1, CenterPosition);
                     return;
                 }
@@ -654,6 +656,7 @@ class boss_the_lich_king : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_TWO && !HealthAbovePct(40))
                 {
                     events.SetPhase(PHASE_TRANSITION);
+                    SetImmuneToTaunt(true);
                     me->GetMotionMaster()->MovePoint(POINT_CENTER_2, CenterPosition);
                     return;
                 }
@@ -806,6 +809,7 @@ class boss_the_lich_king : public CreatureScript
                         SendMusicToPlayers(MUSIC_SPECIAL);
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
+                        SetImmuneToTaunt(false);
                         DoCast(me, SPELL_REMORSELESS_WINTER_1);
                         events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
                         events.ScheduleEvent(EVENT_QUAKE, 62500, 0, PHASE_TRANSITION);
@@ -823,6 +827,7 @@ class boss_the_lich_king : public CreatureScript
                         SendMusicToPlayers(MUSIC_SPECIAL);
                         me->SetReactState(REACT_PASSIVE);
                         me->AttackStop();
+                        SetImmuneToTaunt(false);
                         DoCast(me, SPELL_REMORSELESS_WINTER_2);
                         summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
@@ -897,7 +902,8 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_INTRO_CAST_FREEZE:
                             Talk(SAY_LK_INTRO_3);
-                            DoCastAOE(SPELL_ICE_LOCK, false);
+                            if (Unit* Tirion = me->GetMap()->GetCreature(instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                DoCast(Tirion, SPELL_ICE_LOCK, false);
                             events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
                             break;
                         case EVENT_FINISH_INTRO:
@@ -905,6 +911,7 @@ class boss_the_lich_king : public CreatureScript
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             me->SetReactState(REACT_AGGRESSIVE);
                             events.SetPhase(PHASE_ONE);
+                            me->SetInCombatWithZone();
                             break;
                         case EVENT_SUMMON_SHAMBLING_HORROR:
                             DoCast(me, SPELL_SUMMON_SHAMBLING_HORROR);
@@ -1102,6 +1109,20 @@ class boss_the_lich_king : public CreatureScript
             }
 
         private:
+
+            void SetImmuneToTaunt(bool apply)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, apply);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, apply);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, apply);
+
+                // Following might not be necessay, but just in case...
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_THREAT, apply);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CRITICAL_THREAT, apply);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT_ALL, apply);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_MODIFY_THREAT_PERCENT, apply);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_REDIRECT_THREAT, apply);
+            }
 
             void TeleportSpirit(Creature* summon)
             {
@@ -1476,7 +1497,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                 _events.Reset();
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
-                me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
+                me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)

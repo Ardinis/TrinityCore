@@ -85,12 +85,13 @@ class boss_festergut : public CreatureScript
                 _maxInoculatedStack = 0;
                 _inhaleCounter = 0;
                 _gasDummyGUID = 0;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
             {
                 _Reset();
-                me->SetReactState(REACT_DEFENSIVE);
                 events.ScheduleEvent(EVENT_BERSERK, 300000);
                 events.ScheduleEvent(EVENT_INHALE_BLIGHT, urand(25000, 30000));
                 events.ScheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
@@ -160,6 +161,15 @@ class boss_festergut : public CreatureScript
             {
                 if (spell->Id == PUNGENT_BLIGHT_HELPER)
                     target->RemoveAurasDueToSpell(INOCULATED_HELPER);
+            }
+
+            void MoveInLineOfSight(Unit* who)
+            {
+                if (me->IsWithinDistInMap(who, 20.0f))
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetInCombatWithZone();
+                }
             }
 
             void UpdateAI(uint32 const diff)
@@ -284,6 +294,8 @@ class npc_stinky_icc : public CreatureScript
             npc_stinky_iccAI(Creature* creature) : ScriptedAI(creature)
             {
                 _instance = creature->GetInstanceScript();
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -470,6 +482,54 @@ class achievement_flu_shot_shortage : public AchievementCriteriaScript
         }
 };
 
+class PlagueStenchTargetSelector
+{
+    public:
+        PlagueStenchTargetSelector(Unit* caster) : _caster(caster) { }
+
+        bool operator()(Unit* unit)
+        {
+            return !unit->IsWithinLOSInMap(_caster);
+        }
+    private:
+        Unit* _caster;
+};
+
+class spell_stinky_plague_stench : public SpellScriptLoader
+{
+    public:
+        spell_stinky_plague_stench() : SpellScriptLoader("spell_stinky_plague_stench") { }
+
+        class spell_stinky_plague_stench_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_stinky_plague_stench_SpellScript);
+
+            bool Validate(SpellEntry const* spellEntry)
+            {
+                if (!sSpellStore.LookupEntry(71160))
+                    return false;
+                if (!sSpellStore.LookupEntry(71161))
+                    return false;
+                return true;
+            }
+
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(PlagueStenchTargetSelector(GetCaster()));
+            }
+
+            void Register()
+            {
+                 OnUnitTargetSelect += SpellUnitTargetFn(spell_stinky_plague_stench_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_stinky_plague_stench_SpellScript();
+        }
+};
+
 void AddSC_boss_festergut()
 {
     new boss_festergut();
@@ -478,4 +538,5 @@ void AddSC_boss_festergut()
     new spell_festergut_gastric_bloat();
     new spell_festergut_blighted_spores();
     new achievement_flu_shot_shortage();
+    new spell_stinky_plague_stench();
 }

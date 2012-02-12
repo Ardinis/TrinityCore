@@ -163,8 +163,10 @@ set(scripts_STAT_SRCS
   Northrend/IcecrownCitadel/icecrown_citadel.cpp
   Northrend/IcecrownCitadel/icecrown_citadel.h
   Northrend/IcecrownCitadel/icecrown_citadel_teleport.cpp
+  Northrend/IcecrownCitadel/icecrown_citadel_trashmobs.cpp
   Northrend/IcecrownCitadel/boss_lord_marrowgar.cpp
   Northrend/IcecrownCitadel/boss_lady_deathwhisper.cpp
+  Northrend/IcecrownCitadel/boss_gunship_battle_wowrean.cpp
   Northrend/IcecrownCitadel/boss_deathbringer_saurfang.cpp
   Northrend/IcecrownCitadel/boss_festergut.cpp
   Northrend/IcecrownCitadel/boss_rotface.cpp

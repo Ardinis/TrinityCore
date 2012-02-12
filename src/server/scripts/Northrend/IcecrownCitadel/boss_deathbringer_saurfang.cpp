@@ -246,12 +246,13 @@ class boss_deathbringer_saurfang : public CreatureScript
                 ASSERT(creature->GetVehicleKit()); // we dont actually use it, just check if exists
                 _introDone = false;
                 _fallenChampionCastCount = 0;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
             {
                 _Reset();
-                me->SetReactState(REACT_DEFENSIVE);
                 events.SetPhase(PHASE_COMBAT);
                 _frenzied = false;
                 me->SetPower(POWER_ENERGY, 0);
@@ -435,6 +436,8 @@ class boss_deathbringer_saurfang : public CreatureScript
                             events.SetPhase(PHASE_COMBAT);
                             _introDone = true;
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            me->SetInCombatWithZone();
                             break;
                         case EVENT_SUMMON_BLOOD_BEAST:
                             for (uint32 i10 = 0; i10 < 2; ++i10)

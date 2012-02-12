@@ -364,6 +364,8 @@ class boss_prince_keleseth_icc : public CreatureScript
             {
                 _isEmpowered = false;
                 _spawnHealth = creature->GetMaxHealth();
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void InitializeAI()
@@ -375,19 +377,17 @@ class boss_prince_keleseth_icc : public CreatureScript
                 if (!me->isDead())
                     JustRespawned();
 
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_AGGRESSIVE);
             }
 
             void Reset()
             {
                 events.Reset();
                 summons.DespawnAll();
-
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -588,7 +588,9 @@ class boss_prince_taldaram_icc : public CreatureScript
             {
                 _isEmpowered = false;
                 _spawnHealth = creature->GetMaxHealth();
-            }
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+           }
 
             void InitializeAI()
             {
@@ -599,7 +601,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                 if (!me->isDead())
                     JustRespawned();
 
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_AGGRESSIVE);
             }
 
             void Reset()
@@ -611,7 +613,6 @@ class boss_prince_taldaram_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(_spawnHealth);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void MoveInLineOfSight(Unit* /*who*/)
@@ -811,6 +812,8 @@ class boss_prince_valanar_icc : public CreatureScript
             {
                 _isEmpowered = false;
                 _spawnHealth = creature->GetMaxHealth();
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void InitializeAI()
@@ -822,7 +825,7 @@ class boss_prince_valanar_icc : public CreatureScript
                 if (!me->isDead())
                     JustRespawned();
 
-                me->SetReactState(REACT_DEFENSIVE);
+                me->SetReactState(REACT_AGGRESSIVE);
             }
 
             void Reset()
@@ -834,7 +837,6 @@ class boss_prince_valanar_icc : public CreatureScript
                 _isEmpowered = false;
                 me->SetHealth(me->GetMaxHealth());
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, uint32(true));
-                me->SetReactState(REACT_DEFENSIVE);
             }
 
             void MoveInLineOfSight(Unit* /*who*/)

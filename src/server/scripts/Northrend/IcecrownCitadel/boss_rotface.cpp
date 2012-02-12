@@ -94,6 +94,8 @@ class boss_rotface : public CreatureScript
             {
                 infectionStage = 0;
                 infectionCooldown = 14000;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -157,9 +159,13 @@ class boss_rotface : public CreatureScript
                     Talk(SAY_SLIME_SPRAY);
             }
 
-            void MoveInLineOfSight(Unit* /*who*/)
+            void MoveInLineOfSight(Unit* who)
             {
-                // don't enter combat
+                if (me->IsWithinDistInMap(who, 20.0f))
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetInCombatWithZone();
+                }
             }
 
             void UpdateAI(const uint32 diff)
@@ -346,6 +352,8 @@ class npc_precious_icc : public CreatureScript
             npc_precious_iccAI(Creature* creature) : ScriptedAI(creature), _summons(me)
             {
                 _instance = creature->GetInstanceScript();
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()

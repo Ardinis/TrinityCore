@@ -26,6 +26,7 @@
 #include "DBCStores.h"
 #include "World.h"
 #include "GameObjectAI.h"
+#include "Vehicle.h"
 
 void MapManager::LoadTransports()
 {
@@ -620,6 +621,13 @@ void Transport::BuildStartMovePacket(Map const* targetMap)
 {
     SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     SetGoState(GO_STATE_ACTIVE);
+    UpdateForMap(targetMap);
+}
+
+void Transport::BuildWaitMovePacket(Map const* targetMap)
+{
+    m_WayPoints.clear();
+    SetGoState(GO_STATE_READY);
     UpdateForMap(targetMap);
 }
 

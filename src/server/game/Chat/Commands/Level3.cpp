@@ -64,6 +64,15 @@
 #include "Group.h"
 #include "ChannelMgr.h"
 
+//TrinityJail reload commands Edited by LordPsyan ajustado por Eilo
+	bool ChatHandler::HandleJailReloadCommand(const char* arg)
+{
+    sObjectMgr->LoadJailConf();
+    SendSysMessage(LANG_JAIL_RELOAD);
+    return true;
+}
+
+
 bool ChatHandler::HandleMaxSkillCommand(const char* /*args*/)
 {
     Player* SelectedPlayer = getSelectedPlayer();

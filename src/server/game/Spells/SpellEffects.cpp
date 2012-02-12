@@ -3410,6 +3410,9 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
     unitTarget->ClearUnitState(UNIT_STATE_MOVING);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
+        // For players just turn them & make them stand up
+        if (unitTarget->ToPlayer()->IsSitState())
+            unitTarget->ToPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
 }
 

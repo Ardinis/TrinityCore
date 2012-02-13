@@ -2331,6 +2331,8 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 57992:     // Envenom (Rank 3)
                 case 57993:     // Envenom (Rank 4)
                     return true;
+	    case 5171: //FIX DEBITER
+	      return true;
                 default:
                     break;
             }

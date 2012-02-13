@@ -1719,6 +1719,12 @@ bool Spell::UpdateChanneledTargetList()
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, range, this);
     }
 
+    //If target has Grounding totem aura and totem is not in range of channeling spell
+    if (Unit *Ttarget = m_targets.GetUnitTarget())
+      if (!m_spellInfo->Effects[0].IsAreaAuraEffect() && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && m_spellInfo->IsChanneled())       
+	if (Ttarget->GetEntry() == 5925)          
+	  range += 31;
+
     for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
         if (ihit->missCondition == SPELL_MISS_NONE && (channelTargetEffectMask & ihit->effectMask))
@@ -6468,6 +6474,8 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
                 caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
             if (!caster)
                 caster = m_caster;
+	    if(target->GetEntry() == 5925)
+	      return true;
             if (target != m_caster && !target->IsWithinLOSInMap(caster))
                 return false;
             break;
@@ -7212,8 +7220,13 @@ bool Spell::CanExecuteTriggersOnHit(uint8 effMask, SpellInfo const* spellInfo) c
     // If triggered spell doesn't have SPELL_ATTR4_PROC_ONLY_ON_DUMMY then it can NOT proc on SPELL_EFFECT_DUMMY (needs confirmation)
     for (uint8 i = 0;i < MAX_SPELL_EFFECTS; ++i)
     {
-        if ((effMask & (1 << i)) && (only_on_dummy == (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)))
+      if (m_spellInfo->SpellIconID != 2237)
+	{
+	  if ((effMask & (1 << i)) && (only_on_dummy == (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)))
             return true;
+	}
+      else if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA && (effMask & (1 << i)) && (only_on_dummy == (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DUMMY)))
+	return true;
     }
     return false;
 }

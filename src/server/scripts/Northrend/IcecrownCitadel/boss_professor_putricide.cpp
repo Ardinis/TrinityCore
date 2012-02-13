@@ -49,6 +49,7 @@ enum ScriptTexts
 
 enum Spells
 {
+  SPELL_DEATH_GRIP                 = 49560, // DK's Death Grip, here just for immunities
     // Festergut
     SPELL_RELEASE_GAS_VISUAL            = 69125,
     SPELL_GASEOUS_BLIGHT_LARGE          = 69157,
@@ -235,6 +236,7 @@ class boss_professor_putricide : public CreatureScript
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                 if (events.GetPhaseMask() & PHASE_MASK_COMBAT)
                     instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, FAIL);
+		instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MUTATED_PLAGUE);
             }
 
             void KilledUnit(Unit* victim)
@@ -248,11 +250,23 @@ class boss_professor_putricide : public CreatureScript
                 _JustDied();
                 Talk(SAY_DEATH);
                 DoCast(SPELL_MUTATED_PLAGUE_CLEAR);
+		instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MUTATED_PLAGUE);
             }
 
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_TRANSFORM, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+		summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 switch (summon->GetEntry())
                 {
                     case NPC_GROWING_OOZE_PUDDLE:
@@ -572,8 +586,15 @@ class boss_professor_putricide : public CreatureScript
                             if (!targets.empty())
                                 for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     DoCast(*itr, SPELL_SLIME_PUDDLE_TRIGGER);
-                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, 35000);
-                            break;
+			    switch (_phase)
+			      {
+			      case PHASE_COMBAT_3:
+				events.ScheduleEvent(EVENT_SLIME_PUDDLE, 15000);
+				break;
+			      default:
+				events.ScheduleEvent(EVENT_SLIME_PUDDLE, 35000);
+				break;
+			      }
                         }
                         case EVENT_UNSTABLE_EXPERIMENT:
                             Talk(EMOTE_UNSTABLE_EXPERIMENT);
@@ -712,6 +733,7 @@ class npc_volatile_ooze : public CreatureScript
                 {
                     DoCast(me, SPELL_OOZE_ERUPTION);
                     victim->RemoveAurasDueToSpell(SPELL_VOLATILE_OOZE_ADHESIVE, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
+		    me->Kill(me);
                 }
 
                 if (!_newTargetSelectTimer)

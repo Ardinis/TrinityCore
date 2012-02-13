@@ -312,6 +312,11 @@ class boss_valithria_dreamwalker : public CreatureScript
                 _done = false;
             }
 
+	  void JustDied(Unit* /*killer*/)
+	  {
+	    if (!_done)
+	      me->Respawn();
+	  }
             void AttackStart(Unit* /*target*/)
             {
             }
@@ -324,7 +329,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 DoCast(me, SPELL_COPY_DAMAGE);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
-                _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
+                _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(25000, 38000));
                 if (IsHeroic())
                     _events.ScheduleEvent(EVENT_BERSERK, 420000);
             }

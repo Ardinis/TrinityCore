@@ -606,4 +606,7 @@ void AddSC_boss_lord_marrowgar()
     new spell_marrowgar_coldflame_damage();
     new spell_marrowgar_bone_spike_graveyard();
     new spell_marrowgar_bone_storm();
+
+    if (VehicleSeatEntry* vehSeat = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(6206)))
+      vehSeat->m_flags |= 0x400;
 }

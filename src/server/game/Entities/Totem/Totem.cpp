@@ -138,12 +138,15 @@ void Totem::UnSummon()
 bool Totem::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const
 {
     // TODO: possibly all negative auras immune?
-    if (GetEntry() == 5925)
-        return false;
+  //    if (GetEntry() == 5925)
+  //    return false;
 
     switch (spellInfo->Effects[index].ApplyAuraName)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
+	  for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)  
+	    if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)    
+	      return false;
         case SPELL_AURA_PERIODIC_LEECH:
         case SPELL_AURA_MOD_FEAR:
         case SPELL_AURA_TRANSFORM:

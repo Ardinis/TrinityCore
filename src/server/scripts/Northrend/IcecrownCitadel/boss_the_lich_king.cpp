@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,9 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "icecrown_citadel.h"
+
+#define  NPC_PLATFORM_DESTRUCTIBLE_EDGE_STALKER       22515
+#define TYPE_VICTIM 42
 
 enum Texts
 {
@@ -71,6 +74,8 @@ enum Texts
 
 enum Spells
 {
+    SPELL_DEATH_GRIP                 = 49560,
+
     // The Lich King
     SPELL_PLAGUE_AVOIDANCE              = 72846,    // raging spirits also get it
     SPELL_EMOTE_SIT_NO_SHEATH           = 73220,
@@ -116,11 +121,14 @@ enum Spells
     SPELL_SOUL_REAPER_BUFF              = 69410,
     SPELL_WINGS_OF_THE_DAMNED           = 74352,
     SPELL_VALKYR_TARGET_SEARCH          = 69030,
-    SPELL_CHARGE                        = 74399,    // cast on selected target
     SPELL_VALKYR_CARRY                  = 74445,    // removes unselectable flag
     SPELL_LIFE_SIPHON                   = 73488,
     SPELL_LIFE_SIPHON_HEAL              = 73489,
-    SPELL_EJECT_ALL_PASSENGERS          = 68576,
+    SPELL_VALKYR_CARRY_CAN_CAST      = 74506,
+    SPELL_VALKYR_GRAB_PLAYER         = 68985, //74445,
+    SPELL_RIDE_VEHICLE               = 46598,
+    SPELL_VALKYR_CHARGE              = 74399,
+    SPELL_VALKYR_EJECT_PASSENGER     = 68576,
 
     // Phase 3
     SPELL_VILE_SPIRITS                  = 70498,
@@ -176,6 +184,9 @@ enum Spells
     SPELL_SHOCKWAVE                     = 72149,
     SPELL_ENRAGE                        = 72143,
     SPELL_FRENZY                        = 28747,
+
+    // valkyr
+    
 };
 
 #define NECROTIC_PLAGUE_LK   RAID_MODE<uint32>(70337, 73912, 73913, 73914)
@@ -307,6 +318,19 @@ Position const TerenasSpawn       = {495.5542f, -2517.012f, 1050.000f, 4.6993f};
 Position const TerenasSpawnHeroic = {495.7080f, -2523.760f, 1050.000f, 0.0f};
 Position const SpiritWardenSpawn  = {495.3406f, -2529.983f, 1050.000f, 1.5592f};
 
+struct Position MovePos[]=
+  {
+    {461.792f, -2125.85f, 1040.860f, 0.0f}, // move
+    {503.156f, -2124.51f, 1040.860f, 0.0f}, // move center X: 505.2118 Y: -2124.353 Z: 840.9403
+    {490.110f, -2124.98f, 1040.860f, 0.0f}, // move tirion frostmourne
+    {467.069f, -2123.58f, 1040.857f, 0.0f}, // move tirion attack
+    {498.004f, 2201.57f, 1046.093f, 0.0f},  // move valkyr
+    {489.297f, -2124.84f, 1040.857f, 0.0f}, //start event tirion move 1
+    {503.682f, -2126.63f, 1040.940f, 0.0f}, //boss escapes after wipe
+    {508.989f, -2124.55f, 1045.356f, 0.0f}, //boss levitates above the frostmourne
+    {505.212f, -2124.35f, 1040.94f, 3.14159f}
+  };
+
 enum MovePoints
 {
     POINT_CENTER_1          = 1,
@@ -323,6 +347,12 @@ enum MovePoints
     POINT_LK_OUTRO_2        = 12,
     POINT_GROUND            = 13,
     POINT_CHARGE            = 1003, // globally used number for charge spell effects
+    POINT_START_EVENT_1              = 3659700,
+    POINT_PLATFORM_CENTER            = 3659701,
+    POINT_PLATFORM_END               = 3659702,
+    POINT_VALKYR_END                 = 3659703,
+    POINT_VALKYR_ZET                 = 3659704,
+    POINT_VALKYR_CONTINUE_FLYING     = 3659705,
 };
 
 enum EncounterActions
@@ -336,6 +366,7 @@ enum EncounterActions
     ACTION_SUMMON_TERENAS       = 6,
     ACTION_FINISH_OUTRO         = 7,
     ACTION_TELEPORT_BACK        = 8,
+    ACTION_CHARGE_PLAYER = 9,
 };
 
 enum MiscData
@@ -509,6 +540,7 @@ class boss_the_lich_king : public CreatureScript
                 if (fabs(ground_Z - z) < 0.1f)
                     return;
 
+		//                me->GetMotionMaster()->MoveFall(ground_Z);
                 me->GetMotionMaster()->MoveFall();
             }
 
@@ -741,9 +773,22 @@ class boss_the_lich_king : public CreatureScript
                         summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(15000));
                         return;
                     }
-                    case NPC_STRANGULATE_VEHICLE:
-                        summons.Summon(summon);
-                        return;
+		case NPC_STRANGULATE_VEHICLE:
+		  summons.Summon(summon);
+		  return;
+		case NPC_VALKYR_SHADOWGUARD:
+		  if (Unit *valkyrTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+		    {
+		      summon->AI()->SetGUID(valkyrTarget->GetGUID(), TYPE_VICTIM);
+		    }
+		  else
+		    {
+		      std::cout << "no target wtff ???" << std::endl;
+		      //There is no target - unsummon valkyr
+		      summon->Kill(summon);
+		      summon->DespawnOrUnsummon();
+		    }
+		  break;
                     default:
                         break;
                 }
@@ -855,6 +900,20 @@ class boss_the_lich_king : public CreatureScript
                         break;
                 }
             }
+
+	  void SetImmuneToTaunt(bool apply)
+	  {
+	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, apply);
+	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, apply);
+	    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, apply);
+
+	    // Following might not be necessay, but just in case...
+	    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_THREAT, apply);
+	    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CRITICAL_THREAT, apply);
+	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT_ALL, apply);
+	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_MODIFY_THREAT_PERCENT, apply);
+	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_REDIRECT_THREAT, apply);
+	  }
 
             void UpdateAI(uint32 const diff)
             {
@@ -988,7 +1047,7 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_SUMMON_VALKYR:
                             SendMusicToPlayers(MUSIC_SPECIAL);
                             Talk(SAY_LK_SUMMON_VALKYR);
-                            DoCastAOE(SUMMON_VALKYR);
+			    me->CastSpell(me, SPELL_SUMMON_VALKYR, true);
                             events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
                             break;
                         case EVENT_START_ATTACK:
@@ -1638,6 +1697,7 @@ class npc_strangulate_vehicle : public CreatureScript
             npc_strangulate_vehicleAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+	      _started = false;
             }
 
             void IsSummonedBy(Unit* summoner)
@@ -1657,7 +1717,12 @@ class npc_strangulate_vehicle : public CreatureScript
             {
                 if (action != ACTION_TELEPORT_BACK)
                     return;
-
+		if (!_started)
+		  {
+		    _started = true;
+		    //				_events.ScheduleEvent(EVENT_TELEPORT, 3000);
+		    return ;
+		  }
                 if (TempSummon* summ = me->ToTempSummon())
                     if (Unit* summoner = summ->GetSummoner())
                         DoCast(summoner, SPELL_HARVEST_SOUL_TELEPORT_BACK);
@@ -1677,7 +1742,7 @@ class npc_strangulate_vehicle : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_TELEPORT:
-                            me->GetMotionMaster()->Clear(false);
+ 			    me->GetMotionMaster()->Clear(false);
                             me->GetMotionMaster()->MoveIdle();
                             if (TempSummon* summ = me->ToTempSummon())
                             {
@@ -1722,6 +1787,7 @@ class npc_strangulate_vehicle : public CreatureScript
         private:
             EventMap _events;
             InstanceScript* _instance;
+	  bool _started;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1788,6 +1854,7 @@ class npc_terenas_menethil : public CreatureScript
             {
                 if (damage >= me->GetHealth())
                 {
+		  std::cout << "therenas die" << std::endl;
                     damage = me->GetHealth() - 1;
                     if (!me->HasAura(SPELL_TERENAS_LOSES_INSIDE) && !IsHeroic())
                     {
@@ -1851,7 +1918,7 @@ class npc_terenas_menethil : public CreatureScript
                                     tirion->AI()->AttackStart(lichKing);
                             }
                             break;
-                        case EVENT_DESTROY_SOUL:
+		    case EVENT_DESTROY_SOUL:
                             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
                                 warden->CastSpell((Unit*)NULL, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
@@ -1904,6 +1971,7 @@ class npc_spirit_warden : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
+	      std::cout << "npc_spirit_warden die" << std::endl;
                 if (Creature* terenas = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_TERENAS_MENETHIL)))
                     terenas->AI()->DoAction(ACTION_TELEPORT_BACK);
             }
@@ -1957,7 +2025,7 @@ class npc_spirit_bomb : public CreatureScript
             {
                 float destX, destY, destZ;
                 me->GetPosition(destX, destY);
-                destZ = 1055.0f;    // approximation, gets more precise later
+                destZ = 870 + 10;    // approximation, gets more precise later
                 me->UpdateGroundPositionZ(destX, destY, destZ);
                 me->GetMotionMaster()->MovePoint(POINT_GROUND, destX, destY, destZ);
             }
@@ -2072,10 +2140,10 @@ class spell_the_lich_king_infest : public SpellScriptLoader
             void OnUpdate(AuraEffect* aurEff)
             {
                 // multiply, starting from 2nd tick
-                if (aurEff->GetTickNumber() == 1)
+	      /*                if (aurEff->GetTickNumber() == 1)
                     return;
 
-                aurEff->SetAmount(int32(aurEff->GetAmount() * 1.15f));
+		    aurEff->SetAmount(int32(aurEff->GetAmount() * 1.15f));*/
             }
 
             void Register()
@@ -2460,12 +2528,16 @@ class spell_the_lich_king_defile : public SpellScriptLoader
             }
 
             void ChangeDamageAndGrow()
-            {
-                SetHitDamage(int32(GetHitDamage() * GetCaster()->GetFloatValue(OBJECT_FIELD_SCALE_X)));
-                // HACK: target player should cast this spell on defile
-                // however with current aura handling auras cast by different units
-                // cannot stack on the same aura object increasing the stack count
-                GetCaster()->CastSpell(GetCaster(), SPELL_DEFILE_GROW, true);
+            {      
+	      if (GetHitUnit()->GetTypeId() != TYPEID_PLAYER)
+		return ;
+	      if (GetHitUnit()->isTotem())
+		return ;
+	      SetHitDamage(int32(GetHitDamage() * GetCaster()->GetFloatValue(OBJECT_FIELD_SCALE_X)));
+	      // HACK: target player should cast this spell on defile
+	      // however with current aura handling auras cast by different units
+	      // cannot stack on the same aura object increasing the stack count
+	      GetCaster()->CastSpell(GetCaster(), SPELL_DEFILE_GROW, true);
             }
 
             void Register()
@@ -2593,8 +2665,18 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex effIndex)
             {
-                PreventHitDefaultEffect(effIndex);
-                GetCaster()->CastSpell(GetHitUnit(), SPELL_CHARGE, true);
+	      Unit *target = GetHitUnit(), *caster = GetCaster();
+	      if (!(target && target->isAlive() && caster))
+		return;
+
+	      if (target->GetTypeId() == TYPEID_PLAYER)
+                {
+		  if (UnitAI *pAI = caster->GetAI())
+                    {
+		      pAI->SetGUID(target->GetGUID(), TYPE_VICTIM);
+		      pAI->DoAction(ACTION_CHARGE_PLAYER);
+                    }
+                }
             }
 
             void Register()

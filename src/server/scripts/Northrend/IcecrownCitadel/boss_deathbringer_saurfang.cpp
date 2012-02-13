@@ -85,6 +85,7 @@ enum ScriptTexts
 
 enum Spells
 {
+  SPELL_DEATH_GRIP                 = 49560, // DK's Death Grip, here just for immunities
     // Deathbringer Saurfang
     SPELL_ZERO_POWER                    = 72242,
     SPELL_GRIP_OF_AGONY                 = 70572, // Intro
@@ -353,6 +354,17 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_TRANSFORM, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+	      summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                     summon->AI()->AttackStart(target);
 

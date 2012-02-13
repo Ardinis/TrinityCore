@@ -2449,17 +2449,17 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
     HitChance += int32(m_modSpellHitChance * 100.0f);
 
-    if (HitChance < 100)
-        HitChance = 100;
-    else if (HitChance > 10000)
-        HitChance = 10000;
+    if (HitChance < 90)
+        HitChance = 90;
+    else if (HitChance > 9000)
+        HitChance = 9000;
 
-    int32 tmp = 10000 - HitChance;
+    int32 tmp = 9000 - HitChance;
 
-    int32 rand = irand(0, 10000);
+    int32 rand = urand(0, 9000);
 
     if (rand < tmp)
-        return SPELL_MISS_MISS;
+        return SPELL_MISS_RESIST;
 
     // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore
     // resist and deflect chances
@@ -10049,23 +10049,38 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, SpellInfo const* spellInfo)
 
     // Magic case
     if (spellInfo && (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
-    {
-        // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-        if (spellInfo->Attributes & SPELL_ATTR0_ABILITY || spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REDIRECTED || spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
-            return victim;
-        // I am not sure if this should be redirected.
-        if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-            return victim;
-
-        Unit::AuraEffectList const& magnetAuras = victim->GetAuraEffectsByType(SPELL_AURA_SPELL_MAGNET);
-        for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
-            if (Unit* magnet = (*itr)->GetBase()->GetCaster())
-                if (magnet->isAlive() && IsWithinLOSInMap(magnet))
-                {
-                    (*itr)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
-                    return magnet;
-                }
-    }
+      {    
+	if (victim->HasAura(8178)) //Grounding totem    
+	  {           
+	    for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)         
+	      {               
+		if (spellInfo->Effects[j].ApplyAuraName == SPELL_AURA_MOD_TAUNT && spellInfo->Effects[j].ApplyAuraName != 49560)                      
+		  return victim;// Death Grip        
+	      }          
+	    if (spellInfo->SpellIconID == 2818 && spellInfo->AttributesEx != 335561860) // PENANCE in Group                
+	      return victim;        
+	    if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && !spellInfo->IsChanneled())              
+	      return victim;
+               
+	  }      
+	else
+	  //I am not sure if this should be redirected.          
+	  if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE)   
+	    return victim;
+ 
+	Unit::AuraEffectList const& magnetAuras = victim->GetAuraEffectsByType(SPELL_AURA_SPELL_MAGNET);
+	for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
+	  if (Unit* magnet = (*itr)->GetBase()->GetUnitOwner())
+	    if (magnet->isAlive())              
+	      if (magnet->HasAura(8178)) // Grounding totem
+		return magnet;
+	      else            
+		{                   
+		  (*itr)->GetBase()->DropCharge();                   
+		  return magnet;              
+		}
+     
+      }
     // Melee && ranged case
     else
     {
@@ -12536,6 +12551,25 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     }
 
     // now we ready for speed calculation
+    if ((GetTypeId() == TYPEID_PLAYER) && (getClass() == CLASS_PALADIN) && ((mtype == MOVE_RUN) || (mtype == MOVE_FLIGHT)) && IsMounted())
+      {
+	// only mounted player paladins - running or flying
+	int32 modifier = 0;
+	AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(SPELL_AURA_MOD_SPEED_NOT_STACK);
+	for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+	  {
+	    if (((*i)->GetId() != 26022) && ((*i)->GetId() != 26023)) // Pursuit of Justice, rank 1&2
+	      continue;
+	    if (((*i)->GetAmount() > modifier))
+	      modifier = (*i)->GetAmount();
+	  }
+	if (modifier > 0)
+	  {
+	    float poj_bonus = (100.0f * modifier) / 100.0f;
+	    if (poj_bonus > non_stack_bonus)
+	      non_stack_bonus = poj_bonus;
+	  }
+      }
     float speed = std::max(non_stack_bonus, stack_bonus);
     if (main_speed_mod)
         AddPctN(speed, main_speed_mod);
@@ -14267,7 +14301,21 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             }
         }
     }
-
+    if (GetEntry() == 5925) //Grounding totem and (wand, periodic effects)
+      if (HasAura(8178))   
+	for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)              
+	  if (procSpell && procSpell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && (procSpell->Id == 5019 || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_LEECH || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)) // wand proc
+	    {
+	      Aura * aura = GetAura(8178);
+	      if (aura->GetMaxDuration() != 0)
+		{                         
+		  aura->SetMaxDuration(0);                    
+		  AuraEffect * aurEff = GetAuraEffect(8179, 0);
+		  aurEff->SetPeriodicTimer(10000);                      
+		  aura->SetDuration(600); 
+		}
+	    }
+    
     ProcTriggeredList procTriggered;
     // Fill procTriggered list
     for (AuraApplicationMap::const_iterator itr = GetAppliedAuras().begin(); itr!= GetAppliedAuras().end(); ++itr)
@@ -14524,8 +14572,22 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         } // if (!handled)
 
 	//FIX TOTEM GLEBE
-	if (spellInfo->Id == 8178)
+	if (Id == 8178) //Grounding totem bug after spell hit shaman
 	  takeCharges = false;
+
+	if (GetEntry() == 5925) //Grounding totem (other spells)
+	  if (HasAura(8178))
+	    if (procSpell && (procSpell->DmgClass == SPELL_DAMAGE_CLASS_NONE || procSpell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
+	      {
+		Aura * aura = GetAura(8178);
+		if (aura->GetMaxDuration() != 0)
+		  {                         
+		    aura->SetMaxDuration(0);                    
+		    AuraEffect * aurEff = GetAuraEffect(8179, 0);
+		    aurEff->SetPeriodicTimer(10000);                      
+		    aura->SetDuration(600); 
+		  }
+	      }
 
         // Remove charge (aura can be removed by triggers)
         if (useCharges && takeCharges)

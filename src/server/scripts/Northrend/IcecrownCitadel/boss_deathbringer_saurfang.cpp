@@ -365,11 +365,14 @@ class boss_deathbringer_saurfang : public CreatureScript
 	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
 	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 	      summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+	      summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+		  {
+		    summon->AddThreat(target, 1000000.0f * 5);
                     summon->AI()->AttackStart(target);
-
-                if (IsHeroic())
-                    DoCast(summon, SPELL_SCENT_OF_BLOOD);
+		  }
+		//                if (IsHeroic())
+		//  DoCast(summon, SPELL_SCENT_OF_BLOOD);
 
                 summon->AI()->DoCast(summon, SPELL_BLOOD_LINK_BEAST, true);
                 summon->AI()->DoCast(summon, SPELL_RESISTANT_SKIN, true);
@@ -566,6 +569,63 @@ class boss_deathbringer_saurfang : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return GetIcecrownCitadelAI<boss_deathbringer_saurfangAI>(creature);
+        }
+};
+
+class npc_blood_beast : public CreatureScript
+{
+    public:
+        npc_blood_beast() : CreatureScript("npc_blood_beast") { }
+
+        struct npc_blood_beastAI : public ScriptedAI
+        {
+            npc_blood_beastAI(Creature* creature) : ScriptedAI(creature)
+            {
+                _instance = me->GetInstanceScript();
+            }
+
+            void Reset()
+            {
+		ui_scent = 1000;
+		ui_scent_ = 1000;
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+	      if (IsHeroic())
+		{
+		  if (ui_scent <= diff)
+		    {
+		      me->CastSpell(me, SPELL_SCENT_OF_BLOOD, true);
+		      ui_scent = 10000;
+		    }
+		  else ui_scent -= diff;
+		  
+		  if (ui_scent_ <= diff)
+		    {
+		      const Map::PlayerList &PlayerList = me->GetMap()->GetPlayers();
+		      if (!PlayerList.isEmpty())
+			for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+			  if (Player* player = i->getSource())
+			    if (me->GetDistance(player) < 12.0f)
+			      if (!player->HasAura(SPELL_SCENT_OF_BLOOD))
+				me->AddAura(SPELL_SCENT_OF_BLOOD, player);
+		      ui_scent_ = 1000;
+		    }
+		  else ui_scent_ -= diff;
+		}
+	      DoMeleeAttackIfReady();
+            }
+
+        private:
+	  InstanceScript* _instance;
+	  uint32 ui_scent;
+	  uint32 ui_scent_;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
         }
 };
 
@@ -1289,6 +1349,7 @@ class achievement_ive_gone_and_made_a_mess : public AchievementCriteriaScript
 
 void AddSC_boss_deathbringer_saurfang()
 {
+  new npc_blood_beast();
     new boss_deathbringer_saurfang();
     new npc_high_overlord_saurfang_icc();
     new npc_muradin_bronzebeard_icc();

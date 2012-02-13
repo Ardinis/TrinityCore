@@ -294,6 +294,7 @@ class npc_coldflame : public CreatureScript
         {
             npc_coldflameAI(Creature* creature) : ScriptedAI(creature)
             {
+	      poss = 0;
             }
 
             void IsSummonedBy(Unit* owner)
@@ -339,14 +340,17 @@ class npc_coldflame : public CreatureScript
                 if (_events.ExecuteEvent() == EVENT_COLDFLAME_TRIGGER)
                 {
                     Position newPos;
-                    me->GetNearPosition(newPos, 5.5f, 0.0f);
+                    me->GetNearPosition(newPos, 5.0f, 0.0f);
                     me->NearTeleportTo(newPos.GetPositionX(), newPos.GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                    DoCast(SPELL_COLDFLAME_SUMMON);
-                    _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 450);
+		    poss++;
+		    if (poss >= 3)
+		      DoCast(SPELL_COLDFLAME_SUMMON);
+                    _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 900);
                 }
             }
 
         private:
+	  uint32 poss;
             EventMap _events;
         };
 

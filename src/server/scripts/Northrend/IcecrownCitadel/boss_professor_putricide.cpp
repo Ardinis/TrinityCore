@@ -61,6 +61,7 @@ enum Spells
     SPELL_VILE_GAS_H                    = 69240,
 
     // Professor Putricide
+  SPELL_MALADIE_PESTEUSE = 73117,
     SPELL_SLIME_PUDDLE_TRIGGER          = 70341,
     SPELL_MALLEABLE_GOO                 = 70852,
     SPELL_UNSTABLE_EXPERIMENT           = 70351,
@@ -256,7 +257,7 @@ class boss_professor_putricide : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
-		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+		/*		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
@@ -264,17 +265,18 @@ class boss_professor_putricide : public CreatureScript
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_TRANSFORM, true);
-		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+		//summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
 		summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
-		summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+		summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);*/
                 switch (summon->GetEntry())
                 {
                     case NPC_GROWING_OOZE_PUDDLE:
-                        summon->CastSpell(summon, SPELL_GROW_STACKER, true);
-                        summon->CastSpell(summon, SPELL_SLIME_PUDDLE_AURA, true);
-                        // blizzard casts this spell 7 times initially (confirmed in sniff)
-                        for (uint8 i = 0; i < 7; ++i)
-                            summon->CastSpell(summon, SPELL_GROW, true);
+		      summon->CastSpell(summon, SPELL_GROW_STACKER, true);
+		      summon->CastSpell(summon, SPELL_SLIME_PUDDLE_AURA, true);
+			//			summon->SetVisible(false);
+		      //blizzard casts this spell 7 times initially (confirmed in sniff)
+			 for (uint8 i = 0; i < 7; ++i)
+			summon->CastSpell(summon, SPELL_GROW, true);
                         break;
                     case NPC_GAS_CLOUD:
                         // no possible aura seen in sniff adding the aurastate
@@ -466,7 +468,7 @@ class boss_professor_putricide : public CreatureScript
                         {
                             Talk(SAY_PHASE_TRANSITION_HEROIC);
                             DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
-                            DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
+                            //DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
                             // cast variables
                             if (Is25ManRaid())
                             {
@@ -567,8 +569,10 @@ class boss_professor_putricide : public CreatureScript
                             EnterEvadeMode();
                             break;
                         case EVENT_ROTFACE_VILE_GAS:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                                DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
+			  if (Creature* rotface = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
+			    {
+			      rotface->AI()->DoAction(42);
+			    }
                             events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, urand(15000, 20000), 0, PHASE_ROTFACE);
                             break;
                         case EVENT_ROTFACE_OOZE_FLOOD:
@@ -733,7 +737,7 @@ class npc_volatile_ooze : public CreatureScript
                 {
                     DoCast(me, SPELL_OOZE_ERUPTION);
                     victim->RemoveAurasDueToSpell(SPELL_VOLATILE_OOZE_ADHESIVE, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
-		    me->Kill(me);
+		    //		    me->Kill(me);
                 }
 
                 if (!_newTargetSelectTimer)
@@ -1117,6 +1121,7 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
                                 newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
                                 newPlague->SetDuration(oldPlague->GetDuration());
                                 oldPlague->Remove();
+				GetCaster()->AddAura(SPELL_MALADIE_PESTEUSE,  GetHitUnit());
                                 GetCaster()->RemoveAurasDueToSpell(SPELL_UNBOUND_PLAGUE_SEARCHER);
                                 GetCaster()->CastSpell(GetCaster(), SPELL_PLAGUE_SICKNESS, true);
                                 GetCaster()->CastSpell(GetCaster(), SPELL_UNBOUND_PLAGUE_PROTECTION, true);

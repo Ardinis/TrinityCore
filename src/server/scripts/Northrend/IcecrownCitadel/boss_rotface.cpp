@@ -44,6 +44,9 @@ enum Texts
 enum Spells
 {
     // Rotface
+  SPELL_VILE_GAS_H                    = 69240,
+  SPELL_DEATH_GRIP                 = 49560,
+
     SPELL_SLIME_SPRAY                       = 69508,    // every 20 seconds
     SPELL_MUTATED_INFECTION                 = 69674,    // hastens every 1:30
 
@@ -108,6 +111,22 @@ class boss_rotface : public CreatureScript
                 infectionCooldown = 14000;
             }
 
+	  void DoAction(const int32 action)
+          {
+            if (action == 42)
+              {
+		std::list<Unit*> targets;
+                uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
+                SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
+                float minDist = 0.0f;
+                if (targets.size() >= minTargets)
+                  minDist = -5.0f;
+		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
+                  DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
+	      }
+          }
+
+
             void EnterCombat(Unit* who)
             {
                 if (!instance->CheckRequiredBosses(DATA_ROTFACE, who->ToPlayer()))
@@ -168,6 +187,27 @@ class boss_rotface : public CreatureScript
                 }
             }
 
+	  Unit* GetAuraEffectTriggerTarget(uint32 spellId, uint8 /*effIndex*/)
+	  {
+	    if (spellId == SPELL_SLIME_SPRAY)
+	      {
+
+		for (std::list<uint64>::iterator itr = summons.begin(); itr \
+		       != summons.end();)
+		  {
+		    Creature *summon = Unit::GetCreature(*me, *itr);
+		    if (!summon)
+		      summons.erase(itr++);
+		    else if (summon->GetEntry() == NPC_OOZE_SPRAY_STALKER)
+		      return summon;
+		    else
+		      ++itr;
+		  }
+	      }
+
+	    return NULL;
+	  }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
@@ -185,9 +225,12 @@ class boss_rotface : public CreatureScript
                         case EVENT_SLIME_SPRAY:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                             {
-                                DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
-                                Talk(EMOTE_SLIME_SPRAY);
-                                DoCast(me, SPELL_SLIME_SPRAY);
+			      Position pos;
+			      target->GetPosition(&pos);
+			      Creature *summon = DoSummon(NPC_OOZE_SPRAY_STALKER, pos, 8000, TEMPSUMMON_TIMED_DESPAWN);
+			      Talk(EMOTE_SLIME_SPRAY);
+			      DoCast(summon, SPELL_SLIME_SPRAY);
+
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;
@@ -199,9 +242,12 @@ class boss_rotface : public CreatureScript
                             }
                             break;
                         case EVENT_MUTATED_INFECTION:
-                            me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, NULL, false);
-                            events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
-                            break;
+			  {
+			    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -MUTATED_INFECTION);
+			    me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, target, false);
+			    events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
+			    break;
+			  }
                         default:
                             break;
                     }

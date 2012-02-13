@@ -276,8 +276,12 @@ public:
         uint64 m_guidFireCyclone;
         uint32 m_uifireCount;
 
+      uint32 drakeCount;
+
         void Reset()
         {
+	  drakeCount = 0;
+
             m_bIsBerserk = false;
             m_bIsSoftEnraged = false;
 

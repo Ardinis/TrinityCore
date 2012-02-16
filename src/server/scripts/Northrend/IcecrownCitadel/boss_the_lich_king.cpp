@@ -1579,6 +1579,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
                 _grabbedPlayer = guid;
+		//		DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
             }
 
             void UpdateAI(uint32 const diff)
@@ -1598,6 +1599,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                         case EVENT_GRAB_PLAYER:
                             if (!_grabbedPlayer)
                             {
+			      //			      DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                                 DoCastAOE(SPELL_VALKYR_TARGET_SEARCH);
                                 _events.ScheduleEvent(EVENT_GRAB_PLAYER, 2000);
                             }
@@ -1960,7 +1962,8 @@ class npc_spirit_bomb : public CreatureScript
             {
                 float destX, destY, destZ;
                 me->GetPosition(destX, destY);
-                destZ = 1055.0f;    // approximation, gets more precise later
+                destZ = 870 + 10;    // approximation, gets more precise later
+                //destZ = 1055.0f;    // approximation, gets more precise later
                 me->UpdateGroundPositionZ(destX, destY, destZ);
                 me->GetMotionMaster()->MovePoint(POINT_GROUND, destX, destY, destZ);
             }
@@ -2591,6 +2594,9 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 unitList.clear();
                 unitList.push_back(_target);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
+		GetCaster()->UpdatePosition(_target->GetPositionX(),
+						_target->GetPositionY(), 
+					    _target->GetPositionZ() + 10, 0, true);
             }
 
             void ReplaceTarget(std::list<Unit*>& unitList)

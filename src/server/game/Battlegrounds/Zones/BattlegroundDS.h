@@ -90,7 +90,7 @@ class BattlegroundDS : public Battleground
         uint32 _waterfallTimer;
         uint8 _waterfallStatus;
 
-        virtual void PostUpdateImpl(uint32 diff);
+	//        virtual void PostUpdateImpl(uint32 diff);
     protected:
         uint32 getWaterFallStatus() { return _waterfallStatus; };
         void setWaterFallStatus(uint32 status) { _waterfallStatus = status; };

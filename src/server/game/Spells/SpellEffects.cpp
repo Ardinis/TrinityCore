@@ -3410,7 +3410,6 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
         return;
 
     unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.GetDst()));
-    unitTarget->ClearUnitState(UNIT_STATE_MOVING);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
         // For players just turn them & make them stand up

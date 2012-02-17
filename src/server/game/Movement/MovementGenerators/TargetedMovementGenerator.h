@@ -101,8 +101,8 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
         void Reset(T &);
         void MovementInform(T &);
 
-        static void _clearUnitStateMove(T &u) { u.ClearUnitState(UNIT_STATE_FOLLOW_MOVE); }
-        static void _addUnitStateMove(T &u)  { u.AddUnitState(UNIT_STATE_FOLLOW_MOVE); }
+	//        static void _clearUnitStateMove(T &u) { u.ClearUnitState(UNIT_STATE_FOLLOW_MOVE); }
+	//  static void _addUnitStateMove(T &u)  { u.AddUnitState(UNIT_STATE_FOLLOW_MOVE); }
         bool EnableWalking() const;
         bool _lostTarget(T &) const { return false; }
         void _reachTarget(T &) {}

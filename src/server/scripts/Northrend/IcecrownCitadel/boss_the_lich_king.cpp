@@ -1962,8 +1962,8 @@ class npc_spirit_bomb : public CreatureScript
             {
                 float destX, destY, destZ;
                 me->GetPosition(destX, destY);
-                destZ = 870 + 10;    // approximation, gets more precise later
-                //destZ = 1055.0f;    // approximation, gets more precise later
+                //destZ = 870 + 10;    // approximation, gets more precise later
+                destZ = 1055.0f;    // approximation, gets more precise later
                 me->UpdateGroundPositionZ(destX, destY, destZ);
                 me->GetMotionMaster()->MovePoint(POINT_GROUND, destX, destY, destZ);
             }

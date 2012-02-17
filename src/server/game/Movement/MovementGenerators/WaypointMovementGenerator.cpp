@@ -76,7 +76,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& unit)
 
     if (i_path->at(i_currentNode)->event_id && urand(0, 99) < i_path->at(i_currentNode)->event_chance)
     {
-        sLog->outDebug(LOG_FILTER_MAPSCRIPTS, "Creature movement start script %u at point %u for %u.", i_path->at(i_currentNode)->event_id, i_currentNode, unit.GetGUID());
+        sLog->outDebug(LOG_FILTER_MAPSCRIPTS, "Creature movement start script %u at point %u for "UI64FMTD".", i_path->at(i_currentNode)->event_id, i_currentNode, unit.GetGUID());
         unit.GetMap()->ScriptsStart(sWaypointScripts, i_path->at(i_currentNode)->event_id, &unit, NULL/*, false*/);
     }
 
@@ -238,7 +238,7 @@ void FlightPathMovementGenerator::Reset(Player &unit)
     init.Launch();
 }
 
-bool FlightPathMovementGenerator::Update(Player &unit, const uint32 diff)
+bool FlightPathMovementGenerator::Update(Player &unit, const uint32 /*diff*/)
 {
     uint32 pointId = (uint32)unit.movespline->currentPathIdx();
     if (pointId > i_currentNode)

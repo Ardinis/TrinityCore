@@ -35,10 +35,9 @@
 template<>
 void RandomMovementGenerator<Creature>::_setRandomLocation(Creature &unit)
 {
-    float respX, respY, respZ, respO, currZ, destX, destY, destZ, travelDistZ;
+    float respX, respY, respZ, respO, destX, destY, destZ, travelDistZ;
     unit.GetHomePosition(respX, respY, respZ, respO);
-    currZ = unit.GetPositionZ();
-    Map const* map = unit.GetBaseMap();
+    Map const* map = creature.GetBaseMap();
 
     // For 2D/3D system selection
     //bool is_land_ok  = unit.CanWalk();                // not used?

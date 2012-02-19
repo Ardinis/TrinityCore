@@ -354,6 +354,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
+	      DoZoneInCombat(summon);
 	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
 	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
 	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
@@ -366,18 +367,17 @@ class boss_deathbringer_saurfang : public CreatureScript
 	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 	      summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
 	      summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
-		  {
-		    summon->AddThreat(target, 1000000.0f * 5);
-                    summon->AI()->AttackStart(target);
-		  }
+	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+		{
+		  summon->AddThreat(target, 1000000000.0f * 5);
+		  summon->AI()->AttackStart(target);
+		}
 		//                if (IsHeroic())
 		//  DoCast(summon, SPELL_SCENT_OF_BLOOD);
 
                 summon->AI()->DoCast(summon, SPELL_BLOOD_LINK_BEAST, true);
                 summon->AI()->DoCast(summon, SPELL_RESISTANT_SKIN, true);
                 summons.Summon(summon);
-                DoZoneInCombat(summon);
             }
 
             void SummonedCreatureDespawn(Creature* summon)
@@ -609,7 +609,12 @@ class npc_blood_beast : public CreatureScript
 			  if (Player* player = i->getSource())
 			    if (me->GetDistance(player) < 12.0f)
 			      if (!player->HasAura(SPELL_SCENT_OF_BLOOD))
-				me->AddAura(SPELL_SCENT_OF_BLOOD, player);
+				{
+				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
+				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
+				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
+				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
+				}
 		      ui_scent_ = 1000;
 		    }
 		  else ui_scent_ -= diff;

@@ -21,7 +21,6 @@
  * Scriptnames of files in this file should be prefixed with "spell_warl_".
  */
 
-#include "ScriptPCH.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 
@@ -56,15 +55,7 @@ class spell_warl_demonic_empowerment : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_SUCCUBUS))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELGUARD))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELHUNTER))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_IMP))
+                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_SUCCUBUS) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELGUARD) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELHUNTER) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_IMP))
                     return false;
                 return true;
             }
@@ -129,9 +120,7 @@ class spell_warl_create_healthstone : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R1))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R2))
+                if (!sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R1) || !sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R2))
                     return false;
                 return true;
             }
@@ -224,7 +213,8 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            GetCaster()->CastSpell(GetCaster(), GetEffectValue(), true);
+            Unit* caster = GetCaster();
+            caster->CastSpell(caster, GetEffectValue(), true);
         }
 
         void Register()
@@ -250,7 +240,8 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-                unitList.remove(GetTargetUnit());
+                if (GetTargetUnit())
+                    unitList.remove(GetTargetUnit());
             }
 
             void Register()

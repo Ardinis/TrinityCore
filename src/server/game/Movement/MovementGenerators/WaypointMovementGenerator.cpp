@@ -108,8 +108,11 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature &unit)
     const WaypointData *node = i_path->at(i_currentNode);
 
     m_isArrivalDone = false;
-    
+
+    //    creature.AddUnitState(UNIT_STATE_ROAMING_MOVE);
+
     Movement::MoveSplineInit init(unit);
+
     init.MoveTo(node->x, node->y, node->z);
 
     if (node->orientation != 100 && node->delay != 0)
@@ -142,7 +145,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &unit, const uint32 &d
         if (CanMove(diff))
             return StartMove(unit);
     }
-    else 
+    else
     {
         /*if (unit.IsStopped())
             Stop(STOP_TIME_FOR_PLAYER);
@@ -291,7 +294,7 @@ bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, 
     x = node.x; y = node.y; z = node.z;
     return true;
 }
-    
+
 void FlightPathMovementGenerator::InitEndGridInfo()
 {
     /*! Storage to preload flightmaster grid at end of flight. For multi-stop flights, this will

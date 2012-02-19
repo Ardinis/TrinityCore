@@ -1399,128 +1399,40 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
             }
             break;
-        case SPELLFAMILY_SHAMAN:
-            // Cleansing Totem Pulse
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_SHAMAN_TOTEM_EFFECTS && m_spellInfo->SpellIconID == 1673)
-            {
-                int32 bp1 = 1;
-                // Cleansing Totem Effect
-                if (unitTarget)
-                    m_caster->CastCustomSpell(unitTarget, 52025, NULL, &bp1, NULL, true, NULL, NULL, m_originalCasterGUID);
-                return;
-            }
-            // Healing Stream Totem
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_SHAMAN_HEALING_STREAM)
-            {
-                if (!unitTarget)
-                    return;
-                if (Unit* owner = m_caster->GetOwner())
-                {
-                    if (m_triggeredByAuraSpell)
-                        damage = int32(owner->SpellHealingBonus(unitTarget, m_triggeredByAuraSpell, damage, HEAL));
-
-                    // Restorative Totems
-                    if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 338, 1))
-                        AddPctN(damage, dummy->GetAmount());
-
-                    // Glyph of Healing Stream Totem
-                    if (AuraEffect const* aurEff = owner->GetAuraEffect(55456, EFFECT_0))
-                        AddPctN(damage, aurEff->GetAmount());
-                }
-                m_caster->CastCustomSpell(unitTarget, 52042, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
-                return;
-            }
-            // Mana Spring Totem
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_SHAMAN_MANA_SPRING)
-            {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
-                    return;
-                m_caster->CastCustomSpell(unitTarget, 52032, &damage, 0, 0, true, 0, 0, m_originalCasterGUID);
-                return;
-            }
-            // Lava Lash
-            if (m_spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_SHAMAN_LAVA_LASH)
-            {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                if (m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                {
-                    // Damage is increased by 25% if your off-hand weapon is enchanted with Flametongue.
-                    if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 0x200000, 0, 0))
-                        AddPctN(m_damage, damage);
-                }
-                return;
-            }
-            break;
         case SPELLFAMILY_DEATHKNIGHT:
-            // Death strike
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE)
-            {
-                uint32 count = unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
-                bp = int32(count * m_caster->CountPctFromMaxHealth(int32(m_spellInfo->Effects[EFFECT_0].DamageMultiplier)));
-                // Improved Death Strike
-                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2751, 0))
-                    AddPctN(bp, m_caster->CalculateSpellDamage(m_caster, aurEff->GetSpellInfo(), 2));
-                m_caster->CastCustomSpell(m_caster, 45470, &bp, NULL, NULL, false);
-                return;
-            }
-            // Death Coil
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_COIL)
-            {
-                if (m_caster->IsFriendlyTo(unitTarget))
-                {
-                    bp = int32(damage * 1.5f);
-                    m_caster->CastCustomSpell(unitTarget, 47633, &bp, NULL, NULL, true);
-                }
-                else
-                {
-                    bp = damage;
-                    m_caster->CastCustomSpell(unitTarget, 47632, &bp, NULL, NULL, true);
-                }
-                return;
-            }
             switch (m_spellInfo->Id)
             {
-            case 49560: // Death Grip
-                Position pos;
-                GetSummonPosition(effIndex, pos);
-                if (Unit* unit = unitTarget->GetVehicleBase()) // what is this for?
-                    unit->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
-                else if (!unitTarget->HasAuraType(SPELL_AURA_DEFLECT_SPELLS)) // Deterrence
-                    unitTarget->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
-                return;
-            case 46584: // Raise Dead
-                if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
+                case 46584: // Raise Dead
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
 
-                // Do we have talent Master of Ghouls?
-                if (m_caster->HasAura(52143))
-                    // summon as pet
-                    bp = 52150;
-                else
-                    // or guardian
-                    bp = 46585;
+                    // Do we have talent Master of Ghouls?
+                    if (m_caster->HasAura(52143))
+                        // summon as pet
+                        bp = 52150;
+                    else
+                        // or guardian
+                        bp = 46585;
 
-                if (m_targets.HasDst())
-                    targets.SetDst(*m_targets.GetDst());
-                else
-                {
-                    targets.SetDst(*m_caster);
-                    // Corpse not found - take reagents (only not triggered cast can take them)
-                    triggered = false;
-                }
-                // Remove cooldown - summon spellls have category
-                m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
-                spell_id = 48289;
-                break;
-            // Raise dead - take reagents and trigger summon spells
-            case 48289:
-                if (m_targets.HasDst())
-                    targets.SetDst(*m_targets.GetDst());
+                    if (m_targets.HasDst())
+                        targets.SetDst(*m_targets.GetDst());
+                    else
+                    {
+                        targets.SetDst(*m_caster);
+                        // Corpse not found - take reagents (only not triggered cast can take them)
+                        triggered = false;
+                    }
+                    // Remove cooldown - summon spellls have category
+                    m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+                    spell_id = 48289;
+                    break;
+                // Raise dead - take reagents and trigger summon spells
+                case 48289:
+                    if (m_targets.HasDst())
+                        targets.SetDst(*m_targets.GetDst());
 
-                spell_id = CalculateDamage(0, NULL);
-                break;
+                    spell_id = CalculateDamage(0, NULL);
+                    break;
             }
             break;
     }

@@ -357,7 +357,6 @@ class boss_urom : public CreatureScript
 
                 bool canCast;
                 bool canGoBack;
-
                 uint8 group[3];
 
                 uint32 teleportTimer;

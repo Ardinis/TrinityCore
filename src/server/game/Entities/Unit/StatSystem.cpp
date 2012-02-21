@@ -1293,11 +1293,16 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            //Wild Hunt rank 2
 
-                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
-                {
-                    SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-                    mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
-                }
+                if(itr->first==62762)
+                    mod*=1.30f;
+                else if(itr->first==62758)
+                    mod*=1.15f;
+					
+                //if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
+                //{
+                //    SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
+                //    mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
+                //}
             }
 
             bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;

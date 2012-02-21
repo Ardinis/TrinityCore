@@ -3228,7 +3228,7 @@ public:
                 if (uiBuff & STATE_SHOP)
                     pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Voir un marchand.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
                 if (uiBuff & STATE_MAIL)
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir une boite aux lettres. (Non implemente !)", GOSSIP_SENDER_SEC_MAILBOX, 3);
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir une boite aux lettres. (Non implemente !)", GOSSIP_SENDER_MAIN, 3);
             }
 
         // Horde
@@ -3283,7 +3283,7 @@ public:
                     pPlayer->AddAura(SPELL_CHECK_TIRED, pPlayer);
                 break;
             case GOSSIP_ACTION_MAIL:
-				pCreature->MonsterSay("Non implémenté !", LANG_UNIVERSAL, pPlayer->GetGUID());
+				pCreature->MonsterSay("Non implementer !", LANG_UNIVERSAL, pPlayer->GetGUID());
 				/*
                 //pCreature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_MAILBOX);
                 //pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

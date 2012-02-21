@@ -203,9 +203,11 @@ public:
             m_uiSpellHitCount = 0;
 
             Phase = SKADI;
+			
+			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             Summons.DespawnAll();
-            me->SetSpeed(MOVE_FLIGHT, 3.0f);
+            //me->SetSpeed(MOVE_FLIGHT, 3.0f);
             if ((Unit::GetCreature((*me), m_uiGraufGUID) == NULL) && !me->IsMounted())
                  me->SummonCreature(CREATURE_GRAUF, Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 3.0f);
             if (m_instance)
@@ -219,8 +221,9 @@ public:
         {
             me->SetFlying(false);
             me->Dismount();
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-            if (Unit::GetCreature((*me), m_uiGraufGUID) == NULL)
+            //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+			if (Unit::GetCreature((*me), m_uiGraufGUID) == NULL)
                 me->SummonCreature(CREATURE_GRAUF, Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 3.0f);
         }
 
@@ -228,7 +231,7 @@ public:
         {
             DoScriptText(SAY_AGGRO, me);
 
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
 
             Phase = FLYING;
 
@@ -241,6 +244,7 @@ public:
                 m_instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
                 me->GetMotionMaster()->MoveJump(Location[0].GetPositionX(), Location[0].GetPositionY(), Location[0].GetPositionZ(), 5.0f, 10.0f);
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+				me->SetSpeed(MOVE_FLIGHT, 3.0f);
                 m_uiMountTimer = 1000;
                 Summons.DespawnEntry(CREATURE_GRAUF);
             }
@@ -276,31 +280,31 @@ public:
             Summons.Despawn(summoned);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
-        {
-            if (spell->Id == SPELL_HARPOON_DAMAGE)
-            {
-                m_uiSpellHitCount++;
-                if (m_uiSpellHitCount >= 3)
-                {
-                    Phase = SKADI;
-                    me->SetFlying(false);
-                    me->Dismount();
-                    if (Creature* pGrauf = me->SummonCreature(CREATURE_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3*IN_MILLISECONDS))
-                    {
-                        pGrauf->GetMotionMaster()->MoveFall();
-                        pGrauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
-                    }
-                    me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 5.0f, 10.0f);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                    DoScriptText(SAY_DRAKE_DEATH, me);
-                    m_uiCrushTimer = 8000;
-                    m_uiPoisonedSpearTimer = 10000;
-                    m_uiWhirlwindTimer = 20000;
-                    me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
-                }
-            }
-        }
+        //void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
+        //{
+        //    if (spell->Id == SPELL_HARPOON_DAMAGE)
+        //    {
+        //        m_uiSpellHitCount++;
+        //        if (m_uiSpellHitCount >= 3)
+        //        {
+        //            Phase = SKADI;
+        //            me->SetFlying(false);
+        //            me->Dismount();
+        //            if (Creature* pGrauf = me->SummonCreature(CREATURE_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3*IN_MILLISECONDS))
+        //            {
+        //                pGrauf->GetMotionMaster()->MoveFall();
+        //                pGrauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
+        //            }
+        //            me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 5.0f, 10.0f);
+        //            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+        //            DoScriptText(SAY_DRAKE_DEATH, me);
+        //            m_uiCrushTimer = 8000;
+        //            m_uiPoisonedSpearTimer = 10000;
+        //            m_uiWhirlwindTimer = 20000;
+        //            me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
+        //        }
+        //    }
+        //}
 
         void UpdateAI(const uint32 diff)
         {
@@ -310,18 +314,37 @@ public:
                     if (!UpdateVictim())
                         return;
 
-                    if (me->GetPositionX() >= 519)
+                    if (me->GetPositionX() >= 480)
                     {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                        if (!m_bSaidEmote)
+						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        if (m_uiSpellHitCount >= 3)
                         {
-                            DoScriptText(EMOTE_RANGE, me);
-                            m_bSaidEmote = true;
+                            Phase = SKADI;
+                            me->SetFlying(false);
+                            me->Dismount();
+                            if(Creature* pGrauf = me->SummonCreature(CREATURE_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3*IN_MILLISECONDS))
+                            {
+                                pGrauf->GetMotionMaster()->MoveFall(0);
+                                pGrauf->HandleEmoteCommand(EMOTE_ONESHOT_FLYDEATH);
+                            }
+                            me->GetMotionMaster()->MoveJump(Location[4].GetPositionX(), Location[4].GetPositionY(), Location[4].GetPositionZ(), 5.0f, 10.0f);
+                            DoScriptText(SAY_DRAKE_DEATH, me);
+                            m_uiCrushTimer = 8000;
+                            m_uiPoisonedSpearTimer = 10000;
+                            m_uiWhirlwindTimer = 20000;
+                            me->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM));
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         }
+						if (!m_bSaidEmote)
+						{
+						    DoScriptText(EMOTE_RANGE, me);
+						    m_bSaidEmote = true;
+						}
                     }
                     else
                     {
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                        //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+						me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         m_bSaidEmote = false;
                     }
 
@@ -466,9 +489,14 @@ public:
         InstanceScript* m_instance = pGO->GetInstanceScript();
         if (!m_instance) return false;
 
-        if (Creature* pSkadi = Unit::GetCreature((*pGO), m_instance->GetData64(DATA_SKADI_THE_RUTHLESS)))
+        Creature* pSkadi = Unit::GetCreature(*pGO, m_instance ? m_instance->GetData64(DATA_SKADI_THE_RUTHLESS) : 0);
+        if (pSkadi)
         {
-            player->CastSpell(pSkadi, SPELL_RAPID_FIRE, true);
+            if (CAST_AI(boss_skadi::boss_skadiAI, pSkadi->AI())->m_bSaidEmote == true)
+            {
+                player->CastSpell(pSkadi, SPELL_RAPID_FIRE, true);
+                CAST_AI(boss_skadi::boss_skadiAI, pSkadi->AI())->m_uiSpellHitCount++;
+            }
         }
         return false;
     }

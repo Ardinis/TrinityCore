@@ -1293,7 +1293,7 @@ public:
                         if (Creature* blackKinght = me->GetCreature(*me, instance->GetData64(DATA_BLACK_KNIGHT)))
                         {
                             blackKinght->AI()->Talk(SAY_BK_INTRO_1);
-                            blackKinght->AI()->DoCast(SPELL_DEATH_RESPITE_INTRO);
+                            //blackKinght->AI()->DoCast(SPELL_DEATH_RESPITE_INTRO);
                         }
                         events.ScheduleEvent(5, 4000);
                         break;

@@ -29,6 +29,13 @@ EndContentData */
 
 #include "ScriptPCH.h"
 
+enum SpellGral
+{
+    RIDE_VEHICLE                            = 63151,
+    PLAYER_ON_TOURNAMENT_MOUNT              = 63034,
+    LANCE_EQUIPPED                          = 62853,
+};
+
 /*######
 ## npc_arete
 ######*/
@@ -491,10 +498,70 @@ class npc_tournament_training_dummy : public CreatureScript
 
 };
 
+/*######
+## Squire Danny 
+## Quest The Valiant's Challenge 13699-13713-13723-13724-13725-13726-13727-13728-13729-13731.
+SELECT * FROM quest_template WHERE title LIKE 'The Valiant%s Challenge'
+######*/
+
+enum eSquireDanny
+{
+    NPC_ARGENT_CHAMPION_CREDIT                          = 33708,
+    NPC_ARGENT_CHAMPION                                 = 33707,
+    SAY_START_VALIANT                                   = -1850013,//"You believe you are ready to be a champion? Defend yourself!"  
+    SAY_END_VALIANT                                     = -1850014//"Most impressive. You are worthy to gain the rank of champion"
+};
+
+struct QUEST_THE_VALIANT_CHALLENGE
+{ 
+  uint32 quest_id; 
+};
+
+QUEST_THE_VALIANT_CHALLENGE m_quest[] = {13699, 13713, 13723, 13724, 13725, 13726, 13727, 13728, 13729, 13731};
+
+#define GOSSIP_SQUIRE_DANNY_1   "Je suis pret pour le combat !"
+
+class npc_squire_danny : public CreatureScript
+{
+public:
+    npc_squire_danny() : CreatureScript("npc_squire_danny") { }
+
+    bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+    {    
+        for (int i = 0; i < 10; i++)
+        {
+            if (((pPlayer->GetQuestStatus(m_quest[i].quest_id) == QUEST_STATUS_INCOMPLETE))&&
+                (pPlayer->HasAura(RIDE_VEHICLE)) &&
+                (pPlayer->HasAura(PLAYER_ON_TOURNAMENT_MOUNT)) &&
+                (pPlayer->HasAura(LANCE_EQUIPPED)) &&
+                (!pPlayer->isInCombat()))
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_DANNY_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+
+            }
+        }
+
+        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_SQUIRE, pCreature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        {
+            pPlayer->CLOSE_GOSSIP_MENU();
+            pCreature->SummonCreature(NPC_ARGENT_CHAMPION,8542.566406f,1086.951904f,556.769836f,1.044363f);
+        }
+        return true;
+    }
+};
+
 void AddSC_icecrown()
 {
     new npc_arete;
     new npc_squire_david;
+	new npc_squire_danny;
     new npc_argent_valiant;
     new npc_guardian_pavilion;
     new npc_vereth_the_cunning;

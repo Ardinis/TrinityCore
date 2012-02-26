@@ -693,6 +693,204 @@ public:
     };
 };
 
+/*######
+## lake_frog
+######*/
+
+#define MAIDEN 33220
+#define WARTS_SPELL 62581
+#define LIP_BALM_SPELL 62574
+#define SUMMON_ASHOOD_BRAND_SPELL 62554
+#define FROG_LOVE_SPELL	62537
+#define FROG_DESPAWN_TIMER 30000
+#define MAIDEN_SAY "thank to you, here is you Ashwood Brand !"
+
+struct A_BLADE_FIT_FOR_A_CHAMPION_QUEST
+{ 
+    uint32 quest_id; 
+};
+
+A_BLADE_FIT_FOR_A_CHAMPION_QUEST new_quest[] = {13603, 13666, 13673, 13741, 13746, 13752, 13757, 13762, 13768, 13773, 13778, 13783};
+
+class npc_lake_frog : public CreatureScript
+{
+public:
+    npc_lake_frog() : CreatureScript("npc_lake_frog") { }
+
+    struct npc_lake_frogAI : public ScriptedAI
+    {
+        npc_lake_frogAI(Creature *c) : ScriptedAI(c) {
+        }
+
+        void ReceiveEmote(Player* pPlayer, uint32 emote)
+        {
+            switch (emote)
+            {
+                case TEXT_EMOTE_KISS:
+                    for (int i = 0; i < 12; i++)
+                    {
+                        if (pPlayer->GetQuestStatus(new_quest[i].quest_id) == QUEST_STATUS_INCOMPLETE && pPlayer->HasAura(LIP_BALM_SPELL) && rand()%10 == 1)
+                        {
+                            Unit* summon = me->SummonCreature( MAIDEN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+                            me->ForcedDespawn();
+                            if (summon)
+                            {
+                                summon->CastSpell(pPlayer, SUMMON_ASHOOD_BRAND_SPELL, true, 0, 0, 0);
+                                summon->MonsterSay( MAIDEN_SAY, LANG_UNIVERSAL, NULL);
+                            }
+                        }
+                        else 
+                        {
+                            if (!pPlayer->HasAura(LIP_BALM_SPELL) && ((rand()%100) > 40)) 
+                                me->CastSpell(pPlayer, WARTS_SPELL, true, 0, 0, 0);
+
+                            me->CastSpell( me, FROG_LOVE_SPELL, false);
+                            me->GetMotionMaster()->MoveFollow( pPlayer, 3.0, rand_norm() * 2 * M_PI);
+                            me->ForcedDespawn( FROG_DESPAWN_TIMER);   
+                        }
+                    }
+                    break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature)
+    {
+        return new npc_lake_frogAI(pCreature);
+    }
+};
+
+//Script de la princesse
+#define MAIDEN_DEFAULT_TEXTID 14319
+#define MAIDEN_REWARD_TEXTID 14320
+#define GOSSIP_HELLO_MAIDEN "Delighted to have helped, ma'am. Were you once the guardian of a Send legendary. Would you know From where I could find it?"
+#define SPELL_SUMMON_ASHWOOD_BRAND 62554
+
+class npc_maiden_of_ashwood_lake : public CreatureScript
+{
+public:
+	npc_maiden_of_ashwood_lake(): CreatureScript("npc_maiden_of_ashwood_lake"){}
+
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+	{
+		if(!pPlayer->HasItemCount(44981,1,true))
+		{
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_MAIDEN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+			pPlayer->SEND_GOSSIP_MENU(MAIDEN_DEFAULT_TEXTID, pCreature->GetGUID());
+			pCreature->ForcedDespawn(10000);
+			return true;
+		}
+
+		pPlayer->SEND_GOSSIP_MENU(MAIDEN_DEFAULT_TEXTID, pCreature->GetGUID());
+		return true;
+	}
+
+	bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+	{
+		switch(uiAction)
+		{
+			case GOSSIP_ACTION_INFO_DEF+1:
+				pPlayer->CastSpell(pPlayer,SPELL_SUMMON_ASHWOOD_BRAND,true);
+				pPlayer->SEND_GOSSIP_MENU(MAIDEN_REWARD_TEXTID, pCreature->GetGUID());
+				break;
+		}
+		return true;
+	}
+};
+
+//Quete : Une arme remarquable
+//Quand on utilise l'item:
+//Pop du gameobject 194239 <<NENUFAR
+//Pop du npc 33723
+
+//pop de gob 194238
+#define NPC_TEXTID_MAIDEN_OF_DRAK_MAR_01 -1850000
+#define NPC_TEXTID_MAIDEN_OF_DRAK_MAR_02 -1850001
+#define NPC_TEXTID_MAIDEN_OF_DRAK_MAR_03 -1850002
+#define NPC_TEXTID_MAIDEN_OF_DRAK_MAR_04 -1850003
+#define MAIDEN_OF_DRAK_MAR_TIMER_00 2000
+#define MAIDEN_OF_DRAK_MAR_TIMER_01 5000
+#define MAIDEN_OF_DRAK_MAR_TIMER_02 6000
+#define MAIDEN_OF_DRAK_MAR_TIMER_03 7000
+#define MAIDEN_OF_DRAK_MAR_TIMER_04 20000
+#define MAIDEN_OF_DRAK_MAR_GOB_01 194239
+#define MAIDEN_OF_DRAK_MAR_GOB_02 194238
+//Summon la dame :X: 4602.977 Y: -1600.141 Z: 156.7834 O: 0.7504916
+
+class npc_maiden_of_drak_mar : public CreatureScript
+{
+public:
+	npc_maiden_of_drak_mar(): CreatureScript("npc_maiden_of_drak_mar"){}
+
+	struct npc_maiden_of_drak_marAI : public ScriptedAI
+	{
+		uint32 phase;
+		uint32 uiPhaseTimer;
+		uint64 firstGobGuid;
+		uint64 secondGobGuid;
+
+		npc_maiden_of_drak_marAI(Creature *c) : ScriptedAI(c)
+		{
+			phase = 0;
+			uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_00;
+			if(GameObject* go = me->SummonGameObject(MAIDEN_OF_DRAK_MAR_GOB_01,4602.977f,-1600.141f,156.7834f,0.7504916f,0,0,0,0,0))
+				firstGobGuid = go->GetGUID(); //Pop du nénuphar
+		}
+
+		void UpdateAI(const uint32 diff)
+		{
+			if(uiPhaseTimer <= diff)
+			{
+				phase++;
+					switch(phase)
+					{
+						case 1:
+							DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_01, me);
+							uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_01;
+							break;
+						case 2:
+							DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_02, me);
+							uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_02;
+							break;
+						case 3:
+							DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_03, me);
+							uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_03;
+							break;
+						case 4:
+							DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_04, me);
+							if(GameObject* go = me->SummonGameObject(MAIDEN_OF_DRAK_MAR_GOB_02,4603.351f,-1599.288f,156.8822f,2.234018f,0,0,0,0,0))
+								secondGobGuid = go->GetGUID(); //Pop de la lame
+							uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_04;
+							break;
+						case 5:
+							if(GameObject* go = GameObject::GetGameObject(*me,firstGobGuid))
+								go->RemoveFromWorld();// Dépop du nénuphar
+							if(GameObject* go = GameObject::GetGameObject(*me,secondGobGuid))
+								go->RemoveFromWorld();// Dépop de la lame
+							me->ForcedDespawn();// disparition du pnj
+							break;
+						default:// Ne devrait jamais arriver
+							if(GameObject* go = GameObject::GetGameObject(*me,firstGobGuid))
+								go->RemoveFromWorld();// Dépop du nénuphar
+							if(GameObject* go = GameObject::GetGameObject(*me,secondGobGuid))
+								go->RemoveFromWorld();// Dépop de la lame
+							me->ForcedDespawn();// disparition du pnj
+							break;
+					}
+			}
+			else
+			{
+				uiPhaseTimer -= diff;
+			}
+		}
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+		return new npc_maiden_of_drak_marAI(pCreature);
+	}
+};
+
 void AddSC_grizzly_hills()
 {
     new npc_emily;
@@ -703,4 +901,7 @@ void AddSC_grizzly_hills()
     new npc_wounded_skirmisher;
     new npc_lightning_sentry();
     new npc_venture_co_straggler();
+    new npc_lake_frog;
+    new npc_maiden_of_ashwood_lake;
+    new npc_maiden_of_drak_mar;	
 }

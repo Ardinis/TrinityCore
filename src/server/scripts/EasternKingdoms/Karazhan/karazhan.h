@@ -52,7 +52,8 @@ enum eEnums
     DATA_IMAGE_OF_MEDIVH            = 26,
     DATA_MASTERS_TERRACE_DOOR_1     = 27,
     DATA_MASTERS_TERRACE_DOOR_2     = 28,
-    DATA_GO_SIDE_ENTRANCE_DOOR      = 29
+    DATA_GO_SIDE_ENTRANCE_DOOR      = 29,
+    DATA_CHESS_EVENT,
 };
 
 enum OperaEvents

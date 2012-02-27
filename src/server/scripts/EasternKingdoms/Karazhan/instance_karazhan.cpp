@@ -78,7 +78,7 @@ public:
         uint64 MastersTerraceDoor[2];
         uint64 ImageGUID;
         uint64 DustCoveredChest;
-
+      uint64 endChess;
         void Initialize()
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
@@ -105,6 +105,7 @@ public:
             MastersTerraceDoor[1]= 0;
             ImageGUID = 0;
             DustCoveredChest    = 0;
+	    endChess = NOT_STARTED;
         }
 
         bool IsEncounterInProgress() const
@@ -130,6 +131,7 @@ public:
         {
             switch (type)
             {
+	    case DATA_CHESS_EVENT: endChess = uiData; break;
                 case TYPE_ATTUMEN:              m_auiEncounter[0] = uiData; break;
                 case TYPE_MOROES:
                     if (m_auiEncounter[1] == DONE)
@@ -258,6 +260,8 @@ public:
                 case TYPE_NIGHTBANE:            return m_auiEncounter[11];
                 case DATA_OPERA_PERFORMANCE:    return m_uiOperaEvent;
                 case DATA_OPERA_OZ_DEATHCOUNT:  return m_uiOzDeathCount;
+	    case DATA_CHESS_EVENT: return endChess;
+
             }
 
             return 0;

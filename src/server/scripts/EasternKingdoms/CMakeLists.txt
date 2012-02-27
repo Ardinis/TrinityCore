@@ -204,6 +204,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/bosses_opera.cpp
   EasternKingdoms/Karazhan/boss_moroes.cpp
   EasternKingdoms/Karazhan/boss_terestian_illhoof.cpp
+  EasternKingdoms/Karazhan/boss_chest.cpp
   EasternKingdoms/Karazhan/karazhan.h
 )
 

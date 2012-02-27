@@ -30,9 +30,9 @@ EndContentData */
 #include "trial_of_the_champion.h"
 #include "Vehicle.h"
 
-#define GOSSIP_START_EVENT1     "Estamos listos para comenzar el desafio."  // "I'm ready to start challenge."
-#define GOSSIP_START_EVENT2     "Estamos preparados para el siguiete reto." // "I'm ready for the next challenge."
-#define GOSSIP_START_EVENT3     "Afrontaremos el ultimo reto." // "Let's face our last challenge."
+#define GOSSIP_START_EVENT1     "Je suis pret pour demarrer le challenge !"  // "I'm ready to start challenge."
+#define GOSSIP_START_EVENT2     "Je suis pret pour le prochain defi." // "I'm ready for the next challenge."
+#define GOSSIP_START_EVENT3     "Faisons face a notre dernier defi." // "Let's face our last challenge."
 
 #define ORIENTATION             4.714f
 

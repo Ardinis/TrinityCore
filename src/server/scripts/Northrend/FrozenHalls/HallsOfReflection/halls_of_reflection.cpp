@@ -214,12 +214,12 @@ public:
 
         QuestStatus status = player->GetQuestStatus(m_isSylvana ? QUEST_DELIVRANCE_FROM_THE_PIT_H2 : QUEST_DELIVRANCE_FROM_THE_PIT_A2);
         if (status == QUEST_STATUS_COMPLETE || status == QUEST_STATUS_REWARDED)
-            player->ADD_GOSSIP_ITEM( 0, "¿Puedes bajar la espada?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            player->ADD_GOSSIP_ITEM( 0, "Dame Jaina, nous sommes prets pour la prochaine mission!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
         // once last quest is completed, she offers this shortcut of the starting event
         QuestStatus status2 = player->GetQuestStatus(m_isSylvana ? QUEST_WRATH_OF_THE_LICH_KING_H2 : QUEST_WRATH_OF_THE_LICH_KING_A2);
         if (status2 == QUEST_STATUS_COMPLETE || status2 == QUEST_STATUS_REWARDED)
-            player->ADD_GOSSIP_ITEM( 0, "Oigo a Arthas acercarse. Sea lo que sea lo que tengas que hacer, hazlo rapido.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+            player->ADD_GOSSIP_ITEM( 0, "Dame Sylvanas, nous sommes prets pour la prochaine mission!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
 
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
@@ -1428,7 +1428,7 @@ public:
         if(creature->isQuestGiver())
            player->PrepareQuestMenu( creature->GetGUID());
 
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Vamos!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Courrez !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
 
@@ -2084,7 +2084,7 @@ public:
             {
                 me->SetVisible(true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                summoned==true;
+                summoned=true;
             }
         }
 

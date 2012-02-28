@@ -225,12 +225,10 @@ class boss_rotface : public CreatureScript
                         case EVENT_SLIME_SPRAY:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                             {
-			      Position pos;
-			      target->GetPosition(&pos);
-			      Creature *summon = DoSummon(NPC_OOZE_SPRAY_STALKER, pos, 8000, TEMPSUMMON_TIMED_DESPAWN);
-			      Talk(EMOTE_SLIME_SPRAY);
-			      DoCast(summon, SPELL_SLIME_SPRAY);
-
+                                DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
+                                Talk(EMOTE_SLIME_SPRAY);
+                                DoCast(me, SPELL_SLIME_SPRAY);
+                                // instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); utile pour Quete Rendez Vous. 
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;
@@ -242,12 +240,12 @@ class boss_rotface : public CreatureScript
                             }
                             break;
                         case EVENT_MUTATED_INFECTION:
-			  {
-			    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -MUTATED_INFECTION);
-			    me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, target, false);
-			    events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
-			    break;
-			  }
+							{
+								Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -MUTATED_INFECTION);
+								me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, target, false);
+								events.ScheduleEvent(EVENT_MUTATED_INFECTION, infectionCooldown);
+								break;
+							}
                         default:
                             break;
                     }
@@ -495,10 +493,6 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
 
                 std::list<Creature*> triggers;
                 GetHitUnit()->GetCreatureListWithEntryInGrid(triggers, GetHitUnit()->GetEntry(), 12.5f);
-
-		if (triggers.empty())		  
-                    return;
-
                 triggers.sort(Trinity::ObjectDistanceOrderPred(GetHitUnit()));
                 GetHitUnit()->CastSpell(triggers.back(), uint32(GetEffectValue()), false, NULL, NULL, GetOriginalCaster() ? GetOriginalCaster()->GetGUID() : 0);
             }

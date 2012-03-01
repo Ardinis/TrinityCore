@@ -849,7 +849,7 @@ class boss_prince_valanar_icc : public CreatureScript
                     DoZoneInCombat(controller);
 
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
-                events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
+                events.ScheduleEvent(EVENT_KINETIC_BOMB,  RAID_MODE<uint32>(urand(28000, 30000), urand(18000, 24000), urand(28000, 30000), urand(18000, 24000)));
                 events.ScheduleEvent(EVENT_SHOCK_VORTEX, urand(15000, 20000));
                 if (IsHeroic())
                     me->AddAura(SPELL_SHADOW_PRISON, me);
@@ -1147,10 +1147,18 @@ class npc_ball_of_flame : public CreatureScript
             npc_ball_of_flameAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
                 _despawnTimer = 0;
+                _despawnTimer2 = 10000;
+                    me->SetSpeed(MOVE_FLIGHT, 0.5f, true);
+                    me->SetSpeed(MOVE_RUN, 0.5f, true);
+                    me->SetSpeed(MOVE_WALK, 0.5f, true);
             }
 
             void Reset()
             {
+	      me->SetSpeed(MOVE_FLIGHT, 0.5f, true);
+	      me->SetSpeed(MOVE_RUN, 0.5f, true);
+	      me->SetSpeed(MOVE_WALK, 0.5f, true);
+
                 me->CastSpell(me, SPELL_BALL_OF_FLAMES_VISUAL, true);
                 if (me->GetEntry() == NPC_BALL_OF_INFERNO_FLAME)
                 {
@@ -1198,6 +1206,12 @@ class npc_ball_of_flame : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (_despawnTimer2 <= diff)
+		  {
+		    me->Kill(me);
+		  }
+		else _despawnTimer2 -= diff;
+
                 if (!_despawnTimer)
                     return;
 
@@ -1214,6 +1228,7 @@ class npc_ball_of_flame : public CreatureScript
             uint64 _chaseGUID;
             InstanceScript* _instance;
             uint32 _despawnTimer;
+            uint32 _despawnTimer2;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1238,9 +1253,10 @@ class npc_kinetic_bomb : public CreatureScript
                 me->CastSpell(me, SPELL_UNSTABLE, true);
                 me->CastSpell(me, SPELL_KINETIC_BOMB_VISUAL, true);
                 me->SetReactState(REACT_PASSIVE);
-                me->SetSpeed(MOVE_FLIGHT, IsHeroic() ? 0.3f : 0.15f, true);
+                me->SetSpeed(MOVE_FLIGHT, IsHeroic() ? 0.2f : 0.1f, true);
                 me->GetPosition(_x, _y, _groundZ);
                 _groundZ = me->GetMap()->GetHeight(me->GetPhaseMask(), _x, _y, _groundZ, true, 500.0f);
+		_events.ScheduleEvent(EVENT_BOMB_DESPAWN, 57000);
             }
 
             void DoAction(int32 const action)
@@ -1250,7 +1266,7 @@ class npc_kinetic_bomb : public CreatureScript
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 7.0f, 1.0f, 7.0f);
+                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 15.0f, 1.0f, 15.0f);
                     _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 700);
                 }
             }

@@ -95,6 +95,7 @@ class boss_lord_marrowgar : public CreatureScript
                 _boneSlice = false;
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             }
 
             void Reset()
@@ -211,6 +212,8 @@ class boss_lord_marrowgar : public CreatureScript
                         case EVENT_BONE_STORM_END:
                             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                                 me->GetMotionMaster()->MovementExpired();
+			    me->DeleteThreatList();
+			    DoZoneInCombat();
                             DoStartMovement(me->getVictim());
                             me->SetSpeed(MOVE_RUN, _baseSpeed, true);
                             events.CancelEvent(EVENT_BONE_STORM_MOVE);
@@ -584,7 +587,7 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
                 {
                     const float distance = GetHitUnit()->GetExactDist2d(caster);
                     const int32 damage   = GetHitDamage();
-                    SetHitDamage(int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))));
+                    SetHitDamage(int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))) + 1500);
                 }
             }
 

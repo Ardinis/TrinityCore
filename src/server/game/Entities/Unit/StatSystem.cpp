@@ -1120,18 +1120,12 @@ bool Guardian::UpdateStats(Stats stat)
                 PetSpellMap::const_iterator itr = (ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            // Wild Hunt rank 2
-					
-	            if(itr->first==62762)
-                    mod*=1.40f;
-                else if(itr->first==62758)
-                    mod*=1.20f;
-					
-					// on force l'update auto.
-                //if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
-                //{
-                //    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-                //    AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
-                //}
+						
+                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
+                {
+                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
+                    AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
+                }
             }
             ownersBonus = float(owner->GetStat(stat)) * mod;
             // ownersBonus is multiplied by TOTAL_PCT too
@@ -1299,16 +1293,11 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            //Wild Hunt rank 2
 
-                if(itr->first==62762)
-                    mod*=1.30f;
-                else if(itr->first==62758)
-                    mod*=1.15f;
-					
-                //if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
-                //{
-                //    SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-                //    mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
-                //}
+                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
+                {
+                    SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
+                    mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
+                }
             }
 
             bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;

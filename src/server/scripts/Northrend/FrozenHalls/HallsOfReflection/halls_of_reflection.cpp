@@ -1222,6 +1222,8 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
+			me->setFaction(16);		
+			
             if(!UpdateVictim())
                 return;
 
@@ -1265,7 +1267,7 @@ public:
                 pReflection->SetName(pTemp->GetName());
                 pTemp->CastSpell(pReflection, SPELL_CLONE_NAME, true);
                 pTemp->CastSpell(pReflection, SPELL_CLONE_MODEL, true);
-                pReflection->setFaction(me->getFaction());
+                pReflection->setFaction(16);
                 pReflection->AI()->AttackStart(pTemp);
             }
 

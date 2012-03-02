@@ -435,6 +435,8 @@ public:
 
             if(pInstance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
             {
+				me->setFaction(16);			 
+				
                 uiLiderGUID = pInstance->GetData64(DATA_ESCAPE_LIDER);
                 Creature* pLider = ((Creature*)Unit::GetUnit((*me), uiLiderGUID));
 
@@ -534,11 +536,14 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+				
             if(!pInstance)
                 return;
 
             if(pInstance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
             {
+				me->setFaction(16);			
+				
                 if(Emerge != true)
                 {
                     if(EmergeTimer < diff)
@@ -626,6 +631,7 @@ public:
 
             if(pInstance->GetData(DATA_LICHKING_EVENT) == IN_PROGRESS)
             {
+				me->setFaction(16);
                 if(Walk != true)
                 {
                     Walk = true;

@@ -7256,8 +7256,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         SpellInfo const* spell = (*i)->GetSpellInfo();
                         if (spell->SpellFamilyName == uint32(SPELLFAMILY_SHAMAN) && spell->SpellFamilyFlags.HasFlag(0, 0x02000000, 0))
                         {
-                            if ((*i)->GetCasterGUID() != GetGUID())
-                                continue;
+                            //if ((*i)->GetCasterGUID() != GetGUID())
+                            //    continue;
                             if (spell->Id == 63283)
                                 continue;
                             aurEffA = (*i);

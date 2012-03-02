@@ -227,6 +227,7 @@ class boss_rotface : public CreatureScript
                             {
                                 DoSummon(NPC_OOZE_SPRAY_STALKER, *target, 8000, TEMPSUMMON_TIMED_DESPAWN);
                                 Talk(EMOTE_SLIME_SPRAY);
+				me->SetOrientation(me->GetOrientation() + 2.748895f);
                                 DoCast(me, SPELL_SLIME_SPRAY);
                                 // instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); utile pour Quete Rendez Vous. 
                             }
@@ -494,7 +495,7 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
                 std::list<Creature*> triggers;
                 GetHitUnit()->GetCreatureListWithEntryInGrid(triggers, GetHitUnit()->GetEntry(), 12.5f);
 				
-				if (triggers.empty())		  
+		if (triggers.empty())		  
                     return;
 					
                 triggers.sort(Trinity::ObjectDistanceOrderPred(GetHitUnit()));

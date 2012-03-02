@@ -1120,7 +1120,12 @@ bool Guardian::UpdateStats(Stats stat)
                 PetSpellMap::const_iterator itr = (ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            // Wild Hunt rank 2
-
+					
+	            if(itr->first==62762)
+                    mod*=1.40f;
+                else if(itr->first==62758)
+                    mod*=1.20f;
+					
 					// on force l'update auto.
                 //if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
                 //{

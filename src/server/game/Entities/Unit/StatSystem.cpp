@@ -1121,11 +1121,12 @@ bool Guardian::UpdateStats(Stats stat)
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            // Wild Hunt rank 2
 
-                if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
-                {
-                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-                    AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
-                }
+					// on force l'update auto.
+                //if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
+                //{
+                //    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
+                //    AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
+                //}
             }
             ownersBonus = float(owner->GetStat(stat)) * mod;
             value += ownersBonus;

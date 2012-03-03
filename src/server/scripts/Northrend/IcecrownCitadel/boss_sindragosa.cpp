@@ -1416,15 +1416,16 @@ class spell_sindragosa_icy_grip : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex effIndex)
             {
-                if (Unit *pUnit = GetHitUnit())
-                    if (pUnit->isAlive())
-                    {
-                        float x, y, z;
-                        GetCaster()->GetPosition(x, y, z);
-                        float speedXY = pUnit->GetExactDist2d(x, y) * 10.0f;
-                        pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
-                    }
-                GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
+	      if (Unit *pUnit = GetHitUnit())
+		if (pUnit->isAlive() && !pUnit->HasAura(SPELL_FROST_BEACON))
+		  {
+		    float x, y, z;
+		    GetCaster()->GetPosition(x, y, z);
+		    float speedXY = pUnit->GetExactDist2d(x, y) * 10.0f;
+		    pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
+		  }
+	      if (!GetHitUnit()->HasAura(SPELL_FROST_BEACON))
+		GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
             }
 
             void Register()

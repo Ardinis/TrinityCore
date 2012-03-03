@@ -405,7 +405,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                 Talk(SAY_SWARMING_SHADOWS);
                                 DoCast(target, SPELL_SWARMING_SHADOWS);
                             }
-                            events.ScheduleEvent(EVENT_SWARMING_SHADOWS, 30500, EVENT_GROUP_NORMAL);
+                            events.ScheduleEvent(EVENT_SWARMING_SHADOWS, 32000, EVENT_GROUP_NORMAL);
                             break;
                         case EVENT_TWILIGHT_BLOODBOLT:
                         {

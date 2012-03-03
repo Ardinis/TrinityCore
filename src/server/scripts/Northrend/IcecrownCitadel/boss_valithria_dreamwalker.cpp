@@ -326,7 +326,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 if (action != ACTION_ENTER_COMBAT)
                     return;
 
-                DoCast(me, SPELL_COPY_DAMAGE);
+		DoCast(me, SPELL_COPY_DAMAGE);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
                 _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(25000, 38000));
@@ -359,8 +359,14 @@ class boss_valithria_dreamwalker : public CreatureScript
                         archmage->AI()->DoZoneInCombat();   // call EnterCombat on one of them, that will make it all start
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& damage)
+            void DamageTaken(Unit* attacker, uint32& damage)
             {
+	      if (attacker->GetEntry() == 38421)
+		{
+		  damage = 0;
+		  return ;
+		}
+	      std::cout << attacker->GetEntry() << std::endl;
                 if (me->HealthBelowPctDamaged(25, damage))
                 {
                     if (!_under25PercentTalkDone)

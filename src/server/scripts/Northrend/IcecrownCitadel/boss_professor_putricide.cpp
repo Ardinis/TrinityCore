@@ -220,6 +220,7 @@ class boss_professor_putricide : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SLIME_PUDDLE, 10000);
                 events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(25000, 30000));
+		uiUnstableExperiment = urand(25000, 30000);
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 20000);
 
@@ -468,7 +469,7 @@ class boss_professor_putricide : public CreatureScript
                         {
                             Talk(SAY_PHASE_TRANSITION_HEROIC);
                             DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
-                            //DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
+                            DoCast(me, SPELL_UNSTABLE_EXPERIMENT, true);
                             // cast variables
                             if (Is25ManRaid())
                             {
@@ -504,8 +505,11 @@ class boss_professor_putricide : public CreatureScript
                                 break;
                             case PHASE_COMBAT_2:
                                 SetPhase(PHASE_COMBAT_3);
+				uiUnstableExperiment = 35000;
                                 events.ScheduleEvent(EVENT_MUTATED_PLAGUE, 25000);
-                                events.CancelEvent(EVENT_UNSTABLE_EXPERIMENT);
+				//                                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, 35000);
+				uiUnstableExperiment = 1000000;
+				events.CancelEvent(EVENT_UNSTABLE_EXPERIMENT);
                                 summons.DespawnEntry(NPC_MUTATED_ABOMINATION_10);
                                 summons.DespawnEntry(NPC_MUTATED_ABOMINATION_25);
                                 break;
@@ -551,6 +555,18 @@ class boss_professor_putricide : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
+		if (_phase != PHASE_COMBAT_3)
+		  {
+		    if (uiUnstableExperiment <= diff)
+		      {
+			std::cout << "unstable expermiment gogogo" << std::endl;
+			Talk(EMOTE_UNSTABLE_EXPERIMENT);
+			DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
+			uiUnstableExperiment = urand(35000, 40000);
+		      }
+		    else uiUnstableExperiment -= diff;
+
+		  }
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
@@ -601,9 +617,10 @@ class boss_professor_putricide : public CreatureScript
 			      }
                         }
                         case EVENT_UNSTABLE_EXPERIMENT:
+			  /*			  std::cout << "unstable expermiment gogogo" << std::endl;
                             Talk(EMOTE_UNSTABLE_EXPERIMENT);
                             DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
-                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000));
+                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000));*/
                             break;
                         case EVENT_TEAR_GAS:
                             me->RemoveAurasDueToSpell(71615);
@@ -700,6 +717,7 @@ class boss_professor_putricide : public CreatureScript
             float const _baseSpeed;
             uint8 _oozeFloodStage;
             bool _experimentState;
+	  uint64 uiUnstableExperiment;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1172,14 +1190,14 @@ class spell_putricide_eat_ooze : public SpellScriptLoader
 
                 if (Aura* grow = target->GetAura(uint32(GetEffectValue())))
                 {
-                    if (grow->GetStackAmount() < 3)
+                    if (grow->GetStackAmount() < 4)
                     {
                         target->RemoveAurasDueToSpell(SPELL_GROW_STACKER);
                         target->RemoveAura(grow);
                         target->DespawnOrUnsummon(1);
                     }
                     else
-                        grow->ModStackAmount(-3);
+                        grow->ModStackAmount(-4);
                 }
             }
 

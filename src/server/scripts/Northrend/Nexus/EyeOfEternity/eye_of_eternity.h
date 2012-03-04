@@ -24,7 +24,8 @@ enum InstanceData
     MAX_ENCOUNTER,
 
     DATA_VORTEX_HANDLING,
-    DATA_POWER_SPARKS_HANDLING
+    DATA_POWER_SPARKS_HANDLING,
+    DATA_GIFT
 };
 
 enum InstanceData64
@@ -52,6 +53,7 @@ enum InstanceGameObjects
     GO_NEXUS_RAID_PLATFORM      = 193070,
     GO_EXIT_PORTAL              = 193908,
     GO_FOCUSING_IRIS            = 193958,
+    GO_FOCUSING_IRIS_2          = 193960,
     GO_ALEXSTRASZA_S_GIFT       = 193905,
     GO_ALEXSTRASZA_S_GIFT_2     = 193967
 };
@@ -67,6 +69,8 @@ enum InstanceSpells
     SPELL_VORTEX_5          = 56263, // damage | used to enter to the vehicle
     SPELL_PORTAL_OPENED     = 61236,
     SPELL_RIDE_RED_DRAGON   = 56071,
+    SPELL_SUMMOM_RED_DRAGON = 56070,
+    SPELL_IRIS_OPENED       = 61012,
 };
 
 #endif

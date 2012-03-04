@@ -41,6 +41,8 @@ public:
             lastPortalGUID = 0;
             platformGUID = 0;
             exitPortalGUID = 0;
+
+            checkFallingPlayersTimer = 1500;
         };
 
         bool SetBossState(uint32 type, EncounterState state)
@@ -63,6 +65,7 @@ public:
                     }
 
                     SpawnGameObject(GO_FOCUSING_IRIS, focusingIrisPosition);
+
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
@@ -72,7 +75,7 @@ public:
                 {
                     if (Creature* malygos = instance->GetCreature(malygosGUID))
                         malygos->SummonCreature(NPC_ALEXSTRASZA, 829.0679f, 1244.77f, 279.7453f, 2.32f);
-
+                    /*
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
 
                     // we make the platform appear again because at the moment we don't support looting using a vehicle
@@ -81,6 +84,7 @@ public:
 
                     if (GameObject* chest = instance->GetGameObject(chestGUID))
                         chest->SetRespawnTime(7*DAY);
+                    */
                 }
             }
             return true;
@@ -93,7 +97,7 @@ public:
             GameObject* go = new GameObject;
             if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, instance,
                 PHASEMASK_NORMAL, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(),
-                0, 0, 0, 0, 120, GO_STATE_READY))
+                0, 0, 0, 0, 2, GO_STATE_READY))
             {
                 delete go;
                 return;
@@ -110,6 +114,7 @@ public:
                     platformGUID = go->GetGUID();
                     break;
                 case GO_FOCUSING_IRIS:
+                case GO_FOCUSING_IRIS_2:
                     go->GetPosition(&focusingIrisPosition);
                     break;
                 case GO_EXIT_PORTAL:
@@ -143,11 +148,16 @@ public:
         {
             if (eventId == EVENT_FOCUSING_IRIS)
             {
+                if (Creature* trigger = obj->FindNearestCreature(22517, 20))
+                    trigger->CastSpell(trigger,SPELL_IRIS_OPENED,true);
                 if (GameObject* go = obj->ToGameObject())
                     go->Delete(); // this is not the best way.
 
                 if (Creature* malygos = instance->GetCreature(malygosGUID))
-                    malygos->GetMotionMaster()->MovePoint(4, 770.10f, 1275.33f, 267.23f); // MOVE_INIT_PHASE_ONE
+                {
+                    malygos->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    malygos->GetMotionMaster()->MovePoint(4, 770.10f, 1275.33f, 269.23f); // MOVE_INIT_PHASE_ONE
+                }
 
                 if (GameObject* exitPortal = instance->GetGameObject(exitPortalGUID))
                     exitPortal->Delete();
@@ -220,6 +230,11 @@ public:
                 case DATA_POWER_SPARKS_HANDLING:
                     PowerSparksHandling();
                     break;
+                case DATA_GIFT:                
+                    if (GameObject* chest = instance->GetGameObject(chestGUID))
+                        chest->SetRespawnTime(7*DAY);
+                    SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
+                    break;
             }
         }
 
@@ -280,6 +295,42 @@ public:
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
+        void OnPlayerEnter(Player* pPlayer)
+        {
+            if(GetBossState(DATA_MALYGOS_EVENT) == DONE)
+            {
+                if (GameObject* platform = instance->GetGameObject(platformGUID))
+                    if (platform->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+                        pPlayer->CastSpell(pPlayer, SPELL_SUMMOM_RED_DRAGON, true);
+            }
+        }
+
+        void CheckFallingPlayers()
+        {
+            Map::PlayerList const &PlayerList = instance->GetPlayers();
+        
+            if (PlayerList.isEmpty())
+                return;
+        
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            {
+                  if (i->getSource()->isAlive() && i->getSource()->GetPositionZ()<=100.0f)
+                  {
+                      i->getSource()->SetMovement(MOVE_ROOT);
+                      i->getSource()->setDeathState(JUST_DIED);
+                  }
+            }
+        }
+
+        void Update(uint32 diff)
+        {
+            if (checkFallingPlayersTimer < diff)
+            {
+                CheckFallingPlayers();
+                checkFallingPlayersTimer = 1000;
+            } else checkFallingPlayersTimer -= diff;
+        }
+
         private:
             std::list<uint64> vortexTriggers;
             std::list<uint64> portalTriggers;
@@ -290,6 +341,7 @@ public:
             uint64 chestGUID;
             Position focusingIrisPosition;
             Position exitPortalPosition;
+            uint32 checkFallingPlayersTimer;
     };
 };
 

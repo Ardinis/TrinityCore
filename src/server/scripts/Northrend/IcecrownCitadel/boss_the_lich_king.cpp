@@ -681,6 +681,7 @@ class boss_the_lich_king : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
+	      //	      DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                 switch (summon->GetEntry())
                 {
                     case NPC_SHAMBLING_HORROR:
@@ -1490,10 +1491,12 @@ class npc_valkyr_shadowguard : public CreatureScript
             void Reset()
             {
                 _events.Reset();
+		stuStarted = false;
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
 		//                me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
 		me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
+		//		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -1535,12 +1538,22 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 if (type != POINT_MOTION_TYPE)
                     return;
-
+		if (me->HasUnitState(UNIT_STATE_STUNNED))
+		  return;
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
-                        DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-                        me->DespawnOrUnsummon(1000);
+		      if (!stu)
+			{
+			  DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+			  me->DespawnOrUnsummon(1000);
+			}
+		      else
+			{
+			  //			  DoTeleportTo(_x, _y, _z);
+			  me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
+			  stu = true;
+			}
                         break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
@@ -1562,6 +1575,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                             }
                         }
                         else
+			  if (!IsHeroic())
                             me->DespawnOrUnsummon();
                         break;
                     default:
@@ -1572,7 +1586,8 @@ class npc_valkyr_shadowguard : public CreatureScript
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
                 _grabbedPlayer = guid;
-		//		DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+		if (Player *player = Unit::GetPlayer(*me, guid))
+		  DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
             }
 
             void UpdateAI(uint32 const diff)
@@ -1581,8 +1596,20 @@ class npc_valkyr_shadowguard : public CreatureScript
                     return;
 
                 _events.Update(diff);
+		if (me->HasUnitState(UNIT_STATE_STUNNED))
+		  {
+		    if (!stuStarted)
+		      {
+			stuStarted = true;
+			_x = me->GetPositionX();
+			_y = me->GetPositionY();
+			_z = me->GetPositionZ();
+		      }
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+		    stu = true;
+		  }
+
+                if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_STUNNED))
                     return;
 
                 while (uint32 eventId = _events.ExecuteEvent())
@@ -1614,6 +1641,9 @@ class npc_valkyr_shadowguard : public CreatureScript
             }
 
         private:
+	  bool stu;
+	  bool stuStarted;
+	  uint64 _x, _y, _z;
             EventMap _events;
             Position _dropPoint;
             uint64 _grabbedPlayer;
@@ -2586,10 +2616,10 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 _target = SelectRandomContainerElement(unitList);
                 unitList.clear();
                 unitList.push_back(_target);
+		//		GetCaster()->UpdatePosition(_target->GetPositionX(),
+		//				_target->GetPositionY(), 
+		//			    _target->GetPositionZ() + 10, 0, true);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
-		GetCaster()->UpdatePosition(_target->GetPositionX(),
-						_target->GetPositionY(), 
-					    _target->GetPositionZ() + 10, 0, true);
             }
 
             void ReplaceTarget(std::list<Unit*>& unitList)

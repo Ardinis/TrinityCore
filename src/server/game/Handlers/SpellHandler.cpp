@@ -32,6 +32,7 @@
 #include "ScriptMgr.h"
 #include "GameObjectAI.h"
 #include "SpellAuraEffects.h"
+#include "Vehicle.h"
 
 void WorldSession::HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets& targets)
 {
@@ -279,7 +280,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket & recv_data)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
 
     // ignore for remote control state
-    if (_player->m_mover != _player)
+    if (_player->m_mover != _player && _player->m_mover->GetTypeId() == TYPEID_PLAYER)
         return;
 
     if (GameObject* obj = GetPlayer()->GetMap()->GetGameObject(guid))
@@ -333,6 +334,26 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         recvPacket.rfinish(); // prevent spam at ignore packet
         return;
     }
+
+    if (mover != _player) // you should be able to use your spells on some vehicles
+      if (const Vehicle* veh = mover->GetVehicleKit())
+	{
+	  SeatMap::const_iterator seat;
+	    for (seat = mover->GetVehicleKit()->Seats.begin(); seat != mover->GetVehicleKit()->Seats.end(); ++seat)
+	      if (seat->second.Passenger == _player->GetGUID())
+		break;
+
+            if ((seat->second.SeatInfo && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_ATTACK) || (spellInfo->AttributesEx6 & 0x00001000))
+            {
+                sLog->outBasic("WORLD: player name %s GUID %u on vehicle name %s entry %u started casting %u ... allowed",
+                _player->GetName(), _player->GetGUIDLow(),mover->GetName(),mover->GetEntry(),spellId);
+                mover = _player;
+            }
+           else
+                sLog->outBasic("WORLD: player name %s GUID %u on vehicle name %s entry %u started casting %u ... not allowed",
+                _player->GetName(), _player->GetGUIDLow(),mover->GetName(),mover->GetEntry(),spellId);
+       }
+
 
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {

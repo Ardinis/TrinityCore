@@ -941,18 +941,24 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     if (!pInfo)
                         SetCreateHealth(30*petlevel);
 
+					SetAttackTime(BASE_ATTACK, 1500); // 1,5 Sec au lieu de 2!
+
                     float dmg_multiplier = 0.3f;
+					float dmg_glyphe = 1;
                     if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
+					{
                         dmg_multiplier = 0.6f;
+						dmg_glyphe= 1.96f ;
+					}
 
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier));
-
-                    // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 2
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
-
+					SetModifierValue(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.139 * dmg_glyphe)  );
+                    // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 1.5
+					
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 1.5 / 14)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 1.5 / 14)));
+					
                     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
-                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
+                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.15f);  //  Bonus Stamina (30% of player stamina)(comme j'ai pris la force c'est 30/2)
                     if (!HasAura(58877))//prevent apply twice for the 2 wolves
                         AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
                     break;

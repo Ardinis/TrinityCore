@@ -1635,7 +1635,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 		  // Improved concentration aura - linked aura
 		  if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
 		    if (apply)
-		      target->CastSpell(target, 63510, true);
+		      caster->CastSpell(target, 63510, true);
 		    else target->RemoveAura(63510);
                 case 31821:
                     // Aura Mastery Triggered Spell Handler
@@ -1651,7 +1651,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->CastSpell(target, 64364, true);
                     }
                     else
-                        target->RemoveAurasDueToSpell(64364, GetCasterGUID());
+                        target->RemoveAurasDueToSpell(	64364, GetCasterGUID());
                     break;
                 case 31842: // Divine Illumination
                     // Item - Paladin T10 Holy 2P Bonus
@@ -1664,19 +1664,19 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
             }
-	    if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
-	      {
-                // Improved devotion aura
-                if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
-		  if (apply)
-		    caster->CastSpell(target, 63514, true);
-		  else target->RemoveAura(63514);
-                // 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
-                // Not allow for Retribution Aura (prevent stacking)
-                if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
-		  if (apply)
-		    caster->CastSpell(target, 63531, true);
-		  else target->RemoveAura(63531);
+			if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
+			{
+				// Improved devotion aura
+				if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
+					if (apply)
+						caster->CastSpell(target, 63514, true);
+					else target->RemoveAura(63514);
+				// 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
+				// Not allow for Retribution Aura (prevent stacking)
+				if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
+					if (apply)
+						caster->CastSpell(target, 63531, true);
+					else target->RemoveAura(63531);
 	      }
             break;
         case SPELLFAMILY_DEATHKNIGHT:

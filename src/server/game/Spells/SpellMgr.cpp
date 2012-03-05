@@ -3368,6 +3368,19 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // ENDOF TRIAL OF THE CRUSADER SPELLS
             //
+	case 55849: // Power Spark
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        case 56047: // Random Portal
+            spellInfo->MaxAffectedTargets = 1;
+            break;
+        case 57459: // Arcane Storm
+            spellInfo->MaxAffectedTargets = 5; //guess
+            break;
+        case 57431: // Summon Static Field
+            spellInfo->speed = 0;
+            break;
+
             // ICECROWN CITADEL SPELLS
             //
             // THESE SPELLS ARE WORKING CORRECTLY EVEN WITHOUT THIS HACK

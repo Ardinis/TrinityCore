@@ -27,6 +27,11 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "icecrown_citadel.h"
+#include "Group.h"
+
+#define GOSSIP_MENU 10600
+//#define GOSSIP_MENU "Long have I waited for this day, hero. Are you and your allies prepared to bring the Lich King to justice? We charge on your command!"
+#define GOSSIP_START_EVENT "We are prepared, Highlord. Let us battle for the fate of Azeroth! For the light of dawn!"
 
 enum Texts
 {
@@ -681,6 +686,7 @@ class boss_the_lich_king : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
+	      //	      DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                 switch (summon->GetEntry())
                 {
                     case NPC_SHAMBLING_HORROR:
@@ -1243,15 +1249,85 @@ class npc_tirion_fordring_tft : public CreatureScript
                     SetEquipmentSlots(true);    // remove glow on ashbringer
             }
 
+	  bool OnGossipHello(Player* player, Creature* creature)
+	  {
+            InstanceScript* instance = creature->GetInstanceScript();
+            if (!instance)
+	      return false;
+
+            Player *unfriendlyPlayer = NULL;
+            const Map::PlayerList &PlayerList = creature->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+	      for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+		if (Player* player = i->getSource())
+		  if (!creature->IsFriendlyTo(player))
+		    {
+		      unfriendlyPlayer = player;
+		      break;
+		    }
+
+            if (unfriendlyPlayer)
+	      {
+                char buf[255] = {0};
+                sprintf(buf, "Sorry, but everyone in raid should have at least friendly reputation with the Argent Crusade to participate in the final battle. Player '%s' doesn't meet this requirement.", unfriendlyPlayer->GetName());
+                creature->MonsterSay(buf, LANG_UNIVERSAL, player->GetGUID());
+                return true;
+	      }
+
+	    /*            if (instance->GetData(DATA_LICH_KING_EVENT) == DONE)
+	      {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "The Lich King was already defeated here. Teleport me back to the Light's Hammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
+                return true;
+		}*/
+
+            if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
+	      {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sorry, I'm not the raid leader", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
+                return true;
+	      }
+
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+
+            player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
+
+            return true;
+	  }
+
+	  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+	  {
+            switch (uiAction)
+	      {
+	      case GOSSIP_ACTION_INFO_DEF+2:
+		creature->MonsterSay("OK, I'll wait for raid leader", LANG_UNIVERSAL, player->GetGUID());
+		break;
+	      case GOSSIP_ACTION_INFO_DEF+4:
+
+		break;
+	      case GOSSIP_ACTION_INFO_DEF+3:
+		_events.SetPhase(PHASE_INTRO);
+		me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+		me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+		me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
+		player->CLOSE_GOSSIP_MENU();
+		break;
+	      default:
+		creature->MonsterSay("You've just found a bug. Contact server admin and explain what to do to reproduce this bug", LANG_UNIVERSAL, player->GetGUID());
+		break;
+	      }
+            return true;
+	  }
+
             void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
             {
-                if (me->GetCreatureInfo()->GossipMenuId == sender && !action)
+	      /*                if (me->GetCreatureInfo()->GossipMenuId == sender && !action)
                 {
                     _events.SetPhase(PHASE_INTRO);
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                     me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
-                }
+		    }*/
             }
 
             void JustReachedHome()
@@ -1490,10 +1566,12 @@ class npc_valkyr_shadowguard : public CreatureScript
             void Reset()
             {
                 _events.Reset();
+		stuStarted = false;
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
 		//                me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
 		me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -1535,12 +1613,22 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 if (type != POINT_MOTION_TYPE)
                     return;
-
+		if (me->HasUnitState(UNIT_STATE_STUNNED))
+		  return;
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
-                        DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-                        me->DespawnOrUnsummon(1000);
+		      //		      if (!stu)
+			{
+			  DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+			  me->DespawnOrUnsummon(1000);
+			}
+			//else
+			{
+			  //			  DoTeleportTo(_x, _y, _z);
+			  //me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
+			  //stu = true;
+			}
                         break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
@@ -1562,6 +1650,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                             }
                         }
                         else
+			  if (!IsHeroic())
                             me->DespawnOrUnsummon();
                         break;
                     default:
@@ -1572,7 +1661,8 @@ class npc_valkyr_shadowguard : public CreatureScript
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
                 _grabbedPlayer = guid;
-		//		DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+		if (Player *player = Unit::GetPlayer(*me, guid))
+		  DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
             }
 
             void UpdateAI(uint32 const diff)
@@ -1581,8 +1671,20 @@ class npc_valkyr_shadowguard : public CreatureScript
                     return;
 
                 _events.Update(diff);
+		/*		if (me->HasUnitState(UNIT_STATE_STUNNED))
+		  {
+		    if (!stuStarted)
+		      {
+			stuStarted = true;
+			_x = me->GetPositionX();
+			_y = me->GetPositionY();
+			_z = me->GetPositionZ();
+		      }
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+		    stu = true;
+		  }
+		*/
+                if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_STUNNED))
                     return;
 
                 while (uint32 eventId = _events.ExecuteEvent())
@@ -1614,6 +1716,9 @@ class npc_valkyr_shadowguard : public CreatureScript
             }
 
         private:
+	  bool stu;
+	  bool stuStarted;
+	  uint64 _x, _y, _z;
             EventMap _events;
             Position _dropPoint;
             uint64 _grabbedPlayer;
@@ -2586,10 +2691,10 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 _target = SelectRandomContainerElement(unitList);
                 unitList.clear();
                 unitList.push_back(_target);
+		//		GetCaster()->UpdatePosition(_target->GetPositionX(),
+		//				_target->GetPositionY(), 
+		//			    _target->GetPositionZ() + 10, 0, true);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
-		GetCaster()->UpdatePosition(_target->GetPositionX(),
-						_target->GetPositionY(), 
-					    _target->GetPositionZ() + 10, 0, true);
             }
 
             void ReplaceTarget(std::list<Unit*>& unitList)

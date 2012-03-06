@@ -1286,6 +1286,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     {
         if (isHunterPet())                      //hunter pets benefit from owner's attack power
         {
+			float Dresseur = 0;
             float mod = 1.0f;                                                 //Hunter contribution modifier
             if (isPet())
             {
@@ -1298,9 +1299,18 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                     SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
                     mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
                 }
+
+				if(owner->HasSpell(34454)) // Dresseur rang 2
+					Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.10f;
+				else
+				{
+					if(owner->HasSpell(34453)) // Dresseur 
+						Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.05f;  
+				}
+				
             }
 
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod + Dresseur;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)

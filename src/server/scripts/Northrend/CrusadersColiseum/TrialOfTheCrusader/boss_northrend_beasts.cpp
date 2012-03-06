@@ -364,7 +364,10 @@ public:
             if (m_uiFireBombTimer < diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_FIRE_BOMB);
+		  {
+		    DoCast(target, SPELL_FIRE_BOMB); 
+		    me->SummonCreature(8888888, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 99999999);
+		  }
                 m_uiFireBombTimer = 20000;
             }
             else m_uiFireBombTimer -= diff;
@@ -1004,6 +1007,74 @@ public:
 
 };
 
+
+class bomb_incendiare : public CreatureScript
+{
+public:
+
+  bomb_incendiare() : CreatureScript("bomb_incendiare") { }
+
+  struct bomb_incendiareAI : public ScriptedAI
+  {
+    bomb_incendiareAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
+      Reset();
+    }
+
+InstanceScript* m_pInstance;
+uint8 SnoboldsCount;
+uint32 m_uifire_bomb;
+uint32 m_uiBomb;
+
+
+void Reset() {
+  me->AddAura(SPELL_FIRE_BOMB_DOT, me);
+  //DoStartNoMovement(me->getVictim());
+  SetCombatMovement(false);
+  me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+  me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+  //    me->SetVisibility(VISIBILITY_OFF);
+  m_uiBomb = 3000;
+}
+
+void BombDamage()
+{
+  Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+
+  for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+    {
+      if (Player* pPlayer = i->getSource())
+	{
+	  if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 7)
+	    {
+	      //              DoCast(pPlayer, SPELL_FIRE_BOMB);
+	      me->DealDamage(i->getSource(), 6187, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
+	    }
+	}
+    }
+}
+
+void UpdateAI(const uint32 uiDiff)
+{
+  if (m_uiBomb < uiDiff)
+    {
+      BombDamage();
+      m_uiBomb = 2000;
+    }
+  else m_uiBomb -= uiDiff;
+
+  if (!me->HasAura(SPELL_FIRE_BOMB_DOT))
+    me->ForcedDespawn();
+}
+};
+CreatureAI* GetAI(Creature* pCreature) const
+{
+  return new bomb_incendiareAI(pCreature);
+}
+};
+
+
 void AddSC_boss_northrend_beasts()
 {
     new boss_gormok();
@@ -1012,4 +1083,5 @@ void AddSC_boss_northrend_beasts()
     new boss_dreadscale();
     new mob_slime_pool();
     new boss_icehowl();
+    new bomb_incendiare();
 }

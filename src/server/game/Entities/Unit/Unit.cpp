@@ -17164,7 +17164,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 {
     if (!m_vehicle)
         return;
-
+    //    uint32 faction = m_vehicle->GetFaction();
     m_vehicle->RemovePassenger(this);
 
     // If player is on mouted duel and exits the mount should immediatly lose the duel
@@ -17215,6 +17215,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         else
             ToTempSummon()->UnSummon(2000); // Approximation
     }
+    //m_vehicle->SetFaction(faction);
 }
 
 void Unit::BuildMovementPacket(ByteBuffer *data) const

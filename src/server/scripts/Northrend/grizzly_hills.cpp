@@ -694,70 +694,83 @@ public:
 };
 
 /*######
-## lake_frog
+## Quest 13666 & 13673:  Une lame digne d'un champion!
 ######*/
 
-#define MAIDEN 33220
-#define WARTS_SPELL 62581
-#define LIP_BALM_SPELL 62574
-#define SUMMON_ASHOOD_BRAND_SPELL 62554
-#define FROG_LOVE_SPELL	62537
-#define FROG_DESPAWN_TIMER 30000
-#define MAIDEN_SAY "thank to you, here is you Ashwood Brand !"
-
-struct A_BLADE_FIT_FOR_A_CHAMPION_QUEST
-{ 
-    uint32 quest_id; 
+enum eLakeFrog
+{
+	SPELL_WARTSBGONE_LIP_BALM = 62574,
+	SPELL_FROG_LOVE = 62537,
+	SPELL_WARTS = 62581,
+	NPC_MAIDEN_OF_ASHWOOD_LAKE = 33220,
+	MAIDEN_SPAWN
 };
 
-A_BLADE_FIT_FOR_A_CHAMPION_QUEST new_quest[] = {13603, 13666, 13673, 13741, 13746, 13752, 13757, 13762, 13768, 13773, 13778, 13783};
-
+//Script de la grenouille
 class npc_lake_frog : public CreatureScript
 {
 public:
-    npc_lake_frog() : CreatureScript("npc_lake_frog") { }
+	npc_lake_frog(): CreatureScript("npc_lake_frog"){}
 
-    struct npc_lake_frogAI : public ScriptedAI
-    {
-        npc_lake_frogAI(Creature *c) : ScriptedAI(c) {
-        }
+	struct npc_lake_frogAI : public ScriptedAI // FollowerAI:Permet au npc de suivre une cible
+	{
+		npc_lake_frogAI(Creature *c) : ScriptedAI(c) {}
 
-        void ReceiveEmote(Player* pPlayer, uint32 emote)
-        {
-            switch (emote)
-            {
-                case TEXT_EMOTE_KISS:
-                    for (int i = 0; i < 12; i++)
-                    {
-                        if (pPlayer->GetQuestStatus(new_quest[i].quest_id) == QUEST_STATUS_INCOMPLETE && pPlayer->HasAura(LIP_BALM_SPELL) && rand()%10 == 1)
-                        {
-                            Unit* summon = me->SummonCreature( MAIDEN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
-                            me->ForcedDespawn();
-                            if (summon)
-                            {
-                                summon->CastSpell(pPlayer, SUMMON_ASHOOD_BRAND_SPELL, true, 0, 0, 0);
-                                summon->MonsterSay( MAIDEN_SAY, LANG_UNIVERSAL, NULL);
-                            }
-                        }
-                        else 
-                        {
-                            if (!pPlayer->HasAura(LIP_BALM_SPELL) && ((rand()%100) > 40)) 
-                                me->CastSpell(pPlayer, WARTS_SPELL, true, 0, 0, 0);
+		uint32 uiFollowTimer; //Temps de poursuite (15 sec)
+		bool following;	//Si la grenouille est en train de suivre le joueur
 
-                            me->CastSpell( me, FROG_LOVE_SPELL, false);
-                            me->GetMotionMaster()->MoveFollow( pPlayer, 3.0, rand_norm() * 2 * M_PI);
-                            me->ForcedDespawn( FROG_DESPAWN_TIMER);   
-                        }
-                    }
-                    break;
-            }
-        }
-    };
+		void Reset ()
+		{
+			following=false;
+			uiFollowTimer=15000; // 15 sec
+		}
 
-    CreatureAI* GetAI(Creature* pCreature)
-    {
-        return new npc_lake_frogAI(pCreature);
-    }
+		void UpdateAI(const uint32 diff)
+		{
+			if(following)
+			{
+				if(uiFollowTimer <= diff)
+				{
+					//SetFollowComplete();
+					me->DisappearAndDie();		//dépop
+					me->Respawn(true);
+					Reset();
+				}
+				else uiFollowTimer-=diff;
+			}
+		}
+
+		void ReceiveEmote(Player* pPlayer, uint32 emote)
+		{
+			if(following) //Si la grenouille a déja recu un /bisou il ne se passe rien
+				return;
+
+			if(emote==TEXT_EMOTE_KISS) // Si on fait /bisou
+			{
+				if(!pPlayer->HasAura(SPELL_WARTSBGONE_LIP_BALM))
+					pPlayer->AddAura(SPELL_WARTS,pPlayer);
+				else if(roll_chance_i(10)) // 10% de chance de trouver la grenouille
+				{
+					pPlayer->SummonCreature(NPC_MAIDEN_OF_ASHWOOD_LAKE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0,TEMPSUMMON_TIMED_DESPAWN,30000);
+					me->DisappearAndDie();		//dépop
+					me->Respawn(true); //Repop 15 secondes plus tard
+				}
+				else
+				{
+					pPlayer->RemoveAura(SPELL_WARTSBGONE_LIP_BALM);	//On enleve le buff mis par l'objet de quete
+					me->AddAura(SPELL_FROG_LOVE,me); //On ajoute l'aura a la grenouille (les coeurs)
+					//StartFollow(pPlayer, 35, NULL); //La grenouille suis le joueur
+					following=true;
+				}
+			}
+		}
+
+	};
+
+	CreatureAI* GetAI(Creature* pCreature) const
+	{
+		return new npc_lake_frogAI(pCreature);
+	}
 };
 
 //Script de la princesse

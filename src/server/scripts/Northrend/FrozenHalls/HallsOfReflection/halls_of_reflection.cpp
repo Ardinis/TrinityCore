@@ -2095,7 +2095,6 @@ public:
             Heroic_Strike = 5000;
             Mortal_Strike = 7000;
             Whirlind = 13000;
-           me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
         }
 		
 		npc_throw_quel_delarAI(Creature* c) : ScriptedAI(c) 

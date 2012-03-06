@@ -132,7 +132,7 @@ enum eSquireDavid
 
     NPC_ARGENT_VALIANT                                  = 33448,
 
-    GOSSIP_TEXTID_SQUIRE                                = 14407
+    GOSSIP_TEXTID_SQUIRE_DAVID                          = 14407
 };
 
 #define GOSSIP_SQUIRE_ITEM_1 "I am ready to fight!"
@@ -152,7 +152,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SQUIRE_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
         }
 
-        player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_SQUIRE, creature->GetGUID());
+        player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_SQUIRE_DAVID, creature->GetGUID());
         return true;
     }
 
@@ -176,8 +176,23 @@ enum eArgentValiant
 {
     SPELL_CHARGE                = 63010,
     SPELL_SHIELD_BREAKER        = 65147,
+    SPELL_DEFEND                = 62719,
+    SPELL_THRUST                = 62544,	
 
     NPC_ARGENT_VALIANT_CREDIT   = 24108
+};
+
+enum eValiantText
+{
+       NPC_FACTION_VAILIANT_TEXT_SAY_START_1   = -1850004,//   Tenez-vous prêt !
+       NPC_FACTION_VAILIANT_TEXT_SAY_START_2   = -1850005,//   Que le combat commence !
+       NPC_FACTION_VAILIANT_TEXT_SAY_START_3   = -1850006,//   Préparez-vous !
+       NPC_ARGENT_VAILIANT_TEXT_SAY_START      = -1850007,//   Vous pensez avoir la vaillance en vous ? Nous verrons.
+       NPC_ARGENT_VAILIANT_TEXT_SAY_WIN        = -1850008,//   Impressionnante démonstration. Je pense que vous êtes tout à fait en mesure de rejoindre les rangs des vaillants.
+       NPC_ARGENT_VAILIANT_TEXT_SAY_LOOSE      = -1850009,//   J'ai gagné. Vous aurez sans doute plus de chance la prochaine fois.
+       NPC_FACTION_VAILIANT_TEXT_SAY_WIN_1     = -1850010,//   Je suis vaincue. Joli combat !
+       NPC_FACTION_VAILIANT_TEXT_SAY_WIN_2     = -1850011,//   On dirait que j'ai sous-estimé vos compétences. Bien joué.
+       NPC_FACTION_VAILIANT_TEXT_SAY_LOOSE     = -1850012,//   J'ai gagné. Vous aurez sans doute plus de chance la prochaine fois.
 };
 
 class npc_argent_valiant : public CreatureScript
@@ -189,17 +204,22 @@ public:
     {
         npc_argent_valiantAI(Creature* creature) : ScriptedAI(creature)
         {
+		
+            me->CastSpell(me, SPELL_DEFEND, true);
+            me->CastSpell(me, SPELL_DEFEND, true);
             creature->GetMotionMaster()->MovePoint(0, 8599.258f, 963.951f, 547.553f);
             creature->setFaction(35); //wrong faction in db?
         }
 
         uint32 uiChargeTimer;
         uint32 uiShieldBreakerTimer;
+		uint32 uiDefendTimer;
 
         void Reset()
         {
             uiChargeTimer = 7000;
             uiShieldBreakerTimer = 10000;
+			uiDefendTimer = 10000;
         }
 
         void MovementInform(uint32 uiType, uint32 /*uiId*/)
@@ -212,15 +232,54 @@ public:
 
         void DamageTaken(Unit* pDoneBy, uint32& uiDamage)
         {
-            if (uiDamage > me->GetHealth() && pDoneBy->GetTypeId() == TYPEID_PLAYER)
-            {
-                uiDamage = 0;
-                CAST_PLR(pDoneBy)->KilledMonsterCredit(NPC_ARGENT_VALIANT_CREDIT, 0);
-                me->setFaction(35);
-                me->DespawnOrUnsummon(5000);
-                me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                EnterEvadeMode();
-            }
+               if(pDoneBy)
+               {
+                       if (uiDamage > me->GetHealth() && (pDoneBy->GetTypeId() == TYPEID_PLAYER || pDoneBy->GetOwner()))
+                       {
+                               DoScriptText(NPC_ARGENT_VAILIANT_TEXT_SAY_WIN, me);
+                               uiDamage = 0;
+
+                               if(pDoneBy->GetOwner())
+                                       (pDoneBy->GetOwner())->ToPlayer()->KilledMonsterCredit(NPC_ARGENT_VALIANT_CREDIT,0);
+                               if(pDoneBy->GetTypeId() == TYPEID_PLAYER)
+                                       pDoneBy->ToPlayer()->KilledMonsterCredit(NPC_ARGENT_VALIANT_CREDIT,0);
+
+                               me->setFaction(35);
+                               me->ForcedDespawn(5000);
+                               me->SetHomePosition(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),me->GetOrientation());
+                               EnterEvadeMode();
+                       }
+               }
+        }
+
+        void KilledUnit(Unit* /*victim*/)
+        {
+                       me->setFaction(35);
+                       me->ForcedDespawn(5000);
+                       DoScriptText(NPC_ARGENT_VAILIANT_TEXT_SAY_LOOSE, me);
+                       me->CombatStop(true);
+        }
+
+        void DoMeleeAttackIfReady()
+        {
+               if (me->HasUnitState(UNIT_STATE_CASTING))
+                   return;
+
+               //Make sure our attack is ready and we aren't currently casting before checking distance
+               if (me->isAttackReady())
+               {
+                   //If we are within range melee the target
+                   if (me->IsWithinMeleeRange(me->getVictim()))
+                   {
+                       DoCastVictim(SPELL_THRUST);
+                       me->resetAttackTimer();
+                   }
+               }
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+               DoScriptText(NPC_ARGENT_VAILIANT_TEXT_SAY_START, me);
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -239,6 +298,12 @@ public:
                 DoCastVictim(SPELL_SHIELD_BREAKER);
                 uiShieldBreakerTimer = 10000;
             } else uiShieldBreakerTimer -= uiDiff;
+			
+            if (uiDefendTimer <= uiDiff)
+            {
+               me->CastSpell(me, SPELL_DEFEND, true);
+               uiDefendTimer = 10000;
+            } else uiDefendTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
@@ -541,19 +606,20 @@ public:
             }
         }
 
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_SQUIRE, pCreature->GetGUID());
+        pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXTID_SQUIRE_DAVID, pCreature->GetGUID());
         return true;
     }
 
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
     {
-        pPlayer->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
-        {
-            pPlayer->CLOSE_GOSSIP_MENU();
-            pCreature->SummonCreature(NPC_ARGENT_CHAMPION,8542.566406f,1086.951904f,556.769836f,1.044363f);
-        }
-        return true;
+           if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+           {
+               pPlayer->CLOSE_GOSSIP_MENU();
+               pCreature->SummonCreature(NPC_ARGENT_VALIANT,8575.451f,952.472f,547.554f,0.38f);
+           }
+           //else
+               //pPlayer->SEND_GOSSIP_MENU(???, pCreature->GetGUID()); Missing text
+           return true;
     }
 };
 

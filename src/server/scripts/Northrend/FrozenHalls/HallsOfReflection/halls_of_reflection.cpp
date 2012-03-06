@@ -2058,6 +2058,31 @@ public:
     }
     struct npc_queldelarAI  : public ScriptedAI
     {
+        npc_queldelarAI(Creature *c) : ScriptedAI(c)
+        {
+        }
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who)
+                return;
+            if (me->IsWithinDistInMap(who, 20) && who->HasAura(SPELL_QUELDELAR_AURA))
+            {
+                me->SummonCreature(NPC_QUELDELAR, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+                me->DisappearAndDie();
+            }
+        }
+    };
+};
+
+class npc_throw_quel_delar : public CreatureScript
+{
+public:
+
+	npc_throw_quel_delar()
+		: CreatureScript("npc_throw_quel_delar") {}
+
+	struct npc_throw_quel_delarAI : public ScriptedAI
+	{
         uint32 Bladestorm;
         uint32 Heroic_Strike;
         uint32 Mortal_Strike;
@@ -2070,60 +2095,87 @@ public:
             Heroic_Strike = 5000;
             Mortal_Strike = 7000;
             Whirlind = 13000;
-            bool summoned = false;
-            me->SetVisible(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+           me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
         }
+		
+		npc_throw_quel_delarAI(Creature* c) : ScriptedAI(c) 
+		{ 
+			m_pInstance = (InstanceScript*)c->GetInstanceScript();
+			tempSummon = NULL;
+		}
+		
+		InstanceScript* m_pInstance;
+		TempSummon* tempSummon;
 
-        npc_queldelarAI(Creature *c) : ScriptedAI(c) { }
+		void SpellHit(Unit* caster, SpellEntry const* spell) 
+		{
+			if ( caster->GetTypeId() == TYPEID_PLAYER && spell->Id == 70698 )
+				if ( tempSummon ) 
+				{
+					if ( tempSummon->isDead() )
+						tempSummon->Respawn();
+						
+					tempSummon->SetVisible(true);
+				}
+				else 
+				{
+					tempSummon = me->SummonCreature (37158, 0.0f, 0.0f, 0.0f, 0.0f);
+					tempSummon->SetVisible(true);
+				}
+		}
 
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (!who)
-                return;
+		void UpdateAI (uint32 const diff) 
+		{
+			Map::PlayerList const &players = m_pInstance->instance->GetPlayers();
+			for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+			{
+				Player* player = itr->getSource();
 
-            if (me->IsWithinDistInMap(who, 20) && who->HasAura(SPELL_QUELDELAR_AURA) && (summoned==false))
-            {
-                me->SetVisible(true);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                summoned=true;
-            }
-        }
+				if ( player->isAlive() && me->IsWithinDistInMap(player, 10.0) )
+					if ( player->HasAura(70013) && ( player->ToPlayer()->IsActiveQuest(24480) || player->ToPlayer()->IsActiveQuest(24561) ) ) 
+					{
+						player->RemoveAura(70013);
+						player->CastSpell(me, 70698, false);
+						player->AddItem(50254,1);
+					}
+			}
 
-        void UpdateAI(const uint32 uiDiff)
-        {
             if (!UpdateVictim())
                 return;
 
-            if (Bladestorm <= uiDiff)
+            if (Bladestorm <= diff)
             {
                 DoCast(me->getVictim(), Bladestorm);
                 Bladestorm = 10000;
-            } else Bladestorm -= uiDiff;
+            } else Bladestorm -= diff;
 
-            if (Heroic_Strike <= uiDiff)
+            if (Heroic_Strike <= diff)
             {
                 DoCast(me->getVictim(), Heroic_Strike);
                 Heroic_Strike = 5000;
-            } else Heroic_Strike -= uiDiff;
+            } else Heroic_Strike -= diff;
 
-            if (Mortal_Strike <= uiDiff)
+            if (Mortal_Strike <= diff)
             {
                 DoCast(me->getVictim(), Mortal_Strike);
                 Mortal_Strike = 7000;
-            } else Mortal_Strike -= uiDiff;
+            } else Mortal_Strike -= diff;
 
-            if (Whirlind <= uiDiff)
+            if (Whirlind <= diff)
             {
                 DoCast(me->getVictim(), Whirlind);
                 Whirlind = 13000;
-            } else Whirlind -= uiDiff;
+            } else Whirlind -= diff;
 
-            DoMeleeAttackIfReady();
-        }
-    };
+            DoMeleeAttackIfReady();	
+		}
+	};
+
+	CreatureAI* GetAI(Creature* creature) const 
+	{ 
+		return new npc_throw_quel_delarAI(creature);
+	}
 };
-
 void AddSC_halls_of_reflection()
 {
     new npc_jaina_or_sylvanas_hor(true, "npc_sylvanas_hor_part1");
@@ -2139,4 +2191,5 @@ void AddSC_halls_of_reflection()
     new npc_frostworn_general();
     new npc_spiritual_reflection();
     new npc_queldelar();
+	new npc_throw_quel_delar();
 }

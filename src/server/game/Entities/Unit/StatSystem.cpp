@@ -1307,7 +1307,6 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
 					if(owner->HasSpell(34453)) // Dresseur 
 						Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.05f;  
 				}
-				
             }
 
             bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod + Dresseur;

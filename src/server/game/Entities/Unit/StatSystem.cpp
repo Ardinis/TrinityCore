@@ -1114,6 +1114,7 @@ bool Guardian::UpdateStats(Stats stat)
         }
         else
         {
+/*
             mod = 0.45f;
             if (isPet())
             {
@@ -1127,9 +1128,21 @@ bool Guardian::UpdateStats(Stats stat)
                     AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
                 }
             }
-            ownersBonus = float(owner->GetStat(stat)) * mod;
+*/
+			float Vie = 0.0f;
+			mod = 0.45f;
+            if (isPet())
+            {
+				Vie = 0.0f;
+				if(ToPet()->HasSpell(62762))	// chasse sauvage Range 2
+					Vie += owner->GetStat(stat) * 0.40f; // (UNIT_MOD_STAT_STAMINA, TOTAL_PCT)
+				else
+					if(ToPet()->HasSpell(62758)) // chasse sauvage 
+						Vie += owner->GetStat(stat) * 0.20f;
+            }
+			ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);	
             // ownersBonus is multiplied by TOTAL_PCT too
-			ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);			
+            ownersBonus = float(owner->GetStat(stat))* mod + Vie;
             value += ownersBonus;
         }
     }
@@ -1286,10 +1299,11 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     {
         if (isHunterPet())                      //hunter pets benefit from owner's attack power
         {
-			float Dresseur = 0;
-            float mod = 1.0f;                                                 //Hunter contribution modifier
+			float Dresseur = 0.0f;
+            float mod = 0.0f;                                                 //Hunter contribution modifier
             if (isPet())
             {
+/*		
                 PetSpellMap::const_iterator itr = ToPet()->m_spells.find(62758);    //Wild Hunt rank 1
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            //Wild Hunt rank 2
@@ -1299,7 +1313,14 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                     SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
                     mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
                 }
-
+				502 + 79.5 
+*/
+				if(ToPet()->HasSpell(62762))	// chasse sauvage Range 2
+					mod += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.30f;
+				else
+					if(ToPet()->HasSpell(62758)) // chasse sauvage 
+						mod += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
+					
 				if(owner->HasSpell(34454)) // Dresseur rang 2
 					Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.10f;
 				else
@@ -1309,8 +1330,8 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
 				}
             }
 
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod + Dresseur;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod));
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f + mod + Dresseur;
+            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f + mod));
         }
         else if (IsPetGhoul()) //ghouls benefit from deathknight's attack power (may be summon pet or not)
         {

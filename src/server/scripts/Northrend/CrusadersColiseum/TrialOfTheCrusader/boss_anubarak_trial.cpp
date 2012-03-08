@@ -141,8 +141,6 @@ public:
     {
         boss_anubarak_trialAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             m_instance = (InstanceScript*)creature->GetInstanceScript();
         }
 
@@ -574,7 +572,7 @@ class mob_frost_sphere : public CreatureScript
                 _isFalling = false;
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlying(true);
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(25144);
                 me->SetSpeed(MOVE_RUN, 0.5f, false);
                 me->GetMotionMaster()->MoveRandom(20.0f);
                 DoCast(SPELL_FROST_SPHERE);
@@ -606,7 +604,7 @@ class mob_frost_sphere : public CreatureScript
                 {
                     case POINT_FALL_GROUND:
                         me->RemoveAurasDueToSpell(SPELL_FROST_SPHERE);
-                        me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
+                        me->SetDisplayId(11686);
                         DoCast(SPELL_PERMAFROST_VISUAL);
                         DoCast(SPELL_PERMAFROST);
                         me->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);

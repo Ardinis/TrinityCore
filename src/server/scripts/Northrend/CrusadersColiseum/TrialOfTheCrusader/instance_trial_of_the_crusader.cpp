@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -33,7 +33,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
         struct instance_trial_of_the_crusader_InstanceMapScript : public InstanceScript
         {
-            instance_trial_of_the_crusader_InstanceMapScript(Map* map) : InstanceScript(map) {}
+            instance_trial_of_the_crusader_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
             uint32 EncounterStatus[MAX_ENCOUNTERS];
             uint32 TrialCounter;
@@ -43,6 +43,11 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint32 NorthrendBeasts;
             std::string SaveDataBuffer;
             bool   NeedSave;
+
+            uint32 DataDamageTwin;
+	  uint32 DataPause;
+            uint32 FjolaCasting;
+            uint32 EydisCasting;
 
             uint64 BarrentGUID;
             uint64 TirionGUID;
@@ -85,7 +90,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 EventStage = 0;
 
                 TributeChestGUID = 0;
-
+                DataDamageTwin = 0;
+		DataPause = NOT_STARTED;
                 MainGateDoorGUID = 0;
                 EastPortcullisGUID = 0;
                 WebDoorGUID = 0;
@@ -118,6 +124,17 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     player->SendUpdateWorldState(UPDATE_STATE_UI_SHOW, 1);
                     player->SendUpdateWorldState(UPDATE_STATE_UI_COUNT, GetData(TYPE_COUNTER));
                 }
+            }
+
+            bool IsRaidWiped()
+            {
+                Map::PlayerList const &players = instance->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player* player = i->getSource())
+                        if (player->isAlive())
+                            return false;
+
+                return true;
             }
 
             void OpenDoor(uint64 guid)
@@ -337,6 +354,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         {
                             case GORMOK_DONE:
                                 EventStage = 200;
+
                                 SetData(TYPE_NORTHREND_BEASTS, IN_PROGRESS);
                                 SetData(TYPE_BEASTS, IN_PROGRESS);
                                 break;
@@ -363,6 +381,15 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                         }
                         break;
+		case DATA_PAUSE:
+		  DataPause = data;
+		  data = NOT_STARTED;
+		  break;
+                    case DATA_HEALTH_TWIN_SHARED:
+                        DataDamageTwin = data;
+                        data = NOT_STARTED;
+                        break;
+
                     //Achievements
                     case DATA_SNOBOLD_COUNT:
                         if (data == INCREASE)
@@ -396,9 +423,12 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     sLog->outDetail("[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
                     if (data == FAIL)
                     {
-                        --TrialCounter;
-                        NeedSave = true;
-                        EventStage = (type == TYPE_BEASTS ? 666 : 0);
+                        if (IsRaidWiped())
+                        {
+                            --TrialCounter;
+                            NeedSave = true;
+                            EventStage = (type == TYPE_BEASTS ? 666 : 0);
+                        }
                         data = NOT_STARTED;
                     }
 
@@ -574,6 +604,10 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                 break;
                         };
                         return EventNPCId;
+                    case DATA_HEALTH_TWIN_SHARED:
+                        return DataDamageTwin;
+		case DATA_PAUSE:
+		  return DataPause;
                     default:
                         break;
                 }
@@ -607,7 +641,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                 std::ostringstream saveStream;
 
                 for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
-                    saveStream << EncounterStatus[i] << ' ';
+                    saveStream << EncounterStatus[i] << " ";
 
                 saveStream << TrialCounter;
                 SaveDataBuffer = saveStream.str();

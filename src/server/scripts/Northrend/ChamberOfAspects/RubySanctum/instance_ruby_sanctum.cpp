@@ -79,6 +79,8 @@ public:
         uint64 m_uiArbol2GUID;
         uint64 m_uiArbol3GUID;
 
+      uint64 m_uiBig;
+
         void Initialize()
         {
             for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
@@ -110,6 +112,8 @@ public:
             m_uiOrbFocusGUID = 0;
             m_auiOrbNState = NOT_STARTED;
             m_auiOrbSState = NOT_STARTED;
+
+	    m_uiBig = FAIL;
         }
 
         bool IsEncounterInProgress() const
@@ -336,6 +340,10 @@ public:
                     m_auiOrbSState = uiData;
                     uiData = NOT_STARTED;
                     break;
+	    case DATA_BIG:                      
+	      m_uiBig = uiData; 
+	      uiData = NOT_STARTED; 
+	      break;
                 case TYPE_COUNTER:
                     if (uiData == 0)
                         UpdateWorldState(false,0);
@@ -391,6 +399,8 @@ public:
                     return m_auiOrbNState;
                 case DATA_ORB_S:
                     return m_auiOrbSState;
+	    case DATA_BIG:
+	      return m_uiBig;
                 case TYPE_EVENT_NPC:
                     switch (m_auiEncounter[TYPE_EVENT])
                     {

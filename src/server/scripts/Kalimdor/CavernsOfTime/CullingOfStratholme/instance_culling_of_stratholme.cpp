@@ -63,6 +63,9 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 _genericBunnyGUID = 0;
                 memset(&_encounterState[0], 0, sizeof(uint32) * MAX_ENCOUNTER);
                 _crateCount = 0;
+		uiCountdownTimer = 0;
+		uiCountdownMinute = 26;
+
             }
 
             bool IsEncounterInProgress() const
@@ -104,6 +107,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
                         break;
                     case NPC_INFINITE:
                         _infiniteGUID = creature->GetGUID();
+			creature->SetVisible(false);
+			creature->setFaction(35);
                         break;
                     case NPC_GENERIC_BUNNY:
                         _genericBunnyGUID = creature->GetGUID();
@@ -171,6 +176,22 @@ class instance_culling_of_stratholme : public InstanceMapScript
                         break;
                     case DATA_INFINITE_EVENT:
                         _encounterState[4] = data;
+			switch (_encounterState[4])
+			  {
+			  case DONE:
+                            uiCountdownMinute = 0;
+                            DoUpdateWorldState(WORLDSTATE_NUMBER_INFINITE_SHOW, 0);
+                            break;
+			  case IN_PROGRESS: //make visible
+			    {
+			      if (Creature* pCreature = instance->GetCreature(_infiniteGUID))
+				{
+				  pCreature->SetVisible(true);
+				  pCreature->RestoreFaction();
+				}
+			    }   break;
+			  }
+
                         break;
                     case DATA_CRATE_COUNT:
                         _crateCount = data;
@@ -290,6 +311,32 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
+	  void Update(uint32 diff)
+	  {
+            if (GetData(DATA_INFINITE_EVENT) == SPECIAL || GetData(DATA_INFINITE_EVENT) == IN_PROGRESS)
+	      if (uiCountdownMinute)
+                {
+		  if (uiCountdownTimer < diff)
+                    {
+		      uiCountdownMinute--;
+
+		      if (uiCountdownMinute)
+                        {
+			  DoUpdateWorldState(WORLDSTATE_NUMBER_INFINITE_SHOW, 1);
+			  DoUpdateWorldState(WORLDSTATE_NUMBER_INFINITE_TIMER, uiCountdownMinute);
+                        }
+		      else
+                        {
+			  DoUpdateWorldState(WORLDSTATE_NUMBER_INFINITE_SHOW, 0);
+                        }
+		      SaveToDB();
+		      uiCountdownTimer += 60000;
+                    }
+		  uiCountdownTimer -= diff;
+                }
+	  }
+
+
         private:
             uint64 _arthasGUID;
             uint64 _meathookGUID;
@@ -305,6 +352,13 @@ class instance_culling_of_stratholme : public InstanceMapScript
             uint64 _genericBunnyGUID;
             uint32 _encounterState[MAX_ENCOUNTER];
             uint32 _crateCount;
+
+	  uint64 uiInfinite;
+
+	  uint32 uiCountdownTimer;
+	  uint16 uiCountdownMinute;
+	  std::string str_data;
+
         };
 };
 

@@ -168,7 +168,7 @@ public:
             Summons.DespawnAll();
             m_uiSummonWhelpCount = 0;
             m_bIsMoving = false;
-
+	    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
             if (m_instance)
             {
                 m_instance->SetData(DATA_ONYXIA, NOT_STARTED);

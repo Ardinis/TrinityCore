@@ -165,13 +165,13 @@ public:
                     DoCast(SPELL_CALL_FLAMECALLER);
 
                 DoScriptText(-1666204,me);
-                m_uiSummonTimer = 45*IN_MILLISECONDS;
+                m_uiSummonTimer = 45000;
             } else m_uiSummonTimer -= diff;
 
             if (m_uiCleaveTimer <= diff)
             {
                 DoCast(SPELL_CLEAVE_ARMOR);
-                m_uiCleaveTimer = urand(10*IN_MILLISECONDS,20*IN_MILLISECONDS);
+                m_uiCleaveTimer = 10000;
             } else m_uiCleaveTimer -= diff;
 
             if (m_uiImtimidatingTimer <= diff)

@@ -31,6 +31,8 @@
 
 enum
 {
+  SPELL_AURA_TWILIGHT             = 74807,
+
     //SPELLS
     //All
     SPELL_TWILIGHT_PRECISION                    = 78243, // Increases Halion's chance to hit by 5% and decreases all players' chance to dodge by 20%
@@ -1011,6 +1013,9 @@ public:
         InstanceScript* instance;
 
         uint32 m_timer;
+        uint32 m_go;
+      uint32 m_big;
+
         float m_direction, m_nextdirection;
         bool m_warning;
 
@@ -1027,6 +1032,8 @@ public:
             m_nextdirection = 0.0f;
             m_timer = 30000;
             m_warning = false;
+	    m_go = 0;
+	    m_big = 0;
 
             Creature* pPulsar1 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_N));
             if (!pPulsar1 )
@@ -1056,9 +1063,15 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             if (!instance)
+	      {
                   me->ForcedDespawn();
+		  instance->SetData(DATA_BIG, FAIL);
+	      }
             if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
+	      {
                   me->ForcedDespawn();
+		  instance->SetData(DATA_BIG, FAIL);
+	      }
 
             if (instance->GetData(DATA_ORB_S) == DONE && instance->GetData(DATA_ORB_N) == DONE)
             {
@@ -1088,8 +1101,28 @@ public:
                 m_timer = 30000;
                 m_warning = false;
                 pPulsar1->CastSpell(pPulsar2, SPELL_TWILIGHT_CUTTER_CHANNEL,false);
+		instance->SetData(DATA_BIG, IN_PROGRESS);
+		m_big = 10000;
                 //pPulsar2->CastSpell(pPulsar1, SPELL_TWILIGHT_CUTTER,false);
             } else m_timer -= uiDiff;
+	    if (instance->GetData(DATA_BIG) == IN_PROGRESS)
+	      {
+		if ( m_big >= uiDiff)
+		  {
+		    if (m_go <= uiDiff)
+		      {
+			float x,y;
+			me->GetNearPoint2D(x, y, FR_RADIUS, m_nextdirection);
+			me->SummonCreature(NPC_ORB_CARRIER, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
+			m_go = 500;
+		      }
+		    else m_go -= uiDiff;
+		    m_big -= uiDiff;
+		  }
+	      }
+	    else m_go = 0;
+
+
         }
     };
 };
@@ -1191,9 +1224,16 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             if (!instance)
+	      {
+		instance->SetData(DATA_BIG, FAIL);
                   me->ForcedDespawn();
+	      }
             if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
+	      {
+		instance->SetData(DATA_BIG, FAIL);
                   me->ForcedDespawn();
+	      }
+
             if (!MovementStarted && instance->GetData(m_flag) == SPECIAL)
                 StartMovement(1);
         }
@@ -1256,10 +1296,32 @@ public:
             }
         }
 
+
+      void mob_orb_carrierDamage()
+      {
+	Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+
+	for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+	  {
+	    if (Player* pPlayer = i->getSource())
+	      {
+		if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 3)
+		  {
+		    //DoCast(pPlayer, SPELL_DEFILE);
+		    int32 damage = 20000;
+		    if ((i->getSource())->HasAura(SPELL_AURA_TWILIGHT))
+		      me->DealDamage(i->getSource(), damage, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
+		  }
+	      }
+	  }
+      }
+
+
         void UpdateAI(const uint32 uiDiff)
         {
             if (!instance || instance->GetData(TYPE_HALION) != IN_PROGRESS)
                   me->ForcedDespawn();
+	    mob_orb_carrierDamage();
             if (!MovementStarted)
             {
                 float x,y;

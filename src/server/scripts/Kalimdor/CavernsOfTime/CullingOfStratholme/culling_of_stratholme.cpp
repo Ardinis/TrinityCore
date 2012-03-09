@@ -553,6 +553,10 @@ public:
                 case 48:
                     SetRun(true);
                     DoScriptText(SAY_PHASE406, me);
+		    if (instance)
+		      if (instance->GetData(DATA_INFINITE_EVENT) == SPECIAL && IsHeroic())
+			instance->SetData(DATA_INFINITE_EVENT, IN_PROGRESS); //make visible
+
                     break;
                 case 53:
                     DoScriptText(SAY_PHASE407, me);
@@ -864,9 +868,15 @@ public:
                             DoScriptText(SAY_PHASE209, me);
 
                             uiBossEvent = DATA_MEATHOOK_EVENT;
+
                             if (instance)
+			      {
                                 instance->SetData(DATA_ARTHAS_EVENT, IN_PROGRESS);
 
+				if (instance->GetData(DATA_INFINITE_EVENT) != DONE && IsHeroic())   //if not killed already
+				  instance->SetData(DATA_INFINITE_EVENT, SPECIAL);     //start countdown
+
+			      }
                             me->SetReactState(REACT_DEFENSIVE);
                             SetDespawnAtFar(false);
                             JumpToNextStep(5000);

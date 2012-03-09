@@ -80,7 +80,7 @@ enum
     DATA_ORB_DIRECTION             = 110,
     DATA_ORB_S                     = 111,
     DATA_ORB_N                     = 112,
-
+    DATA_BIG                       = 4242,
 };
 
 enum uiWorldStates

@@ -749,7 +749,7 @@ public:
 			{
 				if(!pPlayer->HasAura(SPELL_WARTSBGONE_LIP_BALM))
 					pPlayer->AddAura(SPELL_WARTS,pPlayer);
-				else if(roll_chance_i(10)) // 10% de chance de trouver la grenouille
+				else if(roll_chance_i(20)) // 20% de chance de trouver la grenouille
 				{
 					pPlayer->SummonCreature(NPC_MAIDEN_OF_ASHWOOD_LAKE,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0,TEMPSUMMON_TIMED_DESPAWN,30000);
 					me->DisappearAndDie();		//dépop

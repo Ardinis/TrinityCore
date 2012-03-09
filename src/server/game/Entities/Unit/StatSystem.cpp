@@ -1140,9 +1140,23 @@ bool Guardian::UpdateStats(Stats stat)
 					if(ToPet()->HasSpell(62758)) // chasse sauvage 
 						Vie += owner->GetStat(stat) * 0.20f;
             }
+			float EnduSup =0.0f;
+            if (isPet())
+            {
+				EnduSup = 0.0f;
+				if(ToPet()->HasSpell(61688))	// Endu Sup Rang 3
+					EnduSup += owner->GetStat(stat) * 0.101f; 
+				else
+					if(ToPet()->HasSpell(61687)) // Endu Sup Rang 2
+						EnduSup += owner->GetStat(stat) * 0.067f;
+					else
+						if(ToPet()->HasSpell(61686)) //  Endu Sup Rang 1
+							EnduSup += owner->GetStat(stat) * 0.033f;
+            }			
+			
 			ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);	
             // ownersBonus is multiplied by TOTAL_PCT too
-            ownersBonus = float(owner->GetStat(stat))* mod + Vie;
+            ownersBonus = float(owner->GetStat(stat))* mod + Vie + EnduSup;
             value += ownersBonus;
         }
     }

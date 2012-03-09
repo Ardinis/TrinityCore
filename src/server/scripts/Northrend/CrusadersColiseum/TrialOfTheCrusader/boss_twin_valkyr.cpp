@@ -158,7 +158,7 @@ struct boss_twin_baseAI : public ScriptedAI
         m_uiSpikeTimer = 20*IN_MILLISECONDS;
         m_uiTouchTimer = urand(10, 15)*IN_MILLISECONDS;
         m_uiBerserkTimer = IsHeroic() ? 6*MINUTE*IN_MILLISECONDS : 10*MINUTE*IN_MILLISECONDS;
-
+	RemoveBadAuras();
         Summons.DespawnAll();
     }
 
@@ -170,8 +170,30 @@ struct boss_twin_baseAI : public ScriptedAI
             m_pInstance->SetData(DATA_HEALTH_TWIN_SHARED, me->GetMaxHealth());
         }
 	m_pInstance->SetData(DATA_PAUSE, NOT_STARTED);
+	RemoveBadAuras();
         me->DespawnOrUnsummon();
     }
+
+  void RemoveBadAuras()
+  {
+    Map* pMap = me->GetMap();
+    Map::PlayerList const &PlayerList = pMap->GetPlayers();
+    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+      if (Player* pPlayer = i->getSource())
+	if (pPlayer->isAlive())
+	  {
+	    pPlayer->RemoveAura(67590);
+	    pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
+	    pPlayer->RemoveAurasDueToSpell(67222);
+	    pPlayer->RemoveAurasDueToSpell(67223);
+	    pPlayer->RemoveAurasDueToSpell(67224);
+	    pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+	    pPlayer->RemoveAurasDueToSpell(67177);
+	    pPlayer->RemoveAurasDueToSpell(67178);
+	    pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+	  }
+
+  }
 
     void MovementInform(uint32 uiType, uint32 uiId)
     {
@@ -312,6 +334,7 @@ struct boss_twin_baseAI : public ScriptedAI
 	      }
         }
 	m_pInstance->SetData(DATA_PAUSE, NOT_STARTED);
+	RemoveBadAuras();
         Summons.DespawnAll();
     }
 

@@ -409,6 +409,29 @@ public:
     }
 };
 
+class item_egg_proto_stolen : public ItemScript
+{
+public:
+    item_egg_proto_stolen() : ItemScript("item_egg_proto_stolen") { }
+
+    bool OnUse(Player* player, Item* pItem, SpellCastTargets const& /*targets*/)
+    {
+      if (player->GetAreaId() != 4631)
+	{
+	  player->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
+	  return true;
+	}
+      if (player->GetQuestStatus(13051) == QUEST_STATUS_INCOMPLETE)
+        {
+	  player->SummonCreature(30461, player->GetPositionX(), player->GetPositionY()-20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000);
+	  player->CompleteQuest(13051);
+        }
+      else
+	player->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
+      return true;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -422,4 +445,5 @@ void AddSC_item_scripts()
     new item_dehta_trap_smasher();
     new item_trident_of_nazjan();
     new item_captured_frog();
+    new item_egg_proto_stolen();
 }

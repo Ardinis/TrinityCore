@@ -3495,14 +3495,17 @@ public:
       if (!killer->ToPlayer())
 	return ;
       if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE))
-	return ;
+	if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
+	  return ;
       if (bjaloot)
 	{
+	  std::cout << killer->ToPlayer()->GetReputation(1104) << std::endl;
 	  if (killer->ToPlayer()->GetReputation(1104) < 14000)
 	    killer->ToPlayer()->SetReputation(1104, 14000);
 	}
       else if (bzepiv)
 	{
+	  std::cout << killer->ToPlayer()->GetReputation(1105) << std::endl;
 	  if (killer->ToPlayer()->GetReputation(1105) < 14000)
 	    killer->ToPlayer()->SetReputation(1105, 14000);
 	}

@@ -772,6 +772,8 @@ public:
 #define SAY_START_2      "Preparez vous !"
 #define SAY_END      "j'ai perdu. Joli combat !"
 #define GOSSIP_VALIANT_1   "Je suis pret pour le combat."
+#define ACTION_START_FIGHT 42
+#define SAY_AGG 4
 
 enum baliant_quest
   {
@@ -779,6 +781,16 @@ enum baliant_quest
     QUEST_AMONG_THECHAMPIONS_H                                                      = 13811,
     QUEST_AMONG_THECHAMPIONS_A2                                             = 13793,
     QUEST_AMONG_THECHAMPIONS_H2                                                     = 13814,
+  QUEST_THE_GRAND_MELEE_1= 13665,
+    QUEST_THE_GRAND_MELEE_2= 13745,
+    QUEST_THE_GRAND_MELEE_3 = 13750,
+    QUEST_THE_GRAND_MELEE_4 = 13756,
+    QUEST_THE_GRAND_MELEE_5 = 13761,
+    QUEST_THE_GRAND_MELEE_6 = 13767,
+    QUEST_THE_GRAND_MELEE_7 = 13772,
+    QUEST_THE_GRAND_MELEE_8 = 13777,
+    QUEST_THE_GRAND_MELEE_9 = 13782,
+    QUEST_THE_GRAND_MELEE_10 = 13787,
   };
 
 class npc_valiant : public CreatureScript
@@ -786,48 +798,70 @@ class npc_valiant : public CreatureScript
 public:
   npc_valiant(): CreatureScript("npc_valiant"){}
 
-  CreatureAI* GetAI(Creature* pCreature)
+  CreatureAI* GetAI(Creature* pCreature) const
   {
     return new npc_valiantAI (pCreature);
   }
 
   bool OnGossipHello(Player* pPlayer, Creature* pCreature)
   {
-    std::cout << "script vaillant" << std::endl;
     if ((pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_H) == QUEST_STATUS_INCOMPLETE)||(pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_H2) == QUEST_STATUS_INCOMPLETE)||(pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_A) == QUEST_STATUS_INCOMPLETE)||(pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_A2) == QUEST_STATUS_INCOMPLETE))
       {
 	pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_VALIANT_1,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF);
 	pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
-      }else
+      }
+    else if((pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_1) == QUEST_STATUS_INCOMPLETE)|| 
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_2) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_3) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_4) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_5) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_6) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_7) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_8) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_9) == QUEST_STATUS_INCOMPLETE) ||
+	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_10) == QUEST_STATUS_INCOMPLETE))
+      {
+	pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_VALIANT_1,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF+1);
+	pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+      }
+    else
       pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
     return true;
   }
   
-  bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+  bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
   {
+    if (!pPlayer)
+      return false;
+    Creature* veh = pPlayer->GetVehicleCreatureBase();
+    if (!veh)
+      return false;
     switch(uiAction)
       {
       case GOSSIP_ACTION_INFO_DEF:
-	if (pPlayer)
-	  pPlayer->CLOSE_GOSSIP_MENU();
-	//	CAST_AI(npc_valiantAI, (pCreature->AI()));
-	pCreature->setFaction(14);
-	pCreature->SetReactState(REACT_AGGRESSIVE);
-	pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-	pCreature->AddThreat(pPlayer, 100000.0f);
-	pCreature->AI()->AttackStart(pPlayer);
-	switch (urand(0,1))
-	  {
-	  case 0: 
-	    pCreature->MonsterSay(SAY_START_1, LANG_UNIVERSAL, 0);
-	    break;
-	  case 1: 
-	    pCreature->MonsterSay(SAY_START_2, LANG_UNIVERSAL, 0);
-	    break;
-	  }
-	
-	break;
+	{
+	  pCreature->setFaction(14);
+	  pCreature->SetReactState(REACT_AGGRESSIVE);
+	  pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	  pCreature->AddThreat(veh, 100000.0f);
+	  pCreature->AI()->AttackStart(veh);
+	  pCreature->AI()->DoAction(1);
+	  pCreature->AI()->DoAction(SAY_AGG);
+	  break;
+	}
+      case GOSSIP_ACTION_INFO_DEF+1:
+	{
+	  pCreature->setFaction(14);
+	  pCreature->SetReactState(REACT_AGGRESSIVE);
+	  pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	  pCreature->AddThreat(veh, 100000.0f);
+	  pCreature->AI()->AttackStart(veh);
+	  pCreature->AI()->DoAction(2);
+	  pCreature->AI()->DoAction(SAY_AGG);
+	  break;
+	}
       }
+    pPlayer->CLOSE_GOSSIP_MENU();
     return true;
   }
        
@@ -837,9 +871,15 @@ struct npc_valiantAI : public ScriptedAI
   Unit *pTarget;
   uint32 SpellTimer;
   uint32 MoviTimer;
-       
+  uint32 act;
+  Player *target;
+
 public:
-  npc_valiantAI(Creature* creature) : ScriptedAI(creature) {}
+  npc_valiantAI(Creature* creature) : ScriptedAI(creature) 
+  {
+    me->setFaction(35);
+    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+  }
 
   enum Spells
     {
@@ -847,7 +887,8 @@ public:
       CHARGE                                  =63010,
       THRUST                                  =68505,
       DEFEND                                  =66482,
-      MUNTED_MELEE_VICTORY    =63596
+      MUNTED_MELEE_VICTORY    =63596,
+      MUNTED_MELEE2_VICTORY    =62996
     };
   enum Timers
     {
@@ -857,37 +898,71 @@ public:
       TIMER_MoviTimer_MAX     =2000
     };
 
-
   void Reset()
   {
-    std::cout << "reset" << std::endl;
     me->setFaction(35);
-    //    me->SetReactState(REACT_PASSIVE);
     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    if (act != 1 && act != 2)
+      act = 0;
   }
-       
+
   void EnterCombat(Unit* who)
   {
     SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
     MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
   }
-       
+
   void JustDied(Unit* Killer)
   {
     me->MonsterSay(SAY_END, LANG_UNIVERSAL, 0);
     me->setFaction(35);
-    me->SetHealth(1);
-    pTarget->CastSpell(pTarget, 63596, true);
-    me->SetVisible(false);
+    if (act == 1)
+      pTarget->CastSpell(pTarget, MUNTED_MELEE_VICTORY, true);
+    else if (act == 2)
+      pTarget->CastSpell(pTarget, MUNTED_MELEE2_VICTORY, true);
+    me->Respawn(true);
+    EnterEvadeMode();
   }
-       
+
+
+  void DoAction(int32 const action)
+  {
+    switch (action)
+      {
+      case 0:
+	act = action;
+	break;
+      case 1:
+	act = action;
+	break;
+      case 2:
+	act = action;
+	break;
+      case SAY_AGG:
+	{
+	  switch (urand(0,1))
+	    {
+	    case 0:
+	      me->MonsterSay(SAY_START_1, LANG_UNIVERSAL, 0);
+	      break;
+	    case 1:
+	      me->MonsterSay(SAY_START_2, LANG_UNIVERSAL, 0);
+	      break;
+	    }
+	  break;
+	}	
+      default : 
+	break;
+      }
+  }
+
   void KilledUnit(Unit *victim)
   {
     Reset();
     EnterEvadeMode();
   }
        
-  void SpellHit(Unit *caster, const SpellEntry *spell)
+  void SpellHit(Unit *caster, const SpellInfo *spell)
   {
     if (spell->Id == SHIELD_BREAKER)
       {
@@ -895,11 +970,27 @@ public:
       }
   }
        
-  void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
+  void SpellHitTarget(Unit *pTarget, const SpellInfo *spell)
   {
     if (spell->Id == SHIELD_BREAKER)
       pTarget->RemoveAura(DEFEND);
   }
+
+  void DoMeleeAttackIfReady()
+  {
+    if (me->HasUnitState(UNIT_STATE_CASTING))
+      return;
+
+    if (me->isAttackReady())
+      {
+	if (me->IsWithinMeleeRange(me->getVictim()))
+	  {
+	    DoCastVictim(SPELL_THRUST);
+	    me->resetAttackTimer();
+	  }
+      }
+  }
+
        
   void UpdateAI(const uint32 uiDiff)
   {
@@ -1008,13 +1099,13 @@ public:
 
 void AddSC_icecrown()
 {
-    new npc_arete;
-    new npc_squire_david;
-	new npc_squire_danny;
-    new npc_argent_valiant;
-    new npc_guardian_pavilion;
-    new npc_vereth_the_cunning;
-    new npc_tournament_training_dummy;
-    new npc_training_dummy_argent;
-    new npc_valiant;
+  new npc_arete();
+  new npc_squire_david();
+  new npc_squire_danny();
+  new npc_argent_valiant();
+  new npc_guardian_pavilion();
+  new npc_vereth_the_cunning();
+  new npc_tournament_training_dummy();
+  new npc_training_dummy_argent();
+  new npc_valiant();
 }

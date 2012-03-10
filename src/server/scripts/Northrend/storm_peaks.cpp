@@ -781,6 +781,60 @@ class npc_hyldsmeet_protodrake : public CreatureScript
         }
 };
 
+class npc_hodir_drake_mount : public CreatureScript
+{
+public:
+  npc_hodir_drake_mount() : CreatureScript("npc_hodir_drake_mount") { }
+
+  struct npc_hodir_drake_mountAI : public CreatureAI
+  {
+    npc_hodir_drake_mountAI(Creature* c) : CreatureAI(c)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+
+    void Reset()
+    {
+      //      std::cout << "reset" << std::endl;
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+
+    void PassengerBoarded(Unit* /*unit*/, int8 /*seat*/, bool apply)
+    {
+      if (!apply)
+	me->Kill(me);
+    }
+
+    void MoveInLineOfSight(Unit* unit)
+    {
+      //      std::cout << "check passenger" << std::endl;
+      Player *billi = unit->ToPlayer();
+      if (!billi)
+	return;
+      if (billi && billi->isAlive() && billi->GetDistance(me) < 30.0f && !billi->isInCombat())
+	{
+	  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+	  if (billi->IsMounted())
+	    billi->Dismount();
+	  billi->CastSpell(me, 49460, true);
+	  //	  billi->EnterVehicle(me, 1);
+	}
+    }
+
+    void UpdateAI(uint32 const diff)
+    {
+
+    }
+
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_hodir_drake_mountAI(creature);
+  }
+};
+
+
 void AddSC_storm_peaks()
 {
     new npc_agnetta_tyrsdottar;
@@ -794,4 +848,5 @@ void AddSC_storm_peaks()
     new npc_brunnhildar_prisoner;
     new npc_icefang;
     new npc_hyldsmeet_protodrake;
+    new npc_hodir_drake_mount;
 }

@@ -752,6 +752,248 @@ public:
 
 };
 
+/*#####################
+## npc_valiant
+######################*/
+
+#define SAY_START_1      "En garde!"
+#define SAY_START_2      "Preparez vous !"
+#define SAY_END      "j'ai perdu. Joli combat !"
+#define GOSSIP_VALIANT_1   "Je suis pret pour le combat."
+
+enum baliant_quest
+  {
+    QUEST_AMONG_THECHAMPIONS_A                                                      = 13790,
+    QUEST_AMONG_THECHAMPIONS_H                                                      = 13811,
+    QUEST_AMONG_THECHAMPIONS_A2                                             = 13793,
+    QUEST_AMONG_THECHAMPIONS_H2                                                     = 13814,
+  };
+
+class npc_valiant : public CreatureScript
+{
+public:
+  npc_valiant(): CreatureScript("npc_valiant"){}
+
+  CreatureAI* GetAI(Creature* pCreature)
+  {
+    return new npc_valiantAI (pCreature);
+  }
+
+  bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+  {
+    std::cout << "script vaillant" << std::endl;
+    if ((pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_H) == QUEST_STATUS_INCOMPLETE)||(pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_H2) == QUEST_STATUS_INCOMPLETE)||(pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_A) == QUEST_STATUS_INCOMPLETE)||(pPlayer->GetQuestStatus(QUEST_AMONG_THECHAMPIONS_A2) == QUEST_STATUS_INCOMPLETE))
+      {
+	pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_VALIANT_1,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF);
+	pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+      }else
+      pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    return true;
+  }
+  
+  bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+  {
+    switch(uiAction)
+      {
+      case GOSSIP_ACTION_INFO_DEF:
+	if (pPlayer)
+	  pPlayer->CLOSE_GOSSIP_MENU();
+	//	CAST_AI(npc_valiantAI, (pCreature->AI()));
+	pCreature->setFaction(14);
+	pCreature->SetReactState(REACT_AGGRESSIVE);
+	pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	pCreature->AddThreat(pPlayer, 100000.0f);
+	pCreature->AI()->AttackStart(pPlayer);
+	switch (urand(0,1))
+	  {
+	  case 0: 
+	    pCreature->MonsterSay(SAY_START_1, LANG_UNIVERSAL, 0);
+	    break;
+	  case 1: 
+	    pCreature->MonsterSay(SAY_START_2, LANG_UNIVERSAL, 0);
+	    break;
+	  }
+	
+	break;
+      }
+    return true;
+  }
+       
+
+struct npc_valiantAI : public ScriptedAI
+{
+  Unit *pTarget;
+  uint32 SpellTimer;
+  uint32 MoviTimer;
+       
+public:
+  npc_valiantAI(Creature* creature) : ScriptedAI(creature) {}
+
+  enum Spells
+    {
+      SHIELD_BREAKER                  =65147,
+      CHARGE                                  =63010,
+      THRUST                                  =68505,
+      DEFEND                                  =66482,
+      MUNTED_MELEE_VICTORY    =63596
+    };
+  enum Timers
+    {
+      TIMER_SPELL_MIN         =1000,
+      TIMER_SPELL_MAX         =2000,
+      TIMER_MoviTimer_MIN     =1000,
+      TIMER_MoviTimer_MAX     =2000
+    };
+
+
+  void Reset()
+  {
+    std::cout << "reset" << std::endl;
+    me->setFaction(35);
+    //    me->SetReactState(REACT_PASSIVE);
+    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+  }
+       
+  void EnterCombat(Unit* who)
+  {
+    SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
+    MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
+  }
+       
+  void JustDied(Unit* Killer)
+  {
+    me->MonsterSay(SAY_END, LANG_UNIVERSAL, 0);
+    me->setFaction(35);
+    me->SetHealth(1);
+    pTarget->CastSpell(pTarget, 63596, true);
+    me->SetVisible(false);
+  }
+       
+  void KilledUnit(Unit *victim)
+  {
+    Reset();
+    EnterEvadeMode();
+  }
+       
+  void SpellHit(Unit *caster, const SpellEntry *spell)
+  {
+    if (spell->Id == SHIELD_BREAKER)
+      {
+	me->RemoveAura(DEFEND);
+      }
+  }
+       
+  void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
+  {
+    if (spell->Id == SHIELD_BREAKER)
+      pTarget->RemoveAura(DEFEND);
+  }
+       
+  void UpdateAI(const uint32 uiDiff)
+  {
+    if (!UpdateVictim())
+      return;
+    pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true);
+               
+    if (SpellTimer<=uiDiff)
+      {
+	if (((pTarget->GetPositionX()-me->GetPositionX()) <= 2) && ((pTarget->GetPositionY()-me->GetPositionY()) <= 2))
+	  {
+	    switch (urand(0,4))
+	      {
+	      case 0: 
+		me->CastSpell(me, DEFEND, true);
+		break;
+	      case 1: 
+		DoCastAOE(THRUST, true);
+		break;
+	      case 2: 
+		DoCastAOE(THRUST, true);
+		break;
+	      case 3: 
+		DoCastAOE(THRUST, true);
+		break;
+	      case 4: 
+		DoCastAOE(THRUST, true);
+		break;
+	      }
+	  }
+	if (((pTarget->GetPositionX()-me->GetPositionX()) > 2) && ((pTarget->GetPositionY()-me->GetPositionY()) > 2))
+	  {
+	    switch (urand(0,7))
+	      {
+	      case 0: 
+		DoCastAOE(SHIELD_BREAKER, true);
+		pTarget->RemoveAura(DEFEND);
+		break;
+	      case 1: 
+		DoCastAOE(SHIELD_BREAKER, true);
+		pTarget->RemoveAura(DEFEND);
+		break;
+	      case 2: 
+		DoCastAOE(SHIELD_BREAKER, true);
+		pTarget->RemoveAura(DEFEND);
+		break;
+	      case 3: 
+		DoCastAOE(CHARGE, true);
+		break;
+	      case 4: 
+		DoCastAOE(CHARGE, true);
+		break;
+	      case 5: 
+		DoCastAOE(CHARGE, true);
+		break;
+	      case 6: 
+		DoCastAOE(CHARGE, true);
+		break;
+	      case 7: 
+		me->CastSpell(me, DEFEND, true);
+		break;
+	      }
+	  }
+	SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
+                       
+      } else SpellTimer -= uiDiff;
+    if (MoviTimer<=uiDiff)
+      {
+	switch (urand(0,8))
+	  {
+	  case 0: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+4), pTarget->GetPositionY(), pTarget->GetPositionZ());
+	    break;
+	  case 1: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()-5), pTarget->GetPositionZ());
+	    break;
+	  case 2: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-2), (pTarget->GetPositionY()+1), pTarget->GetPositionZ());
+	    break;
+	  case 3: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-3), (pTarget->GetPositionY()-4), pTarget->GetPositionZ());
+	    break;
+	  case 4: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-1), (pTarget->GetPositionY()+5), pTarget->GetPositionZ());
+	    break;
+	  case 5: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-4), (pTarget->GetPositionY()+5), pTarget->GetPositionZ());
+	    break;
+	  case 6: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()), pTarget->GetPositionZ());
+	    break;
+	  case 7: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-5), (pTarget->GetPositionY()+2), pTarget->GetPositionZ());
+	    break;
+	  case 8: 
+	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-5), (pTarget->GetPositionY()-1), pTarget->GetPositionZ());
+	  }
+	MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
+      } else MoviTimer -= uiDiff;
+    
+    DoMeleeAttackIfReady();
+  }
+};
+
+};
+
 void AddSC_icecrown()
 {
     new npc_arete;
@@ -762,4 +1004,5 @@ void AddSC_icecrown()
     new npc_vereth_the_cunning;
     new npc_tournament_training_dummy;
     new npc_training_dummy_argent;
+    new npc_valiant;
 }

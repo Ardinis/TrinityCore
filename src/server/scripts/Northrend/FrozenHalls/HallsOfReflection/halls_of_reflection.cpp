@@ -2047,82 +2047,41 @@ class at_hor_waves_restarter : public AreaTriggerScript
         }
 };
 
-class npc_queldelar : public CreatureScript
-{
-public:
-    npc_queldelar() : CreatureScript("npc_queldelar") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_queldelarAI(creature);
-    }
-    struct npc_queldelarAI  : public ScriptedAI
-    {
-        npc_queldelarAI(Creature *c) : ScriptedAI(c)
-        {
-        }
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (!who)
-                return;
-            if (me->IsWithinDistInMap(who, 20) && who->HasAura(SPELL_QUELDELAR_AURA))
-            {
-                me->SummonCreature(NPC_QUELDELAR, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                me->DisappearAndDie();
-            }
-        }
-    };
-};
-
-class npc_throw_quel_delar : public CreatureScript
+class npc_throw_quel_delar : public CreatureScript // Frostmourne Altar Bunny (Quel'Delar) entry 37704
 {
 public:
 
 	npc_throw_quel_delar()
-		: CreatureScript("npc_throw_quel_delar") {}
+		: CreatureScript("npc_throw_quel_delar")
+	{
+	}
 
 	struct npc_throw_quel_delarAI : public ScriptedAI
 	{
-        uint32 Bladestorm;
-        uint32 Heroic_Strike;
-        uint32 Mortal_Strike;
-        uint32 Whirlind;
-        bool summoned;
-
-        void Reset()
-        {
-            Bladestorm = 10000;
-            Heroic_Strike = 5000;
-            Mortal_Strike = 7000;
-            Whirlind = 13000;
-        }
-		
 		npc_throw_quel_delarAI(Creature* c) : ScriptedAI(c) 
 		{ 
 			m_pInstance = (InstanceScript*)c->GetInstanceScript();
 			tempSummon = NULL;
 		}
-		
+
 		InstanceScript* m_pInstance;
+
 		TempSummon* tempSummon;
 
-		void SpellHit(Unit* caster, SpellEntry const* spell) 
+		// Called when hit by a spell
+		void SpellHit(Unit* caster, SpellInfo const* spell) 
 		{
 			if ( caster->GetTypeId() == TYPEID_PLAYER && spell->Id == 70698 )
 				if ( tempSummon ) 
 				{
 					if ( tempSummon->isDead() )
 						tempSummon->Respawn();
-						
 					tempSummon->SetVisible(true);
 				}
-				else 
-				{
-					tempSummon = me->SummonCreature (37158, 0.0f, 0.0f, 0.0f, 0.0f);
-					tempSummon->SetVisible(true);
-				}
+				else tempSummon = me->SummonCreature (37158, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_MANUAL_DESPAWN);
 		}
 
+		//Called at World update tick
 		void UpdateAI (uint32 const diff) 
 		{
 			Map::PlayerList const &players = m_pInstance->instance->GetPlayers();
@@ -2135,45 +2094,21 @@ public:
 					{
 						player->RemoveAura(70013);
 						player->CastSpell(me, 70698, false);
+						player->CastSpell(me, 70700, false);
 						player->AddItem(50254,1);
 					}
 			}
 
-            if (!UpdateVictim())
-                return;
-
-            if (Bladestorm <= diff)
-            {
-                DoCast(me->getVictim(), Bladestorm);
-                Bladestorm = 10000;
-            } else Bladestorm -= diff;
-
-            if (Heroic_Strike <= diff)
-            {
-                DoCast(me->getVictim(), Heroic_Strike);
-                Heroic_Strike = 5000;
-            } else Heroic_Strike -= diff;
-
-            if (Mortal_Strike <= diff)
-            {
-                DoCast(me->getVictim(), Mortal_Strike);
-                Mortal_Strike = 7000;
-            } else Mortal_Strike -= diff;
-
-            if (Whirlind <= diff)
-            {
-                DoCast(me->getVictim(), Whirlind);
-                Whirlind = 13000;
-            } else Whirlind -= diff;
-
-            DoMeleeAttackIfReady();	
 		}
+
 	};
 
+	// Called when a CreatureAI object is needed for the creature.
 	CreatureAI* GetAI(Creature* creature) const 
 	{ 
 		return new npc_throw_quel_delarAI(creature);
 	}
+
 };
 void AddSC_halls_of_reflection()
 {
@@ -2189,6 +2124,5 @@ void AddSC_halls_of_reflection()
     new at_hor_waves_restarter();
     new npc_frostworn_general();
     new npc_spiritual_reflection();
-    new npc_queldelar();
 	new npc_throw_quel_delar();
 }

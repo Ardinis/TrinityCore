@@ -102,6 +102,9 @@ enum BossSpells
     SPELL_SPIKE_SPEED3      = 65923,
     SPELL_SPIKE_FAIL        = 66181,
     SPELL_SPIKE_TELE        = 66170,
+
+    SPELL_LIGHT_ESSENCE         = 65686,
+    SPELL_DARK_ESSENCE          = 65684,
 };
 
 #define SPELL_PERMAFROST_HELPER RAID_MODE<uint32>(66193, 67856, 67855, 67857)
@@ -271,7 +274,29 @@ public:
             for (int i=0; i < 6; i++)
                 if (Unit* summoned = me->SummonCreature(NPC_FROST_SPHERE, SphereSpawn[i]))
                     m_aSphereGUID[i] = summoned->GetGUID();
+	    RemoveBadAuras();
         }
+
+      void RemoveBadAuras()
+      {
+	Map* pMap = me->GetMap();
+	Map::PlayerList const &PlayerList = pMap->GetPlayers();
+	for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+	  if (Player* pPlayer = i->getSource())
+	    if (pPlayer->isAlive())
+	      {
+		pPlayer->RemoveAura(67590);
+		pPlayer->RemoveAurasDueToSpell(SPELL_LIGHT_ESSENCE);
+		pPlayer->RemoveAurasDueToSpell(67222);
+		pPlayer->RemoveAurasDueToSpell(67223);
+		pPlayer->RemoveAurasDueToSpell(67224);
+		pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+		pPlayer->RemoveAurasDueToSpell(67177);
+		pPlayer->RemoveAurasDueToSpell(67178);
+		pPlayer->RemoveAurasDueToSpell(SPELL_DARK_ESSENCE);
+	      }
+
+      }
 
         void UpdateAI(const uint32 uiDiff)
         {

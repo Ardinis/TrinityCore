@@ -880,7 +880,7 @@ public:
     pTarget->CastSpell(pTarget, 63596, true);
     me->SetVisible(false);
   }
-       
+
   void KilledUnit(Unit *victim)
   {
     Reset();

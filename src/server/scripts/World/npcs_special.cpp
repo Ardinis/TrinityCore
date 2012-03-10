@@ -3426,6 +3426,180 @@ public:
     }
 };
 
+#define GIVRE_BOLT 9672
+#define GIVRE_JAVELOT 49906
+#define LIEN_SOUMISSION 52185
+#define NOVA_GIVRE 11831
+#define VEINE_GLACIALE 54792
+
+class npc_artuis : public CreatureScript
+{
+public:
+  npc_artuis() : CreatureScript("npc_artuis") { }
+
+  struct npc_artuisAI : public ScriptedAI
+  {
+  private:
+    uint32 m_uibolt;
+    uint32 m_uijav;
+    uint32 m_uisoum;
+    uint32 m_uinova;
+    uint32 m_uiveine;
+    uint32 mui_calivemob;
+    bool endphase;
+    bool firstbucle;
+    Creature* jaloot;
+    Creature* zepiv;
+    bool bjaloot;
+    bool bzepiv;
+    SummonList Summons;
+
+  public:
+    npc_artuisAI(Creature* pCreature) : ScriptedAI(pCreature), Summons(me)
+    {
+    }
+
+    void Reset()
+    {
+      Summons.DespawnAll();
+      mui_calivemob = 500;
+      m_uibolt = 2000;
+      m_uijav = 3000;
+      //      m_uisoum = 0;
+      m_uinova = 4000;
+      m_uiveine = 5000;
+      firstbucle = false;
+      jaloot  = me->SummonCreature(28667, 5616.91f, 3772.67f, -94.5f, 1.78f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000);
+      zepiv = me->SummonCreature(28668, 5631.62f, 3794.36f, -92.5f, 3.4f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000);
+      jaloot->AddAura(52182, jaloot);
+      zepiv->AddAura(52182, zepiv);
+      bjaloot = false;
+      bzepiv = false;
+      SetEndPhase(false);
+      //      me->SetReactState(REACT_AGGRESSIVE);
+      me->AttackStop();
+    }
+
+    void JustReachedHome()
+    {
+      Summons.DespawnAll();
+    }
+
+    void JustSummoned(Creature* summon)
+    {
+      Summons.Summon(summon);
+    }
+
+    void JustDied(Unit* killer)
+    {
+      if (!killer->ToPlayer())
+	return ;
+      if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
+	return ;
+      if (bjaloot)
+	{
+	  if (killer->ToPlayer()->GetReputation(1104) < 14000)
+	    killer->ToPlayer()->SetReputation(1104, 14000);
+	}
+      else if (bzepiv)
+	{
+	  if (killer->ToPlayer()->GetReputation(1105) < 14000)
+	    killer->ToPlayer()->SetReputation(1105, 14000);
+	}
+      Summons.DespawnAll();
+    }
+
+
+    void DamageTaken(Unit* /*doneBy*/, uint32& damage)
+    {
+      if (!HealthAbovePct(30))
+	SetEndPhase(true);
+    }
+
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (!UpdateVictim())
+	return;
+      if (me->HasUnitState(UNIT_STATE_CASTING) && !isEndPhase())
+	return;
+      if (!isEndPhase())
+	{
+	  if (m_uibolt <= diff)
+	    {
+	      DoCast(me->getVictim(), GIVRE_BOLT, true);
+	      m_uibolt = 2000;
+	    }
+	  else m_uibolt -= diff;
+	  
+	  if (m_uijav <= diff)
+	    {
+	      DoCast(me->getVictim(), GIVRE_JAVELOT, true);
+	      m_uijav = 3000;
+	    }
+	  else m_uijav -= diff;
+
+	  if (m_uinova <= diff)
+	    {
+	      DoCast(me->getVictim(), NOVA_GIVRE, true);
+	      m_uinova = 4000;
+	    }
+	  else m_uinova -= diff;
+
+	  if (m_uiveine <= diff)
+	    {
+	      DoCast(me->getVictim(), VEINE_GLACIALE, true);
+	      m_uiveine = 5000;
+	    }
+	  else m_uiveine -= diff;
+	}
+      else if (!firstbucle)
+	{
+	  firstbucle = true;
+	  jaloot->RemoveAura(52182);
+	  zepiv->RemoveAura(52182);
+	  //	  me->CastCustomSpell(LIEN_SOUMISSION, SPELLVALUE_MAX_TARGETS, 1, jaloot, true);
+	  //  me->CastCustomSpell(LIEN_SOUMISSION, SPELLVALUE_MAX_TARGETS, 1, zepiv, true);
+	  //	  DoCast(jaloot, LIEN_SOUMISSION);
+	  DoCastAOE(LIEN_SOUMISSION);
+	}
+      else if (firstbucle)
+	{
+	  if (mui_calivemob <= diff)
+	    {
+	      if (!jaloot->isAlive())
+		bjaloot = true;
+	      else if (!zepiv->isAlive())
+		bzepiv = true;
+	      mui_calivemob = 500;
+	      if (bjaloot || bzepiv)
+		{
+		  SetEndPhase(false);
+		  me->RemoveAurasDueToSpell(LIEN_SOUMISSION);
+		}
+	    }
+	  else mui_calivemob -= diff;
+	}
+    }
+
+    void SetEndPhase(bool st)
+    {
+      endphase = st;
+    }
+
+    bool isEndPhase()
+    {
+      return endphase;
+    }
+  };
+
+  CreatureAI *GetAI(Creature *creature) const
+  {
+    return new npc_artuisAI(creature);
+  }
+
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3453,12 +3627,13 @@ void AddSC_npcs_special()
     new npc_wormhole;
     new npc_pet_trainer;
     new npc_locksmith;
-    new npc_tabard_vendor;
-    new npc_experience;
-    new npc_fire_elemental;
-    new npc_earth_elemental;
-    new npc_firework;
+    new npc_tabard_vendor();
+    new npc_experience();
+    new npc_fire_elemental();
+    new npc_earth_elemental();
+    new npc_firework();
     new npc_spring_rabbit();
-    new npc_argent_squire;	
-	new vehicle_knight_gryphon();	
+    new npc_argent_squire();	
+    new npc_artuis();
+    new vehicle_knight_gryphon();	
 }

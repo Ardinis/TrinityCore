@@ -816,8 +816,8 @@ public:
 	  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 	  if (billi->IsMounted())
 	    billi->Dismount();
-	  billi->CastSpell(me, 49460, true);
-	  //	  billi->EnterVehicle(me, 1);
+	  //	  billi->CastSpell(me, 49460, true);
+	  billi->EnterVehicle(me, 1);
 	}
     }
 

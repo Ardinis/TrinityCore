@@ -61,6 +61,16 @@ void MapManager::LoadTransports()
             continue;
         }
 
+		// Zep Canno
+        if (goinfo->entry == 201834)
+        {
+            sLog->outErrorDb("Loading zeppelin");
+            delete goinfo;
+            continue;
+        }
+
+               //		
+		
         if (goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", entry, name.c_str());

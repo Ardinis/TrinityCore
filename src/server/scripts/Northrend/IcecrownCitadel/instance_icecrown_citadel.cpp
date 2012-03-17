@@ -111,6 +111,17 @@ class instance_icecrown_citadel : public InstanceMapScript
                 LoadDoorData(doorData);
                 TeamInInstance = 0;
                 HeroicAttempts = MaxHeroicAttempts;
+                SaurfangAllianceTent1GUID = 0;
+                SaurfangAllianceTent2GUID = 0;
+                SaurfangHordeTent1GUID = 0;
+                SaurfangHordeTent2GUID = 0;
+                SaurfangBonfireGUID = 0;
+                SaurfangForgeGUID = 0;
+                SaurfangAnvilGUID = 0;
+		 	    SaurfangAllianceSmithGUID = 0;
+		 	    SaurfangAllianceSellerGUID = 0;
+			    SaurfangHordeSmithGUID = 0;
+			    SaurfangHordeSellerGUID = 0;				
                 LadyDeathwisperElevatorGUID = 0;
                 DeathbringerSaurfangGUID = 0;
                 DeathbringerSaurfangDoorGUID = 0;
@@ -205,6 +216,22 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
+				    case 37936:                                                    
+					 	   SaurfangHordeSmithGUID = creature->GetGUID();
+						   creature->SetVisible(false);
+						   break;
+				    case 37935:                                                     
+						   SaurfangHordeSellerGUID = creature->GetGUID();
+						   creature->SetVisible(false);
+						   break;
+				    case 37904:                                                   
+						   SaurfangAllianceSellerGUID = creature->GetGUID();
+						   creature->SetVisible(false);
+						   break;
+				    case 37903:                                                    
+						   SaurfangAllianceSmithGUID = creature->GetGUID();
+						   creature->SetVisible(false);
+						   break;				
                     case NPC_KOR_KRON_GENERAL:
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER, ALLIANCE);
@@ -407,6 +434,27 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
+				    case 191508:
+						   SaurfangForgeGUID = go->GetGUID();
+						   break;
+				    case 191345:
+						   SaurfangAnvilGUID = go->GetGUID();
+						   break;
+				    case 196417:
+						   SaurfangBonfireGUID = go->GetGUID();
+						   break;
+				    case 201868:
+						   if (!SaurfangAllianceTent1GUID)
+								   SaurfangAllianceTent1GUID = go->GetGUID();
+						   else
+								   SaurfangAllianceTent2GUID = go->GetGUID();
+						  break;
+				    case 201887:
+						   SaurfangHordeTent1GUID = go->GetGUID();
+						   break;
+				    case 201886:
+						   SaurfangHordeTent2GUID = go->GetGUID();
+						   break;				
                     case GO_DOODAD_ICECROWN_ICEWALL02:
                     case GO_ICEWALL:
                     case GO_LORD_MARROWGAR_S_ENTRANCE:
@@ -611,6 +659,28 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (type)
                 {
+				    case DATA_SAURFANG_HORDE_SELLER:
+						   return SaurfangHordeSellerGUID;
+				    case DATA_SAURFANG_HORDE_SMITH:
+						   return SaurfangHordeSmithGUID;
+				    case DATA_SAURFANG_ALLIANCE_SELLER:
+						   return SaurfangAllianceSellerGUID;
+				    case DATA_SAURFANG_ALLIANCE_SMITH:
+						   return SaurfangAllianceSmithGUID;
+				    case GO_SAURFANG_HORDE_TENT1:
+						   return SaurfangHordeTent1GUID;
+				    case GO_SAURFANG_HORDE_TENT2:
+						   return SaurfangHordeTent2GUID;
+					case GO_SAURFANG_ALLIANCE_TENT1:
+						   return SaurfangAllianceTent1GUID;
+//				    case GO_SAURFANG_ALLIANCE_TENT2:
+//						   return SaurfangAllianceTent2GUID;
+				    case GO_SAURFANG_BONFIRE:
+						   return SaurfangBonfireGUID;
+				    case GO_SAURFANG_ANVIL:
+						   return SaurfangAnvilGUID;
+				    case GO_SAURFANG_FORGE:
+						   return SaurfangForgeGUID;				
                     case DATA_DEATHBRINGER_SAURFANG:
                         return DeathbringerSaurfangGUID;
                     case DATA_SAURFANG_EVENT_NPC:
@@ -1141,7 +1211,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         // no break
                     case DATA_DEATHBRINGER_SAURFANG:
                         if (GetBossState(DATA_GUNSHIP_EVENT) != DONE)
-                            return false;
+                            return true;//false
                         // no break
                     case DATA_GUNSHIP_EVENT:
                         if (GetBossState(DATA_LADY_DEATHWHISPER) != DONE)
@@ -1555,6 +1625,17 @@ class instance_icecrown_citadel : public InstanceMapScript
 
         protected:
             EventMap Events;
+		    uint64 SaurfangAllianceTent1GUID;
+		    uint64 SaurfangAllianceTent2GUID;
+		    uint64 SaurfangHordeTent1GUID;
+		    uint64 SaurfangHordeTent2GUID;
+		    uint64 SaurfangBonfireGUID;
+		    uint64 SaurfangForgeGUID;
+		    uint64 SaurfangAnvilGUID;
+		    uint64 SaurfangAllianceSmithGUID;
+		    uint64 SaurfangAllianceSellerGUID;
+		    uint64 SaurfangHordeSmithGUID;
+		    uint64 SaurfangHordeSellerGUID;			
             uint64 LadyDeathwisperElevatorGUID;
             uint64 DeathbringerSaurfangGUID;
             uint64 DeathbringerSaurfangDoorGUID;

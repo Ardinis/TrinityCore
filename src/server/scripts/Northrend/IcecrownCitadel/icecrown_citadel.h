@@ -114,6 +114,11 @@ enum DataTypes
     // Gunship: Datos para logros
     DATA_BEEN_WAITING_ACHIEVEMENT   = 49,
     DATA_NECK_DEEP_ACHIEVEMENT      = 50,
+	
+    DATA_SAURFANG_HORDE_SELLER      = 51,
+    DATA_SAURFANG_HORDE_SMITH       = 52,
+    DATA_SAURFANG_ALLIANCE_SELLER   = 53,
+    DATA_SAURFANG_ALLIANCE_SMITH    = 54,	
 
     // Gunship: Datos para la pelea
     // La numeracion es muy arriba por seguridad
@@ -354,6 +359,14 @@ enum GameObjectsIds
     GO_DEATHBRINGER_S_CACHE_10H             = 202238,
     GO_DEATHBRINGER_S_CACHE_25H             = 202241,
     GO_SCOURGE_TRANSPORTER_SAURFANG         = 202244,
+	
+    GO_SAURFANG_FORGE                       = 191508,
+    GO_SAURFANG_ANVIL                       = 191345,
+    GO_SAURFANG_BONFIRE                     = 196417,
+    GO_SAURFANG_HORDE_TENT1                 = 201887,
+    GO_SAURFANG_HORDE_TENT2                 = 201886,
+    GO_SAURFANG_ALLIANCE_TENT1              = 201868,
+    GO_SAURFANG_ALLIANCE_TENT2              = 201868,	
 
     // Professor Putricide
     GO_ORANGE_PLAGUE_MONSTER_ENTRANCE       = 201371,

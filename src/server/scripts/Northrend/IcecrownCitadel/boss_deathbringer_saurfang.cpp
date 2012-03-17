@@ -960,19 +960,19 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                                 break;
                         case EVENT_OUTRO_HORDE_6_5:
 							printf(" \n HORDE OUTRO \n");
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_FORGE)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_FORGE, -514.589f, 2244.63f, 539.291f, 5.04638f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_ANVIL)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_ANVIL, -518.931f, 2242.55f, 539.29f, 5.282f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_BONFIRE)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_BONFIRE, -525.496f, 2227.39f, 539.291f, 2.18124f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_HORDE_TENT1)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_HORDE_TENT1, -524.565f, 2236.97f, 539.29f, 2.23466f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_HORDE_TENT2)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_HORDE_TENT2, -532.78f, 2228.43f, 539.29f, 2.48599f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (Creature* pCreature = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_HORDE_SELLER)))
+                                if (Creature* pCreature = me->SummonCreature(37935 ,-529.348f , 2226.35f ,539.291f, 5.87753f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
                                         pCreature->SetVisible(true);
-                                if (Creature* pCreature = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_HORDE_SMITH)))
+                                if (Creature* pCreature = me->SummonCreature(37936 ,-521.219f , 2233.37f ,539.292f, 5.41553f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
                                         pCreature->SetVisible(true);
                                 _peon1->DespawnOrUnsummon();
                                 _peon2->DespawnOrUnsummon();
@@ -1384,19 +1384,19 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                                 break;
                         case EVENT_OUTRO_ALLIANCE_21_6:
 								printf(" Outro alliance 21_6");
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_FORGE)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_FORGE, -514.589f, 2244.63f, 539.291f, 5.04638f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_ANVIL)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_ANVIL, -518.931f, 2242.55f, 539.29f, 5.282f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_BONFIRE)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_BONFIRE, -525.496f, 2227.39f, 539.291f, 2.18124f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_ALLIANCE_TENT1)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_ALLIANCE_TENT1, -524.565f, 2236.97f, 539.29f, 2.23466f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (GameObject* pGo = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SAURFANG_ALLIANCE_TENT2)))
+                                if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_ALLIANCE_TENT2, -532.78f, 2228.43f, 539.29f, 2.48599f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (Creature* pCreature = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_ALLIANCE_SELLER)))
+                                if (Creature* pCreature = me->SummonCreature(37904 ,-529.348f , 2226.35f ,539.291f, 5.87753f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
                                         pCreature->SetVisible(true);
-                                if (Creature* pCreature = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_ALLIANCE_SMITH)))
+                                if (Creature* pCreature = me->SummonCreature(37903 ,-521.219f , 2233.37f ,539.292f, 5.41553f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
                                         pCreature->SetVisible(true);
                                 _peon1->DespawnOrUnsummon();
                                 _peon2->DespawnOrUnsummon();

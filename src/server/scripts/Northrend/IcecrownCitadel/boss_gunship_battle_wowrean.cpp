@@ -534,6 +534,27 @@ void DoCheckFallingPlayer(Creature* me)
     }
 }
 
+void DoWinCheck(Creature* me)
+{
+    Map* map = me->GetMap();
+
+    if(map)
+    {
+        Map::PlayerList const &lPlayers = map->GetPlayers();
+        if (!lPlayers.isEmpty())
+        {
+            for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            {
+                if (Player* pPlayer = itr->getSource())
+                {
+                    if (pPlayer->IsWithinDistInMap(me, 300.0f))
+                        pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 5.0f, me->GetOrientation());
+                }
+            }
+        }
+    }
+}
+
 // ***** OJO *****
 // Esta parte de la script es una mierda, hay que mirar como spamearlo de otra manera, lo mismo que en el preparegunshipevent();
 // Restart event
@@ -1055,7 +1076,7 @@ class npc_muradin_gunship : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_WIPE_CHECK:
-                            //DoCheckFallingPlayer(me);
+                            DoCheckFallingPlayer(me);
                             if (DoWipeCheck(skybreaker))
                                 events.ScheduleEvent(EVENT_WIPE_CHECK, 3000);
                             else
@@ -1155,6 +1176,7 @@ class npc_muradin_gunship : public CreatureScript
                             break;
                         case EVENT_OUTRO_ALLIANCE_2:
                             StopFlyShip(skybreaker);
+							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), /*-590.200022f, 2241.193115f, 538.588269f*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
 							HorsCombatDelItem();
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
@@ -1596,6 +1618,7 @@ class npc_saurfang_gunship : public CreatureScript
                             break;
                         case EVENT_OUTRO_HORDE_2:
                             StopFlyShip(orgrimmar);
+							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), /*-590.200022f, 2241.193115f, 539.588269f,*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
                             HorsCombatDelItem();
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);

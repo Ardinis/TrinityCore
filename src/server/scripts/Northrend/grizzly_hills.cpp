@@ -776,7 +776,7 @@ public:
 //Script de la princesse
 #define MAIDEN_DEFAULT_TEXTID 14319
 #define MAIDEN_REWARD_TEXTID 14320
-#define GOSSIP_HELLO_MAIDEN "Delighted to have helped, ma'am. Were you once the guardian of a Send legendary. Would you know From where I could find it?"
+#define GOSSIP_HELLO_MAIDEN "Ravi d'avoir aide, ma'am. Etiez-vous le gardien d'un Envoyer legendaire. Savez vous ou je pourais le trouver?"
 #define SPELL_SUMMON_ASHWOOD_BRAND 62554
 
 class npc_maiden_of_ashwood_lake : public CreatureScript

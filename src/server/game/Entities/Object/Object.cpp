@@ -1301,8 +1301,8 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
-    return (IsWithinLOS(ox, oy, oz) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
-    //    return IsWithinLOS(ox, oy, oz);
+    //    return (IsWithinLOS(ox, oy, oz) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
+        return IsWithinLOS(ox, oy, oz);
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
@@ -1311,9 +1311,13 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
+  //  std::cout << "pos calc" << std::endl;
+  // std::cout << 
+  //GetPositionX() << GetPositionY() << GetPositionZ()+2.f << std::endl
+  //	    << ox << oy << oz+2.f << std::endl;
   if (GetMapId()==616) return true; //hack for Eye of Eternity
     if (IsInWorld())
-      return (GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask()) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
+      return (GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+5.f, ox, oy, oz+5.f, GetPhaseMask()) /*&& GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz)*/);
 
 
     return true;
@@ -2683,12 +2687,12 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
 
     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
 
-    while (!GetMap()->IsInDynLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ, destx, desty, destz))
+    /*    while (!GetMap()->IsInDynLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ, destx, desty, destz))
     {
         destx -= 2.0f * cos(angle);
         desty -= 2.0f * sin(angle);
         col = true;
-    }
+	}*/
 
     // collision occured
     if (col)

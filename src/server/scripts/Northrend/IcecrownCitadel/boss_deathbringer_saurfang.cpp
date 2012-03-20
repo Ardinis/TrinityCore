@@ -710,6 +710,19 @@ class npc_blood_beast : public CreatureScript
             {
 		ui_scent = 1000;
 		ui_scent_ = 1000;
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_TRANSFORM, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+		me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+		first = true;
             }
 
             void UpdateAI(uint32 const diff)
@@ -718,6 +731,15 @@ class npc_blood_beast : public CreatureScript
 		{
 		  if (ui_scent <= diff)
 		    {
+		      if (first)
+			{
+			  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+			    {
+			      me->AddThreat(target, 1000000000.0f * 5);
+			      me->AI()->AttackStart(target);
+			    }
+			  first = false;
+			}
 		      me->CastSpell(me, SPELL_SCENT_OF_BLOOD, true);
 		      ui_scent = 10000;
 		    }
@@ -748,6 +770,7 @@ class npc_blood_beast : public CreatureScript
 	  InstanceScript* _instance;
 	  uint32 ui_scent;
 	  uint32 ui_scent_;
+	  bool first;
         };
 
         CreatureAI* GetAI(Creature* creature) const

@@ -6679,15 +6679,20 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
                 }
                 else if (damage > 0)
+				{
                     triggered_spell_id = 58597;
+					target = this;
+					break;
+				}
+				else
+                    return false;
+
 
                 // Item - Paladin T8 Holy 4P Bonus
                 if (Unit* caster = triggeredByAura->GetCaster())
                     if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
                         cooldown = aurEff->GetAmount();
-
-                target = this;
-                break;
+				break;
             }
             // Righteous Vengeance
             if (dummySpell->SpellIconID == 3025)

@@ -3580,6 +3580,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 40166: // Introspection
             case 40167: // Introspection
                 spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+			case 53651:
+			    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+				break;				
             default:
                 break;
         }

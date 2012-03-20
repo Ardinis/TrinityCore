@@ -6102,7 +6102,9 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
             case 53563:
             {
                 // area aura owner casts the spell
-                GetBase()->GetUnitOwner()->CastSpell(target, triggeredSpellInfo, true, 0, this, GetBase()->GetUnitOwner()->GetGUID());
+				Unit * triggerCaster = (Unit *)(GetBase()->GetOwner());
+				triggerCaster->CastSpell(target, triggeredSpellInfo,true, 0, this, triggerCaster->GetGUID());
+                //GetBase()->GetUnitOwner()->CastSpell(target, triggeredSpellInfo, true, 0, this, GetBase()->GetUnitOwner()->GetGUID());
                 return;
             }
             // Slime Spray - temporary here until preventing default effect works again

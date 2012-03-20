@@ -158,13 +158,13 @@ public:
                 } else uiSpawnTimer -= diff;
             }
 
-            if (uiPhase == 0 && HealthBelowPct(30))
+            if (uiPhase == 0 && HealthBelowPct(70))
             {
                 DoScriptText(SAY_SUMMON_SNAKES, me);
                 uiPhase = 1;
             }
 
-            if (uiPhase == 1 && HealthBelowPct(25))
+            if (uiPhase == 1 && HealthBelowPct(50))
             {
                 DoScriptText(SAY_SUMMON_CONSTRICTORS, me);
                 uiPhase = 2;

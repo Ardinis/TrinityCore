@@ -149,6 +149,7 @@ public:
             if (uiExplodeCorpseTimer <= diff)
             {
                 DoCast(SPELL_CORPSE_EXPLODE);
+				DamageExplosion(me);
                 DoScriptText(SAY_EXPLODE, me);
                 uiExplodeCorpseTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
             } else uiExplodeCorpseTimer -= diff;
@@ -166,6 +167,27 @@ public:
                 instance->SetData(DATA_TROLLGORE_EVENT, DONE);
         }
 
+		void DamageExplosion(Creature* me)
+		{
+			Map* map = me->GetMap();
+
+			if(map)
+			{
+				Map::PlayerList const &lPlayers = map->GetPlayers();
+				if (!lPlayers.isEmpty())
+				{
+					for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+					{
+						if (Player* pPlayer = itr->getSource())
+						{
+							if (pPlayer->IsWithinDistInMap(me, 300.0f))
+								DoCast(DUNGEON_MODE(49618, 59809));
+						}
+					}
+				}
+			}
+		}		
+		
         uint32 GetData(uint32 type)
         {
             if (type == DATA_CONSUMPTION_JUNCTION)

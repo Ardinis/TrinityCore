@@ -547,8 +547,14 @@ void DoWinCheck(Creature* me)
             {
                 if (Player* pPlayer = itr->getSource())
                 {
-                    if (pPlayer->IsWithinDistInMap(me, 300.0f))
-                        pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 5.0f, me->GetOrientation());
+					if(pPlayer->isInCombat())
+					{
+						pPlayer->CombatStop();
+						pPlayer->DeleteThreatList();
+					}
+
+                    if (pPlayer->GetPositionZ() < 500.0f)
+                        pPlayer->TeleportTo(631,-590.516f, 2215.20f, 541.04f, 6.165f);
                 }
             }
         }
@@ -1025,12 +1031,13 @@ class npc_muradin_gunship : public CreatureScript
 				DespawnCreatures(NPC_GB_SKYBREAKER_MORTAR_SOLDIER,300.0f);
 				DespawnCreatures(NPC_GB_KORKRON_SERGANTE,300.0f);
 				DespawnCreatures(NPC_GB_KORKRON_REAVERS ,300.0f);
-				DespawnCreatures(NPC_GB_KORKRON_AXETHROWER,300.0f);
+				DespawnCreatures(NPC_GB_KORKRON_REAVER,300.0f);
 				DespawnCreatures(NPC_GB_KORKRON_AXETHROWER,300.0f);
 				DespawnCreatures(NPC_GB_SKYBREAKER_MARINE,300.0f);
 				DespawnCreatures(NPC_GB_SKYBREAKER_RIFLEMAN,300.0f);
 				DespawnCreatures(NPC_GB_ALLIANCE_CANON,200.0f);
 				DespawnCreatures(NPC_GB_ZAFOD_BOOMBOX,300.0f);
+
 			}
 			
 			void HorsCombatDelItem()
@@ -1042,7 +1049,11 @@ class npc_muradin_gunship : public CreatureScript
 					{
 						if (Player* pPlr = itr->getSource())
 						{
-							pPlr->ClearInCombat();						
+							if(pPlr->isInCombat())
+							{
+								pPlr->CombatStop();
+								pPlr->DeleteThreatList();
+							}
 							pPlr->DestroyItemCount(49278,1,true);
 						}
 					}
@@ -1054,20 +1065,23 @@ class npc_muradin_gunship : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                if (!HealthAbovePct(75))
+                if(_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
                 {
-                    me->SetHealth(me->GetMaxHealth() / 100 * 76); // find a better way to avoid the hardcore spell spam ....
-                    DoCast(me, SPELL_TASTE_OF_BLOOD);
-                }
+					if (!HealthAbovePct(75))
+					{
+						me->SetHealth(me->GetMaxHealth() / 100 * 76); // find a better way to avoid the hardcore spell spam ....
+						DoCast(me, SPELL_TASTE_OF_BLOOD);
+					}
 
-                if (UpdateVictim())
-                {
-                    if (!EventScheduled)
-                    {
-                        EventScheduled = true; // should temp fix the hardcore casting
-                        events.ScheduleEvent(EVENT_RENDING_THROW, 3000);
-                    }
-                }
+					if (UpdateVictim())
+					{
+						if (!EventScheduled)
+						{
+							EventScheduled = true; // should temp fix the hardcore casting
+							events.ScheduleEvent(EVENT_RENDING_THROW, 3000);
+						}
+					}
+				}
 
                 events.Update(diff);
 
@@ -1171,6 +1185,7 @@ class npc_muradin_gunship : public CreatureScript
                             _instance->DoCastSpellOnPlayers(SPELL_ACHIEVEMENT_CHECK);
 							GoAndDespawn();
 							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
                             StartFlyShip(skybreaker);
                             StopFlyShip(CheckUnfriendlyShip(me,_instance,DATA_GB_HIGH_OVERLORD_SAURFANG));
                             break;
@@ -1179,6 +1194,8 @@ class npc_muradin_gunship : public CreatureScript
 							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), /*-590.200022f, 2241.193115f, 538.588269f*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
 							HorsCombatDelItem();
+							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                             break;
@@ -1396,13 +1413,10 @@ class npc_saurfang_gunship : public CreatureScript
                      }
                      case ACTION_DONE:
                          if (Creature* pAllianceBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
-                         {
                              _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pAllianceBoss);
-                         }
+
                          if (Creature* pHordeBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORGRIMMAR_HAMMER_BOSS)))
-                         {
                              _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pHordeBoss);
-                         }
 
                          me->SetReactState(REACT_PASSIVE);
                          _instance->SetBossState(DATA_GUNSHIP_EVENT, DONE);
@@ -1446,9 +1460,7 @@ class npc_saurfang_gunship : public CreatureScript
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
                 if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE && me->GetHealthPct() < 2.0f )
-                {
                     damage = 0;
-                }
 
                 if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE && me->GetHealthPct() < 2.0f )
                 {
@@ -1487,11 +1499,12 @@ class npc_saurfang_gunship : public CreatureScript
 				DespawnCreatures(NPC_GB_KORKRON_SERGANTE,300.0f);
 				DespawnCreatures(NPC_GB_KORKRON_REAVERS ,300.0f);
 				DespawnCreatures(NPC_GB_KORKRON_AXETHROWER,300.0f);
-				DespawnCreatures(NPC_GB_KORKRON_AXETHROWER,300.0f);
+				DespawnCreatures(NPC_GB_SKYBREAKER_SORCERER,300.0f);
 				DespawnCreatures(NPC_GB_SKYBREAKER_MARINE,300.0f);
 				DespawnCreatures(NPC_GB_SKYBREAKER_RIFLEMAN,300.0f);
 				DespawnCreatures(NPC_GB_HORDE_CANON,200.0f);
 				DespawnCreatures(NPC_GB_ZAFOD_BOOMBOX,300.0f);
+				DespawnCreatures(NPC_GB_SKYBREAKER_SERGANTE,300.0f);
 			}			
 
 			void HorsCombatDelItem()
@@ -1503,7 +1516,11 @@ class npc_saurfang_gunship : public CreatureScript
 					{
 						if (Player* pPlr = itr->getSource())
 						{
-							pPlr->ClearInCombat();						
+							if(pPlr->isInCombat())
+							{
+								pPlr->CombatStop();
+								pPlr->DeleteThreatList();
+							}
 							pPlr->DestroyItemCount(49278,1,true);
 						}
 					}
@@ -1527,7 +1544,7 @@ class npc_saurfang_gunship : public CreatureScript
                     {
                         if (!EventScheduled)
                         {
-                            events.ScheduleEvent(EVENT_RENDING_THROW, 1500);
+                            events.ScheduleEvent(EVENT_RENDING_THROW, 3000);
                             EventScheduled = true;
                         }
                     }
@@ -1613,6 +1630,7 @@ class npc_saurfang_gunship : public CreatureScript
                             _instance->DoCastSpellOnPlayers(SPELL_ACHIEVEMENT_CHECK);
 							GoAndDespawn();
 							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
                             StartFlyShip(orgrimmar);
                             StopFlyShip(CheckUnfriendlyShip(me,_instance,DATA_GB_MURADIN_BRONZEBEARD));
                             break;
@@ -1621,6 +1639,8 @@ class npc_saurfang_gunship : public CreatureScript
 							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), /*-590.200022f, 2241.193115f, 539.588269f,*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
                             HorsCombatDelItem();
+							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                             break;
@@ -1642,7 +1662,7 @@ class npc_saurfang_gunship : public CreatureScript
                                 {
                                     DoCastVictim(SPELL_RENDING_THROW);
                                     EventScheduled = false;
-                               }
+                                }
                                else
                                    events.CancelEvent(EVENT_RENDING_THROW);
                             break;

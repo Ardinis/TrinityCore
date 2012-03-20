@@ -1394,7 +1394,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                                         pGo->SetRespawnTime(7*DAY);
                                 if (GameObject* pGo = me->SummonGameObject(GO_SAURFANG_ALLIANCE_TENT2, -532.78f, 2228.43f, 539.29f, 2.48599f, 0, 0, 0, 0, 7*DAY))
                                         pGo->SetRespawnTime(7*DAY);
-                                if (Creature* pCreature = me->SummonCreature(37904 ,-529.348f , 2226.35f ,539.291f, 5.87753f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
+                                if (Creature* pCreature = me->SummonCreature(37904 ,-529.532f , 2226.46f ,539.292f, 5.63936f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
                                         pCreature->SetVisible(true);
                                 if (Creature* pCreature = me->SummonCreature(37903 ,-521.219f , 2233.37f ,539.292f, 5.41553f, TEMPSUMMON_TIMED_DESPAWN, 7*DAY))
                                         pCreature->SetVisible(true);

@@ -1068,15 +1068,6 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                     }
                 }
             }
-			// Detournement test
-            if (Player* player = target->ToPlayer())
-            {
-                if (Pet* pet = player->GetPet())
-                {
-                    pet->CastPetAuras(true);
-                }
-            }		
-			// fin test detournement
         }
         default:
             break;

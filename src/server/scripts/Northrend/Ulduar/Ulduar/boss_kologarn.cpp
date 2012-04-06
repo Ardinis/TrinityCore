@@ -35,7 +35,7 @@ EndScriptData */
 #define SPELL_ARM_SWEEP         RAID_MODE(63766, 63983)
 #define SPELL_STONE_SHOUT       RAID_MODE(63716, 64005)
 #define SPELL_PETRIFY_BREATH    RAID_MODE(62030, 63980)
-#define SPELL_STONE_GRIP        RAID_MODE(62166, 63981)
+#define SPELL_STONE_GRIP        RAID_MODE(64290, 64292)
 #define SPELL_STONE_GRIP_CANCEL 65594
 #define SPELL_SUMMON_RUBBLE     63633
 #define SPELL_FALLING_RUBBLE    63821
@@ -573,7 +573,7 @@ class spell_ulduar_stone_grip : public SpellScriptLoader
 
                 caster->RemoveAurasDueToSpell(GetId());
                 caster->ExitVehicle();
-                caster->GetMotionMaster()->MoveJump(1756.25f + irand(-3, 3), -8.3f + irand(-3, 3), 448.8f, 5.0f, 5.0f);
+                caster->GetMotionMaster()->MoveJump(1756.25f + irand(-3, 3), -8.3f + irand(-3, 3), 448.8f, 15.0f, 15.0f);
                 PreventDefaultAction();
             }
 

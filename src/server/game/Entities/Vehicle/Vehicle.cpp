@@ -383,8 +383,19 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     }
 
     if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK1))
-        unit->AddUnitState(UNIT_STATE_ONVEHICLE);
-
+    {
+        switch (GetVehicleInfo()->m_ID)
+        {
+            case 342: //Ignis
+            case 335: //XT-002
+			case 380: //Kologarn's Right Arm
+                break;
+            default:
+                unit->AddUnitState(UNIT_STATE_ONVEHICLE);
+                break;
+        }
+    }
+	
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     unit->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
     VehicleSeatEntry const* veSeat = seat->second.SeatInfo;

@@ -8037,7 +8037,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         return true;                        // charge counting (will removed)
 
                     CastSpell(this, 28682, true);
-
+	
                     return (procEx & PROC_EX_CRITICAL_HIT) ? true : false;
                 }
                 // Empowered Fire

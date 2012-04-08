@@ -13823,8 +13823,11 @@ void Unit::RemoveFromWorld()
     {
         m_duringRemoveFromWorld = true;
         if (IsVehicle())
+	  {
+	    std::cout << "crash test" << std::endl;
+	    //RemoveVehicleKit();
             GetVehicleKit()->Uninstall();
-
+	  }
         RemoveCharmAuras();
         RemoveBindSightAuras();
         RemoveNotOwnSingleTargetAuras();

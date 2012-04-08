@@ -765,6 +765,8 @@ OutdoorPvPWGCreType OutdoorPvPWG::GetCreatureType(uint32 entry) const
 void OutdoorPvPWG::OnCreatureCreate(Creature *creature)
 {
    uint32 entry = creature->GetEntry();
+   if (entry == 28366)
+     m_turret.insert(creature);
    switch(GetCreatureType(entry))
    {
        case CREATURE_SIEGE_VEHICLE:
@@ -896,6 +898,9 @@ void OutdoorPvPWG::OnCreatureRemove(Creature *creature)
            m_creatures.erase(creature); // prevents crash, but i think it's wrong
        }
            break;
+   case CREATURE_TURRET:
+     m_turret.erase(creature); // prevents crash, but i think it's wrong
+     break;
        default:
            m_creatures.erase(creature);
            break;
@@ -1024,6 +1029,16 @@ void OutdoorPvPWG::BroadcastStateChange(BuildingState *state) const
        for (uint32 team = 0; team < 2; ++team)
            for (PlayerSet::const_iterator p_itr = m_players[team].begin(); p_itr != m_players[team].end(); ++p_itr)
                state->SendUpdate(*p_itr);
+}
+
+bool OutdoorPvPWG::UpdateTurret()
+{
+  for (CreatureSet::iterator itr = m_creatures.begin(); itr != m_creatures.end(); ++itr)
+    {
+      if ((*itr)->isAlive())
+	(*itr)->setFaction(WintergraspFaction[getDefenderTeam()]);
+    }
+  return true;
 }
 
 // Called at Start and Battle End
@@ -1516,6 +1531,8 @@ bool OutdoorPvPWG::Update(uint32 diff)
    if (!sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
        return false;
 
+
+
    if (m_timer > diff)
    {
        m_timer -= diff;
@@ -1523,7 +1540,7 @@ bool OutdoorPvPWG::Update(uint32 diff)
        if (isWarTime())
        {
            OutdoorPvP::Update(diff); // update capture points
-
+	   UpdateTurret();
            /*********************************************************/
            /***        BATTLEGROUND RESSURECTION SYSTEM           ***/
            /*********************************************************/

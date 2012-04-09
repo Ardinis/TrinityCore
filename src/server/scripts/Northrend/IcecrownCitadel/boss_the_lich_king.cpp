@@ -1191,6 +1191,77 @@ class npc_tirion_fordring_tft : public CreatureScript
     public:
         npc_tirion_fordring_tft() : CreatureScript("npc_tirion_fordring_tft") { }
 
+  /*	  bool OnGossipHello(Player* player, Creature* creature)
+	  {
+            InstanceScript* instance = creature->GetInstanceScript();
+            if (!instance)
+	      return false;
+
+            Player *unfriendlyPlayer = NULL;
+            const Map::PlayerList &PlayerList = creature->GetMap()->GetPlayers();
+            if (!PlayerList.isEmpty())
+	      for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+		if (Player* player = i->getSource())
+		  if (!creature->IsFriendlyTo(player))
+		    {
+		      unfriendlyPlayer = player;
+		      break;
+		    }
+
+            if (unfriendlyPlayer)
+	      {
+                char buf[255] = {0};
+                sprintf(buf, "Sorry, but everyone in raid should have at least friendly reputation with the Argent Crusade to participate in the final battle. Player '%s' doesn't meet this requirement.", unfriendlyPlayer->GetName());
+                creature->MonsterSay(buf, LANG_UNIVERSAL, player->GetGUID());
+                return true;
+	      }
+
+	    /*            if (instance->GetData(DATA_LICH_KING_EVENT) == DONE)
+	      {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "The Lich King was already defeated here. Teleport me back to the Light's Hammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+                player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
+                return true;
+		}*/
+  /*
+            if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
+	      {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sorry, I'm not the raid leader", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
+                return true;
+	      }
+
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+
+            player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
+
+            return true;
+	  }
+
+	  bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+	  {
+            switch (uiAction)
+	      {
+	      case GOSSIP_ACTION_INFO_DEF+2:
+		creature->MonsterSay("OK, I'll wait for raid leader", LANG_UNIVERSAL, player->GetGUID());
+		break;
+	      case GOSSIP_ACTION_INFO_DEF+4:
+
+		break;
+	      case GOSSIP_ACTION_INFO_DEF+3:
+		_events.SetPhase(PHASE_INTRO);
+		creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+		creature->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+		creature->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
+		player->CLOSE_GOSSIP_MENU();
+		break;
+	      default:
+		creature->MonsterSay("You've just found a bug. Contact server admin and explain what to do to reproduce this bug", LANG_UNIVERSAL, player->GetGUID());
+		break;
+	      }
+            return true;
+	  }
+  */
+
         struct npc_tirion_fordringAI : public ScriptedAI
         {
             npc_tirion_fordringAI(Creature* creature) : ScriptedAI(creature),
@@ -1248,76 +1319,6 @@ class npc_tirion_fordring_tft : public CreatureScript
                 else if (spell->Id == SPELL_BROKEN_FROSTMOURNE_KNOCK)
                     SetEquipmentSlots(true);    // remove glow on ashbringer
             }
-
-	  bool OnGossipHello(Player* player, Creature* creature)
-	  {
-            InstanceScript* instance = creature->GetInstanceScript();
-            if (!instance)
-	      return false;
-
-            Player *unfriendlyPlayer = NULL;
-            const Map::PlayerList &PlayerList = creature->GetMap()->GetPlayers();
-            if (!PlayerList.isEmpty())
-	      for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-		if (Player* player = i->getSource())
-		  if (!creature->IsFriendlyTo(player))
-		    {
-		      unfriendlyPlayer = player;
-		      break;
-		    }
-
-            if (unfriendlyPlayer)
-	      {
-                char buf[255] = {0};
-                sprintf(buf, "Sorry, but everyone in raid should have at least friendly reputation with the Argent Crusade to participate in the final battle. Player '%s' doesn't meet this requirement.", unfriendlyPlayer->GetName());
-                creature->MonsterSay(buf, LANG_UNIVERSAL, player->GetGUID());
-                return true;
-	      }
-
-	    /*            if (instance->GetData(DATA_LICH_KING_EVENT) == DONE)
-	      {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "The Lich King was already defeated here. Teleport me back to the Light's Hammer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
-                player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
-                return true;
-		}*/
-
-            if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
-	      {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sorry, I'm not the raid leader", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
-                return true;
-	      }
-
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
-
-            player->SEND_GOSSIP_MENU(GOSSIP_MENU, creature->GetGUID());
-
-            return true;
-	  }
-
-	  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
-	  {
-            switch (uiAction)
-	      {
-	      case GOSSIP_ACTION_INFO_DEF+2:
-		creature->MonsterSay("OK, I'll wait for raid leader", LANG_UNIVERSAL, player->GetGUID());
-		break;
-	      case GOSSIP_ACTION_INFO_DEF+4:
-
-		break;
-	      case GOSSIP_ACTION_INFO_DEF+3:
-		_events.SetPhase(PHASE_INTRO);
-		me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-		me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-		me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
-		player->CLOSE_GOSSIP_MENU();
-		break;
-	      default:
-		creature->MonsterSay("You've just found a bug. Contact server admin and explain what to do to reproduce this bug", LANG_UNIVERSAL, player->GetGUID());
-		break;
-	      }
-            return true;
-	  }
 
             void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
             {

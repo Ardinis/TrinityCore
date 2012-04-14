@@ -3338,6 +3338,7 @@ void Spell::EffectDistract(SpellEffIndex /*effIndex*/)
         if (unitTarget->ToPlayer()->IsSitState())
             unitTarget->ToPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
+		unitTarget->SendMovementFlagUpdate();
 }
 
 void Spell::EffectPickPocket(SpellEffIndex /*effIndex*/)

@@ -120,7 +120,7 @@ enum Spells
     SPELL_HURL_AXE                    = 70161,
 	SPELL_HURL_AXE_HM				  = 72540,
     SPELL_SHOOT                       = 70162,
-	//SPELL_SHOOT_HM					  =
+	SPELL_SHOOT_HM					  =	72568,
 
     // Kor'kron Rocketeer & Skybreaker Mortar Soldier
     SPELL_ROCKET_ARTILLERY_MARKER     = 71371,
@@ -1965,7 +1965,7 @@ class npc_korkron_axethrower_rifleman : public CreatureScript
                     if(me->GetEntry() == NPC_GB_KORKRON_AXETHROWER)
                         DoCast(me->getVictim(), RAID_MODE(SPELL_HURL_AXE, SPELL_HURL_AXE , SPELL_HURL_AXE_HM , SPELL_HURL_AXE_HM ));
                     else if(me->GetEntry() == NPC_GB_SKYBREAKER_RIFLEMAN)
-                        DoCast(me->getVictim(), SPELL_SHOOT);
+                        DoCast(me->getVictim(), RAID_MODE(SPELL_SHOOT, SPELL_SHOOT , SPELL_SHOOT_HM , SPELL_SHOOT_HM ));
                     attacktimer = urand(6000, 15000);
                 } else attacktimer -= diff;
 

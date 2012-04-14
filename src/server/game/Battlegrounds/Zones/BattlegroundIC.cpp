@@ -123,7 +123,6 @@ void BattlegroundIC::PostUpdateImpl(uint32 diff)
 
             GetBGObject(BG_IC_GO_ALLIANCE_GATE_3)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Alliance door
             GetBGObject(BG_IC_GO_HORDE_GATE_1)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED); // Horde door
-
             doorsClosed = true;
         } else closeFortressDoorsTimer -= diff;
     }
@@ -261,14 +260,14 @@ void BattlegroundIC::StartingEventCloseDoors()
 void BattlegroundIC::StartingEventOpenDoors()
 {
     //after 20 seconds they should be despawned
-    DoorOpen(BG_IC_GO_DOODAD_ND_HUMAN_GATE_CLOSEDFX_DOOR01);
-    DoorOpen(BG_IC_GO_DOODAD_ND_WINTERORC_WALL_GATEFX_DOOR01);
+  DoorOpen(BG_IC_GO_DOODAD_ND_HUMAN_GATE_CLOSEDFX_DOOR01);
+  DoorOpen(BG_IC_GO_DOODAD_ND_WINTERORC_WALL_GATEFX_DOOR01);
 
-    DoorOpen(BG_IC_GO_DOODAD_HU_PORTCULLIS01_1);
-    DoorOpen(BG_IC_GO_DOODAD_HU_PORTCULLIS01_2);
-    DoorOpen(BG_IC_GO_DOODAD_VR_PORTCULLIS01_1);
-    DoorOpen(BG_IC_GO_DOODAD_VR_PORTCULLIS01_2);
-
+  DoorOpen(BG_IC_GO_DOODAD_HU_PORTCULLIS01_1);
+  DoorOpen(BG_IC_GO_DOODAD_HU_PORTCULLIS01_2);
+  DoorOpen(BG_IC_GO_DOODAD_VR_PORTCULLIS01_1);
+  DoorOpen(BG_IC_GO_DOODAD_VR_PORTCULLIS01_2);
+  
     for (uint8 i = 0; i < MAX_FORTRESS_TELEPORTERS_SPAWNS; i++)
     {
         if (!AddObject(BG_IC_Teleporters[i].type, BG_IC_Teleporters[i].entry,
@@ -750,8 +749,12 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
                             if (Vehicle* vehicleDemolisher = demolisher->GetVehicleKit())
                             {
                                 // is IsVehicleInUse working as expected?
-                                if (!vehicleDemolisher->IsVehicleInUse())
-                                    DelCreature(i);
+		  //                                if (!vehicleDemolisher->IsVehicleInUse())
+				  if (!vehicleDemolisher->GetPassenger(0))
+				    {
+				      vehicleDemolisher->RemoveAllPassengers();
+				      DelCreature(i);
+				    }
                             }
                         }
                     }
@@ -778,8 +781,11 @@ void BattlegroundIC::HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture)
                         if (Vehicle* vehicleSiege = siegeEngine->GetVehicleKit())
                         {
                             // is VehicleInUse working as expected ?
-                            if (!vehicleSiege->IsVehicleInUse())
-                                DelCreature(enemySiege);
+			  if (!vehicleSiege->GetPassenger(0))
+			    {
+			      vehicleSiege->RemoveAllPassengers();
+			      DelCreature(enemySiege);
+			    }
                         }
                     }
 

@@ -10720,10 +10720,18 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
     // Mod damage from spell mechanic
     if (uint32 mechanicMask = spellProto->GetAllEffectsMechanicMask())
     {
+		int32 dmgBonusDisease = 0;
         AuraEffectList const& mDamageDoneMechanic = victim->GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
         for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
             if (mechanicMask & uint32(1<<((*i)->GetMiscValue())))
-                AddPctN(TakenTotalMod, (*i)->GetAmount());
+            {
+                if ((*i)->GetSpellInfo()->Id != 65142) // Check if not disease damage modifier
+                    AddPctN(TakenTotalMod, (*i)->GetAmount());
+                else if ((*i)->GetAmount() > dmgBonusDisease) // Store highest disease modifier bonus
+                    dmgBonusDisease = (*i)->GetAmount();
+            }
+        if (dmgBonusDisease != 0)
+            AddPctN(TakenTotalMod, dmgBonusDisease); // apply bonus
     }
 
     // Taken/Done fixed damage bonus auras

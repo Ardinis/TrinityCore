@@ -10,7 +10,6 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
-  Commands/cs_anticheat.cpp
   Commands/cs_account.cpp
   Commands/cs_achievement.cpp
   Commands/cs_debug.cpp
@@ -29,6 +28,7 @@ set(scripts_STAT_SRCS
   Commands/cs_tele.cpp
   Commands/cs_titles.cpp
   Commands/cs_wp.cpp
+#  Commands/cs_anticheat.cpp
 #  Commands/cs_character.cpp
 #  Commands/cs_list.cpp
 #  Commands/cs_lookup.cpp

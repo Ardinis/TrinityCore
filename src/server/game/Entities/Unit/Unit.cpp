@@ -6811,7 +6811,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
                     bool stacker = !procSpell || procSpell->Id == 53595;
                     // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
-                    bool damager = procSpell && procSpell->EquippedItemClass != -1;
+                    bool damager = procSpell && procSpell->EquippedItemClass == ITEM_CLASS_WEAPON;
 
                     if (!stacker && !damager)
                         return false;
@@ -6843,12 +6843,12 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
                     bool stacker = !procSpell || procSpell->Id == 53595;
                     // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
-                    bool damager = procSpell && procSpell->EquippedItemClass != -1;
+                    bool damager = procSpell && procSpell->EquippedItemClass == ITEM_CLASS_WEAPON;
 
                     if (!stacker && !damager)
                         return false;
 
-                    triggered_spell_id = 53742;
+                    triggered_spell_id = 31803;
 
                     // On target with 5 stacks of Blood Corruption direct damage is done
                     if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))

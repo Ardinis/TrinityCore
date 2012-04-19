@@ -16,7 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include "AnticheatMgr.h"
+#include "AnticheatMgr.h"
 #include "Common.h"
 #include "Language.h"
 #include "DatabaseEnv.h"
@@ -18976,7 +18976,7 @@ void Player::SaveToDB(bool create /*=false*/)
     CharacterDatabase.CommitTransaction(trans);
 
     // we save the data here to prevent spamming
-//    sAnticheatMgr->SavePlayerData(this);
+    sAnticheatMgr->SavePlayerData(this);
 
     // in this way we prevent to spam the db by each report made!
     // sAnticheatMgr->SavePlayerData(this);

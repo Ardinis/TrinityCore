@@ -3252,6 +3252,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_MODIFY_THREAT_PERCENT;
                 spellInfo->EffectBasePoints[EFFECT_1] = -6; // -5%
                 break;
+            case 12721: // Deep Wound
+            case 50526: // Wandering Plague
+            case 53353: // Chimera Shot - Serpent
+            case 61840: // Righteous Vengeance
             case 63675: // Improved Devouring Plague
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                 break;

@@ -124,6 +124,10 @@ class ReputationMgr
         {
             return SetReputation(factionEntry, standing, true);
         }
+        bool SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing)
+        {
+            return SetOneFactionReputation(factionEntry, standing, false);
+        }
 
         void SetVisible(FactionTemplateEntry const* factionTemplateEntry);
         void SetVisible(FactionEntry const* factionEntry);

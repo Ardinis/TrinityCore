@@ -19,7 +19,7 @@
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
-#include "ulduar.h" 
+#include "ulduar.h"
 #include "Vehicle.h"
 
 enum Yells
@@ -38,21 +38,15 @@ enum Yells
 
 enum Spells
 {
-    SPELL_FLAME_JETS_10                         = 62680,
-    SPELL_FLAME_JETS_25                         = 63472,
-    SPELL_SCORCH_10                             = 62546,
-    SPELL_SCORCH_25                             = 63474,
-    SPELL_SLAG_POT_10                           = 62717,
-    SPELL_SLAG_POT_25                           = 63477,
-    SPELL_SLAG_IMBUED_10                        = 62836,
-    SPELL_SLAG_IMBUED_25                        = 63536,
-    SPELL_ACTIVATE_CONSTRUCT                    = 62488,
-    SPELL_STRENGHT                              = 64473,
-    SPELL_GRAB                                  = 62707,
-    SPELL_BERSERK                               = 47008,
-
-    SPELL_SLAG_IMBUED                           = 62836,
-    SPELL_SLAG_POT_DAMAGE                       = 65722,
+    SPELL_FLAME_JETS            = 62680,
+    SPELL_SCORCH                = 62546,
+    SPELL_SLAG_POT              = 62717,
+    SPELL_SLAG_POT_DAMAGE       = 65722,
+    SPELL_SLAG_IMBUED           = 62836,
+    SPELL_ACTIVATE_CONSTRUCT    = 62488,
+    SPELL_STRENGHT              = 64473,
+    SPELL_GRAB                  = 62707,
+    SPELL_BERSERK               = 47008,
 
     // Iron Construct
     SPELL_HEAT                  = 65667,
@@ -64,15 +58,14 @@ enum Spells
 
 enum Events
 {
-    EVENT_NONE,
-    EVENT_JET,
-    EVENT_SCORCH,
-    EVENT_SLAG_POT,
-    EVENT_GRAB_POT,
-    EVENT_CHANGE_POT,
-    EVENT_END_POT,
-    EVENT_CONSTRUCT,
-    EVENT_BERSERK
+    EVENT_JET           = 1,
+    EVENT_SCORCH        = 2,
+    EVENT_SLAG_POT      = 3,
+    EVENT_GRAB_POT      = 4,
+    EVENT_CHANGE_POT    = 5,
+    EVENT_END_POT       = 6,
+    EVENT_CONSTRUCT     = 7,
+    EVENT_BERSERK       = 8,
 };
 
 enum Actions
@@ -143,12 +136,12 @@ class boss_ignis : public CreatureScript
             {
                 _EnterCombat();
                 DoScriptText(SAY_AGGRO, me);
-				events.ScheduleEvent(EVENT_JET, 30000);
-				events.ScheduleEvent(EVENT_SCORCH, 25000);
-				events.ScheduleEvent(EVENT_SLAG_POT, 35000);
-				events.ScheduleEvent(EVENT_CONSTRUCT, 15000);
-				events.ScheduleEvent(EVENT_END_POT, 40000);
-				events.ScheduleEvent(EVENT_BERSERK, 480000);
+                events.ScheduleEvent(EVENT_JET, 30000);
+                events.ScheduleEvent(EVENT_SCORCH, 25000);
+                events.ScheduleEvent(EVENT_SLAG_POT, 35000);
+                events.ScheduleEvent(EVENT_CONSTRUCT, 15000);
+                events.ScheduleEvent(EVENT_END_POT, 40000);
+                events.ScheduleEvent(EVENT_BERSERK, 480000);
                 _slagPotGUID = 0;
                 _shattered = false;
                 _firstConstructKill = 0;
@@ -218,20 +211,25 @@ class boss_ignis : public CreatureScript
                     {
                         case EVENT_JET:
                             me->MonsterTextEmote(EMOTE_JETS, 0, true);
-                            DoCastAOE(RAID_MODE(SPELL_FLAME_JETS_10, SPELL_FLAME_JETS_25));
+                            DoCast(me, SPELL_FLAME_JETS);
                             events.ScheduleEvent(EVENT_JET, urand(35000, 40000));
                             break;
                         case EVENT_SLAG_POT:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true))
-                            {
-                                DoScriptText(SAY_SLAG_POT, me);
-                                _slagPotGUID = target->GetGUID();
-                                DoCast(target, SPELL_GRAB);
-                                events.DelayEvents(3000);
-                                events.ScheduleEvent(EVENT_GRAB_POT, 500);
-                            }
-                            events.ScheduleEvent(EVENT_SLAG_POT, RAID_MODE(30000, 15000));
-                            break;
+							if (Unit* targetold = me->getVictim())
+								if (Creature* summon = me->FindNearestCreature(NPC_IRON_CONSTRUCT, 1000, true))
+									if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+										if (target != summon->getVictim() && target != targetold)
+										{
+											DoScriptText(SAY_SLAG_POT, me);
+											_slagPotGUID = target->GetGUID();
+											DoCast(target, SPELL_GRAB);
+											events.DelayEvents(3000);
+											events.ScheduleEvent(EVENT_GRAB_POT, 500);
+											events.ScheduleEvent(EVENT_SLAG_POT, RAID_MODE(30000, 15000));
+											break;
+										}
+										else
+											break;
                         case EVENT_GRAB_POT:
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, _slagPotGUID))
                             {
@@ -243,7 +241,7 @@ class boss_ignis : public CreatureScript
                         case EVENT_CHANGE_POT:
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, _slagPotGUID))
                             {
-                                slagPotTarget->AddAura(RAID_MODE(SPELL_SLAG_POT_10, SPELL_SLAG_POT_25), slagPotTarget);
+                                slagPotTarget->AddAura(SPELL_SLAG_POT, slagPotTarget);
                                 slagPotTarget->EnterVehicle(me, 1);
                                 events.CancelEvent(EVENT_CHANGE_POT);
                                 events.ScheduleEvent(EVENT_END_POT, 10000);
@@ -253,8 +251,7 @@ class boss_ignis : public CreatureScript
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, _slagPotGUID))
                             {
                                 slagPotTarget->ExitVehicle();
-								slagPotTarget->CastSpell(SlagPotTarget, RAID_MODE(SPELL_SLAG_IMBUED_10, SPELL_SLAG_IMBUED_25), true);
-                                slagPotTarget = NULL;
+								slagPotTarget = NULL;
                                 _slagPotGUID = 0;
                                 events.CancelEvent(EVENT_END_POT);
                             }
@@ -263,7 +260,7 @@ class boss_ignis : public CreatureScript
                             DoScriptText(RAND(SAY_SCORCH_1, SAY_SCORCH_2), me);
                             if (Unit* target = me->getVictim())
                                 me->SummonCreature(NPC_GROUND_SCORCH, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 45000);
-                            DoCast(RAID_MODE(SPELL_SCORCH_10, SPELL_SCORCH_25));
+                            DoCast(SPELL_SCORCH);
                             events.ScheduleEvent(EVENT_SCORCH, 25000);
                             break;
                         case EVENT_CONSTRUCT:
@@ -286,7 +283,6 @@ class boss_ignis : public CreatureScript
             }
 
         private:
-		    Unit* SlagPotTarget;
             uint64 _slagPotGUID;
             Vehicle* _vehicle;
             time_t _firstConstructKill;
@@ -296,7 +292,7 @@ class boss_ignis : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetUlduarAI<boss_ignis_AI>(creature);
+            return new boss_ignis_AI(creature);
         }
 };
 
@@ -363,7 +359,7 @@ class npc_iron_construct : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetUlduarAI<npc_iron_constructAI>(creature);
+            return new npc_iron_constructAI(creature);
         }
 };
 
@@ -407,9 +403,9 @@ class npc_scorch_ground : public CreatureScript
             {
                 if (_heat)
                 {
-                    if (_heatTimer <= uiDiff)
+                    if(_heatTimer <= uiDiff)
                     {
-                        Creature* construct = me->GetCreature(*me, _constructGUID);
+                        Creature* construct = me->GetCreature(*me , _constructGUID);
                         if (construct && !construct->HasAura(SPELL_MOLTEN))
                         {
                             me->AddAura(SPELL_HEAT, construct);
@@ -429,7 +425,7 @@ class npc_scorch_ground : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetUlduarAI<npc_scorch_groundAI>(creature);
+            return new npc_scorch_groundAI(creature);
         }
 };
 

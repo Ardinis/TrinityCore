@@ -3603,6 +3603,106 @@ public:
 
 };
 
+class npc_risen_ally : public CreatureScript
+{
+    public:
+        npc_risen_ally() : CreatureScript("npc_risen_ally") { }
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_risen_allyAI(pCreature);
+        }
+
+        struct npc_risen_allyAI : public ScriptedAI
+        {
+            npc_risen_allyAI(Creature* pCreature) : ScriptedAI(pCreature)
+            {
+                me->setPowerType(POWER_ENERGY);
+
+	            me->SetUInt32Value(UNIT_FIELD_LEVEL, pCreature->getLevel());
+	            me->SetUInt32Value(UNIT_FIELD_RESISTANCES, pCreature->GetUInt32Value(UNIT_FIELD_RESISTANCES));
+	           
+				//me->SetSheath(SHEATH_STATE_MELEE);
+				me->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
+				me->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
+				me->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+				me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+				me->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
+
+				uint32 petlevel = pCreature->getLevel();
+			
+				pCreature->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+			    pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+
+				if (Player* creator = ((Player *)me->GetOwner()))
+				{
+					creator->RemoveAllAuras();
+
+					me->SetPower(POWER_ENERGY,creator->GetMaxHealth());
+					me->SetMaxPower(POWER_ENERGY,creator->GetMaxHealth());
+
+					pCreature->SetMaxHealth(creator->GetMaxHealth());
+					pCreature->SetHealth(creator->GetMaxHealth());
+					pCreature->setFaction(creator->getFaction());
+
+					me->SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(creator->GetArmor()) * 0.15f);
+				}
+            }
+
+            void EnterCombat(Unit *who)
+            {
+            }
+
+			void AttackStart(Unit* who)
+			{
+				if (!who) return;
+
+				if (me->Attack(who, true))
+				{
+					me->SetInCombatWith(who);
+					who->SetInCombatWith(me);
+					DoStartMovement(who, 10.0f);
+					SetCombatMovement(true);
+				}
+			}
+
+            void JustDied(Unit* Killer)
+            {
+				if (Player* creator = ((Player *)me->GetOwner()))
+				{
+					creator->RemoveAurasDueToSpell(46619);
+					creator->RemoveAurasDueToSpell(62218);
+				}
+            }
+
+            void Reset()
+            {
+				me->SetSheath(SHEATH_STATE_MELEE);
+				me->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
+				me->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
+				me->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+				me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+				me->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
+
+				if (Player* creator = ((Player *)me->GetOwner()))
+				{
+				   me->SetLevel(creator->getLevel());
+				   me->setFaction(creator->getFaction());
+				}			
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+				if(!me->isCharmed())
+					me->ForcedDespawn();
+
+				if (me->isInCombat())
+					DoMeleeAttackIfReady();
+            }
+        };
+};
+
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3638,5 +3738,6 @@ void AddSC_npcs_special()
     new npc_spring_rabbit();
     new npc_argent_squire();	
     new npc_artuis();
-    new vehicle_knight_gryphon();	
+    new vehicle_knight_gryphon();
+	new npc_risen_ally();
 }

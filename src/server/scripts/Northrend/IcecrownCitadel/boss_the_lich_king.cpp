@@ -1322,13 +1322,13 @@ class npc_tirion_fordring_tft : public CreatureScript
 
             void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
             {
-	      /*                if (me->GetCreatureInfo()->GossipMenuId == sender && !action)
+	      if (me->GetCreatureInfo()->GossipMenuId == sender && !action)
                 {
-                    _events.SetPhase(PHASE_INTRO);
-                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                    me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
-		    }*/
+		  _events.SetPhase(PHASE_INTRO);
+		  me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+		  me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+		  me->GetMotionMaster()->MovePoint(POINT_TIRION_INTRO, TirionIntro);
+		}
             }
 
             void JustReachedHome()

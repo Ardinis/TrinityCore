@@ -2583,6 +2583,18 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                     // TODO: move these to sql
                     switch (m_spellInfo->Id)
                     {
+                        case 61999:  //Raise Ally
+                        {
+                            if((m_targets.GetUnitTarget()->isAlive()) || (m_targets.GetUnitTarget()->GetTypeId() != TYPEID_PLAYER ))
+                            {
+                                m_caster->ToPlayer()->RemoveSpellCooldown(m_spellInfo->Id, true);
+                                SendCastResult(SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW);
+                                finish(false);
+                            }
+                            else
+                                m_targets.GetUnitTarget()->CastSpell(m_targets.GetUnitTarget(), 46619,true);
+                            break;
+                        }
                         case 46584: // Raise Dead
                         {
                             if (WorldObject* result = FindCorpseUsing<Trinity::RaiseDeadObjectCheck>())

@@ -187,6 +187,8 @@ extern char const* localeNames[TOTAL_LOCALES];
 
 LocaleConstant GetLocaleByName(const std::string& name);
 
+char **my_explode(char *str, char separator);
+
 typedef std::vector<std::string> StringVector;
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)

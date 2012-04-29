@@ -21,7 +21,7 @@
 
 enum TrinityStrings
 {
-	// Added by WarHead for the Jail edited by spgm, textos editados a español y ajustes por Eilo 
+	// Added by WarHead for the Jail edited by spgm, textos editados a español y ajustes por Eilo
 	LANG_JAIL_YOURE_JAILED              = 950,  // "Has sido encarcelado por %s durante %u minuto(s)!"
 	LANG_JAIL_REASON                    = 951,  // "%s escribio como razon: %s"
 	LANG_JAIL_WAS_JAILED                = 952,  // "%s encarcelado por %u minuto(s)."
@@ -1120,6 +1120,21 @@ enum TrinityStrings
     // Use for custom patches             11000-11999
     LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
+
+    LANG_DIAM_NOT_ENOUGH = 11100,
+    LANG_DIAM_ZERO = 11101,
+    LANG_DIAM_INFO = 11102,
+    LANG_DIAM_ADD = 11105,
+    LANG_DIAM_REM = 11106,
+    LANG_DIAM_LVL_BUY = 11107,
+    LANG_DIAM_LVL_ERR = 11108,
+
+    LANG_RECUP_WAITING = 11205,
+    LANG_RECUP_ALREADY_DONE = 11200,
+    LANG_RECUP_REFUSED = 11201,
+    LANG_RECUP_SKILL = 11202,
+    LANG_RECUP_DONE = 11203,
+    LANG_RECUP_NOT_EXISTS = 11204,
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)

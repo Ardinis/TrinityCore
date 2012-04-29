@@ -61,7 +61,7 @@ bool ChatHandler::HandleStartCommand(const char* /*args*/)
         SendSysMessage(LANG_JAIL_DENIED);
         return true;
     }
-    // Jail mod end.  
+    // Jail mod end.
     Player* chr = m_session->GetPlayer();
 
     if (chr->isInFlight())
@@ -205,4 +205,161 @@ bool ChatHandler::HandleJailInfoCommand(const char* args)
         return true;
     }
     return false;
+}
+
+bool ChatHandler::HandleDiamondInfoCommand(const char* /*args*/)
+{
+  QueryResult result = StoreDatabase.PQuery( "SELECT diamond FROM diamond WHERE acctid = '%u'", m_session->GetAccountId());
+  if (!result){
+    StoreDatabase.PExecute("INSERT INTO diamond(acctid, diamond) VALUES('%d', '0')", m_session->GetAccountId());
+    PSendSysMessage(LANG_DIAM_INFO, 0);
+    return true;
+  }
+
+  Field *fields = result->Fetch();
+  PSendSysMessage(LANG_DIAM_INFO, fields[0].GetInt32());
+
+  return true;
+}
+
+bool ChatHandler::HandleDiamondLevelCommand(const char* /*args*/)
+{
+  Player *chr = m_session->GetPlayer();
+  uint32 chrLvl = chr->getLevel();
+  int32 diam = 0;
+
+  QueryResult result = StoreDatabase.PQuery("SELECT diamond FROM diamond WHERE acctid='%d'", m_session->GetAccountId());
+  if (!result)
+    {
+      StoreDatabase.PExecute("INSERT INTO diamond(acctid, diamond) VALUES('%d', '0')", m_session->GetAccountId());
+      PSendSysMessage(LANG_DIAM_ZERO);
+      return true;
+    }
+  Field *fields = result->Fetch();
+  diam = fields[0].GetInt32();
+
+  //Is the character has diamond ?
+  if (diam == 0)
+    {
+      PSendSysMessage(LANG_DIAM_ZERO);
+      return true;
+    }
+
+  result = StoreDatabase.Query("SELECT level FROM level ORDER BY level DESC");
+  fields = result->Fetch();
+  uint32 dataLvl = fields[0].GetUInt32();
+
+  if (chrLvl >= dataLvl)
+    {
+      PSendSysMessage(LANG_DIAM_LVL_ERR);
+      return true;
+    }
+
+  result = StoreDatabase.PQuery("SELECT price, nblevel FROM level WHERE level = '%u'", chrLvl);
+  fields = result->Fetch();
+  int32 dataPrice = fields[0].GetInt32();
+  uint32 dataNblvl = fields[1].GetUInt32();
+
+  //Is character has enough diamond ?
+  if (diam < dataPrice)
+    {
+      PSendSysMessage(LANG_DIAM_NOT_ENOUGH, dataPrice);
+      return true;
+    }
+
+  diam -= dataPrice;
+  int32 newlevel = chrLvl + dataNblvl;
+
+  int chrguid = chr->GetGUID();
+  int acctid = m_session->GetAccountId();
+
+  //Character level up
+  chr->GiveLevel(newlevel);
+  chr->InitTalentForLevel();
+  chr->SetUInt32Value(PLAYER_XP, 0);
+
+  StoreDatabase.PExecute("UPDATE diamond SET diamond='%d' WHERE acctid='%u'", diam, m_session->GetAccountId());
+  StoreDatabase.PExecute("INSERT INTO lvl_bought(acctid, charid, clvl, elvl, nlvl, price) VALUES('%u', '%u', '%u', '%u', '%u', '%u')", acctid, chrguid, chrLvl, newlevel, dataNblvl, dataPrice);
+
+  chr->SaveToDB ();
+
+  PSendSysMessage(LANG_DIAM_LVL_BUY, dataNblvl, dataPrice);
+
+  return true;
+}
+
+bool ChatHandler::HandleRecupCommand(const char* /*args*/)
+{
+  Player *perso = m_session->GetPlayer();
+  int charguid = perso->GetGUID();
+  int acctid = m_session->GetAccountId();
+
+  QueryResult result = WebDatabase.PQuery("SELECT * FROM recups WHERE account=%u AND perso=%u", acctid, charguid);
+  if(result)
+    {
+      Field *fields = result->Fetch();
+      int32 r_guid = fields[0].GetInt32();
+      int32 r_status = fields[10].GetInt32();
+
+      if (r_status == (int32)0 || r_status == (int32)1 || r_status == (int32)2)
+	{
+	  PSendSysMessage(LANG_RECUP_WAITING);
+	  return true;
+	}
+      if (r_status == (int32)4)
+	{
+	  PSendSysMessage(LANG_RECUP_ALREADY_DONE);
+	  return true;
+	}
+      if (r_status < (int32)0)
+	{
+	  PSendSysMessage(LANG_RECUP_REFUSED);
+	  return true;
+	}
+
+      const char *r_skills = fields[6].GetString().c_str();
+
+      if (r_skills){
+
+	char **t_skills = my_explode((char*)r_skills, ';');
+	char **my_skill;
+	for (int i = 0; t_skills[i]; i++)
+	  {
+	    my_skill = my_explode(t_skills[i], ' ');
+	    if (my_skill[0] && my_skill[1]){
+	      uint16 skill_id = static_cast<uint16>(atoi(my_skill[0]));
+	      uint16 skill_level = static_cast<uint16>(atoi(my_skill[1]));
+	      uint16 skill_max = perso->GetMaxSkillValueForLevel();
+	      uint16 skill_step = perso->GetSkillStep(skill_id);
+	      perso->SetSkill(skill_id, skill_step, skill_level, skill_max);
+	    }
+	  }
+      }
+      const char *r_reputs = fields[7].GetString().c_str();
+      if(r_reputs){
+	char **t_reputs = my_explode((char*)r_reputs, ';');
+	char **my_reput;
+	const FactionEntry *factionEntry;
+	for (int i = 0; t_reputs[i]; i++)
+	  {
+	    my_reput = my_explode(t_reputs[i], ' ');
+	    if(my_reput[0] && my_reput[1]){
+	      factionEntry = sFactionStore.LookupEntry((uint32)atoi(my_reput[0]));
+	      if(!factionEntry){
+		PSendSysMessage("Reputation inexistante. Passee.");
+	      }
+	      else{
+		perso->GetReputationMgr().SetReputation(factionEntry, (int32)atoi(my_reput[1]));
+	      }
+	    }
+	  }
+      }
+      WebDatabase.PExecute("UPDATE recups SET status=4 WHERE id=%u", r_guid);
+      perso->SaveToDB ();
+      PSendSysMessage(LANG_RECUP_DONE);
+    }
+  else
+    PSendSysMessage(LANG_RECUP_NOT_EXISTS);
+
+  return true;
 }

@@ -439,6 +439,54 @@ bool Master::_StartDB()
         return false;
     }
 
+    ///- Get Web database info from configuration file
+    dbstring = ConfigMgr::GetStringDefault("WebDatabaseInfo", "");
+    if (dbstring.empty())
+    {
+        sLog->outError("Web database not specified in configuration file");
+        return false;
+    }
+
+    async_threads = ConfigMgr::GetIntDefault("WebDatabase.WorkerThreads", 1);
+    if (async_threads < 1 || async_threads > 32)
+    {
+        sLog->outError("Web database: invalid number of worker threads specified. "
+            "Please pick a value between 1 and 32.");
+        return false;
+    }
+
+    synch_threads = ConfigMgr::GetIntDefault("WebDatabase.SynchThreads", 1);
+    ///- Initialise the login database
+    if (!WebDatabase.Open(dbstring, async_threads, synch_threads))
+    {
+        sLog->outError("Cannot connect to web database %s", dbstring.c_str());
+        return false;
+    }
+
+    ///- Get store database info from configuration file
+    dbstring = ConfigMgr::GetStringDefault("StoreDatabaseInfo", "");
+    if (dbstring.empty())
+    {
+        sLog->outError("Store database not specified in configuration file");
+        return false;
+    }
+
+    async_threads = ConfigMgr::GetIntDefault("StoreDatabase.WorkerThreads", 1);
+    if (async_threads < 1 || async_threads > 32)
+    {
+        sLog->outError("Store database: invalid number of worker threads specified. "
+            "Please pick a value between 1 and 32.");
+        return false;
+    }
+
+    synch_threads = ConfigMgr::GetIntDefault("StoreDatabase.SynchThreads", 1);
+    ///- Initialise the login database
+    if (!StoreDatabase.Open(dbstring, async_threads, synch_threads))
+    {
+        sLog->outError("Cannot connect to store database %s", dbstring.c_str());
+        return false;
+    }
+
     ///- Get the realm Id from the configuration file
     realmID = ConfigMgr::GetIntDefault("RealmID", 0);
     if (!realmID)

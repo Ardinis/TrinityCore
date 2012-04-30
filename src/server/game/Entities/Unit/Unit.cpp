@@ -12650,7 +12650,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     }
 
     // now we ready for speed calculation
-    if ((GetTypeId() == TYPEID_PLAYER) && (getClass() == CLASS_PALADIN) && ((mtype == MOVE_RUN) || (mtype == MOVE_FLIGHT)) && IsMounted())
+    /*    if ((GetTypeId() == TYPEID_PLAYER) && (getClass() == CLASS_PALADIN) && ((mtype == MOVE_RUN) || (mtype == MOVE_FLIGHT)) && IsMounted())
       {
 	// only mounted player paladins - running or flying
 	int32 modifier = 0;
@@ -12668,7 +12668,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 	    if (poj_bonus > non_stack_bonus)
 	      non_stack_bonus = poj_bonus;
 	  }
-      }
+	  }*/
     float speed = std::max(non_stack_bonus, stack_bonus);
     if (main_speed_mod)
         AddPctN(speed, main_speed_mod);

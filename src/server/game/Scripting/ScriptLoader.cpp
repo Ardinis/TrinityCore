@@ -47,10 +47,6 @@ void AddSC_holiday_spell_scripts();
 void AddSC_SmartSCripts();
 
 //Commands
-<<<<<<< HEAD
-=======
-void AddSC_anticheat_commandscript();
->>>>>>> parent of 2872901... Fix Guide de Lumiere ! (+petit soucis anticheat Scriptloader!)
 void AddSC_account_commandscript();
 void AddSC_achievement_commandscript();
 void AddSC_debug_commandscript();
@@ -664,10 +660,6 @@ void AddSpellScripts()
 
 void AddCommandScripts()
 {
-<<<<<<< HEAD
-=======
-    AddSC_anticheat_commandscript();
->>>>>>> parent of 2872901... Fix Guide de Lumiere ! (+petit soucis anticheat Scriptloader!)
     AddSC_account_commandscript();
     AddSC_achievement_commandscript();
     AddSC_debug_commandscript();

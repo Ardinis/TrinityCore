@@ -70,6 +70,11 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
         // Register Visible Aura
         if (slot < MAX_AURAS)
         {
+	  if ( GetBase()->GetId() == 32223 && slot == 4)
+	    {
+	      sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK : Aura: 32223 Effect: 0 put to unit visible auras slot: 4");
+	      return ;
+	    }
             _slot = slot;
             GetTarget()->SetVisibleAura(slot, this);
             SetNeedClientUpdate();

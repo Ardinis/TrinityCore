@@ -2905,6 +2905,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 67858: // Impale
             case 67859: // Impale
             case 67860: // Impale
+			case 60103: // Fouet de Lave ( Lava Lash )
             case 69293: // Wing Buffet
             case 74439: // Machine Gun
             case 63278: // Mark of the Faceless (General Vezax)

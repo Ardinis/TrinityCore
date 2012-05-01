@@ -3186,7 +3186,8 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint8 effMask)
         return NULL;
 
     Unit* caster = aura->GetCaster();
-
+    //>>>>>>>>>>>>>>>>
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "apply aura");
     AuraApplication * aurApp = new AuraApplication(this, caster, aura, effMask);
     m_appliedAuras.insert(AuraApplicationMap::value_type(aurId, aurApp));
 

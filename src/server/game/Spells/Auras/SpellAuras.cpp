@@ -72,13 +72,13 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
         {
 	  if ( GetBase()->GetId() == 32223 && slot == 4)
 	    {
-	      sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK : Aura: 32223 Effect: 0 put to unit visible auras slot: 4");
+	      sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK : caster %s Aura: 32223 Effect: 0 put to unit visible auras slot: 4", caster->GetName());
 	      return ;
 	    }
             _slot = slot;
             GetTarget()->SetVisibleAura(slot, this);
             SetNeedClientUpdate();
-            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), slot);
+            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "caster %s Aura: %u Effect: %d put to unit visible auras slot: %u", caster->GetName(), GetBase()->GetId(), GetEffectMask(), slot);
         }
         else
             sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d could not find empty unit visible slot", GetBase()->GetId(), GetEffectMask());

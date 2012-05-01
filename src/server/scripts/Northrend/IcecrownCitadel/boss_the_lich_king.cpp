@@ -1571,7 +1571,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
 		//                me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
-		me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
+		me->SetSpeed(MOVE_FLIGHT, 0.142857f, true);
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
             }
 

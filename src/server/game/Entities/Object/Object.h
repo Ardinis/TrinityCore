@@ -166,7 +166,9 @@ class Object
         uint64 GetUInt64Value(uint16 index) const
         {
 	  if (!(index + 1 < m_valuesCount || PrintIndexError(index, false)))
-	    return 0;
+	    {
+	      return 0;
+	    }
             return *((uint64*)&(m_uint32Values[index]));
         }
 

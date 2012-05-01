@@ -165,7 +165,8 @@ class Object
 
         uint64 GetUInt64Value(uint16 index) const
         {
-            ASSERT(index + 1 < m_valuesCount || PrintIndexError(index, false));
+	  if (!(index + 1 < m_valuesCount || PrintIndexError(index, false)))
+	    return 0;
             return *((uint64*)&(m_uint32Values[index]));
         }
 
@@ -533,7 +534,7 @@ class GridObject
     public:
         bool IsInGrid() const { return _gridRef.isValid(); }
         void AddToGrid(GridRefManager<T>& m) { ASSERT(!IsInGrid()); _gridRef.link(&m, (T*)this); }
-        void RemoveFromGrid() { ASSERT(IsInGrid()); _gridRef.unlink(); }
+        void RemoveFromGrid() { if (IsInGrid()) _gridRef.unlink(); }
     private:
         GridReference<T> _gridRef;
 };

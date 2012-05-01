@@ -72,13 +72,13 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
         {
 	  if ( GetBase()->GetId() == 32223 && slot == 4)
 	    {
-	      sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK : caster %s Aura: 32223 Effect: 0 put to unit visible auras slot: 4", caster->GetName());
+	      sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK : caster  Aura: 32223 Effect: 0 put to unit visible auras slot: 4");
 	      return ;
 	    }
             _slot = slot;
             GetTarget()->SetVisibleAura(slot, this);
             SetNeedClientUpdate();
-            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "caster %s Aura: %u Effect: %d put to unit visible auras slot: %u", caster->GetName(), GetBase()->GetId(), GetEffectMask(), slot);
+            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "caster  Aura: %u Effect: %d put to unit visible auras slot: %u", GetBase()->GetId(), GetEffectMask(), slot);
         }
         else
             sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura: %u Effect: %d could not find empty unit visible slot", GetBase()->GetId(), GetEffectMask());
@@ -576,19 +576,23 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
                     itr->first->GetName(), itr->first->IsInWorld() ? itr->first->GetMap()->GetId() : uint32(-1));
                 ASSERT(false);
             }
+	    //////////////////////////////////
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 580");
             itr->first->_CreateAuraApplication(this, itr->second);
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 582");
             ++itr;
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 584");
         }
     }
-
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 587");
     // remove auras from units no longer needing them
     for (UnitList::iterator itr = targetsToRemove.begin(); itr != targetsToRemove.end();++itr)
         if (AuraApplication * aurApp = GetApplicationOfTarget((*itr)->GetGUID()))
             (*itr)->_UnapplyAura(aurApp, AURA_REMOVE_BY_DEFAULT);
-
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 592");
     if (!apply)
         return;
-
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 595");
     // apply aura effects for units
     for (std::map<Unit*, uint8>::iterator itr = targets.begin(); itr!= targets.end();++itr)
     {
@@ -596,9 +600,11 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
         {
             // owner has to be in world, or effect has to be applied to self
             ASSERT((!GetOwner()->IsInWorld() && GetOwner() == itr->first) || GetOwner()->IsInMap(itr->first));
+	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 603");
             itr->first->_ApplyAura(aurApp, itr->second);
         }
     }
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 605");
 }
 
 // targets have to be registered and not have effect applied yet to use this function

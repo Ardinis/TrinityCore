@@ -34,7 +34,7 @@ endif()
 
 if(_GIT_VERSION_OK)
   execute_process(
-    COMMAND "${_GIT_EXEC}" describe --match init --dirty=+ --abbrev=12
+    COMMAND "${_GIT_EXEC}" describe --match v3 --dirty=+ --abbrev=12
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE rev_info
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -60,10 +60,9 @@ if(NOT rev_info)
   message(STATUS "WARNING - Missing repository tags - you may need to pull tags with git fetch -t")
   message(STATUS "WARNING - Continuing anyway - note that the versionstring will be set to 0000-00-00 00:00:00 (Archived)")
   set(rev_date "0000-00-00 00:00:00 +0000")
-  set(rev_hash "Archived")
+  set(rev_info "Archived")
 else()
   # Extract information required to build a proper versionstring
-  string(REGEX REPLACE init-|[0-9]+-g "" rev_hash ${rev_info})
 endif()
 
 # Its not set during initial run
@@ -72,11 +71,8 @@ if(NOT BUILDDIR)
 endif()
 
 # Create the actual revision.h file from the above params
-if(NOT "${rev_hash_cached}" MATCHES "${rev_hash}")
-  configure_file(
-    "${CMAKE_SOURCE_DIR}/revision.h.in.cmake"
-    "${BUILDDIR}/revision.h"
-    @ONLY
-  )
-  set(rev_hash_cached "${rev_hash}" CACHE INTERNAL "Cached commit-hash")
-endif()
+configure_file(
+  "${CMAKE_SOURCE_DIR}/revision.h.in.cmake"
+  "${BUILDDIR}/revision.h"
+  @ONLY
+)

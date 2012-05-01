@@ -793,7 +793,9 @@ void Object::SetInt32Value(uint16 index, int32 value)
 
 void Object::SetUInt32Value(uint16 index, uint32 value)
 {
-    ASSERT(index < m_valuesCount || PrintIndexError(index, true));
+  //    ASSERT(index < m_valuesCount || PrintIndexError(index, true));
+  if (!(index < m_valuesCount || PrintIndexError(index, true)))
+	return ;
 
     if (m_uint32Values[index] != value)
     {

@@ -16,7 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "AnticheatMgr.h"
 #include "Common.h"
 #include "CreatureAIImpl.h"
 #include "Log.h"
@@ -6634,40 +6633,27 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 break;
             }
             // Light's Beacon - Beacon of Light
-			if (dummySpell->Id == 53651)
-			{		
-                Unit* beaconTarget = NULL;
-                Group *pGroup = NULL;
-                pGroup = this->ToPlayer()->GetGroup();
-
-                // Check Party/Raid Group
-                if(pGroup)
+            if (dummySpell->Id == 53651)
+            {
+                // Get target of beacon of light
+                if (Unit* beaconTarget = triggeredByAura->GetBase()->GetCaster())
                 {
-                    for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                    // do not proc when target of beacon of light is healed
+                    if (beaconTarget == this)
+                        return false;
+                    // check if it was heal by paladin which casted this beacon of light
+                    if (beaconTarget->GetAura(53563, victim->GetGUID()))
                     {
-                        Player* Member = itr->getSource();
-
-                        // check if it was heal by paladin which casted this beacon of light
-                        if(Aura const * aura = Member->GetAura(53563, victim->GetGUID()))
+                        if (beaconTarget->IsWithinLOSInMap(victim))
                         {
-                            beaconTarget = Member;
-
-                            // do not proc when target of beacon of light is healed
-                            if(beaconTarget == this)
-                                return false;
-
-                            basepoints0 = int32(damage);
-                            triggered_spell_id = 53652;
-                            victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
-                            break;
+                            basepoints0 = damage;
+                            victim->CastCustomSpell(beaconTarget, 53654, &basepoints0, NULL, NULL, true);
+                            return true;
                         }
                     }
                 }
-                else
-                    return false;
-
-                return true;
-			}
+                return false;
+            }
             // Judgements of the Wise
             if (dummySpell->SpellIconID == 3017)
             {
@@ -12594,9 +12580,6 @@ void Unit::SetVisible(bool x)
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 {
-    //if (this->ToPlayer())
-    //    sAnticheatMgr->DisableAnticheatDetection(this->ToPlayer());
-
     int32 main_speed_mod  = 0;
     float stack_bonus     = 1.0f;
     float non_stack_bonus = 1.0f;
@@ -12667,7 +12650,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     }
 
     // now we ready for speed calculation
-    if ((GetTypeId() == TYPEID_PLAYER) && (getClass() == CLASS_PALADIN) && ((mtype == MOVE_RUN) || (mtype == MOVE_FLIGHT)) && IsMounted())
+    /*    if ((GetTypeId() == TYPEID_PLAYER) && (getClass() == CLASS_PALADIN) && ((mtype == MOVE_RUN) || (mtype == MOVE_FLIGHT)) && IsMounted())
       {
 	// only mounted player paladins - running or flying
 	int32 modifier = 0;
@@ -12685,7 +12668,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 	    if (poj_bonus > non_stack_bonus)
 	      non_stack_bonus = poj_bonus;
 	  }
-      }
+	  }*/
     float speed = std::max(non_stack_bonus, stack_bonus);
     if (main_speed_mod)
         AddPctN(speed, main_speed_mod);
@@ -16742,9 +16725,6 @@ void Unit::UpdateObjectVisibility(bool forced)
 
 void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
 {
-    //if (this->ToPlayer())
-    //    sAnticheatMgr->DisableAnticheatDetection(this->ToPlayer());
-
     Player* player = NULL;
     if (GetTypeId() == TYPEID_PLAYER)
         player = (Player*)this;

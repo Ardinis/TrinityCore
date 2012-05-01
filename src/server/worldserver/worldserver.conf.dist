@@ -91,6 +91,8 @@ LogsDir = ""
 LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
 WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
 CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
+WebDatabaseInfo       = "127.0.0.1;3306;trinity;trinity;characters"
+StoreDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;characters"
 
 #
 #    LoginDatabase.WorkerThreads
@@ -106,6 +108,8 @@ CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
 LoginDatabase.WorkerThreads     = 1
 WorldDatabase.WorkerThreads     = 1
 CharacterDatabase.WorkerThreads = 1
+WebDatabase.WorkerThreads 	= 1
+StoreDatabase.WorkerThreads 	= 1
 
 #
 #    LoginDatabase.SynchThreads
@@ -119,6 +123,8 @@ CharacterDatabase.WorkerThreads = 1
 LoginDatabase.SynchThreads     = 1
 WorldDatabase.SynchThreads     = 1
 CharacterDatabase.SynchThreads = 2
+WebDatabase.SynchThreads       = 2
+StoreDatabase.SynchThreads     = 2
 
 #
 #    MaxPingTime
@@ -2251,9 +2257,9 @@ Rate.MoveSpeed = 1
 
 #
 #    Rate.InstanceResetTime
-#        Description: Multiplier for the rate between global raid/heroic instance resets 
-#                     (dbc value). Higher value increases the time between resets, 
-#                     lower value lowers the time, you need clean instance_reset in 
+#        Description: Multiplier for the rate between global raid/heroic instance resets
+#                     (dbc value). Higher value increases the time between resets,
+#                     lower value lowers the time, you need clean instance_reset in
 #                     characters db in order to let new values work.
 #        Default:     1
 
@@ -2863,40 +2869,6 @@ LevelReq.Auction = 1
 #        Default:     1
 
 LevelReq.Mail = 1
-
-#
-#     Anticheat.Enable
-#        Description: Enables or disables the Anticheat System functionality
-#        Default:     1 - (Enabled)
-#                     0 - (Disabled)
-
-Anticheat.Enable = 1
-
-#     Anticheat.ReportsForIngameWarnings
-#        Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.
-#        Default:     70
-
-Anticheat.ReportsForIngameWarnings = 70
-
-#     Anticheat.DetectionsEnabled
-#        Description: It represents which detections are enabled.
-#
-#        SPEED_HACK_DETECTION            = 1
-#        FLY_HACK_DETECTION              = 2
-#        WALK_WATER_HACK_DETECTION       = 4
-#        JUMP_HACK_DETECTION             = 8
-#        TELEPORT_PLANE_HACK_DETECTION   = 16
-#        CLIMB_HACK_DETECTION            = 32
-#
-#        Default:     31
-
-Anticheat.DetectionsEnabled = 31
-
-#     Anticheat.MaxReportsForDailyReport
-#        Description: How many reports must the player have to make a report that it is in DB for a day (not only during the player's session).
-#        Default:     70
-
-Anticheat.MaxReportsForDailyReport = 70
 
 #
 #     PlayerDump.DisallowPaths

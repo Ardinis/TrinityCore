@@ -340,6 +340,13 @@ ChatCommand* ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                               "", NULL }
     };
 
+    static ChatCommand diamondCommandTable[] =
+    {
+      { "info",SEC_PLAYER,false, OldHandler<&ChatHandler::HandleDiamondInfoCommand>,"", NULL },
+      { "level",SEC_PLAYER,false, OldHandler<&ChatHandler::HandleDiamondLevelCommand>,"", NULL },
+      { NULL,0,false, NULL,"", NULL },
+    };
+
     static ChatCommand commandTable[] =
     {
         { "character",      SEC_GAMEMASTER,     true,  NULL,                                           "", characterCommandTable},
@@ -399,7 +406,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "neargrave",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleNearGraveCommand>,           "", NULL },
         { "explorecheat",   SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleExploreCheatCommand>,        "", NULL },
         { "hover",          SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleHoverCommand>,               "", NULL },
-        { "levelup",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleLevelUpCommand>,             "", NULL },
+        { "levelup",        SEC_ADMINISTRATOR,  true, OldHandler<&ChatHandler::HandleLevelUpCommand>,             "", NULL },
         { "showarea",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleShowAreaCommand>,            "", NULL },
         { "hidearea",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleHideAreaCommand>,            "", NULL },
         { "additem",        SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleAddItemCommand>,             "", NULL },
@@ -432,6 +439,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "unbindsight",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnbindSightCommand>,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
         { "wg",             SEC_ADMINISTRATOR,  false, NULL,                                 "", wintergraspCommandTable },
+	{ "diamond",        SEC_PLAYER,         false, NULL,                                           "", diamondCommandTable },
+	{ "recup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleRecupCommand>,              "", NULL},
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 

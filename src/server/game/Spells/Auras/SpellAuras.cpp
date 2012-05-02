@@ -70,11 +70,6 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
         // Register Visible Aura
         if (slot < MAX_AURAS)
         {
-	  if ( GetBase()->GetId() == 32223 && slot == 4)
-	    {
-	      sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK : caster  Aura: 32223 Effect: 0 put to unit visible auras slot: 4");
-	      return ;
-	    }
             _slot = slot;
             GetTarget()->SetVisibleAura(slot, this);
             SetNeedClientUpdate();
@@ -580,22 +575,16 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
                 ASSERT(false);
             }
 	    //////////////////////////////////
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 580");
             itr->first->_CreateAuraApplication(this, itr->second);
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 582");
             ++itr;
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 584");
         }
     }
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 587");
     // remove auras from units no longer needing them
     for (UnitList::iterator itr = targetsToRemove.begin(); itr != targetsToRemove.end();++itr)
         if (AuraApplication * aurApp = GetApplicationOfTarget((*itr)->GetGUID()))
             (*itr)->_UnapplyAura(aurApp, AURA_REMOVE_BY_DEFAULT);
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 592");
     if (!apply)
         return;
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 595");
     // apply aura effects for units
     for (std::map<Unit*, uint8>::iterator itr = targets.begin(); itr!= targets.end();++itr)
     {

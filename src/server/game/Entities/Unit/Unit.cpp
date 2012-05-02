@@ -3220,37 +3220,45 @@ void Unit::_ApplyAuraEffect(Aura* aura, uint8 effIndex)
 // should be done after registering aura in lists
 void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask)
 {
+  ///////////////////
     Aura* aura = aurApp->GetBase();
-
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L3225");
     _RemoveNoStackAurasDueToAura(aura);
 
     if (aurApp->GetRemoveMode())
+      {
+	sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32230");
         return;
-
+      }
     // Update target aura state flag
     if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState())
         ModifyAuraState(aState, true);
-
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32236");
     if (aurApp->GetRemoveMode())
+      {
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32239");
         return;
-
+      }
     // Sitdown on apply aura req seated
     if (aura->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED && !IsSitState())
         SetStandState(UNIT_STAND_STATE_SIT);
-
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32245");
     Unit* caster = aura->GetCaster();
 
     if (aurApp->GetRemoveMode())
+      {
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32250");
         return;
-
+      }
     aura->HandleAuraSpecificMods(aurApp, caster, true, false);
-
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32254");
     // apply effects of the aura
     for (uint8 i = 0 ; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (effMask & 1 << i && (!aurApp->GetRemoveMode()) && !IsImmunedToSpellEffect(aura->GetSpellInfo(), i))
             aurApp->_HandleEffect(i, true);
     }
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32261");
 }
 
 // removes aura application from lists and unapplies effects

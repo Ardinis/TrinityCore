@@ -239,6 +239,26 @@ class boss_blood_council_controller : public CreatureScript
                     _invocationOrder[1] = InvocationData(instance->GetData64(DATA_PRINCE_KELESETH_GUID), SPELL_INVOCATION_OF_BLOOD_KELESETH, EMOTE_KELESETH_INVOCATION, 71080);
                     _invocationOrder[2] = InvocationData(instance->GetData64(DATA_PRINCE_TALDARAM_GUID), SPELL_INVOCATION_OF_BLOOD_TALDARAM, EMOTE_TALDARAM_INVOCATION, 71081);
                 }
+
+		if (IsHeroic())
+		  {
+		    const Map::PlayerList &PlayerList = me->GetMap()->GetPlayers();
+		    if (PlayerList.isEmpty())
+                        return;
+
+                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                    {
+                        if (Player* player = i->getSource())
+                        {
+                           if (player->isGameMaster())
+                                continue;
+
+                            if (player->isAlive())
+                                player->AddAura(SPELL_SHADOW_PRISON_DUMMY, player);
+                        }
+		    }
+		  }
+
             }
 
             void SetData(uint32 /*type*/, uint32 data)
@@ -278,6 +298,7 @@ class boss_blood_council_controller : public CreatureScript
                         killer->Kill(prince);
                     }
                 }
+		instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SHADOW_PRISON_DUMMY);
             }
 
             void UpdateAI(uint32 const diff)

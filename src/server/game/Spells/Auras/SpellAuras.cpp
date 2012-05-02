@@ -613,11 +613,11 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
         {
             // owner has to be in world, or effect has to be applied to self
             ASSERT((!GetOwner()->IsInWorld() && GetOwner() == itr->first) || GetOwner()->IsInMap(itr->first));
-	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 603");
+	    //	    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 603");
             itr->first->_ApplyAura(aurApp, itr->second);
         }
     }
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 605");
+    //    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "SPELLAURA.CPP LINE 605");
 }
 
 // targets have to be registered and not have effect applied yet to use this function

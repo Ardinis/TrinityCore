@@ -3187,7 +3187,7 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint8 effMask)
 
     Unit* caster = aura->GetCaster();
     //>>>>>>>>>>>>>>>>
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "apply aura");
+    //sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "apply aura");
     AuraApplication * aurApp = new AuraApplication(this, caster, aura, effMask);
     m_appliedAuras.insert(AuraApplicationMap::value_type(aurId, aurApp));
 
@@ -3222,43 +3222,53 @@ void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask)
 {
   ///////////////////
     Aura* aura = aurApp->GetBase();
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L3225");
+    if (!aura)
+      return ;
+    //    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L3225");
     _RemoveNoStackAurasDueToAura(aura);
 
     if (aurApp->GetRemoveMode())
       {
-	sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32230");
+	//	sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32230");
         return;
       }
     // Update target aura state flag
     if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState())
         ModifyAuraState(aState, true);
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32236");
+    // sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32236");
     if (aurApp->GetRemoveMode())
       {
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32239");
+	//sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32239");
         return;
       }
     // Sitdown on apply aura req seated
     if (aura->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED && !IsSitState())
         SetStandState(UNIT_STAND_STATE_SIT);
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32245");
-    Unit* caster = aura->GetCaster();
 
+    if (!aura)
+      return ;
+
+    Unit* caster = aura->GetCaster();
+    if (!caster)
+      {
+	sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK UNIT.CPP L 3254 :  Unit* caster = aura->GetCaster() is NULL");
+	return ;
+      }
     if (aurApp->GetRemoveMode())
       {
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32250");
+	//sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32250");
         return;
       }
+    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32259");
     aura->HandleAuraSpecificMods(aurApp, caster, true, false);
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32254");
+    //sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32254");
     // apply effects of the aura
     for (uint8 i = 0 ; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (effMask & 1 << i && (!aurApp->GetRemoveMode()) && !IsImmunedToSpellEffect(aura->GetSpellInfo(), i))
             aurApp->_HandleEffect(i, true);
     }
-    sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32261");
+    //sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32261");
 }
 
 // removes aura application from lists and unapplies effects
@@ -3271,6 +3281,8 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 
     aurApp->SetRemoveMode(removeMode);
     Aura* aura = aurApp->GetBase();
+    if (!aura)
+      return ;
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura %u now is remove mode %d", aura->GetId(), removeMode);
 
     // dead loop is killing the server probably
@@ -3279,7 +3291,6 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     ++m_removedAurasCount;
 
     Unit* caster = aura->GetCaster();
-
     // Remove all pointers from lists here to prevent possible pointer invalidation on spellcast/auraapply/auraremove
     m_appliedAuras.erase(i);
 
@@ -3310,6 +3321,11 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     }
 
     aurApp->_Remove();
+    if (!caster)
+      {
+	sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK UNIT.CPP L 3326 :  Unit* caster = aura->GetCaster() is NULL");
+	return ;
+      }
     aura->_UnapplyForTarget(this, caster, aurApp);
 
     // remove effects of the spell - needs to be done after removing aura from lists
@@ -8023,10 +8039,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             {
                 *handled = true;
                 // Check if we are the target and prevent mana gain
-                if (triggeredByAura->GetCasterGUID() == victim->GetGUID())
+                if (victim && triggeredByAura->GetCasterGUID() == victim->GetGUID())
                     return false;
                 // Lookup base amount mana restore
-                for (uint8 i = 0; i<MAX_SPELL_EFFECTS; i++)
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
                 {
                     if (procSpell->Effects[i].Effect == SPELL_EFFECT_ENERGIZE)
                     {
@@ -15552,14 +15568,6 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     if (!victim->GetHealth())
         return;
 
-    // Inform pets (if any) when player kills target)
-    if (Player* player = ToPlayer())
-    {
-        Pet* pet = player->GetPet();
-        if (pet && pet->isAlive() && pet->isControlled())
-            pet->AI()->KilledUnit(victim);
-    }
-
     // find player: owner of controlled `this` or `this` itself maybe
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
     Creature* creature = victim->ToCreature();
@@ -15688,6 +15696,15 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         victim->setDeathState(JUST_DIED);
     }
 
+    // Inform pets (if any) when player kills target)
+    // MUST come after victim->setDeathState(JUST_DIED); or pet next target
+    // selection will get stuck on same target and break pet react state
+    if (Player* player = ToPlayer())
+    {
+       Pet* pet = player->GetPet();
+       if (pet && pet->isAlive() && pet->isControlled())
+            pet->AI()->KilledUnit(victim);
+   }
     // 10% durability loss on death
     // clean InHateListOf
     if (Player* plrVictim = victim->ToPlayer())
@@ -17622,7 +17639,13 @@ bool CharmInfo::IsCommandAttack()
 
 void CharmInfo::SaveStayPosition()
 {
-    m_unit->GetPosition(m_stayX, m_stayY, m_stayZ);
+      m_unit->GetPosition(m_stayX, m_stayY, m_stayZ);
+  //! At this point a new spline destination is enabled because of Unit::StopMoving()
+
+  /*  G3D::Vector3 const stayPos = m_unit->movespline->FinalDestination();
+    m_stayX = stayPos.x;
+    m_stayY = stayPos.y;
+    m_stayZ = stayPos.z;*/
 }
 
 void CharmInfo::GetStayPosition(float &x, float &y, float &z)

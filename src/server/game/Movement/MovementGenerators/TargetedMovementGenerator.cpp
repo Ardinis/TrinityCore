@@ -39,14 +39,15 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &unit)
 
     float x, y, z;
 
-    if (i_offset && i_target->IsWithinDistInMap(&unit,2*i_offset))
+    /*    if (i_offset && i_target->IsWithinDistInMap(&unit,2*i_offset))
     {
         if (!unit.movespline->Finalized())
             return;
 
         unit.GetPosition(x, y, z);
     }
-    else if (!i_offset)
+    else*/
+    if (!i_offset)
     {
         if (i_target->IsWithinMeleeRange(&unit))
             return;

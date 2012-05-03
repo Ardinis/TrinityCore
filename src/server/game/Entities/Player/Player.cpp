@@ -20312,6 +20312,9 @@ void Player::RestoreSpellMods(Spell* spell, uint32 ownerAuraId, Aura* aura)
             if (iterMod == spell->m_appliedMods.end())
                 continue;
 
+	    // secondly, check if the current mod is one of the spellmods applied by the mod aura
+            if (!(mod->mask & spell->m_spellInfo->SpellFamilyFlags))
+                continue;
             // remove from list
             spell->m_appliedMods.erase(iterMod);
 

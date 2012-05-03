@@ -35,8 +35,8 @@ void HomeMovementGenerator<Creature>::Reset(Creature &)
 
 void HomeMovementGenerator<Creature>::_setTargetLocation(Creature &unit)
 {
-    if (!&unit)
-        return;
+      if (!&unit)
+       return;
 
     if (unit.HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED))
         return;

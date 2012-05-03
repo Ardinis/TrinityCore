@@ -241,7 +241,7 @@ void FlightPathMovementGenerator::Reset(Player &unit)
     init.Launch();
 }
 
-bool FlightPathMovementGenerator::Update(Player &unit, const uint32 /*diff*/)
+bool FlightPathMovementGenerator::Update(Player &unit, const uint32& /*diff*/)
 {
     uint32 pointId = (uint32)unit.movespline->currentPathIdx();
     if (pointId > i_currentNode)

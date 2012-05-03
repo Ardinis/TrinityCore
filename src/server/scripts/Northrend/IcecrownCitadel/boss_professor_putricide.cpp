@@ -555,20 +555,21 @@ class boss_professor_putricide : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-		if (_phase != PHASE_COMBAT_3)
-		  {
-		    if (uiUnstableExperiment <= diff)
-		      {
-			std::cout << "unstable expermiment gogogo" << std::endl;
-			Talk(EMOTE_UNSTABLE_EXPERIMENT);
-			DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
-			uiUnstableExperiment = urand(35000, 40000);
-		      }
-		    else uiUnstableExperiment -= diff;
-
-		  }
                 while (uint32 eventId = events.ExecuteEvent())
                 {
+
+		  if (_phase != PHASE_COMBAT_3)
+		    {
+		      if (uiUnstableExperiment <= diff)
+			{
+			  std::cout << "unstable expermiment gogogo" << std::endl;
+			  Talk(EMOTE_UNSTABLE_EXPERIMENT);
+			  DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
+			  uiUnstableExperiment = urand(35000, 40000);
+			}
+		      else uiUnstableExperiment -= diff;
+		    }
+
                     switch (eventId)
                     {
                         case EVENT_FESTERGUT_DIES:

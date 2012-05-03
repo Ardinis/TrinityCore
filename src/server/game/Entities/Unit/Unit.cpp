@@ -3245,15 +3245,15 @@ void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask)
     if (aura->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED && !IsSitState())
         SetStandState(UNIT_STAND_STATE_SIT);
 
-    if (!aura)
-      return ;
+    //    if (!aura)
+    //  return ;
 
     Unit* caster = aura->GetCaster();
-    if (!caster)
+    /*    if (!caster)
       {
 	sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK UNIT.CPP L 3254 :  Unit* caster = aura->GetCaster() is NULL");
 	return ;
-      }
+	}*/
     if (aurApp->GetRemoveMode())
       {
 	//sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32250");
@@ -3281,8 +3281,8 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 
     aurApp->SetRemoveMode(removeMode);
     Aura* aura = aurApp->GetBase();
-    if (!aura)
-      return ;
+    //    if (!aura)
+    //  return ;
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Aura %u now is remove mode %d", aura->GetId(), removeMode);
 
     // dead loop is killing the server probably
@@ -3321,11 +3321,11 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     }
 
     aurApp->_Remove();
-    if (!caster)
+    /*    if (!caster)
       {
 	sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK UNIT.CPP L 3326 :  Unit* caster = aura->GetCaster() is NULL");
 	return ;
-      }
+	}*/
     aura->_UnapplyForTarget(this, caster, aurApp);
 
     // remove effects of the spell - needs to be done after removing aura from lists

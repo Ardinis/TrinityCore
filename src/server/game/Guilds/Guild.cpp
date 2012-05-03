@@ -1616,8 +1616,8 @@ void Guild::HandleRemoveLowestRank(WorldSession* session)
 
 void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 {
-    if (!_GetPurchasedTabsSize())
-        return;                                                     // No guild bank tabs - no money in bank
+  //    if (!_GetPurchasedTabsSize())
+  //     return;                                                     // No guild bank tabs - no money in bank
 
     Player* player = session->GetPlayer();
 
@@ -1649,8 +1649,8 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
 
 bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
 {
-    if (!_GetPurchasedTabsSize())
-        return false;                                       // No guild bank tabs - no money
+  //    if (!_GetPurchasedTabsSize())
+  //     return false;                                       // No guild bank tabs - no money
 
     if (m_bankMoney < amount)                               // Not enough money in bank
         return false;

@@ -4801,9 +4801,14 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (playerCaster->GetSession() && condInfo.mLastFailedCondition
                     && condInfo.mLastFailedCondition->ErrorTextId)
+		  {
                     playerCaster->GetSession()->SendNotification(condInfo.mLastFailedCondition->ErrorTextId);
+		    return SPELL_FAILED_DONT_REPORT;
+		  }
             }
-            return SPELL_FAILED_DONT_REPORT;
+	    if (!condInfo.mLastFailedCondition || !condInfo.mLastFailedCondition->ConditionTarget)
+	      return SPELL_FAILED_CASTER_AURASTATE;
+	    return SPELL_FAILED_BAD_TARGETS;
         }
     }
 

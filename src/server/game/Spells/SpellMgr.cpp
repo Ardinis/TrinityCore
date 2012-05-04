@@ -3618,7 +3618,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case SPELLFAMILY_DRUID:
                 // Starfall Target Selection
-                if (spellInfo->SpellFamilyFlags[2] & 0x100)
+                if (spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
                     spellInfo->MaxAffectedTargets = 2;
                 break;
             case SPELLFAMILY_PALADIN:

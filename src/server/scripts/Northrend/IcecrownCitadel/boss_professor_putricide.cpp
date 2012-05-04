@@ -272,6 +272,7 @@ class boss_professor_putricide : public CreatureScript
                 switch (summon->GetEntry())
                 {
                     case NPC_GROWING_OOZE_PUDDLE:
+
 		      summon->CastSpell(summon, SPELL_GROW_STACKER, true);
 		      summon->CastSpell(summon, SPELL_SLIME_PUDDLE_AURA, true);
 			//			summon->SetVisible(false);
@@ -281,6 +282,7 @@ class boss_professor_putricide : public CreatureScript
                         break;
                     case NPC_GAS_CLOUD:
                         // no possible aura seen in sniff adding the aurastate
+		      // summon->AI()->DoTeleportTo(4325.39f, 3214.71f, 391.0f, 5.65f);
                         summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
                         summon->CastSpell(summon, SPELL_GASEOUS_BLOAT_PROC, true);
@@ -289,6 +291,7 @@ class boss_professor_putricide : public CreatureScript
                         return;
                     case NPC_VOLATILE_OOZE:
                         // no possible aura seen in sniff adding the aurastate
+		      // summon->AI()->DoTeleportTo( 4390.10f, 3214.70f, 391.0f, 3.82f);
                         summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
                         summon->CastSpell(summon, SPELL_OOZE_ERUPTION_SEARCH_PERIODIC, true);
@@ -750,7 +753,7 @@ class npc_volatile_ooze : public CreatureScript
                     return;
 
                 Unit* victim = me->getVictim();
-                
+
                 if (victim && victim->IsWithinDistInMap(me, 1.0f) && victim->HasAura(SPELL_VOLATILE_OOZE_ADHESIVE) && victim->isAlive())
                 {
                     DoCast(me, SPELL_OOZE_ERUPTION);

@@ -3390,7 +3390,7 @@ public:
         vehicle_knight_gryphonAI(Creature *c) : VehicleAI(c) 
         {
             MovingStarted = false;
-            curPoint = 0;
+            curPoint = 8;
         }
 
         uint8 curPoint;
@@ -3399,7 +3399,7 @@ public:
         void UpdateAI(const uint32 diff)
         {
             if (!MovingStarted) {
-                me->GetMotionMaster()->MovePoint(curPoint,movePosition[curPoint]);
+                me->GetMotionMaster()->MovePoint(curPoint,movePosition[8]);
                 MovingStarted = true;
             } else
                 if (me->GetDistance(movePosition[curPoint]) <= 5.0f)

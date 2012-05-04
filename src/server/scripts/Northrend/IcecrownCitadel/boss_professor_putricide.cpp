@@ -556,7 +556,7 @@ class boss_professor_putricide : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-		  if (_phase != PHASE_COMBAT_3 && start)
+		/*		  if (_phase != PHASE_COMBAT_3 && start)
 		    {
 		      if (uiUnstableExperiment <= diff)
 			{
@@ -565,7 +565,7 @@ class boss_professor_putricide : public CreatureScript
 			  uiUnstableExperiment = urand(35000, 40000);
 			}
 		      else uiUnstableExperiment -= diff;
-		    }
+		      }*/
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {

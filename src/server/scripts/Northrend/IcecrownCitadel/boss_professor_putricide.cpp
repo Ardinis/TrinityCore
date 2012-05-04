@@ -189,7 +189,7 @@ class boss_professor_putricide : public CreatureScript
                 if (!(events.GetPhaseMask() & PHASE_MASK_NOT_SELF))
                     instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, NOT_STARTED);
                 instance->SetData(DATA_NAUSEA_ACHIEVEMENT, uint32(true));
-
+		start = false;
                 events.Reset();
                 summons.DespawnAll();
                 SetPhase(PHASE_COMBAT_1);
@@ -315,6 +315,7 @@ class boss_professor_putricide : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
+	      start = true;
                 switch (_phase)
                 {
                     case PHASE_COMBAT_1:
@@ -558,20 +559,20 @@ class boss_professor_putricide : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-		if (_phase != PHASE_COMBAT_3)
-		  {
-		    if (uiUnstableExperiment <= diff)
-		      {
-			std::cout << "unstable expermiment gogogo" << std::endl;
-			Talk(EMOTE_UNSTABLE_EXPERIMENT);
-			DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
-			uiUnstableExperiment = urand(35000, 40000);
-		      }
-		    else uiUnstableExperiment -= diff;
+		/*		  if (_phase != PHASE_COMBAT_3 && start)
+		    {
+		      if (uiUnstableExperiment <= diff)
+			{
+			  Talk(EMOTE_UNSTABLE_EXPERIMENT);
+			  DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
+			  uiUnstableExperiment = urand(35000, 40000);
+			}
+		      else uiUnstableExperiment -= diff;
+		      }*/
 
-		  }
                 while (uint32 eventId = events.ExecuteEvent())
                 {
+
                     switch (eventId)
                     {
                         case EVENT_FESTERGUT_DIES:
@@ -721,6 +722,7 @@ class boss_professor_putricide : public CreatureScript
             uint8 _oozeFloodStage;
             bool _experimentState;
 	  uint64 uiUnstableExperiment;
+	  bool start;
         };
 
         CreatureAI* GetAI(Creature* creature) const

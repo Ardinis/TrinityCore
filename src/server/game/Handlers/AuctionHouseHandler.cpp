@@ -319,7 +319,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
 
                     SQLTransaction trans = CharacterDatabase.BeginTransaction();
                     item->DeleteFromInventoryDB(trans);
-                    item->SaveToDB(trans);
+                    item->DeleteFromDB(trans);
                     CharacterDatabase.CommitTransaction(trans);
                 }
                 else

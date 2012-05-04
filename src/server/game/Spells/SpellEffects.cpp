@@ -1380,6 +1380,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 if (m_caster->HasUnitState(UNIT_STATE_CONTROLLED))
                     return;
 
+				if (!m_caster->IsWithinLOSInMap(unitTarget))
+					return;
+
                 m_caster->CastSpell(unitTarget, damage, true);
                 return;
             }

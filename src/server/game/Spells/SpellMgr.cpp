@@ -2905,6 +2905,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 67858: // Impale
             case 67859: // Impale
             case 67860: // Impale
+			case 60103: // Fouet de Lave ( Lava Lash )
             case 69293: // Wing Buffet
             case 74439: // Machine Gun
             case 63278: // Mark of the Faceless (General Vezax)
@@ -3617,7 +3618,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case SPELLFAMILY_DRUID:
                 // Starfall Target Selection
-                if (spellInfo->SpellFamilyFlags[2] & 0x100)
+                if (spellInfo->SpellFamilyFlags[2] & SPELLFAMILYFLAG2_DRUID_STARFALL)
                     spellInfo->MaxAffectedTargets = 2;
                 break;
             case SPELLFAMILY_PALADIN:

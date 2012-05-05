@@ -3492,24 +3492,25 @@ public:
 
     void JustDied(Unit* killer)
     {
-      if (!killer->ToPlayer())
-	return ;
-      if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE))
-	if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
-	  return ;
-      if (bjaloot)
-	{
-	  std::cout << killer->ToPlayer()->GetReputation(1104) << std::endl;
-	  if (killer->ToPlayer()->GetReputation(1104) < 14000)
-	    killer->ToPlayer()->SetReputation(1104, 14000);
-	}
-      else if (bzepiv)
-	{
-	  std::cout << killer->ToPlayer()->GetReputation(1105) << std::endl;
-	  if (killer->ToPlayer()->GetReputation(1105) < 14000)
-	    killer->ToPlayer()->SetReputation(1105, 14000);
-	}
-      Summons.DespawnAll();
+		if (!killer->ToPlayer())
+		return ;
+		if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE))
+			if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
+			return ;
+		if (bjaloot)
+		{
+			std::cout << killer->ToPlayer()->GetReputation(1104) << std::endl;
+			if (killer->ToPlayer()->GetReputation(1104) < 14000)
+				killer->ToPlayer()->SetReputation(1104, 14000);
+		}
+		else if (bzepiv)
+		{
+			std::cout << killer->ToPlayer()->GetReputation(1105) << std::endl;
+			if (killer->ToPlayer()->GetReputation(1105) < 14000)
+				killer->ToPlayer()->SetReputation(1105, 14000);
+		}
+		me->SummonGameObject(190777, 5619.5f, 3775.12f, -94.64f, 0.047f, 0.0f, 0.0f, 0.0f, 0.0f, 180000);  //despawn apres 3 minutes apres pop.
+		Summons.DespawnAll();
     }
 
 

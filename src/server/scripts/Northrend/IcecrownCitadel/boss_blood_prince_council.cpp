@@ -420,11 +420,11 @@ class boss_prince_keleseth_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_SHADOW_RESONANCE, urand(10000, 15000));
                 events.ScheduleEvent(EVENT_SHADOW_LANCE, 2000);
 
-                if (IsHeroic())
+		/*                if (IsHeroic())
                 {
                     me->AddAura(SPELL_SHADOW_PRISON, me);
                     DoCast(me, SPELL_SHADOW_PRISON_DUMMY);
-                }
+		    }*/
             }
 
             void JustDied(Unit* /*killer*/)
@@ -648,8 +648,8 @@ class boss_prince_taldaram_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_GLITTERING_SPARKS, urand(12000, 15000));
                 events.ScheduleEvent(EVENT_CONJURE_FLAME, 20000);
-                if (IsHeroic())
-                    me->AddAura(SPELL_SHADOW_PRISON, me);
+		// if (IsHeroic())
+		//  me->AddAura(SPELL_SHADOW_PRISON, me);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -872,8 +872,8 @@ class boss_prince_valanar_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_KINETIC_BOMB,  RAID_MODE<uint32>(urand(28000, 30000), urand(18000, 24000), urand(28000, 30000), urand(18000, 24000)));
                 events.ScheduleEvent(EVENT_SHOCK_VORTEX, urand(15000, 20000));
-                if (IsHeroic())
-                    me->AddAura(SPELL_SHADOW_PRISON, me);
+                //if (IsHeroic())
+		//  me->AddAura(SPELL_SHADOW_PRISON, me);
             }
 
             void JustDied(Unit* /*killer*/)

@@ -687,7 +687,7 @@ public:
                     pReal->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     instance->SetData(TYPE_COUNTER, 0);
                 }
-            me->ForcedDespawn();
+            me->DespawnOrUnsummon();
         }
 
         void KilledUnit(Unit* pVictim)
@@ -717,7 +717,7 @@ public:
 
             if (!instance)
             {
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
                     return;
             }
 
@@ -727,7 +727,7 @@ public:
                     if (!pReal->isAlive())
                         pReal->Respawn();
 
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
             }
 
             if (!UpdateVictim())
@@ -922,13 +922,13 @@ public:
         {
             if (!instance)
             {
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
                 return;
             }
 
             if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
             {
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
                 return;
             }
 
@@ -941,7 +941,7 @@ public:
                     {
                         instance->SetData(TYPE_HALION_EVENT, FAIL);
                         instance->SetData(TYPE_HALION, FAIL);
-                        me->ForcedDespawn();
+                        me->DespawnOrUnsummon();
                     } else m_detectplayers = false;
                 } else m_detectplayers = true;
 
@@ -1064,12 +1064,12 @@ public:
         {
             if (!instance)
 	      {
-                  me->ForcedDespawn();
+                  me->DespawnOrUnsummon();
 		  instance->SetData(DATA_BIG, FAIL);
 	      }
             if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
 	      {
-                  me->ForcedDespawn();
+                  me->DespawnOrUnsummon();
 		  instance->SetData(DATA_BIG, FAIL);
 	      }
 
@@ -1216,7 +1216,7 @@ public:
             if (focus = me->GetMap()->GetCreature(instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
                 focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
             else
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
             me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MovePoint(id, x, y,  me->GetPositionZ());
         }
@@ -1226,12 +1226,12 @@ public:
             if (!instance)
 	      {
 		instance->SetData(DATA_BIG, FAIL);
-                  me->ForcedDespawn();
+                  me->DespawnOrUnsummon();
 	      }
             if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
 	      {
 		instance->SetData(DATA_BIG, FAIL);
-                  me->ForcedDespawn();
+                  me->DespawnOrUnsummon();
 	      }
 
             if (!MovementStarted && instance->GetData(m_flag) == SPECIAL)
@@ -1292,7 +1292,7 @@ public:
             {
                 me->GetMotionMaster()->MovementExpired();
                 MovementStarted = false;
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
             }
         }
 
@@ -1320,7 +1320,7 @@ public:
         void UpdateAI(const uint32 uiDiff)
         {
             if (!instance || instance->GetData(TYPE_HALION) != IN_PROGRESS)
-                  me->ForcedDespawn();
+                  me->DespawnOrUnsummon();
 	    mob_orb_carrierDamage();
             if (!MovementStarted)
             {
@@ -1329,7 +1329,7 @@ public:
                 if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
                 if (Creature* focus = me->GetMap()->GetCreature(instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
                     focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                else me->ForcedDespawn();
+                else me->DespawnOrUnsummon();
                 me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MovePoint(1, x, y,  me->GetPositionZ());
                 MovementStarted = true;
@@ -1383,14 +1383,14 @@ public:
         void UpdateAI(const uint32 diff)
         {
             if(m_instance && m_instance->GetData(TYPE_HALION) != IN_PROGRESS)
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
 
 //        if (!me->HasAura(SPELL_TWILIGHT_ENTER))
 //             DoCast(SPELL_TWILIGHT_ENTER);
 
             if (m_uiConsumptTimer <= diff)
             {
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
             }
             else m_uiConsumptTimer -= diff;
 
@@ -1453,11 +1453,11 @@ public:
         void UpdateAI(const uint32 diff)
         {
             if(m_instance && m_instance->GetData(TYPE_HALION) != IN_PROGRESS)
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
 
             if (m_uiConbustTimer <= diff)
             {
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
             }
             else m_uiConbustTimer -= diff;
 
@@ -1577,7 +1577,7 @@ public:
                     if (m_uiMeteorImpactTimer <= uiDiff)
                     {
                         DoCast(SPELL_METEOR_IMPACT);
-                        me->ForcedDespawn();
+                        me->DespawnOrUnsummon();
                         m_uiMeteorImpactTimer = 500;
                     } else m_uiMeteorImpactTimer -= uiDiff;
                     break;

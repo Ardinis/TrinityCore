@@ -585,7 +585,7 @@ public:
 
             // drake unsummoned, passengers dropped
             if (!me->IsOnVehicle(drake) && !hasEmptySeats)
-                me->ForcedDespawn(3000);
+                me->DespawnOrUnsummon(3000);
 
             if (enter_timer <= 0)
                 return;
@@ -640,7 +640,7 @@ public:
 
                     me->ExitVehicle();
                     me->CastSpell(me, SPELL_SUMMON_LIBERATED, true);
-                    me->ForcedDespawn(500);
+                    me->DespawnOrUnsummon(500);
 
                     // drake is empty now, deliver credit for drake and despawn him
                     if (drake->GetVehicleKit()->HasEmptySeat(1) &&
@@ -651,7 +651,7 @@ public:
                         if (rider->ToPlayer())
                             rider->ToPlayer()->KilledMonsterCredit(29709, 0);
 
-                        drake->ToCreature()->ForcedDespawn(0);
+                        drake->ToCreature()->DespawnOrUnsummon(0);
                     }
                 }
             }

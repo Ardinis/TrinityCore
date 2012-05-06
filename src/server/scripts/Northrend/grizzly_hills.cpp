@@ -790,7 +790,7 @@ public:
 		{
 			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_HELLO_MAIDEN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 			pPlayer->SEND_GOSSIP_MENU(MAIDEN_DEFAULT_TEXTID, pCreature->GetGUID());
-			pCreature->ForcedDespawn(10000);
+			pCreature->DespawnOrUnsummon(10000);
 			return true;
 		}
 
@@ -880,14 +880,14 @@ public:
 								go->RemoveFromWorld();// Dépop du nénuphar
 							if(GameObject* go = GameObject::GetGameObject(*me,secondGobGuid))
 								go->RemoveFromWorld();// Dépop de la lame
-							me->ForcedDespawn();// disparition du pnj
+							me->DespawnOrUnsummon();// disparition du pnj
 							break;
 						default:// Ne devrait jamais arriver
 							if(GameObject* go = GameObject::GetGameObject(*me,firstGobGuid))
 								go->RemoveFromWorld();// Dépop du nénuphar
 							if(GameObject* go = GameObject::GetGameObject(*me,secondGobGuid))
 								go->RemoveFromWorld();// Dépop de la lame
-							me->ForcedDespawn();// disparition du pnj
+							me->DespawnOrUnsummon();// disparition du pnj
 							break;
 					}
 			}

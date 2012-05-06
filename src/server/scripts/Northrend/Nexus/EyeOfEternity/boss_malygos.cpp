@@ -777,7 +777,7 @@ public:
 			  Creature* pTrigger = GetClosestCreatureWithEntry(me, 30494, 100.0f);
 			  if(pTrigger)
 			    {
-			      pTrigger->ForcedDespawn();
+			      pTrigger->DespawnOrUnsummon();
 			    }
 
 			  me->AI()->EnterEvadeMode();

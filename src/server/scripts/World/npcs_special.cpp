@@ -3695,7 +3695,7 @@ class npc_risen_ally : public CreatureScript
             void UpdateAI(const uint32 diff)
             {
 				if(!me->isCharmed())
-					me->ForcedDespawn();
+				  me->DespawnOrUnsummon(800);
 
 				if (me->isInCombat())
 					DoMeleeAttackIfReady();

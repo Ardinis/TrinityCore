@@ -221,7 +221,7 @@ public:
         {
 
             if (pInstance && pInstance->GetData(TYPE_ZARITHRIAN) != IN_PROGRESS)
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
 
             if (!UpdateVictim())
                 return;

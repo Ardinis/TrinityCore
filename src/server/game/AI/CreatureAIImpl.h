@@ -331,6 +331,8 @@ class EventMap : private std::map<uint32, uint32>
         {
             if (phase && phase < 8)
                 _phase = (1 << (phase + 24));
+	    else if (!phase)
+                _phase = 0;
         }
 
         // Creates new event entry in map with given id, time, group if given (1 - 8) and phase if given (1 - 8)

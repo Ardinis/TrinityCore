@@ -1897,7 +1897,7 @@ class npc_vampiric_fiend_icc : public CreatureScript
                 {
                     DoCastAOE(SPELL_LEECHING_ROT);
                     // despawn en 3 segs despues de chupar
-                    me->ForcedDespawn(3000); 
+                    me->DespawnOrUnsummon(3000); 
                     // castea cada 10 segs
                     m_uiLEECHING_Timer = 10000;
                 }

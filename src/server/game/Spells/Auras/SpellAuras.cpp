@@ -44,8 +44,15 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
 
     if (GetBase()->CanBeSentToClient())
     {	
+		uint32 MaximumAura = MAX_AURAS;
+
+		if(GetBase()->GetId() == 32223)
+		{
+			sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"Test Gabi fix CRASH : AuraApplication L96 GetBaseSpell : %u , aura->GetID : %u",GetBase()->GetId(), aura->GetId());
+			MaximumAura = 3;
+		}
         // Try find slot for aura
-        uint8 slot = MAX_AURAS;
+        uint8 slot = MaximumAura;
         // Lookup for auras already applied from spell
         if (AuraApplication * foundAura = GetTarget()->GetAuraApplication(GetBase()->GetId(), GetBase()->GetCasterGUID(), GetBase()->GetCastItemGUID()))
         {
@@ -57,7 +64,7 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
             Unit::VisibleAuraMap const* visibleAuras = GetTarget()->GetVisibleAuras();
             // lookup for free slots in units visibleAuras
             Unit::VisibleAuraMap::const_iterator itr = visibleAuras->find(0);
-            for (uint32 freeSlot = 0; freeSlot < MAX_AURAS; ++itr, ++freeSlot)
+            for (uint32 freeSlot = 0; freeSlot < MaximumAura; ++itr, ++freeSlot)
             {
                 if (itr == visibleAuras->end() || itr->first != freeSlot)
                 {
@@ -68,7 +75,7 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
         }
 
         // Register Visible Aura
-        if (slot < MAX_AURAS)
+        if (slot < MaximumAura)
         {
             _slot = slot;
             GetTarget()->SetVisibleAura(slot, this);
@@ -498,24 +505,38 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
     for (std::map<Unit*, uint8>::iterator itr = targets.begin(); itr!= targets.end();)
     {
         // aura mustn't be already applied on target
-        if (AuraApplication * aurApp = GetApplicationOfTarget(itr->first->GetGUID()))
+        //if (AuraApplication * aurApp = GetApplicationOfTarget(itr->first->GetGUID()))
+        //{
+        //    // the core created 2 different units with same guid
+        //    // this is a major failue, which i can't fix right now
+        //    // let's remove one unit from aura list
+        //    // this may cause area aura "bouncing" between 2 units after each update
+        //    // but because we know the reason of a crash we can remove the assertion for now
+        //    if (aurApp->GetTarget() != itr->first)
+        //    {
+        //        // remove from auras to register list
+        //        targets.erase(itr++);
+        //        continue;
+        //    }
+        //    else
+        //    {
+        //        // ok, we have one unit twice in target map (impossible, but...)
+        //        ASSERT(false);
+        //    }
+        //}
+        if (IsAppliedOnTarget(itr->first->GetGUID()))
         {
-            // the core created 2 different units with same guid
-            // this is a major failue, which i can't fix right now
-            // let's remove one unit from aura list
-            // this may cause area aura "bouncing" between 2 units after each update
-            // but because we know the reason of a crash we can remove the assertion for now
-            if (aurApp->GetTarget() != itr->first)
-            {
-                // remove from auras to register list
-                targets.erase(itr++);
-                continue;
-            }
-            else
-            {
-                // ok, we have one unit twice in target map (impossible, but...)
-                ASSERT(false);
-            }
+            AuraApplication * aurApp = GetApplicationOfTarget(itr->first->GetGUID());
+            // check if we have valid pointer
+            ASSERT(aurApp->GetTarget());
+            // check if we really have same guid
+            ASSERT(aurApp->GetTarget()->GetGUID() == itr->first->GetGUID());
+            // check if we really have base aura
+            ASSERT(aurApp->GetBase() == this);
+            // check if core created 2 units with same guid
+            ASSERT(aurApp->GetTarget() == itr->first);
+            // ok, we have same unit twice in map, how?
+            ASSERT(false);
         }
 
         bool addUnit = true;

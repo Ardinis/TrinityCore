@@ -7569,9 +7569,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                 if (pPet && pPet->getVictim() && damage && procSpell)
                 {
-                    uint32 procDmg = damage / 2;
-                    pPet->SendSpellNonMeleeDamageLog(pPet->getVictim(), procSpell->Id, procDmg, procSpell->GetSchoolMask(), 0, 0, false, 0, false);
-                    pPet->DealDamage(pPet->getVictim(), procDmg, NULL, SPELL_DIRECT_DAMAGE, procSpell->GetSchoolMask(), procSpell, true);
+                    pPet->SendSpellNonMeleeDamageLog(pPet->getVictim(), procSpell->Id, damage, procSpell->GetSchoolMask(), 0, 0, false, 0, false);
+                    pPet->DealDamage(pPet->getVictim(), damage, NULL, SPELL_DIRECT_DAMAGE, procSpell->GetSchoolMask(), procSpell, true);
                     break;
                 }
                 else
@@ -10665,8 +10664,28 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
         case SPELLFAMILY_DEATHKNIGHT:
             // Improved Icy Touch
             if (spellProto->SpellFamilyFlags[0] & 0x2)
+			{
                 if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2721, 0))
                     AddPctN(DoneTotalMod, aurEff->GetAmount());
+				Unit* pPet = NULL;
+                for (Unit::ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr) //Find Rune Weapon
+                    if ((*itr)->GetEntry() == 27893)
+                    {
+						pPet = (*itr);
+                        break;
+                    }
+                    if (pPet && getVictim())
+                    {
+                        pPet->CastSpell(getVictim(),55095,true);
+                        Aura *aur=getVictim()->GetAura(55095,pPet->GetGUID());
+                                        
+                        if (AuraEffect const* epidemic = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
+                        {
+                            aur->SetMaxDuration(epidemic->GetAmount()+aur->GetMaxDuration());
+                            aur->SetDuration(aur->GetMaxDuration());
+                        }
+                    }
+			}
 
             // Sigil of the Vengeful Heart
             if (spellProto->SpellFamilyFlags[0] & 0x2000)

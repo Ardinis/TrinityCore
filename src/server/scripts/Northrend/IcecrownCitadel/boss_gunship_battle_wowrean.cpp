@@ -817,7 +817,7 @@ class npc_muradin_gunship : public CreatureScript
         bool OnGossipHello(Player* player, Creature* pCreature)
         {
             InstanceScript* pInstance = pCreature->GetInstanceScript();
-            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
+            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE && pInstance->GetBossState(DATA_GUNSHIP_EVENT) != DONE)
             {
                 if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
                 {
@@ -1298,7 +1298,7 @@ class npc_saurfang_gunship : public CreatureScript
         bool OnGossipHello(Player* player, Creature* pCreature)
         {
             InstanceScript* pInstance = pCreature->GetInstanceScript();
-            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
+            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE && pInstance->GetBossState(DATA_GUNSHIP_EVENT) != DONE)
             {
                 if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
                 {

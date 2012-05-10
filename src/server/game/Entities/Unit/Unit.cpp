@@ -280,7 +280,6 @@ Unit::~Unit()
     _DeleteRemovedAuras();
 
     delete m_charmInfo;
-    delete m_vehicleKit;
     delete movespline;
 
     ASSERT(!m_duringRemoveFromWorld);
@@ -13903,11 +13902,13 @@ void Unit::RemoveFromWorld()
     {
         m_duringRemoveFromWorld = true;
         if (IsVehicle())
-	  {
+		{
 	    //	    std::cout << "crash test" << std::endl;
 	    //RemoveVehicleKit();
             GetVehicleKit()->Uninstall();
-	  }
+			delete m_vehicleKit;
+			m_vehicleKit = NULL;
+		}
         RemoveCharmAuras();
         RemoveBindSightAuras();
         RemoveNotOwnSingleTargetAuras();

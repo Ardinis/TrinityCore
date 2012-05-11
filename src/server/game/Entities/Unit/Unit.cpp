@@ -13906,14 +13906,9 @@ void Unit::RemoveFromWorld()
     if (IsInWorld())
     {
         m_duringRemoveFromWorld = true;
-        if (IsVehicle())
-		{
-	    //	    std::cout << "crash test" << std::endl;
-	    //RemoveVehicleKit();
-            GetVehicleKit()->Uninstall();
-			delete m_vehicleKit;
-			m_vehicleKit = NULL;
-		}
+	if (IsVehicle())
+	  RemoveVehicleKit();
+
         RemoveCharmAuras();
         RemoveBindSightAuras();
         RemoveNotOwnSingleTargetAuras();
@@ -13921,7 +13916,7 @@ void Unit::RemoveFromWorld()
         RemoveAllGameObjects();
         RemoveAllDynObjects();
 
-        ExitVehicle();
+        ExitVehicle(); // Remove applied auras with SPELL_AURA_CONTROL_VEHICLE
         UnsummonAllTotems();
         RemoveAllControlled();
 

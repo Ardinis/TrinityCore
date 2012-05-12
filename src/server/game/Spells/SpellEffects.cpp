@@ -4125,44 +4125,19 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            Unit* pPet = NULL;
-            for (Unit::ControlList::const_iterator itr = m_caster->m_Controlled.begin(); itr != m_caster->m_Controlled.end(); ++itr) //Find Rune Weapon
-                if ((*itr)->GetEntry() == 27893)
-                {
-					pPet = (*itr);
-                    break;
-                }
-		
             // Plague Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x1)
             {
                 // Glyph of Plague Strike
                 if (AuraEffect const* aurEff = m_caster->GetAuraEffect(58657, EFFECT_0))
                     AddPctN(totalDamagePercentMod, aurEff->GetAmount());
-                // double disease when dancing runic weapon active
-                if (pPet && m_caster->getVictim())
-                {
-                    pPet->CastSpell(m_caster->getVictim(),m_spellInfo->Effects[EFFECT_2].CalcValue(),true);
-                    Aura *aur=m_caster->getVictim()->GetAura(m_spellInfo->Effects[EFFECT_2].CalcValue(),pPet->GetGUID());
-                    
-                    if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
-                    { 
-                        aur->SetMaxDuration(epidemic->GetAmount()+aur->GetMaxDuration());
-                        aur->SetDuration(aur->GetMaxDuration());
-                    }
-                }
-					
                 break;
             }
             // Blood Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
             {
-                if(pPet)
-					AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * (unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())) / 2.0f);
-                else
-					AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
+                AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
 
-										
                 // Glyph of Blood Strike
                 if (m_caster->GetAuraEffect(59332, EFFECT_0))
                     if (unitTarget->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
@@ -4188,31 +4163,19 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     if (roll_chance_i(aurEff->GetAmount()))
                         consumeDiseases = false;
 
-                if(pPet)
-                    AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * (unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases)+unitTarget->GetDiseasesByCaster(pPet->GetGUID(),consumeDiseases)) / 2.0f);
-                else
-                    AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f);
-  				
+                AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f);
                 break;
             }
             // Blood-Caked Strike - Blood-Caked Blade
             if (m_spellInfo->SpellIconID == 1736)
             {
-                if(pPet)
-                    AddPctF(totalDamagePercentMod, (unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())) * 12.5f);
-                else
-                    AddPctF(totalDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
+                AddPctF(totalDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
                 break;
             }
             // Heart Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
             {
                 AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()));
-
-                if(pPet)
-                    AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() *(unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())));
-                else
-                    AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() *(unitTarget->GetDiseasesByCaster(m_caster->GetGUID())));
                 break;
             }
             break;

@@ -8988,11 +8988,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Item - Warrior T10 Melee 4P Bonus
             if (AuraEffect const* aurEff = GetAuraEffect(70847, 0))
             {
-                if (!roll_chance_i(aurEff->GetAmount()))
-                    break;
-                CastSpell(this, 70849, true, castItem, triggeredByAura); // Extra Charge!
-                CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
-                CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
+                int32 amount = aurEff->GetAmount();
+                if (roll_chance_i(amount))
+                    CastSpell(this, 70849, true, castItem, triggeredByAura); // Extra Charge
+                if (roll_chance_i(amount)) 
+                    CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
+                if (roll_chance_i(amount))
+                    CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
             }
             break;
         }

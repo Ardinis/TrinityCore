@@ -229,6 +229,7 @@ class boss_professor_putricide : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+			sLog->outError(" <!> LANCEMENT SCRIPT : PUTRICIDE <!>");
                 if (events.GetPhaseMask() & PHASE_MASK_NOT_SELF)
                     return;
 

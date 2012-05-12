@@ -235,6 +235,7 @@ class boss_sindragosa : public CreatureScript
 
            void EnterCombat(Unit* victim)
             {
+			sLog->outError(" <!> LANCEMENT SCRIPT : SINDRAGOSA <!>");
                 if (!instance->CheckRequiredBosses(DATA_SINDRAGOSA, victim->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -754,6 +755,7 @@ class npc_spinestalker : public CreatureScript
             {
                 if (action == ACTION_START_FROSTWYRM)
                 {
+				sLog->outError(" <!> LANCEMENT SCRIPT : SPINESTALKER <!>");
                     _instance->SetData(DATA_SPINESTALKER, 255);
                     if (me->isDead())
                         return;
@@ -889,6 +891,7 @@ class npc_rimefang : public CreatureScript
             {
                 if (action == ACTION_START_FROSTWYRM)
                 {
+				sLog->outError(" <!> LANCEMENT SCRIPT : RIMEFANG <!>");
                     _instance->SetData(DATA_RIMEFANG, 255);
                     if (me->isDead())
                         return;

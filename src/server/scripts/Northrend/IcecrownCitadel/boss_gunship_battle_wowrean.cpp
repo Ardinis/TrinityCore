@@ -846,6 +846,7 @@ class npc_muradin_gunship : public CreatureScript
             {
                 pCreature->AI()->DoAction(ACTION_INTRO_START);
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+				sLog->outError(" <!> LANCEMENT SCRIPT : CANNO ALLY <!>");
             }
             return true;
         }
@@ -1211,6 +1212,7 @@ class npc_muradin_gunship : public CreatureScript
                         case EVENT_OUTRO_ALLIANCE_3:
                             me->GetMotionMaster()->MovePoint(1, -555.59f, 2213.01f, 539.28f);
 							GoAndDespawn();
+							sLog->outError(" <!> FIN DU SCRIPT : CANNONNIERE <!>");
                             break;
                         case EVENT_FAIL:
                             TeleportPlayers(map, ALLIANCE);
@@ -1327,6 +1329,7 @@ class npc_saurfang_gunship : public CreatureScript
             {
                 pCreature->AI()->DoAction(ACTION_INTRO_START);
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+				sLog->outError(" <!> LANCEMENT SCRIPT : CANNO HORDE <!>");
             }
             return true;
         }
@@ -1666,6 +1669,7 @@ class npc_saurfang_gunship : public CreatureScript
                         case EVENT_OUTRO_HORDE_3:
                             me->GetMotionMaster()->MovePoint(1, -555.59f, 2213.01f, 539.28f);
 							GoAndDespawn();
+							sLog->outError(" <!> FIN SCRIPT : CANNONIERE HORDE <!>");
                             break;
                         case EVENT_FAIL:
                             TeleportPlayers(map, HORDE);

@@ -325,7 +325,7 @@ class boss_valithria_dreamwalker : public CreatureScript
             {
                 if (action != ACTION_ENTER_COMBAT)
                     return;
-
+				sLog->outError(" <!> LANCEMENT SCRIPT : ValITHRIA <!>");
 		DoCast(me, SPELL_COPY_DAMAGE);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
@@ -336,6 +336,7 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void HealReceived(Unit* /*healer*/, uint32& heal)
             {
+			sLog->outError(" <!> LANCEMENT SCRIPT : ValITHRIA <!>");
                 // encounter complete
                 if (me->HealthAbovePctHealed(100, heal) && !_done)
                 {

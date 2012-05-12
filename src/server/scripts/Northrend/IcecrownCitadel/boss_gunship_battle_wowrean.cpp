@@ -1206,12 +1206,14 @@ class npc_muradin_gunship : public CreatureScript
 							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), /*-590.200022f, 2241.193115f, 538.588269f*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
 							HorsCombatDelItem();
+							Fin = true;
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                             break;
                         case EVENT_OUTRO_ALLIANCE_3:
                             me->GetMotionMaster()->MovePoint(1, -555.59f, 2213.01f, 539.28f);
 							GoAndDespawn();
+							Fin = true;
 							sLog->outError(" <!> FIN DU SCRIPT : CANNONNIERE <!>");
                             break;
                         case EVENT_FAIL:
@@ -1663,12 +1665,14 @@ class npc_saurfang_gunship : public CreatureScript
 							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), /*-590.200022f, 2241.193115f, 539.588269f,*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
                             HorsCombatDelItem();
+							Fin = true;
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                             break;
                         case EVENT_OUTRO_HORDE_3:
                             me->GetMotionMaster()->MovePoint(1, -555.59f, 2213.01f, 539.28f);
 							GoAndDespawn();
+							Fin = true;
 							sLog->outError(" <!> FIN SCRIPT : CANNONIERE HORDE <!>");
                             break;
                         case EVENT_FAIL:

@@ -1618,7 +1618,7 @@ class npc_saurfang_gunship : public CreatureScript
                             Talk(SAY_BOARDING_ORGRIMS_HAMMER_1);
                             break;
                         case EVENT_BOARDING_GUNSHIP:
-							if(Fin == true)
+							if(Fin == false)
 							{
 								 count = 0;
 								 if (Creature* saurfang = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_MURADIN_BRONZEBEARD_NOT_VISUAL)))
@@ -1632,7 +1632,7 @@ class npc_saurfang_gunship : public CreatureScript
 							 }
                             break;
                         case EVENT_BOARDING_REAVERS_MARINE:
-                            if(Fin == true && count <= SummonCount)
+                            if(Fin == false && count <= SummonCount)
                             {
                                 if(Creature* marine = orgrimmar->AddNPCPassengerInInstance(NPC_GB_SKYBREAKER_MARINE, 15.03016f, -7.00016f, 37.70952f, 1.55138f))
                                 {

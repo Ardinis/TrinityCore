@@ -936,8 +936,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (FrostwyrmCount == 255)
                             return;
 
-			//                        if (instance->IsHeroic() && !HeroicAttempts)
-			//  return;
+			if (instance->IsHeroic() && !HeroicAttempts)
+			  return;
 
                         if (GetBossState(DATA_SINDRAGOSA) == DONE)
                             return;

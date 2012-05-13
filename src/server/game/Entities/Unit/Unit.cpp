@@ -812,7 +812,16 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     sLog->outStaticDebug("DealDamageEnd returned %d damage", damage);
-
+    if (GetTypeId() == TYPEID_PLAYER)
+      {
+        Player* killer = ToPlayer();
+	sLog->outStaticDebug("player : %s", killer->GetName());
+        // in bg, count dmg if victim is also a player
+        if (victim->GetTypeId() == TYPEID_PLAYER)
+	  sLog->outStaticDebug("victim : %s", victim->ToPlayer()->GetName());
+	else
+	  sLog->outStaticDebug("victim entry: %d" , victim->GetGUID());
+      }
     return damage;
 }
 

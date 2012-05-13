@@ -950,9 +950,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                                     --FrostwyrmCount;
                                     if (!FrostwyrmCount)
                                     {
-                                        instance->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
+				      /*                                        instance->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
                                         if (Creature* boss = instance->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
-                                            boss->AI()->DoAction(ACTION_START_FROSTWYRM);
+					boss->AI()->DoAction(ACTION_START_FROSTWYRM);*/
                                     }
                                 }
                                 break;

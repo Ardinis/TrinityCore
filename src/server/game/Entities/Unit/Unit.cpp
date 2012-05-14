@@ -11612,7 +11612,7 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
     }
 
     // Spells that don't have effectMechanics.
-    if (!spellInfo->HasAnyEffectMechanic() && spellInfo->Mechanic)
+    if (spellInfo->Mechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
@@ -11652,7 +11652,7 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
 
 bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const
 {
-    if (!spellInfo)
+  if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
     uint32 effect = spellInfo->Effects[index].Effect;

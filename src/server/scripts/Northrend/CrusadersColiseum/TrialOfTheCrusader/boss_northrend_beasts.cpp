@@ -736,6 +736,7 @@ public:
             m_fTrampleTargetY = 0;
             m_fTrampleTargetZ = 0;
             m_uiStage = 0;
+	    me->SetSpeed(MOVE_JUMP, 2.0f);
         }
 
         void JustDied(Unit* /*pKiller*/)

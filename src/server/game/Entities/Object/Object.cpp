@@ -1322,7 +1322,7 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
   //	    << ox << oy << oz+2.f << std::endl;
   if (GetMapId()==616) return true; //hack for Eye of Eternity
     if (IsInWorld())
-      return (GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+5.f, ox, oy, oz+5.f, GetPhaseMask()) /*&& GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz)*/);
+      return (GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask()) /*&& GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz)*/);
 
 
     return true;

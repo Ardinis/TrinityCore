@@ -108,7 +108,8 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
 		plr->KnockbackFrom(1291.56f, 790.837f, 20.0f, 7.0f);
 	    }
 	  SpawnBGObject(BG_DS_OBJECT_WATER_1, RESPAWN_IMMEDIATELY);
-	  GetBgMap()->SetDynLOSObjectState(m_dynamicLOSid, true);
+	  if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+	    gob->EnableCollision(true);
 	  m_waterFall = BG_DS_WATERFALL_DURATION;
 	  m_waterFallStatus = 2;
 	}
@@ -116,7 +117,8 @@ void BattlegroundDS::PostUpdateImpl(uint32 diff)
         {
 	  DoorOpen(BG_DS_OBJECT_WATER_2);
 	  SpawnBGObject(BG_DS_OBJECT_WATER_1, RESPAWN_ONE_DAY);
-	  GetBgMap()->SetDynLOSObjectState(m_dynamicLOSid, false);
+	  if (GameObject* gob = GetBgMap()->GetGameObject(m_BgObjects[BG_DS_OBJECT_WATER_1]))
+	    gob->EnableCollision(false);
 	  m_waterFall = urand(BG_DS_WATERFALL_TIMER_MIN, BG_DS_WATERFALL_TIMER_MAX);
 	  m_waterFallStatus = 0;
         }

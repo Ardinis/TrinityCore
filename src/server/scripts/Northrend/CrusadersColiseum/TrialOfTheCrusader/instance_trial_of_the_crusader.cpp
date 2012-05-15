@@ -218,18 +218,22 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     case GO_CRUSADERS_CACHE_10:
                         if (instance->GetSpawnMode() == RAID_DIFFICULTY_10MAN_NORMAL)
                             CrusadersCacheGUID = go->GetGUID();
+			go->EnableCollision(false);
                         break;
                     case GO_CRUSADERS_CACHE_25:
                         if (instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_NORMAL)
                             CrusadersCacheGUID = go->GetGUID();
+			go->EnableCollision(false);
                         break;
                     case GO_CRUSADERS_CACHE_10_H:
                         if (instance->GetSpawnMode() == RAID_DIFFICULTY_10MAN_HEROIC)
                             CrusadersCacheGUID = go->GetGUID();
+			go->EnableCollision(false);
                         break;
                     case GO_CRUSADERS_CACHE_25_H:
                         if (instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
                             CrusadersCacheGUID = go->GetGUID();
+			go->EnableCollision(false);
                         break;
                     case GO_ARGENT_COLISEUM_FLOOR:
                         FloorGUID = go->GetGUID();
@@ -253,6 +257,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     case GO_TRIBUTE_CHEST_25H_50:
                     case GO_TRIBUTE_CHEST_25H_99:
                         TributeChestGUID = go->GetGUID();
+			go->EnableCollision(false);
                         break;
                 }
             }

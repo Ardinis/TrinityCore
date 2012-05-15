@@ -547,7 +547,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                     for (uint8 i = 0; i < boneSpikeCount; ++i)
                     {
                         // select any unit but not the tank
-                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 1, 150.0f, true, -SPELL_IMPALED);
+                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 1, 75.0f, true, -SPELL_IMPALED);
                         if (!target)
                             break;
 

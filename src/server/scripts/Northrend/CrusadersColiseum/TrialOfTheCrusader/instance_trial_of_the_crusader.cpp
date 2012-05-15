@@ -41,6 +41,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             uint32 EventTimer;
             uint32 EventNPCId;
             uint32 NorthrendBeasts;
+	  uint64 uiPortal;
+
             std::string SaveDataBuffer;
             bool   NeedSave;
 
@@ -83,6 +85,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
             void Initialize()
             {
+	        uiPortal = 0;
                 for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                     EncounterStatus[i] = NOT_STARTED;
 
@@ -207,6 +210,11 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
+		case GO_PORTAL:
+		  go->SetPhaseMask(2, true);
+		  uiPortal = go->GetGUID();
+		  break;
+
                     case GO_CRUSADERS_CACHE_10:
                         if (instance->GetSpawnMode() == RAID_DIFFICULTY_10MAN_NORMAL)
                             CrusadersCacheGUID = go->GetGUID();
@@ -299,6 +307,8 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                         switch (data)
                         {
                             case DONE:
+			      if(GameObject *pPortal = instance->GetGameObject(uiPortal))
+				pPortal->SetPhaseMask(1, true);
                                 EventStage = 6000;
                                 break;
                             case SPECIAL:
@@ -423,7 +433,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                     sLog->outDetail("[ToCr] EncounterStatus[type %u] %u = data %u;", type, EncounterStatus[type], data);
                     if (data == FAIL)
                     {
-                        if (IsRaidWiped())
+		      //                        if (IsRaidWiped())
                         {
                             --TrialCounter;
                             NeedSave = true;

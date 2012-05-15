@@ -217,6 +217,8 @@ enum eCreature
 
 enum eGameObject
 {
+  GO_PORTAL                    = 202079,
+
     GO_CRUSADERS_CACHE_10       = 195631,
     GO_CRUSADERS_CACHE_25       = 195632,
     GO_CRUSADERS_CACHE_10_H     = 195633,

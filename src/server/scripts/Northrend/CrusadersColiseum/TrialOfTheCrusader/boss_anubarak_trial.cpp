@@ -232,7 +232,6 @@ public:
 
         void JustSummoned(Creature* summoned)
         {
-            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true);
             switch (summoned->GetEntry())
             {
                 case NPC_BURROW:
@@ -241,9 +240,18 @@ public:
                     summoned->CastSpell(summoned, SPELL_CHURNING_GROUND, false);
                     break;
                 case NPC_SPIKE:
+		  {
+		    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true);
+		    int count = 0;
+		    while (target->GetTypeId() != TYPEID_PLAYER && count < 5)
+		      {
+			target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true);
+			count++;
+		      }
                     summoned->CombatStart(target);
                     DoScriptText(EMOTE_SPIKE, me, target);
                     break;
+		  }
             }
             Summons.Summon(summoned);
         }

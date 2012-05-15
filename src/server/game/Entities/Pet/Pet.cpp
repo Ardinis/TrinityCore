@@ -871,7 +871,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             //damage range is then petlevel / 2
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
             //damage is increased afterwards as strength and pet scaling modify attack power
-            break;
+
+            //        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (GetTotalAttackPowerValue(BASE_ATTACK)*0.22 * 2 / 14)));
+            //        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (GetTotalAttackPowerValue(BASE_ATTACK)*0.22 * 2 / 14)));
+			// les pets reçoivent 22% de la PA du chassou a voir si il se plaigne, test par gabi.
+	        break;
         }
         default:
         {

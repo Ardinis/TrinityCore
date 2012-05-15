@@ -817,16 +817,16 @@ class npc_muradin_gunship : public CreatureScript
         bool OnGossipHello(Player* player, Creature* pCreature)
         {
             InstanceScript* pInstance = pCreature->GetInstanceScript();
-            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
+            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE && pInstance->GetBossState(DATA_GUNSHIP_EVENT) != DONE)
             {
                 if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
                 {
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Je ne suis pas le chef de groupe...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Je ne suis pas le Chef du Raid...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
                     player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
                     return true;
                 }
 
-                player->ADD_GOSSIP_ITEM(0, "My companions are all accounted for, Muradin. Let's go!", 631, 1001);
+                player->ADD_GOSSIP_ITEM(0, "Mes compagnons sont en bon ordre, Muradin, Allons-y !", 631, 1001);
                 player->SEND_GOSSIP_MENU(player->GetGossipTextId(pCreature), pCreature->GetGUID());
                 return true;
             }
@@ -840,12 +840,13 @@ class npc_muradin_gunship : public CreatureScript
             player->CLOSE_GOSSIP_MENU();
 
             if (action == GOSSIP_ACTION_INFO_DEF+2)
-                pCreature->MonsterSay("I'll wait for the raid leader.", LANG_UNIVERSAL, player->GetGUID());
+                pCreature->MonsterSay("Je vais attendre le Chef de Raid.", LANG_UNIVERSAL, player->GetGUID());
 
             if (action == 1001)
             {
                 pCreature->AI()->DoAction(ACTION_INTRO_START);
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+				sLog->outError(" <!> LANCEMENT SCRIPT : CANNO ALLY <!>");
             }
             return true;
         }
@@ -879,6 +880,7 @@ class npc_muradin_gunship : public CreatureScript
                 RiflDieCount = 0;
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 EventScheduled = false;
+				Fin = false;
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -1039,6 +1041,7 @@ class npc_muradin_gunship : public CreatureScript
 				DespawnCreatures(NPC_GB_SKYBREAKER_RIFLEMAN,300.0f);
 				DespawnCreatures(NPC_GB_ALLIANCE_CANON,200.0f);
 				DespawnCreatures(NPC_GB_ZAFOD_BOOMBOX,300.0f);
+				DespawnCreatures(NPC_GB_PORTAL, 200.0f);
 
 			}
 			
@@ -1161,18 +1164,21 @@ class npc_muradin_gunship : public CreatureScript
                             Talk(SAY_BOARDING_SKYBREAKER_1);
                             break;
                         case EVENT_BOARDING_GUNSHIP:
-                            if (Creature* saurfang = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HIGH_OVERLORD_SAURFANG_NOT_VISUAL)))
-                                saurfang->AI()->Talk(SAY_BOARDING_SKYBREAKER_SAURFANG);
+							if(Fin == false)
+							{
+	                            count = 0;						
+								if (Creature* saurfang = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HIGH_OVERLORD_SAURFANG_NOT_VISUAL)))
+									saurfang->AI()->Talk(SAY_BOARDING_SKYBREAKER_SAURFANG);
 
-                            if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -15.51547f, -0.160213f, 20.87252f, 1.56211f))
-                                sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
+								if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -15.51547f, -0.160213f, 20.87252f, 1.56211f))
+									sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 
-                            events.ScheduleEvent(EVENT_SUMMON_PORTAL, 90000);
-                            events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
-                            count = 0;
+								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 90000);
+								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
+							}
                             break;
                         case EVENT_BOARDING_REAVERS_MARINE:
-                            if(count <= SummonCount)
+                            if(Fin == false && count <= SummonCount)
                             {
                                 if(Creature* reavers = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_REAVERS, -15.51547f, -0.160213f, 20.87252f, 1.56211f))
                                 {
@@ -1183,26 +1189,32 @@ class npc_muradin_gunship : public CreatureScript
                             }
                             break;
                         case EVENT_OUTRO_ALLIANCE_1:
+							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
                             _instance->DoCompleteAchievement(RAID_MODE(IM_ON_A_BOAT_10,IM_ON_A_BOAT_25,IM_ON_A_BOAT_10,IM_ON_A_BOAT_25));
                             _instance->DoCastSpellOnPlayers(SPELL_ACHIEVEMENT_CHECK);
 							GoAndDespawn();
-							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
-							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
+							Fin = true;
                             StartFlyShip(skybreaker);
                             StopFlyShip(CheckUnfriendlyShip(me,_instance,DATA_GB_HIGH_OVERLORD_SAURFANG));
                             break;
                         case EVENT_OUTRO_ALLIANCE_2:
+							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
                             StopFlyShip(skybreaker);
+							GoAndDespawn();
 							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), /*-590.200022f, 2241.193115f, 538.588269f*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
 							HorsCombatDelItem();
-							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
-							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
+							Fin = true;
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                             break;
                         case EVENT_OUTRO_ALLIANCE_3:
                             me->GetMotionMaster()->MovePoint(1, -555.59f, 2213.01f, 539.28f);
+							GoAndDespawn();
+							Fin = true;
+							sLog->outError(" <!> FIN DU SCRIPT : CANNONNIERE <!>");
                             break;
                         case EVENT_FAIL:
                             TeleportPlayers(map, ALLIANCE);
@@ -1272,6 +1284,7 @@ class npc_muradin_gunship : public CreatureScript
                 uint32 RocketerCount;
                 uint32 RiflCount;
                 bool EventScheduled;
+				bool Fin;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const
@@ -1289,16 +1302,16 @@ class npc_saurfang_gunship : public CreatureScript
         bool OnGossipHello(Player* player, Creature* pCreature)
         {
             InstanceScript* pInstance = pCreature->GetInstanceScript();
-            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
+            if (pInstance && pInstance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE && pInstance->GetBossState(DATA_GUNSHIP_EVENT) != DONE)
             {
                 if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
                 {
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm not the raid leader...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Je ne suis pas le Chef du Raid...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
                     player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
                     return true;
                 }
 
-                player->ADD_GOSSIP_ITEM(0, "My companions are all accounted for, Saurfang. Let's go!", 631, 1001);
+                player->ADD_GOSSIP_ITEM(0, "Mes compagnons sont en bon ordre, Saurcroc, Allons-y !", 631, 1001);
                 player->SEND_GOSSIP_MENU(player->GetGossipTextId(pCreature), pCreature->GetGUID());
                 return true;
             }
@@ -1312,15 +1325,17 @@ class npc_saurfang_gunship : public CreatureScript
             player->CLOSE_GOSSIP_MENU();
 
             if (action == GOSSIP_ACTION_INFO_DEF+2)
-                pCreature->MonsterSay("I'll wait for the raid leader.", LANG_UNIVERSAL, player->GetGUID());
+                pCreature->MonsterSay("Je vais attendre le Chef de Raid.", LANG_UNIVERSAL, player->GetGUID());
 
             if (action == 1001)
             {
                 pCreature->AI()->DoAction(ACTION_INTRO_START);
                 pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+				sLog->outError(" <!> LANCEMENT SCRIPT : CANNO HORDE <!>");
             }
             return true;
         }
+
         struct npc_saurfang_gunshipAI : public ScriptedAI
         {
             npc_saurfang_gunshipAI(Creature *creature) : ScriptedAI(creature),
@@ -1349,6 +1364,7 @@ class npc_saurfang_gunship : public CreatureScript
                 RocketerCount = RAID_MODE(2, 4, 2, 4);
                 AxesCount = RAID_MODE(4, 6, 4, 6);
                 EventScheduled = false;
+				Fin = false;
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -1507,6 +1523,7 @@ class npc_saurfang_gunship : public CreatureScript
 				DespawnCreatures(NPC_GB_HORDE_CANON,200.0f);
 				DespawnCreatures(NPC_GB_ZAFOD_BOOMBOX,300.0f);
 				DespawnCreatures(NPC_GB_SKYBREAKER_SERGANTE,300.0f);
+				DespawnCreatures(NPC_GB_PORTAL, 200.0f);
 			}			
 
 			void HorsCombatDelItem()
@@ -1606,18 +1623,21 @@ class npc_saurfang_gunship : public CreatureScript
                             Talk(SAY_BOARDING_ORGRIMS_HAMMER_1);
                             break;
                         case EVENT_BOARDING_GUNSHIP:
-                             count = 0;
-                             if (Creature* saurfang = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_MURADIN_BRONZEBEARD_NOT_VISUAL)))
-                                 saurfang->AI()->Talk(SAY_BOARDING_SKYBREAKER_MURADIN);
+							if(Fin == false)
+							{
+								 count = 0;
+								 if (Creature* saurfang = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_MURADIN_BRONZEBEARD_NOT_VISUAL)))
+									 saurfang->AI()->Talk(SAY_BOARDING_SKYBREAKER_MURADIN);
 
-                             if (Creature* sergante = orgrimmar->AddNPCPassengerInInstance(NPC_GB_SKYBREAKER_SERGANTE, 15.03016f, -7.00016f, 37.70952f, 1.55138f))
-                                 sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
-
-                             events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 90000);
+								 if (Creature* sergante = orgrimmar->AddNPCPassengerInInstance(NPC_GB_SKYBREAKER_SERGANTE, 15.03016f, -7.00016f, 37.70952f, 1.55138f))
+									 sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
+									
+								 events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
+								 events.ScheduleEvent(EVENT_SUMMON_PORTAL, 90000);
+							 }
                             break;
                         case EVENT_BOARDING_REAVERS_MARINE:
-                            if(count <= SummonCount)
+                            if(Fin == false && count <= SummonCount)
                             {
                                 if(Creature* marine = orgrimmar->AddNPCPassengerInInstance(NPC_GB_SKYBREAKER_MARINE, 15.03016f, -7.00016f, 37.70952f, 1.55138f))
                                 {
@@ -1628,26 +1648,32 @@ class npc_saurfang_gunship : public CreatureScript
                             }
                             break;
                         case EVENT_OUTRO_HORDE_1:
+							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
                             _instance->DoCompleteAchievement(RAID_MODE(IM_ON_A_BOAT_10,IM_ON_A_BOAT_25,IM_ON_A_BOAT_10,IM_ON_A_BOAT_25));
                             _instance->DoCastSpellOnPlayers(SPELL_ACHIEVEMENT_CHECK);
 							GoAndDespawn();
-							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
-							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
+							Fin = true;
                             StartFlyShip(orgrimmar);
                             StopFlyShip(CheckUnfriendlyShip(me,_instance,DATA_GB_MURADIN_BRONZEBEARD));
                             break;
                         case EVENT_OUTRO_HORDE_2:
+							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
+							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
+							GoAndDespawn();
                             StopFlyShip(orgrimmar);
 							DoWinCheck(me);
                             me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), /*-590.200022f, 2241.193115f, 539.588269f,*/-561.319f, 2211.445f, 539.285f, 0, 0, 0, 0, 0, 100000);
                             HorsCombatDelItem();
-							events.CancelEvent(EVENT_BOARDING_REAVERS_MARINE);
-							events.CancelEvent(EVENT_BOARDING_GUNSHIP);
+							Fin = true;
 							me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                             break;
                         case EVENT_OUTRO_HORDE_3:
                             me->GetMotionMaster()->MovePoint(1, -555.59f, 2213.01f, 539.28f);
+							GoAndDespawn();
+							Fin = true;
+							sLog->outError(" <!> FIN SCRIPT : CANNONIERE HORDE <!>");
                             break;
                         case EVENT_FAIL:
                             TeleportPlayers(map, HORDE);
@@ -1725,6 +1751,7 @@ class npc_saurfang_gunship : public CreatureScript
                 uint32 SummonCount;
                 uint32 count;
                 bool EventScheduled;
+				bool Fin;
                 Map* map;
                 EventMap events;
                 InstanceScript* _instance;
@@ -2551,7 +2578,7 @@ class npc_zafod_boombox : public CreatureScript
         {
             // Maybe this isn't blizzlike but I can't find any spell in the DBCs
             if (pPlayer->GetItemCount(49278, false) == 0)
-                pPlayer->ADD_GOSSIP_ITEM(0, "Yeah, I'm sure safety is your top priority. Give me a rocket pack.", 631, 1);
+                pPlayer->ADD_GOSSIP_ITEM(0, "Oui, je suis sur que la securite est votre priorite. Donnez moi un de ces engins !", 631, 1);
             pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
             return true;
         }
@@ -2566,7 +2593,7 @@ class npc_zafod_boombox : public CreatureScript
                 uint32 curItemCount = player->GetItemCount(49278, false);
                 if (curItemCount >= 1)
                 {
-                    pCreature->MonsterWhisper("You already have my rocket pack!", player->GetGUIDLow());
+                    pCreature->MonsterWhisper("Vous avez deja un Jetpack !", player->GetGUIDLow());
                     return false;
                 }
 
@@ -2579,7 +2606,7 @@ class npc_zafod_boombox : public CreatureScript
                 }
                 else
                 {
-                    pCreature->MonsterWhisper("You don't have any empty space for my rocket pack!", player->GetGUIDLow());
+                    pCreature->MonsterWhisper("Vous n'avez plus d'espace dans vos sacs pour mon JetPack", player->GetGUIDLow());
                     return false;
                 }
             }

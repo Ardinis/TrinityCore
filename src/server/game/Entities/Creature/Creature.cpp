@@ -135,7 +135,7 @@ CreatureBaseStats const* CreatureBaseStats::GetBaseStats(uint8 level, uint8 unit
 
 bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    m_owner.ForcedDespawn();
+    m_owner.DespawnOrUnsummon();    // since we are here, we are not TempSummon as object type cannot change during runtime
     return true;
 }
 
@@ -356,8 +356,10 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 
     m_regenHealth = cInfo->RegenHealth;
 
-    // creatures always have melee weapon ready if any
-    SetSheath(SHEATH_STATE_MELEE);
+    // creatures always have melee weapon ready if any unless specified otherwise
+
+    if (!GetCreatureAddon())
+        SetSheath(SHEATH_STATE_MELEE);
 
     SelectLevel(GetCreatureInfo());
     if (team == HORDE)

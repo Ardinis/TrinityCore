@@ -395,7 +395,8 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            DoCast(me, SPELL_ARTHAS_AURA);
+            if (!me->HasAura(SPELL_ARTHAS_AURA))
+				DoCast(me, SPELL_ARTHAS_AURA);
         }
 
         void JustDied(Unit* /*killer*/)

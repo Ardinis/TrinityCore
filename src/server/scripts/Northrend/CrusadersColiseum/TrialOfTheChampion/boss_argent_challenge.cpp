@@ -635,28 +635,24 @@ public:
 
             if (oldWoundsTimer <= diff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                {
-                    if (target && target->isAlive())
-                        DoCast(target, SPELL_OLD_WOUNDS);
-                }
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                if (target && target->isAlive())
+                    DoCast(target, DUNGEON_MODE(SPELL_OLD_WOUNDS, SPELL_OLD_WOUNDS_H));
                 oldWoundsTimer = 12000;
             }else oldWoundsTimer -= diff;
 
             if (wakingNightmareTimer <= diff)
             {
                 DoScriptText(SAY_PALETRESS_NIGHTMARE_WARNING, me);
-                DoCast(me, SPELL_WAKING_NIGHTMARE);
-                wakingNightmareTimer = 15000;
+                DoCast(me, DUNGEON_MODE(SPELL_WAKING_NIGHTMARE, SPELL_WAKING_NIGHTMARE_H));
+                wakingNightmareTimer = 7000;
             }else wakingNightmareTimer -= diff;
 
             if (shadowPastTimer <= diff)
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                {
-                    if (target && target->isAlive())
-                        DoCast(target, SPELL_SHADOWS_PAST);
-                }
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
+                if (target && target->isAlive())
+                    DoCast(target, DUNGEON_MODE(SPELL_SHADOWS_PAST,SPELL_SHADOWS_PAST_H));
                 shadowPastTimer = 5000;
             }else shadowPastTimer -= diff;
 
@@ -666,9 +662,14 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             if (me->isSummon())
-                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                    if (summoner->isAlive())
-                        summoner->GetAI()->SetData(1, 0);
+			{
+                Unit* summoner = me->ToTempSummon()->GetSummoner();
+                if (summoner && summoner->isAlive())
+				{
+                    summoner->GetAI()->SetData(1, 0);
+					summoner->RemoveAura(SPELL_SHIELD);
+				}
+			}
         }
     };
 

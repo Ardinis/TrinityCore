@@ -26,6 +26,8 @@ Script Data End */
 #include "ScriptPCH.h"
 #include "culling_of_stratholme.h"
 
+#define MalGanisKillCredit 31006
+
 enum Spells
 {
     SPELL_CARRION_SWARM                         = 52720, //A cresting wave of chaotic magic splashes over enemies in front of the caster, dealing 3230 to 3570 Shadow damage and 380 to 420 Shadow damage every 3 sec. for 15 sec.
@@ -110,6 +112,8 @@ public:
 
              if (instance)
                  instance->SetData(DATA_MAL_GANIS_EVENT, NOT_STARTED);
+				 
+			DoCast(me, SPELL_KILL_CREDIT);
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -222,12 +226,21 @@ public:
                                 uiOutroTimer = 500;
                                 break;
                             case 5:
+                                if (instance)
+                                {
+                                    Map::PlayerList const & PlList = instance->instance->GetPlayers();
+                                    if (!PlList.isEmpty())
+                                        for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                                            if (Player * pl = itr->getSource())
+                                                pl->KilledMonsterCredit(MalGanisKillCredit, 0);
+                                }							
                                 me->SetVisible(false);
                                 me->Kill(me);
                                 break;
-
                         }
-                    } else uiOutroTimer -= diff;
+                    } 
+					else 
+						uiOutroTimer -= diff;
                     break;
             }
         }

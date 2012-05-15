@@ -259,7 +259,7 @@ class npc_tiger_matriarch : public CreatureScript
                     vehSummoner->RemoveAurasDueToSpell(SPELL_SPIRIT_OF_THE_TIGER_RIDER);
                     vehSummoner->RemoveAurasDueToSpell(SPELL_SUMMON_ZENTABRA_TRIGGER);
                 }
-                me->ForcedDespawn();
+                me->DespawnOrUnsummon();
             }
 
             void DamageTaken(Unit* attacker, uint32& damage)
@@ -282,7 +282,7 @@ class npc_tiger_matriarch : public CreatureScript
                         vehSummoner->RemoveAurasDueToSpell(SPELL_SUMMON_ZENTABRA_TRIGGER);
                     }
 
-                    me->ForcedDespawn();
+                    me->DespawnOrUnsummon();
                 }
             }
 

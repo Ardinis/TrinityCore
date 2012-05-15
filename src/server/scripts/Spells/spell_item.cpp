@@ -1737,7 +1737,7 @@ class spell_item_rocket_boots : public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
                 if (Battleground* bg = caster->GetBattleground())
                     bg->EventPlayerDroppedFlag(caster);
-
+		caster->RemoveSpellCooldown(SPELL_ROCKET_BOOTS_PROC);
                 caster->CastSpell(caster, SPELL_ROCKET_BOOTS_PROC, true, NULL);
             }
 

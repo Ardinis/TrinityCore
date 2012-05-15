@@ -161,6 +161,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+				sLog->outError(" <!> LANCEMENT SCRIPT : LANATHEL <!>");
                 if (!instance->CheckRequiredBosses(DATA_BLOOD_QUEEN_LANA_THEL, who->ToPlayer()))
                 {
                     EnterEvadeMode();

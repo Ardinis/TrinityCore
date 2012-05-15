@@ -262,7 +262,7 @@ class ValithriaDespawner : public BasicEvent
 
             if (CreatureData const* data = creature->GetCreatureData())
                 creature->SetPosition(data->posX, data->posY, data->posZ, data->orientation);
-            creature->ForcedDespawn();
+            creature->DespawnOrUnsummon();
 
             creature->SetCorpseDelay(corpseDelay);
             creature->SetRespawnDelay(respawnDelay);
@@ -325,7 +325,7 @@ class boss_valithria_dreamwalker : public CreatureScript
             {
                 if (action != ACTION_ENTER_COMBAT)
                     return;
-
+				sLog->outError(" <!> LANCEMENT SCRIPT : ValITHRIA <!>");
 		DoCast(me, SPELL_COPY_DAMAGE);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
@@ -336,6 +336,7 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void HealReceived(Unit* /*healer*/, uint32& heal)
             {
+			sLog->outError(" <!> LANCEMENT SCRIPT : ValITHRIA <!>");
                 // encounter complete
                 if (me->HealthAbovePctHealed(100, heal) && !_done)
                 {
@@ -1121,7 +1122,7 @@ class npc_dream_cloud : public CreatureScript
                             me->GetMotionMaster()->MoveIdle();
                             // must use originalCaster the same for all clouds to allow stacking
                             me->CastSpell(me, EMERALD_VIGOR, false, NULL, NULL, _instance->GetData64(DATA_VALITHRIA_DREAMWALKER));
-                            me->ForcedDespawn(100);
+                            me->DespawnOrUnsummon(100);
                             break;
                         default:
                             break;

@@ -169,6 +169,30 @@ enum PutricideData
 #define EXPERIMENT_STATE_OOZE   false
 #define EXPERIMENT_STATE_GAS    true
 
+class AbominationDespawner
+{
+    public:
+        explicit AbominationDespawner(Unit* owner) : _owner(owner) { }
+
+        bool operator()(uint64 guid)
+        {
+            if (Unit* summon = ObjectAccessor::GetUnit(*_owner, guid))
+            {
+                if (summon->GetEntry() == NPC_MUTATED_ABOMINATION_10 || summon->GetEntry() == NPC_MUTATED_ABOMINATION_25)
+               {
+                    if (Vehicle* veh = summon->GetVehicleKit())
+                       veh->RemoveAllPassengers(); // also despawns the vehicle
+
+                   return true;
+                }
+                return false;
+           }
+            return true;
+        }
+    private:
+        Unit* _owner;
+};
+
 class boss_professor_putricide : public CreatureScript
 {
     public:
@@ -205,6 +229,7 @@ class boss_professor_putricide : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+			sLog->outError(" <!> LANCEMENT SCRIPT : PUTRICIDE <!>");
                 if (events.GetPhaseMask() & PHASE_MASK_NOT_SELF)
                     return;
 
@@ -514,8 +539,7 @@ class boss_professor_putricide : public CreatureScript
 				//                                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, 35000);
 				uiUnstableExperiment = 1000000;
 				events.CancelEvent(EVENT_UNSTABLE_EXPERIMENT);
-                                summons.DespawnEntry(NPC_MUTATED_ABOMINATION_10);
-                                summons.DespawnEntry(NPC_MUTATED_ABOMINATION_25);
+				summons.remove_if(AbominationDespawner(me));
                                 break;
                             default:
                                 break;
@@ -559,7 +583,7 @@ class boss_professor_putricide : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-		/*		  if (_phase != PHASE_COMBAT_3 && start)
+		if (_phase != PHASE_COMBAT_3 && start)
 		    {
 		      if (uiUnstableExperiment <= diff)
 			{
@@ -568,7 +592,7 @@ class boss_professor_putricide : public CreatureScript
 			  uiUnstableExperiment = urand(35000, 40000);
 			}
 		      else uiUnstableExperiment -= diff;
-		      }*/
+		    }
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {

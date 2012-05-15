@@ -63,7 +63,9 @@ enum eSpells
     SPELL_CLAW              = 67774,
     SPELL_CLAW_H            = 67879,
     SPELL_LEAP              = 67749,
-    SPELL_LEAP_H            = 67880
+    SPELL_LEAP_H            = 67880,
+	
+	SPELL_KILL_CREDIT       = 68663
 };
 
 enum eModels
@@ -150,7 +152,9 @@ public:
         {
             DoCast(instance->GetData(DATA_TEAM) == ALLIANCE ? SPELL_RAISE_ARELAS : SPELL_RAISE_JAEREN);
             Talk(SAY_AGGRO);
-
+			
+			DoCast(me, SPELL_KILL_CREDIT);
+			
             if (InstanceScript* instance = me->GetInstanceScript())
                 if (instance->GetData(BOSS_BLACK_KNIGHT) != IN_PROGRESS)
                     instance->SetData(BOSS_BLACK_KNIGHT, IN_PROGRESS);

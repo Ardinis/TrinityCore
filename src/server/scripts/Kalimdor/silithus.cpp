@@ -967,14 +967,13 @@ public:
 
         void SummonNextWave()
         {
-            //uint8 count = WavesInfo[WaveCount].SpawnCount;
             uint8 locIndex = WavesInfo[WaveCount].UsedSpawnPoint;
-            //uint8 KaldoreiSoldierCount = 0;
-            //uint8 AnubisathConquerorCount = 0;
-            //uint8 QirajiWaspCount = 0;
-            for (uint8 i = 0; i < 67; ++i)
+	    uint8 count = locIndex + WavesInfo[WaveCount].SpawnCount;
+
+
+	    /*for (uint8 i = locIndex; i <= count; ++i)
             {
-                if (Creature* spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, SpawnLocation[locIndex + i], TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, WavesInfo[WaveCount].DespTimer))
+	      if (Creature* spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, SpawnLocation[i].x, SpawnLocation[i].y, SpawnLocation[i].z,SpawnLocation[i].o, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, WavesInfo[WaveCount].DespTimer))
                 {
                     spawn->LoadCreaturesAddon();
                     if (spawn->GetEntry() == 15423)
@@ -991,7 +990,7 @@ public:
                         spawnAI->PlayerGUID = PlayerGUID;
                     }
                 }
-            }
+		}*/
             WaveTimer = WavesInfo[WaveCount].SpawnTimer;
             AnnounceTimer = WavesInfo[WaveCount].YellTimer;
         }

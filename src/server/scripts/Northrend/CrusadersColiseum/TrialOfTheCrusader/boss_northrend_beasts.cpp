@@ -1001,7 +1001,7 @@ public:
       else m_uiBomb -= uiDiff;
       
       if (!me->HasAura(SPELL_FIRE_BOMB_DOT))
-	me->ForcedDespawn();
+	me->DespawnOrUnsummon();
     }
   };
   CreatureAI* GetAI(Creature* pCreature) const

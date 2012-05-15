@@ -114,6 +114,7 @@ class boss_lord_marrowgar : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+				sLog->outError(" <!> LANCEMENT SCRIPT : GARGAMOELLE <!>");
                 Talk(SAY_AGGRO);
 
                 me->setActive(true);

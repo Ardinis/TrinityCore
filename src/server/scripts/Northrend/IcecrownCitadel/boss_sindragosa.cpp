@@ -235,6 +235,7 @@ class boss_sindragosa : public CreatureScript
 
            void EnterCombat(Unit* victim)
             {
+			sLog->outError(" <!> LANCEMENT SCRIPT : SINDRAGOSA <!>");
                 if (!instance->CheckRequiredBosses(DATA_SINDRAGOSA, victim->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -754,6 +755,7 @@ class npc_spinestalker : public CreatureScript
             {
                 if (action == ACTION_START_FROSTWYRM)
                 {
+				sLog->outError(" <!> LANCEMENT SCRIPT : SPINESTALKER <!>");
                     _instance->SetData(DATA_SPINESTALKER, 255);
                     if (me->isDead())
                         return;
@@ -889,6 +891,7 @@ class npc_rimefang : public CreatureScript
             {
                 if (action == ACTION_START_FROSTWYRM)
                 {
+				sLog->outError(" <!> LANCEMENT SCRIPT : RIMEFANG <!>");
                     _instance->SetData(DATA_RIMEFANG, 255);
                     if (me->isDead())
                         return;
@@ -1631,22 +1634,27 @@ class at_sindragosa_lair : public AreaTriggerScript
         {
             if (InstanceScript* instance = player->GetInstanceScript())
             {
+	      Creature* spinestalker = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SPINESTALKER));
+	      Creature* rimefang = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_RIMEFANG));
                 if (!instance->GetData(DATA_SPINESTALKER))
-                    if (Creature* spinestalker = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SPINESTALKER)))
+                    if (spinestalker)
                         spinestalker->AI()->DoAction(ACTION_START_FROSTWYRM);
 
                 if (!instance->GetData(DATA_RIMEFANG))
-                    if (Creature* rimefang = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_RIMEFANG)))
+                    if (rimefang)
                         rimefang->AI()->DoAction(ACTION_START_FROSTWYRM);
-
-                if (!instance->GetData(DATA_SINDRAGOSA_FROSTWYRMS) && instance->GetBossState(DATA_SINDRAGOSA) != DONE)
+                if (instance->GetBossState(DATA_SINDRAGOSA) != DONE && rimefang && spinestalker)
                 {
-                    if (player->GetMap()->IsHeroic() && !instance->GetData(DATA_HEROIC_ATTEMPTS))
-                        return true;
+		  if (spinestalker->isAlive() || rimefang->isAlive())
+		    return true;
+		  //                    if (player->GetMap()->IsHeroic() && !instance->GetData(DATA_HEROIC_ATTEMPTS))
+		  //    return true;
 
-                    player->GetMap()->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
-                    if (Creature* sindragosa = player->GetMap()->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
-                        sindragosa->AI()->DoAction(ACTION_START_FROSTWYRM);
+		  player->GetMap()->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
+		  Creature* sindragosa = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SINDRAGOSA));
+		  if (!sindragosa)
+		    if (sindragosa = player->GetMap()->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
+		      sindragosa->AI()->DoAction(ACTION_START_FROSTWYRM);
                 }
             }
 

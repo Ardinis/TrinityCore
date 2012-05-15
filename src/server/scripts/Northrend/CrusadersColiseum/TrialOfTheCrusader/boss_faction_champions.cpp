@@ -48,6 +48,7 @@ enum eSpells
 {
     SPELL_ANTI_AOE      = 68595,
     SPELL_PVP_TRINKET   = 65547,
+
 };
 
 class boss_toc_champion_controller : public CreatureScript
@@ -267,7 +268,7 @@ struct boss_faction_championsAI : public ScriptedAI
     void Reset()
     {
         championControllerGUID = 0;
-        CCTimer = rand()%10000;
+	CCTimer = rand()%10000;
         ThreatTimer = 5000;
     }
 
@@ -321,7 +322,7 @@ struct boss_faction_championsAI : public ScriptedAI
         me->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
         me->RemoveAurasByType(SPELL_AURA_MOD_PACIFY);
         me->RemoveAurasByType(SPELL_AURA_MOD_CONFUSE);
-        //DoCast(me, SPELL_PVP_TRINKET);
+        DoCast(me, SPELL_PVP_TRINKET);
     }
 
     void JustDied(Unit* /*killer*/)
@@ -441,7 +442,10 @@ struct boss_faction_championsAI : public ScriptedAI
             if (CCTimer < uiDiff)
             {
                 RemoveCC();
-                CCTimer = 8000+rand()%2000;
+		if (IsHeroic())
+		  CCTimer = 4000;
+		else
+		  CCTimer = 8000+rand()%2000;
             }
             else CCTimer -= uiDiff;
         }
@@ -501,20 +505,20 @@ public:
             if (m_uiNatureGraspTimer <= uiDiff)
             {
                 DoCast(me, SPELL_NATURE_GRASP);
-                m_uiNatureGraspTimer = urand(40*IN_MILLISECONDS, 80*IN_MILLISECONDS);
+                m_uiNatureGraspTimer = urand(20*IN_MILLISECONDS, 80*IN_MILLISECONDS);
             } else m_uiNatureGraspTimer -= uiDiff;
 
             if (m_uiTranquilityTimer <= uiDiff)
             {
                 DoCastAOE(SPELL_TRANQUILITY);
-                m_uiTranquilityTimer = urand(40*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiTranquilityTimer = urand(20*IN_MILLISECONDS, 90*IN_MILLISECONDS);
             } else m_uiTranquilityTimer -= uiDiff;
 
             if (m_uiBarkskinTimer <= uiDiff)
             {
                 if (HealthBelowPct(50))
                     DoCast(me, SPELL_BARKSKIN);
-                m_uiBarkskinTimer = urand(45*IN_MILLISECONDS, 90*IN_MILLISECONDS);
+                m_uiBarkskinTimer = urand(25*IN_MILLISECONDS, 90*IN_MILLISECONDS);
             } else m_uiBarkskinTimer -= uiDiff;
 
             if (m_uiCommonTimer <= uiDiff)
@@ -538,7 +542,7 @@ public:
                             DoCast(target, SPELL_THORNS);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -818,7 +822,7 @@ public:
                         DoCast(me, SPELL_MANA_BURN);
                         break;
                 }
-                m_uiCommonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);

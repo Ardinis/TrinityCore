@@ -736,6 +736,7 @@ public:
             m_fTrampleTargetY = 0;
             m_fTrampleTargetZ = 0;
             m_uiStage = 0;
+	    me->SetSpeed(MOVE_JUMP, 2.0f);
         }
 
         void JustDied(Unit* /*pKiller*/)
@@ -982,11 +983,12 @@ public:
 	{
 	  if (Player* pPlayer = i->getSource())
 	    {
-	      if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 7)
-		{
-		  //              DoCast(pPlayer, SPELL_FIRE_BOMB);
-		  me->DealDamage(i->getSource(), 6187, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
-		}
+	      if (pPlayer->isAlive())
+		if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 7)
+		  {
+		    //              DoCast(pPlayer, SPELL_FIRE_BOMB);
+		    me->DealDamage(i->getSource(), 6187, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
+		  }
 	    }
 	}
     }

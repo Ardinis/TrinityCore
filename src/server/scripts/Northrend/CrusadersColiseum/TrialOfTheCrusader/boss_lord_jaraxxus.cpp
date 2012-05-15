@@ -272,12 +272,41 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             me->SetInCombatWithZone();
             DoCast(SPELL_LEGION_FLAME_EFFECT);
+	    m_uiBomb = 2000;
         }
 
-        void UpdateAI(const uint32 /*uiDiff*/)
-        {
+      void FireDamage()
+      {
+	Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+
+	for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+	  {
+	    if (Player* pPlayer = i->getSource())
+	      {
+		if (pPlayer->isAlive())
+		  if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 7)
+		    {
+		      //              DoCast(pPlayer, SPELL_FIRE_BOMB);
+		      me->DealDamage(i->getSource(), 6187, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
+		    }
+	      }
+	  }
+      }
+
+      void UpdateAI(const uint32 uiDiff)
+      {
+	if (m_uiBomb < uiDiff)
+	  {
+	    FireDamage();
+	    m_uiBomb = 2000;
+	  }
+	else m_uiBomb -= uiDiff;
+
             UpdateVictim();
-        }
+      }
+
+    private :
+      uint32 m_uiBomb;
     };
 
 };

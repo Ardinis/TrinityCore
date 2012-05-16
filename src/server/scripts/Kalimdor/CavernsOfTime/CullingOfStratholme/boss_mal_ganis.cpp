@@ -113,7 +113,7 @@ public:
              if (instance)
                  instance->SetData(DATA_MAL_GANIS_EVENT, NOT_STARTED);
 				 
-			DoCast(me, SPELL_KILL_CREDIT);
+	     //			DoCast(me, SPELL_KILL_CREDIT);
         }
 
         void EnterCombat(Unit* /*who*/)

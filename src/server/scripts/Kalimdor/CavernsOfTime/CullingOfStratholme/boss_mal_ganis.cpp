@@ -233,7 +233,9 @@ public:
                                         for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
                                             if (Player * pl = itr->getSource())
                                                 pl->KilledMonsterCredit(MalGanisKillCredit, 0);
-                                }							
+                                }		
+				// give achievement credit and LFG rewards to players. criteria use spell 58630 which doesn't exist, but it was created in spell_dbc
+				DoCast(me, SPELL_KILL_CREDIT);					
                                 me->SetVisible(false);
                                 me->Kill(me);
                                 break;
@@ -251,8 +253,7 @@ public:
             {
                 instance->SetData(DATA_MAL_GANIS_EVENT, DONE);
 
-                // give achievement credit and LFG rewards to players. criteria use spell 58630 which doesn't exist, but it was created in spell_dbc
-                DoCast(me, SPELL_KILL_CREDIT);
+
             }
         }
 

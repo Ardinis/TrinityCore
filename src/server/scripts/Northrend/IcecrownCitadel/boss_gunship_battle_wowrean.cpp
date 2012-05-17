@@ -942,7 +942,7 @@ class npc_muradin_gunship : public CreatureScript
                              pAllianceBoss->AddThreat(pHordeBoss, 0.0f);
                              pHordeBoss->AddThreat(pAllianceBoss, 0.0f);
                              _instance->SetBossState(DATA_GUNSHIP_EVENT, IN_PROGRESS);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
+                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 43000);
                              RelocateTransport(skybreaker);
                              RelocateTransport(CheckUnfriendlyShip(me,_instance, DATA_GB_HIGH_OVERLORD_SAURFANG));
                         }
@@ -988,14 +988,14 @@ class npc_muradin_gunship : public CreatureScript
 							RocketerDieCount = 0;
                         ++RocketerDieCount;
 						if(RocketerDieCount == RocketerCount)
-							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 50000);
+							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 40000);
                         break;
                     case ACTION_AXES_RIFL_DIE:
 						if( RiflDieCount == RiflCount)
 							RiflDieCount = 0;
                         ++RiflDieCount;
 						if(RiflDieCount == RiflCount)
-							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 50000);
+							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 40000);
                         break;
                 }
             }
@@ -1195,8 +1195,8 @@ class npc_muradin_gunship : public CreatureScript
 								if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -9.51547f, -0.160213f, 20.87252f, 1.56211f))
 									sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 
-								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
-								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
+								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 43000);
+								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 2000);
 							}
 							break;
 						case EVENT_BOARDING_REAVERS_MARINE:
@@ -1212,7 +1212,7 @@ class npc_muradin_gunship : public CreatureScript
 									if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -9.51547f, -0.160213f, 20.87252f, 1.56211f))
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 								}
-								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 31000 / SummonCount);
+								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 43000 );//  31000 / SummonCount
 								++count;
 							}
 							break;
@@ -1473,7 +1473,7 @@ class npc_saurfang_gunship : public CreatureScript
                              pAllianceBoss->AddThreat(pHordeBoss, 0.0f);
                              pHordeBoss->AddThreat(pAllianceBoss, 0.0f);
                              _instance->SetBossState(DATA_GUNSHIP_EVENT, IN_PROGRESS);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
+                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 43000);
                              RelocateTransport(orgrimmar);
                              RelocateTransport(CheckUnfriendlyShip(me,_instance, DATA_GB_MURADIN_BRONZEBEARD));
                          }
@@ -1519,14 +1519,14 @@ class npc_saurfang_gunship : public CreatureScript
 							 RocketerDieCount = 0;
                          ++RocketerDieCount;
 						if(RocketerDieCount == RocketerCount)
-							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 50000);
+							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 40000);
                          break;
                      case ACTION_AXES_RIFL_DIE:
 						 if(AxesDieCount == AxesCount)
 							 AxesDieCount = 0;
                          ++AxesDieCount;
 						if(AxesDieCount == AxesCount)
-							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 50000);
+							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 40000);
                          break;
                  }
             }
@@ -1708,8 +1708,8 @@ class npc_saurfang_gunship : public CreatureScript
 									if (Creature* sergante = orgrimmar->AddNPCPassengerInInstance(NPC_GB_SKYBREAKER_SERGANTE, 15.03016f, -7.00016f, 37.70952f, 1.55138f))
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 									
-									events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
-									events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
+									events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 2000);
+									events.ScheduleEvent(EVENT_SUMMON_PORTAL, 43000);
 								}
 							break;
 						case EVENT_BOARDING_REAVERS_MARINE:
@@ -1726,7 +1726,7 @@ class npc_saurfang_gunship : public CreatureScript
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 								}
 								count++;
-								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 31000 / SummonCount);
+								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 43000); // 31000 / SummonCount
 							}
 							break;
 						case EVENT_OUTRO_HORDE_1:
@@ -2210,14 +2210,14 @@ class npc_sergeant : public CreatureScript
                             switch (me->GetEntry())
                             {
                                 case NPC_GB_KORKRON_SERGANTE:
-                                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, SPELL_ON_SKYBREAKERS_DECK))
+                                    if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 1, 0.0f, true, SPELL_ON_SKYBREAKERS_DECK))
                                     {
                                         me->GetMotionMaster()->MoveChase(target);
                                         me->AI()->AttackStart(target);
                                     }
                                 break;
                                 case NPC_GB_SKYBREAKER_SERGANTE:
-                                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, SPELL_ON_ORGRIMS_HAMMERS_DECK))
+                                    if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 1, 0.0f, true, SPELL_ON_ORGRIMS_HAMMERS_DECK))
                                     {
                                         me->GetMotionMaster()->MoveChase(target);
                                         me->AI()->AttackStart(target);
@@ -2228,7 +2228,7 @@ class npc_sergeant : public CreatureScript
                             events.ScheduleEvent(EVENT_BLADE_STORM, 3000);
                             break;
                         case EVENT_BURNING_PITCH:
-                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 400.0f, true))
+                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_NEAREST, 0, 400.0f, true))
                             {
                                 if (me->GetEntry() == NPC_GB_KORKRON_SERGANTE)
                                     DoCast(pTarget, SPELL_BURNING_PITCH_H);
@@ -2349,14 +2349,14 @@ class npc_marine_or_reaver : public CreatureScript
                             switch (me->GetEntry())
                             {
                                 case NPC_GB_KORKRON_REAVERS:
-                                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, SPELL_ON_SKYBREAKERS_DECK))
+                                    if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 1, 0.0f, true, SPELL_ON_SKYBREAKERS_DECK))
                                     {
                                         me->GetMotionMaster()->MoveChase(target);
                                         me->AI()->AttackStart(target);
                                     }
                                 break;
                                 case NPC_GB_SKYBREAKER_MARINE:
-                                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, SPELL_ON_ORGRIMS_HAMMERS_DECK))
+                                    if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 1, 0.0f, true, SPELL_ON_ORGRIMS_HAMMERS_DECK))
                                     {
                                         me->GetMotionMaster()->MoveChase(target);
                                         me->AI()->AttackStart(target);
@@ -2365,7 +2365,7 @@ class npc_marine_or_reaver : public CreatureScript
                             }
                             break;
                         case EVENT_BURNING_PITCH:
-                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 300, true))
+                            if (Unit* pTarget = SelectTarget(SELECT_TARGET_NEAREST, 0, 300, true))
                             {
                                if (me->GetEntry() == NPC_GB_KORKRON_REAVERS)
                                     DoCast(pTarget, SPELL_BURNING_PITCH_H);

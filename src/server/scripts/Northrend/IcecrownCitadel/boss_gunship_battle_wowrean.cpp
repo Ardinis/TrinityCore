@@ -861,8 +861,8 @@ class npc_muradin_gunship : public CreatureScript
 
             void Reset()
             {
-                if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
-                    return;
+	      if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS || _instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
+		return;
                 // Cambios en el reactstate y flags, gracias Ws
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
@@ -909,6 +909,8 @@ class npc_muradin_gunship : public CreatureScript
 
             void DoAction(int32 const action)
             {
+	      if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
+		return;
                 switch (action)
                 {
                     case ACTION_INTRO_START:
@@ -1067,7 +1069,7 @@ class npc_muradin_gunship : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+	      if (me->HasUnitState(UNIT_STATE_CASTING) || (_instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE))
                     return;
 
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
@@ -1345,7 +1347,7 @@ class npc_saurfang_gunship : public CreatureScript
 
             void Reset()
             {
-                if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
+	      if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS || _instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
                     return;
 
                 // Cambios en el reactstate y flags, gracias Ws
@@ -1393,6 +1395,8 @@ class npc_saurfang_gunship : public CreatureScript
 
             void DoAction(int32 const action)
             {
+	      if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE)
+		return;
                 switch (action)
                 {
                      case ACTION_INTRO_START:
@@ -1548,7 +1552,7 @@ class npc_saurfang_gunship : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (me->HasUnitState(UNIT_STATE_CASTING))
+	      if (me->HasUnitState(UNIT_STATE_CASTING) || (_instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE))
                     return;
 
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)

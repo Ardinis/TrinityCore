@@ -942,7 +942,7 @@ class npc_muradin_gunship : public CreatureScript
                              pAllianceBoss->AddThreat(pHordeBoss, 0.0f);
                              pHordeBoss->AddThreat(pAllianceBoss, 0.0f);
                              _instance->SetBossState(DATA_GUNSHIP_EVENT, IN_PROGRESS);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 30000);
+                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
                              RelocateTransport(skybreaker);
                              RelocateTransport(CheckUnfriendlyShip(me,_instance, DATA_GB_HIGH_OVERLORD_SAURFANG));
                         }
@@ -981,21 +981,21 @@ class npc_muradin_gunship : public CreatureScript
                         events.ScheduleEvent(EVENT_FAIL, 10000);
                         break;
                     case ACTION_MAGE_DIE:
-                        events.ScheduleEvent(EVENT_SPAWN_MAGE, 30000);
+                        events.ScheduleEvent(EVENT_SPAWN_MAGE, 40000);
                         break;
                     case ACTION_ROCK_DIE:
 						if( RocketerDieCount == RocketerCount)
 							RocketerDieCount = 0;
                         ++RocketerDieCount;
 						if(RocketerDieCount == RocketerCount)
-							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 30000);
+							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 50000);
                         break;
                     case ACTION_AXES_RIFL_DIE:
 						if( RiflDieCount == RiflCount)
 							RiflDieCount = 0;
                         ++RiflDieCount;
 						if(RiflDieCount == RiflCount)
-							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 30000);
+							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 50000);
                         break;
                 }
             }
@@ -1195,7 +1195,7 @@ class npc_muradin_gunship : public CreatureScript
 								if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -9.51547f, -0.160213f, 20.87252f, 1.56211f))
 									sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 
-								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 30000);
+								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
 								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
 							}
 							break;
@@ -1212,7 +1212,7 @@ class npc_muradin_gunship : public CreatureScript
 									if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -9.51547f, -0.160213f, 20.87252f, 1.56211f))
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 								}
-								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 21000 / SummonCount);
+								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 31000 / SummonCount);
 								++count;
 							}
 							break;
@@ -1473,7 +1473,7 @@ class npc_saurfang_gunship : public CreatureScript
                              pAllianceBoss->AddThreat(pHordeBoss, 0.0f);
                              pHordeBoss->AddThreat(pAllianceBoss, 0.0f);
                              _instance->SetBossState(DATA_GUNSHIP_EVENT, IN_PROGRESS);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 30000);
+                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
                              RelocateTransport(orgrimmar);
                              RelocateTransport(CheckUnfriendlyShip(me,_instance, DATA_GB_MURADIN_BRONZEBEARD));
                          }
@@ -1512,21 +1512,21 @@ class npc_saurfang_gunship : public CreatureScript
                          events.ScheduleEvent(EVENT_FAIL, 10000);
                          break;
                      case ACTION_MAGE_DIE:
-                         events.ScheduleEvent(EVENT_SPAWN_MAGE, 30000);
+                         events.ScheduleEvent(EVENT_SPAWN_MAGE, 40000);
                          break;
                      case ACTION_ROCK_DIE:
 						 if(RocketerDieCount == RocketerCount)
 							 RocketerDieCount = 0;
                          ++RocketerDieCount;
 						if(RocketerDieCount == RocketerCount)
-							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 30000);
+							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 50000);
                          break;
                      case ACTION_AXES_RIFL_DIE:
 						 if(AxesDieCount == AxesCount)
 							 AxesDieCount = 0;
                          ++AxesDieCount;
 						if(AxesDieCount == AxesCount)
-							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 30000);
+							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 50000);
                          break;
                  }
             }
@@ -1709,7 +1709,7 @@ class npc_saurfang_gunship : public CreatureScript
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 									
 									events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
-									events.ScheduleEvent(EVENT_SUMMON_PORTAL, 30000);
+									events.ScheduleEvent(EVENT_SUMMON_PORTAL, 50000);
 								}
 							break;
 						case EVENT_BOARDING_REAVERS_MARINE:
@@ -1726,7 +1726,7 @@ class npc_saurfang_gunship : public CreatureScript
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 								}
 								count++;
-								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 21000 / SummonCount);
+								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 31000 / SummonCount);
 							}
 							break;
 						case EVENT_OUTRO_HORDE_1:

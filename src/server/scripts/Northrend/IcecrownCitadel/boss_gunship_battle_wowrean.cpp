@@ -1974,8 +1974,11 @@ class npc_korkron_axethrower_rifleman : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-                if (_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+                if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
                     return;
+		  }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -2084,8 +2087,10 @@ class npc_sergeant : public CreatureScript
             void UpdateAI(const uint32 diff)
             {
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
                     return;
-
+		  }
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -2221,7 +2226,10 @@ class npc_marine_or_reaver : public CreatureScript
             void UpdateAI(const uint32 diff)
             {
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
                     return;
+		  }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -2371,7 +2379,10 @@ class npc_gunship_mage : public CreatureScript
             void UpdateAI(const uint32 diff)
             {
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
                     return;
+		  }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -2513,7 +2524,10 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
             void UpdateAI(const uint32 diff)
             {
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
                     return;
+		  }
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -2776,6 +2790,12 @@ class npc_korkron_primalist: public CreatureScript
                 if (!instance)
                     return;
 
+                if (instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
+                    return;
+		  }
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -2897,6 +2917,12 @@ class npc_korkron_defender: public CreatureScript
                 if (!instance)
                     return;
 
+                if(instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
+		  {
+		    me->Kill(me);
+                    return;
+		  }
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -3011,6 +3037,7 @@ class npc_skybreaker_vindicator: public CreatureScript
             {
                 if (!instance)
                     return;
+
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;

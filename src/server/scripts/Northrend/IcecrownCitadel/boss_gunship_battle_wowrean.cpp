@@ -987,25 +987,15 @@ class npc_muradin_gunship : public CreatureScript
 						if( RocketerDieCount == RocketerCount)
 							RocketerDieCount = 0;
                         ++RocketerDieCount;
-						printf("\n\n RocketerdieCount : %d\n",RocketerDieCount);
-						printf("\n\n Fin Muradin RocketerDieCount : %d\n",Fin);
-      //                  if(!Fin)
-						//{
-							if(RocketerDieCount == RocketerCount)
-								events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 30000);
-						//}
+						if(RocketerDieCount == RocketerCount)
+							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 30000);
                         break;
                     case ACTION_AXES_RIFL_DIE:
 						if( RiflDieCount == RiflCount)
 							RiflDieCount = 0;
                         ++RiflDieCount;
-						printf("\n\n RiflDieCount Muradin: %d\n",RiflDieCount);
-						printf("\n\n Fin Muradin RiffleCount : %d\n",Fin);
-						//if(!Fin)
-						//{
-							if(RiflDieCount == RiflCount)
-								events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 30000);
-						//}
+						if(RiflDieCount == RiflCount)
+							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 30000);
                         break;
                 }
             }
@@ -1207,9 +1197,6 @@ class npc_muradin_gunship : public CreatureScript
 
 								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 30000);
 								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 3000);
-
-								printf("\n\n RocketerdieCount : %d\n",RocketerDieCount);
-								printf("\n\n RiflDieCount : %d\n",RiflDieCount);
 							}
 							break;
 						case EVENT_BOARDING_REAVERS_MARINE:
@@ -1286,8 +1273,6 @@ class npc_muradin_gunship : public CreatureScript
 							break;
 						case EVENT_RESPAWN_ROCKETEER:
 							Talk(SAY_NEW_MORTAR_TEAM_SPAWNED);
-							printf("\n Fin Muradin = %d\n",Fin);
-							//RocketerDieCount = 0;
 							if(Fin && _instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
 							{
 								if(RocketerCount == 2)
@@ -1532,25 +1517,16 @@ class npc_saurfang_gunship : public CreatureScript
                      case ACTION_ROCK_DIE:
 						 if(RocketerDieCount == RocketerCount)
 							 RocketerDieCount = 0;
-
                          ++RocketerDieCount;
-						 printf(" \n\n Fin Saurcroc Rocketdie = %d",Fin);
-						 //if(!Fin)
-						 //{
-							if(RocketerDieCount == RocketerCount)
-								events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 30000);
-						 //}
+						if(RocketerDieCount == RocketerCount)
+							events.ScheduleEvent(EVENT_RESPAWN_ROCKETEER, 30000);
                          break;
                      case ACTION_AXES_RIFL_DIE:
 						 if(AxesDieCount == AxesCount)
 							 AxesDieCount = 0;
-						 printf(" \n\n Fin Saurcroc AxesDieCount = %d",Fin);
                          ++AxesDieCount;
-						 //if(!Fin)
-						 //{
-							if(AxesDieCount == AxesCount)
-								events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 30000);
-						 //}
+						if(AxesDieCount == AxesCount)
+							events.ScheduleEvent(EVENT_RESPAWN_AXES_RIFLEMEN, 30000);
                          break;
                  }
             }
@@ -1723,7 +1699,6 @@ class npc_saurfang_gunship : public CreatureScript
 							Talk(SAY_BOARDING_ORGRIMS_HAMMER_1);
 							break;
 						case EVENT_BOARDING_GUNSHIP:
-							printf("\n BOARDING DE GUNSHIP DE HORDE !! : %d",Fin);
 							if(!Fin && count != 10 && _instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE && _instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS && _instance->GetBossState(DATA_GUNSHIP_EVENT) != DONE)
 							{
 									count = 0;
@@ -1762,7 +1737,6 @@ class npc_saurfang_gunship : public CreatureScript
 							_instance->DoCastSpellOnPlayers(SPELL_ACHIEVEMENT_CHECK);
 							GoAndDespawn();
 							Fin = true;
-							printf("\n BOARDING DE GUNSHIP DE HORDE A LA FIN DE L'EVENT!! : %d",Fin);
 							count = 10;
 							StartFlyShip(orgrimmar);
 							StopFlyShip(CheckUnfriendlyShip(me,_instance,DATA_GB_MURADIN_BRONZEBEARD));
@@ -1822,11 +1796,8 @@ class npc_saurfang_gunship : public CreatureScript
 							break;
 						case EVENT_RESPAWN_ROCKETEER:
 							Talk(SAY_NEW_ROCKETEERS_SPAWNED);
-							//RocketerDieCount = 0;
-							printf("\n Fin = %d\n",Fin);
 							if(Fin && _instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
 							{
-								printf("\n FinRESPAWN = %d\n",Fin);
 								if(RocketerCount == 2)
 								{
 									orgrimmar->AddNPCPassengerInInstance(NPC_GB_KORKRON_ROCKETEER, -11.44849f, -25.71838f, 33.64343f, 1.49248f);
@@ -1843,7 +1814,6 @@ class npc_saurfang_gunship : public CreatureScript
 							break;
 						case EVENT_RESPAWN_AXES_RIFLEMEN:
 							Talk(SAY_NEW_AXETHROWER_SPAWNED);
-							//AxesDieCount = 0;
 							if(Fin && _instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
 							{
 								if(AxesCount == 4)

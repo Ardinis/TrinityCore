@@ -1650,9 +1650,11 @@ class at_sindragosa_lair : public AreaTriggerScript
 		  //                    if (player->GetMap()->IsHeroic() && !instance->GetData(DATA_HEROIC_ATTEMPTS))
 		  //    return true;
 
-                    player->GetMap()->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
-                    if (Creature* sindragosa = player->GetMap()->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
-                        sindragosa->AI()->DoAction(ACTION_START_FROSTWYRM);
+		  player->GetMap()->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
+		  Creature* sindragosa = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SINDRAGOSA));
+		  if (!sindragosa)
+		    if (sindragosa = player->GetMap()->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
+		      sindragosa->AI()->DoAction(ACTION_START_FROSTWYRM);
                 }
             }
 

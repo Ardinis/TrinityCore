@@ -241,7 +241,7 @@ class boss_blood_council_controller : public CreatureScript
                     _invocationOrder[2] = InvocationData(instance->GetData64(DATA_PRINCE_TALDARAM_GUID), SPELL_INVOCATION_OF_BLOOD_TALDARAM, EMOTE_TALDARAM_INVOCATION, 71081);
                 }
 
-		if (IsHeroic())
+		/*		if (IsHeroic())
 		  {
 		    const Map::PlayerList &PlayerList = me->GetMap()->GetPlayers();
 		    if (PlayerList.isEmpty())
@@ -258,7 +258,7 @@ class boss_blood_council_controller : public CreatureScript
                                 player->AddAura(SPELL_SHADOW_PRISON_DUMMY, player);
                         }
 		    }
-		  }
+		    }*/
 		
             }
 		

@@ -228,7 +228,7 @@ public:
 
             if (instance->GetData(TYPE_HALION_EVENT) != FAIL)
                 return;
-
+	    sLog->outError(" <!> LANCEMENT SCRIPT : HALLION <!>");
             ScriptedAI::EnterEvadeMode();
         }
 

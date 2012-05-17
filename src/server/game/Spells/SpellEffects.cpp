@@ -1303,7 +1303,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 					if (aura->GetCharges())
 					{
 						m_caster->ToPlayer()->RestoreSpellMods(this, 52437);                       
-						aura->DropCharge();
+						//aura->DropCharge();      
 					}
                 break;
             }

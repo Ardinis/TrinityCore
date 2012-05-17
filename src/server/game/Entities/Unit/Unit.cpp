@@ -812,7 +812,16 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     sLog->outStaticDebug("DealDamageEnd returned %d damage", damage);
-
+    if (GetTypeId() == TYPEID_PLAYER)
+      {
+        Player* killer = ToPlayer();
+	sLog->outStaticDebug("player : %s", killer->GetName());
+        // in bg, count dmg if victim is also a player
+        if (victim->GetTypeId() == TYPEID_PLAYER)
+	  sLog->outStaticDebug("victim : %s", victim->ToPlayer()->GetName());
+	else
+	  sLog->outStaticDebug("victim entry: %d" , victim->GetGUID());
+      }
     return damage;
 }
 
@@ -8991,13 +9000,11 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Item - Warrior T10 Melee 4P Bonus
             if (AuraEffect const* aurEff = GetAuraEffect(70847, 0))
             {
-                int32 amount = aurEff->GetAmount();
-                if (roll_chance_i(amount))
-                    CastSpell(this, 70849, true, castItem, triggeredByAura); // Extra Charge
-                if (roll_chance_i(amount)) 
-                    CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
-                if (roll_chance_i(amount))
-                    CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
+                if (!roll_chance_i(aurEff->GetAmount()))
+                    break;
+                CastSpell(this, 70849, true, castItem, triggeredByAura); // Extra Charge!
+                CastSpell(this, 71072, true, castItem, triggeredByAura); // Slam GCD Reduced
+                CastSpell(this, 71069, true, castItem, triggeredByAura); // Execute GCD Reduced
             }
             break;
         }
@@ -11605,7 +11612,7 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
     }
 
     // Spells that don't have effectMechanics.
-    if (!spellInfo->HasAnyEffectMechanic() && spellInfo->Mechanic)
+    if (spellInfo->Mechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
@@ -11645,7 +11652,7 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
 
 bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const
 {
-    if (!spellInfo)
+  if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
     uint32 effect = spellInfo->Effects[index].Effect;

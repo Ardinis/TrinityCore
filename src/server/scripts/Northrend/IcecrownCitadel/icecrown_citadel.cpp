@@ -822,6 +822,7 @@ class boss_sister_svalna : public CreatureScript
                         break;
                     case ACTION_RESURRECT_CAPTAINS:
                         events.ScheduleEvent(EVENT_SVALNA_RESURRECT, 7000);
+						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case ACTION_CAPTAIN_DIES:
                         Talk(SAY_SVALNA_CAPTAIN_DEATH);
@@ -881,7 +882,7 @@ class boss_sister_svalna : public CreatureScript
                         {
                             Talk(EMOTE_SVALNA_IMPALE, target->GetGUID());
                             summon->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, target, false);
-                            summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
+                            //summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
                             _impaledguid = target->GetGUID();
                         }
                         break;

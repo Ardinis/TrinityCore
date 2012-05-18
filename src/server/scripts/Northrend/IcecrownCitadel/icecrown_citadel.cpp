@@ -860,12 +860,7 @@ class boss_sister_svalna : public CreatureScript
                         {
                             Talk(EMOTE_SVALNA_IMPALE, target->GetGUID());
                             summon->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, target, false);
-<<<<<<< HEAD
-                            //summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
-                            _impaledguid = target->GetGUID();
-=======
                             summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
->>>>>>> parent of 817f9a2... Fix Issue On Sister Svalna (can't kill)
                         }
                         break;
                     default:

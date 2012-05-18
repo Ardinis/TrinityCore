@@ -152,6 +152,11 @@ public:
         {
             DoCast(instance->GetData(DATA_TEAM) == ALLIANCE ? SPELL_RAISE_ARELAS : SPELL_RAISE_JAEREN);
             Talk(SAY_AGGRO);
+<<<<<<< HEAD
+=======
+			
+			DoCast(me, SPELL_KILL_CREDIT);
+>>>>>>> parent of 817f9a2... Fix Issue On Sister Svalna (can't kill)
 			
             if (InstanceScript* instance = me->GetInstanceScript())
                 if (instance->GetData(BOSS_BLACK_KNIGHT) != IN_PROGRESS)
@@ -341,8 +346,11 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+<<<<<<< HEAD
 			DoCast(me, SPELL_KILL_CREDIT);			
 
+=======
+>>>>>>> parent of 817f9a2... Fix Issue On Sister Svalna (can't kill)
             if (instance)
                 instance->SetData(BOSS_BLACK_KNIGHT, DONE);
         }

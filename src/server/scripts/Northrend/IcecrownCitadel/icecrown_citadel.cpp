@@ -129,7 +129,6 @@ enum Spells
     SPELL_IMPALING_SPEAR            = 71443,
     SPELL_AETHER_SHIELD             = 71463,
     SPELL_HURL_SPEAR                = 71466,
-	SPELL_DIVINE_SURGE              = 71465,	
 
     // Captain Arnath
     SPELL_DOMINATE_MIND             = 14515,
@@ -735,17 +734,12 @@ class boss_sister_svalna : public CreatureScript
             void Reset()
             {
                 _Reset();
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
-                _impaledguid = 0;
+                me->SetReactState(REACT_DEFENSIVE);
                 _isEventInProgress = false;
             }
 
             void JustDied(Unit* /*killer*/)
             {
-				if (_impaledguid)
-					RemoveSpike();
-					
                 _JustDied();
                 Talk(SAY_SVALNA_DEATH);
 
@@ -768,8 +762,9 @@ class boss_sister_svalna : public CreatureScript
                 _EnterCombat();
                 if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
                     crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
-                events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);	
-                events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 30000));
+                events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
+                events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
+                events.ScheduleEvent(EVENT_AETHER_SHIELD, urand(100000, 110000));
             }
 
             void KilledUnit(Unit* victim)
@@ -777,8 +772,6 @@ class boss_sister_svalna : public CreatureScript
                 switch (victim->GetTypeId())
                 {
                     case TYPEID_PLAYER:
-						if (victim->GetGUID() == _impaledguid)
-							_impaledguid = 0;
                         Talk(SAY_SVALNA_KILL);
                         break;
                     case TYPEID_UNIT:
@@ -802,7 +795,6 @@ class boss_sister_svalna : public CreatureScript
             void JustReachedHome()
             {
                 _JustReachedHome();
-				me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlying(false);
             }
@@ -826,7 +818,6 @@ class boss_sister_svalna : public CreatureScript
                         break;
                     case ACTION_CAPTAIN_DIES:
                         Talk(SAY_SVALNA_CAPTAIN_DEATH);
-						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case ACTION_RESET_EVENT:
                         me->setActive(false);
@@ -857,19 +848,6 @@ class boss_sister_svalna : public CreatureScript
                 me->SetFlying(false);
             }
 
-            void RemoveSpike()
-            {
-				if (!_impaledguid)
-					return;
-
-				if (Player* _impaled = ObjectAccessor::GetPlayer(*me , _impaledguid))
-				{
-					_impaled->RemoveAurasDueToSpell(VEHICLE_SPELL_RIDE_HARDCODED);
-					_impaled->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR);
-					_impaledguid = 0;
-				}
-            }			
-			
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
                 switch (spell->Id)
@@ -882,8 +860,12 @@ class boss_sister_svalna : public CreatureScript
                         {
                             Talk(EMOTE_SVALNA_IMPALE, target->GetGUID());
                             summon->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, target, false);
+<<<<<<< HEAD
                             //summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
                             _impaledguid = target->GetGUID();
+=======
+                            summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
+>>>>>>> parent of 817f9a2... Fix Issue On Sister Svalna (can't kill)
                         }
                         break;
                     default:
@@ -901,9 +883,6 @@ class boss_sister_svalna : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-				if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))	
-					RemoveSpike();
-				
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
@@ -915,34 +894,22 @@ class boss_sister_svalna : public CreatureScript
                             me->setActive(false);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_NPC);
                             me->SetFlying(false);
-                            me->SetPosition(4356.33f, 2484.21f, 368.43f, 1.54f);
+                            me->SetPosition(4356.33f, 2484.21f, 358.43f, 1.54f);
                             Talk(SAY_SVALNA_RESURRECT_CAPTAINS);
                             me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
                             break;
                         case EVENT_SVALNA_COMBAT:
-							me->SetFlying(false);
                             me->SetReactState(REACT_DEFENSIVE);
-							DoCast(me, SPELL_DIVINE_SURGE, true);							
                             Talk(SAY_SVALNA_AGGRO);
                             break;
                         case EVENT_IMPALING_SPEAR:
-							if (_impaledguid)
-								break;
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_IMPALING_SPEAR))
                             {
-                                if (Creature* _oldspike = GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))
-								{
-									_oldspike->DespawnOrUnsummon();
-									RemoveSpike();
-								}
+                                DoCast(me, SPELL_AETHER_SHIELD);
                                 DoCast(target, SPELL_IMPALING_SPEAR);
-								events.ScheduleEvent(EVENT_AETHER_SHIELD, 5000);
                             }
-                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
+                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 25000));
                             break;
-						case EVENT_AETHER_SHIELD:
-							DoCast(me, SPELL_AETHER_SHIELD, true);
-							break;
                         default:
                             break;
                     }
@@ -952,7 +919,6 @@ class boss_sister_svalna : public CreatureScript
             }
 
         private:
-			uint64 _impaledguid;
             bool _isEventInProgress;
         };
 
@@ -1432,6 +1398,7 @@ class npc_captain_arnath : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
+
         private:
             Creature* FindFriendlyCreature() const
             {
@@ -1457,8 +1424,8 @@ class npc_captain_brandon : public CreatureScript
         struct npc_captain_brandonAI : public npc_argent_captainAI
         {
             npc_captain_brandonAI(Creature* creature) : npc_argent_captainAI(creature)
-			{
-			}
+            {
+            }
 
             void Reset()
             {
@@ -1479,8 +1446,6 @@ class npc_captain_brandon : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-
-
 
                 while (uint32 eventId = Events.ExecuteEvent())
                 {
@@ -1575,6 +1540,7 @@ class npc_captain_grondel : public CreatureScript
                             break;
                     }
                 }
+
                 DoMeleeAttackIfReady();
             }
         };
@@ -1637,6 +1603,7 @@ class npc_captain_rupert : public CreatureScript
                             break;
                     }
                 }
+
                 DoMeleeAttackIfReady();
             }
         };
@@ -1967,7 +1934,7 @@ class spell_svalna_revive_champion : public SpellScriptLoader
                 pos.m_positionZ = caster->GetBaseMap()->GetHeight(caster->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true, 20.0f);
                 pos.m_positionZ += 0.05f;
                 caster->SetHomePosition(pos);
-				caster->GetMotionMaster()->MovePoint(POINT_LAND, pos);
+                caster->GetMotionMaster()->MovePoint(POINT_LAND, pos);
             }
 
             void Register()

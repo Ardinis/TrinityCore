@@ -152,7 +152,7 @@ public:
         {
             DoCast(instance->GetData(DATA_TEAM) == ALLIANCE ? SPELL_RAISE_ARELAS : SPELL_RAISE_JAEREN);
             Talk(SAY_AGGRO);
-			
+
 			DoCast(me, SPELL_KILL_CREDIT);
 			
             if (InstanceScript* instance = me->GetInstanceScript())
@@ -343,6 +343,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             Talk(SAY_DEATH);
+
             if (instance)
                 instance->SetData(BOSS_BLACK_KNIGHT, DONE);
         }

@@ -330,17 +330,6 @@ ChatCommand* ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 
-<<<<<<< HEAD
-    static ChatCommand wintergraspCommandTable[] =
-    {
-        { "status",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspStatusCommand>,       "", NULL },
-        { "enable",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspEnableCommand>,       "", NULL },
-        { "start",          SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspStartCommand>,        "", NULL },
-        { "stop",           SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspStopCommand>,         "", NULL },
-        { "switch",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspSwitchTeamCommand>,   "", NULL },
-        { "timer",          SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleWintergraspTimerCommand>,        "", NULL },
-        { NULL,             0,                  false, NULL,                                               "", NULL }
-    };
 
     static ChatCommand diamondCommandTable[] =
     {
@@ -349,8 +338,6 @@ ChatCommand* ChatHandler::getCommandTable()
       { NULL,0,false, NULL,"", NULL },
     };
 
-=======
->>>>>>> parent of 583ecc1... ajout du joug d'hiver
     static ChatCommand commandTable[] =
     {
         { "character",      SEC_GAMEMASTER,     true,  NULL,                                           "", characterCommandTable},
@@ -442,12 +429,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "bindsight",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleBindSightCommand>,           "", NULL },
         { "unbindsight",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnbindSightCommand>,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
-<<<<<<< HEAD
-        { "wg",             SEC_ADMINISTRATOR,  false, NULL,                                 "", wintergraspCommandTable },
 	{ "diamond",        SEC_PLAYER,         false, NULL,                                           "", diamondCommandTable },
 	{ "recup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleRecupCommand>,              "", NULL},
-=======
->>>>>>> parent of 583ecc1... ajout du joug d'hiver
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 

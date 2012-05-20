@@ -190,6 +190,7 @@ class boss_blood_council_controller : public CreatureScript
                 _resetCounter = 0;
 
                 instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, NOT_STARTED);
+				instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SHADOW_RESONANCE_RESIST);
             }
 
             void EnterCombat(Unit* who)
@@ -300,6 +301,7 @@ class boss_blood_council_controller : public CreatureScript
                     }
                 }
 		instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SHADOW_PRISON_DUMMY);
+		instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SHADOW_RESONANCE_RESIST);
             }
 
             void UpdateAI(uint32 const diff)

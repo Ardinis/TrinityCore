@@ -814,6 +814,7 @@ class boss_sister_svalna : public CreatureScript
                         break;
                     case ACTION_RESURRECT_CAPTAINS:
                         events.ScheduleEvent(EVENT_SVALNA_RESURRECT, 7000);
+						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         break;
                     case ACTION_CAPTAIN_DIES:
                         Talk(SAY_SVALNA_CAPTAIN_DEATH);

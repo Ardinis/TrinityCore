@@ -762,7 +762,7 @@ class instance_ulduar : public InstanceMapScript
                         if (state == DONE)
                         {
                             if (GameObject* HodirRareCache = instance->GetGameObject(HodirRareCacheGUID))
-                                if (GetData(DATA_HODIR_RARE_CACHE))
+                                if (GetData(DATA_HODIR_RARE_CACHE) == 1)
                                     HodirRareCache->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                             if (GameObject* HodirChest = instance->GetGameObject(HodirChestGUID))
                                 HodirChest->SetRespawnTime(HodirChest->GetRespawnDelay());
@@ -849,7 +849,7 @@ class instance_ulduar : public InstanceMapScript
                             go->SetGoState(GOState(data));
                         break;
                     case DATA_HODIR_RARE_CACHE:
-                        HodirRareCacheData = data;
+						HodirRareCacheData = data;
                         if (!HodirRareCacheData)
                         {
                             if (Creature* Hodir = instance->GetCreature(HodirGUID))

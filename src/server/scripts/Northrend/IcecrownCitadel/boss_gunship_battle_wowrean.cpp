@@ -1480,7 +1480,7 @@ class npc_saurfang_gunship : public CreatureScript
                          else
                              me->AI()->DoAction(ACTION_FAIL);
                          break;
-                     }
+                     }	
                      case ACTION_DONE:
                          if (Creature* pAllianceBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
                              _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pAllianceBoss);

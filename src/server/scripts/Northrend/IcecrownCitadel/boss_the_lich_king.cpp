@@ -514,12 +514,12 @@ class boss_the_lich_king : public CreatureScript
             void EnterCombat(Unit* target)
             {
 			sLog->outError(" <!> LANCEMENT SCRIPT : LICH KING <!>");
-                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
+			/*                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
                 {
                     EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
                     return;
-                }
+		    }*/
 
                 me->setActive(true);
                 DoZoneInCombat();
@@ -1010,7 +1010,7 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_HARVEST_SOULS:
                             Talk(SAY_LK_HARVEST_SOUL);
-                            DoCastAOE(SPELL_HARVEST_SOULS);
+			    DoCastAOE(SPELL_HARVEST_SOULS);
                             events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), 0, PHASE_THREE);
                             events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
                             me->SetReactState(REACT_PASSIVE);
@@ -1032,10 +1032,12 @@ class boss_the_lich_king : public CreatureScript
                                 {
                                     triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
                                     Unit* spawner = triggers.front();
-                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
+				    //                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
                                 }
-
+				//				DoCastAOE(SPELL_VILE_SPIRITS);
+				events.ScheduleEvent(EVENT_WICKED_SPIRITS, urand(35000, 40000), 0, PHASE_FROSTMOURNE);
+				events.ScheduleEvent(EVENT_VILE_SPIRITS, urand(35000, 40000), EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
                                 for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
                                 {
                                     Creature* summon = ObjectAccessor::GetCreature(*me, *i);
@@ -2064,6 +2066,8 @@ class npc_spirit_bomb : public CreatureScript
                 me->GetPosition(destX, destY);
                 //destZ = 870 + 10;    // approximation, gets more precise later
                 destZ = 1055.0f;    // approximation, gets more precise later
+		me->SetSpeed(MOVE_RUN, 0.5f);
+		me->SetSpeed(MOVE_FLIGHT, 0.5f);
                 me->UpdateGroundPositionZ(destX, destY, destZ);
                 me->GetMotionMaster()->MovePoint(POINT_GROUND, destX, destY, destZ);
             }

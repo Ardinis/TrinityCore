@@ -365,6 +365,7 @@ class ChatHandler
         void HandleCharacterLevel(Player* player, uint64 playerGuid, uint32 oldLevel, uint32 newLevel);
         void HandleLearnSkillRecipesHelper(Player* player, uint32 skill_id);
 
+<<<<<<< HEAD
         //Wintergrasp
         bool HandleWintergraspStatusCommand(const char *args);
         bool HandleWintergraspStartCommand(const char *args);
@@ -380,6 +381,8 @@ class ChatHandler
 	//Recup Command
 	bool HandleRecupCommand(const char* args);
 
+=======
+>>>>>>> parent of 583ecc1... ajout du joug d'hiver
         // Stores informations about a deleted character
         struct DeletedInfo
         {

@@ -769,17 +769,22 @@ void OutdoorPvPWG::OnCreatureCreate(Creature *creature)
     {
         case CREATURE_SIEGE_VEHICLE:
         {
+  std::cout << "OnCreatureCreate CREATURE_SIEGE_VEHICLE" << std::endl;
             if (!creature->isSummon())
+	      {
+		std::cout << "!creature->isSummon()" << std::endl;
                 return;
-
+	      }
             TeamId team;
             if (creature->getFaction() == WintergraspFaction[TEAM_ALLIANCE])
                 team = TEAM_ALLIANCE;
             else if (creature->getFaction() == WintergraspFaction[TEAM_HORDE])
                 team = TEAM_HORDE;
             else
+	      {
+		std::cout << "return faction" << std::endl;
                 return;
-
+	      }
             if (uint32 engLowguid = GUID_LOPART(((TempSummon*)creature)->GetSummonerGUID()))
             {
                 if (OPvPCapturePointWG *workshop = GetWorkshopByEngGuid(engLowguid))

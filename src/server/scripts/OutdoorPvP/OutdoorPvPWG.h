@@ -280,7 +280,6 @@ class OutdoorPvPWG : public OutdoorPvP
        BuildingState *m_gate;
 
        CreatureSet m_creatures;
-       CreatureSet m_turret;
        CreatureSet m_vehicles[2];
        GameObjectSet m_gobjects;
        GameObjectSet m_gobjectsDestroyable;
@@ -308,7 +307,6 @@ class OutdoorPvPWG : public OutdoorPvP
        void PromotePlayer(Player *player) const;
        void UpdateTenacityStack();
        void UpdateAllWorldObject();
-       bool UpdateTurret();
        bool UpdateCreatureInfo(Creature *creature);
        bool UpdateGameObjectInfo(GameObject *go) const;
        bool CanBuildVehicle(OPvPCapturePointWG *workshop) const;

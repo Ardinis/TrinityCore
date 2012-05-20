@@ -373,6 +373,14 @@ class ChatHandler
 	//Recup Command
 	bool HandleRecupCommand(const char* args);
 
+        //Wintergrasp
+        bool HandleWintergraspStatusCommand(const char *args);
+        bool HandleWintergraspStartCommand(const char *args);
+        bool HandleWintergraspStopCommand(const char *args);
+        bool HandleWintergraspEnableCommand(const char *args);
+        bool HandleWintergraspSwitchTeamCommand(const char *args);
+        bool HandleWintergraspTimerCommand(const char *args);
+
         // Stores informations about a deleted character
         struct DeletedInfo
         {

@@ -532,6 +532,42 @@ class spell_stinky_plague_stench : public SpellScriptLoader
         }
 };
 
+class spell_festergut_gaseous_blight : public SpellScriptLoader
+{
+    public:
+        spell_festergut_gaseous_blight() : SpellScriptLoader("spell_festergut_gaseous_blight") { }
+
+        class spell_festergut_gaseous_blight_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_festergut_gaseous_blight_SpellScript);
+
+            bool Validate(SpellEntry const* /*spell*/)
+            {
+                if (!sSpellStore.LookupEntry(SPELL_ORANGE_BLIGHT_RESIDUE))
+                    return false;
+                return true;
+            }
+
+            void ExtraEffect()
+            {
+                if (GetHitUnit()->HasAura(SPELL_ORANGE_BLIGHT_RESIDUE))
+                    return;
+
+                GetHitUnit()->CastSpell(GetHitUnit(), SPELL_ORANGE_BLIGHT_RESIDUE, true);
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_festergut_gaseous_blight_SpellScript::ExtraEffect);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_festergut_gaseous_blight_SpellScript();
+        }
+};
+
 void AddSC_boss_festergut()
 {
     new boss_festergut();
@@ -541,4 +577,5 @@ void AddSC_boss_festergut()
     new spell_festergut_blighted_spores();
     new achievement_flu_shot_shortage();
     new spell_stinky_plague_stench();
+	new spell_festergut_gaseous_blight();
 }

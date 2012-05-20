@@ -232,7 +232,7 @@ class boss_rotface : public CreatureScript
                                 Talk(EMOTE_SLIME_SPRAY);
 				//me->SetOrientation(me->GetOrientation() + 2.748895f);
                                 DoCast(stalker, SPELL_SLIME_SPRAY);
-                                //instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); //utile pour Quete Rendez Vous. 
+                                instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); //utile pour Quete Rendez Vous. 
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;

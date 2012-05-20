@@ -44,6 +44,7 @@
 #include "Transport.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "CreatureGroups.h"
+#include "OutdoorPvPMgr.h"
 #include "OutdoorPvPWG.h"
 
 //mute player for some times

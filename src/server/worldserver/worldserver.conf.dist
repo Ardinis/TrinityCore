@@ -22,11 +22,10 @@
 #    BATTLEGROUND CONFIG
 #    ARENA CONFIG
 #    NETWORK CONFIG
-#    AUCTION HOUSE BOT
 #    CONSOLE AND REMOTE ACCESS
 #    CHARACTER DELETE OPTIONS
 #    CUSTOM SERVER OPTIONS
-#    WINTERGRASP
+#    WINTERGRASP OPTIONS
 #
 ###################################################################################################
 
@@ -2888,7 +2887,7 @@ PlayerDump.DisallowOverwrite = 1
 ###################################################################################################
 
 ###################################################################################################
-# WINTERGRASP SCRIPT OPTIONS
+# WINTERGRASP OPTIONS
 #
 #   OutdoorPvP.Wintergrasp.Enabled
 #       Determines whether the Wintergrasp battle is enabled or not.

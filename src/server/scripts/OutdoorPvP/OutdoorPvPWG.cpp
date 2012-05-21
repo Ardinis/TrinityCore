@@ -1042,18 +1042,39 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
     {
         case CREATURE_TURRET:
         {
+	  uint32 factionId = 0;
             if (isWarTime())
             {
                 if (!creature->isAlive())
                     creature->Respawn(true);
-                creature->setFaction(WintergraspFaction[getDefenderTeam()]);
+		factionId = WintergraspFaction[getDefenderTeam()];
                 creature->SetVisible(true);
             } else {
                 if (creature->IsVehicle() && creature->GetVehicleKit())
                     creature->GetVehicleKit()->RemoveAllPassengers();
                 creature->SetVisible(false);
-                creature->setFaction(35);
+		factionId = 35;
             }
+	    creature->setFaction(factionId);
+
+	    // Faction is set in creature_template - not inside creature
+
+	    // Update in memory..
+	    if (CreatureTemplate const* cinfo = creature->GetCreatureInfo())
+	      {
+		const_cast<CreatureTemplate*>(cinfo)->faction_A = factionId;
+		const_cast<CreatureTemplate*>(cinfo)->faction_H = factionId;
+	      }
+
+	    // ..and DB
+	    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_FACTION);
+
+	    stmt->setUInt16(0, uint16(factionId));
+	    stmt->setUInt16(1, uint16(factionId));
+	    stmt->setUInt32(2, creature->GetEntry());
+
+	    WorldDatabase.Execute(stmt);
+
             return false;
         }
         case CREATURE_OTHER:
@@ -1558,6 +1579,17 @@ bool OutdoorPvPWG::Update(uint32 diff)
         {
             OutdoorPvP::Update(diff); // update capture points
 
+	    //New pop system
+	    std::map<Player *, unsigned int>::iterator it;
+
+	    for ( it = playersVehicles.begin() ; it != playersVehicles.end(); it++ )
+	      {
+		if ((*it).second >= diff)
+		  (*it).second -= diff;
+		else
+		  (*it).second = 0;
+	      }
+
             /*********************************************************/
             /***        BATTLEGROUND RESSURECTION SYSTEM           ***/
             /*********************************************************/
@@ -1770,7 +1802,11 @@ void OutdoorPvPWG::StartBattle()
     }
 
     //Uncomment to tele Defenders inside Fortress
-    //TeamCastSpell(getDefenderTeam(), SPELL_TELEPORT_FORTRESS);
+    TeamCastSpell(getDefenderTeam(), SPELL_TELEPORT_FORTRESS);
+    if (getAttackerTeam() == TEAM_ALLIANCE)
+      TeamCastSpell(getAttackerTeam(), SPELL_TELEPORT_ALLIENCE_CAMP);
+    else
+      TeamCastSpell(getAttackerTeam(), SPELL_TELEPORT_HORDE_CAMP);
 
     UpdateTenacityStack();
     // Update timer in players battlegrounds tab
@@ -1783,6 +1819,7 @@ void OutdoorPvPWG::EndBattle()
     sWorld->setWorldState(WORLDSTATE_WINTERGRASP_CONTROLING_FACTION, getDefenderTeam());
     sWorld->UpdateAreaDependentAuras();
     //Sound on End Battle
+
     for (PlayerSet::iterator itr = m_players[getDefenderTeam()].begin(); itr != m_players[getDefenderTeam()].end(); ++itr)
     {
         if (getDefenderTeam()==TEAM_ALLIANCE)
@@ -1939,6 +1976,9 @@ void OutdoorPvPWG::EndBattle()
         }
     }
 
+    TeamCastSpell(getAttackerTeam(), SPELL_TELEPORT_DALARAN);
+    TeamCastSpell(getDefenderTeam(), SPELL_TELEPORT_FORTRESS);
+
     m_wartime = false;
     m_timer = sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_INTERVAL) * MINUTE * IN_MILLISECONDS;
     RemoveOfflinePlayerWGAuras();
@@ -1947,6 +1987,8 @@ void OutdoorPvPWG::EndBattle()
     // update go factions
     for (GameObjectSet::iterator itr = m_gobjects.begin(); itr != m_gobjects.end(); ++itr)
        UpdateGameObjectInfo(*itr);
+
+
 }
 
 bool OutdoorPvPWG::CanBuildVehicle(OPvPCapturePointWG *workshop) const

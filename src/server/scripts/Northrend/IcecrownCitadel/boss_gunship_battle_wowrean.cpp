@@ -942,7 +942,7 @@ class npc_muradin_gunship : public CreatureScript
                              pAllianceBoss->AddThreat(pHordeBoss, 0.0f);
                              pHordeBoss->AddThreat(pAllianceBoss, 0.0f);
                              _instance->SetBossState(DATA_GUNSHIP_EVENT, IN_PROGRESS);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 53000);
+                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 55000);
                              RelocateTransport(skybreaker);
                              RelocateTransport(CheckUnfriendlyShip(me,_instance, DATA_GB_HIGH_OVERLORD_SAURFANG));
                         }
@@ -1195,7 +1195,7 @@ class npc_muradin_gunship : public CreatureScript
 								if(Creature* sergante = skybreaker->AddNPCPassengerInInstance(NPC_GB_KORKRON_SERGANTE, -9.51547f, -0.160213f, 20.87252f, 1.56211f))
 									sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 
-								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 53000);
+								events.ScheduleEvent(EVENT_SUMMON_PORTAL, 55000);
 								events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 2000);
 							}
 							break;
@@ -1473,7 +1473,7 @@ class npc_saurfang_gunship : public CreatureScript
                              pAllianceBoss->AddThreat(pHordeBoss, 0.0f);
                              pHordeBoss->AddThreat(pAllianceBoss, 0.0f);
                              _instance->SetBossState(DATA_GUNSHIP_EVENT, IN_PROGRESS);
-                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 53000);
+                             events.ScheduleEvent(EVENT_SUMMON_PORTAL, 55000);
                              RelocateTransport(orgrimmar);
                              RelocateTransport(CheckUnfriendlyShip(me,_instance, DATA_GB_MURADIN_BRONZEBEARD));
                          }
@@ -1709,7 +1709,7 @@ class npc_saurfang_gunship : public CreatureScript
 										sergante->CastSpell(sergante, SPELL_TELEPORT_VISUAL, true);
 									
 									events.ScheduleEvent(EVENT_BOARDING_REAVERS_MARINE, 2000);
-									events.ScheduleEvent(EVENT_SUMMON_PORTAL, 53000);
+									events.ScheduleEvent(EVENT_SUMMON_PORTAL, 55000);
 								}
 							break;
 						case EVENT_BOARDING_REAVERS_MARINE:
@@ -2610,7 +2610,8 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
                 events.ScheduleEvent(EVENT_EXPERIENCED, urand(19000, 21000)); // ~20 sec
                 events.ScheduleEvent(EVENT_VETERAN, urand(39000, 41000));     // ~40 sec
                 events.ScheduleEvent(EVENT_ELITE, urand(59000, 61000));       // ~60 sec
-                events.ScheduleEvent(EVENT_ROCKET_ART, urand(10000, 15000));   // ~12 sec
+				rockettimer = urand(10000, 15000);
+				
             }
 
             void JustDied(Unit* killer)
@@ -2638,6 +2639,28 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
 
                 events.Update(diff);
 
+                if (rockettimer <= diff)
+                {
+					if(Player* target = SelectRandomPlayerInTheMaps(me->GetMap()))
+					{
+						if(me->GetEntry() == NPC_GB_KORKRON_ROCKETEER && target->HasAura(SPELL_ON_SKYBREAKERS_DECK))
+						{
+							me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_ROCKET_ARTILLERY_TRIGGERED, true);
+							me->CastSpell(target, 69400, true);
+						}
+						else 
+						{
+							if(me->GetEntry() == NPC_GB_SKYBREAKER_MORTAR_SOLDIER && target->HasAura(SPELL_ON_ORGRIMS_HAMMERS_DECK))
+							{
+								me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_ROCKET_ARTILLERY_TRIGGERED, true);
+								me->CastSpell(target, 70173, true);
+							}
+						}	
+					}						
+                    rockettimer = urand(10000, 15000);
+                } else rockettimer -= diff;				
+				
+				
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
@@ -2653,22 +2676,6 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
                             me->RemoveAurasDueToSpell(SPELL_VETERAN);
                             DoCast(me, SPELL_ELITE);
                             break;
-                        case EVENT_ROCKET_ART:
-                            if(Player* target = SelectRandomPlayerInTheMaps(me->GetMap()))
-                            {
-                                if(me->GetEntry() == NPC_GB_KORKRON_ROCKETEER && target->HasAura(SPELL_ON_SKYBREAKERS_DECK))
-                                {
-                                    me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_ROCKET_ARTILLERY_TRIGGERED, true);
-                                    me->CastSpell(target, 69400, true);
-                                }
-                                else if(me->GetEntry() == NPC_GB_SKYBREAKER_MORTAR_SOLDIER && target->HasAura(SPELL_ON_ORGRIMS_HAMMERS_DECK))
-                                {
-                                    me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_ROCKET_ARTILLERY_TRIGGERED, true);
-                                    me->CastSpell(target, 70173, true);
-                                }
-                            }
-                            events.ScheduleEvent(EVENT_ROCKET_ART, urand(10000, 15000));   // ~12 sec
-                            break;
                         default:
                             break;
                     }
@@ -2678,6 +2685,7 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
             private:
                 EventMap events;
                 InstanceScript* _instance;
+				uint32 rockettimer;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const

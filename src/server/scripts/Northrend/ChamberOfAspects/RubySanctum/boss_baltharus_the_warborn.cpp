@@ -133,6 +133,8 @@ public:
             if (!pInstance) return;
 	    summons.DespawnAll();
             pInstance->SetData(TYPE_BALTHARUS, FAIL);
+	    canSummonClone = false;
+	    clone = 0;
         }
 
         void MoveInLineOfSight(Unit* pWho)

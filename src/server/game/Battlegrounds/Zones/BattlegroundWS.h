@@ -21,6 +21,7 @@
 
 #include "Battleground.h"
 
+
 enum BG_WS_TimerOrScore
 {
     BG_WS_MAX_TEAM_SCORE    = 3,
@@ -208,6 +209,7 @@ class BattlegroundWS : public Battleground
         void AddPoint(uint32 TeamID, uint32 Points = 1)     { m_TeamScores[GetTeamIndexByTeamId(TeamID)] += Points; }
         void SetTeamPoint(uint32 TeamID, uint32 Points = 0) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] = Points; }
         void RemovePoint(uint32 TeamID, uint32 Points = 1)  { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
+
     private:
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
         uint64 m_DroppedFlagGUID[2];
@@ -225,6 +227,7 @@ class BattlegroundWS : public Battleground
         uint8 _minutesElapsed;
 
         virtual void PostUpdateImpl(uint32 diff);
+
 };
 #endif
 

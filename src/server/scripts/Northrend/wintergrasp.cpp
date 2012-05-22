@@ -68,6 +68,8 @@ bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint3
       OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
       if (!pvpWG)
 	return true;
+      if (pvpWG->playersVehicles[pPlayer] != 0)
+	return true;
       float destX, destY, destZ;
       Position pos;
       spawnpospnj->GetPosition(&pos);
@@ -80,9 +82,9 @@ bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint3
             case 0:
 	      if (Creature *sum = pCreature->SummonCreature(27881 ,destX, destY, destZ))
 		{
-		  std::cout << "sum" << std::endl;
 		  sum->setFaction(pCreature->getFaction());
 		  pvpWG->OnCreatureCreate(sum);
+		  pvpWG->playersVehicles[pPlayer] = 120000;
 		}
 	      break;
             case 1: 
@@ -90,6 +92,7 @@ bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint3
 		{
 		  sum->setFaction(pCreature->getFaction());
 		  pvpWG->OnCreatureCreate(sum);
+		  pvpWG->playersVehicles[pPlayer] = 120000;
 		}
 	      break;
             case 2: 
@@ -97,6 +100,7 @@ bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint3
 		{
 		  sum->setFaction(pCreature->getFaction());
 		  pvpWG->OnCreatureCreate(sum);
+		  pvpWG->playersVehicles[pPlayer] = 120000;
 		}
 	      break;
         }

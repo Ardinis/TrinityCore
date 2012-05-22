@@ -265,6 +265,7 @@ class OutdoorPvPWG : public OutdoorPvP
         uint32 m_timer;
         bool m_changeAlly;
         bool m_changeHorde;
+	std::map<Player *, unsigned int> playersVehicles;
 
     protected:
         // Temporal BG specific till 3.2

@@ -49,6 +49,7 @@ enum BossSpells
     SPELL_SABER_LASH                 = 40504, // every 10-15 secs
     SPELL_SUMMON_CLONE               = 74511, // summons npc 39899 (Clone)
     SPELL_CHANNEL_SPELL              = 76221, // Channeling dummy spell
+    SPELL_SIPHONED_MIGHT        = 74507,
 };
 
 /*######
@@ -67,7 +68,7 @@ public:
 
     struct boss_baltharusAI : public ScriptedAI
     {
-        boss_baltharusAI(Creature* pCreature) : ScriptedAI(pCreature)
+      boss_baltharusAI(Creature* pCreature) : ScriptedAI(pCreature), summons(me)
         {
             pInstance = (InstanceScript*)pCreature->GetInstanceScript();
             Reset();
@@ -84,10 +85,19 @@ public:
         uint32 m_uiEnevatingTimer;
         uint32 m_uiSaberLashTimer;
 
+
+      bool canSummonClone;
+      uint32 clone;
+      SummonList summons;
+
         void Reset()
         {
             if(!pInstance)
                 return;
+
+	    canSummonClone = false;
+	    clone = 0;
+
 
             if (me->isAlive()) pInstance->SetData(TYPE_BALTHARUS, NOT_STARTED);
             me->SetRespawnDelay(7*DAY);
@@ -121,7 +131,7 @@ public:
         void JustReachedHome()
         {
             if (!pInstance) return;
-
+	    summons.DespawnAll();
             pInstance->SetData(TYPE_BALTHARUS, FAIL);
         }
 
@@ -142,7 +152,7 @@ public:
 
           //  if (pDummyTarget && pDummyTarget->isSummon())
           //      pDummyTarget->DespawnOrUnsummon();
-
+	    summons.DespawnAll();
             DoScriptText(-1666303,me);
             pInstance->SetData(TYPE_BALTHARUS, DONE);
         }
@@ -164,20 +174,36 @@ public:
             if(!pInstance || !summoned) return;
 
             if ( summoned->GetEntry() != NPC_BALTHARUS_TARGET )
-            {
-                 if (!pClone) pClone = summoned;
-                 else if (!pClone->isAlive()) pClone = summoned;
-                 pClone->SetInCombatWithZone();
-            }
+	      {
+		summoned->SetHealth(me->GetHealth());
+		summoned->SetInCombatWithZone();
+		summons.Summon(summoned);
+	      }
         }
 
-        void SummonedCreatureJustDied(Creature* summoned)
-        {
-             if (!pInstance || !summoned) return;
-
-             if (summoned == pClone) pClone = NULL;
-        }
-
+      void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+      {
+	if (clone == 3)
+	  return;
+	if ( HealthBelowPct(26) && clone == 2)
+	  {
+	    canSummonClone = true;
+	    clone++;
+	    return;
+	  }
+	if ( HealthBelowPct(51) && clone == 1)
+	  {
+	    canSummonClone = true;
+	    clone++;
+	    return ;
+	  }
+	if ( HealthBelowPct(76) && clone == 0)
+	  {
+	    canSummonClone = true;
+	    clone++;
+	    return ;
+	  }
+      }
         void EnterCombat(Unit* pWho)
         {
             if (!pInstance) return;
@@ -192,23 +218,6 @@ public:
             SetCombatMovement(true);
             pInstance->SetData(TYPE_BALTHARUS, IN_PROGRESS);
             DoScriptText(-1666300,me);
-        }
-
-        void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
-        {
-            if (!pInstance) return;
-
-            if (!me || !me->isAlive())
-                return;
-
-            if(pDoneBy->GetGUID() == me->GetGUID())
-              return;
-
-            if (pClone && pClone->isAlive())
-            {
-                pDoneBy->DealDamage(pClone, uiDamage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                uiDamage = 0;
-            }
         }
 
         void UpdateAI(uint32 const diff)
@@ -227,60 +236,13 @@ public:
             if (!UpdateVictim())
                 return;
 
-            switch (uiStage)
-            {
-                case 0:
-                     if ( HealthBelowPct(67)) uiStage = 1;
-                     break;
 
-                case 1:
-                     me->InterruptNonMeleeSpells(true);
-                     if (Is25ManRaid())
-                         DoCast(SPELL_SUMMON_CLONE);
-                     uiStage = 2;
-                     break;
-
-                case 2:
-                     if (me->IsNonMeleeSpellCasted(false)) return;
-                     DoCast(SPELL_REPELLING_WAVE);
-                     uiStage = 3;
-
-                case 3:
-                     if ( HealthBelowPct(51)) uiStage = 4;
-                     break;
-
-                case 4:
-                     me->InterruptNonMeleeSpells(true);
-                     if (!Is25ManRaid())
-                            DoCast(SPELL_SUMMON_CLONE);
-                     uiStage = 5;
-                     break;
-
-                case 5:
-                     if (me->IsNonMeleeSpellCasted(false)) return;
-                     DoCast(SPELL_REPELLING_WAVE);
-                     uiStage = 6;
-
-                case 6:
-                     if ( HealthBelowPct(34)) uiStage = 7;
-                     break;
-
-                case 7:
-                     me->InterruptNonMeleeSpells(true);
-                     if (Is25ManRaid())
-                         DoCast(SPELL_SUMMON_CLONE);
-                     uiStage = 8;
-                     break;
-
-                case 8:
-                     if (me->IsNonMeleeSpellCasted(false)) return;
-                     DoCast(SPELL_REPELLING_WAVE);
-                     uiStage = 9;
-
-                case 9:
-                default:
-                     break;
-            }
+	    if (canSummonClone)
+	      {
+                DoCast(SPELL_SUMMON_CLONE);
+		DoCast(SPELL_REPELLING_WAVE);
+		canSummonClone = false;
+	      }
 
             if (m_uiEnevatingTimer <= diff)
             {
@@ -598,9 +560,41 @@ public:
     };
 };
 
+
+class spell_baltharus_enervating_brand_trigger : public SpellScriptLoader
+{
+public:
+  spell_baltharus_enervating_brand_trigger() : SpellScriptLoader("spell_baltharus_enervating_brand_trigger") { }
+
+  class spell_baltharus_enervating_brand_trigger_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_baltharus_enervating_brand_trigger_SpellScript);
+
+    void CheckDistance()
+    {
+      if (Unit* caster = GetOriginalCaster())
+	{
+	  if (Unit* target = GetHitUnit())
+	    target->CastSpell(caster, SPELL_SIPHONED_MIGHT, true);
+	}
+    }
+
+    void Register()
+    {
+      OnHit += SpellHitFn(spell_baltharus_enervating_brand_trigger_SpellScript::CheckDistance);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_baltharus_enervating_brand_trigger_SpellScript();
+  }
+};
+
 void AddSC_boss_baltharus_the_warborn()
 {
     new boss_baltharus();
     new mob_baltharus_clone();
     new mob_xerestrasza();
+    new spell_baltharus_enervating_brand_trigger();
 }

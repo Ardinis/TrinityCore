@@ -245,7 +245,7 @@ public:
                      if (!me->IsNonMeleeSpellCasted(false))
                      {
                          doBeacon(false);
-                         setStage(4);
+                         setStage(5);
                      }
                      break;
 
@@ -269,13 +269,11 @@ public:
                          {
                              //DoCast(SPELL_CONFLAGATION_1);
                              doBeacon(false);
+			     setStage(5);
                          }
                          m_uiConflagrateTimer = 5*IN_MILLISECONDS;
                      } else m_uiConflagrateTimer -= diff;
-
-                     if ( HealthBelowPct(61) ) setStage(5);
-                     break;
-
+		     break;
                 case 5: //Air phase end
                      StartMovement(0);
                      setStage(6);
@@ -327,7 +325,7 @@ public:
                      if (!me->IsNonMeleeSpellCasted(false))
                      {
                          doBeacon(false);
-                         setStage(11);
+                         setStage(12);
                      };
                      break;
 
@@ -343,6 +341,7 @@ public:
                          doBeacon(true);
                          DoCast(SPELL_CONFLAGATION);
                          m_uiBeakonTimer = urand(12*IN_MILLISECONDS,22*IN_MILLISECONDS);
+			 setStage(12);
                      } else m_uiBeakonTimer -= diff;
 
                      if (m_uiConflagrateTimer <= diff)

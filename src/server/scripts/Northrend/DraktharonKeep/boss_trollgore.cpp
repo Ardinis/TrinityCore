@@ -124,6 +124,8 @@ public:
             {
                 DoScriptText(SAY_CONSUME, me);
                 DoCast(SPELL_CONSUME);
+				DoCast(me,DUNGEON_MODE(SPELL_CONSUME_AURA, H_SPELL_CONSUME_AURA));
+				
                 uiConsumeTimer = 15*IN_MILLISECONDS;
             } else uiConsumeTimer -= diff;
 
@@ -148,8 +150,9 @@ public:
 
             if (uiExplodeCorpseTimer <= diff)
             {
-                DoCast(SPELL_CORPSE_EXPLODE);
-				DamageExplosion(me);
+				DoCast(DUNGEON_MODE(49618, 59809));
+                //DoCast(SPELL_CORPSE_EXPLODE);
+				//DamageExplosion(me);
                 DoScriptText(SAY_EXPLODE, me);
                 uiExplodeCorpseTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
             } else uiExplodeCorpseTimer -= diff;

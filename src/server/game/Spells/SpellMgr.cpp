@@ -2116,6 +2116,35 @@ void SpellMgr::LoadSpellPetAuras()
     sLog->outString();
 }
 
+bool SpellMgr::IsCCSpell(SpellInfo const *spellProto, uint8 EffMask)
+{
+       if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER ||
+               spellProto->SpellFamilyName == SPELLFAMILY_GENERIC)
+               return false; 
+       
+       for (uint8 effIndex = 0; effIndex<MAX_SPELL_EFFECTS; ++effIndex)
+       {
+               if (EffMask && !(EffMask & (1<<effIndex)))
+				   continue;    
+        
+               switch(spellProto->Effects[effIndex].ApplyAuraName)
+               {
+				case SPELL_AURA_MOD_CONFUSE:
+				case SPELL_AURA_MOD_FEAR:
+				case SPELL_AURA_MOD_STUN:
+				case SPELL_AURA_MOD_ROOT:
+				case SPELL_AURA_TRANSFORM:
+					if (!spellProto->IsPositiveEffect(effIndex))
+						return true;
+					break;
+				default:
+					break;
+               }
+       }
+
+       return false;
+}
+
 // Fill custom data about enchancments
 void SpellMgr::LoadEnchantCustomAttr()
 {
@@ -2942,6 +2971,10 @@ void SpellMgr::LoadSpellCustomAttr()
             default:
                 break;
         }
+
+		// Speed needs to be set for some reason, else delay won't apply
+		 if (IsCCSpell(spellInfo) && !spellInfo->Speed)
+			spellInfo->Speed = 12345.0f;
 
         switch (spellInfo->SpellFamilyName)
         {

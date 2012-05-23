@@ -700,6 +700,9 @@ class SpellMgr
         SpellInfo const* GetSpellInfo(uint32 spellId) const { return spellId < GetSpellInfoStoreSize() ?  mSpellInfoMap[spellId] : NULL; }
         uint32 GetSpellInfoStoreSize() const { return mSpellInfoMap.size(); }
 
+		// CCDelay
+		bool IsCCSpell(SpellInfo const *spellProto, uint8 EffMask= 0);
+
     // Modifiers
     public:
 

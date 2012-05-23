@@ -779,7 +779,7 @@ void Spell::SelectSpellTargets()
         }
     }
 
-    if (m_targets.HasDst())
+    if (m_targets.HasDst() && !sSpellMgr->IsCCSpell(m_spellInfo))
     {
         if (m_targets.HasTraj())
         {
@@ -1022,7 +1022,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
 
     // Spell have speed - need calculate incoming time
     // Incoming time is zero for self casts. At least I think so.
-    if (m_spellInfo->Speed > 0.0f && m_caster != target)
+    if (m_spellInfo->Speed > 0.0f && m_caster != target && m_spellInfo->Speed != 12345)
     {
         // calculate spell incoming interval
         // TODO: this is a hack
@@ -1036,6 +1036,12 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay)
             m_delayMoment = targetInfo.timeDelay;
     }
+	 // Apply delay for CC spells here, can be easily tweaked.
+	else if (m_spellInfo->Speed == 12345)
+	{
+		targetInfo.timeDelay = 150LL;
+		m_delayMoment = 150LL;
+	}
     else
         targetInfo.timeDelay = 0LL;
 

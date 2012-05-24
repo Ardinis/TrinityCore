@@ -1304,11 +1304,12 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                 if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, pos))
                 {
                     summon->AI()->SetGUID(GetHitUnit()->GetGUID(), DATA_TRAPPED_PLAYER);
-		    /*                    if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
+		    if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
                     {
                         go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
+			go->EnableCollision(false);
                         summon->AddGameObject(go);
-			}*/
+		    }
                 }
             }
 
@@ -1347,23 +1348,27 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
 class FrostBombTargetSelector
 {
     public:
-        FrostBombTargetSelector(Unit* caster, std::list<Creature*> const& collisionList) : _caster(caster), _collisionList(collisionList) { }
+        FrostBombTargetSelector(Unit* caster, std::list<GameObject*> const& collisionList) : _caster(caster), _collisionList(collisionList) { }
 
         bool operator()(Unit* unit)
         {
             if (unit->HasAura(SPELL_ICE_TOMB_DAMAGE) || unit->GetTypeId() != TYPEID_PLAYER)
                 return true;
-
-            for (std::list<Creature*>::const_iterator itr = _collisionList.begin(); itr != _collisionList.end(); ++itr)
-                if ((*itr)->IsInBetween(_caster, unit))
+            for (std::list<GameObject*>::const_iterator itr = _collisionList.begin(); itr != _collisionList.end(); ++itr)
+	      //	      if (GameObject* go = (*itr)->GetGameObject(0))
+		{
+		  std::cout << "WTFFFFFFFF" << std::endl;
+		  //		if (go->IsInBetween(_caster, unit, 2.0f)
+		  //  && _caster->GetExactDist2d(unit->GetPositionX(), unit->GetPositionY()) - _caster->GetExactDist2d(go->GetPositionX(), go->GetPositionY()) < 5.0f)
+		  if ((*itr)->IsInBetween(_caster, unit, 2.0f))
                     return true;
-
+		}
             return false;
         }
 
     private:
         Unit* _caster;
-        std::list<Creature*> const& _collisionList;
+        std::list<GameObject*> const& _collisionList;
 };
 
 class spell_sindragosa_collision_filter : public SpellScriptLoader
@@ -1384,8 +1389,10 @@ class spell_sindragosa_collision_filter : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-                std::list<Creature*> tombs;
-                GetCreatureListWithEntryInGrid(tombs, GetCaster(), NPC_ICE_TOMB, 200.0f);
+	      //                std::list<Creature*> tombs;
+                std::list<GameObject*> tombs;
+		GetGameObjectListWithEntryInGrid(tombs, GetCaster(), GO_ICE_BLOCK, 200.0f);
+		  //                GetCreatureListWithEntryInGrid(tombs, GetCaster(), NPC_ICE_TOMB, 200.0f);
                 unitList.remove_if (FrostBombTargetSelector(GetCaster(), tombs));
             }
 
@@ -1425,10 +1432,18 @@ class spell_sindragosa_icy_grip : public SpellScriptLoader
 		    float x, y, z;
 		    GetCaster()->GetPosition(x, y, z);
 		    float speedXY = pUnit->GetExactDist2d(x, y) * 10.0f;
-		    pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
+		    //		    pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
+		    GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
+		    if (pUnit->ToPlayer())
+		      pUnit->ToPlayer()->TeleportTo(631, x, y, z+1.0f, rand() % 5);
+		    else
+		      pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
 		  }
-	      if (!GetHitUnit()->HasAura(SPELL_FROST_BEACON))
-		GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
+	      //	      if (!GetHitUnit()->HasAura(SPELL_FROST_BEACON))
+	      //	{
+		  //		  GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
+
+	      //}
             }
 
             void Register()

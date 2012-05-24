@@ -965,23 +965,23 @@ public:
                     else
                     break;
 
-                if (!m_lastBuffReal || m_lastBuffReal != Buff[buffnum].real)
+                if (!m_lastBuffTwilight || m_lastBuffTwilight != Buff[buffnum].twilight)
                 {
                     if (pHalionReal && pHalionReal->isAlive())
                     {
-                        if (m_lastBuffReal) pHalionReal->RemoveAurasDueToSpell(m_lastBuffReal);
-                            pHalionReal->CastSpell(pHalionReal, Buff[buffnum].real, true);
-                        m_lastBuffReal = Buff[buffnum].real;
+                        if (m_lastBuffTwilight) pHalionReal->RemoveAurasDueToSpell(m_lastBuffTwilight);
+                            pHalionReal->CastSpell(pHalionReal, Buff[buffnum].twilight, true);
+                        m_lastBuffTwilight = Buff[buffnum].twilight;
                     }
                 }
 
-                if (!m_lastBuffTwilight || m_lastBuffTwilight != Buff[buffnum].twilight)
+                if (!m_lastBuffReal || m_lastBuffReal != Buff[buffnum].real)
                 {
                     if (pHalionTwilight && pHalionTwilight->isAlive())
                     {
-                        if (m_lastBuffTwilight) pHalionTwilight->RemoveAurasDueToSpell(m_lastBuffTwilight);
-                            pHalionTwilight->CastSpell(pHalionTwilight, Buff[buffnum].twilight, true);
-                        m_lastBuffTwilight = Buff[buffnum].twilight;
+                        if (m_lastBuffReal) pHalionTwilight->RemoveAurasDueToSpell(m_lastBuffReal);
+                            pHalionTwilight->CastSpell(pHalionTwilight, Buff[buffnum].real, true);
+                        m_lastBuffReal = Buff[buffnum].real;
                     }
                 }
 

@@ -2573,11 +2573,8 @@ class npc_gunship_cannon : public CreatureScript
                         veh->RemoveAllPassengers();
                 }
                 else
-                {
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                }
             }
-
         };
 
         CreatureAI* GetAI(Creature* pCreature) const

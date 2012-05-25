@@ -781,8 +781,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         return;
                     unitTarget->ToCreature()->setDeathState(JUST_ALIVED);
                     return;
-                }
-/*				
+                }		
                 case 12162:                                 // Deep wounds
                 case 12850:                                 // (now good common check for this spells)
                 case 12868:
@@ -813,8 +812,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     damage = damage / ticks;
                     m_caster->CastCustomSpell(unitTarget, 12721, &damage, NULL, NULL, true);
                     return;
-                }
-*/				
+                }				
                 case 13567:                                 // Dummy Trigger
                 {
                     // can be used for different aura triggering, so select by aura

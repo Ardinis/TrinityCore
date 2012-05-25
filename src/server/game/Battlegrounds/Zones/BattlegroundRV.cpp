@@ -167,9 +167,10 @@ bool BattlegroundRV::HandlePlayerUnderMap(Player* player)
     // Wait for elevators to Go up, before start checking for UnderMaped players
   if (GetStartTime() < uint32(StartDelayTimes[BG_STARTING_EVENT_FIRST] + 30*IN_MILLISECONDS))
     return true;
-
-    player->TeleportTo(GetMapId(), 763.5f, -284, 28.276f, 2.422f, false);
-    return true;
+  float x, y, z, o;
+  player->GetPosition(x, y, z, o);
+  player->TeleportTo(GetMapId(), x, y, 37.0f, o, false);
+  return true;
 }
 
 void BattlegroundRV::HandleAreaTrigger(Player* Source, uint32 Trigger)

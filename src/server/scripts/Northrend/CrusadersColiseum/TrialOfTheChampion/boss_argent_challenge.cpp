@@ -459,8 +459,8 @@ public:
                 DoCastAOE(SPELL_HOLY_NOVA, false);
                 DoCast(me, SPELL_SHIELD);
                 //DoCastAOE(SPELL_SUMMON_MEMORY, false);
-                DoCastAOE(SPELL_CONFESS, false);
-                Talk(SAY_PALETRESS_SUMMON_MEMORY);
+                //DoCastAOE(SPELL_CONFESS, false);
+                Talk(SAY_PALETRESS_SUMMON_MEMORY);	
 
                 shielded = true;
                 switch(urand(0, 24))
@@ -581,8 +581,15 @@ public:
                             break;
                         case 1:
                             if (Creature* memory = Unit::GetCreature(*me, memoryGUID))
+							{
                                 if (memory->isAlive())
                                     DoCast(memory, SPELL_RENEW);
+								else
+								{
+									if (me->HasAura(SPELL_SHIELD))
+										me->RemoveAura(SPELL_SHIELD);
+								}
+							}
                             break;
                     }
                     renewTimer = urand(15000, 17000);

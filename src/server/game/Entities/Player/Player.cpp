@@ -8209,6 +8209,10 @@ void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackTy
 
 void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply)
 {
+	// don't apply mod if item is broken or cannot be used
+	if (item->IsBroken() || !CanUseAttackType(attackType))
+		return;
+	
     // generic not weapon specific case processes in aura code
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
         return;
@@ -8222,13 +8226,13 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
         default: return;
     }
 
-    if (!item->IsBroken()&&item->IsFitToSpellRequirements(aura->GetSpellInfo()))
+    if (item->IsFitToSpellRequirements(aura->GetSpellInfo()))
         HandleBaseModValue(mod, FLAT_MOD, float (aura->GetAmount()), apply);
 }
 
 void Player::_ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply)
 {
-    //don't apply mod if item is broken
+    // don't apply mod if item is broken or cannot be used
     if (item->IsBroken() || !CanUseAttackType(attackType))
         return;
 
@@ -11561,6 +11565,10 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
             // check this only in game
             if (not_loading)
             {
+				//don't allow warrior and rogue class 100% ARP 100% crit chance exploit
+				if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR))
+					return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+				
                 // May be here should be more stronger checks; STUNNED checked
                 // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
                 if (HasUnitState(UNIT_STATE_STUNNED))

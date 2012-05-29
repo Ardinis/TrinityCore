@@ -3426,11 +3426,12 @@ public:
     }
 };
 
-#define GIVRE_BOLT 9672
-#define GIVRE_JAVELOT 49906
-#define LIEN_SOUMISSION 52185
-#define NOVA_GIVRE 11831
-#define VEINE_GLACIALE 54792
+#define GIVRE_BOLT			9672
+#define GIVRE_JAVELOT		49906
+#define LIEN_SOUMISSION		52185
+#define NOVA_GIVRE			11831
+#define VEINE_GLACIALE		54792
+#define WhispProbleme		"Vous avez tuer Jaloot et Zepiv, attendez le respawn de Artruis ! Pour choisir de nouveau votre reputation."
 
 class npc_artuis : public CreatureScript
 {
@@ -3440,18 +3441,9 @@ public:
   struct npc_artuisAI : public ScriptedAI
   {
   private:
-    uint32 m_uibolt;
-    uint32 m_uijav;
-    uint32 m_uisoum;
-    uint32 m_uinova;
-    uint32 m_uiveine;
-    uint32 mui_calivemob;
-    bool endphase;
-    bool firstbucle;
-    Creature* jaloot;
-    Creature* zepiv;
-    bool bjaloot;
-    bool bzepiv;
+    uint32 m_uibolt, m_uijav, m_uinova, m_uiveine, mui_calivemob;
+    bool endphase, firstbucle, bjaloot, bzepiv, npcpop;
+    Creature *jaloot, *zepiv;
     SummonList Summons;
 
   public:
@@ -3465,14 +3457,10 @@ public:
       mui_calivemob = 500;
       m_uibolt = 2000;
       m_uijav = 3000;
-      //      m_uisoum = 0;
       m_uinova = 4000;
-      m_uiveine = 5000;
+      m_uiveine = 20000;
       firstbucle = false;
-      jaloot  = me->SummonCreature(28667, 5616.91f, 3772.67f, -94.5f, 1.78f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000);
-      zepiv = me->SummonCreature(28668, 5631.62f, 3794.36f, -92.5f, 3.4f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000);
-      jaloot->AddAura(52182, jaloot);
-      zepiv->AddAura(52182, zepiv);
+	  npcpop = false;
       bjaloot = false;
       bzepiv = false;
       SetEndPhase(false);
@@ -3480,23 +3468,25 @@ public:
       me->AttackStop();
     }
 
-    void JustReachedHome()
-    {
-      Summons.DespawnAll();
-    }
+	void JustReachedHome()
+	{
+		Summons.DespawnAll();
+	}
 
-    void JustSummoned(Creature* summon)
-    {
-      Summons.Summon(summon);
-    }
+	void JustSummoned(Creature* summon)
+	{
+		Summons.Summon(summon);
+	}
 
     void JustDied(Unit* killer)
     {
 		if (!killer->ToPlayer())
 		return ;
+
 		if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE))
 			if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
-			return ;
+				return ;
+
 		if (bjaloot)
 		{
 			std::cout << killer->ToPlayer()->GetReputation(1104) << std::endl;
@@ -3509,92 +3499,133 @@ public:
 			if (killer->ToPlayer()->GetReputation(1105) < 14000)
 				killer->ToPlayer()->SetReputation(1105, 14000);
 		}
-		me->SummonGameObject(190777, 5619.5f, 3775.12f, -94.64f, 0.047f, 0.0f, 0.0f, 0.0f, 0.0f, 180000);  //despawn apres 3 minutes apres pop.
+/*	Gob Pop manuellement en attendant(fonctionne) car il est inutilisable par les joueurs. SOUCIS SQL	*/
+/*
+        std::list<GameObject*> ArtuisGob;
+        me->GetGameObjectListWithEntryInGrid(ArtuisGob, 190777, 100.0f);
+        if (ArtuisGob.empty())
+			me->SummonGameObject(190777, 5619.55f, 3776.31f, -94.513f, 2.39f, 0.0f, 0.0f, 0.0f, 0.0f, 180000))//despawn apres 3 minutes apres pop.
+*/
+		
 		Summons.DespawnAll();
     }
 
 
     void DamageTaken(Unit* /*doneBy*/, uint32& damage)
     {
-      if (!HealthAbovePct(30))
-	SetEndPhase(true);
+		if (!HealthAbovePct(30))
+			SetEndPhase(true);
     }
 
 
     void UpdateAI(const uint32 diff)
     {
-      if (!UpdateVictim())
-	return;
-      if (me->HasUnitState(UNIT_STATE_CASTING) && !isEndPhase())
-	return;
-      if (!isEndPhase())
-	{
-	  if (m_uibolt <= diff)
-	    {
-	      DoCast(me->getVictim(), GIVRE_BOLT, true);
-	      m_uibolt = 2000;
-	    }
-	  else m_uibolt -= diff;
-	  
-	  if (m_uijav <= diff)
-	    {
-	      DoCast(me->getVictim(), GIVRE_JAVELOT, true);
-	      m_uijav = 3000;
-	    }
-	  else m_uijav -= diff;
+		if (!UpdateVictim())
+			return;
 
-	  if (m_uinova <= diff)
-	    {
-	      DoCast(me->getVictim(), NOVA_GIVRE, true);
-	      m_uinova = 4000;
-	    }
-	  else m_uinova -= diff;
+		if (me->HasUnitState(UNIT_STATE_CASTING) && !isEndPhase())
+			return;
 
-	  if (m_uiveine <= diff)
-	    {
-	      DoCast(me->getVictim(), VEINE_GLACIALE, true);
-	      m_uiveine = 5000;
-	    }
-	  else m_uiveine -= diff;
-	}
-      else if (!firstbucle)
-	{
-	  firstbucle = true;
-	  jaloot->RemoveAura(52182);
-	  zepiv->RemoveAura(52182);
-	  //	  me->CastCustomSpell(LIEN_SOUMISSION, SPELLVALUE_MAX_TARGETS, 1, jaloot, true);
-	  //  me->CastCustomSpell(LIEN_SOUMISSION, SPELLVALUE_MAX_TARGETS, 1, zepiv, true);
-	  //	  DoCast(jaloot, LIEN_SOUMISSION);
-	  DoCastAOE(LIEN_SOUMISSION);
-	}
-      else if (firstbucle)
-	{
-	  if (mui_calivemob <= diff)
-	    {
-	      if (!jaloot->isAlive())
-		bjaloot = true;
-	      else if (!zepiv->isAlive())
-		bzepiv = true;
-	      mui_calivemob = 500;
-	      if (bjaloot || bzepiv)
+		if(!npcpop)
 		{
-		  SetEndPhase(false);
-		  me->RemoveAurasDueToSpell(LIEN_SOUMISSION);
+            std::list<Creature*> jalootpop;
+            GetCreatureListWithEntryInGrid(jalootpop, me, 28667, 100.0f);
+			if(jalootpop.empty())
+			{
+				jaloot = me->SummonCreature(28667, 5616.91f, 3772.67f, -94.5f, 1.78f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 180000);
+				jaloot->AddAura(52182, jaloot);
+			}
+			else
+			{
+				if(!jaloot->GetAura(52182))
+					jaloot->AddAura(52182, jaloot);
+			}
+
+            std::list<Creature*> zepivpop;
+            GetCreatureListWithEntryInGrid(zepivpop, me, 28668, 100.0f);
+			if(zepivpop.empty())
+			{
+				zepiv = me->SummonCreature(28668, 5631.62f, 3794.36f, -92.5f, 3.4f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 180000);
+				zepiv->AddAura(52182, zepiv);
+			}
+			else
+			{
+				if(!zepiv->GetAura(52182))
+					zepiv->AddAura(52182, zepiv);
+			}
+			npcpop = true;
 		}
-	    }
-	  else mui_calivemob -= diff;
+
+		if (!isEndPhase())
+		{
+			if (m_uibolt <= diff)
+			{
+				DoCast(me->getVictim(), GIVRE_BOLT, true);
+				m_uibolt = 2000;
+			}
+			else m_uibolt -= diff;
+	  
+			if (m_uijav <= diff)
+			{
+				DoCast(me->getVictim(), GIVRE_JAVELOT, true);
+				m_uijav = 3000;
+			}
+			else m_uijav -= diff;
+
+			if (m_uinova <= diff)
+			{
+				DoCast(me->getVictim(), NOVA_GIVRE, true);
+				m_uinova = 4000;
+			}
+			else m_uinova -= diff;
+
+			if (m_uiveine <= diff)
+			{
+				DoCast(me->getVictim(), VEINE_GLACIALE, true);
+				m_uiveine = 20000;
+			}
+			else m_uiveine -= diff;
+		}
+		else if (!firstbucle)
+		{
+			firstbucle = true;
+			jaloot->RemoveAura(52182);
+			zepiv->RemoveAura(52182);
+		  //	  me->CastCustomSpell(LIEN_SOUMISSION, SPELLVALUE_MAX_TARGETS, 1, jaloot, true);
+		  //  me->CastCustomSpell(LIEN_SOUMISSION, SPELLVALUE_MAX_TARGETS, 1, zepiv, true);
+		  //	  DoCast(jaloot, LIEN_SOUMISSION);
+			DoCastAOE(LIEN_SOUMISSION);
+		}
+		else if (firstbucle)
+		{
+			if (mui_calivemob <= diff)
+			{
+				if (!jaloot->isAlive())
+					bjaloot = true;
+				else if (!zepiv->isAlive())
+					bzepiv = true;
+
+				mui_calivemob = 500;
+
+				if (bjaloot || bzepiv)
+				{
+					SetEndPhase(false);
+					me->RemoveAurasDueToSpell(LIEN_SOUMISSION);
+				}
+			}
+			else mui_calivemob -= diff;
+		}
 	}
-    }
 
-    void SetEndPhase(bool st)
-    {
-      endphase = st;
-    }
+	void SetEndPhase(bool st)
+	{
+		endphase = st;
+	}
 
-    bool isEndPhase()
-    {
-      return endphase;
-    }
+	bool isEndPhase()
+	{
+		return endphase;
+	}
   };
 
   CreatureAI *GetAI(Creature *creature) const

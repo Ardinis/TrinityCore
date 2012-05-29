@@ -1434,10 +1434,13 @@ class spell_sindragosa_icy_grip : public SpellScriptLoader
 		    float speedXY = pUnit->GetExactDist2d(x, y) * 10.0f;
 		    //		    pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
 		    GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
-		    if (pUnit->ToPlayer())
-		      pUnit->ToPlayer()->TeleportTo(631, x, y, z+1.0f, rand() % 5);
-		    else
-		      pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
+		    if (!pUnit->HasAura(SPELL_FROST_BREATH_P1) && !pUnit->HasAura(SPELL_FROST_BREATH_P2))
+		      {
+			if (pUnit->ToPlayer())
+			  pUnit->ToPlayer()->TeleportTo(631, x, y, z+1.0f, pUnit->ToPlayer()->GetOrientation());
+			else
+			  pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
+		      }
 		  }
 	      //	      if (!GetHitUnit()->HasAura(SPELL_FROST_BEACON))
 	      //	{

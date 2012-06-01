@@ -3431,7 +3431,6 @@ public:
 #define LIEN_SOUMISSION		52185
 #define NOVA_GIVRE			11831
 #define VEINE_GLACIALE		54792
-#define WhispProbleme		"Vous avez tuer Jaloot et Zepiv, attendez le respawn de Artruis ! Pour choisir de nouveau votre reputation."
 
 class npc_artuis : public CreatureScript
 {
@@ -3483,20 +3482,21 @@ public:
 		if (!killer->ToPlayer())
 		return ;
 
+/*
 		if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE))
 			if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
 				return ;
-
+*/
 		if (bjaloot)
 		{
 			std::cout << killer->ToPlayer()->GetReputation(1104) << std::endl;
-			if (killer->ToPlayer()->GetReputation(1104) < 14000)
+			//if (killer->ToPlayer()->GetReputation(1104) < 14000)
 				killer->ToPlayer()->SetReputation(1104, 14000);
 		}
 		else if (bzepiv)
 		{
 			std::cout << killer->ToPlayer()->GetReputation(1105) << std::endl;
-			if (killer->ToPlayer()->GetReputation(1105) < 14000)
+			//if (killer->ToPlayer()->GetReputation(1105) < 14000)
 				killer->ToPlayer()->SetReputation(1105, 14000);
 		}
 /*	Gob Pop manuellement en attendant(fonctionne) car il est inutilisable par les joueurs. SOUCIS SQL	*/

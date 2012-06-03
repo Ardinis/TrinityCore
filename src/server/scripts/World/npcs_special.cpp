@@ -3482,11 +3482,11 @@ public:
 		if (!killer->ToPlayer())
 		return ;
 
-/*
+
 		if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE))
-			if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
+			if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_REWARDED))
 				return ;
-*/
+
 		if (bjaloot)
 		{
 			std::cout << killer->ToPlayer()->GetReputation(1104) << std::endl;

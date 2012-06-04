@@ -536,6 +536,140 @@ public:
 };
 
 /*######
+## Quest: Cold Hearted (12856)
+######*/
+
+enum eCaptiveProtodrake
+{
+    QUEST_COLD_HEARTED                = 12856,
+    ENTRY_FREED_PROTODRAKE            = 29709,
+    SPELL_RIDE_FREED_DRAKE            = 55029
+};
+
+class npc_captive_protodrake : public CreatureScript
+{
+public:
+    npc_captive_protodrake() : CreatureScript("npc_captive_protodrake") {}
+
+    struct npc_captive_protodrakeAI : public ScriptedAI
+    {
+        npc_captive_protodrakeAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        void PassengerBoarded(Unit* pWho, int8 /*seatId*/, bool apply) 
+        {
+            if (pWho && apply)
+            {
+                if (pWho->ToPlayer()->GetQuestStatus(QUEST_COLD_HEARTED) == QUEST_STATUS_INCOMPLETE)
+                {
+                    pWho->ExitVehicle();
+                    Creature* pFreed = pWho->SummonCreature(ENTRY_FREED_PROTODRAKE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 300000);
+                    if (pFreed && pFreed->IsVehicle())
+                    {
+                        pWho->RemoveAurasDueToSpell(45472);  //remove parachute
+                        pWho->CastSpell(pFreed, SPELL_RIDE_FREED_DRAKE, true);
+                        pFreed->SetFlying(true);  //should not be here
+                        pFreed->SetSpeed(MOVE_FLIGHT, 3.0f);
+                        me->DisappearAndDie();
+                    }
+                }
+            }
+        }
+
+    };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_captive_protodrakeAI(creature);
+    }
+};
+
+enum eFreedProtodrake
+{
+    ENTRY_LIBERATED_BRUNNHILDAR         = 29734
+};
+
+const Position FreedDrakeWaypoints[6] =
+{
+    {7250.15f, -2327.22f, 869.03f, 0.0f},
+    {7118.79f, -2122.05f, 841.32f, 0.0f},
+    {7052.86f, -1905.99f, 888.59f, 0.0f},
+    {7038.24f, -1822.77f, 857.94f, 0.0f},
+    {7044.09f, -1792.25f, 841.69f, 0.0f},
+    {7071.20f, -1780.73f, 822.42f, 0.0f}
+};
+
+class npc_freed_protodrake : public CreatureScript
+{
+public:
+    npc_freed_protodrake() : CreatureScript("npc_freed_protodrake") { }
+
+    struct npc_freed_protodrakeAI : public ScriptedAI
+    {
+        npc_freed_protodrakeAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+
+        uint8 count;
+        bool wp_reached;
+        bool movementStarted;
+
+        void Reset()
+        {
+            count = 0;
+            wp_reached = false;
+            movementStarted = false;
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE || id != count)
+                return;
+
+            if (id < 5)
+            {
+                ++count;
+                wp_reached = true;
+            }
+            else //reached village, give credits
+            {
+                Unit* pPlayer = me->GetVehicleKit()->GetPassenger(0); //get player
+                if (pPlayer && pPlayer->GetTypeId() == TYPEID_PLAYER)
+                {
+                    for (uint8 i = 1; i < 4; ++i) //try to get prisoners
+                        if (Unit* pPrisoner = me->GetVehicleKit()->GetPassenger(i))
+                        {
+                            pPlayer->ToPlayer()->KilledMonsterCredit(ENTRY_LIBERATED_BRUNNHILDAR, 0);
+                            pPrisoner->ExitVehicle();
+                        }
+
+                    pPlayer->ToPlayer()->KilledMonsterCredit(ENTRY_FREED_PROTODRAKE, 0);
+                    me->DespawnOrUnsummon(1000);
+                    pPlayer->ExitVehicle();
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 uiDiff)
+        {
+            if (!me->isCharmed() && !movementStarted)
+            {
+                movementStarted = true;
+                wp_reached = true;
+            }
+
+            if (wp_reached)
+            {
+                wp_reached = false;
+                me->GetMotionMaster()->MovePoint(count, FreedDrakeWaypoints[count]);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_freed_protodrakeAI(pCreature);
+    }
+};
+
+/*######
 ## npc_brunnhildar_prisoner
 ######*/
 
@@ -558,7 +692,7 @@ public:
     {
         npc_brunnhildar_prisonerAI(Creature* creature) : ScriptedAI(creature) {}
 
-        uint64 drakeGUID;
+        Unit* drake;
         uint16 enter_timer;
         bool hasEmptySeats;
 
@@ -566,25 +700,14 @@ public:
         {
             me->CastSpell(me, SPELL_ICE_PRISON, true);
             enter_timer = 0;
-            drakeGUID = 0;
+            drake = NULL;
             hasEmptySeats = false;
         }
 
         void UpdateAI(const uint32 diff)
         {
-            //TODO: not good script
-            if (!drakeGUID)
-                return;
-
-            Creature* drake = Unit::GetCreature(*me, drakeGUID);
-            if (!drake)
-            {
-                drakeGUID = 0;
-                return;
-            }
-
             // drake unsummoned, passengers dropped
-            if (!me->IsOnVehicle(drake) && !hasEmptySeats)
+            if (drake && !me->IsOnVehicle(drake) && !hasEmptySeats)
                 me->DespawnOrUnsummon(3000);
 
             if (enter_timer <= 0)
@@ -604,15 +727,8 @@ public:
 
         void MoveInLineOfSight(Unit* unit)
         {
-            if (!unit || !drakeGUID)
+            if (!unit || !drake)
                 return;
-
-            Creature* drake = Unit::GetCreature(*me, drakeGUID);
-            if (!drake)
-            {
-                drakeGUID = 0;
-                return;
-            }
 
             if (!me->IsOnVehicle(drake) && !me->HasAura(SPELL_ICE_PRISON))
             {
@@ -657,7 +773,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* hitter, const SpellInfo* spell)
+        void SpellHit(Unit* hitter, const SpellEntry* spell)
         {
             if (!hitter || !spell)
                 return;
@@ -669,7 +785,7 @@ public:
             enter_timer = 500;
 
             if (hitter->IsVehicle())
-                drakeGUID = hitter->GetGUID();
+                drake = hitter;
             else
                 return;
 
@@ -678,59 +794,82 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const
+    CreatureAI *GetAI(Creature* creature) const
     {
         return new npc_brunnhildar_prisonerAI(creature);
     }
 };
 
+/*######
+## Fix Quest http://www.wowhead.com/quest=12851 "Going Bearback"
+######*/
+
+enum eGoingBearback
+  {
+    MOB_FROSTWORG                     = 29358,
+    SPELL_ABLAZE                      = 54683,
+    SPELL_FROSTWORG_CREDIT            = 54896,
+    SPELL_FROSTGIANT_CREDIT           = 54893,
+    SPELL_FLAMING_ARROW_EFFECT        = 54798
+  };
+
 class npc_icefang : public CreatureScript
 {
 public:
-    npc_icefang() : CreatureScript("npc_icefang") { }
+  npc_icefang() : CreatureScript("npc_icefang") {}
 
-    struct npc_icefangAI : public npc_escortAI
+  struct npc_icefangAI : public ScriptedAI
+  {
+    npc_icefangAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+    bool bBurned;
+
+    uint32 uiCheckTimer;
+    uint32 uiDespawnTimer;
+
+    void Reset()
     {
-        npc_icefangAI(Creature* creature) : npc_escortAI(creature) {}
-
-        void AttackStart(Unit* /*who*/) {}
-        void EnterCombat(Unit* /*who*/) {}
-        void EnterEvadeMode() {}
-
-        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply)
-        {
-            if (who->GetTypeId() == TYPEID_PLAYER)
-            {
-                if (apply)
-                    Start(false, true, who->GetGUID());
-            }
-        }
-
-        void WaypointReached(uint32 /*wp*/)
-        {
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-        }
-
-        void OnCharmed(bool /*apply*/)
-        {
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            npc_escortAI::UpdateAI(diff);
-
-            if (!UpdateVictim())
-                return;
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_icefangAI (creature);
+      bBurned = false;
+      uiCheckTimer = 5000;
+      uiDespawnTimer = 4000;
+      me->SetCorpseDelay(5);
     }
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (uiCheckTimer < diff && !bBurned)
+	{
+	  if (Aura* pFlames = me->GetAura(SPELL_FLAMING_ARROW_EFFECT))
+	    {
+	      Unit* pIcefang = pFlames->GetCaster();
+	      if (pIcefang && pIcefang->IsVehicle())
+		if (Unit* pPlayer = pIcefang->GetVehicleKit()->GetPassenger(0))
+		  {
+		    bBurned = true;
+		    me->CastSpell(me, SPELL_ABLAZE, true);
+		    pPlayer->CastSpell(pPlayer, me->GetEntry() == MOB_FROSTWORG ? SPELL_FROSTWORG_CREDIT : SPELL_FROSTGIANT_CREDIT, true);
+		  }
+	    }
+	  uiCheckTimer = 5000;
+	} else uiCheckTimer -= diff;
+
+      if (bBurned && me->isAlive())
+	if (uiDespawnTimer < diff)
+	  {
+	    me->Kill(me);
+	  } else uiDespawnTimer -= diff;
+
+      if (!UpdateVictim())
+	return;
+
+      DoMeleeAttackIfReady();
+    }
+  };
+
+  CreatureAI *GetAI(Creature *creature) const
+  {
+    return new npc_icefangAI(creature);
+  }
 };
 
 class npc_hyldsmeet_protodrake : public CreatureScript
@@ -846,6 +985,8 @@ void AddSC_storm_peaks()
     new npc_injured_goblin;
     new npc_roxi_ramrocket;
     new npc_brunnhildar_prisoner;
+	new npc_freed_protodrake;
+	new npc_captive_protodrake;
     new npc_icefang;
     new npc_hyldsmeet_protodrake;
     new npc_hodir_drake_mount;

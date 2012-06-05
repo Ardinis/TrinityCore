@@ -1426,27 +1426,21 @@ class spell_sindragosa_icy_grip : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex effIndex)
             {
-	      if (Unit *pUnit = GetHitUnit())
-		if (pUnit->isAlive() && !pUnit->HasAura(SPELL_FROST_BEACON))
-		  {
-		    float x, y, z;
-		    GetCaster()->GetPosition(x, y, z);
-		    float speedXY = pUnit->GetExactDist2d(x, y) * 10.0f;
-		    //		    pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
-		    GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
-		    if (!pUnit->HasAura(SPELL_FROST_BREATH_P1) && !pUnit->HasAura(SPELL_FROST_BREATH_P2))
-		      {
-			if (pUnit->ToPlayer())
-			  pUnit->ToPlayer()->TeleportTo(631, x, y, z+1.0f, pUnit->ToPlayer()->GetOrientation());
-			else
-			  pUnit->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
-		      }
-		  }
-	      //	      if (!GetHitUnit()->HasAura(SPELL_FROST_BEACON))
-	      //	{
-		  //		  GetHitUnit()->CastSpell(GetCaster(), SPELL_ICY_GRIP_JUMP, true);
-
-	      //}
+				PreventHitDefaultEffect(effIndex);
+				if (Unit *pUnit = GetCaster())
+				{
+					if (pUnit->isAlive() && !GetHitUnit()->HasAura(SPELL_FROST_BEACON) && !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P1) && !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P2))
+                    {
+						uint64 uiSindragosa = pUnit->GetInstanceScript()->GetData64(DATA_SINDRAGOSA);
+						if (Creature *pSindragosa = pUnit->GetCreature(*pUnit, uiSindragosa))
+						{
+							float x, y, z;
+							pSindragosa->GetPosition(x, y, z);
+							float speedXY = GetHitUnit()->GetExactDist2d(GetCaster()) * 10.0f;
+							GetHitUnit()->GetMotionMaster()->MoveJump(x, y, z+1.0f, speedXY, 1.0f);
+						}
+                    }
+				}
             }
 
             void Register()

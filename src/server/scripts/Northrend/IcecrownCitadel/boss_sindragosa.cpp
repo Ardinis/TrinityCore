@@ -1429,7 +1429,16 @@ class spell_sindragosa_icy_grip : public SpellScriptLoader
 				PreventHitDefaultEffect(effIndex);
 				if (Unit *pUnit = GetCaster())
 				{
-					if (pUnit->isAlive() && !GetHitUnit()->HasAura(SPELL_FROST_BEACON) && !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P1) && !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P2))
+					if (pUnit->isAlive() 
+						&& !GetHitUnit()->HasAura(SPELL_FROST_BEACON) 
+						&& !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P1)
+						&& !GetHitUnit()->HasAura(71056)
+						&& !GetHitUnit()->HasAura(71057)
+						&& !GetHitUnit()->HasAura(71058)
+						&& !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P2) 
+						&& !GetHitUnit()->HasAura(73062)
+						&& !GetHitUnit()->HasAura(73063)
+						&& !GetHitUnit()->HasAura(73064))
                     {
 						uint64 uiSindragosa = pUnit->GetInstanceScript()->GetData64(DATA_SINDRAGOSA);
 						if (Creature *pSindragosa = pUnit->GetCreature(*pUnit, uiSindragosa))

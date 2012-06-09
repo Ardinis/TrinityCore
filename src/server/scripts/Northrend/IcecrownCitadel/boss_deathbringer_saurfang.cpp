@@ -115,6 +115,7 @@ enum Spells
     SPELL_BLOOD_LINK_BEAST              = 72176,
     SPELL_RESISTANT_SKIN                = 72723,
     SPELL_SCENT_OF_BLOOD                = 72769, // Heroic only
+	SPELL_SCENT_OF_BLOOD_TRIGGERED      = 72771,
 
     SPELL_RIDE_VEHICLE                  = 70640, // Outro
     SPELL_ACHIEVEMENT                   = 72928,
@@ -409,30 +410,32 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-	      DoZoneInCombat(summon);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_TRANSFORM, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
-	      summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
-		{
-		  summon->AddThreat(target, 1000000000.0f * 5);
-		  summon->AI()->AttackStart(target);
-		}
-		//                if (IsHeroic())
-		//  DoCast(summon, SPELL_SCENT_OF_BLOOD);
+                summon->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+				summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+				
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                    summon->AI()->AttackStart(target);
 
+                if (IsHeroic())
+                {
+                    summon->AddAura(SPELL_SCENT_OF_BLOOD_TRIGGERED,summon);
+					std::list<Unit*> playerList;
+                    SelectTargetList(playerList, RAID_MODE(10,25,10,25), SELECT_TARGET_RANDOM, 0, true);
+                    for (std::list<Unit*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                    {
+                        Unit *pTemp = (*itr);
+                        pTemp->AddAura(SPELL_SCENT_OF_BLOOD,pTemp);
+                    }
+                }
+	
                 summon->AI()->DoCast(summon, SPELL_BLOOD_LINK_BEAST, true);
                 summon->AI()->DoCast(summon, SPELL_RESISTANT_SKIN, true);
                 summons.Summon(summon);
+				DoZoneInCombat(summon);
             }
 
             void SummonedCreatureDespawn(Creature* summon)
@@ -704,80 +707,32 @@ class npc_blood_beast : public CreatureScript
         {
             npc_blood_beastAI(Creature* creature) : ScriptedAI(creature)
             {
-                _instance = me->GetInstanceScript();
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+				me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
             }
 
-            void Reset()
+            void IsSummonedBy(Unit* summoner)
             {
-		ui_scent = 1000;
-		ui_scent_ = 1000;
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SILENCE, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_TRANSFORM, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
-		me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
-		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-		first = true;
             }
-
+                        
             void UpdateAI(uint32 const diff)
             {
-	      if (IsHeroic())
-		{
-		  if (ui_scent <= diff)
-		    {
-		      if (first)
-			{
-			  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
-			    {
-			      me->AddThreat(target, 1000000000.0f * 5);
-			      me->AI()->AttackStart(target);
-			    }
-			  first = false;
-			}
-		      me->CastSpell(me, SPELL_SCENT_OF_BLOOD, true);
-		      ui_scent = 10000;
-		    }
-		  else ui_scent -= diff;
-		  
-		  if (ui_scent_ <= diff)
-		    {
-		      const Map::PlayerList &PlayerList = me->GetMap()->GetPlayers();
-		      if (!PlayerList.isEmpty())
-			for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-			  if (Player* player = i->getSource())
-			    if (me->GetDistance(player) < 12.0f)
-			      if (!player->HasAura(SPELL_SCENT_OF_BLOOD))
-				{
-				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
-				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
-				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
-				  me->AddAura(SPELL_SCENT_OF_BLOOD, player);
-				}
-		      ui_scent_ = 1000;
-		    }
-		  else ui_scent_ -= diff;
-		}
-	      DoMeleeAttackIfReady();
+                if (!UpdateVictim())
+                    return;
+
+				DoMeleeAttackIfReady();
             }
 
-        private:
-	  InstanceScript* _instance;
-	  uint32 ui_scent;
-	  uint32 ui_scent_;
-	  bool first;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
-        }
+            };
+                        
+            CreatureAI* GetAI(Creature* creature) const
+            {
+                return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
+            }
 };
 
 class npc_high_overlord_saurfang_icc : public CreatureScript
@@ -1889,7 +1844,7 @@ class achievement_ive_gone_and_made_a_mess : public AchievementCriteriaScript
 
 void AddSC_boss_deathbringer_saurfang()
 {
-  new npc_blood_beast();
+	new npc_blood_beast();
     new boss_deathbringer_saurfang();
     new npc_high_overlord_saurfang_icc();
     new npc_muradin_bronzebeard_icc();

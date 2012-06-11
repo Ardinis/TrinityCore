@@ -20,7 +20,7 @@
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "icecrown_citadel.h"
-#include "../../../collision/Management/VMapFactory.h"
+#include "../../../collision/Management/VMapFactory.h"   
 
 enum Texts
 {
@@ -31,7 +31,7 @@ enum Texts
     SAY_RESPITE_FOR_A_TORMENTED_SOUL    = 4, // Aaah! It burns! What sorcery is this?!
     SAY_AIR_PHASE                       = 5, // Your incursion ends here! None shall survive!
     SAY_PHASE_2                         = 6, // Now feel my master's limitless power and despair!
-    EMOTE_WARN_FROZEN_ORB               = 7, // %s fires a frozen orb towards $N!
+    EMOTE_WARN_FROZEN_ORB               = -1368531, // %s fires a frozen orb towards $N!
     SAY_KILL                            = 8, // Perish!
                                              // A flaw of mortality...
     SAY_BERSERK                         = 9, // Enough! I tire of these games!
@@ -509,8 +509,8 @@ class boss_sindragosa : public CreatureScript
                             {
                                 if(target)
                                 {
-                                Talk(EMOTE_WARN_FROZEN_ORB, target->GetGUID());
-                                DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
+									DoScriptText(EMOTE_WARN_FROZEN_ORB, me, target);
+									DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
                                 }
                             }
                             events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));

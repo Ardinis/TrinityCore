@@ -3483,7 +3483,7 @@ public:
 		return ;
 
 
-		if (!(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_COMPLETE) || !(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_REWARDED) || !(killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_INCOMPLETE))
+		if (killer->ToPlayer()->GetQuestStatus(12581) == QUEST_STATUS_NONE)
 			return ;
 
 		if (bjaloot)

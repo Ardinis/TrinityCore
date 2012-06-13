@@ -896,6 +896,9 @@ class WorldSession
         void HandleEnterPlayerVehicle(WorldPacket& data);
         void HandleUpdateProjectilePosition(WorldPacket& recvPacket);
 
+	//paragon channels filtres
+	void filtreParagonMsg(std::string &msg);
+
     private:
         void InitializeQueryCallbackParameters();
         void ProcessQueryCallbacks();

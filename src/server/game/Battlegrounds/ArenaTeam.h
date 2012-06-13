@@ -169,10 +169,12 @@ class ArenaTeam
 
         uint32 GetPoints(uint32 MemberRating);
         int32  GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
-        int32  GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won);
+		int32  GetPursuitMod(uint32 ownRating, uint32 ownMMRRating);
+		int32  GetRatingModWon(uint32 ownRating, uint32 ownMMRRating, uint32 opponentRating, bool won);
+		int32  GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won /*, float confidence_factor*/);
         float  GetChanceAgainst(uint32 ownRating, uint32 opponentRating);
         int32  WonAgainst(uint32 Own_MMRating, uint32 Opponent_MMRating, int32& rating_change);
-        void   MemberWon(Player* player, uint32 againstMatchmakerRating, int32 MatchmakerRatingChange);
+        void   MemberWon(Player* player, uint32 Own_MMRating, uint32 againstMatchmakerRating, int32 MatchmakerRatingChange);
         int32  LostAgainst(uint32 Own_MMRating, uint32 Opponent_MMRating, int32& rating_change);
         void   MemberLost(Player* player, uint32 againstMatchmakerRating, int32 MatchmakerRatingChange = -12);
         void   OfflineMemberLost(uint64 guid, uint32 againstMatchmakerRating, int32 MatchmakerRatingChange = -12);

@@ -432,7 +432,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 if (Channel* chn = cMgr->GetChannel(channel, _player))
                 {
                     sScriptMgr->OnPlayerChat(_player, type, lang, msg, chn);
-
+		    filtreParagonMsg(msg);
                     chn->Say(_player->GetGUID(), msg.c_str(), lang);
                 }
             }
@@ -632,4 +632,48 @@ void WorldSession::SendChatRestrictedNotice(ChatRestrictionType restriction)
     WorldPacket data(SMSG_CHAT_RESTRICTED, 1);
     data << uint8(restriction);
     SendPacket(&data);
+}
+
+void WorldSession::filtreParagonMsg(std::string &msg)
+{
+  int maj = 0;
+  for (unsigned int cnt = 0; cnt < (msg.size() - 1); cnt++)
+    {
+      if (msg[cnt] >= 65 && msg[cnt] <= 90)
+	maj++;
+    }
+  if (maj >= 5)
+    {
+      int randss = urand(0, 6);
+      switch (randss)
+	{
+	case 0:
+	  msg = "j aime les papillons";
+	  break;
+
+	case 1:
+	  msg = "les mj sont trop gentils";
+	  break;
+
+	case 2:
+	  msg = "j ecrit avec mes pieds";
+	  break;
+
+	case 3:
+	  msg = "je suis un papillon";
+	  break;
+
+	case 4:
+	  msg = "je mange des arcs-en-ciels";
+	  break;
+
+	case 5:
+	  msg = "je fait des cacas papillons";
+	  break;
+
+	default:
+	  msg = "vive les poneys !";
+	  break;
+	}
+    }
 }

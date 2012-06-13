@@ -639,10 +639,15 @@ void WorldSession::filtreParagonMsg(std::string &msg)
   int maj = 0;
   for (unsigned int cnt = 0; cnt < (msg.size() - 1); cnt++)
     {
+      if (msg[cnt] == '[')
+	{
+	  maj = 0;
+	  break;
+	}
       if (msg[cnt] >= 65 && msg[cnt] <= 90)
 	maj++;
     }
-  if (maj >= 5)
+  if (maj >= 8)
     {
       int randss = urand(0, 6);
       switch (randss)

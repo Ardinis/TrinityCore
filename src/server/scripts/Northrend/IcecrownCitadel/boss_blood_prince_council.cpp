@@ -39,7 +39,7 @@ enum Texts
     SAY_TALDARAM_INVOCATION     = 0,
     EMOTE_TALDARAM_INVOCATION   = 1,
     SAY_TALDARAM_SPECIAL        = 2,
-    EMOTE_TALDARAM_FLAME        = 3,
+    EMOTE_TALDARAM_FLAME        = -1379731,
     SAY_TALDARAM_KILL           = 4,
     EMOTE_TALDARAM_BERSERK      = 5,
     EMOTE_TALDARAM_DEATH        = 6,
@@ -696,7 +696,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true);     // too bad for you raiders, its going to boom
 
                 if (summon->GetEntry() == NPC_BALL_OF_INFERNO_FLAME && target)
-                    Talk(EMOTE_TALDARAM_FLAME, target->GetGUID());
+					DoScriptText(EMOTE_TALDARAM_FLAME, me, target);
 
                 if (target)
                     summon->AI()->SetGUID(target->GetGUID());

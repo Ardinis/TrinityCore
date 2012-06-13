@@ -36,7 +36,7 @@ enum Texts
     SAY_KILL                    = 6,
     SAY_BERSERK                 = 7,
     SAY_DEATH                   = 8,
-    EMOTE_MUTATED_INFECTION     = 9,
+    EMOTE_MUTATED_INFECTION     = -1366271,
 
     EMOTE_PRECIOUS_ZOMBIES      = 0,
 };
@@ -574,7 +574,7 @@ class spell_rotface_mutated_infection : public SpellScriptLoader
             {
                 if (Creature* caster = GetCaster()->ToCreature())
                     if (Unit* target = GetHitUnit())
-                        caster->AI()->Talk(EMOTE_MUTATED_INFECTION, target->GetGUID());
+                        DoScriptText(EMOTE_MUTATED_INFECTION, caster, target);
             }
 
             void Register()

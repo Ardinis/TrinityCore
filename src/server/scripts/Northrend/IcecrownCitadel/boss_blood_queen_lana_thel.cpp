@@ -30,7 +30,7 @@ enum Texts
     SAY_MIND_CONTROL            = 2,
     EMOTE_BLOODTHIRST           = 3,
     SAY_SWARMING_SHADOWS        = 4,
-    EMOTE_SWARMING_SHADOWS      = 5,
+    EMOTE_SWARMING_SHADOWS      = -1379551,
     SAY_PACT_OF_THE_DARKFALLEN  = 6,
     SAY_AIR_PHASE               = 7,
     SAY_KILL                    = 8,
@@ -408,7 +408,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         case EVENT_SWARMING_SHADOWS:
                             if (Player* target = SelectRandomTarget(false))
                             {
-                                Talk(EMOTE_SWARMING_SHADOWS, target->GetGUID());
+								DoScriptText(EMOTE_SWARMING_SHADOWS, me, target);
                                 Talk(SAY_SWARMING_SHADOWS);
                                 DoCast(target, SPELL_SWARMING_SHADOWS);
                             }

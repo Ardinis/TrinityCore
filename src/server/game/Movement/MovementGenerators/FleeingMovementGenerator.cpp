@@ -186,7 +186,7 @@ template<class T>
 bool FleeingMovementGenerator<T>::_setMoveData(T &unit)
 {
     float cur_dist_xyz = unit.GetDistance(i_caster_x, i_caster_y, i_caster_z);
-
+	
     if (i_to_distance_from_caster > 0.0f)
     {
         if ((i_last_distance_from_caster > i_to_distance_from_caster && cur_dist_xyz < i_to_distance_from_caster)   ||

@@ -3619,6 +3619,16 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_SCHOOL_DAMAGE
                 spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // SPELL_EFFECT_WMO_DAMAGE, Huck but it must be -> Fortress towers are much bigger than original WMO damage radius of spell
                 break;
+			case 7328:  // Redemption
+            case 7329:  // Redemption
+            case 10322: // Redemption
+            case 10324: // Redemption
+            case 20772: // Redemption
+            case 20773: // Redemption
+            case 48949: // Redemption
+            case 48950: // Redemption
+                spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
+                break;
             case 40055: // Introspection
             case 40165: // Introspection
             case 40166: // Introspection

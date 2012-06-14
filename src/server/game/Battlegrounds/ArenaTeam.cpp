@@ -632,18 +632,18 @@ int32 ArenaTeam::GetPursuitMod(uint32 ownRating, uint32 ownMMRRating)
 	float pursuit_mod;
 	
 	if (ownMMRRating < 2000)
-       {
+    {
 	    if (ownRating > 1000)
-		pursuit_mod = float(ownMMRRating) / float(ownRating);
+			pursuit_mod = float(ownMMRRating) / float(ownRating);
 	    else
-		pursuit_mod = float(ownMMRRating) / 1000.0f;
+			pursuit_mod = float(ownMMRRating) / 1000.0f;
 	}
 	else
 	{
 	    if (ownRating > 1000)
-		pursuit_mod = 2000.0f / float(ownRating);
-    else
-		pursuit_mod = 2000.0f / 1000.0f;
+			pursuit_mod = 2000.0f / float(ownRating);
+		else
+			pursuit_mod = 2000.0f / 1000.0f;
 	}
     return ceil(pursuit_mod);
 }

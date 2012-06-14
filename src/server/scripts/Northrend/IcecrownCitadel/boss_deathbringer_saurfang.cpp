@@ -955,6 +955,11 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                                         pCreature->SetVisible(true);
                                 _peon1->DespawnOrUnsummon();
                                 _peon2->DespawnOrUnsummon();
+								for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+								{
+									if (Player* pPlayer = itr->getSource())
+										pPlayer->CombatStop();
+								}
                                 break;							
                     }
                 }
@@ -1379,6 +1384,11 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                                         pCreature->SetVisible(true);
                                 _peon1->DespawnOrUnsummon();
                                 _peon2->DespawnOrUnsummon();
+								for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+								{
+									if (Player* pPlayer = itr->getSource())
+										pPlayer->CombatStop();
+								}
                                 break;
 					}
                 }

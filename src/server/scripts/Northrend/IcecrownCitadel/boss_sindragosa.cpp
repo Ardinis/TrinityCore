@@ -1655,8 +1655,8 @@ class at_sindragosa_lair : public AreaTriggerScript
         {
             if (InstanceScript* instance = player->GetInstanceScript())
             {
-				//if(instance->GetBossState(DATA_SINDRAGOSA_GAUNTLET) == DONE)
-				//{
+				if(instance->GetBossState(DATA_SINDRAGOSA_GAUNTLET) == DONE)
+				{
 					Creature* spinestalker = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_SPINESTALKER));
 					Creature* rimefang = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_RIMEFANG));
 					if (!instance->GetData(DATA_SPINESTALKER))
@@ -1680,7 +1680,7 @@ class at_sindragosa_lair : public AreaTriggerScript
 							if (sindragosa = player->GetMap()->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
 								sindragosa->AI()->DoAction(ACTION_START_FROSTWYRM);
 					}
-				//}
+				}
             }
             return true;
         }

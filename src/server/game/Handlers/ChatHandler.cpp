@@ -694,6 +694,6 @@ void WorldSession::filtreParagonMsg(std::string &msg)
 	default:
 	  msg = "vive les poneys !";
 	  break;
-	}
-	}*/
+	  }*/
+    }
 }

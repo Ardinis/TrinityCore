@@ -26,6 +26,7 @@ void AddSC_example_commandscript();
 
 //custom
 void AddSC_telenpc();
+void AddSC_player_event();
 
 // spells
 void AddSC_deathknight_spell_scripts();
@@ -1258,7 +1259,7 @@ void AddCustomScripts()
 {
 #ifdef SCRIPTS
   AddSC_telenpc();
-
+  AddSC_player_event();
     /* This is where custom scripts should be added. */
 
 #endif

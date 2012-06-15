@@ -11,6 +11,7 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   Custom/telenpc.cpp
+  Custom/player_event.cpp
 )
 
 message("  -> Prepared: Custom")

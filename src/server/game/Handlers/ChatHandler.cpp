@@ -649,7 +649,9 @@ void WorldSession::filtreParagonMsg(std::string &msg)
     }
   if (maj >= 8)
     {
-      int randss = urand(0, 9);
+      msg = "...";
+
+      /*      int randss = urand(0, 6);
       switch (randss)
 	{
 	case 0:
@@ -692,6 +694,6 @@ void WorldSession::filtreParagonMsg(std::string &msg)
 	default:
 	  msg = "vive les poneys !";
 	  break;
-	}
+	  }*/
     }
 }

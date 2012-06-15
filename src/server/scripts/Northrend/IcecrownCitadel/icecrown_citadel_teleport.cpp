@@ -41,7 +41,8 @@ class icecrown_citadel_teleport : public GameObjectScript
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Deathbringer's Rise.", GOSSIP_SENDER_ICC_PORT, DEATHBRINGER_S_RISE_TELEPORT);
                 if (instance->GetData(DATA_COLDFLAME_JETS) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Upper Spire.", GOSSIP_SENDER_ICC_PORT, UPPER_SPIRE_TELEPORT);
-                if (instance->GetBossState(DATA_SINDRAGOSA_GAUNTLET) == DONE) // DATA_VALITHRIA_DREAMWALKER
+                // TODO: Gauntlet event before Sindragosa
+                if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to Sindragosa's Lair", GOSSIP_SENDER_ICC_PORT, SINDRAGOSA_S_LAIR_TELEPORT);
             }
 

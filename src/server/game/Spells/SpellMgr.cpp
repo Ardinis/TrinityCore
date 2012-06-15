@@ -3454,9 +3454,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 70460: // Coldflame Jets (Traps after Saurfang)
                 spellInfo->DurationIndex = 1;   // 10 seconds
                 break;
-            case 71412: // Green Ooze Summon (Professor Putricide)
-            case 71415: // Orange Ooze Summon (Professor Putricide)
-	      spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            case 71413: // Green Ooze Summon (Professor Putricide)
+            case 71414: // Orange Ooze Summon (Professor Putricide)
+                spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
                 break;
             case 71159: // Awaken Plagued Zombies
                 spellInfo->DurationIndex = 21;
@@ -3618,6 +3618,16 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_KNOCK_BACK
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_SCHOOL_DAMAGE
                 spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // SPELL_EFFECT_WMO_DAMAGE, Huck but it must be -> Fortress towers are much bigger than original WMO damage radius of spell
+                break;
+			case 7328:  // Redemption
+            case 7329:  // Redemption
+            case 10322: // Redemption
+            case 10324: // Redemption
+            case 20772: // Redemption
+            case 20773: // Redemption
+            case 48949: // Redemption
+            case 48950: // Redemption
+                spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
                 break;
             case 40055: // Introspection
             case 40165: // Introspection

@@ -663,7 +663,7 @@ void WorldSession::filtreParagonMsg(std::string &msg)
 	  break;
 
 	case 2:
-	  msg = "j ecrit avec mes pieds";
+	  msg = "j ecris avec mes pieds";
 	  break;
 
 	case 3:
@@ -675,7 +675,20 @@ void WorldSession::filtreParagonMsg(std::string &msg)
 	  break;
 
 	case 5:
-	  msg = "je fait des cacas papillons";
+	  msg = "je fais des cacas papillons";
+	  break;
+
+	case 6:
+	  msg = "42 est la réponses !";
+	  break;
+
+	case 7:
+	  msg = "je vie pour le nombre 42 !";
+	  break;
+
+
+	case 8:
+	  msg = "je danse la vie ! je chante la vie ! je ne suis qu amour !";
 	  break;
 
 	default:

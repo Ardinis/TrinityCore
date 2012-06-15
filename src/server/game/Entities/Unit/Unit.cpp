@@ -7387,7 +7387,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (GetTypeId() != TYPEID_PLAYER  || !victim || !victim->isAlive() || !castItem || !castItem->IsEquipped())
                     return false;
 
-		WeaponAttackType attType = WeaponAttackType(Player::GetAttackBySlot(castItem->GetSlot()));
+                Player* player = ToPlayer();
+                WeaponAttackType attType = WeaponAttackType(player->GetAttackBySlot(castItem->GetSlot()));
                 if ((attType != BASE_ATTACK && attType != OFF_ATTACK)
                     || (attType == BASE_ATTACK && procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK)
                     || (attType == OFF_ATTACK && procFlag & PROC_FLAG_DONE_MAINHAND_ATTACK))
@@ -7984,8 +7985,12 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     for (uint8 i = 1; i < stack; ++i)
                         dmg += mod * stack;
                     if (Unit* caster = triggeredByAura->GetCaster())
-		      caster->CastCustomSpell(70701, SPELLVALUE_BASE_POINT0, dmg);
-		    break;
+                    {
+                        caster->CastCustomSpell(70701, SPELLVALUE_BASE_POINT0, dmg);
+                        if (Creature* creature = caster->ToCreature())
+                            creature->DespawnOrUnsummon(1);
+                    }
+                    break;
                 }
                 // Ball of Flames Proc
                 case 71756:

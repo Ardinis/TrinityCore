@@ -183,7 +183,6 @@ public:
 
   bool OnGossipHello(Player* player, GameObject* gameObject)
   {
-    std::cout << "WTFKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK" << std::endl;
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Toutes nos felicitations aux lorem ipsum pour le first down roi liche en 25HM !", GOSSIP_SENDER_MAIN, 42);
     player->SEND_GOSSIP_MENU(gameObject->GetGOInfo()->GetGossipMenuId(), gameObject->GetGUID());
     return true;

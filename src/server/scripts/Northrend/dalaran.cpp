@@ -166,8 +166,33 @@ public:
     }
 };
 
+class gob_lk : public GameObjectScript
+{
+
+public:
+  gob_lk() : GameObjectScript("gob_lk") { }
+
+  bool OnGossipSelect(Player* player, GameObject* /*gameObject*/, uint32 sender, uint32 action)
+  {
+    player->PlayerTalkClass->ClearMenus();
+    if (sender != GOSSIP_SENDER_MAIN)
+      return false;
+    player->SendMovieStart(16);
+    player->CLOSE_GOSSIP_MENU();
+  }
+
+  bool OnGossipHello(Player* player, GameObject* gameObject)
+  {
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Toutes nos felicitations aux lorem ipsum pour le first down roi liche en 25HM !", GOSSIP_SENDER_MAIN, 42);
+    player->SEND_GOSSIP_MENU(gameObject->GetGOInfo()->GetGossipMenuId(), gameObject->GetGUID());
+    return true;
+  }
+
+};
+
 void AddSC_dalaran()
 {
     new npc_mageguard_dalaran;
     new npc_hira_snowdawn;
+    new gob_lk();
 }

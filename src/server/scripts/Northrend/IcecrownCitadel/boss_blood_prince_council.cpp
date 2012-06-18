@@ -1295,6 +1295,12 @@ class npc_kinetic_bomb : public CreatureScript
                 }
             }
 
+            void DamageTaken(Unit* attacker, uint32& )
+            {
+	      if (!attacker->ToPlayer())
+		me->Kill(attacker);
+	    }
+
             void UpdateAI(uint32 const diff)
             {
                 _events.Update(diff);

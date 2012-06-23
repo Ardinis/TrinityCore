@@ -313,6 +313,21 @@ class achievement_tilted : public AchievementCriteriaScript
         }
 };
 
+#define DALARAN_ZONE_ID 4395
+class achievement_torch_juggler : public AchievementCriteriaScript
+{
+	public:
+		achievement_torch_juggler() : AchievementCriteriaScript("achievement_torch_juggler") { }
+		
+		bool OnCheck(Player* source, Unit* /*target*/)
+		{
+			if (!source || source->GetZoneId() != DALARAN_ZONE_ID)
+				return false;
+				
+			return true;
+		}
+};
+
 void AddSC_achievement_scripts()
 {
     new achievement_resilient_victory();
@@ -331,4 +346,5 @@ void AddSC_achievement_scripts()
     new achievement_arena_kills("achievement_arena_5v5_kills", ARENA_TYPE_5v5);
     new achievement_bg_sa_defense_of_ancients();
     new achievement_tilted();
+	new achievement_torch_juggler();
 }

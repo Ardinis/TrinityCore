@@ -12757,12 +12757,14 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         if (float minSpeedMod = (float)GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
         {
             float min_speed = minSpeedMod / 100.0f;
-	    if (float minSpeedMod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
-	      {
-		float min_speed = minSpeedMod / 100.0f;
-		if (speed < min_speed)
-		  speed = min_speed;
-	      }
+			if (float minSpeedMod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
+			{
+				float min_speed = minSpeedMod / 100.0f;
+				if (speed < min_speed)
+					speed = min_speed;
+				if (GetTypeId() == TYPEID_UNIT && GetEntry() == 36609)  // Val'kyr Shadowguard
+					speed *= 0.642857f;
+			}
         }
     }
     SetSpeed(mtype, speed, forced);

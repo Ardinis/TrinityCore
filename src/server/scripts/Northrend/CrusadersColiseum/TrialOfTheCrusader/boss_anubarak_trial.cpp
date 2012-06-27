@@ -684,11 +684,6 @@ public:
             m_uiTargetGUID = 0;
         }
 
-		bool CanAIAttack(Unit const* victim) const
-        {
-            return victim->GetTypeId() == TYPEID_PLAYER;
-        }
-		
         void EnterCombat(Unit* who)
         {
             m_uiTargetGUID = who->GetGUID();

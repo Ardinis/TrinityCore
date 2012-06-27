@@ -179,7 +179,6 @@ public:
       return false;
     player->SendMovieStart(16);
     player->CLOSE_GOSSIP_MENU();
-	return true;
   }
 
   bool OnGossipHello(Player* player, GameObject* gameObject)

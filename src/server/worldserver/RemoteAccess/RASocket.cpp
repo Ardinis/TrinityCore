@@ -260,7 +260,7 @@ int RASocket::authenticate()
 
 int RASocket::subnegotiate()
 {
-    char buf[2048];
+    char buf[1024];
 
     ACE_Data_Block db(sizeof (buf),
         ACE_Message_Block::MB_DATA,

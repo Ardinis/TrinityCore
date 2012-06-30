@@ -547,7 +547,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                     for (uint8 i = 0; i < boneSpikeCount; ++i)
                     {
                         // select any unit but not the tank
-                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 1, 75.0f, true, -SPELL_IMPALED);
+                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 1, 0.0f, true, -SPELL_IMPALED);
                         if (!target)
                             break;
 
@@ -588,7 +588,7 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
                 {
                     const float distance = GetHitUnit()->GetExactDist2d(caster);
                     const int32 damage   = GetHitDamage();
-                    SetHitDamage((int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))) + 1500) * 2.1);
+                    SetHitDamage((int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))) + 1500) * 3);
                 }
             }
 

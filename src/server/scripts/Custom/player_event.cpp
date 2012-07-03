@@ -9,7 +9,7 @@ class player_event : public PlayerScript
   }
 
 
-  void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg)
+  /*  void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg)
   {
     if (msg.find("murloc") != std::string::npos)
       {
@@ -82,7 +82,7 @@ class player_event : public PlayerScript
       }
     if (msg.find("demorph") != std::string::npos)
       player->SetDisplayId(player->GetNativeDisplayId());
-  }
+      }*/
 
 
 

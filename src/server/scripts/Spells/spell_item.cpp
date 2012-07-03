@@ -45,6 +45,7 @@ class spell_item_trigger_spell : public SpellScriptLoader
             {
                 if (!sSpellMgr->GetSpellInfo(_triggeredSpellId))
                     return false;
+				
                 return true;
             }
 
@@ -53,6 +54,7 @@ class spell_item_trigger_spell : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 if (Item* pItem = GetCastItem())
                     caster->CastSpell(caster, _triggeredSpellId, true, pItem);
+
             }
 
             void Register()
@@ -82,11 +84,11 @@ class spell_item_deviate_fish : public SpellScriptLoader
 {
     public:
         spell_item_deviate_fish() : SpellScriptLoader("spell_item_deviate_fish") { }
-
+		
         class spell_item_deviate_fish_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_item_deviate_fish_SpellScript);
-
+			
             bool Load()
             {
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;

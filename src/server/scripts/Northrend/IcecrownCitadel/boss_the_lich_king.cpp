@@ -76,6 +76,8 @@ enum Texts
 
 enum Spells
 {
+  SPELL_DEATH_GRIP                 = 49560,
+
     // The Lich King
     SPELL_PLAGUE_AVOIDANCE              = 72846,    // raging spirits also get it
     SPELL_EMOTE_SIT_NO_SHEATH           = 73220,
@@ -500,6 +502,7 @@ class boss_the_lich_king : public CreatureScript
                 _necroticPlagueStack = 0;
                 _vileSpiritExplosions = 0;
                 SetEquipmentSlots(true);
+		mui_dead = 30000;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -514,12 +517,12 @@ class boss_the_lich_king : public CreatureScript
             void EnterCombat(Unit* target)
             {
 			sLog->outError(" <!> LANCEMENT SCRIPT : LICH KING <!>");
-			/*                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
+			if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
                 {
                     EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
                     return;
-		    }*/
+		    }
 
                 me->setActive(true);
                 DoZoneInCombat();
@@ -870,6 +873,20 @@ class boss_the_lich_king : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING) && !(events.GetPhaseMask() & PHASE_MASK_NO_CAST_CHECK))
                     return;
 
+		if (mui_dead <= diff)
+		  {
+		    Map::PlayerList const& players = me->GetMap()->GetPlayers();
+		    if (!players.isEmpty())
+		      for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        if (Player* player = itr->getSource())
+			  if (!player->isAlive())
+			    player->TeleportTo(631, 505.0f, -2128.0f, 841.0f, 0.0f);
+			    //			    player->GetSession()->SendPacket(data);
+		    mui_dead = 15000;
+		  }
+		else mui_dead -= diff;
+
+
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
@@ -1032,7 +1049,8 @@ class boss_the_lich_king : public CreatureScript
                                 {
                                     triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
                                     Unit* spawner = triggers.front();
-				    //                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
+				    if (Is25ManRaid())
+				      spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
                                 }
 				//				DoCastAOE(SPELL_VILE_SPIRITS);
@@ -1181,6 +1199,7 @@ class boss_the_lich_king : public CreatureScript
 
             uint32 _necroticPlagueStack;
             uint32 _vileSpiritExplosions;
+	  uint32 mui_dead;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1570,12 +1589,24 @@ class npc_valkyr_shadowguard : public CreatureScript
             void Reset()
             {
                 _events.Reset();
+		endPhase = false;
 		stuStarted = false;
+			  HadGrab = false;
                 me->SetReactState(REACT_PASSIVE);
-                DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
-		//                me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
+		// DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
+		//me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
 		me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+		//me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
+		me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+		mui_check = 3000;
+		mui_check2 = 3000;
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -1594,10 +1625,15 @@ class npc_valkyr_shadowguard : public CreatureScript
 
                 if (me->HealthBelowPctDamaged(50, damage))
                 {
+		  HadGrab = false;
+		  endPhase = false;
+		    mui_check = 3600000;
+		    mui_check2 = 3600000;
                     _events.Reset();
                     DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
                     me->GetMotionMaster()->MoveTargetedHome();
                     me->ClearUnitState(UNIT_STATE_EVADE);
+
                 }
             }
 
@@ -1617,15 +1653,13 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 if (type != POINT_MOTION_TYPE)
                     return;
-		if (me->HasUnitState(UNIT_STATE_STUNNED))
-		  return;
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
 		      //		      if (!stu)
 			{
-			  DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-			  me->DespawnOrUnsummon(1000);
+			  //			  DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+			  //	  me->DespawnOrUnsummon(1000);
 			}
 			//else
 			{
@@ -1650,7 +1684,8 @@ class npc_valkyr_shadowguard : public CreatureScript
                                 DoCast(target, SPELL_VALKYR_CARRY);
                                 _dropPoint.Relocate(triggers.front());
                                 _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 1500);
-
+				_trig = triggers.front();
+				endPhase = true;
                             }
                         }
                         else
@@ -1665,6 +1700,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
                 _grabbedPlayer = guid;
+		std::cout << "setguid" << std::endl;
 		if (Player *player = Unit::GetPlayer(*me, guid))
 		  DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
             }
@@ -1688,9 +1724,52 @@ class npc_valkyr_shadowguard : public CreatureScript
 		    stu = true;
 		  }
 		*/
-                if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_STUNNED))
+                if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
+		if (mui_check <= diff)
+		  {
+		std::cout << "check" << std::endl;
+		    if (_grabbedPlayer)
+		      {
+			if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
+			  {
+			    std::cout << "check start" << std::endl;
+			    HadGrab = true;
+			    std::cout << "check end" << std::endl;
+			  }
+			else if (HadGrab)
+			  {
+			    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+			      lichKing->AI()->EnterEvadeMode();
+			    _instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+			    HadGrab = false;
+			  }
+		      }
+		    mui_check = 3000;
+		  }
+		else mui_check -= diff;
+
+		if (endPhase)
+		  {
+		    if (mui_check2 <= diff)
+		      {
+			mui_check2 = 1000;
+			if (me->IsWithinDistInMap(_trig, 1.0f))
+			  {
+			    endPhase = false;
+			    DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+			    if (!IsHeroic())
+			      me->DespawnOrUnsummon(1000);
+			    else
+			      {
+				me->GetMotionMaster()->MoveTargetedHome();
+				me->ClearUnitState(UNIT_STATE_EVADE);
+			      }
+			  }
+		      }
+		    else mui_check2 -= diff;
+		  }
                 while (uint32 eventId = _events.ExecuteEvent())
                 {
                     switch (eventId)
@@ -1704,8 +1783,9 @@ class npc_valkyr_shadowguard : public CreatureScript
                             }
                             break;
                         case EVENT_MOVE_TO_DROP_POS:
-                            me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
-                            break;
+			  //                            me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
+			  me->GetMotionMaster()->MoveFollow(_trig, 0.0f, 0.0f);
+			  break;
                         case EVENT_LIFE_SIPHON:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                                 DoCast(target, SPELL_LIFE_SIPHON);
@@ -1723,10 +1803,15 @@ class npc_valkyr_shadowguard : public CreatureScript
 	  bool stu;
 	  bool stuStarted;
 	  uint64 _x, _y, _z;
-            EventMap _events;
-            Position _dropPoint;
-            uint64 _grabbedPlayer;
-            InstanceScript* _instance;
+	  EventMap _events;
+	  Position _dropPoint;
+	  uint64 _grabbedPlayer;
+	  InstanceScript* _instance;
+	  Creature *_trig;
+	  bool endPhase;
+	  uint32 mui_check;
+	  uint32 mui_check2;
+	  bool HadGrab;
         };
 
         CreatureAI* GetAI(Creature* creature) const

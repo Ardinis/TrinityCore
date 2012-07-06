@@ -868,7 +868,7 @@ Creature* Transport::AddNPCPassengerInInstance(uint32 entry, float x, float y, f
     map->AddToMap(creature);
     m_NPCPassengerSet.insert(creature);
 
-    creature->setActive(true);
+            creature->setActive(true);
     sScriptMgr->OnAddCreaturePassenger(this, creature);
     return creature;
 }

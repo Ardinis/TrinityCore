@@ -364,6 +364,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
         {
             // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
             // use `item_template` or if not set then only use spell cooldowns
+
             SpellInfo const* spell = sSpellMgr->GetSpellInfo(pProto->Spells[s].SpellId);
             if (spell)
             {

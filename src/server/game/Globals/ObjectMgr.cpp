@@ -2098,7 +2098,7 @@ void ObjectMgr::LoadItemTemplates()
                                              "startquest, lockid, Material, sheath, RandomProperty, RandomSuffix, block, itemset, MaxDurability, area, Map, BagFamily, "
     //                                            118             119             120             121             122            123              124            125
                                              "TotemCategory, socketColor_1, socketContent_1, socketColor_2, socketContent_2, socketColor_3, socketContent_3, socketBonus, "
-    //                                            126                 127                     128            129            130            131         132         133
+    //                                            126                  127                     128            129            130            131         132         133
                                              "GemProperties, RequiredDisenchantSkill, ArmorDamageModifier, Duration, ItemLimitCategory, HolidayId, ScriptName, DisenchantID, "
     //                                           134        135            136
                                              "FoodType, minMoneyLoot, maxMoneyLoot FROM item_template");
@@ -2120,7 +2120,6 @@ void ObjectMgr::LoadItemTemplates()
         uint32 entry = fields[0].GetUInt32();
 
         ItemTemplate& itemTemplate = _itemTemplateStore[entry];
-
         itemTemplate.ItemId                    = entry;
         itemTemplate.Class                     = uint32(fields[1].GetUInt8());
         itemTemplate.SubClass                  = uint32(fields[2].GetUInt8());
@@ -6719,16 +6718,16 @@ void ObjectMgr::LoadJailConf(void)
 		m_jailconf_warn_player  = 1;
 		m_jailconf_amnestie     = 180;
 
-		m_jailconf_ally_x       = -8673.43;
-		m_jailconf_ally_y       = 631.795;
-		m_jailconf_ally_z       = 96.9406;
-		m_jailconf_ally_o       = 2.1785;
+		m_jailconf_ally_x       = -8673.43f;
+		m_jailconf_ally_y       = 631.795f;
+		m_jailconf_ally_z       = 96.9406f;
+		m_jailconf_ally_o       = 2.1785f;
 		m_jailconf_ally_m       = 0;
 
-		m_jailconf_horde_x      = 2179.85;
-		m_jailconf_horde_y      = -4763.96;
-		m_jailconf_horde_z      = 54.911;
-		m_jailconf_horde_o      = 4.44216;
+		m_jailconf_horde_x      = 2179.85f;
+		m_jailconf_horde_y      = -4763.96f;
+		m_jailconf_horde_z      = 54.911f;
+		m_jailconf_horde_o      = 4.44216f;
 		m_jailconf_horde_m      = 1;
 
 		m_jailconf_ban          = 0;

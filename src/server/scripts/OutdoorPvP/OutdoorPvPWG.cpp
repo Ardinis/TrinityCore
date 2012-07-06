@@ -1886,20 +1886,21 @@ void OutdoorPvPWG::EndBattle()
         uint32 marks = 0;
         uint32 playersWithRankNum = 0;
         uint32 honor = 0;
-
-        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
+	std::cout << "damagedNum : " << damagedNum << std::endl;
+	std::cout << "damagedNum : " << intactNum << std::endl;
+	//        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
         {
             // Calculate Level 70+ with Corporal or Lieutenant rank
-            for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-                if ((*itr)->getLevel() > 74 && ((*itr)->HasAura(SPELL_LIEUTENANT) || (*itr)->HasAura(SPELL_CORPORAL)))
-                    ++playersWithRankNum;
-            baseHonor = team == getDefenderTeam() ? sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_WIN_BATTLE) : sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_LOSE_BATTLE);
-            baseHonor += (sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_DAMAGED_TOWER) * m_towerDamagedCount[OTHER_TEAM(team)]);
-            baseHonor += (sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_DESTROYED_TOWER) * m_towerDestroyedCount[OTHER_TEAM(team)]);
-            baseHonor += (sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_INTACT_BUILDING) * intactNum);
-            baseHonor += (sWorld->getIntConfig(CONFIG_OUTDOORPVP_WINTERGRASP_DAMAGED_BUILDING) * damagedNum);
-            if (playersWithRankNum)
-                baseHonor /= playersWithRankNum;
+            //for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
+	  //   if ((*itr)->getLevel() > 74 && ((*itr)->HasAura(SPELL_LIEUTENANT) || (*itr)->HasAura(SPELL_CORPORAL)))
+	  //         ++playersWithRankNum;
+            baseHonor = team == getDefenderTeam() ? 3000 : 1250;
+            baseHonor += 750 * m_towerDamagedCount[OTHER_TEAM(team)];
+            baseHonor += 750 * m_towerDestroyedCount[OTHER_TEAM(team)];
+            baseHonor += 750 * intactNum;
+            baseHonor += 1500 * damagedNum;
+            //if (playersWithRankNum)
+	    //  baseHonor /= playersWithRankNum;
         }
 
         for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
@@ -1908,7 +1909,7 @@ void OutdoorPvPWG::EndBattle()
                 continue; // No rewards for level <75
 
             // give rewards
-            if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
+	    //            if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
             {
                 if (team == getDefenderTeam())
                 {
@@ -1943,7 +1944,7 @@ void OutdoorPvPWG::EndBattle()
                 (*itr)->RewardHonor(NULL, 1, honor);
                 RewardMarkOfHonor(*itr, marks);
                 (*itr)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, spellRewardId);
-            } else {
+            } /*else {
                 if ((*itr)->HasAura(SPELL_LIEUTENANT) || (*itr)->HasAura(SPELL_CORPORAL))
                 {
                     // TODO - Honor from SpellReward should be shared by team players
@@ -1959,7 +1960,7 @@ void OutdoorPvPWG::EndBattle()
                     for (uint32 i = 0; i < m_towerDestroyedCount[OTHER_TEAM(team)]; ++i)
                         (*itr)->CastSpell(*itr, SPELL_DESTROYED_TOWER, true);
                 }
-            }
+		}*/
             if (team == getDefenderTeam())
             {
                 if ((*itr)->HasAura(SPELL_LIEUTENANT) || (*itr)->HasAura(SPELL_CORPORAL))

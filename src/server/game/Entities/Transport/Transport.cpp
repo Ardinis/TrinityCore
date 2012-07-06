@@ -824,13 +824,8 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     else
         currenttguid = std::max(tguid, currenttguid);
 
-<<<<<<< HEAD
     creature->SetGUIDTransport(tguid);
     sScriptMgr->OnAddCreaturePassenger(this, creature);
-=======
-    pCreature->SetGUIDTransport(tguid);
-    sScriptMgr->OnAddCreaturePassenger(this, pCreature);
->>>>>>> parent of 592ad10... Core/Transports: Fixed NPCs on transport disappearing after grid unloading
     return tguid;
 }
 

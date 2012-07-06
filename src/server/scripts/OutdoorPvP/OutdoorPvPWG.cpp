@@ -1886,8 +1886,11 @@ void OutdoorPvPWG::EndBattle()
         uint32 marks = 0;
         uint32 playersWithRankNum = 0;
         uint32 honor = 0;
-	std::cout << "damagedNum : " << damagedNum << std::endl;
-	std::cout << "damagedNum : " << intactNum << std::endl;
+	bool cplteachievement = false;
+	/*	std::cout << "damagedNum : " << damagedNum << std::endl;
+	std::cout << "intactNum : " << intactNum << std::endl;
+	std::cout << "m_towerDamagedCount : " << m_towerDamagedCount[OTHER_TEAM(team)] << std::endl;
+	std::cout << "m_towerDestroyedCount : " << m_towerDestroyedCount[OTHER_TEAM(team)] << std::endl;*/
 	//        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
         {
             // Calculate Level 70+ with Corporal or Lieutenant rank
@@ -1897,18 +1900,25 @@ void OutdoorPvPWG::EndBattle()
             baseHonor = team == getDefenderTeam() ? 3000 : 1250;
             baseHonor += 750 * m_towerDamagedCount[OTHER_TEAM(team)];
             baseHonor += 750 * m_towerDestroyedCount[OTHER_TEAM(team)];
-            baseHonor += 750 * intactNum;
-            baseHonor += 1500 * damagedNum;
+            baseHonor += 1500 * intactNum;
+            baseHonor += 750 * damagedNum;
+	    if (m_towerDestroyedCount[OTHER_TEAM(team)] > 0)
+	      cplteachievement = true;
             //if (playersWithRankNum)
 	    //  baseHonor /= playersWithRankNum;
+	    // 1727
         }
+	AchievementEntry const* pAE = sAchievementStore.LookupEntry(1727);
 
         for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
         {
             if ((*itr)->getLevel() < 75)
                 continue; // No rewards for level <75
 
-            // give rewards
+	    if (cplteachievement && pAE)
+	      (*itr)->CompletedAchievement(pAE);
+
+	    // give rewards
 	    //            if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
             {
                 if (team == getDefenderTeam())

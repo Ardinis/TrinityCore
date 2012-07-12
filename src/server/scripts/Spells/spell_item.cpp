@@ -2030,7 +2030,7 @@ void AddSC_item_spell_scripts()
     new spell_item_socrethars_stone();
     new spell_item_demon_broiled_surprise();
     new spell_item_complete_raptor_capture();
-    new spell_item_impale_leviroth();
+    //    new spell_item_impale_leviroth();
     new spell_item_brewfest_mount_transformation();
     new spell_item_nitro_boots();
     new spell_item_teach_language();

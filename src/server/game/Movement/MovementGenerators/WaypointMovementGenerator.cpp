@@ -199,15 +199,15 @@ void FlightPathMovementGenerator::Initialize(Player &unit)
     InitEndGridInfo();
 }
 
-void FlightPathMovementGenerator::Finalize(Player &unit)
+void FlightPathMovementGenerator::Finalize(Player& unit)
 {
     // remove flag to prevent send object build movement packets for flight state and crash (movement generator already not at top of stack)
     unit.ClearUnitState(UNIT_STATE_IN_FLIGHT);
 
     unit.Dismount();
-    unit.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+    unit.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
-    if(unit.m_taxi.empty())
+    if (unit.m_taxi.empty())
     {
         unit.getHostileRefManager().setOnlineOfflineState(true);
 	//        if(unit.pvpInfo.inHostileArea)

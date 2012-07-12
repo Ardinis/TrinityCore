@@ -170,7 +170,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         sLog->outError("Gameobject (GUID: %u Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", guidlow, name_id, x, y);
         return false;
     }
-
+	else
+	{
+		if(guidlow > 3492269)
+			sLog->outBasic(" POP GAMEOBJECT (GUID: %u Entry: %u) Coordonne Map: %u (X: %f Y: %f , Z = %f)", guidlow, name_id, map->GetId(),x, y, z);
+	}
+	
     SetPhaseMask(phaseMask, false);
 
     SetZoneScript();

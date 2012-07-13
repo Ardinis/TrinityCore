@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -605,7 +605,7 @@ float ArenaTeam::GetChanceAgainst(uint32 ownRating, uint32 opponentRating)
 {
     // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
     // ELO system
-    return 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponentRating - (float)ownRating) / 650.0f));
+    return 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponentRating - (float)ownRating) / 400.0f));
 }
 
 int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won /*, float& confidence_factor*/)
@@ -659,9 +659,7 @@ int32 ArenaTeam::GetRatingModWon(uint32 ownRating, uint32 ownMMRRating, uint32 o
     float mod;
 
     if ((ownMMRRating - ownRating) > 250)
-    {
 		mod = 48.0f * (won_mod - chance) * pursuit_mod;
-    }
     else
 		mod = (24.0f + (24.0f * (float(ownMMRRating) - float(ownRating)) / 200.0f)) * (won_mod - chance) * pursuit_mod;
 

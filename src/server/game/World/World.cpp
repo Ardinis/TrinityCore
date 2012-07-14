@@ -2620,16 +2620,18 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
 void World::UpdateSessions(uint32 diff)
 {
     ///- Add new sessions
+  sLog->outError("/!\\ BEGIN ADD SESSION/!\\");
     WorldSession* sess = NULL;
     while (addSessQueue.next(sess))
         AddSession_ (sess);
+  sLog->outError("/!\\ END ADD SESSION/!\\");
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
     {
         next = itr;
         ++next;
-
+  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1/!\\");
         ///- and remove not active sessions from the list
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
@@ -2643,6 +2645,7 @@ void World::UpdateSessions(uint32 diff)
             delete pSession;
 
         }
+  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1 END/!\\");
     }
 }
 

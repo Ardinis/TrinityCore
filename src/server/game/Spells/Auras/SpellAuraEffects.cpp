@@ -6313,17 +6313,13 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         procVictim |= PROC_FLAG_TAKEN_DAMAGE;
        if (damage > 0)
       {
-	std::cout << "mod aoe damage on pet" << std::endl;
 	//	if (m_spellInfo->isArea())
 	  {
-	    std::cout << "is aoe" << std::endl;
 	    if (target->HasAura(65220) || target->HasAura(32233) || target->HasAura(63623) || target->HasAura(62137))
 	      {
-		std::cout << "pet has aura" << std::endl;
 		if (GetCaster()->GetTypeId() == TYPEID_UNIT)
 		  {
 		    damage = int32(float(damage) / 100 * 10);
-		    std::cout << "mod aoe damage on pet" << std::endl;
 		  }
 		resist -= damage;
 	      }

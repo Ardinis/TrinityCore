@@ -2631,7 +2631,7 @@ void World::UpdateSessions(uint32 diff)
     {
         next = itr;
         ++next;
-  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1/!\\");
+	//  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1/!\\");
         ///- and remove not active sessions from the list
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
@@ -2645,8 +2645,8 @@ void World::UpdateSessions(uint32 diff)
             delete pSession;
 
         }
-  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1 END/!\\");
     }
+  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1 END/!\\");
 }
 
 // This handles the issued and queued CLI commands

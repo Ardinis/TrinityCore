@@ -2624,7 +2624,7 @@ void World::UpdateSessions(uint32 diff)
     WorldSession* sess = NULL;
     while (addSessQueue.next(sess))
         AddSession_ (sess);
-  sLog->outError("/!\\ END ADD SESSION/!\\");
+    sLog->outError("/!\\ END ADD SESSION/!\\ : %d",  m_sessions.size());
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)

@@ -173,7 +173,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 	else
 	{
 		if(guidlow > 3492269)
-			sLog->outBasic(" POP GAMEOBJECT (GUID: %u Entry: %u) Coordonne Map: %u (X: %f Y: %f , Z = %f)", guidlow, name_id, map->GetId(),x, y, z);
+			sLog->outError(" POP GAMEOBJECT (GUID: %u Entry: %u) Coordonne Map: %u (X: %f Y: %f , Z = %f)", guidlow, name_id, map->GetId(),x, y, z);
 	}
 	
     SetPhaseMask(phaseMask, false);

@@ -10125,48 +10125,47 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth)
 Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
 {
     // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-    if (spellInfo->Attributes & SPELL_ATTR0_ABILITY || spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REDIRECTED || spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+	if ( (spellInfo->Attributes & SPELL_ATTR0_ABILITY || spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REDIRECTED || spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY) && spellInfo->SpellIconID != 225 && spellInfo->Id != 16857 && spellInfo->Id != 527 && spellInfo->Id != 988)
         return victim;
 
     // Magic case
-    if (victim->HasAura(8178)) //Grounding totem    
-      {           
-	for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)         
-	  {               
-	    if (spellInfo->Effects[j].ApplyAuraName == SPELL_AURA_MOD_TAUNT && spellInfo->Effects[j].ApplyAuraName != 49560)                      
-	      return victim;// Death Grip        
-	  }          
-	if (spellInfo->SpellIconID == 2818 && spellInfo->AttributesEx != 335561860) // PENANCE in Group                
-	  return victim;        
-	if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && !spellInfo->IsChanneled())              
-	  return victim;
-               
-      }      
-    else
-      //I am not sure if this should be redirected.          
-      if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE)   
-	return victim;
+    if (victim->HasAura(8178)) //Grounding totem
+	{           
+		for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+		{               
+			if (spellInfo->Effects[j].ApplyAuraName == SPELL_AURA_MOD_TAUNT && spellInfo->Effects[j].ApplyAuraName != 49560)                      
+				return victim;// Death Grip        
+		}
+
+		if (spellInfo->SpellIconID == 2818 && spellInfo->AttributesEx != 335561860) // PENANCE in Group                
+			return victim;        
+		if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && !spellInfo->IsChanneled())              
+			return victim;
+	}      
+	else
+	{
+		//I am not sure if this should be redirected.          
+		if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellInfo->Id != 16857)
+			return victim;
+	}
 
     Unit::AuraEffectList const& magnetAuras = victim->GetAuraEffectsByType(SPELL_AURA_SPELL_MAGNET);
     for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
-      {
-	if (Unit* magnet = (*itr)->GetBase()->GetUnitOwner())
-	  if (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-	      && spellInfo->CheckTarget(this, magnet, false) == SPELL_CAST_OK
-	      && _IsValidAttackTarget(magnet, spellInfo)
-	      && IsWithinLOSInMap(magnet))
-	    {
-	      if (magnet->HasAura(8178)) // Grounding totem
-		return magnet;
-	      else
-		{
-		  (*itr)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
-		  return magnet;
-		}
-	    }
-      } 
+	{
+		if (Unit* magnet = (*itr)->GetBase()->GetUnitOwner())
+			if (magnet->isAlive() && IsWithinLOSInMap(magnet))              
+				if (magnet->HasAura(8178)) // Grounding totem
+				{
+					(*itr)->GetBase()->DropCharge();  
 
-    return victim;
+					// Totems are destroyed upon redirection
+					if (magnet->ToTotem())
+						magnet->DealDamage(magnet, magnet->GetMaxHealth());		  
+
+					return magnet;
+				}
+	} 
+	return victim;
 }
 
 Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)

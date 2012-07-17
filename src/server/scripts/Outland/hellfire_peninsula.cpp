@@ -194,6 +194,7 @@ public:
                 case 50:
                     if (pRyga && pRyga->isAlive() && !pRyga->isInCombat())
                         DoScriptText(SAY_WOLF_WELCOME, pRyga);
+						DoCast(me, SPELL_ANCESTRAL_WOLF_BUFF, true);
                     break;
             }
         }

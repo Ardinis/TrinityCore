@@ -364,6 +364,21 @@ void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount)
         else
             m_effects[i] = NULL;
     }
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->SpellFamilyName == SPELLFAMILY_POTION && caster->HasAura(53042))
+    {
+        if(sSpellMgr->IsSpellMemberOfSpellGroup(m_spellInfo->Id,SPELL_GROUP_ELIXIR_BATTLE) ||
+            sSpellMgr->IsSpellMemberOfSpellGroup(m_spellInfo->Id,SPELL_GROUP_ELIXIR_GUARDIAN))
+        {
+            if(caster->HasSpell(m_spellInfo->Effects[0].TriggerSpell))
+            {
+                for (uint8 i=0 ; i<MAX_SPELL_EFFECTS; ++i)
+                {
+                    if (effMask & (uint8(1) << i))
+                        m_effects[i]->SetAmount((int32)(m_effects[i]->GetAmount() * 1.376f));
+                }
+            }
+        }
+    }	
 }
 
 Aura::~Aura()

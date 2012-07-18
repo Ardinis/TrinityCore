@@ -336,6 +336,7 @@ void World::AddQueuedPlayer(WorldSession* sess)
 
 bool World::RemoveQueuedPlayer(WorldSession* sess)
 {
+sLog->outError("Gabi : DEBUT RemoveQueuedPlayer ! ");	
     // sessions count including queued to remove (if removed_session set)
     uint32 sessions = GetActiveSessionCount();
 
@@ -388,7 +389,7 @@ bool World::RemoveQueuedPlayer(WorldSession* sess)
     // iter point to first not updated socket, position store new position
     for (; iter != m_QueuedPlayer.end(); ++iter, ++position)
         (*iter)->SendAuthWaitQue(position);
-
+sLog->outError("Gabi : FIN RemoveQueuedPlayer ! ");	
     return found;
 }
 
@@ -2638,6 +2639,7 @@ void World::UpdateSessions(uint32 diff)
 
         if (!pSession->Update(diff, updater))    // As interval = 0
         {
+			sLog->outError("Gabi : Appel a RemoveQueuedPlayer ! ");		
             if (!RemoveQueuedPlayer(itr->second) && itr->second && getIntConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
                 m_disconnects[itr->second->GetAccountId()] = time(NULL);
             RemoveQueuedPlayer(pSession);

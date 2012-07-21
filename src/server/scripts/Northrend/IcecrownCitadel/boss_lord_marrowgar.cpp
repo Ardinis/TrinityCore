@@ -164,7 +164,7 @@ class boss_lord_marrowgar : public CreatureScript
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
 
-		if (_bstorm)
+		/*		if (_bstorm)
 		  {
 		    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
 		    _bstorm = false;
@@ -173,7 +173,7 @@ class boss_lord_marrowgar : public CreatureScript
 		  {
 		    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
 		    _endstorm = false;
-		  }
+		    }*/
 
                 events.Update(diff);
 

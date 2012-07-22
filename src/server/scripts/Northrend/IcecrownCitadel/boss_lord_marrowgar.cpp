@@ -95,7 +95,7 @@ class boss_lord_marrowgar : public CreatureScript
                 _boneSlice = false;
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+		//		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             }
 
             void Reset()
@@ -110,7 +110,10 @@ class boss_lord_marrowgar : public CreatureScript
                 events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(45000, 50000));
                 events.ScheduleEvent(EVENT_ENRAGE, 600000);
                 _boneSlice = false;
+		_bstorm = false;
+		_endstorm = false;
             }
+
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -161,6 +164,17 @@ class boss_lord_marrowgar : public CreatureScript
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
 
+		/*		if (_bstorm)
+		  {
+		    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+		    _bstorm = false;
+		  }
+		else if (_endstorm)
+		  {
+		    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+		    _endstorm = false;
+		    }*/
+
                 events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -189,6 +203,7 @@ class boss_lord_marrowgar : public CreatureScript
                             Talk(EMOTE_BONE_STORM);
                             me->FinishSpell(CURRENT_MELEE_SPELL, false);
                             DoCast(me, SPELL_BONE_STORM);
+			    _bstorm = true;
                             events.DelayEvents(3000, EVENT_GROUP_SPECIAL);
                             events.ScheduleEvent(EVENT_BONE_STORM_BEGIN, 3050);
                             events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(90000, 95000));
@@ -221,6 +236,7 @@ class boss_lord_marrowgar : public CreatureScript
                             events.ScheduleEvent(EVENT_ENABLE_BONE_SLICE, 10000);
                             if (!IsHeroic())
                                 events.RescheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(15000, 20000), EVENT_GROUP_SPECIAL);
+			    _endstorm = true;
                             break;
                         case EVENT_ENABLE_BONE_SLICE:
                             _boneSlice = true;
@@ -279,6 +295,8 @@ class boss_lord_marrowgar : public CreatureScript
             float _baseSpeed;
             bool _introDone;
             bool _boneSlice;
+	  bool _endstorm;
+	  bool _bstorm;
         };
 
         CreatureAI* GetAI(Creature* creature) const

@@ -3478,6 +3478,9 @@ void SpellMgr::LoadDbcDataCorrections()
 				spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
 				break;
             // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS IS NOT IMPLEMENTED
+	case 70897: // Dark Martyrdom
+	  spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
+	  break;
             case 71604: // Mutated Strength (Professor Putricide)
             case 72673: // Mutated Strength (Professor Putricide)
             case 72674: // Mutated Strength (Professor Putricide)

@@ -1162,6 +1162,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
 
             void DoSpawnKeeperForSupport() // Despawn on Sara Reset
             {
+/*			
                 uint32 supportFlag = instance->GetData(DATA_KEEPER_SUPPORT_YOGG);
 
                 if ((supportFlag & MIMIRON_SUPPORT) == MIMIRON_SUPPORT)
@@ -1172,6 +1173,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                     DoSummon(NPC_KEEPER_THORIM, KeeperSpawnLocation[2], 0, TEMPSUMMON_MANUAL_DESPAWN);
                 if ((supportFlag & HODIR_SUPPORT) == HODIR_SUPPORT)
                     DoSummon(NPC_KEEPER_HODIR, KeeperSpawnLocation[3], 0, TEMPSUMMON_MANUAL_DESPAWN);
+*/
             }
 
             uint64 GetEventNPCGuid(uint32 entry)
@@ -2766,14 +2768,14 @@ class npc_support_keeper : public CreatureScript
                     switch (me->GetEntry())
                     {
                         case NPC_KEEPER_THORIM:   // Hm... what's up with killing the Undying in Phase 3? Dealt with by spell ? 
-                            if(!me->HasAura(SPELL_TITANIC_STORM))
+                            if(!me->HasAura(SPELL_TITANIC_STORM) && THORIM_SUPPORT)
                                 DoCast(SPELL_TITANIC_STORM);
                             uiSecondarySpell_Timer = 10000;
                             return;
                         case NPC_KEEPER_FREYA:
                             if(!summoned)
                             {
-                                if(!summoning)
+                                if(!summoning && FREYA_SUPPORT)
                                 {
                                     DoCast(SPELL_SANITY_WELL);
                                     uiSecondarySpell_Timer = 3000;
@@ -2790,7 +2792,7 @@ class npc_support_keeper : public CreatureScript
                             {
                                 std::list<Creature*> creatureList;
                                 GetAliveSaronitCreatureListInGrid(creatureList,5000);
-                                if(!creatureList.empty())
+                                if(!creatureList.empty() && MIMIRON_SUPPORT)
                                 {
                                     std::list<Creature*>::iterator itr = creatureList.begin();
                                     std::advance(itr, urand(0, creatureList.size() - 1));
@@ -2801,7 +2803,7 @@ class npc_support_keeper : public CreatureScript
                             return;
                         case NPC_KEEPER_HODIR:
                             {
-                                if(!me->HasAura(SPELL_HODIRS_PROTECTIVE_GAZE))
+                                if(!me->HasAura(SPELL_HODIRS_PROTECTIVE_GAZE) && HODIR_SUPPORT)
                                     DoCast(me, SPELL_HODIRS_PROTECTIVE_GAZE, false);
                                 uiSecondarySpell_Timer = 25000;
                             }
@@ -3448,6 +3450,7 @@ class npc_keeper_help : public CreatureScript
             if(InstanceScript* instance = creature->GetInstanceScript())
             {
                 uint32 supportFlag = instance->GetData(DATA_KEEPER_SUPPORT_YOGG);
+
                 switch (creature->GetEntry())
                 {
                     // Since the flags are binary, a simple bool check fulfills the requirements - no need to check against the flag again.
@@ -3487,18 +3490,22 @@ class npc_keeper_help : public CreatureScript
                         case NPC_HELP_KEEPER_FREYA:
                             DoScriptText(SAY_FREYA_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, FREYA_SUPPORT);
+							player->SummonCreature(NPC_KEEPER_FREYA, KeeperSpawnLocation[1], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                         case NPC_HELP_KEEPER_MIMIRON:
                             DoScriptText(SAY_MIMIRON_HELP, creature, player);
-                            instance->SetData(DATA_ADD_HELP_FLAG, MIMIRON_SUPPORT);
+                            instance->SetData(DATA_ADD_HELP_FLAG, MIMIRON_SUPPORT);	
+							player->SummonCreature(NPC_KEEPER_MIMIRON, KeeperSpawnLocation[0], TEMPSUMMON_MANUAL_DESPAWN);		
                             break;
                         case NPC_HELP_KEEPER_THORIM:
                             DoScriptText(SAY_THORIM_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, THORIM_SUPPORT);
+							player->SummonCreature(NPC_KEEPER_THORIM, KeeperSpawnLocation[2], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                         case NPC_HELP_KEEPER_HODIR:
                             DoScriptText(SAY_HODIR_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, HODIR_SUPPORT);
+							player->SummonCreature(NPC_KEEPER_HODIR, KeeperSpawnLocation[3], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                     }
                 }

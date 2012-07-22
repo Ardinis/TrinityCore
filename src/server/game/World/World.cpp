@@ -245,9 +245,11 @@ World::AddSession_(WorldSession* s)
 
         if (old != m_sessions.end())
         {
+		sLog->outError("Gabi : NOUVELLE DONNEE World::AddSession_  AVANT RemoveQueuedPlayer ! ");	
             // prevent decrease sessions count if session queued
             if (RemoveQueuedPlayer(old->second))
                 decrease_session = false;
+		sLog->outError("Gabi : NOUVELLE DONNEE World::AddSession_  APRES RemoveQueuedPlayer ! ");			
             // not remove replaced session form queue if listed
             delete old->second;
         }

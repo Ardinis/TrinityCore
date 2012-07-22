@@ -1039,8 +1039,8 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
 	 // Apply delay for CC spells here, can be easily tweaked.
 	else if (m_spellInfo->Speed == 12345)
 	{
-		targetInfo.timeDelay = 150LL;
-		m_delayMoment = 150LL;
+		targetInfo.timeDelay = 100LL;
+		m_delayMoment = 100LL;
 	}
     else
         targetInfo.timeDelay = 0LL;

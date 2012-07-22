@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -45,49 +45,136 @@ enum UlduarBosses
     BOSS_VEZAX               = 17,
     BOSS_YOGGSARON           = 18,
     BOSS_ALGALON             = 19,
+    BOSS_SARA                = 20,
+    DATA_BRAIN_DOOR_1,
+    DATA_BRAIN_DOOR_2,
+    DATA_BRAIN_DOOR_3,
+    DATA_KEEPER_SUPPORT_YOGG,
+
+    // Razorscale
+    DATA_EXPEDITION_COMMANDER,
+
+    // Hodir
+    DATA_HODIR_RARE_CACHE,
+
+    // Collosus (Leviathan)
+    DATA_COLOSSUS,               
+
+    // Assembly of Iorn
+    DATA_STEELBREAKER,
+    DATA_MOLGEIM,
+    DATA_BRUNDIR,
+
+    DATA_EXP_COMMANDER,
+    DATA_RAZORSCALE_CONTROL,
+
+    // XT-002
+    DATA_TOY_PILE_0,
+    DATA_TOY_PILE_1,
+    DATA_TOY_PILE_2,
+    DATA_TOY_PILE_3,
+
+    // Freya Elders
+    DATA_ELDER_BRIGHTLEAF,
+    DATA_ELDER_IRONBRANCH,
+    DATA_ELDER_STONEBARK,
+
+    // Thorim
+    DATA_RUNIC_COLOSSUS,
+    DATA_RUNE_GIANT,
+    DATA_RUNIC_DOOR,
+    DATA_STONE_DOOR,
+    DATA_HODIR_RARE_CHEST,
+
+    DATA_CALL_TRAM,
+    // Mimiron
+    DATA_LEVIATHAN_MK_II,
+    DATA_VX_001,
+    DATA_AERIAL_UNIT,
+    DATA_MIMIRON_ELEVATOR,
+
+    // Pre YoggSaron
+    DATA_ADD_HELP_FLAG,
+
+    // YoggSaron himself - phase during fight
+    DATA_PORTAL_PHASE,
+    DATA_IS_ENCOUNTER_IN_PROGRESS,
+    DATA_BRAIN_EVT_CNT,
+    DATA_KEEPER_CNT,
+
+    // Algalon the Observer
+    DATA_ALGALON_SUMMON_STATE,
+    DATA_SIGILDOOR_01,
+    DATA_SIGILDOOR_02,
+    DATA_SIGILDOOR_03,
+    DATA_UNIVERSE_FLOOR_01,
+    DATA_UNIVERSE_FLOOR_02,
+    DATA_UNIVERSE_GLOBE,
+    DATA_ALGALON_TRAPDOOR,
+    DATA_BRANN_BRONZEBEARD_ALG,
 };
 
-enum UlduarNPCs
+enum UlduarBossDeadFlags
 {
-    // General
-    NPC_LEVIATHAN                = 33113,
-    NPC_SALVAGED_DEMOLISHER      = 33109,
-    NPC_SALVAGED_SIEGE_ENGINE    = 33060,
-    NPC_IGNIS                    = 33118,
-    NPC_RAZORSCALE               = 33186,
-    NPC_RAZORSCALE_CONTROLLER    = 33233,
-    NPC_STEELFORGED_DEFFENDER    = 33236,
-    NPC_EXPEDITION_COMMANDER     = 33210,
-    NPC_XT002                    = 33293,
-    NPC_XT_TOY_PILE              = 33337,
-    NPC_STEELBREAKER             = 32867,
-    NPC_MOLGEIM                  = 32927,
-    NPC_BRUNDIR                  = 32857,
-    NPC_KOLOGARN                 = 32930,
-    NPC_FOCUSED_EYEBEAM          = 33632,
-    NPC_FOCUSED_EYEBEAM_RIGHT    = 33802,
-    NPC_LEFT_ARM                 = 32933,
-    NPC_RIGHT_ARM                = 32934,
-    NPC_RUBBLE                   = 33768,
-    NPC_AURIAYA                  = 33515,
-    NPC_MIMIRON                  = 33350,
-    NPC_HODIR                    = 32845,
-    NPC_THORIM                   = 32865,
-    NPC_FREYA                    = 32906,
-    NPC_VEZAX                    = 33271,
-    NPC_YOGGSARON                = 33288,
-    NPC_SARA                     = 33134,
-    NPC_ALGALON                  = 32871,
-    NPC_BRANN_ALGALON            = 34064,
+    DEAD_NONE             =        0,   // Death is registered, but irrelevant
+    DEAD_FLAME_LEVIATHAN  = (1 << 0),
+    DEAD_IGNIS            = (1 << 1),
+    DEAD_RAZORSCALE       = (1 << 2),
+    DEAD_XT002            = (1 << 3),
+    DEAD_ASSEMBLY         = (1 << 4),
+    DEAD_KOLOGARN         = (1 << 5),
+    DEAD_AURIAYA          = (1 << 6),
+    DEAD_HODIR            = (1 << 7),
+    DEAD_THORIM           = (1 << 8),
+    DEAD_FREYA            = (1 << 9),
+    DEAD_MIMIRON          = (1 << 10),
+    DEAD_VEZAX            = (1 << 11),
+    DEAD_YOGGSARON        = (1 << 12),
+    DEAD_ALGALON          = (1 << 13)
+};
+
+enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-NPCs
+{
+    NPC_LEVIATHAN               = 33113,
+    NPC_SALVAGED_DEMOLISHER     = 33109,
+    NPC_SALVAGED_SIEGE_ENGINE   = 33060,
+    NPC_IGNIS                   = 33118,
+    NPC_RAZORSCALE              = 33186,
+    NPC_RAZORSCALE_CONTROLLER   = 33233,
+    NPC_STEELFORGED_DEFFENDER   = 33236,
+    NPC_EXPEDITION_COMMANDER    = 33210,
+    NPC_XT002                   = 33293,
+    NPC_XT_TOY_PILE             = 33337,
+    NPC_STEELBREAKER            = 32867,
+    NPC_MOLGEIM                 = 32927,
+    NPC_BRUNDIR                 = 32857,
+    NPC_KOLOGARN                = 32930,
+    NPC_KOLOGARN_BRIDGE         = 34297,
+    NPC_FOCUSED_EYEBEAM         = 33632,
+    NPC_FOCUSED_EYEBEAM_RIGHT   = 33802,
+    NPC_LEFT_ARM                = 32933,
+    NPC_RIGHT_ARM               = 32934,
+    NPC_RUBBLE                  = 33768,
+    NPC_AURIAYA                 = 33515,
+    NPC_MIMIRON                 = 33350,
+    NPC_HODIR                   = 32845,
+    NPC_THORIM                  = 32865,
+    NPC_RUNIC_COLOSSUS          = 32872,
+    NPC_RUNE_GIANT              = 32873,
+    NPC_FREYA                   = 32906,
+    NPC_ELDER_IRONBRANCH        = 32913,
+    NPC_ELDER_STONEBARK         = 32914,
+    NPC_ELDER_BRIGHTLEAF        = 32915,
+    NPC_VEZAX                   = 33271,
+    NPC_YOGGSARON               = 33288,
+    NPC_YOGGSARON_CTRL          = 29224,
+    NPC_SARA                    = 33134,
+    NPC_ALGALON                 = 32871,
 
     // Mimiron
     NPC_LEVIATHAN_MKII           = 33432,
     NPC_VX_001                   = 33651,
     NPC_AERIAL_COMMAND_UNIT      = 33670,
-
-    // Thorim
-    NPC_RUNIC_COLOSSUS          = 32872,
-    NPC_RUNE_GIANT              = 32873,	
 
     // Freya's Keepers
     NPC_IRONBRANCH               = 32913,
@@ -125,135 +212,92 @@ enum UlduarNPCs
 
 enum UlduarGameObjects
 {
-    GO_KOLOGARN_CHEST_HERO                = 195047,
-    GO_KOLOGARN_CHEST                     = 195046,
-    GO_KOLOGARN_BRIDGE                    = 194232,
-    GO_KOLOGARN_DOOR                      = 194553,
-    GO_THORIM_CHEST_HERO                  = 194315,
-    GO_THORIM_CHEST                       = 194314,
-    GO_THORIM_ENCOUNTER_DOOR              = 194559,
-    GO_THORIM_STONE_DOOR                  = 194558,
-    GO_THORIM_RUNIC_DOOR                  = 194557,
-    GO_HODIR_RARE_CACHE_OF_WINTER         = 194200,
-    GO_HODIR_RARE_CACHE_OF_WINTER_HERO    = 194201,
-    GO_HODIR_CHEST_HERO                   = 194308,
-    GO_HODIR_CHEST                        = 194307,
-    GO_LEVIATHAN_DOOR                     = 194905,
-    GO_LEVIATHAN_GATE                     = 194630,
-    GO_XT_002_DOOR                        = 194631,
-    GO_VEZAX_DOOR                         = 194750,
-    GO_MOLE_MACHINE                       = 194316,
-    GO_RAZOR_HARPOON_1                    = 194542,
-    GO_RAZOR_HARPOON_2                    = 194541,
-    GO_RAZOR_HARPOON_3                    = 194543,
-    GO_RAZOR_HARPOON_4                    = 194519,
-    GO_RAZOR_BROKEN_HARPOON               = 194565,
-    GO_HODIR_DOOR                         = 194442,
-    GO_HODIR_ICE_DOOR                     = 194441,
-    GO_HODIR_STONE_DOOR                   = 194634,
-    GO_ARCHIVUM_DOOR                      = 194556,
-    GO_MIMIRON_TRAIN                      = 194675,
-    GO_MIMIRON_ELEVATOR                   = 194749,
-    GO_MIMIRON_DOOR_1                     = 194776,
-    GO_MIMIRON_DOOR_2                     = 194774,
-    GO_MIMIRON_DOOR_3                     = 194775,
-    GO_BIG_RED_BUTTON                     = 194739,
-    GO_WAY_TO_YOGG                        = 194255,
-    GO_YOGGSARON_DOOR                     = 194773,
-    GO_YOGGBRAIN_DOOR_1                   = 194635,
-    GO_YOGGBRAIN_DOOR_2                   = 194636,
-    GO_YOGGBRAIN_DOOR_3                   = 194637,
-    GO_ALGALON_DOOR                       = 194767,
-    GO_ALGALON_FLOOR_COM                  = 194715,
-    GO_ALGALON_FLOOR_OOC                  = 194716,
-    GO_ALGALON_GLOBE                      = 194148,
-    GO_ALGALON_BRIDGE                     = 194253,
-    GO_ALGALON_INVISDOOR                  = 194910,
-    GO_ALGALON_CONSOLE                    = 194628,
-    GO_GIFT_OF_THE_OBSERVER               = 194821,
-    GO_IRON_COUNCIL_ENTRANCE              = 194554,
-    GO_XT002_DOOR                         = 194631,
+    GO_IRON_COUNCIL_ENTRANCE    = 194554,
+    GO_ARCHIVUM_DOOR            = 194556,
+
+    GO_KOLOGARN_CHEST_HERO      = 195047,
+    GO_KOLOGARN_CHEST           = 195046,
+    GO_KOLOGARN_BRIDGE          = 194232,
+    GO_KOLOGARN_DOOR            = 194553,
+
+    GO_THORIM_CHEST_HERO        = 194315,
+    GO_THORIM_CHEST             = 194314,
+    GO_THORIM_ENCOUNTER_DOOR    = 194559,
+    GO_THORIM_STONE_DOOR        = 194558,
+    GO_THORIM_RUNIC_DOOR        = 194557,
+
+    GO_HODIR_RARE_CACHE_OF_WINTER_HERO  = 194201,
+    GO_HODIR_RARE_CACHE_OF_WINTER       = 194200,
+    GO_HODIR_CHEST_HERO                 = 194308,
+    GO_HODIR_CHEST                      = 194307,
+    GO_HODIR_IN_DOOR_STONE              = 194442,
+    GO_HODIR_OUT_DOOR_ICE               = 194441,
+    GO_HODIR_OUT_DOOR_STONE             = 194634,
+
+    GO_FREYA_CHEST              = 194324,
+    GO_FREYA_CHEST_HERO         = 194325,
+    GO_FREYA_CHEST_HARD         = 194327,
+    GO_FREYA_CHEST_HERO_HARD    = 194331,
+
+    GO_LEVIATHAN_DOOR           = 194905,
+    GO_LEVIATHAN_GATE           = 194630,
+
+    GO_XT_002_DOOR              = 194631,
+
+    GO_MIMIRON_TRAIN            = 194675,
+    GO_MIMIRON_ELEVATOR         = 194749,
+    GO_MIMIRON_DOOR_1           = 194776,
+    GO_MIMIRON_DOOR_2           = 194774,
+    GO_MIMIRON_DOOR_3           = 194775,
+
+    GO_BIG_RED_BUTTON           = 194739,
+
+    GO_WAY_TO_YOGG              = 194255,
+    GO_VEZAX_DOOR               = 194750,
+    GO_YOGGSARON_DOOR           = 194773,
+    GO_YOGGBRAIN_DOOR_1         = 194635,
+    GO_YOGGBRAIN_DOOR_2         = 194636,
+    GO_YOGGBRAIN_DOOR_3         = 194637,
+    GO_MOLE_MACHINE             = 194316,
+    GO_RAZOR_HARPOON_1          = 194542,
+    GO_RAZOR_HARPOON_2          = 194541,
+    GO_RAZOR_HARPOON_3          = 194543,
+    GO_RAZOR_HARPOON_4          = 194519,
+    GO_RAZOR_BROKEN_HARPOON     = 194565,
+
+    GO_ALGALON_ACCESS           = 194628,
+    GO_ALGALON_DOOR_1           = 194911,
+    GO_ALGALON_DOOR_2           = 194767,
+    GO_ALGALON_PLATFORM         = 194715,
+    GO_ALGALON_GLOBE            = 194148,
+    GO_ALGALON_BRIDGE           = 194253,
+    GO_ALGALON_B_VISUAL         = 194716,
+    GO_ALGALON_B_DOOR           = 194910,
+    GO_GIFT_OF_THE_OBSERVER_10  = 194821,
+    GO_GIFT_OF_THE_OBSERVER_25  = 194822,
+    // Dummies - not yet in db
+    GO_LEVIATHAN_CHEST_10       = 555555,
+    GO_LEVIATHAN_CHEST_25       = 444444
 };
 
-enum UlduarSharedActions
+enum UlduarTowerEvents // Separated from other data, since that's the relevant point which decides for hardmode 
 {
     EVENT_TOWER_OF_STORM_DESTROYED      = 21031,
     EVENT_TOWER_OF_FROST_DESTROYED      = 21032,
     EVENT_TOWER_OF_FLAMES_DESTROYED     = 21033,
     EVENT_TOWER_OF_LIFE_DESTROYED       = 21030,
+};
+
+enum LeviathanData  
+{
     ACTION_TOWER_OF_STORM_DESTROYED     = 1,
     ACTION_TOWER_OF_FROST_DESTROYED     = 2,
     ACTION_TOWER_OF_FLAMES_DESTROYED    = 3,
     ACTION_TOWER_OF_LIFE_DESTROYED      = 4,
     ACTION_MOVE_TO_CENTER_POSITION      = 10,
-    ACTION_ALGALON_ASCEND               = -123460, //Wipe Raid, don't respawn
 };
 
-enum UlduarAchievementCriteriaIds
-{
-    CRITERIA_CON_SPEED_ATORY    = 21597,
-    CRITERIA_DISARMED           = 21687,
-};
-
-enum UlduarData
-{
-    // Collosus (Leviathan)
-    DATA_COLOSSUS                = 20,
-
-    // Razorscale
-    DATA_EXPEDITION_COMMANDER,
-    DATA_RAZORSCALE_CONTROL,
-
-    // XT-002
-    DATA_TOY_PILE_0,
-    DATA_TOY_PILE_1,
-    DATA_TOY_PILE_2,
-    DATA_TOY_PILE_3,
-
-    //Mimiron
-    DATA_LEVIATHAN_MK_II,
-    DATA_VX_001,
-    DATA_AERIAL_UNIT,
-    DATA_MIMIRON_ELEVATOR,
-    DATA_CALL_TRAM,
-
-    // Thorim
-    DATA_RUNIC_COLOSSUS,
-    DATA_RUNE_GIANT,
-    DATA_RUNIC_DOOR,
-    DATA_STONE_DOOR,
-    DATA_HODIR_RARE_CHEST,
-	
-    // Hodir
-    DATA_HODIR_RARE_CACHE,
-	
-    //Algalon
-    DATA_ALGALON_INTRO,
-    DATA_ALGALON_TIMER,
-    DATA_BRANN_ALGALON,
-	
-    //Yogg Saron
-    TYPE_SARA,
-    TYPE_BRAIN_DOOR_1,
-    TYPE_BRAIN_DOOR_2,
-    TYPE_BRAIN_DOOR_3,
-    DATA_KEEPER_SUPPORT_YOGG,
-    DATA_ADD_HELP_FLAG,
-    DATA_PORTAL_PHASE = 1,
-};
-
-enum UlduarWorldStates
-{
-    WORLDSTATE_SHOW_TIMER                 = 4132,
-    WORLDSTATE_ALGALON_TIMER              = 4131
-};
-
-enum UlduarAchievements
-{
-    ACHIEVEMENT_CHAMPION_OF_ULDUAR      = 2903,
-    ACHIEVEMENT_CONQUEROR_OF_ULDUAR     = 2904
-};
-
+// TODO: Review those
 enum UlduarAchievementCriteria
 {
     ACHIEVEMENT_UNBROKEN_10                              = 10044, // Leviathan
@@ -306,40 +350,56 @@ enum UlduarAchievementCriteria
     ACHIEVEMENT_CRITERIA_KILL_WITHOUT_DEATHS_YOGGSARON_25           = 10364,
 
     ACHIEVEMENT_CRITERIA_KILL_WITHOUT_DEATHS_ALGALON_10             = 10568,
-    ACHIEVEMENT_CRITERIA_KILL_WITHOUT_DEATHS_ALGALON_25             = 10570
+    ACHIEVEMENT_CRITERIA_KILL_WITHOUT_DEATHS_ALGALON_25             = 10570,
+    ACHIEVEMENT_CRITERIA_CON_SPEED_ATORY                            = 21597,
+    ACHIEVEMENT_CRITERIA_DISARMED                                   = 21687,
+    ACHIEVEMENT_CRITERIA_HERALD_OF_TITANS                           = 10678,
 };
 
+// Achievements for "Do not die during boss-fights"
+enum UlduarAchievements
+{
+    ACHIEVEMENT_CHAMPION_OF_ULDUAR      = 2903,
+    ACHIEVEMENT_CONQUEROR_OF_ULDUAR     = 2904
+};
+
+// Used for Yogg-Saron fight
 enum UlduarKeeperSupport
 {
-    THORIM_SUPPORT                      = 0x01,
-    HODIR_SUPPORT                       = 0x02,
-    FREYA_SUPPORT                       = 0x04,
-    MIMIRON_SUPPORT                     = 0x08
-};
-
-enum UlduarBossDeadFlags
-{
-    DEAD_FLAME_LEVIATHAN                = 0x0001,
-    DEAD_IGNIS                          = 0x0002,
-    DEAD_RAZORSCALE                     = 0x0004,
-    DEAD_XT002                          = 0x0008,
-    DEAD_ASSEMBLY                       = 0x0010,
-    DEAD_KOLOGARN                       = 0x0020,
-    DEAD_AURIAYA                        = 0x0040,
-    DEAD_HODIR                          = 0x0080,
-    DEAD_THORIM                         = 0x0100,
-    DEAD_FREYA                          = 0x0200,
-    DEAD_MIMIRON                        = 0x0400,
-    DEAD_VEZAX                          = 0x0800,
-    DEAD_YOGGSARON                      = 0x1000
+    THORIM_SUPPORT                      = (1 << 0),
+    HODIR_SUPPORT                       = (1 << 1),
+    FREYA_SUPPORT                       = (1 << 2),
+    MIMIRON_SUPPORT                     = (1 << 3)
 };
 
 enum UlduarAchievementData
 {
     // FL Achievement boolean
     DATA_UNBROKEN = 29052906, // 2905, 2906 are achievement IDs,
+    MAX_HERALD_ARMOR_ITEMLEVEL  = 226,
+    MAX_HERALD_WEAPON_ITEMLEVEL = 232,
 };
 
+enum UlduarEvents
+{
+    EVENT_DESPAWN_ALGALON       = 1,
+    EVENT_UPDATE_ALGALON_TIMER  = 2,
+    ACTION_INIT_ALGALON         = 6,
+};
+
+enum UlduarWorldstates
+{
+    WORLD_STATE_ALGALON_DESPAWN_TIMER = 4131,
+    WORLD_STATE_ALGALON_TIMER_ENABLED = 4132
+};
+
+enum UlduarArea
+{
+    MAP_ULDUAR              = 603,
+    AREA_FORMATION_GROUNDS  = 4652
+};
+
+// Cute guard, really...
 template<class AI>
 CreatureAI* GetUlduarAI(Creature* creature)
 {

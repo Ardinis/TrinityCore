@@ -366,7 +366,7 @@ class boss_xt002 : public CreatureScript
                             for (uint8 n = 0; n < 3; n++)
                                 me->SummonCreature(NPC_XE321_BOOMBOT, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
-                            events.ScheduleEvent(EVENT_SPAWN_ADDS, 12*IN_MILLISECONDS, 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_SPAWN_ADDS, 22*IN_MILLISECONDS, 0, PHASE_TWO);
                             break;
                     }
                 }

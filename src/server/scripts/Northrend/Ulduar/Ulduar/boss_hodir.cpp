@@ -555,7 +555,7 @@ class npc_snowpacked_icicle : public CreatureScript
         {
             npc_snowpacked_icicleAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+                me->SetDisplayId(15880);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->SetReactState(REACT_PASSIVE);
             }            
@@ -563,6 +563,7 @@ class npc_snowpacked_icicle : public CreatureScript
             void Reset()
             {
                 despawnTimer = 12000;
+		me->SummonGameObject(GO_SNOWDRIFT, me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(), 0.572729f,  0, 0, 0, 0, 60000);
             }
 
             void UpdateAI(uint32 const diff)

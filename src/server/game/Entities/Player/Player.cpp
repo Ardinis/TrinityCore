@@ -7545,6 +7545,8 @@ void Player::UpdateArea(uint32 newArea)
     }
     else
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+
+
 }
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)

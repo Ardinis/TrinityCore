@@ -303,7 +303,7 @@ class boss_flame_leviathan : public CreatureScript
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
-                me->SetReactState(REACT_PASSIVE);   // Enforce react-type, unless PURSUE gehts active.
+		//                me->SetReactState(REACT_PASSIVE);   // Enforce react-type, unless PURSUE gehts active.
                 events.ScheduleEvent(EVENT_PURSUE, 1);
                 events.ScheduleEvent(EVENT_MISSILE, urand(1500, 4*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_VENT, 20*IN_MILLISECONDS);
@@ -499,7 +499,7 @@ class boss_flame_leviathan : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || !CheckInRoom())
+	      if (!UpdateVictim()/* || !CheckInRoom()*/)
                     return;
 
                 events.Update(diff);

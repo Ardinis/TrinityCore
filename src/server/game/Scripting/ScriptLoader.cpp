@@ -437,6 +437,7 @@ void AddSC_boss_hodir();
 void AddSC_boss_freya();
 void AddSC_boss_algalon();
 void AddSC_boss_yoggsaron();
+void AddSC_boss_thorim();
 void AddSC_instance_ulduar();
 void AddSC_boss_keleseth();              //Utgarde Keep
 void AddSC_boss_skarvald_dalronn();
@@ -1155,6 +1156,7 @@ void AddNorthrendScripts()
     AddSC_boss_algalon();
     AddSC_boss_yoggsaron();
     AddSC_instance_ulduar();
+    AddSC_boss_thorim();
     AddSC_boss_keleseth();              //Utgarde Keep
     AddSC_boss_skarvald_dalronn();
     AddSC_boss_ingvar_the_plunderer();

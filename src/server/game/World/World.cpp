@@ -245,11 +245,11 @@ World::AddSession_(WorldSession* s)
 
         if (old != m_sessions.end())
         {
-		sLog->outError("Gabi : NOUVELLE DONNEE World::AddSession_  AVANT RemoveQueuedPlayer ! ");	
+	  //		sLog->outError("Gabi : NOUVELLE DONNEE World::AddSession_  AVANT RemoveQueuedPlayer ! ");	
             // prevent decrease sessions count if session queued
             if (RemoveQueuedPlayer(old->second))
                 decrease_session = false;
-		sLog->outError("Gabi : NOUVELLE DONNEE World::AddSession_  APRES RemoveQueuedPlayer ! ");			
+	    //	sLog->outError("Gabi : NOUVELLE DONNEE World::AddSession_  APRES RemoveQueuedPlayer ! ");			
             // not remove replaced session form queue if listed
             delete old->second;
         }
@@ -338,7 +338,7 @@ void World::AddQueuedPlayer(WorldSession* sess)
 
 bool World::RemoveQueuedPlayer(WorldSession* sess)
 {
-sLog->outError("Gabi : DEBUT RemoveQueuedPlayer ! ");	
+  //sLog->outError("Gabi : DEBUT RemoveQueuedPlayer ! ");	
     // sessions count including queued to remove (if removed_session set)
     uint32 sessions = GetActiveSessionCount();
 
@@ -391,7 +391,7 @@ sLog->outError("Gabi : DEBUT RemoveQueuedPlayer ! ");
     // iter point to first not updated socket, position store new position
     for (; iter != m_QueuedPlayer.end(); ++iter, ++position)
         (*iter)->SendAuthWaitQue(position);
-sLog->outError("Gabi : FIN RemoveQueuedPlayer ! ");	
+    //sLog->outError("Gabi : FIN RemoveQueuedPlayer ! ");	
     return found;
 }
 
@@ -2623,11 +2623,11 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
 void World::UpdateSessions(uint32 diff)
 {
     ///- Add new sessions
-  sLog->outError("/!\\ BEGIN ADD SESSION/!\\");
+  //  sLog->outError("/!\\ BEGIN ADD SESSION/!\\");
     WorldSession* sess = NULL;
     while (addSessQueue.next(sess))
         AddSession_ (sess);
-    sLog->outError("/!\\ END ADD SESSION/!\\ : %d",  m_sessions.size());
+    // sLog->outError("/!\\ END ADD SESSION/!\\ : %d",  m_sessions.size());
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
@@ -2641,7 +2641,7 @@ void World::UpdateSessions(uint32 diff)
 
         if (!pSession->Update(diff, updater))    // As interval = 0
         {
-			sLog->outError("Gabi : Appel a RemoveQueuedPlayer ! ");		
+	  //			sLog->outError("Gabi : Appel a RemoveQueuedPlayer ! ");		
             if (!RemoveQueuedPlayer(itr->second) && itr->second && getIntConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
                 m_disconnects[itr->second->GetAccountId()] = time(NULL);
             RemoveQueuedPlayer(pSession);
@@ -2650,7 +2650,7 @@ void World::UpdateSessions(uint32 diff)
 
         }
     }
-  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1 END/!\\");
+    //  sLog->outError("/!\\ UPDATE SIGNAL SESSIONS +1 END/!\\");
 }
 
 // This handles the issued and queued CLI commands

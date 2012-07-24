@@ -501,7 +501,7 @@ class boss_flame_leviathan : public CreatureScript
             {
 	      if (!UpdateVictim()/* || !CheckInRoom()*/)
                     return;
-
+	      return;
                 events.Update(diff);
 
                 // Check for shutdown initialization

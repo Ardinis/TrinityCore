@@ -41,71 +41,6 @@
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
 
-
-void filtreParagonMsg(std::string &msg)
-{
-  int maj = 0;
-  for (unsigned int cnt = 0; cnt < (msg.size() - 1); cnt++)
-    {
-      if (msg[cnt] == '[')
-	{
-	  maj = 0;
-	  break;
-	}
-      if (msg[cnt] >= 65 && msg[cnt] <= 90)
-	maj++;
-    }
-  if (maj >= 8)
-    {
-      msg = "restons zen.";
-
-      /*      int randss = urand(0, 6);
-      switch (randss)
-	{
-	case 0:
-	  msg = "j aime les papillons";
-	  break;
-
-	case 1:
-	  msg = "les mj sont trop gentils";
-	  break;
-
-	case 2:
-	  msg = "j ecris avec mes pieds";
-	  break;
-
-	case 3:
-	  msg = "je suis un papillon";
-	  break;
-
-	case 4:
-	  msg = "je mange des arcs-en-ciels";
-	  break;
-
-	case 5:
-	  msg = "je fais des cacas papillons";
-	  break;
-
-	case 6:
-	  msg = "42 est la réponses !";
-	  break;
-
-	case 7:
-	  msg = "je vie pour le nombre 42 !";
-	  break;
-
-
-	case 8:
-	  msg = "je danse la vie ! je chante la vie ! je ne suis qu amour !";
-	  break;
-
-	default:
-	  msg = "vive les poneys !";
-	  break;
-	  }*/
-    }
-}
-
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {
     if (lang != LANG_ADDON)
@@ -699,3 +634,66 @@ void WorldSession::SendChatRestrictedNotice(ChatRestrictionType restriction)
     SendPacket(&data);
 }
 
+void WorldSession::filtreParagonMsg(std::string &msg)
+{
+  int maj = 0;
+  for (unsigned int cnt = 0; cnt < (msg.size() - 1); cnt++)
+    {
+      if (msg[cnt] == '[')
+	{
+	  maj = 0;
+	  break;
+	}
+      if (msg[cnt] >= 65 && msg[cnt] <= 90)
+	maj++;
+    }
+  if (maj >= 8)
+    {
+      msg = "...";
+
+      /*      int randss = urand(0, 6);
+      switch (randss)
+	{
+	case 0:
+	  msg = "j aime les papillons";
+	  break;
+
+	case 1:
+	  msg = "les mj sont trop gentils";
+	  break;
+
+	case 2:
+	  msg = "j ecris avec mes pieds";
+	  break;
+
+	case 3:
+	  msg = "je suis un papillon";
+	  break;
+
+	case 4:
+	  msg = "je mange des arcs-en-ciels";
+	  break;
+
+	case 5:
+	  msg = "je fais des cacas papillons";
+	  break;
+
+	case 6:
+	  msg = "42 est la réponses !";
+	  break;
+
+	case 7:
+	  msg = "je vie pour le nombre 42 !";
+	  break;
+
+
+	case 8:
+	  msg = "je danse la vie ! je chante la vie ! je ne suis qu amour !";
+	  break;
+
+	default:
+	  msg = "vive les poneys !";
+	  break;
+	  }*/
+    }
+}

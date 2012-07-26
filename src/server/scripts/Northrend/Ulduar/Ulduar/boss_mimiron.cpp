@@ -1230,8 +1230,6 @@ class boss_vx_001 : public CreatureScript
                         DoZoneInCombat();
                         break;
                     case DO_VX001_ASSEMBLED:                                // Reassemble and heal share some stuff, fallthrough is intended
-		      me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-		      me->SetStandState(UNIT_STAND_STATE_STAND);
                         if (MimironHardMode)
                             DoCast(me, SPELL_EMERGENCY_MODE, true);
                         me->SetHealth( (me->GetMaxHealth() >> 1) );
@@ -1627,7 +1625,6 @@ class boss_aerial_unit : public CreatureScript
                         }
                         break;
                     case DO_AERIAL_ASSEMBLED:
-		      me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                         me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!
                         phase = PHASE_AERIAL_ASSEMBLED__GLOBAL_4;
                         events.SetPhase(phase);

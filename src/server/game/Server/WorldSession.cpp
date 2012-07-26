@@ -47,7 +47,7 @@
 
 bool MapSessionFilter::Process(WorldPacket* packet)
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    OpcodeHandler const &opHandle = opcodeTable[packet->GetOpcode()];
 
     //let's check if our opcode can be really processed in Map::Update()
     if (opHandle.packetProcessing == PROCESS_INPLACE)
@@ -69,7 +69,7 @@ bool MapSessionFilter::Process(WorldPacket* packet)
 //OR packet handler is not thread-safe!
 bool WorldSessionFilter::Process(WorldPacket* packet)
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    OpcodeHandler const &opHandle = opcodeTable[packet->GetOpcode()];
     //check if packet handler is supposed to be safe
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;
@@ -96,10 +96,8 @@ m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 m_sessionDbLocaleIndex(locale),
 m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter),
-isRecruiter(isARecruiter), timeLastWhoCommand(0)
+isRecruiter(isARecruiter), timeLastWhoCommand(0),_warden(NULL)
 {
-    _warden = NULL;
-
     if (sock)
     {
         m_Address = sock->GetRemoteAddress();
@@ -121,8 +119,8 @@ WorldSession::~WorldSession()
     /// - If have unclosed socket, close it
     if (m_Socket)
     {
-        m_Socket->CloseSocket();
-        m_Socket->RemoveReference();
+        m_Socket->CloseSocket ();
+        m_Socket->RemoveReference ();
         m_Socket = NULL;
     }
 
@@ -137,7 +135,7 @@ WorldSession::~WorldSession()
     LoginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = %u;", GetAccountId());     // One-time query
 }
 
-void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
+void WorldSession::SizeError(WorldPacket const &packet, uint32 size) const
 {
     sLog->outError("Client (account %u) send packet %s (%u) with size " SIZEFMTD " but expected %u (attempt to crash server?), skipped",
         GetAccountId(), LookupOpcodeName(packet.GetOpcode()), packet.GetOpcode(), packet.size(), size);
@@ -195,8 +193,8 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     }
 #endif                                                      // !TRINITY_DEBUG
 
-    if (m_Socket->SendPacket(*packet) == -1)
-        m_Socket->CloseSocket();
+    if (m_Socket->SendPacket (*packet) == -1)
+        m_Socket->CloseSocket ();
 }
 
 /// Add an incoming packet to the queue
@@ -208,7 +206,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, const char *reason)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION (account: %u, guidlow: %u, char: %s): received unexpected opcode %s (0x%.4X, status: %s) %s",
+    sLog->outError("SESSION (account: %u, guidlow: %u, char: %s): received unexpected opcode %s (0x%.4X, status: %s) %s",
         GetAccountId(), m_GUIDLow, _player ? _player->GetName() : "<none>",
         LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode(), status, reason);
 }
@@ -216,7 +214,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char* status, 
 /// Logging helper for unexpected opcodes
 void WorldSession::LogUnprocessedTail(WorldPacket* packet)
 {
-    sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
+    sLog->outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
         LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode(), uint32(packet->rpos()), uint32(packet->wpos()));
     packet->print_storage();
 }
@@ -290,7 +288,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                         // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
                         break;
                     case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
-                        if (!_player && !m_playerRecentlyLogout && !m_playerLogout) // There's a short delay between _player = null and m_playerRecentlyLogout = true during logout
+                        if (!_player && !m_playerRecentlyLogout)
                             LogUnexpectedOpcode(packet, "STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT",
                                 "the player has not logged in yet and not recently logout");
                         else
@@ -323,9 +321,9 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             break;
                         }
 
-                        // some auth opcodes can be recieved before STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes
-                        // however when we recieve CMSG_CHAR_ENUM we are surely no longer during the logout process.
-                        if (packet->GetOpcode() == CMSG_CHAR_ENUM)
+                        // single from authed time opcodes send in to after logout time
+                        // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
+                        if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
                             m_playerRecentlyLogout = false;
 
                         sScriptMgr->OnPacketReceive(m_Socket, WorldPacket(*packet));
@@ -334,7 +332,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             LogUnprocessedTail(packet);
                         break;
                     case STATUS_NEVER:
-                        sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION (account: %u, guidlow: %u, char: %s): received not allowed opcode %s (0x%.4X)",
+                        sLog->outError("SESSION (account: %u, guidlow: %u, char: %s): received not allowed opcode %s (0x%.4X)",
                             GetAccountId(), m_GUIDLow, _player ? _player->GetName() : "<none>",
                             LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
                         break;
@@ -345,7 +343,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                         break;
                 }
             }
-            catch(ByteBufferException &)
+            catch (ByteBufferException &)
             {
                 sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
                         packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
@@ -404,7 +402,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
-        if (uint64 lguid = _player->GetLootGUID())
+        if (uint64 lguid = GetPlayer()->GetLootGUID())
             DoLootRelease(lguid);
 
         ///- If the player just died before logging out, make him appear as a ghost
@@ -518,41 +516,44 @@ void WorldSession::LogoutPlayer(bool Save)
         if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
             _player->RemoveFromGroup();
 
-        //! Send update to group and reset stored max enchanting level
+        ///- Send update to group and reset stored max enchanting level
         if (_player->GetGroup())
         {
             _player->GetGroup()->SendUpdate();
             _player->GetGroup()->ResetMaxEnchantingLevel();
         }
 
-        //! Broadcast a logout message to the player's friends
+        ///- Broadcast a logout message to the player's friends
         sSocialMgr->SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetGUIDLow(), true);
-        sSocialMgr->RemovePlayerSocial(_player->GetGUIDLow());
+        sSocialMgr->RemovePlayerSocial (_player->GetGUIDLow ());
 
-        //! Call script hook before deletion
-        sScriptMgr->OnPlayerLogout(_player);
+        // Call script hook before deletion
+        sScriptMgr->OnPlayerLogout(GetPlayer());
 
-        //! Remove the player from the world
+        ///- Remove the player from the world
         // the player may not be in the world when logging out
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
         _player->CleanupsBeforeDelete();
-        sLog->outChar("Account: %d (IP: %s) Logout Character:[%s] (GUID: %u) Level: %d", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow(), _player->getLevel());
+        sLog->outChar("Account: %d (IP: %s) Logout Character:[%s] (GUID: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow());
         if (Map* _map = _player->FindMap())
             _map->RemovePlayerFromMap(_player, true);
+        SetPlayer(NULL);                                    // deleted in Remove call
 
-        SetPlayer(NULL); //! Pointer already deleted during RemovePlayerFromMap
-
-        //! Send the 'logout complete' packet to the client
-        //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
+        ///- Send the 'logout complete' packet to the client
         WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);
         SendPacket(&data);
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
 
-        //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
+        //No SQL injection as AccountId is uint32
+
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ACCOUNT_ONLINE);
+
         stmt->setUInt32(0, GetAccountId());
+
         CharacterDatabase.Execute(stmt);
+
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
     }
 
     m_playerLogout = false;
@@ -793,7 +794,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo* mi)
 
     data >> mi->fallTime;
 
-    if (mi->HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if (mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
     {
         data >> mi->j_zspeed;
         data >> mi->j_sinAngle;
@@ -804,77 +805,35 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo* mi)
     if (mi->HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
         data >> mi->splineElevation;
 
-    //! Anti-cheat checks. Please keep them in seperate if() blocks to maintain a clear overview.
-    //! Might be subject to latency, so just remove improper flags.
-    #ifdef TRINITY_DEBUG
-    #define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
-    { \
-        if (check) \
-        { \
-            sLog->outDebug(LOG_FILTER_UNITS, "WorldSession::ReadMovementInfo: Violation of MovementFlags found (%s). " \
-                "MovementFlags: %u, MovementFlags2: %u for player GUID: %u. Mask %u will be removed.", \
-                STRINGIZE(check), mi->GetMovementFlags(), mi->GetExtraMovementFlags(), GetPlayer()->GetGUIDLow(), maskToRemove); \
-            mi->RemoveMovementFlag((maskToRemove)); \
-        } \
-    }
-    #else
-    #define REMOVE_VIOLATING_FLAGS(check, maskToRemove) \
-        if (check) \
-            mi->RemoveMovementFlag((maskToRemove));
-    #endif
+    // This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid,
+    // and when used in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD
+    // it will freeze clients that receive this player's movement info.
+    if (mi->HasMovementFlag(MOVEMENTFLAG_ROOT))
+        mi->flags &= ~MOVEMENTFLAG_ROOT;
 
+    // Cannot hover and jump at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_HOVER) && mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
+        mi->flags &= ~MOVEMENTFLAG_JUMPING;
 
-    /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
-        in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD.
-        It will freeze clients that receive this player's movement info.
-    */
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_ROOT),
-        MOVEMENTFLAG_ROOT);
+    // Cannot ascend and descend at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_ASCENDING) && mi->HasMovementFlag(MOVEMENTFLAG_DESCENDING))
+        mi->flags &= ~(MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING);
 
-    //! Cannot hover without SPELL_AURA_HOVER
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_HOVER) && !GetPlayer()->HasAuraType(SPELL_AURA_HOVER),
-        MOVEMENTFLAG_HOVER);
+    // Cannot move left and right at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_RIGHT))
+        mi->flags &= ~(MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT);
 
-    //! Cannot ascend and descend at the same time
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_ASCENDING) && mi->HasMovementFlag(MOVEMENTFLAG_DESCENDING),
-        MOVEMENTFLAG_ASCENDING | MOVEMENTFLAG_DESCENDING);
+    // Cannot strafe left and right at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT))
+        mi->flags &= ~(MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
 
-    //! Cannot move left and right at the same time
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_RIGHT),
-        MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT);
+    // Cannot pitch up and down at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_PITCH_UP) && mi->HasMovementFlag(MOVEMENTFLAG_PITCH_DOWN))
+        mi->flags &= ~(MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN);
 
-    //! Cannot strafe left and right at the same time
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) && mi->HasMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT),
-        MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
-
-    //! Cannot pitch up and down at the same time
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_PITCH_UP) && mi->HasMovementFlag(MOVEMENTFLAG_PITCH_DOWN),
-        MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN);
-
-    //! Cannot move forwards and backwards at the same time
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FORWARD) && mi->HasMovementFlag(MOVEMENTFLAG_BACKWARD),
-        MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD);
-
-    //! Cannot walk on water without SPELL_AURA_WATER_WALK
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_WATERWALKING) && !GetPlayer()->HasAuraType(SPELL_AURA_WATER_WALK),
-        MOVEMENTFLAG_WATERWALKING);
-
-    //! Cannot feather fall without SPELL_AURA_FEATHER_FALL
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FALLING_SLOW) && !GetPlayer()->HasAuraType(SPELL_AURA_FEATHER_FALL),
-        MOVEMENTFLAG_FALLING_SLOW);
-
-    /*! Cannot fly if no fly auras present. Exception is being a GM.
-        Note that we check for account level instead of Player::IsGameMaster() because in some
-        situations it may be feasable to use .gm fly on as a GM without having .gm on,
-        e.g. aerial combat.
-    */
-
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY) && GetSecurity() == SEC_PLAYER &&
-        !GetPlayer()->m_mover->HasAuraType(SPELL_AURA_FLY) &&
-        !GetPlayer()->m_mover->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED),
-        MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY);
-
-    #undef REMOVE_VIOLATING_FLAGS
+    // Cannot move forwards and backwards at the same time
+    if (mi->HasMovementFlag(MOVEMENTFLAG_FORWARD) && mi->HasMovementFlag(MOVEMENTFLAG_BACKWARD))
+        mi->flags &= ~(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD);
 }
 
 void WorldSession::WriteMovementInfo(WorldPacket* data, MovementInfo* mi)
@@ -893,9 +852,6 @@ void WorldSession::WriteMovementInfo(WorldPacket* data, MovementInfo* mi)
        *data << mi->t_pos.PositionXYZOStream();
        *data << mi->t_time;
        *data << mi->t_seat;
-
-       if (mi->HasExtraMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT))
-           *data << mi->t_time2;
     }
 
     if (mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mi->HasExtraMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING))
@@ -903,7 +859,7 @@ void WorldSession::WriteMovementInfo(WorldPacket* data, MovementInfo* mi)
 
     *data << mi->fallTime;
 
-    if (mi->HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if (mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
     {
         *data << mi->j_zspeed;
         *data << mi->j_sinAngle;
@@ -919,7 +875,6 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 {
     if (data.rpos() + 4 > data.size())
         return;
-
     uint32 size;
     data >> size;
 
@@ -939,7 +894,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
     ByteBuffer addonInfo;
     addonInfo.resize(size);
 
-    if (uncompress(const_cast<uint8*>(addonInfo.contents()), &uSize, const_cast<uint8*>(data.contents() + pos), data.size() - pos) == Z_OK)
+    if (uncompress(const_cast<uint8 *>(addonInfo.contents()), &uSize, const_cast<uint8 *>(data.contents() + pos), data.size() - pos) == Z_OK)
     {
         uint32 addonsCount;
         addonInfo >> addonsCount;                         // addons count
@@ -1166,15 +1121,15 @@ void WorldSession::ProcessQueryCallbacks()
 
 void WorldSession::InitWarden(BigNumber* k, std::string os)
 {
-  /*    if (os == "Win")
+    if (os == "Win")
     {
-        _warden = new WardenWin();
+        _warden = (Warden*)new WardenWin();
         _warden->Init(this, k);
     }
     else if (os == "OSX")
     {
         // Disabled as it is causing the client to crash
-        // _warden = new WardenMac();
+        // _warden = (Warden*)new WardenMac();
         // _warden->Init(this, k);
-	}*/
+    }
 }

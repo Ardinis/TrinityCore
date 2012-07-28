@@ -327,6 +327,9 @@ class boss_mimiron : public CreatureScript
                 me->CombatStop(true);
                 if (instance)
                 {
+					printf("\n! FIN COMBAT ! \n");
+					instance->SetBossState(BOSS_MIMIRON, DONE);
+
                      if (gotHardMode)
                         me->SummonGameObject(RAID_MODE(CACHE_OF_INNOVATION_HARDMODE_10, CACHE_OF_INNOVATION_HARDMODE_25), 2744.65f, 2569.46f,
                         364.314f, 3.14159f, 0, 0, 0.7f, 0.7f, 604800);
@@ -364,6 +367,14 @@ class boss_mimiron : public CreatureScript
 
                 while (uint32 event = events.ExecuteEvent())
                 {
+					if(phase == PHASE_AERIAL_ACTIVATION)
+					{
+					printf("\n LA PHASE EST AERIAL ACTIVATION ! ");
+						if (Creature* VX_001 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001)))
+							VX_001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_USE_STANDING);
+					}
+					else
+						printf("\n LA PHASE EST AAUTRE CHOSE ! Phase = %u" , phase);
                     switch (event)
                     {
                     case EVENT_CHECK_TARGET:
@@ -450,6 +461,7 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_STEP_2:
+						printf("\n EVENT_STEP_2 !\n");
                         switch (phase)
                         {
                             case PHASE_INTRO:
@@ -483,6 +495,7 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_STEP_3:
+						printf("\n EVENT_STEP_3 !\n");
                         switch (phase)
                         {
                             case PHASE_INTRO:
@@ -517,6 +530,7 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_STEP_4:
+						printf("\n EVENT_STEP_4 !\n");
                         switch (phase)
                         {
                             case PHASE_INTRO:
@@ -567,6 +581,7 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_STEP_5:
+						printf("\n EVENT_STEP-5 !\n");
                         switch (phase) // TODO: Add other phases if required
                         {
                             case PHASE_INTRO:
@@ -590,6 +605,7 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_STEP_6:
+						printf("\n EVENT_STEP_6 !\n");
                         switch (phase) // TODO: Add other phases if required
                         {
                             case PHASE_INTRO:
@@ -617,6 +633,7 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_STEP_7:
+						printf("\n EVENT_STEP_7 !\n");
                         switch (phase) // TODO: Add other phases if required
                         {
                             case PHASE_INTRO:
@@ -700,6 +717,7 @@ class boss_mimiron : public CreatureScript
                         break;
                     case DO_ACTIVATE_AERIAL:
                         phase = PHASE_AERIAL_ACTIVATION;
+
                         events.SetPhase(phase);
                         events.ScheduleEvent(EVENT_STEP_1, 5000, 0, phase);
                         break;
@@ -1257,24 +1275,29 @@ class boss_vx_001 : public CreatureScript
                     damage = 0;
                     spinning = false;
                     me->InterruptNonMeleeSpells(true);
+					me->GetMotionMaster()->Clear(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+					me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->SetHealth(me->GetMaxHealth());
-                    me->SetStandState(UNIT_STAND_STATE_DEAD);                                       
+                    //me->SetHealth(me->GetMaxHealth());
+                    me->SetStandState(UNIT_STAND_STATE_DEAD);
+
                     switch (phase)
                     {
                         case PHASE_VX001_SOLO__GLOBAL_2:
+						printf("\n Phase SOLO !!\n");
                             if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
                                 Mimiron->AI()->DoAction(DO_ACTIVATE_AERIAL);
                             break;
                         case PHASE_VX001_ASSEMBLED__GLOBAL_4:
+						printf("\n Phase ASSEMBLER !!\n");
                             if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
                                 Mimiron->AI()->DoAction(DO_VX001_SELF_REPAIR_START);
                             DoCast(me, SPELL_SELF_REPAIR);
                             break;
                     }
-                    events.Reset();               
+                    events.Reset();
                     phase = PHASE_IDLE;
                     events.SetPhase(phase);  
                 }
@@ -1729,8 +1752,9 @@ class boss_aerial_unit : public CreatureScript
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->SetHealth(me->GetMaxHealth());                    
+                    //me->SetHealth(me->GetMaxHealth());                    
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
+
                     switch (phase)
                     {
                         case PHASE_AERIAL_SOLO__GLOBAL_3:

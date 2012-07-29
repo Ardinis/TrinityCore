@@ -136,6 +136,7 @@ enum Actions
     DO_START_AERIAL,
     DO_DISABLE_AERIAL,
     DO_ACTIVATE_V0L7R0N,
+	DO_ACTIVATE_DEATH_TIMER,
     DO_LEVIATHAN_ASSEMBLED,
     DO_LEVIATHAN_SELF_REPAIR_START,
     DO_LEVIATHAN_SELF_REPAIR_END,
@@ -302,8 +303,10 @@ class boss_mimiron : public CreatureScript
                 phase = PHASE_IDLE;
                 events.SetPhase(phase);
                 flameCount = 0;
+				_botTimer = 0;
                 gotHardMode = false;
                 enraged = false;
+				_checkBotAlive = true;
 
                 events.ScheduleEvent(EVENT_CHECK_TARGET, 7000);
 
@@ -354,7 +357,6 @@ class boss_mimiron : public CreatureScript
                 me->CombatStop(true);
                 if (instance)
                 {
-					printf("\n! FIN COMBAT ! \n");
 					instance->SetBossState(BOSS_MIMIRON, DONE);
 
                      if (gotHardMode)
@@ -411,18 +413,14 @@ class boss_mimiron : public CreatureScript
                         events.ScheduleEvent(EVENT_CHECK_TARGET, 7000);
                         break;
                     case EVENT_CHECK_BOTALIVE:  // Check if all are dead
-						printf("\n EVENT_CHECK_BOTALIVE !");
-						printf("\n [DATA_LEVIATHAN_MK_II] = %b , [DATA_AERIAL_UNIT] = %b , [DATA_VX_001] = %b!", isSelfRepairing[DATA_LEVIATHAN_MK_II], isSelfRepairing[DATA_AERIAL_UNIT], isSelfRepairing[DATA_VX_001] );
-                        if (isSelfRepairing[DATA_LEVIATHAN_MK_II] && isSelfRepairing[DATA_AERIAL_UNIT] && isSelfRepairing[DATA_VX_001])
+						if (isSelfRepairing[DATA_LEVIATHAN_MK_II] && isSelfRepairing[DATA_AERIAL_UNIT] && isSelfRepairing[DATA_VX_001])
                         {
-							printf("\n ALL BOT DEAD!");
                             // We're down, baby.
                             Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II));
                             Creature* VX_001 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001));
                             Creature* AerialUnit = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT));
                             if (Leviathan && VX_001 && AerialUnit)
                             {
-								printf("\n Tout Target !");
                                 Leviathan->DisappearAndDie();
                                 VX_001->DisappearAndDie();
                                 AerialUnit->DisappearAndDie();
@@ -807,6 +805,49 @@ class boss_mimiron : public CreatureScript
 					}
 				}
 
+                // All sections need to die within 15 seconds, else they respawn
+                if (_checkBotAlive)
+                    _botTimer = 0;
+                else
+                {
+                    _botTimer += diff;
+                    if (_botTimer > 15000) // spell 64383
+                    {
+                        if (Creature* Leviathan = me->GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
+                            Leviathan->AI()->DoAction(DO_LEVIATHAN_ASSEMBLED);
+                        if (Creature* VX_001 = me->GetCreature(*me, instance->GetData64(DATA_VX_001)))
+                            VX_001->AI()->DoAction(DO_VX001_ASSEMBLED);
+                        if (Creature* AerialUnit = me->GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT)))
+                            AerialUnit->AI()->DoAction(DO_AERIAL_ASSEMBLED);
+
+                        _checkBotAlive = true;
+                    }
+                    else
+                    {
+                        Creature* Leviathan = me->GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II));
+                        Creature* VX_001 = me->GetCreature(*me, instance->GetData64(DATA_VX_001));
+                        Creature* AerialUnit = me->GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT));
+                        if (Leviathan && VX_001 && AerialUnit)
+                        {
+                            if (Leviathan->getStandState() == UNIT_STAND_STATE_DEAD &&
+                                VX_001->getStandState() == UNIT_STAND_STATE_DEAD &&
+                                AerialUnit->getStandState() == UNIT_STAND_STATE_DEAD)
+                            {
+                                Leviathan->DespawnOrUnsummon(5*MINUTE*IN_MILLISECONDS);
+                                VX_001->DisappearAndDie();
+                                AerialUnit->DisappearAndDie();
+                                me->Kill(Leviathan);
+                                DespawnCreatures(NPC_FLAMES_INITIAL, 100.0f);
+                                DespawnCreatures(NPC_PROXIMITY_MINE, 100.0f);
+                                DespawnCreatures(NPC_ROCKET, 100);
+                                me->ExitVehicle();
+                                EncounterPostProgress();
+                                _checkBotAlive = true;
+                            }
+                        }
+                    }
+                }
+
             }
 
             uint32 GetData(uint32 type)
@@ -848,6 +889,9 @@ class boss_mimiron : public CreatureScript
                         phase = PHASE_V0L7R0N_ACTIVATION;
                         events.SetPhase(phase);
                         events.ScheduleEvent(EVENT_STEP_1, 1000, 0, phase);
+                        break;
+                    case DO_ACTIVATE_DEATH_TIMER:
+                        _checkBotAlive = false;
                         break;
                     case DO_ACTIVATE_HARD_MODE:     // Cannot be done infight, since the button gets locked on EnterCombat() with Mimiron.
                         gotHardMode = true;
@@ -898,9 +942,11 @@ class boss_mimiron : public CreatureScript
                 std::map< BombIndices, bool > setUpUsTheBomb;
                 MyPhase phase;
                 uint32 flameCount;
+				uint32 _botTimer;
                 bool gotHardMode;
                 bool enraged;
                 bool gotEncounterFinished;
+				bool _checkBotAlive;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1012,6 +1058,8 @@ class boss_leviathan_mk : public CreatureScript
                             if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
                                 Mimiron->AI()->DoAction(DO_LEVIATHAN_SELF_REPAIR_START);
                             DoCast(me, SPELL_SELF_REPAIR);
+							if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+								Mimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
                             break;
                     }
                     events.Reset(); // Wipe events, just for the case
@@ -1374,6 +1422,8 @@ class boss_vx_001 : public CreatureScript
                             DoCast(me, SPELL_EMERGENCY_MODE, true);
                         me->SetHealth( (me->GetMaxHealth() >> 1) );
                         phase = PHASE_VX001_ASSEMBLED__GLOBAL_4;
+						if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+							Mimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
                         events.SetPhase(phase);
                     case DO_VX001_SELF_REPAIR_END:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);                
@@ -1770,6 +1820,8 @@ class boss_aerial_unit : public CreatureScript
                     case DO_AERIAL_ASSEMBLED:
                         me->SetHealth( (me->GetMaxHealth() >> 1) );               // Once again, re-assemble and repairing share some stuff, so the fallthrough is intended!
                         phase = PHASE_AERIAL_ASSEMBLED__GLOBAL_4;
+						if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+							Mimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
                         events.SetPhase(phase);
                     case DO_AERIAL_SELF_REPAIR_END:
                         if (gotMimironHardMode)

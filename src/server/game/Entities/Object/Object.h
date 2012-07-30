@@ -426,7 +426,7 @@ struct Position
     float GetExactDist2d(const float x, const float y) const
         { return sqrt(GetExactDist2dSq(x, y)); }
     float GetExactDist2dSq(const Position* pos) const
-        { float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; return dx*dx + dy*dy; }
+        { if (!pos) return 0; float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; return dx*dx + dy*dy; }
     float GetExactDist2d(const Position* pos) const
         { return sqrt(GetExactDist2dSq(pos)); }
     float GetExactDistSq(float x, float y, float z) const
@@ -434,7 +434,7 @@ struct Position
     float GetExactDist(float x, float y, float z) const
         { return sqrt(GetExactDistSq(x, y, z)); }
     float GetExactDistSq(const Position* pos) const
-        { float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; float dz = m_positionZ - pos->m_positionZ; return dx*dx + dy*dy + dz*dz; }
+        { if (!pos) return 0; float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; float dz = m_positionZ - pos->m_positionZ; return dx*dx + dy*dy + dz*dz; }
     float GetExactDist(const Position* pos) const
         { return sqrt(GetExactDistSq(pos)); }
 

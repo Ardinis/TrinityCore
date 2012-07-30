@@ -617,6 +617,11 @@ void AddSC_boss_ignis()
     new spell_ignis_slag_pot();
     new spell_ignis_flame_jets();
     new achievement_ignis_shattered();
+	
+
+    // has to be done or else players wil absorb dmg from slag pot vehicle seat 1 slagpot
+    if (VehicleSeatEntry* vehSeat = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(3206)))
+        vehSeat->m_flags |= 0x400;	
 }
 
 #undef SPELL_FLAME_JETS

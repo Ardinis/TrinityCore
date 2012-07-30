@@ -352,8 +352,8 @@ class boss_xt002 : public CreatureScript
                             // Spawn Pummeller
                             me->SummonCreature(NPC_XM024_PUMMELLER, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);                         
 
-                            // Spawn 5 Scrapbots
-                            for (uint8 n = 0; n < 5; n++)
+                            // Spawn 4 Scrapbots
+                            for (uint8 n = 0; n < 4; n++)
                             {
                                 uint8 pos = rand() % 4;
                                 me->SummonCreature(NPC_XS013_SCRAPBOT, 
@@ -362,8 +362,8 @@ class boss_xt002 : public CreatureScript
                                     spawnLocations[pos].GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000); 
                             }
 
-                            // Spawn 3 Bombs
-                            for (uint8 n = 0; n < 3; n++)
+                            // Spawn 2 Bombs
+                            for (uint8 n = 0; n < 2; n++)
                                 me->SummonCreature(NPC_XE321_BOOMBOT, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
                             events.ScheduleEvent(EVENT_SPAWN_ADDS, 22*IN_MILLISECONDS, 0, PHASE_TWO);

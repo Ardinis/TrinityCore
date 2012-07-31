@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+* Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -636,7 +636,7 @@ class WorldObject : public Object, public WorldLocation
 
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetPhaseMask() const { return m_phaseMask; }
-        bool InSamePhase(WorldObject const* obj) const { return InSamePhase(obj->GetPhaseMask()); }
+        bool InSamePhase(WorldObject const* obj) const { if (!obj) return false; return InSamePhase(obj->GetPhaseMask()); }
         bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask); }
 
         uint32 GetZoneId() const;
@@ -652,8 +652,10 @@ class WorldObject : public Object, public WorldLocation
 
         float GetDistance(const WorldObject* obj) const
         {
-            float d = GetExactDist(obj) - GetObjectSize() - obj->GetObjectSize();
-            return d > 0.0f ? d : 0.0f;
+	  if (!obj)
+	    return 0.0f;
+	  float d = GetExactDist(obj) - GetObjectSize() - obj->GetObjectSize();
+	  return d > 0.0f ? d : 0.0f;
         }
         float GetDistance(const Position &pos) const
         {
@@ -667,8 +669,10 @@ class WorldObject : public Object, public WorldLocation
         }
         float GetDistance2d(const WorldObject* obj) const
         {
-            float d = GetExactDist2d(obj) - GetObjectSize() - obj->GetObjectSize();
-            return d > 0.0f ? d : 0.0f;
+	  if (!obj)
+	    return 0.0f;
+	  float d = GetExactDist2d(obj) - GetObjectSize() - obj->GetObjectSize();
+	  return d > 0.0f ? d : 0.0f;
         }
         float GetDistance2d(float x, float y) const
         {
@@ -680,14 +684,14 @@ class WorldObject : public Object, public WorldLocation
         bool IsSelfOrInSameMap(const WorldObject* obj) const
         {
             if (this == obj)
-                return true;
+	      return true;
             return IsInMap(obj);
         }
         bool IsInMap(const WorldObject* obj) const
         {
-            if (obj)
-                return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
-            return false;
+	  if (obj)
+	    return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
+	  return false;
         }
         bool IsWithinDist3d(float x, float y, float z, float dist) const
             { return IsInDist(x, y, z, dist + GetObjectSize()); }

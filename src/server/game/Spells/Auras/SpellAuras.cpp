@@ -1096,7 +1096,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (*itr < 0)
                         target->RemoveAurasDueToSpell(-(*itr));
                     else if (removeMode != AURA_REMOVE_BY_DEATH)
-                        target->CastSpell(target, *itr, true, NULL, NULL, GetCasterGUID());
+		      {
+			switch (*itr) //Will be transoform as an function's pointer array via compilation.
+			  {
+			  case 64694:
+			  case 65263:
+			  case 65264:
+			    caster->CastSpell(caster, *itr, true, NULL, NULL, GetCasterGUID());
+			    break;
+			  default:
+			    target->CastSpell(target, *itr, true, NULL, NULL, GetCasterGUID());
+			    break;
+
+			  }
+
+		      }
                 }
             }
             if (std::vector<int32> const* spellTriggered = sSpellMgr->GetSpellLinked(GetId() + SPELL_LINK_AURA))

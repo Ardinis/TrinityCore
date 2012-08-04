@@ -3330,12 +3330,8 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
     }
 
     aurApp->_Remove();
-    /*    if (!caster)
-      {
-	sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "CRASH FIX TISK UNIT.CPP L 3326 :  Unit* caster = aura->GetCaster() is NULL");
-	return ;
-	}*/
-    aura->_UnapplyForTarget(this, caster, aurApp);
+    if (caster)
+      aura->_UnapplyForTarget(this, caster, aurApp);
 
     // remove effects of the spell - needs to be done after removing aura from lists
     for (uint8 itr = 0 ; itr < MAX_SPELL_EFFECTS; ++itr)
@@ -3356,13 +3352,14 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
 
     // Remove aurastates only if were not found
     if (!auraStateFound)
-        ModifyAuraState(auraState, false);
+      ModifyAuraState(auraState, false);
 
-    aura->HandleAuraSpecificMods(aurApp, caster, false, false);
+    if (caster)
+      aura->HandleAuraSpecificMods(aurApp, caster, false, false);
 
     // only way correctly remove all auras from list
     //if (removedAuras != m_removedAurasCount) new aura may be added
-        i = m_appliedAuras.begin();
+    i = m_appliedAuras.begin();
 }
 
 void Unit::_UnapplyAura(AuraApplication * aurApp, AuraRemoveMode removeMode)
@@ -6668,7 +6665,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 {
                     victim->CastSpell(victim, 57894, true, NULL, NULL, GetGUID());
                     return true;
-                }	
+                }
             }
             break;
         }
@@ -7585,7 +7582,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 break;
             }
             // Dancing Rune Weapon
-/*			
+/*
             if (dummySpell->Id == 49028)
             {
                 // 1 dummy aura for dismiss rune blade
@@ -8095,7 +8092,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                         return true;                        // charge counting (will removed)
 
                     CastSpell(this, 28682, true);
-	
+
                     return (procEx & PROC_EX_CRITICAL_HIT) ? true : false;
                 }
                 // Empowered Fire
@@ -8704,7 +8701,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 					for (uint8 i = 0; i < MAX_RUNES; ++i)
 						if (ToPlayer()->GetRuneCooldown(i) == 0)
 							return false;
-				}				
+				}
                 break;
             }
             case SPELLFAMILY_ROGUE:
@@ -10147,21 +10144,21 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
 
     // Magic case
     if (victim->HasAura(8178)) //Grounding totem
-	{           
+	{
 		for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-		{               
-			if (spellInfo->Effects[j].ApplyAuraName == SPELL_AURA_MOD_TAUNT && spellInfo->Effects[j].ApplyAuraName != 49560)                      
-				return victim;// Death Grip        
+		{
+			if (spellInfo->Effects[j].ApplyAuraName == SPELL_AURA_MOD_TAUNT && spellInfo->Effects[j].ApplyAuraName != 49560)
+				return victim;// Death Grip
 		}
 
-		if (spellInfo->SpellIconID == 2818 && spellInfo->AttributesEx != 335561860) // PENANCE in Group                
-			return victim;        
-		if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && !spellInfo->IsChanneled())              
+		if (spellInfo->SpellIconID == 2818 && spellInfo->AttributesEx != 335561860) // PENANCE in Group
 			return victim;
-	}      
+		if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && !spellInfo->IsChanneled())
+			return victim;
+	}
 	else
 	{
-		//I am not sure if this should be redirected.          
+		//I am not sure if this should be redirected.
 		if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellInfo->Id != 16857)
 			return victim;
 	}
@@ -10170,18 +10167,18 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
     for (Unit::AuraEffectList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
 	{
 		if (Unit* magnet = (*itr)->GetBase()->GetUnitOwner())
-			if (magnet->isAlive() && IsWithinLOSInMap(magnet))              
+			if (magnet->isAlive() && IsWithinLOSInMap(magnet))
 				if (magnet->HasAura(8178)) // Grounding totem
 				{
-					(*itr)->GetBase()->DropCharge();  
+					(*itr)->GetBase()->DropCharge();
 
 					// Totems are destroyed upon redirection
 					if (magnet->ToTotem())
-						magnet->DealDamage(magnet, magnet->GetMaxHealth());		  
+						magnet->DealDamage(magnet, magnet->GetMaxHealth());
 
 					return magnet;
 				}
-	} 
+	}
 	return victim;
 }
 
@@ -10742,10 +10739,10 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
 
     // from positive and negative SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
     // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
-	
+
     //TakenTotalMod *= victim->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellProto->GetSchoolMask());
-	
-//	 test 
+
+//	 test
 	 float multiplier = 1.0f;
 	 int32 dmgBonusNonstackable = 0;
 	 uint32 iconId = 0;
@@ -14478,20 +14475,20 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         }
     }
     if (GetEntry() == 5925) //Grounding totem and (wand, periodic effects)
-      if (HasAura(8178))   
-	for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)              
+      if (HasAura(8178))
+	for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
 	  if (procSpell && procSpell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && (procSpell->Id == 5019 || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_LEECH || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)) // wand proc
 	    {
 	      Aura * aura = GetAura(8178);
 	      if (aura->GetMaxDuration() != 0)
-		{                         
-		  aura->SetMaxDuration(0);                    
+		{
+		  aura->SetMaxDuration(0);
 		  AuraEffect * aurEff = GetAuraEffect(8179, 0);
-		  aurEff->SetPeriodicTimer(10000);                      
-		  aura->SetDuration(600); 
+		  aurEff->SetPeriodicTimer(10000);
+		  aura->SetDuration(600);
 		}
 	    }
-    
+
     ProcTriggeredList procTriggered;
     // Fill procTriggered list
     for (AuraApplicationMap::const_iterator itr = GetAppliedAuras().begin(); itr!= GetAppliedAuras().end(); ++itr)
@@ -14778,11 +14775,11 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 	      {
 		Aura * aura = GetAura(8178);
 		if (aura->GetMaxDuration() != 0)
-		  {                         
-		    aura->SetMaxDuration(0);                    
+		  {
+		    aura->SetMaxDuration(0);
 		    AuraEffect * aurEff = GetAuraEffect(8179, 0);
-		    aurEff->SetPeriodicTimer(10000);                      
-		    aura->SetDuration(600); 
+		    aurEff->SetPeriodicTimer(10000);
+		    aura->SetDuration(600);
 		  }
 	      }
 
@@ -16842,8 +16839,8 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
     }
     else
     {
-       // Bladestorm	
-       if (player->HasAura(46924))	
+       // Bladestorm
+       if (player->HasAura(46924))
            return;
         float vcos, vsin;
         GetSinCos(x, y, vsin, vcos);

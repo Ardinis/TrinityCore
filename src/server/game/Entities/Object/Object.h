@@ -151,45 +151,46 @@ class Object
 
         int32 GetInt32Value(uint16 index) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
-            return m_int32Values[index];
+	  if (index < m_valuesCount || PrintIndexError(index, false))
+	    return m_int32Values[index];
+	  return 0;
         }
 
         uint32 GetUInt32Value(uint16 index) const
         {
-	  //            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
-	  if (!(index < m_valuesCount || PrintIndexError(index, false)))
-	      return (0);
-            return m_uint32Values[index];
+	  if ((index < m_valuesCount) || PrintIndexError(index, false))
+	    return m_uint32Values[index];
+	  return (0);
         }
 
         uint64 GetUInt64Value(uint16 index) const
         {
-	  if (!(index + 1 < m_valuesCount || PrintIndexError(index, false)))
-	    {
-	      return 0;
-	    }
-            return *((uint64*)&(m_uint32Values[index]));
+	  if ((index + 1 < m_valuesCount) || PrintIndexError(index, false))
+	    return *((uint64*) (&(m_uint32Values[index])));
+	  return 0;
         }
 
         float GetFloatValue(uint16 index) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
+	  if (index < m_valuesCount || PrintIndexError(index, false))
             return m_floatValues[index];
+	  return 0;
         }
 
         uint8 GetByteValue(uint16 index, uint8 offset) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
-            ASSERT(offset < 4);
-            return *(((uint8*)&m_uint32Values[index])+offset);
+	  if (index < m_valuesCount || PrintIndexError(index, false))
+	    if (offset < 4)
+	      return *(((uint8*)&m_uint32Values[index])+offset);
+	  return 0;
         }
 
         uint16 GetUInt16Value(uint16 index, uint8 offset) const
         {
-            ASSERT(index < m_valuesCount || PrintIndexError(index, false));
-            ASSERT(offset < 2);
-            return *(((uint16*)&m_uint32Values[index])+offset);
+	  if (index < m_valuesCount || PrintIndexError(index, false))
+            if (offset < 2)
+	      return *(((uint16*)&m_uint32Values[index])+offset);
+	  return 0;
         }
 
         void SetInt32Value(uint16 index, int32 value);

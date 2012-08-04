@@ -15523,6 +15523,13 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
             chance = victim->GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate, spellProto);
         }
     }
+    if (spellProto->GetFirstRankSpell()->Id == 51940)
+      {
+	if (GetSpellModOwner()->HasAura(51554))
+	  chance += 40;
+	if (GetSpellModOwner()->HasAura(51555))
+	  chance += 80;
+      }
     // Apply chance modifer aura
     if (Player* modOwner = GetSpellModOwner())
     {

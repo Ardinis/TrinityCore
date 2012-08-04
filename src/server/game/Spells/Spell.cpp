@@ -682,8 +682,9 @@ void Spell::SelectExplicitTargets()
     if (Unit* target = m_targets.GetUnitTarget())
     {
         // check for explicit target redirection, for Grounding Totem for example
-        if (m_spellInfo->GetExplicitTargetMask() & TARGET_FLAG_UNIT_ENEMY
+        if ((m_spellInfo->GetExplicitTargetMask() & TARGET_FLAG_UNIT_ENEMY
             || (m_spellInfo->GetExplicitTargetMask() & TARGET_FLAG_UNIT && !m_spellInfo->IsPositive()))
+			|| m_spellInfo->Id == 527 || m_spellInfo->Id == 988)
         {
             Unit* redirect;
             switch (m_spellInfo->DmgClass)
@@ -696,7 +697,10 @@ void Spell::SelectExplicitTargets()
                     redirect = m_caster->GetMeleeHitRedirectTarget(target, m_spellInfo);
                     break;
                 default:
-                    redirect = NULL;
+					if(m_spellInfo->SpellIconID == 225)
+						redirect = m_caster->GetMagicHitRedirectTarget(target, m_spellInfo);
+					else
+						redirect = NULL;
                     break;
             }
             if (redirect && (redirect != target))

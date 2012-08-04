@@ -1,0 +1,1 @@
+insert into spell_linked_spell values ('23881', '23885', '', 'Sanguinaire');

@@ -3592,6 +3592,9 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint32 dispellerSpellId
 
             if (aura->GetSpellInfo()->AttributesEx7 & SPELL_ATTR7_DISPEL_CHARGES)
                 aura->ModCharges(-dispelInfo.GetRemovedCharges(), AURA_REMOVE_BY_ENEMY_SPELL);
+	    //Should be better to add an enum: AURA_REMOVE_BY_DISPEL
+	    else if (aura->GetSpellInfo()->SpellIconID == 32 && aura->GetSpellInfo()->Category == 471)
+	      aura->ModStackAmount(-dispelInfo.GetRemovedCharges(), AURA_REMOVE_BY_CANCEL);
             else
                 aura->ModStackAmount(-dispelInfo.GetRemovedCharges(), AURA_REMOVE_BY_ENEMY_SPELL);
 

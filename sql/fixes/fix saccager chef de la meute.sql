@@ -1,3 +1,4 @@
+
 delete from spell_group where spell_id = '29801';
 delete from spell_group where spell_id = '17007';
 

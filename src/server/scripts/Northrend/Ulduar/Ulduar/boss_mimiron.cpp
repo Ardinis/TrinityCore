@@ -69,7 +69,7 @@ enum Spells
    SPELL_SELF_REPAIR                           = 64383,
 
    // Leviathan MK II
-   SPELL_MINES_SPAWN                           = 63016, /*65347*/
+   SPELL_MINES_SPAWN                           = 65347,
    SPELL_FLAME_SUPPRESSANT_MK                  = 64570,
    SPELL_NAPALM_SHELL_10                       = 63666,
    SPELL_NAPALM_SHELL_25                       = 65026,
@@ -1139,7 +1139,9 @@ class boss_leviathan_mk : public CreatureScript
                     {
                         case EVENT_PROXIMITY_MINE:
                             for (uint8 i = 0; i < 10; i++)
-                                DoCast(SPELL_MINES_SPAWN);
+			      {
+				DoCast(SPELL_MINES_SPAWN);
+			      }
                             DoCast(SPELL_PROXIMITY_MINES);
                             events.RescheduleEvent(EVENT_PROXIMITY_MINE, 35000, phase);
                             break;
@@ -1266,13 +1268,16 @@ class npc_proximity_mine : public CreatureScript
 
             void InitializeAI()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
+	      //                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
+	      Reset();
             }
 
             void Reset()
             {
                 uiBoomTimer = 35000;
                 boomLocked = false;
+		st = false;
+		uist = 3000;
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -1289,31 +1294,50 @@ class npc_proximity_mine : public CreatureScript
 
             void MoveInLineOfSight(Unit* who)
             {
-                if (!boomLocked && me->IsWithinDistInMap(who, 0.5f) && who->ToPlayer() && !who->ToPlayer()->isGameMaster())
-                {
-                    DoCastAOE(SPELL_EXPLOSION);
-                    boomLocked = true;
-                    me->DespawnOrUnsummon(200);
-                }
+	      if (!st)
+		return;
+	      if (!boomLocked)
+		if (who->ToPlayer())
+		  if (me->IsWithinDistInMap(who, 0.5f) /*&& !who->ToPlayer()->isGameMaster()*/)
+		    {
+		      std::cout << "BOOM !!!!!" << std::endl;
+		      DoCastAOE(SPELL_EXPLOSION);
+		      boomLocked = true;
+		      me->DespawnOrUnsummon(200);
+		    }
             }
+
+            void DamageTaken(Unit* /*who*/, uint32 &damage)
+            {
+	      damage = 0;
+	    }
 
             void UpdateAI(const uint32 diff)
             {
-                if (uiBoomTimer <= diff)
+	      if (uist <= diff)
+		{
+		  st = true;
+		  uist = 35000;
+		}
+	      else
+		uist -= diff;
+
+	      /*                if (uiBoomTimer <= diff)
                 {
                     if (!boomLocked)
                     {
+		      std::cout << "BOOM TIMER !!!!!" << std::endl;
                         DoCastAOE(SPELL_EXPLOSION);
                         me->DespawnOrUnsummon(200);
                         boomLocked = true;
                     }                    
                 }
-                else uiBoomTimer -= diff;
+                else uiBoomTimer -= diff;*/
             }
 
             private:
-                uint32 uiBoomTimer;
-                bool boomLocked;
+	  uint32 uiBoomTimer, uist;
+	  bool boomLocked, st;
         };
 
         CreatureAI* GetAI(Creature* creature) const

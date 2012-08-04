@@ -117,6 +117,7 @@ class instance_ulduar : public InstanceMapScript
             uint64 VX001GUID;
             uint64 AerialUnitGUID;
             uint64 MimironElevatorGUID;
+	  uint64 MimironChestHMGUID;
             std::list<uint64> MimironDoorGUIDList;
 
             // Thorim
@@ -235,6 +236,7 @@ class instance_ulduar : public InstanceMapScript
                 VX001GUID           = 0;
                 AerialUnitGUID      = 0;
                 MimironElevatorGUID = 0;
+		MimironChestHMGUID = 0;
 
                 // Thorim
                 ThorimGUID          = 0;
@@ -769,6 +771,8 @@ class instance_ulduar : public InstanceMapScript
                     case GO_MIMIRON_ELEVATOR:
                         gameObject->setActive(true);
                         MimironElevatorGUID = gameObject->GetGUID();
+			gameObject->SetGoState(GO_STATE_ACTIVE);
+			gameObject->EnableCollision(false);
                         break;
                     case GO_MIMIRON_DOOR_1:
                     case GO_MIMIRON_DOOR_2:
@@ -776,6 +780,10 @@ class instance_ulduar : public InstanceMapScript
                         gameObject->setActive(true);
                         MimironDoorGUIDList.push_back(gameObject->GetGUID());
                         break;
+		case GO_MIMIRON_CHEST_HM:
+		  gameObject->EnableCollision(false);
+		  MimironChestHMGUID = gameObject->GetGUID();
+		  break;
 
                     // Vezax related
                     case GO_WAY_TO_YOGG:

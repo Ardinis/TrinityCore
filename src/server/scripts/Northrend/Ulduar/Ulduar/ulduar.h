@@ -250,6 +250,8 @@ enum UlduarGameObjects
     GO_MIMIRON_DOOR_2           = 194774,
     GO_MIMIRON_DOOR_3           = 194775,
 
+    GO_MIMIRON_CHEST_HM		= 194956,
+
     GO_BIG_RED_BUTTON           = 194739,
 
     GO_WAY_TO_YOGG              = 194255,

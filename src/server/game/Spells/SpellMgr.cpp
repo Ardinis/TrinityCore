@@ -3030,6 +3030,11 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+	    case 63311:
+	      spellInfo->rangeIndex = 1;
+	      spellInfo->EffectImplicitTargetA[0] = 104;
+	      spellInfo->EffectRadiusIndex[0] = 13;
+	      break;
 	    case 51490:
 	    case 59156:
 	    case 59158:

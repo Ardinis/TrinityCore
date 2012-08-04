@@ -14624,6 +14624,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                         sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "ProcDamageAndSpell: casting mending (triggered by %s dummy aura of spell %u)",
                             (isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
 
+			//Can't take charge if dmg are totaly absorbed.
+			if (damage <= 0 && procExtra & PROC_EX_ABSORB)
+			  break;
+
                         HandleAuraRaidProcFromChargeWithValue(triggeredByAura);
                         takeCharges = true;
                         break;
@@ -14719,8 +14723,25 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                         //break;
                     default:
                         // nothing do, just charges counter
-                        takeCharges = true;
-                        break;
+		      switch (triggeredByAura->GetBase()->GetId())
+			{
+			  //Feu interieur should not proc on totaly absorbed dmg.
+			case 588:
+			case 602:
+			case 1006:
+			case 7128:
+			case 10951:
+			case 10952:
+			case 25431:
+			case 48040:
+			case 48168:
+			  if (damage <= 0 && procExtra & PROC_EX_ABSORB)
+			    break;
+			default:
+			  takeCharges = true;
+			  break;
+			}
+		      break;
                 } // switch (triggeredByAura->GetAuraType())
             } // for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
         } // if (!handled)

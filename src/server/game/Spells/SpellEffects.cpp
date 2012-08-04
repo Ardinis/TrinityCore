@@ -4170,12 +4170,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID(), consumeDiseases) / 2.0f);
                 break;
             }
-            // Blood-Caked Strike - Blood-Caked Blade
-            if (m_spellInfo->SpellIconID == 1736)
-            {
-                AddPctF(totalDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
-                break;
-            }
             // Heart Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
             {
@@ -4231,6 +4225,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     }
 
     int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
+
+    // Blood-Caked Strike - Blood-Caked Blade
+    if (m_spellInfo->SpellIconID == 1736)
+      weaponDamagePercentMod += unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f / 100;
+    //AddPctF(weaponDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
 
     // Sequence is important
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)

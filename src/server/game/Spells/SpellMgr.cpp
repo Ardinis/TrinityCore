@@ -3030,6 +3030,12 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+	    case 51490:
+	    case 59156:
+	    case 59158:
+	    case 59159:
+	         spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+	         break;
             case 40244: case 40245: // Simon Game Visual
             case 40246: case 40247: // Simon Game Visual
             case 42835: // Spout, remove damage effect, only anim is needed

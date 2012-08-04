@@ -1268,7 +1268,7 @@ class npc_proximity_mine : public CreatureScript
 
             void InitializeAI()
             {
-	      //                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
+	      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
 	      Reset();
             }
 

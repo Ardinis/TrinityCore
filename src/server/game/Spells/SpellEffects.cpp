@@ -4229,7 +4229,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     // Blood-Caked Strike - Blood-Caked Blade
     if (m_spellInfo->SpellIconID == 1736)
       weaponDamagePercentMod += unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f / 100;
-    //AddPctF(weaponDamagePercentMod, unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) * 12.5f);
 
     // Sequence is important
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)

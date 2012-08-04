@@ -5650,7 +5650,13 @@ SpellCastResult Spell::CheckCasterAuras() const
             {
                 if (!((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_STUN)))
                 {
-                    foundNotStun = true;
+		  // Ecorce needs to check the MECHANIC_SAPPED (Assomer) and MECHANIC_KNOCKOUT (Repentir, Suriner, etc)
+		  if (m_spellInfo->Id == 22812 &&
+		      (((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_KNOCKOUT)) ||
+		       ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_SAPPED))))
+		    continue;
+
+		  foundNotStun = true;
                     break;
                 }
             }

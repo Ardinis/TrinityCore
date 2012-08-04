@@ -12012,7 +12012,11 @@ void Unit::ApplySpellDispelImmunity(const SpellInfo* spellProto, DispelType type
             if (spell->GetDispelMask() & dispelMask)
             {
                 // Dispel aura
-                RemoveAura(itr);
+	      //Fusee eclairante
+	      //if (!(spellProto->SpellIconID == 136 && spell->SpellIconID == 250 && ToPlayer() && trouver une condition pour savoir si il est en jump ou pas ...))
+	      // Dispel aura
+	      RemoveAura(itr);
+
             }
             else
                 ++itr;

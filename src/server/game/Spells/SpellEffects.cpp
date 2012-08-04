@@ -2192,6 +2192,9 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
 
             addhealth += damageAmount;
         }
+	//Sanguinaire
+	else if (m_spellInfo->Id == 23880)
+	  addhealth = m_caster->GetMaxHealth() * 0.5f / 100;
         // Runic Healing Injector (heal increased by 25% for engineers - 3.2.0 patch change)
         else if (m_spellInfo->Id == 67489)
         {

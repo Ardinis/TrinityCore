@@ -280,7 +280,7 @@ bool ChatHandler::HandleDiamondLevelCommand(const char* /*args*/)
 
   StoreDatabase.PExecute("UPDATE diamond SET diamond='%d' WHERE acctid='%u'", diam, m_session->GetAccountId());
   StoreDatabase.PExecute("INSERT INTO lvl_bought(acctid, charid, clvl, elvl, nlvl, price) VALUES('%u', '%u', '%u', '%u', '%u', '%u')", acctid, chrguid, chrLvl, newlevel, dataNblvl, dataPrice);
-
+  chr->SaveToDB();
   PSendSysMessage(LANG_DIAM_LVL_BUY, dataNblvl, dataPrice);
 
   return true;
@@ -353,6 +353,7 @@ bool ChatHandler::HandleRecupCommand(const char* /*args*/)
 	  }
       }
       WebDatabase.PExecute("UPDATE recups SET status=4 WHERE id=%u", r_guid);
+      perso->SaveToDB();
       PSendSysMessage(LANG_RECUP_DONE);
     }
   else

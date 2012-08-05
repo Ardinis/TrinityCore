@@ -4757,11 +4757,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         if (reqCombat && m_caster->isInCombat() && !m_spellInfo->CanBeUsedInCombat())
             return SPELL_FAILED_AFFECTING_COMBAT;
-
-	if ((m_spellInfo->Id == 4987 || (m_spellInfo->Category == 12 && m_spellInfo->SpellIconID == 47))
-	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
-	  return SPELL_FAILED_NOTHING_TO_DISPEL;
-
     }
 
     // cancel autorepeat spells if cast start when moving

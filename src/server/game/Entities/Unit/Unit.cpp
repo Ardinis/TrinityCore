@@ -4227,21 +4227,6 @@ bool Unit::HasAuraTypeWithValue(AuraType auratype, int32 value) const
     return false;
 }
 
-bool Unit::HasNegativeAuraDispellable(Unit* caster)
-{
-  Unit::AuraMap const& auras = GetOwnedAuras();
-
-  for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-    {
-      Aura* aura = itr->second;
-      AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
-      if (aura->GetSpellInfo()->Dispel == DISPEL_MAGIC && !(aurApp->IsPositive() == IsFriendlyTo(caster)))
-	return true;
-    }
-  return false;
-}
-
-
 bool Unit::HasNegativeAuraWithInterruptFlag(uint32 flag, uint64 guid)
 {
     if (!(m_interruptMask & flag))

@@ -126,7 +126,6 @@ int Master::Run()
     sLog->outString("%s (worldserver-daemon)", _FULLVERSION);
     sLog->outString("<Ctrl-C> to stop.\n");
 
-    sLog->outString("Powered by");
     sLog->outString(" ______                       __");
     sLog->outString("/\\__  _\\       __          __/\\ \\__");
     sLog->outString("\\/_/\\ \\/ _ __ /\\_\\    ___ /\\_\\ \\, _\\  __  __");

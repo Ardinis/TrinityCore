@@ -1598,12 +1598,28 @@ class boss_vx_001 : public CreatureScript
                             break;
                         case EVENT_ROCKET_STRIKE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                if (Unit* missile = me->GetVehicleKit()->GetPassenger(5))
-                                    missile->CastSpell(target, SPELL_ROCKET_STRIKE, true);
+			      {
+				Position destination;
+				target->GetPosition(&destination);
+				if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+				  {
+				    if (Unit* missile = me->GetVehicleKit()->GetPassenger(5))
+				      me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
+				    c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
+				  }
+			      }
                             if (phase == PHASE_VX001_ASSEMBLED__GLOBAL_4)
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                    if (Unit* missile = me->GetVehicleKit()->GetPassenger(6))
-                                        missile->CastSpell(target, SPELL_ROCKET_STRIKE, true);
+				  {
+				    Position destination;
+				    target->GetPosition(&destination);
+				    if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+				      {
+					if (Unit* missile = me->GetVehicleKit()->GetPassenger(6))
+					  me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
+					c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
+				      }
+				  }
                             events.RescheduleEvent(EVENT_ROCKET_STRIKE, urand(20000, 25000), 0, phase);
                             break;
                         case EVENT_HEAT_WAVE:
@@ -1646,6 +1662,68 @@ class boss_vx_001 : public CreatureScript
         }
 };
 
+class npc_rocket_strike_target : public CreatureScript
+{
+    public:
+        npc_rocket_strike_target() : CreatureScript("npc_rocket_strike_target") {}
+
+        struct npc_rocket_strike_targetAI : public Scripted_NoMovementAI
+        {
+            npc_rocket_strike_targetAI(Creature* creature) : Scripted_NoMovementAI(creature) 
+	  {
+	    casted = false;
+	  }
+
+            void InitializeAI()
+            {
+
+            }
+
+            void Reset()
+            {
+	      casted = false;
+            }
+
+            void SpellHit(Unit* caster, SpellInfo const* spell)
+            {
+                if (!spell)
+                    return;
+		//		std::cout << "SPELL HIT : " << spell->Id << std::endl;
+		if (spell->Id == 64064)
+		  {
+		    uiBoom = 5000;
+		    casted = true;
+		  }
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+	      if (!casted)
+		return ;
+	      if (uiBoom <= diff)
+		{
+		  if (Player * player = me->SelectNearestPlayer(3))
+		    {
+		      //		      player->CastSpell(player, SPELL_ROCKET_STRIKE_DMG, true);
+		    }
+		  uiBoom = 30000;
+		  me->DespawnOrUnsummon();
+		}
+	      else
+		uiBoom -= diff;
+            }
+
+            private:
+                bool casted;
+	        uint32 uiBoom;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_rocket_strike_targetAI(creature);
+        }
+};
+
 class npc_rocket_strike : public CreatureScript
 {
     public:
@@ -1653,7 +1731,11 @@ class npc_rocket_strike : public CreatureScript
 
         struct npc_rocket_strikeAI : public Scripted_NoMovementAI
         {
-            npc_rocket_strikeAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+            npc_rocket_strikeAI(Creature* creature) : Scripted_NoMovementAI(creature) 
+	  {
+                casted = false;
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
+	  }
 
             void InitializeAI()
             {
@@ -1669,7 +1751,7 @@ class npc_rocket_strike : public CreatureScript
             {
                 if (!casted)
                 {
-                   
+		  casted = true;         
                     DoCast(me, SPELL_ROCKET_STRIKE_AURA);
                     me->DespawnOrUnsummon(10000);
                 }                
@@ -1775,6 +1857,7 @@ class boss_aerial_unit : public CreatureScript
                 events.SetPhase(PHASE_IDLE);
                 summons.DespawnAll();
                 gotMimironHardMode = false;
+		ui_checkpos = 1000;
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1794,6 +1877,7 @@ class boss_aerial_unit : public CreatureScript
             {
                 if (!caster || !spell)
                     return;
+		std::cout << "SPELL HIT : " << spell->Id << std::endl;
                 if (spell->Id == SPELL_SELF_REPAIR)
                     DoAction(DO_AERIAL_SELF_REPAIR_END);
                 if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
@@ -1810,6 +1894,7 @@ class boss_aerial_unit : public CreatureScript
                 
                 events.ScheduleEvent(EVENT_PLASMA_BALL, 1000);
                 events.ScheduleEvent(EVENT_SUMMON_JUNK_BOT, 10000, 0, PHASE_AERIAL_SOLO__GLOBAL_3);
+		me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), 380.04f);
             }
 
             void DoAction(int32 const action)
@@ -1870,6 +1955,20 @@ class boss_aerial_unit : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
+
+		if (ui_checkpos <= diff)
+		  {
+		    if (me->GetPositionZ() < 367.0f)
+		      {
+			Position destination;
+			me->GetPosition(&destination);
+			destination.m_positionZ = 380.04f;
+			me->GetMotionMaster()->MoveTakeoff(1, destination, 5.0f); // Check if MoveTakeoff is ok here, a flying unit should have a landing animation, but... just 4 the case
+		      }
+		    ui_checkpos = 1000;
+		  }
+		else
+		  ui_checkpos -= diff;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -1973,6 +2072,7 @@ class boss_aerial_unit : public CreatureScript
             private:
                 MyPhase phase;
                 bool gotMimironHardMode;
+	  uint32 ui_checkpos;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -2468,6 +2568,9 @@ void AddSC_boss_mimiron()
     new npc_mimiron_flame_trigger();
     new npc_mimiron_flame_spread();
     new npc_frost_bomb();
+
+    new npc_rocket_strike_target();
+
 
     new spell_rapid_burst();    
     

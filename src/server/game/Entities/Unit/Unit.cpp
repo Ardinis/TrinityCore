@@ -15526,7 +15526,8 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
             chance = victim->GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate, spellProto);
         }
     }
-    if (spellProto->GetFirstRankSpell()->Id == 51940)
+    //Earthliving with blessing of the eternals
+    if (victim && spellProto->GetFirstRankSpell()->Id == 51940 && victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
       {
 	if (GetSpellModOwner()->HasAura(51554))
 	  chance += 40;

@@ -4238,7 +4238,10 @@ bool Unit::HasNegativeAuraDispellable(Unit* caster)
     {
       Aura* aura = itr->second;
       AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
-      if (aura->GetSpellInfo()->Dispel == DISPEL_MAGIC && !(aurApp->IsPositive() == IsFriendlyTo(caster)))
+      if ((aura->GetSpellInfo()->Dispel == DISPEL_MAGIC
+	   || aura->GetSpellInfo()->Dispel == DISPEL_POISON
+	   || aura->GetSpellInfo()->Dispel == DISPEL_DISEASE)
+	  && !(aurApp->IsPositive() == IsFriendlyTo(caster)))
 	return true;
     }
   return false;

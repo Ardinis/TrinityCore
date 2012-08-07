@@ -1102,7 +1102,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 			  case 64694:
 			  case 65263:
 			  case 65264:
-			    if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
+			    if (caster && removeMode == AURA_REMOVE_BY_ENEMY_SPELL)
 			      caster->CastSpell(caster, *itr, true, NULL, NULL, GetCasterGUID());
 			    break;
 			  default:

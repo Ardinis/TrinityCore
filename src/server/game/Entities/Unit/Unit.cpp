@@ -4234,16 +4234,20 @@ bool Unit::HasNegativeAuraDispellable(Unit* caster)
 {
   Unit::AuraMap const& auras = GetOwnedAuras();
 
-  for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-    {
-      Aura* aura = itr->second;
-      AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
-      if ((aura->GetSpellInfo()->Dispel == DISPEL_MAGIC
-	   || aura->GetSpellInfo()->Dispel == DISPEL_POISON
-	   || aura->GetSpellInfo()->Dispel == DISPEL_DISEASE)
-	  && !(aurApp->IsPositive() == IsFriendlyTo(caster)))
-	return true;
-    }
+    for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+      {
+	if (!aurApp)
+	  {
+	    return false;
+	  }
+	Aura* aura = itr->second;
+	AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
+	if ((aura->GetSpellInfo()->Dispel == DISPEL_MAGIC
+	     || aura->GetSpellInfo()->Dispel == DISPEL_POISON
+	     || aura->GetSpellInfo()->Dispel == DISPEL_DISEASE)
+	    && !(aurApp->IsPositive() == IsFriendlyTo(caster)))
+	  return true;
+      }
   return false;
 }
 

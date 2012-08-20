@@ -584,6 +584,7 @@ class boss_sindragosa : public CreatureScript
                             }
                             else
                             {
+                                events.DelayEvents(9000, EVENT_GROUP_LAND_PHASE);
                                 me->GetMotionMaster()->MovePoint(POINT_LAND, SindragosaLandPos);
                             }
                             break;

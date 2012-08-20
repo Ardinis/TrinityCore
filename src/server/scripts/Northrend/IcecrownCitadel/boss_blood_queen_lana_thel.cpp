@@ -47,7 +47,7 @@ enum Spells
     SPELL_ESSENCE_OF_THE_BLOOD_QUEEN_PLR    = 70879,
     SPELL_FRENZIED_BLOODTHIRST              = 70877,
     SPELL_UNCONTROLLABLE_FRENZY             = 70923,
-    SPELL_PRESENCE_OF_THE_DARKFALLEN        = 71952,
+    SPELL_PRESENCE_OF_THE_DARKFALLEN        = 70995, //71952,
     SPELL_BLOOD_MIRROR_DAMAGE               = 70821,
     SPELL_BLOOD_MIRROR_VISUAL               = 71510,
     SPELL_BLOOD_MIRROR_DUMMY                = 70838,
@@ -350,6 +350,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                             {
                                 Unit* target = targets.front();
                                 DoCast(target, SPELL_VAMPIRIC_BITE);
+				me->AddAura(SPELL_PRESENCE_OF_THE_DARKFALLEN, me);
                                 Talk(SAY_VAMPIRIC_BITE);
                                 _vampires.insert(target->GetGUID());
                             }
@@ -549,9 +550,10 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 GetCaster()->RemoveAura(spellId, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
                 GetCaster()->CastSpell(GetCaster(), SPELL_ESSENCE_OF_THE_BLOOD_QUEEN_PLR, true);
                 // Presence of the Darkfallen buff on Blood-Queen
-                if (GetCaster()->GetMap()->IsHeroic())
-                    GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
-                // Shadowmourne questline
+		//  if (GetCaster()->GetMap()->IsHeroic())
+		  //		  GetCaster()->AddAura(SPELL_PRESENCE_OF_THE_DARKFALLEN, GetCaster());
+		//  GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
+		    //                // Shadowmourne questline
                 if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
                 {
                     if (Aura* aura = GetCaster()->GetAura(SPELL_GUSHING_WOUND))

@@ -580,11 +580,11 @@ class boss_sindragosa : public CreatureScript
                             {
                                 //Disallow landing while there is a bomb falling
                                 events.ScheduleEvent(EVENT_LAND, 1000);
-                                events.DelayEvents(8000, EVENT_GROUP_LAND_PHASE);
+                                events.DelayEvents(12000, EVENT_GROUP_LAND_PHASE);
                             }
                             else
                             {
-                                events.DelayEvents(9000, EVENT_GROUP_LAND_PHASE);
+                                events.DelayEvents(11000, EVENT_GROUP_LAND_PHASE);
                                 me->GetMotionMaster()->MovePoint(POINT_LAND, SindragosaLandPos);
                             }
                             break;

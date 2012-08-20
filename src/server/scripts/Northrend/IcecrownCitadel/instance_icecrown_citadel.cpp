@@ -595,6 +595,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DREAMWALKER_CACHE_10_H:
                     case GO_DREAMWALKER_CACHE_25_H:
                         uiDreamwalkerCache = go->GetGUID();
+			go->EnableCollision(false);
                         break;
                     default:
                         break;
@@ -851,6 +852,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                         HandleGameObject(BloodwingSigilGUID, state != DONE);
+			if(GameObject *go = instance->GetGameObject(BloodwingSigilGUID))
+			  {
+			    if (state != DONE)
+			      go->EnableCollision(true);
+			    else
+			      go->EnableCollision(false);
+			  }
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)

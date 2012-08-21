@@ -2476,6 +2476,177 @@ public:
 
 };
 
+#define SPELL_DISJOINTE_ESSENCE_10 71906
+#define SPELL_DISJOINTE_ESSENCE_25 71942
+#define SPELL_RAGING_SPIRIT_VISUAL          69197
+#define SPELL_RAGING_SPIRIT_VISUAL_CLONE    69198
+
+class npc_val_icc : public CreatureScript
+{
+    public:
+        npc_val_icc() : CreatureScript("npc_val_icc") { }
+
+        struct npc_val_iccAI : public ScriptedAI
+        {
+            npc_val_iccAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void Reset()
+            {
+	      mui_cast = 3000;
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+		if (mui_cast <= diff)
+		  {
+		    std::cout << "sum ???????????" << std::endl;
+		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+		      {
+			Position pos;
+			target->GetPosition(&pos);
+			if (Creature *c = me->SummonCreature(8000100, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
+			  {
+			    std::cout << "sum !!!!!!!!!!!!!" << std::endl;
+			    c->AI()->DoAction(target->getClass());
+			    //			    c->CastSpell(c, SPELL_PLAGUE_AVOIDANCE, true);
+			    c->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL, true);
+			    target->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
+			  }
+		      }
+		    mui_cast = 15000;
+		  }
+		else
+		  mui_cast -= diff;
+                DoMeleeAttackIfReady();
+            }
+
+	private:
+	  uint32 mui_cast;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_val_iccAI(creature);
+        }
+};
+
+
+class npc_ess_disjointe : public CreatureScript
+{
+    public:
+        npc_ess_disjointe() : CreatureScript("npc_ess_disjointe") { }
+
+        struct npc_ess_disjointeAI : public ScriptedAI
+        {
+            npc_ess_disjointeAI(Creature* creature) : ScriptedAI(creature)
+            {
+            }
+
+            void Reset()
+            {
+	      CastTimer = 10000;
+	      classPlayer = 0;
+	      me->SetHealth(RAID_MODE(126000, 315000, 126000, 315000)); 
+	      me->SetMaxHealth(RAID_MODE(126000, 315000, 126000, 315000)); 
+            }
+
+            void DoAction(int32 const action)
+            {
+	      classPlayer = action;
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+		
+		if (CastTimer <= diff)
+		  {
+		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+		      {
+			switch (classPlayer)
+			  {
+			  case CLASS_DRUID:
+                            if (urand(0, 1))
+			      me->CastSpell(target, RAND(RAND(71926, 9806), 71925), false);
+                            else
+			      me->CastSpell(me, RAND(57655, 71956), false);
+                            break;
+			  case CLASS_HUNTER:
+			    if (urand(0, 1))
+			      me->CastSpell(target, RAND(57635, 72258), false);
+			    else
+			      me->CastSpell(target, 72258, false);
+                            break;
+			  case CLASS_MAGE:
+                            me->CastSpell(target, 71928, false);
+			    break;
+			  case CLASS_WARLOCK:
+			    if (urand(0, 1))
+			      me->CastSpell(target, RAND(RAND(71937, 71965), 71936), true);
+			    else
+			      me->CastSpell(target, RAND(71938, 11658), true);
+			    break;
+			  case CLASS_WARRIOR:
+			    if (urand(0, 1))
+			      me->CastSpell(target, 71961, false);
+                            else
+			      me->CastSpell(me, 23719, false);
+                            break;
+			  case CLASS_PALADIN:
+                            if (urand(0, 1))
+			      me->CastSpell(target, 71953, false);
+                            else
+			      me->CastSpell(me, RAND(RAND(71930, 57767), 69207), false);
+                            break;
+			  case CLASS_PRIEST:
+                            if (urand(0,1))
+			      me->CastSpell(target, 38307, false);
+                            else
+			      me->CastSpell(me, RAND(71932, 71931), false);
+                            break;
+			  case CLASS_SHAMAN:
+			      me->CastSpell(target, 71934, false);
+                            break;
+			  case CLASS_ROGUE:
+                            if (urand(0,1))
+			      me->CastSpell(target, RAND(57640, 71955), false);
+			    else
+			      me->CastSpell(target, 71933, false);
+                            break;
+			  case CLASS_DEATH_KNIGHT:
+                            if (urand(0,1))
+			      me->CastSpell(target, RAND(71924, 71923), true);
+                            else
+			      me->CastSpell(target, RAND(71951, 57602), true);
+                            break;
+			  }
+		      }
+		    CastTimer = 3000;
+		  } else CastTimer -= diff;
+                DoMeleeAttackIfReady();
+            }
+	private :
+	  uint32 CastTimer;
+	  uint32 classPlayer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_ess_disjointeAI(creature);
+        }
+};
 
 void AddSC_icecrown_citadel()
 {
@@ -2505,4 +2676,6 @@ void AddSC_icecrown_citadel()
     new at_icc_start_frostwing_gauntlet();
     new at_icc_start_sindragosa_gauntlet();
     new npc_buff_icc();
+    new npc_val_icc();
+    new npc_ess_disjointe();
 }

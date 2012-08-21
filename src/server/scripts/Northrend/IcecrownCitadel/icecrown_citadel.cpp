@@ -700,6 +700,31 @@ class npc_frost_freeze_trap : public CreatureScript
                 }
             }
 
+	  /*	  void DoResetAggro()
+	  {
+	    Map* map = me->GetMap();
+
+	    if(map)
+	      {
+		Map::PlayerList const &lPlayers = map->GetPlayers();
+		if (!lPlayers.isEmpty())
+		  {
+		    for(Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+		      {
+			if (Player* pPlayer = itr->getSource())
+			  {
+			    if (pPlayer->isInCombat())
+			      {
+				pPlayer->CombatStop();
+				pPlayer->DeleteThreatList();
+			      }
+			  }
+		      }
+		  }
+	      }
+	      }*/
+
+
             void UpdateAI(uint32 const diff)
             {
                 _events.Update(diff);
@@ -708,6 +733,7 @@ class npc_frost_freeze_trap : public CreatureScript
                 {
                     DoCast(me, SPELL_COLDFLAME_JETS);
                     _events.ScheduleEvent(EVENT_ACTIVATE_TRAP, 22000);
+		    me->DeleteThreatList();
                 }
             }
 

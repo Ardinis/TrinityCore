@@ -242,8 +242,9 @@ class boss_blood_council_controller : public CreatureScript
                     _invocationOrder[2] = InvocationData(instance->GetData64(DATA_PRINCE_TALDARAM_GUID), SPELL_INVOCATION_OF_BLOOD_TALDARAM, EMOTE_TALDARAM_INVOCATION, 71081);
                 }
 
-		/*		if (IsHeroic())
-		  {
+		if (IsHeroic())
+                    DoCast(me, SPELL_SHADOW_PRISON_DUMMY);
+				/*		  {
 		    const Map::PlayerList &PlayerList = me->GetMap()->GetPlayers();
 		    if (PlayerList.isEmpty())
                         return;
@@ -1710,6 +1711,11 @@ class spell_blood_council_shadow_prison_damage : public SpellScriptLoader
 
             void AddExtraDamage()
             {
+	      if (GetHitUnit()->GetTypeId() != TYPEID_PLAYER)
+		{
+		  SetHitDamage(1);
+		  return;
+		}
                 if (Aura* aur = GetHitUnit()->GetAura(GetSpellInfo()->Id))
                     if (AuraEffect const* eff = aur->GetEffect(1))
                         SetHitDamage(GetHitDamage() + eff->GetAmount());

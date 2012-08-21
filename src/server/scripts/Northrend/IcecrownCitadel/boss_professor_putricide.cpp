@@ -225,6 +225,7 @@ class boss_professor_putricide : public CreatureScript
 
                 if (instance->GetBossState(DATA_ROTFACE) == DONE && instance->GetBossState(DATA_FESTERGUT) == DONE)
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+		mui_despawnAbo = 3600000;
             }
 
             void EnterCombat(Unit* who)
@@ -539,7 +540,7 @@ class boss_professor_putricide : public CreatureScript
 				//                                events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, 35000);
 				uiUnstableExperiment = 1000000;
 				events.CancelEvent(EVENT_UNSTABLE_EXPERIMENT);
-				summons.remove_if(AbominationDespawner(me));
+				mui_despawnAbo = 15000;
                                 break;
                             default:
                                 break;
@@ -593,6 +594,14 @@ class boss_professor_putricide : public CreatureScript
 			}
 		      else uiUnstableExperiment -= diff;
 		    }
+
+		if (mui_despawnAbo <= diff)
+		  {
+		    summons.remove_if(AbominationDespawner(me));
+		    mui_despawnAbo = 3600000;
+		  }
+		else
+		  mui_despawnAbo -= diff;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -747,6 +756,7 @@ class boss_professor_putricide : public CreatureScript
             bool _experimentState;
 	  uint64 uiUnstableExperiment;
 	  bool start;
+	  uint32 mui_despawnAbo;
         };
 
         CreatureAI* GetAI(Creature* creature) const

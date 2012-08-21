@@ -444,8 +444,8 @@ class boss_valithria_dreamwalker : public CreatureScript
 		if (mui_damageme <= diff)
 		  {
 		    if (IsHeroic())
-		      me->DealDamage(me, 20000);
-		    mui_damageme = 3000;
+		      me->DealDamage(me, 10000);
+		    mui_damageme = 1000;
 		  }
 		else
 		  mui_damageme -= diff;

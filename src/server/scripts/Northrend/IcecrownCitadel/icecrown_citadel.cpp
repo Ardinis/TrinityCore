@@ -2321,6 +2321,87 @@ class at_icc_start_sindragosa_gauntlet : public AreaTriggerScript
         }
 };
 
+/*
+HORDE :
+[PNJ] Garrosh Hurlenfer <Suzerain de l'offensive chanteguerre>: http://fr.wowhead.com/npc=39372
+[Buff 5%]: http://fr.wowhead.com/spell=73816#see-also-other
+[Buff 10%]: http://fr.wowhead.com/spell=73818
+[Buff 15%]: http://fr.wowhead.com/spell=73819
+[Buff 20%]: http://fr.wowhead.com/spell=73820
+[Buff 25%]: http://fr.wowhead.com/spell=73821
+[Buff 30%]: http://fr.wowhead.com/spell=73822
+ALLIANCE :
+[PNJ] Roi Varian Wrynn <Roi de Hurlevent>: http://fr.wowhead.com/npc=39371#comments
+[Buff 5%]: http://fr.wowhead.com/spell=73762
+[Buff 10%]: http://fr.wowhead.com/spell=73824
+[Buff 15%]: http://fr.wowhead.com/spell=73825
+[Buff 20%]: http://fr.wowhead.com/spell=73826
+[Buff 25%]: http://fr.wowhead.com/spell=73827
+[Buff 30%]: http://fr.wowhead.com/spell=73828
+*/
+
+class npc_buff_icc : public CreatureScript
+{
+public:
+
+  npc_buff_icc() : CreatureScript("npc_buff_icc") { }
+
+  bool OnGossipHello(Player* player, Creature* creature)
+  {
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 5 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 10 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 15 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 20 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 25 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 30 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "no buff !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
+    player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
+
+    return true;
+  }
+
+  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+  {
+    player->PlayerTalkClass->ClearMenus();
+    player->CLOSE_GOSSIP_MENU();
+    InstanceScript* instanceScript = creature->GetInstanceScript();
+    if (!instanceScript)
+      return true;
+    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
+    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
+    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
+    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
+    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
+    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
+    switch (action)
+      {
+      case GOSSIP_ACTION_INFO_DEF+1:
+	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816, true);
+	break;
+      case GOSSIP_ACTION_INFO_DEF+2:
+	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818, true);
+	break;
+      case GOSSIP_ACTION_INFO_DEF+3:
+	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819, true);
+	break;
+      case GOSSIP_ACTION_INFO_DEF+4:
+	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820, true);
+	break;
+      case GOSSIP_ACTION_INFO_DEF+5:
+	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821, true);
+	break;
+      case GOSSIP_ACTION_INFO_DEF+6:
+	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822, true);
+	break;
+      default:
+	break;
+      }
+    return true;
+  }
+
+};
+
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -2348,4 +2429,5 @@ void AddSC_icecrown_citadel()
     new at_icc_start_blood_quickening();
     new at_icc_start_frostwing_gauntlet();
 	new at_icc_start_sindragosa_gauntlet();
+	new npc_buff_icc();
 }

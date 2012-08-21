@@ -197,8 +197,15 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             void OnPlayerEnter(Player* player)
             {
-                if (!TeamInInstance)
-                    TeamInInstance = player->GetTeam();
+	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
+	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
+	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
+	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
+	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
+	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
+	      player->CastSpell(player, player->GetTeam() == ALLIANCE ? 73828 : 73822, true);
+	      if (!TeamInInstance)
+		TeamInInstance = player->GetTeam();
 
                 if (instance->IsHeroic())
                     Events.ScheduleEvent(EVENT_CHECK_HERO_ACHIEVEMENT, 10000);

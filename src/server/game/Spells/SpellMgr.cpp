@@ -3066,6 +3066,12 @@ void SpellMgr::LoadDbcDataCorrections()
             case 31344: // Howl of Azgalor
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS; // 100yards instead of 50000?!
                 break;
+            case 71465:
+	    case 71468:
+	    case 71469:
+            case 71464:
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS; // 100yards instead of 50000?!
+                break;
             case 42818: // Headless Horseman - Wisp Flight Port
             case 42821: // Headless Horseman - Wisp Flight Missile
                 spellInfo->rangeIndex = 6; // 100 yards

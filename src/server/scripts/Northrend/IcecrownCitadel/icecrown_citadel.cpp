@@ -129,7 +129,8 @@ enum Spells
     SPELL_IMPALING_SPEAR            = 71443,
     SPELL_AETHER_SHIELD             = 71463,
     SPELL_HURL_SPEAR                = 71466,
-	SPELL_DIVINE_SURGE              = 71465,
+    SPELL_DIVINE_SURGE              = 71465,
+    SPELL_ETHER_EXPLOSION = 71468,
 
     // Captain Arnath
     SPELL_DOMINATE_MIND             = 14515,
@@ -957,258 +958,292 @@ class npc_alchemist_adrianna : public CreatureScript
 
 class boss_sister_svalna : public CreatureScript
 {
-    public:
-        boss_sister_svalna() : CreatureScript("boss_sister_svalna") { }
+public:
+  boss_sister_svalna() : CreatureScript("boss_sister_svalna") { }
 
-        struct boss_sister_svalnaAI : public BossAI
-        {
-            boss_sister_svalnaAI(Creature* creature) : BossAI(creature, DATA_SISTER_SVALNA),
-                _isEventInProgress(false)
-            {
-            }
+  struct boss_sister_svalnaAI : public BossAI
+  {
+    boss_sister_svalnaAI(Creature* creature) : BossAI(creature, DATA_SISTER_SVALNA),
+					       _isEventInProgress(false)
+    {
+      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+    }
 
-            void InitializeAI()
-            {
-                if (!me->isDead())
-                    Reset();
+    void InitializeAI()
+    {
+      if (!me->isDead())
+	Reset();
+      
+      me->SetReactState(REACT_PASSIVE);
+    }
 
-                me->SetReactState(REACT_PASSIVE);
-            }
+    void Reset()
+    {
+      _Reset();
+      me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+      me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
+      _impaledguid = 0;
+      _isEventInProgress = false;
+      me->SetFlying(false);
+      me->SetUnitMovementFlags(MOVEMENTFLAG_HOVER);
+    }
 
-            void Reset()
-            {
-                _Reset();
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
-                _impaledguid = 0;
-                _isEventInProgress = false;
-            }
+    void JustDied(Unit* /*killer*/)
+    {
+      if (_impaledguid)
+	RemoveSpike();
+      
+      _JustDied();
+      Talk(SAY_SVALNA_DEATH);
 
-            void JustDied(Unit* /*killer*/)
-            {
-				if (_impaledguid)
-					RemoveSpike();
-					
-                _JustDied();
-                Talk(SAY_SVALNA_DEATH);
+      uint64 delay = 1;
+      for (uint32 i = 0; i < 4; ++i)
+	{
+	  if (Creature* crusader = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CAPTAIN_ARNATH + i)))
+	    {
+	      if (crusader->isAlive() && crusader->GetEntry() == crusader->GetCreatureData()->id)
+		{
+		  crusader->m_Events.AddEvent(new CaptainSurviveTalk(*crusader), crusader->m_Events.CalculateTime(delay));
+		  delay += 6000;
+		}
+	    }
+	}
+    }
 
-                uint64 delay = 1;
-                for (uint32 i = 0; i < 4; ++i)
-                {
-                    if (Creature* crusader = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CAPTAIN_ARNATH + i)))
-                    {
-                        if (crusader->isAlive() && crusader->GetEntry() == crusader->GetCreatureData()->id)
-                        {
-                            crusader->m_Events.AddEvent(new CaptainSurviveTalk(*crusader), crusader->m_Events.CalculateTime(delay));
-                            delay += 6000;
-                        }
-                    }
-                }
-            }
+    void EnterCombat(Unit* /*attacker*/)
+    {
+      me->SetFlying(false);
+      _EnterCombat();
+      if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
+	crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
+      events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);	
+      events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 30000));
+    }
 
-            void EnterCombat(Unit* /*attacker*/)
-            {
-                _EnterCombat();
-                if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
-                    crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
-                events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);	
-                events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 30000));
-            }
+    void KilledUnit(Unit* victim)
+    {
+      switch (victim->GetTypeId())
+	{
+	case TYPEID_PLAYER:
+	  if (victim->GetGUID() == _impaledguid)
+	    _impaledguid = 0;
+	  Talk(SAY_SVALNA_KILL);
+	  break;
+	case TYPEID_UNIT:
+	  switch (victim->GetEntry())
+	    {
+	    case NPC_CAPTAIN_ARNATH:
+	    case NPC_CAPTAIN_BRANDON:
+	    case NPC_CAPTAIN_GRONDEL:
+	    case NPC_CAPTAIN_RUPERT:
+	      Talk(SAY_SVALNA_KILL_CAPTAIN);
+	      break;
+	    default:
+	      break;
+	    }
+	  break;
+	default:
+	  break;
+	}
+    }
+    
+    void JustReachedHome()
+    {
+      _JustReachedHome();
+      me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
+      me->SetReactState(REACT_PASSIVE);
+      me->SetFlying(false);
+    }
 
-            void KilledUnit(Unit* victim)
-            {
-                switch (victim->GetTypeId())
-                {
-                    case TYPEID_PLAYER:
-						if (victim->GetGUID() == _impaledguid)
-							_impaledguid = 0;
-                        Talk(SAY_SVALNA_KILL);
-                        break;
-                    case TYPEID_UNIT:
-                        switch (victim->GetEntry())
-                        {
-                            case NPC_CAPTAIN_ARNATH:
-                            case NPC_CAPTAIN_BRANDON:
-                            case NPC_CAPTAIN_GRONDEL:
-                            case NPC_CAPTAIN_RUPERT:
-                                Talk(SAY_SVALNA_KILL_CAPTAIN);
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+    void DoAction(int32 const action)
+    {
+      switch (action)
+	{
+	case ACTION_KILL_CAPTAIN:
+	  me->CastCustomSpell(SPELL_CARESS_OF_DEATH, SPELLVALUE_MAX_TARGETS, 1, me, true);
+	  break;
+	case ACTION_START_GAUNTLET:
+	  me->setActive(true);
+	  _isEventInProgress = true;
+	  me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+	  events.ScheduleEvent(EVENT_SVALNA_START, 25000);
+	  break;
+	case ACTION_RESURRECT_CAPTAINS:
+	  events.ScheduleEvent(EVENT_SVALNA_RESURRECT, 7000);
+	  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+	  break;
+	case ACTION_CAPTAIN_DIES:
+	  Talk(SAY_SVALNA_CAPTAIN_DEATH);
+	  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+	  break;
+	case ACTION_RESET_EVENT:
+	  me->setActive(false);
+	  Reset();
+	  break;
+	default:
+	  break;
+	}
+    }
 
-            void JustReachedHome()
-            {
-                _JustReachedHome();
-				me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlying(false);
-            }
-
-            void DoAction(int32 const action)
-            {
-                switch (action)
-                {
-                    case ACTION_KILL_CAPTAIN:
-                        me->CastCustomSpell(SPELL_CARESS_OF_DEATH, SPELLVALUE_MAX_TARGETS, 1, me, true);
-                        break;
-                    case ACTION_START_GAUNTLET:
-                        me->setActive(true);
-                        _isEventInProgress = true;
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                        events.ScheduleEvent(EVENT_SVALNA_START, 25000);
-                        break;
-                    case ACTION_RESURRECT_CAPTAINS:
-                        events.ScheduleEvent(EVENT_SVALNA_RESURRECT, 7000);
-						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                        break;
-                    case ACTION_CAPTAIN_DIES:
-                        Talk(SAY_SVALNA_CAPTAIN_DEATH);
-						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                        break;
-                    case ACTION_RESET_EVENT:
-                        me->setActive(false);
-                        Reset();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            void SpellHit(Unit* caster, SpellInfo const* spell)
-            {
-                if (spell->Id == SPELL_HURL_SPEAR && me->HasAura(SPELL_AETHER_SHIELD))
-                {
-                    me->RemoveAurasDueToSpell(SPELL_AETHER_SHIELD);
-                    Talk(EMOTE_SVALNA_BROKEN_SHIELD, caster->GetGUID());
-                }
-            }
-
-            void MovementInform(uint32 type, uint32 id)
-            {
-                if (type != EFFECT_MOTION_TYPE || id != POINT_LAND)
-                    return;
-
-                _isEventInProgress = false;
-                me->setActive(false);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                me->SetFlying(false);
-            }
-
-            void RemoveSpike()
-            {
-				if (!_impaledguid)
-					return;
-
-				if (Player* _impaled = ObjectAccessor::GetPlayer(*me , _impaledguid))
-				{
-					_impaled->RemoveAurasDueToSpell(VEHICLE_SPELL_RIDE_HARDCODED);
-					_impaled->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR);
-					_impaledguid = 0;
-				}
-            }			
+    void SpellHit(Unit* caster, SpellInfo const* spell)
+    {
+      if (spell->Id == SPELL_HURL_SPEAR && me->HasAura(SPELL_AETHER_SHIELD))
+	{
+	  me->RemoveAurasDueToSpell(SPELL_AETHER_SHIELD);
+	  Talk(EMOTE_SVALNA_BROKEN_SHIELD, caster->GetGUID());
+	  DoCastAOE(SPELL_ETHER_EXPLOSION);
+	}
+    }
+    
+    void MovementInform(uint32 type, uint32 id)
+    {
+      if (type != EFFECT_MOTION_TYPE || id != POINT_LAND)
+	return;
+      
+      _isEventInProgress = false;
+      me->setActive(false);
+      me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+      me->SetFlying(false);
+    }
+    
+    void RemoveSpike()
+    {
+      if (!_impaledguid)
+	return;
+      
+      if (Player* _impaled = ObjectAccessor::GetPlayer(*me , _impaledguid))
+	{
+	  _impaled->RemoveAurasDueToSpell(VEHICLE_SPELL_RIDE_HARDCODED);
+	  _impaled->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR);
+	  _impaledguid = 0;
+	}
+    }			
 			
-            void SpellHitTarget(Unit* target, SpellInfo const* spell)
-            {
-                switch (spell->Id)
-                {
-                    case SPELL_IMPALING_SPEAR_KILL:
-                        me->Kill(target);
-                        break;
-                    case SPELL_IMPALING_SPEAR:
-                        if (TempSummon* summon = target->SummonCreature(NPC_IMPALING_SPEAR, *target))
-                        {
-                            Talk(EMOTE_SVALNA_IMPALE, target->GetGUID());
-                            summon->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, target, false);
-                            //summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
-                            _impaledguid = target->GetGUID();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+    void SpellHitTarget(Unit* target, SpellInfo const* spell)
+    {
+      switch (spell->Id)
+	{
+	case SPELL_IMPALING_SPEAR_KILL:
+	  me->Kill(target);
+	  break;
+	case SPELL_IMPALING_SPEAR:
+	  if (TempSummon* summon = target->SummonCreature(NPC_IMPALING_SPEAR, *target))
+	    {
+	      Talk(EMOTE_SVALNA_IMPALE, target->GetGUID());
+	      summon->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, target, false);
+	      //summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK1 | UNIT_FLAG2_ALLOW_ENEMY_INTERACT);
+	      _impaledguid = target->GetGUID();
+	    }
+	  break;
+	default:
+	  break;
+	}
+    }
 
-            void UpdateAI(uint32 const diff)
-            {
-                if (!UpdateVictim() && !_isEventInProgress)
-                    return;
+    void UpdateAI(uint32 const diff)
+    {
+      if (!UpdateVictim() && !_isEventInProgress)
+	return;
+      
+      events.Update(diff);
+      
+      if (me->HasUnitState(UNIT_STATE_CASTING))
+	return;
 
-                events.Update(diff);
+      if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))	
+	RemoveSpike();
+      
+      while (uint32 eventId = events.ExecuteEvent())
+	{
+	  switch (eventId)
+	    {
+	    case EVENT_SVALNA_START:
+	      Talk(SAY_SVALNA_EVENT_START);
+	      break;
+	    case EVENT_SVALNA_RESURRECT:
+	      me->setActive(false);
+	      me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_NPC);
+	      me->SetFlying(false);
+	      me->SetPosition(4356.33f, 2484.21f, 368.43f, 1.54f);
+	      Talk(SAY_SVALNA_RESURRECT_CAPTAINS);
+	      me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
+	      break;
+	    case EVENT_SVALNA_COMBAT:
+	      me->SetFlying(false);
+	      me->SetReactState(REACT_DEFENSIVE);
+	      DoCast(me, SPELL_DIVINE_SURGE, true);							
+	      Talk(SAY_SVALNA_AGGRO);
+	      break;
+	    case EVENT_IMPALING_SPEAR:
+	      if (_impaledguid)
+		break;
+	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_IMPALING_SPEAR))
+		{
+		  if (Creature* _oldspike = GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))
+		    {
+		      _oldspike->DespawnOrUnsummon();
+		      RemoveSpike();
+		    }
+		  DoCast(target, SPELL_IMPALING_SPEAR);
+		  events.ScheduleEvent(EVENT_AETHER_SHIELD, 5000);
+		}
+	      events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
+	      break;
+	    case EVENT_AETHER_SHIELD:
+	      DoCast(me, SPELL_AETHER_SHIELD, true);
+	      break;
+	    default:
+	      break;
+	    }
+	}
+      
+      DoMeleeAttackIfReady();
+    }
+    
+  private:
+    uint64 _impaledguid;
+    bool _isEventInProgress;
+  };
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-				if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))	
-					RemoveSpike();
-				
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_SVALNA_START:
-                            Talk(SAY_SVALNA_EVENT_START);
-                            break;
-                        case EVENT_SVALNA_RESURRECT:
-                            me->setActive(false);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_NPC);
-                            me->SetFlying(false);
-                            me->SetPosition(4356.33f, 2484.21f, 368.43f, 1.54f);
-                            Talk(SAY_SVALNA_RESURRECT_CAPTAINS);
-                            me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
-                            break;
-                        case EVENT_SVALNA_COMBAT:
-							me->SetFlying(false);
-                            me->SetReactState(REACT_DEFENSIVE);
-							DoCast(me, SPELL_DIVINE_SURGE, true);							
-                            Talk(SAY_SVALNA_AGGRO);
-                            break;
-                        case EVENT_IMPALING_SPEAR:
-							if (_impaledguid)
-								break;
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_IMPALING_SPEAR))
-                            {
-                                if (Creature* _oldspike = GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))
-								{
-									_oldspike->DespawnOrUnsummon();
-									RemoveSpike();
-								}
-                                DoCast(target, SPELL_IMPALING_SPEAR);
-								events.ScheduleEvent(EVENT_AETHER_SHIELD, 5000);
-                            }
-                            events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(40000, 50000));
-                            break;
-						case EVENT_AETHER_SHIELD:
-							DoCast(me, SPELL_AETHER_SHIELD, true);
-							break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-        private:
-			uint64 _impaledguid;
-            bool _isEventInProgress;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetIcecrownCitadelAI<boss_sister_svalnaAI>(creature);
-        }
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return GetIcecrownCitadelAI<boss_sister_svalnaAI>(creature);
+  }
 };
 
 class npc_crok_scourgebane : public CreatureScript
 {
     public:
         npc_crok_scourgebane() : CreatureScript("npc_crok_scourgebane") { }
+
+
+  bool OnGossipHello(Player* player, Creature* creature)
+  {
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "On y va ?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+    player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
+
+    return true;
+  }
+
+  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+  {
+    player->PlayerTalkClass->ClearMenus();
+    player->CLOSE_GOSSIP_MENU();
+    InstanceScript* instanceScript = creature->GetInstanceScript();
+    if (!instanceScript)
+      return true;
+    switch (action)
+      {
+      case GOSSIP_ACTION_INFO_DEF+1:
+	creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	creature->AI()->DoAction(ACTION_START_GAUNTLET);
+	break;
+      default:
+	break;
+      }
+    return true;
+  }
 
         struct npc_crok_scourgebaneAI : public npc_escortAI
         {
@@ -1221,6 +1256,7 @@ class npc_crok_scourgebane : public CreatureScript
                 _isEventActive = false;
                 _isEventDone = _instance->GetBossState(DATA_SISTER_SVALNA) == DONE;
                 _didUnderTenPercentText = false;
+		me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
 
             void Reset()
@@ -1598,6 +1634,8 @@ struct npc_argent_captainAI : public ScriptedAI
                 Talk(SAY_CAPTAIN_RESURRECTED);
                 me->UpdateEntry(newEntry, Instance->GetData(DATA_TEAM_IN_INSTANCE), me->GetCreatureData());
                 DoCast(me, SPELL_UNDEATH, true);
+		Position pos = {4356.48f, 2489.20f, 359.5f};
+		me->GetMotionMaster()->MovePoint(POINT_LAND, pos);
             }
         }
 
@@ -1918,6 +1956,17 @@ class npc_impaling_spear : public CreatureScript
 {
     public:
         npc_impaling_spear() : CreatureScript("npc_impaling_spear") { }
+
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+      if (Player *pl2 = creature->FindNearestPlayer(2))
+	if (pl2->GetGUID() == player->GetGUID())
+	  return false;
+      player->AddItem(50307, 1);
+      creature->DespawnOrUnsummon(100);
+      return true;
+    }
 
         struct npc_impaling_spearAI : public CreatureAI
         {
@@ -2326,9 +2375,9 @@ class at_icc_start_frostwing_gauntlet : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-            if (InstanceScript* instance = player->GetInstanceScript())
+	  /*            if (InstanceScript* instance = player->GetInstanceScript())
                 if (Creature* crok = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_CROK_SCOURGEBANE)))
-                    crok->AI()->DoAction(ACTION_START_GAUNTLET);
+		crok->AI()->DoAction(ACTION_START_GAUNTLET);*/
             return true;
         }
 };
@@ -2435,7 +2484,7 @@ void AddSC_icecrown_citadel()
     new npc_frost_freeze_trap();
     new npc_alchemist_adrianna();
     new boss_sister_svalna();
-	new npc_sindragosas_ward();
+    new npc_sindragosas_ward();
     new npc_crok_scourgebane();
     new npc_captain_arnath();
     new npc_captain_brandon();
@@ -2454,6 +2503,6 @@ void AddSC_icecrown_citadel()
     new at_icc_shutdown_traps();
     new at_icc_start_blood_quickening();
     new at_icc_start_frostwing_gauntlet();
-	new at_icc_start_sindragosa_gauntlet();
-	new npc_buff_icc();
+    new at_icc_start_sindragosa_gauntlet();
+    new npc_buff_icc();
 }

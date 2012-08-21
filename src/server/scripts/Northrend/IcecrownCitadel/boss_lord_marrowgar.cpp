@@ -389,12 +389,13 @@ class npc_bone_spike : public CreatureScript
 
         struct npc_bone_spikeAI : public Scripted_NoMovementAI
         {
-            npc_bone_spikeAI(Creature* creature) : Scripted_NoMovementAI(creature), _hasTrappedUnit(false)
-            {
-                ASSERT(creature->GetVehicleKit());
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-            }
+	  npc_bone_spikeAI(Creature* creature) : Scripted_NoMovementAI(creature), _hasTrappedUnit(false), _instance(creature->GetInstanceScript())
+	  {
+	    ASSERT(creature->GetVehicleKit());
+	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+	    ui_des = 2000;
+	  }
 
             void JustDied(Unit* /*killer*/)
             {
@@ -417,10 +418,26 @@ class npc_bone_spike : public CreatureScript
                 summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
                 _events.ScheduleEvent(EVENT_FAIL_BONED, 8000);
                 _hasTrappedUnit = true;
+		ui_des = 2000;
             }
 
             void UpdateAI(uint32 const diff)
             {
+	      if (ui_des <= diff)
+		{
+		  if (_instance->GetBossState(DATA_LORD_MARROWGAR) != IN_PROGRESS)
+		    {
+		      if (_hasTrappedUnit)
+			if (TempSummon* summ = me->ToTempSummon())
+			  if (Unit* trapped = summ->GetSummoner())
+			    trapped->RemoveAurasDueToSpell(SPELL_IMPALED);
+		      me->DespawnOrUnsummon();
+		    }
+		  ui_des = 1000;
+		}
+	      else
+		ui_des -= diff;
+
                 if (!_hasTrappedUnit)
                     return;
 
@@ -434,6 +451,8 @@ class npc_bone_spike : public CreatureScript
         private:
             EventMap _events;
             bool _hasTrappedUnit;
+	  uint32 ui_des;
+	  InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const

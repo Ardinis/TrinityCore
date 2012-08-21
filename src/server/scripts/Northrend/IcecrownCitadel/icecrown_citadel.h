@@ -121,6 +121,8 @@ enum DataTypes
     DATA_SAURFANG_ALLIANCE_SELLER   = 53,
     DATA_SAURFANG_ALLIANCE_SMITH    = 54,	
 
+    DATA_TEMPETE = 55,
+
     // Gunship: Datos para la pelea
     // La numeracion es muy arriba por seguridad
     DATA_FIRST_SQUAD_STATE                  = 100,

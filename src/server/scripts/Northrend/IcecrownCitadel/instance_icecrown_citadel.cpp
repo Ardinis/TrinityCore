@@ -184,6 +184,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 MuradinBronzebeardNotVisualGUID = 0;
                 GbBattleMageGUID = 0;
                 isPrepared = false;
+		tempete = 0;
             }
 
             void FillInitialWorldStates(WorldPacket& data)
@@ -661,6 +662,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return BloodQuickeningState;
                     case DATA_HEROIC_ATTEMPTS:
                         return HeroicAttempts;
+		case DATA_TEMPETE:
+		  return tempete;
                     default:
                         break;
                 }
@@ -1073,6 +1076,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                         SaveToDB();
                         break;
                     }
+		case DATA_TEMPETE :
+		  tempete = data;
+		  break;
                     default:
                         break;
                 }
@@ -1730,6 +1736,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 GBSkybreakerGUID;
             uint64 GBOgrimsHammerGUID;
             bool isPrepared;
+
+	  uint32 tempete;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

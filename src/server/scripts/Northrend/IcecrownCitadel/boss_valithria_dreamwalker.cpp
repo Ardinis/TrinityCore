@@ -310,6 +310,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 _over75PercentTalkDone = false;
                 _justDied = false;
                 _done = false;
+		mui_damageme = 3000;
             }
 
 	  void JustDied(Unit* /*killer*/)
@@ -366,7 +367,7 @@ class boss_valithria_dreamwalker : public CreatureScript
 		  damage = 0;
 		  return ;
 		}
-	      std::cout << attacker->GetEntry() << std::endl;
+	      //	      std::cout << attacker->GetEntry() << std::endl;
                 if (me->HealthBelowPctDamaged(25, damage))
                 {
                     if (!_under25PercentTalkDone)
@@ -440,6 +441,15 @@ class boss_valithria_dreamwalker : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
+		if (mui_damageme <= diff)
+		  {
+		    if (IsHeroic())
+		      me->DealDamage(me, 20000);
+		    mui_damageme = 3000;
+		  }
+		else
+		  mui_damageme -= diff;
+
                 while (uint32 eventId = _events.ExecuteEvent())
                 {
                     switch (eventId)
@@ -484,6 +494,7 @@ class boss_valithria_dreamwalker : public CreatureScript
             bool _over75PercentTalkDone;
             bool _justDied;
             bool _done;
+	  uint32 mui_damageme;
         };
 
         CreatureAI* GetAI(Creature* creature) const

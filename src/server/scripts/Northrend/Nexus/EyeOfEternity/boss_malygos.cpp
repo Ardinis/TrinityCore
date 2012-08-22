@@ -1274,6 +1274,7 @@ public:
              else
                 me->SetInCombatWithZone();
 	    units = NULL;
+	    lostUnits = false;
             _instance = creature->GetInstanceScript();
         }
 
@@ -1346,7 +1347,15 @@ public:
 
         void UpdateEscortAI(const uint32 /*diff*/)
         {
+	  if (lostUnits)
+	    return;
             // we dont do melee damage!
+	  if (units)
+	    if (!units->isAlive())
+	      {
+		lostUnits = true;
+		SetEscortPaused(true);
+	      }
         }
 
         void WaypointReached(uint32 /*i*/)
@@ -1357,8 +1366,7 @@ public:
     private:
       InstanceScript* _instance;
       Unit *units;
-
-
+      bool lostUnits;
     };
 };
 

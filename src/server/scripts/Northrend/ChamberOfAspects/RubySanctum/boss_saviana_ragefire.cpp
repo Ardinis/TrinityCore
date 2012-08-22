@@ -173,6 +173,16 @@ public:
             DoScriptText(-1666403,me);
         }
 
+      void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+      {
+	switch (spell->Id)
+	  {
+	  case 19801 : //tir tranquilisant
+	    me->RemoveAurasDueToSpell(SPELL_ENRAGE);
+	    break;
+	  }
+      }
+
         void doBeacon(bool command = false)
         {
             if (command)

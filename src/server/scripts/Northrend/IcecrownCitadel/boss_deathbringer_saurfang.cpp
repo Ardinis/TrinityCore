@@ -715,6 +715,11 @@ class npc_blood_beast : public CreatureScript
 				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
             }
 
+	  void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
+	  {
+	    //place for fix blood beast damage
+	  }
+
             void IsSummonedBy(Unit* summoner)
             {
             }

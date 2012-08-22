@@ -1889,6 +1889,7 @@ class npc_gunship_skybreaker : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->SetDisplayId(11686);
+		me->SetMaxHealth(RAID_MODE(690000, 1380000, 793500, 1586997));
 		me->SetHealth(RAID_MODE(690000, 1380000, 793500, 1586997));
             }
 
@@ -1948,6 +1949,7 @@ class npc_gunship_orgrimmar : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 me->SetDisplayId(11686);
+		me->SetMaxHealth(RAID_MODE(690000, 1380000, 793500, 1586997));
 		me->SetHealth(RAID_MODE(690000, 1380000, 793500, 1586997));
             }
 

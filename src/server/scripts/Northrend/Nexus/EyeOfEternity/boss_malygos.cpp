@@ -1273,9 +1273,10 @@ public:
                 me->SetReactState(REACT_PASSIVE);
              else
                 me->SetInCombatWithZone();
-
+	    units = NULL;
             _instance = creature->GetInstanceScript();
         }
+
 
         void PassengerBoarded(Unit* unit, int8 /*seat*/, bool apply)
         {
@@ -1283,12 +1284,14 @@ public:
             {
                 if (unit->GetTypeId() == TYPEID_UNIT)
                 {
+		  units = unit;
                     me->setFaction(FACTION_HOSTILE);
                     unit->ToCreature()->SetInCombatWithZone();
                 }
             }
             else
             {
+	      units = NULL;
                 // Error found: This is not called if the passenger is a player
 
                 if (unit->GetTypeId() == TYPEID_UNIT)
@@ -1348,10 +1351,14 @@ public:
 
         void WaypointReached(uint32 /*i*/)
         {
+
         }
 
     private:
-        InstanceScript* _instance;
+      InstanceScript* _instance;
+      Unit *units;
+
+
     };
 };
 

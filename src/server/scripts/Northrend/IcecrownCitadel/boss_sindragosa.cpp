@@ -511,15 +511,15 @@ class boss_sindragosa : public CreatureScript
                             {
                                 if(target)
                                 {
-									DoScriptText(EMOTE_WARN_FROZEN_ORB, me, target);
-									DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
+				  DoScriptText(EMOTE_WARN_FROZEN_ORB, me, target);
+				  DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
                                 }
                             }
                             events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));
                             break;
                         case EVENT_FROST_BOMB:
                         {
-			  if (_bombes < 2)
+			  if (_bombes <= 2)
 			    {
 			      float myX, myY, myZ;
 			      me->GetPosition(myX, myY, myZ);
@@ -617,7 +617,6 @@ class boss_sindragosa : public CreatureScript
                             break;
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
 

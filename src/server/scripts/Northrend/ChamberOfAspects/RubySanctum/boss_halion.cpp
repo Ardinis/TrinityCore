@@ -985,7 +985,7 @@ public:
                     }
                 }
 
-                instance->SetData(TYPE_COUNTER, 50 + (int)Buff[buffnum].diff);
+                instance->SetData(TYPE_COUNTER, 50 + (int)Buff[buffnum].diff * 5);
                 m_uiCorporealityTimer = 5*IN_MILLISECONDS;
             } else m_uiCorporealityTimer -= diff;
         }
@@ -1266,6 +1266,7 @@ public:
         {
 //          me->SetDisplayId(10045);
       //    me->SetDisplayId(11686);
+	    me->SetFlying(false);
             me->SetRespawnDelay(7*DAY);
             SetCombatMovement(false);
             me->SetPhaseMask(32, true);
@@ -1274,6 +1275,9 @@ public:
             MovementStarted = false;
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
             me->SetSpeed(MOVE_RUN, 6.0f, true);
+            me->SetSpeed(MOVE_WALK, 6.0f, true);
+	    me->SetFlying(false);
+	    //            me->SetSpeed(MOVE_FLY, 6.0f, true);
         }
 
         void AttackStart(Unit *pWho)

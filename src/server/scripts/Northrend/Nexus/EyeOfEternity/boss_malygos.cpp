@@ -317,6 +317,8 @@ public:
 
             if (instance)
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+
+	    isc = false;
         }
 
         uint32 GetData(uint32 data)
@@ -835,7 +837,7 @@ public:
             //    StartPhaseTwo();
 
             // the boss is handling vortex
-            if (me->HasAura(SPELL_VORTEX_2))
+	    if (me->HasAura(SPELL_VORTEX_2))
 	      {
 		  //std::cout << "me->HasAura(SPELL_VORTEX_2)" << std::endl;
 
@@ -905,14 +907,18 @@ public:
                         break;
                     case EVENT_SURGE_POWER:
 		  //std::cout << "EVENT_SURGE_POWER" << std::endl;
-
 			Talk(SAY_DEEP_BREATH_WARNING);
                         me->GetMotionMaster()->MovePoint(MOVE_DEEP_BREATH_EXECUTION, MalygosPositions[0].GetPositionX(), MalygosPositions[0].GetPositionY(), MalygosPositions[0].GetPositionZ());
                         _delayedMovement = false;
 			SendDeepBreathCast();
 			CastSpellToTrigger(SPELL_SURGE_OF_POWER_BREATH, true, true);
 			CastSurgeOfPower();
-                        events.RescheduleEvent(EVENT_SUMMON_ARCANE, urand(14, 16)*IN_MILLISECONDS, 0, PHASE_TWO);
+                        events.RescheduleEvent(EVENT_SURGE_POWER, urand(5, 6)*IN_MILLISECONDS, 0, PHASE_TWO);
+			if (!isc)
+			  {
+			    events.RescheduleEvent(EVENT_SUMMON_ARCANE, urand(8, 16)*IN_MILLISECONDS, 0, PHASE_TWO);
+			    isc = true;
+			  }
                         break;
                     case EVENT_SUMMON_ARCANE:
 		      //Talk(SAY_ANTI_MAGIC_SHELL); // does he really say that? I haven't seen it on youtube
@@ -998,19 +1004,19 @@ public:
         }
 
     private:
-        uint8 _phase;
-        uint32 _bersekerTimer;
-        uint8 _currentPos; // used for phase 2 rotation...
-        bool _delayedMovement; // used in phase 2.
-        uint32 _delayedMovementTimer; // used in phase 2
-        uint8 _summonDeaths;
-        Position _homePosition; // it can get bugged because core thinks we are pathing
-        bool _mustTalk;
-        bool _cannotMove;
+      uint8 _phase;
+      uint32 _bersekerTimer;
+      uint8 _currentPos; // used for phase 2 rotation...
+      bool _delayedMovement; // used in phase 2.
+      uint32 _delayedMovementTimer; // used in phase 2
+      uint8 _summonDeaths;
+      Position _homePosition; // it can get bugged because core thinks we are pathing
+      bool _mustTalk;
+      bool _cannotMove;
       uint32 introTimer;
-        uint64 introPortalGUID;
+      uint64 introPortalGUID;
       uint32 m_uiWipeCheckTimer;
-
+      bool isc;
     };
 };
 

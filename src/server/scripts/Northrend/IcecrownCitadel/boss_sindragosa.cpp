@@ -478,6 +478,9 @@ class boss_sindragosa : public CreatureScript
                         case EVENT_BLISTERING_COLD:
                             Talk(EMOTE_WARN_BLISTERING_COLD);
                             DoCast(me, SPELL_BLISTERING_COLD);
+			    me->SetReactState(REACT_AGGRESSIVE);
+			    if (Unit* target = me->getVictim())
+			      DoStartMovement(target);
                             events.ScheduleEvent(EVENT_BLISTERING_COLD_YELL, 5000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_BLISTERING_COLD_YELL:

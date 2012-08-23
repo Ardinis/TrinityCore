@@ -176,7 +176,11 @@ public:
 
             if (m_uiImtimidatingTimer <= diff)
             {
+	      if (Unit *un = me->getVictim())
+		un->ApplySpellImmune(0, IMMUNITY_ID, SPELL_IMTIMIDATING_ROAR, true);
                 DoCast(SPELL_IMTIMIDATING_ROAR);
+	      if (Unit *un = me->getVictim())
+		un->ApplySpellImmune(0, IMMUNITY_ID, SPELL_IMTIMIDATING_ROAR, false);
                 m_uiImtimidatingTimer = urand(15*IN_MILLISECONDS,25*IN_MILLISECONDS);
             } else m_uiImtimidatingTimer -= diff;
 

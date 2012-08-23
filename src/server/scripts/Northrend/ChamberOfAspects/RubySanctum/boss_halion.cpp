@@ -183,6 +183,9 @@ public:
                 pGoPortal->Delete();
             if (GameObject* pGoPortal = me->FindNearestGameObject(GO_HALION_PORTAL_3, 50.0f))
                 pGoPortal->Delete();
+	    instance->SetData(DATA_HALION_HEALTH_TOTAL_INIT, me->GetMaxHealth());
+	    instance->SetData(DATA_HALION_REAL_DAMAGED_INIT, 0);
+	    instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_INIT, 0);
         }
 
         void setStage(uint8 phase)
@@ -308,6 +311,18 @@ public:
             me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MovePoint(id, SpawnLoc[id].x, SpawnLoc[id].y, SpawnLoc[id].z);
             MovementStarted = true;
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+	  instance->SetData(DATA_HALION_HEALTH_TOTAL, damage);
+	  instance->SetData(DATA_HALION_REAL_DAMAGED_TOTAL, damage);
+	  //instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_TOTAL, damage);
+	  if (me->GetHealth() > 1)
+	    {
+	      me->SetHealth(instance->GetData(DATA_HALION_HEALTH_TOTAL));
+	      damage = 0;
+	    }
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -608,6 +623,19 @@ public:
                 DoCast(me, SPELL_TWILIGHT_ENTER);
         }
 
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+	  instance->SetData(DATA_HALION_HEALTH_TOTAL, damage);
+	  //instance->SetData(DATA_HALION_REAL_DAMAGED_TOTAL, damage);
+	  instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_TOTAL, damage);
+	  if (me->GetHealth() > 1)
+	    {
+	      me->SetHealth(instance->GetData(DATA_HALION_HEALTH_TOTAL));
+	      damage = 0;
+	    }
+        }
+
+
         void setStage(uint8 phase)
         {
             stage = phase;
@@ -767,8 +795,12 @@ public:
                         }
                     } else m_uiSoulCunsumTimer -= uiDiff;
 
-                    if ( HealthBelowPct(51) )
+                    if (HealthBelowPct(51))
+		      {
+			instance->SetData(DATA_HALION_REAL_DAMAGED_INIT, 0);
+			instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_INIT, 0);
                         setStage(2);
+		      }
                     break;
 
                 case 2:           //To two realms
@@ -951,20 +983,16 @@ public:
                 pHalionReal = me->GetMap()->GetCreature(instance->GetData64(NPC_HALION_REAL));
                 pHalionTwilight = me->GetMap()->GetCreature(instance->GetData64(NPC_HALION_TWILIGHT));
 
-                float p_RealHP = (pHalionReal && pHalionReal->isAlive()) ? pHalionReal->GetHealthPct() : 100.0f;
-                float p_TwilightHP = (pHalionTwilight && pHalionTwilight->isAlive()) ? pHalionTwilight->GetHealthPct() : 100.0f;
 
-                float m_diff = (p_RealHP - p_TwilightHP);
-
-                uint8 buffnum;
-
-                if (m_diff <= Buff[0].diff) buffnum = 0;
-                else for (uint8 i = 0; i < 11; i++)
-                    if (m_diff >= Buff[i].diff)
-                        buffnum = i+1;
-                    else
-                    break;
-
+		uint32 realDamage = instance->GetData(DATA_HALION_REAL_DAMAGED_TOTAL);
+		uint32 twilightDamage = instance->GetData(DATA_HALION_TWILIGHT_DAMAGED_TOTAL);
+                double buffnums = ((double)realDamage - (double)twilightDamage) * 0.00001;
+		int buffnum = (int)buffnums;
+		if (buffnum < -10)
+		  buffnum = -10;
+		if (buffnum > 10)
+		  buffnum = 11;
+		buffnum += 10 - 1;
                 if (!m_lastBuffTwilight || m_lastBuffTwilight != Buff[buffnum].twilight)
                 {
                     if (pHalionReal && pHalionReal->isAlive())
@@ -984,8 +1012,8 @@ public:
                         m_lastBuffReal = Buff[buffnum].real;
                     }
                 }
-
-                instance->SetData(TYPE_COUNTER, 50 + (int)Buff[buffnum].diff * 5);
+		double b = buffnums * 10;
+                instance->SetData(TYPE_COUNTER, 50 + b);
                 m_uiCorporealityTimer = 5*IN_MILLISECONDS;
             } else m_uiCorporealityTimer -= diff;
         }

@@ -347,10 +347,11 @@ class boss_xt002 : public CreatureScript
                             SetPhaseOne();
                             break;
                         case EVENT_SPAWN_ADDS:
-                            DoScriptText(SAY_SUMMON, me);
+			  DoScriptText(SAY_SUMMON, me);
 
                             // Spawn Pummeller
-                            me->SummonCreature(NPC_XM024_PUMMELLER, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);                         
+                            me->SummonCreature(NPC_XM024_PUMMELLER, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+
 
                             // Spawn 4 Scrapbots
                             for (uint8 n = 0; n < 4; n++)
@@ -365,8 +366,8 @@ class boss_xt002 : public CreatureScript
                             // Spawn 2 Bombs
                             for (uint8 n = 0; n < 2; n++)
                                 me->SummonCreature(NPC_XE321_BOOMBOT, spawnLocations[rand() % 4], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-
-                            events.ScheduleEvent(EVENT_SPAWN_ADDS, 22*IN_MILLISECONDS, 0, PHASE_TWO);
+			  
+                            events.ScheduleEvent(EVENT_SPAWN_ADDS, 12*IN_MILLISECONDS, 0, PHASE_TWO);
                             break;
                     }
                 }
@@ -499,7 +500,7 @@ class mob_xt002_heart : public CreatureScript
                 {
                     xt002->AI()->SetData(DATA_TRANSFERED_HEALTH, me->GetMaxHealth());
                     xt002->AI()->DoAction(ACTION_ENTER_HARD_MODE);
-                    damage = 0;
+		    //                    damage = 0;
                 }
             }
 
@@ -863,8 +864,6 @@ class spell_xt002_searing_light_spawn_life_spark : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_LIFE_SPARK))
-                    return false;
                 return true;
             }
 
@@ -873,7 +872,7 @@ class spell_xt002_searing_light_spawn_life_spark : public SpellScriptLoader
                 if (Player* player = GetOwner()->ToPlayer())
                     if (Unit* xt002 = GetCaster())
                         if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                            player->CastSpell(player, SPELL_SUMMON_LIFE_SPARK, true);
+                            xt002->CastSpell(player, SPELL_SUMMON_LIFE_SPARK, true);
             }
 
             void Register()
@@ -899,17 +898,23 @@ class spell_xt002_gravity_bomb_aura : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_VOID_ZONE))
-                    return false;
+	      //                if (!sSpellMgr->GetSpellInfo(SPELL_SUMMON_VOID_ZONE))
+	      //    return false;
                 return true;
             }
 
             void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
             {
                 if (Player* player = GetOwner()->ToPlayer())
+		  {
                     if (Unit* xt002 = GetCaster())
+		      {
                         if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                            player->CastSpell(player, SPELL_SUMMON_VOID_ZONE, true);    // TODO: Check if casting this spell works as intended, may have problems due to target selection
+			  {
+                            xt002->CastSpell(player, SPELL_SUMMON_VOID_ZONE, true);    // TODO: Check if casting this spell works as intended, may have problems due to target selection
+			  }
+		      }
+		  }
             }
 
             void OnPeriodic(AuraEffect const* aurEff)
@@ -1088,7 +1093,7 @@ class spell_xt002_heart_overload_periodic : public SpellScriptLoader
                             {
                                 uint8 a = urand(0, 4);
                                 uint32 spellId = spells[a];
-                                toyPile->CastSpell(toyPile, spellId, true);
+				//				toyPile->CastSpell(toyPile, spellId, true);
                             }
                         }
                     }

@@ -899,7 +899,7 @@ public:
                         PrepareForVortex();
                         events.ScheduleEvent(EVENT_VORTEX, urand(60, 80)*IN_MILLISECONDS, 0, PHASE_ONE);
 			events.ScheduleEvent(EVENT_ARCANE_STORM, urand(18, 20)*IN_MILLISECONDS, 0, _phase); // about 5s after vortex ends
-                       events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(20, 60)*IN_MILLISECONDS, 0, PHASE_ONE); //better would be just delay by 10s or something, but ...
+                       events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(25, 60)*IN_MILLISECONDS, 0, PHASE_ONE); //better would be just delay by 10s or something, but ...
                         break;
                     case EVENT_POWER_SPARKS:
                         instance->SetData(DATA_POWER_SPARKS_HANDLING, 0);
@@ -993,6 +993,19 @@ public:
 
         void JustDied(Unit* /*killer*/)
         {
+	  Map* map = me->GetMap();
+	  if (map && map->IsDungeon())
+	    {
+	      std::list<Player*> PlayerList;
+	      Map::PlayerList const& Players = map->GetPlayers();
+	      for (Map::PlayerList::const_iterator itr = Players.begin(); itr != Players.end(); ++itr)
+		{
+		  if (Player* player = itr->getSource())
+		    if (player->isDead())
+		      player->ResurrectPlayer(1.0f);
+		}
+	    }
+	  //	  DoCastAOE(SPELL_MASS_RESURRECTION);
             Talk(SAY_DEATH);
             _JustDied();
             //me->ClearUnitState(UNIT_STAT_ROOT);
@@ -1355,12 +1368,19 @@ public:
         {
 	  if (lostUnits)
 	    return;
+	  std::cout << "check" << std::endl;
             // we dont do melee damage!
 	  if (units)
 	    if (!units->isAlive())
 	      {
 		lostUnits = true;
-		SetEscortPaused(true);
+		//		SetEscortPaused(true);
+		//		me->GetMotionMaster()->MovePoint(1, me->GetPositionX(), me->GetPositionY(), GROUND_Z);
+		if (Creature *pShell = me->SummonCreature(me->GetEntry(), me->GetPositionX(), me->GetPositionY(), FLOOR_Z + 1, 0, TEMPSUMMON_TIMED_DESPAWN, 300000))
+		  {
+		  }
+		me->DespawnOrUnsummon();
+		std::cout << "check ok !" << std::endl;
 	      }
         }
 

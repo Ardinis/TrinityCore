@@ -1678,7 +1678,7 @@ class npc_healthy_spore : public CreatureScript
 
         struct npc_healthy_sporeAI : public Scripted_NoMovementAI
         {
-            npc_healthy_sporeAI(Creature* creature) : Scripted_NoMovementAI(creature)
+	  npc_healthy_sporeAI(Creature* creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript())
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);                
             }
@@ -1694,9 +1694,11 @@ class npc_healthy_spore : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (InstanceScript* inst = me->GetInstanceScript())
-                    if (inst->GetBossState(BOSS_FREYA) != IN_PROGRESS)
+                if (_instance)
+		  {
+                    if (_instance->GetBossState(BOSS_FREYA) != IN_PROGRESS)
                         me->DisappearAndDie();
+		  }
                 else 
                     me->DisappearAndDie();
 
@@ -1712,6 +1714,7 @@ class npc_healthy_spore : public CreatureScript
 
             private:
                 uint32 lifeTimer;
+	  InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1727,7 +1730,7 @@ class npc_eonars_gift : public CreatureScript
 
         struct npc_eonars_giftAI : public Scripted_NoMovementAI
         {
-            npc_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+	  npc_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript()) {}
 
             void InitializeAI()
             {                
@@ -1743,9 +1746,11 @@ class npc_eonars_gift : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (InstanceScript* inst = me->GetInstanceScript())
-                    if (inst->GetBossState(BOSS_FREYA) != IN_PROGRESS)
+	      if (_instance)
+		  {
+                    if (_instance->GetBossState(BOSS_FREYA) != IN_PROGRESS)
                         me->DisappearAndDie();
+		  }
                 else 
                     me->DisappearAndDie();
                 
@@ -1762,6 +1767,7 @@ class npc_eonars_gift : public CreatureScript
 
             private:
                 uint32 lifeBindersGiftTimer;
+	  InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const

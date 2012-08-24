@@ -100,7 +100,7 @@ bool OnGossipHello(Player* Plr, GameObject* pCrea)
     Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Villes de la Horde ->", GOSSIP_SENDER_MAIN, 2000);
   Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Villes neutres ->", GOSSIP_SENDER_MAIN, 3000);
   Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Donjons ->", GOSSIP_SENDER_MAIN, 5000);
-  Plr->ADD_GOSSIP_ITEM( 5, "Guerre ouverte", GOSSIP_SENDER_MAIN, 3501);
+  Plr->ADD_GOSSIP_ITEM( 5, "Ceremonie PVP", GOSSIP_SENDER_MAIN, 3501);
 
   Plr->SEND_GOSSIP_MENU(Plr->GetGossipTextId(pCrea), pCrea->GetGUID());
   return true;
@@ -561,10 +561,11 @@ void OnSendDefaultMenu(Player* Plr, GameObject* pCrea, uint32 action)
     case 3501: // Arena PvP Option
       Plr->PlayerTalkClass->ClearMenus();
       Plr->CLOSE_GOSSIP_MENU();
-      if (Plr->GetTeam() == ALLIANCE) // Gurubashi for Alliance
+      Plr->TeleportTo(1, -8673.44f, 1955.63f, 109.12f, 0.38f);
+      /*      if (Plr->GetTeam() == ALLIANCE) // Gurubashi for Alliance
         Plr->TeleportTo(1, -3818.0f, 1094.0f, 133.0f, 6.22f);
       else // Gurubashi for Horde
-        Plr->TeleportTo(1, -3690.0f, 1084.0f, 133.0f, 3.112f);
+      Plr->TeleportTo(1, -3690.0f, 1084.0f, 133.0f, 3.112f);*/
       break;
     case 5200: //Mall
       Plr->PlayerTalkClass->ClearMenus();

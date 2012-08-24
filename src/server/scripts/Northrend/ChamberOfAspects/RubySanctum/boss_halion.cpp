@@ -183,6 +183,9 @@ public:
                 pGoPortal->Delete();
             if (GameObject* pGoPortal = me->FindNearestGameObject(GO_HALION_PORTAL_3, 50.0f))
                 pGoPortal->Delete();
+	    instance->SetData(DATA_HALION_HEALTH_TOTAL_INIT, me->GetMaxHealth());
+	    instance->SetData(DATA_HALION_REAL_DAMAGED_INIT, 0);
+	    instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_INIT, 0);
         }
 
         void setStage(uint8 phase)
@@ -308,6 +311,18 @@ public:
             me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MovePoint(id, SpawnLoc[id].x, SpawnLoc[id].y, SpawnLoc[id].z);
             MovementStarted = true;
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+	  instance->SetData(DATA_HALION_HEALTH_TOTAL, damage);
+	  instance->SetData(DATA_HALION_REAL_DAMAGED_TOTAL, damage);
+	  //instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_TOTAL, damage);
+	  if (me->GetHealth() > 1)
+	    {
+	      me->SetHealth(instance->GetData(DATA_HALION_HEALTH_TOTAL));
+	      damage = 0;
+	    }
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -608,6 +623,19 @@ public:
                 DoCast(me, SPELL_TWILIGHT_ENTER);
         }
 
+        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        {
+	  instance->SetData(DATA_HALION_HEALTH_TOTAL, damage);
+	  //instance->SetData(DATA_HALION_REAL_DAMAGED_TOTAL, damage);
+	  instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_TOTAL, damage);
+	  if (me->GetHealth() > 1)
+	    {
+	      me->SetHealth(instance->GetData(DATA_HALION_HEALTH_TOTAL));
+	      damage = 0;
+	    }
+        }
+
+
         void setStage(uint8 phase)
         {
             stage = phase;
@@ -767,8 +795,12 @@ public:
                         }
                     } else m_uiSoulCunsumTimer -= uiDiff;
 
-                    if ( HealthBelowPct(51) )
+                    if (HealthBelowPct(51))
+		      {
+			instance->SetData(DATA_HALION_REAL_DAMAGED_INIT, 0);
+			instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_INIT, 0);
                         setStage(2);
+		      }
                     break;
 
                 case 2:           //To two realms
@@ -838,16 +870,27 @@ struct HalionBuffLine
 static HalionBuffLine Buff[]=
 {
     {-10.0f,SPELL_CORPOREALITY_100I, SPELL_CORPOREALITY_100D},
+    {-10.0f,SPELL_CORPOREALITY_100I, SPELL_CORPOREALITY_100D},
     {-8.0f,SPELL_CORPOREALITY_80I, SPELL_CORPOREALITY_80D},
+    {-8.0f,SPELL_CORPOREALITY_80I, SPELL_CORPOREALITY_80D},
+    {-6.0f,SPELL_CORPOREALITY_60I, SPELL_CORPOREALITY_60D},
     {-6.0f,SPELL_CORPOREALITY_60I, SPELL_CORPOREALITY_60D},
     {-4.0f,SPELL_CORPOREALITY_40I, SPELL_CORPOREALITY_40D},
     {-2.0f,SPELL_CORPOREALITY_20I, SPELL_CORPOREALITY_20D},
+    {-2.0f,SPELL_CORPOREALITY_20I, SPELL_CORPOREALITY_20D},
+    {-1.0f,SPELL_CORPOREALITY_EVEN, SPELL_CORPOREALITY_EVEN},
     {-1.0f,SPELL_CORPOREALITY_EVEN, SPELL_CORPOREALITY_EVEN},
     {1.0f,SPELL_CORPOREALITY_EVEN, SPELL_CORPOREALITY_EVEN},
+    {1.0f,SPELL_CORPOREALITY_EVEN, SPELL_CORPOREALITY_EVEN},
+    {2.0f,SPELL_CORPOREALITY_20D, SPELL_CORPOREALITY_20I},
     {2.0f,SPELL_CORPOREALITY_20D, SPELL_CORPOREALITY_20I},
     {4.0f,SPELL_CORPOREALITY_40D, SPELL_CORPOREALITY_40I},
+    {4.0f,SPELL_CORPOREALITY_40D, SPELL_CORPOREALITY_40I},
+    {6.0f,SPELL_CORPOREALITY_60D, SPELL_CORPOREALITY_60I},
     {6.0f,SPELL_CORPOREALITY_60D, SPELL_CORPOREALITY_60I},
     {8.0f,SPELL_CORPOREALITY_80D, SPELL_CORPOREALITY_80I},
+    {8.0f,SPELL_CORPOREALITY_80D, SPELL_CORPOREALITY_80I},
+    {10.0f,SPELL_CORPOREALITY_100D, SPELL_CORPOREALITY_100I},
     {10.0f,SPELL_CORPOREALITY_100D, SPELL_CORPOREALITY_100I},
 };
 
@@ -951,41 +994,40 @@ public:
                 pHalionReal = me->GetMap()->GetCreature(instance->GetData64(NPC_HALION_REAL));
                 pHalionTwilight = me->GetMap()->GetCreature(instance->GetData64(NPC_HALION_TWILIGHT));
 
-                float p_RealHP = (pHalionReal && pHalionReal->isAlive()) ? pHalionReal->GetHealthPct() : 100.0f;
-                float p_TwilightHP = (pHalionTwilight && pHalionTwilight->isAlive()) ? pHalionTwilight->GetHealthPct() : 100.0f;
-
-                float m_diff = (p_RealHP - p_TwilightHP);
-
-                uint8 buffnum;
-
-                if (m_diff <= Buff[0].diff) buffnum = 0;
-                else for (uint8 i = 0; i < 11; i++)
-                    if (m_diff >= Buff[i].diff)
-                        buffnum = i+1;
-                    else
-                    break;
-
+		uint32 realDamage = instance->GetData(DATA_HALION_REAL_DAMAGED_TOTAL);
+		uint32 twilightDamage = instance->GetData(DATA_HALION_TWILIGHT_DAMAGED_TOTAL);
+                double buffnums = ((double)twilightDamage - (double)realDamage) * 0.00001;
+		int buffnum = (int)buffnums;
+		if (buffnum < -10)
+		  buffnum = -11;
+		if (buffnum > 10)
+		  buffnum = 10;
+		buffnum += 11;
                 if (!m_lastBuffTwilight || m_lastBuffTwilight != Buff[buffnum].twilight)
-                {
+		  {
                     if (pHalionReal && pHalionReal->isAlive())
-                    {
+		      {
                         if (m_lastBuffTwilight) pHalionReal->RemoveAurasDueToSpell(m_lastBuffTwilight);
-                            pHalionReal->CastSpell(pHalionReal, Buff[buffnum].twilight, true);
+			pHalionReal->CastSpell(pHalionReal, Buff[buffnum].twilight, true);
                         m_lastBuffTwilight = Buff[buffnum].twilight;
-                    }
-                }
-
+		      }
+		  }
+		
                 if (!m_lastBuffReal || m_lastBuffReal != Buff[buffnum].real)
-                {
+		  {
                     if (pHalionTwilight && pHalionTwilight->isAlive())
-                    {
+		      {
                         if (m_lastBuffReal) pHalionTwilight->RemoveAurasDueToSpell(m_lastBuffReal);
-                            pHalionTwilight->CastSpell(pHalionTwilight, Buff[buffnum].real, true);
+			pHalionTwilight->CastSpell(pHalionTwilight, Buff[buffnum].real, true);
                         m_lastBuffReal = Buff[buffnum].real;
-                    }
-                }
-
-                instance->SetData(TYPE_COUNTER, 50 + (int)Buff[buffnum].diff * 5);
+		      }
+		  }
+		double b = (buffnums * 5);
+		if (b < -50)
+		  b = -50;
+		if (b > 50)
+		  b = 50;
+                instance->SetData(TYPE_COUNTER, 50 + b);
                 m_uiCorporealityTimer = 5*IN_MILLISECONDS;
             } else m_uiCorporealityTimer -= diff;
         }
@@ -995,421 +1037,421 @@ public:
 class mob_orb_rotation_focus : public CreatureScript
 {
 public:
-    mob_orb_rotation_focus() : CreatureScript("mob_orb_rotation_focus") { }
+  mob_orb_rotation_focus() : CreatureScript("mob_orb_rotation_focus") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new mob_orb_rotation_focusAI(pCreature);
+  }
+
+  struct mob_orb_rotation_focusAI : public ScriptedAI
+  {
+    mob_orb_rotation_focusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        return new mob_orb_rotation_focusAI(pCreature);
+      instance = (InstanceScript*)pCreature->GetInstanceScript();
+      Reset();
     }
 
-    struct mob_orb_rotation_focusAI : public ScriptedAI
+    InstanceScript* instance;
+
+    uint32 m_timer;
+    uint32 m_go;
+    uint32 m_big;
+
+    float m_direction, m_nextdirection;
+    bool m_warning;
+
+    void Reset()
     {
-        mob_orb_rotation_focusAI(Creature* pCreature) : ScriptedAI(pCreature)
-        {
-            instance = (InstanceScript*)pCreature->GetInstanceScript();
-            Reset();
-        }
+      me->SetDisplayId(11686);
+      //        me->SetDisplayId(10045);
+      me->SetRespawnDelay(7*DAY);
+      me->SetPhaseMask(65535, true);
+      SetCombatMovement(false);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+      m_direction = 0.0f;
+      m_nextdirection = 0.0f;
+      m_timer = 30000;
+      m_warning = false;
+      m_go = 0;
+      m_big = 0;
+	    
+      Creature* pPulsar1 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_N));
+      if (!pPulsar1 )
+	{
+	  float x,y;
+	  me->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
+	  pPulsar1 = me->SummonCreature(NPC_SHADOW_PULSAR_N, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
+	} else if (!pPulsar1->isAlive())
+	pPulsar1->Respawn();
+      
+      Creature* pPulsar2 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_S));
+      if (!pPulsar2)
+	{
+	  float x,y;
+	  me->GetNearPoint2D(x, y, FR_RADIUS, m_direction + M_PI);
+	  pPulsar2 = me->SummonCreature(NPC_SHADOW_PULSAR_S, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
+	} else if (!pPulsar2->isAlive())
+	pPulsar2->Respawn();
+    }
 
-        InstanceScript* instance;
-
-        uint32 m_timer;
-        uint32 m_go;
-      uint32 m_big;
-
-        float m_direction, m_nextdirection;
-        bool m_warning;
-
-        void Reset()
-        {
-            me->SetDisplayId(11686);
-//        me->SetDisplayId(10045);
-            me->SetRespawnDelay(7*DAY);
-            me->SetPhaseMask(65535, true);
-            SetCombatMovement(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_direction = 0.0f;
-            m_nextdirection = 0.0f;
-            m_timer = 30000;
-            m_warning = false;
-	    m_go = 0;
-	    m_big = 0;
-
-            Creature* pPulsar1 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_N));
-            if (!pPulsar1 )
-            {
-                float x,y;
-                me->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                pPulsar1 = me->SummonCreature(NPC_SHADOW_PULSAR_N, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
-            } else if (!pPulsar1->isAlive())
-                pPulsar1->Respawn();
-
-            Creature* pPulsar2 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_S));
-            if (!pPulsar2)
-            {
-                float x,y;
-                me->GetNearPoint2D(x, y, FR_RADIUS, m_direction + M_PI);
-                pPulsar2 = me->SummonCreature(NPC_SHADOW_PULSAR_S, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
-            } else if (!pPulsar2->isAlive())
-                pPulsar2->Respawn();
-        }
-
-        void AttackStart(Unit *who)
-        {
-            //ignore all attackstart commands
-            return;
-        }
-
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (!instance)
-	      {
-                  me->DespawnOrUnsummon();
-		  instance->SetData(DATA_BIG, FAIL);
-	      }
-            if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
-	      {
-                  me->DespawnOrUnsummon();
-		  instance->SetData(DATA_BIG, FAIL);
-	      }
-
-            if (instance->GetData(DATA_ORB_S) == DONE && instance->GetData(DATA_ORB_N) == DONE)
-            {
-                m_direction = m_nextdirection;
-                m_nextdirection = (m_direction - M_PI/64.0f);
-                if (m_nextdirection < 0.0f )
-                    m_nextdirection = m_nextdirection + 2.0f*M_PI;
-                instance->SetData(DATA_ORB_DIRECTION, (uint32)(m_nextdirection*1000));
-                instance->SetData(DATA_ORB_N, SPECIAL);
-                instance->SetData(DATA_ORB_S, SPECIAL);
-                sLog->outDebug(LOG_FILTER_MAPS, "EventMGR: creature %u send direction %u ",me->GetEntry(),instance->GetData(DATA_ORB_DIRECTION));
-            }
-
-            if (m_timer - 6000 <= uiDiff && !m_warning)
-            {
-                DoScriptText(-1666110,me);
-                m_warning = true;
-            }
-
-            Creature* pPulsar1 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_N));
-            Creature* pPulsar2 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_S));
-            if (m_timer <= uiDiff)
-            {
-                float x,y;
-                me->GetNearPoint2D(x, y, FR_RADIUS, m_nextdirection);
-                me->SummonCreature(NPC_ORB_CARRIER, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
-                m_timer = 30000;
-                m_warning = false;
-                pPulsar1->CastSpell(pPulsar2, SPELL_TWILIGHT_CUTTER_CHANNEL,false);
-		instance->SetData(DATA_BIG, IN_PROGRESS);
-		m_big = 10000;
-                //pPulsar2->CastSpell(pPulsar1, SPELL_TWILIGHT_CUTTER,false);
+    void AttackStart(Unit *who)
+    {
+      //ignore all attackstart commands
+      return;
+    }
+    
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!instance)
+	{
+	  me->DespawnOrUnsummon();
+	  instance->SetData(DATA_BIG, FAIL);
+	}
+      if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
+	{
+	  me->DespawnOrUnsummon();
+	  instance->SetData(DATA_BIG, FAIL);
+	}
+      
+      if (instance->GetData(DATA_ORB_S) == DONE && instance->GetData(DATA_ORB_N) == DONE)
+	{
+	  m_direction = m_nextdirection;
+	  m_nextdirection = (m_direction - M_PI/64.0f);
+	  if (m_nextdirection < 0.0f )
+	    m_nextdirection = m_nextdirection + 2.0f*M_PI;
+	  instance->SetData(DATA_ORB_DIRECTION, (uint32)(m_nextdirection*1000));
+	  instance->SetData(DATA_ORB_N, SPECIAL);
+	  instance->SetData(DATA_ORB_S, SPECIAL);
+	  sLog->outDebug(LOG_FILTER_MAPS, "EventMGR: creature %u send direction %u ",me->GetEntry(),instance->GetData(DATA_ORB_DIRECTION));
+	}
+      
+      if (m_timer - 6000 <= uiDiff && !m_warning)
+	{
+	  DoScriptText(-1666110,me);
+	  m_warning = true;
+	}
+      
+      Creature* pPulsar1 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_N));
+      Creature* pPulsar2 = me->GetMap()->GetCreature(instance->GetData64(NPC_SHADOW_PULSAR_S));
+      if (m_timer <= uiDiff)
+	{
+	  float x,y;
+	  me->GetNearPoint2D(x, y, FR_RADIUS, m_nextdirection);
+	  me->SummonCreature(NPC_ORB_CARRIER, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
+	  m_timer = 30000;
+	  m_warning = false;
+	  pPulsar1->CastSpell(pPulsar2, SPELL_TWILIGHT_CUTTER_CHANNEL,false);
+	  instance->SetData(DATA_BIG, IN_PROGRESS);
+	  m_big = 10000;
+	  //pPulsar2->CastSpell(pPulsar1, SPELL_TWILIGHT_CUTTER,false);
             } else m_timer -= uiDiff;
-	    if (instance->GetData(DATA_BIG) == IN_PROGRESS)
-	      {
-		if ( m_big >= uiDiff)
-		  {
-		    if (m_go <= uiDiff)
-		      {
-			float x,y;
-			me->GetNearPoint2D(x, y, FR_RADIUS, m_nextdirection);
-			me->SummonCreature(NPC_ORB_CARRIER, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
-			m_go = 500;
-		      }
-		    else m_go -= uiDiff;
-		    m_big -= uiDiff;
-		  }
-	      }
-	    else m_go = 0;
-
-
-        }
-    };
+      if (instance->GetData(DATA_BIG) == IN_PROGRESS)
+	{
+	  if ( m_big >= uiDiff)
+	    {
+	      if (m_go <= uiDiff)
+		{
+		  float x,y;
+		  me->GetNearPoint2D(x, y, FR_RADIUS, m_nextdirection);
+		  me->SummonCreature(NPC_ORB_CARRIER, x, y, me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN, 5000);
+		  m_go = 500;
+		}
+	      else m_go -= uiDiff;
+	      m_big -= uiDiff;
+	    }
+	}
+      else m_go = 0;
+      
+      
+    }
+  };
 };
 
 class mob_halion_orb : public CreatureScript
 {
 public:
-    mob_halion_orb() : CreatureScript("mob_halion_orb") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
+  mob_halion_orb() : CreatureScript("mob_halion_orb") { }
+  
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new mob_halion_orbAI(pCreature);
+  }
+  
+  struct mob_halion_orbAI : public ScriptedAI
+  {
+    mob_halion_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        return new mob_halion_orbAI(pCreature);
+      instance = (InstanceScript*)pCreature->GetInstanceScript();
+      Reset();
     }
-
-    struct mob_halion_orbAI : public ScriptedAI
+    
+    InstanceScript* instance;
+    
+    float m_direction,m_delta;
+    uint32 m_flag;
+    uint32 m_flag1;
+    bool MovementStarted;
+    Creature* focus;
+    uint32 nextPoint;
+    
+    void Reset()
     {
-        mob_halion_orbAI(Creature* pCreature) : ScriptedAI(pCreature)
-        {
-            instance = (InstanceScript*)pCreature->GetInstanceScript();
-            Reset();
-        }
-
-        InstanceScript* instance;
-
-        float m_direction,m_delta;
-        uint32 m_flag;
-        uint32 m_flag1;
-        bool MovementStarted;
-        Creature* focus;
-        uint32 nextPoint;
-
-        void Reset()
-        {
-            if (!instance)
-                return;
-            me->SetRespawnDelay(7*DAY);
-           // me->SetDisplayId(11686);
-            SetCombatMovement(false);
-            me->SetPhaseMask(32, true);
-            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            if (me->GetEntry() == NPC_SHADOW_PULSAR_N)
-            {
-                m_flag = DATA_ORB_N;
-                m_delta = 0.0f;
-            } else if (me->GetEntry() == NPC_SHADOW_PULSAR_S)
-            {
-                m_flag = DATA_ORB_S;
-                m_delta = M_PI;
-            };
-            m_direction = 0.0f;
-            nextPoint = 0;
-            MovementStarted = false;
-            instance->SetData(m_flag, DONE);
-            sLog->outDebug(LOG_FILTER_MAPS, "EventMGR: creature %u assume m_flag %u ",me->GetEntry(),m_flag);
-        }
-
-        void AttackStart(Unit *who)
-        {
-            //ignore all attackstart commands
-            return;
-        }
-
-        void MovementInform(uint32 type, uint32 id)
-        {
-            if (!instance)
-                return;
-
-            if (type != POINT_MOTION_TYPE || !MovementStarted)
-                return;
-
-            if (id == nextPoint)
-            {
-                me->GetMotionMaster()->MovementExpired();
-                MovementStarted = false;
-                instance->SetData(m_flag, DONE);
-            }
-        }
-
-        void StartMovement(uint32 id)
-        {
-            if (!instance)
-                return;
-
-            nextPoint = id;
-            float x,y;
-            instance->SetData(m_flag, IN_PROGRESS);
-            MovementStarted = true;
-            m_direction = ((float)instance->GetData(DATA_ORB_DIRECTION)/1000 + m_delta);
-            if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
-            if (focus = me->GetMap()->GetCreature(instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
-                focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-            else
-                me->DespawnOrUnsummon();
-            me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MovePoint(id, x, y,  me->GetPositionZ());
-        }
-
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (!instance)
-	      {
-		instance->SetData(DATA_BIG, FAIL);
-                  me->DespawnOrUnsummon();
-	      }
-            if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
-	      {
-		instance->SetData(DATA_BIG, FAIL);
-                  me->DespawnOrUnsummon();
-	      }
-
-            if (!MovementStarted && instance->GetData(m_flag) == SPECIAL)
-                StartMovement(1);
-        }
-    };
+      if (!instance)
+	return;
+      me->SetRespawnDelay(7*DAY);
+      // me->SetDisplayId(11686);
+      SetCombatMovement(false);
+      me->SetPhaseMask(32, true);
+      //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+      if (me->GetEntry() == NPC_SHADOW_PULSAR_N)
+	{
+	  m_flag = DATA_ORB_N;
+	  m_delta = 0.0f;
+	} else if (me->GetEntry() == NPC_SHADOW_PULSAR_S)
+	{
+	  m_flag = DATA_ORB_S;
+	  m_delta = M_PI;
+	};
+      m_direction = 0.0f;
+      nextPoint = 0;
+      MovementStarted = false;
+      instance->SetData(m_flag, DONE);
+      sLog->outDebug(LOG_FILTER_MAPS, "EventMGR: creature %u assume m_flag %u ",me->GetEntry(),m_flag);
+    }
+    
+    void AttackStart(Unit *who)
+    {
+      //ignore all attackstart commands
+      return;
+    }
+    
+    void MovementInform(uint32 type, uint32 id)
+    {
+      if (!instance)
+	return;
+      
+      if (type != POINT_MOTION_TYPE || !MovementStarted)
+	return;
+      
+      if (id == nextPoint)
+	{
+	  me->GetMotionMaster()->MovementExpired();
+	  MovementStarted = false;
+	  instance->SetData(m_flag, DONE);
+	}
+    }
+    
+    void StartMovement(uint32 id)
+    {
+      if (!instance)
+	return;
+      
+      nextPoint = id;
+      float x,y;
+      instance->SetData(m_flag, IN_PROGRESS);
+      MovementStarted = true;
+      m_direction = ((float)instance->GetData(DATA_ORB_DIRECTION)/1000 + m_delta);
+      if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
+      if (focus = me->GetMap()->GetCreature(instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
+	focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
+      else
+	me->DespawnOrUnsummon();
+      me->GetMotionMaster()->Clear();
+      me->GetMotionMaster()->MovePoint(id, x, y,  me->GetPositionZ());
+    }
+    
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!instance)
+	{
+	  instance->SetData(DATA_BIG, FAIL);
+	  me->DespawnOrUnsummon();
+	}
+      if (instance->GetData(TYPE_HALION) != IN_PROGRESS)
+	{
+	  instance->SetData(DATA_BIG, FAIL);
+	  me->DespawnOrUnsummon();
+	}
+      
+      if (!MovementStarted && instance->GetData(m_flag) == SPECIAL)
+	StartMovement(1);
+    }
+  };
 };
 
 class mob_orb_carrier : public CreatureScript
 {
 public:
-    mob_orb_carrier() : CreatureScript("mob_orb_carrier") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
+  mob_orb_carrier() : CreatureScript("mob_orb_carrier") { }
+  
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new mob_orb_carrierAI(pCreature);
+  }
+  
+  struct mob_orb_carrierAI : public ScriptedAI
+  {
+    mob_orb_carrierAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        return new mob_orb_carrierAI(pCreature);
+      instance = (InstanceScript*)pCreature->GetInstanceScript();
+      Reset();
     }
-
-    struct mob_orb_carrierAI : public ScriptedAI
+    
+    InstanceScript* instance;
+    
+    bool MovementStarted;
+    
+    void Reset()
     {
-        mob_orb_carrierAI(Creature* pCreature) : ScriptedAI(pCreature)
-        {
-            instance = (InstanceScript*)pCreature->GetInstanceScript();
-            Reset();
-        }
-
-        InstanceScript* instance;
-
-        bool MovementStarted;
-
-        void Reset()
-        {
-//          me->SetDisplayId(10045);
+      //          me->SetDisplayId(10045);
       //    me->SetDisplayId(11686);
-	    me->SetFlying(false);
-            me->SetRespawnDelay(7*DAY);
-            SetCombatMovement(false);
-            me->SetPhaseMask(32, true);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            MovementStarted = false;
-            me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
-            me->SetSpeed(MOVE_RUN, 6.0f, true);
-            me->SetSpeed(MOVE_WALK, 6.0f, true);
-	    me->SetFlying(false);
-	    //            me->SetSpeed(MOVE_FLY, 6.0f, true);
-        }
-
-        void AttackStart(Unit *pWho)
-        {
-            return;
-        }
-
-        void MovementInform(uint32 type, uint32 id)
-        {
-            if (!instance) return;
-
-            if (type != POINT_MOTION_TYPE || !MovementStarted)
-                return;
-
-            if (id == 1)
-            {
-                me->GetMotionMaster()->MovementExpired();
-                MovementStarted = false;
-                me->DespawnOrUnsummon();
-            }
-        }
-
-
-      void mob_orb_carrierDamage()
-      {
-	Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-
-	for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-	  {
-	    if (Player* pPlayer = i->getSource())
-	      {
-		if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 3)
-		  {
-		    //DoCast(pPlayer, SPELL_DEFILE);
-		    int32 damage = 20000;
-		    if ((i->getSource())->HasAura(SPELL_AURA_TWILIGHT))
-		      me->DealDamage(i->getSource(), damage, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-		  }
-	      }
-	  }
-      }
-
-
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (!instance || instance->GetData(TYPE_HALION) != IN_PROGRESS)
-                  me->DespawnOrUnsummon();
-	    mob_orb_carrierDamage();
-            if (!MovementStarted)
-            {
-                float x,y;
-                float m_direction = ((float)instance->GetData(DATA_ORB_DIRECTION)/1000.0f + M_PI - M_PI/32.0f);
-                if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
-                if (Creature* focus = me->GetMap()->GetCreature(instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
-                    focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
-                else me->DespawnOrUnsummon();
-                me->GetMotionMaster()->Clear();
-                me->GetMotionMaster()->MovePoint(1, x, y,  me->GetPositionZ());
-                MovementStarted = true;
-            }
-        }
-    };
+      me->SetFlying(false);
+      me->SetRespawnDelay(7*DAY);
+      SetCombatMovement(false);
+      me->SetPhaseMask(32, true);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+      MovementStarted = false;
+      me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
+      me->SetSpeed(MOVE_RUN, 6.0f, true);
+      me->SetSpeed(MOVE_WALK, 6.0f, true);
+      me->SetFlying(false);
+      //            me->SetSpeed(MOVE_FLY, 6.0f, true);
+    }
+    
+    void AttackStart(Unit *pWho)
+    {
+      return;
+    }
+    
+    void MovementInform(uint32 type, uint32 id)
+    {
+      if (!instance) return;
+      
+      if (type != POINT_MOTION_TYPE || !MovementStarted)
+	return;
+      
+      if (id == 1)
+	{
+	  me->GetMotionMaster()->MovementExpired();
+	  MovementStarted = false;
+	  me->DespawnOrUnsummon();
+	}
+    }
+    
+    
+    void mob_orb_carrierDamage()
+    {
+      Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+      
+      for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+	{
+	  if (Player* pPlayer = i->getSource())
+	    {
+	      if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 3)
+		{
+		  //DoCast(pPlayer, SPELL_DEFILE);
+		  int32 damage = 20000;
+		  if ((i->getSource())->HasAura(SPELL_AURA_TWILIGHT))
+		    me->DealDamage(i->getSource(), damage, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
+		}
+	    }
+	}
+    }
+    
+    
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!instance || instance->GetData(TYPE_HALION) != IN_PROGRESS)
+	me->DespawnOrUnsummon();
+      mob_orb_carrierDamage();
+      if (!MovementStarted)
+	{
+	  float x,y;
+	  float m_direction = ((float)instance->GetData(DATA_ORB_DIRECTION)/1000.0f + M_PI - M_PI/32.0f);
+	  if (m_direction > 2.0f*M_PI) m_direction = m_direction - 2.0f*M_PI;
+	  if (Creature* focus = me->GetMap()->GetCreature(instance->GetData64(NPC_ORB_ROTATION_FOCUS)))
+	    focus->GetNearPoint2D(x, y, FR_RADIUS, m_direction);
+	  else me->DespawnOrUnsummon();
+	  me->GetMotionMaster()->Clear();
+	  me->GetMotionMaster()->MovePoint(1, x, y,  me->GetPositionZ());
+	  MovementStarted = true;
+	}
+    }
+  };
 };
-
+  
 class mob_soul_consumption : public CreatureScript
 {
 public:
-    mob_soul_consumption() : CreatureScript("mob_soul_consumption") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
+  mob_soul_consumption() : CreatureScript("mob_soul_consumption") { }
+  
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new mob_soul_consumptionAI(pCreature);
+  }
+  
+  struct mob_soul_consumptionAI : public ScriptedAI
+  {
+    mob_soul_consumptionAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        return new mob_soul_consumptionAI(pCreature);
+      m_instance = (InstanceScript*)pCreature->GetInstanceScript();
+      Reset();
+    }
+    
+    InstanceScript* m_instance;
+
+    float m_Size0;
+    float m_Size;
+    uint32 m_uiConsumptTimer;
+
+    void Reset()
+    {
+      if (!IsHeroic()) me->SetPhaseMask(32,true);
+      else me->SetPhaseMask(65535,true);
+      SetCombatMovement(false);
+      m_uiConsumptTimer = 60*IN_MILLISECONDS;
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+      DoCast(SPELL_CONSUMPTION_AURA);
+      m_Size0 = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
+      m_Size = m_Size0;
     }
 
-    struct mob_soul_consumptionAI : public ScriptedAI
+    void AttackStart(Unit *pWho)
     {
-        mob_soul_consumptionAI(Creature* pCreature) : ScriptedAI(pCreature)
-        {
-            m_instance = (InstanceScript*)pCreature->GetInstanceScript();
-            Reset();
-        }
-
-        InstanceScript* m_instance;
-
-        float m_Size0;
-        float m_Size;
-        uint32 m_uiConsumptTimer;
-
-        void Reset()
-        {
-            if (!IsHeroic()) me->SetPhaseMask(32,true);
-                else me->SetPhaseMask(65535,true);
-            SetCombatMovement(false);
-            m_uiConsumptTimer = 60*IN_MILLISECONDS;
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            DoCast(SPELL_CONSUMPTION_AURA);
-            m_Size0 = me->GetFloatValue(OBJECT_FIELD_SCALE_X);
-            m_Size = m_Size0;
-        }
-
-        void AttackStart(Unit *pWho)
-        {
-            return;
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            if(m_instance && m_instance->GetData(TYPE_HALION) != IN_PROGRESS)
-                me->DespawnOrUnsummon();
-
-//        if (!me->HasAura(SPELL_TWILIGHT_ENTER))
-//             DoCast(SPELL_TWILIGHT_ENTER);
-
-            if (m_uiConsumptTimer <= diff)
-            {
-                me->DespawnOrUnsummon();
-            }
-            else m_uiConsumptTimer -= diff;
-
-            if (SelectTarget(SELECT_TARGET_RANDOM, 1, m_Size * 3.0f, true))
-            {
-                m_Size = m_Size*1.01f;
-                me->SetFloatValue(OBJECT_FIELD_SCALE_X, m_Size);
-            }
-            else if (SelectTarget(SELECT_TARGET_RANDOM, 0, m_Size * 3.0f, true))
-            {
-                m_Size = m_Size*1.01f;
-                me->SetFloatValue(OBJECT_FIELD_SCALE_X, m_Size);
-            }
-        }
-    };
+      return;
+    }
+    
+    void UpdateAI(const uint32 diff)
+    {
+      if(m_instance && m_instance->GetData(TYPE_HALION) != IN_PROGRESS)
+	me->DespawnOrUnsummon();
+      
+      //        if (!me->HasAura(SPELL_TWILIGHT_ENTER))
+      //             DoCast(SPELL_TWILIGHT_ENTER);
+      
+      if (m_uiConsumptTimer <= diff)
+	{
+	  me->DespawnOrUnsummon();
+	}
+      else m_uiConsumptTimer -= diff;
+      
+      if (SelectTarget(SELECT_TARGET_RANDOM, 1, m_Size * 3.0f, true))
+	{
+	  m_Size = m_Size*1.01f;
+	  me->SetFloatValue(OBJECT_FIELD_SCALE_X, m_Size);
+	}
+      else if (SelectTarget(SELECT_TARGET_RANDOM, 0, m_Size * 3.0f, true))
+	{
+	  m_Size = m_Size*1.01f;
+	  me->SetFloatValue(OBJECT_FIELD_SCALE_X, m_Size);
+	}
+    }
+  };
 };
 
 class mob_fiery_combustion : public CreatureScript

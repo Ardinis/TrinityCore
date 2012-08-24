@@ -2507,14 +2507,14 @@ class npc_val_icc : public CreatureScript
 
 		if (mui_cast <= diff)
 		  {
-		    std::cout << "sum ???????????" << std::endl;
+		    //std::cout << "sum ???????????" << std::endl;
 		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
 		      {
 			Position pos;
 			target->GetPosition(&pos);
 			if (Creature *c = me->SummonCreature(8000100, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
 			  {
-			    std::cout << "sum !!!!!!!!!!!!!" << std::endl;
+			    //std::cout << "sum !!!!!!!!!!!!!" << std::endl;
 			    c->AI()->DoAction(target->getClass());
 			    //			    c->CastSpell(c, SPELL_PLAGUE_AVOIDANCE, true);
 			    c->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL, true);

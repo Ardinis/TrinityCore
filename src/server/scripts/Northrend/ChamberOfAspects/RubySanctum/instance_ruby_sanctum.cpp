@@ -81,13 +81,17 @@ public:
 
       uint64 m_uiBig;
 
+      uint32 hallionHealthTotal;
+      uint32 hallionRealDamageTotal;
+      uint32 hallionTwilightDamageTotal;
+
         void Initialize()
         {
             for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                 m_auiEncounter[i] = NOT_STARTED;
 
             m_auiEventTimer = 1000;
-
+	    hallionHealthTotal = 0;
             m_uiHalion_pGUID = 0;
             m_uiHalion_tGUID = 0;
             m_uiRagefireGUID = 0;
@@ -114,6 +118,9 @@ public:
             m_auiOrbSState = NOT_STARTED;
 
 	    m_uiBig = FAIL;
+
+	    hallionRealDamageTotal = 0;
+	    hallionTwilightDamageTotal = 0;
         }
 
         bool IsEncounterInProgress() const
@@ -269,6 +276,27 @@ public:
         {
             switch(uiType)
             {
+	    case DATA_HALION_REAL_DAMAGED_INIT:
+	      hallionRealDamageTotal = 0;
+	      break;
+	    case DATA_HALION_TWILIGHT_DAMAGED_INIT:
+	      hallionTwilightDamageTotal = 0;
+	      break;
+	    case DATA_HALION_REAL_DAMAGED_TOTAL:
+	      hallionRealDamageTotal += uiData;
+	      break;
+	    case DATA_HALION_TWILIGHT_DAMAGED_TOTAL:
+	      hallionTwilightDamageTotal += uiData;
+	      break;
+	    case DATA_HALION_HEALTH_TOTAL_INIT:
+	      hallionHealthTotal = uiData;
+	      break;
+	    case DATA_HALION_HEALTH_TOTAL:
+	      if (hallionHealthTotal > uiData)
+		hallionHealthTotal -= uiData;
+	      else
+		hallionHealthTotal = 1;
+	      break;
                 case TYPE_EVENT:
                     m_auiEncounter[uiType] = uiData;
                     uiData = NOT_STARTED;
@@ -377,6 +405,14 @@ public:
         {
             switch(uiType)
             {
+	    case DATA_HALION_REAL_DAMAGED_TOTAL:
+              return hallionRealDamageTotal;
+              break;
+            case DATA_HALION_TWILIGHT_DAMAGED_TOTAL:
+              return hallionTwilightDamageTotal;
+              break;
+	    case DATA_HALION_HEALTH_TOTAL:
+	      return hallionHealthTotal;
                 case TYPE_RAGEFIRE:
                     return m_auiEncounter[uiType];
                 case TYPE_BALTHARUS:

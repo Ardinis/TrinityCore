@@ -1300,7 +1300,7 @@ class npc_proximity_mine : public CreatureScript
 		if (who->ToPlayer())
 		  if (me->IsWithinDistInMap(who, 0.5f) /*&& !who->ToPlayer()->isGameMaster()*/)
 		    {
-		      std::cout << "BOOM !!!!!" << std::endl;
+		      //std::cout << "BOOM !!!!!" << std::endl;
 		      DoCastAOE(SPELL_EXPLOSION);
 		      boomLocked = true;
 		      me->DespawnOrUnsummon(200);
@@ -1326,7 +1326,7 @@ class npc_proximity_mine : public CreatureScript
                 {
                     if (!boomLocked)
                     {
-		      std::cout << "BOOM TIMER !!!!!" << std::endl;
+		      //std::cout << "BOOM TIMER !!!!!" << std::endl;
                         DoCastAOE(SPELL_EXPLOSION);
                         me->DespawnOrUnsummon(200);
                         boomLocked = true;
@@ -1688,7 +1688,7 @@ class npc_rocket_strike_target : public CreatureScript
             {
                 if (!spell)
                     return;
-		//		std::cout << "SPELL HIT : " << spell->Id << std::endl;
+		//		//std::cout << "SPELL HIT : " << spell->Id << std::endl;
 		if (spell->Id == 64064)
 		  {
 		    uiBoom = 5000;
@@ -1877,7 +1877,7 @@ class boss_aerial_unit : public CreatureScript
             {
                 if (!caster || !spell)
                     return;
-		std::cout << "SPELL HIT : " << spell->Id << std::endl;
+		//std::cout << "SPELL HIT : " << spell->Id << std::endl;
                 if (spell->Id == SPELL_SELF_REPAIR)
                     DoAction(DO_AERIAL_SELF_REPAIR_END);
                 if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))

@@ -769,10 +769,10 @@ void OutdoorPvPWG::OnCreatureCreate(Creature *creature)
     {
         case CREATURE_SIEGE_VEHICLE:
         {
-  std::cout << "OnCreatureCreate CREATURE_SIEGE_VEHICLE" << std::endl;
+  //std::cout << "OnCreatureCreate CREATURE_SIEGE_VEHICLE" << std::endl;
             if (!creature->isSummon())
 	      {
-		std::cout << "!creature->isSummon()" << std::endl;
+		//std::cout << "!creature->isSummon()" << std::endl;
                 return;
 	      }
             TeamId team;
@@ -782,7 +782,7 @@ void OutdoorPvPWG::OnCreatureCreate(Creature *creature)
                 team = TEAM_HORDE;
             else
 	      {
-		std::cout << "return faction" << std::endl;
+		//std::cout << "return faction" << std::endl;
                 return;
 	      }
             if (uint32 engLowguid = GUID_LOPART(((TempSummon*)creature)->GetSummonerGUID()))
@@ -1887,10 +1887,10 @@ void OutdoorPvPWG::EndBattle()
         uint32 playersWithRankNum = 0;
         uint32 honor = 0;
 	bool cplteachievement = false;
-	/*	std::cout << "damagedNum : " << damagedNum << std::endl;
-	std::cout << "intactNum : " << intactNum << std::endl;
-	std::cout << "m_towerDamagedCount : " << m_towerDamagedCount[OTHER_TEAM(team)] << std::endl;
-	std::cout << "m_towerDestroyedCount : " << m_towerDestroyedCount[OTHER_TEAM(team)] << std::endl;*/
+	/*	//std::cout << "damagedNum : " << damagedNum << std::endl;
+	//std::cout << "intactNum : " << intactNum << std::endl;
+	//std::cout << "m_towerDamagedCount : " << m_towerDamagedCount[OTHER_TEAM(team)] << std::endl;
+	//std::cout << "m_towerDestroyedCount : " << m_towerDestroyedCount[OTHER_TEAM(team)] << std::endl;*/
 	//        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
         {
             // Calculate Level 70+ with Corporal or Lieutenant rank

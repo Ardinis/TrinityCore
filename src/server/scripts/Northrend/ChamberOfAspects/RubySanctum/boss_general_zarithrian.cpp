@@ -170,13 +170,19 @@ public:
 
             if (m_uiCleaveTimer <= diff)
             {
-                DoCast(SPELL_CLEAVE_ARMOR);
-                m_uiCleaveTimer = 10000;
+	      std::cout << "cast armor cleave" << std::endl;
+	      if (me->getVictim())
+		me->CastSpell(me->getVictim(), SPELL_CLEAVE_ARMOR, true);
+	      m_uiCleaveTimer = 10000;
             } else m_uiCleaveTimer -= diff;
 
             if (m_uiImtimidatingTimer <= diff)
             {
+	      if (Unit *un = me->getVictim())
+		un->ApplySpellImmune(0, IMMUNITY_ID, SPELL_IMTIMIDATING_ROAR, true);
                 DoCast(SPELL_IMTIMIDATING_ROAR);
+	      if (Unit *un = me->getVictim())
+		un->ApplySpellImmune(0, IMMUNITY_ID, SPELL_IMTIMIDATING_ROAR, false);
                 m_uiImtimidatingTimer = urand(15*IN_MILLISECONDS,25*IN_MILLISECONDS);
             } else m_uiImtimidatingTimer -= diff;
 

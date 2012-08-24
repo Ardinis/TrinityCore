@@ -1701,7 +1701,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
                 _grabbedPlayer = guid;
-		std::cout << "setguid" << std::endl;
+		//std::cout << "setguid" << std::endl;
 		if (Player *player = Unit::GetPlayer(*me, guid))
 		  DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
             }
@@ -1730,14 +1730,14 @@ class npc_valkyr_shadowguard : public CreatureScript
 
 		if (mui_check <= diff)
 		  {
-		std::cout << "check" << std::endl;
+		//std::cout << "check" << std::endl;
 		    if (_grabbedPlayer)
 		      {
 			if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
 			  {
-			    std::cout << "check start" << std::endl;
+			    //std::cout << "check start" << std::endl;
 			    HadGrab = true;
-			    std::cout << "check end" << std::endl;
+			    //std::cout << "check end" << std::endl;
 			  }
 			else if (HadGrab)
 			  {

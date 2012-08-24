@@ -1370,7 +1370,7 @@ class FrostBombTargetSelector
             for (std::list<GameObject*>::const_iterator itr = _collisionList.begin(); itr != _collisionList.end(); ++itr)
 	      //	      if (GameObject* go = (*itr)->GetGameObject(0))
 		{
-		  std::cout << "WTFFFFFFFF" << std::endl;
+		  //std::cout << "WTFFFFFFFF" << std::endl;
 		  //		if (go->IsInBetween(_caster, unit, 2.0f)
 		  //  && _caster->GetExactDist2d(unit->GetPositionX(), unit->GetPositionY()) - _caster->GetExactDist2d(go->GetPositionX(), go->GetPositionY()) < 5.0f)
 		  if ((*itr)->IsInBetween(_caster, unit, 2.0f))

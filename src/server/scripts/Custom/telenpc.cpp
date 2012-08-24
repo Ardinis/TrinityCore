@@ -100,7 +100,7 @@ bool OnGossipHello(Player* Plr, GameObject* pCrea)
     Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Villes de la Horde ->", GOSSIP_SENDER_MAIN, 2000);
   Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Villes neutres ->", GOSSIP_SENDER_MAIN, 3000);
   Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Donjons ->", GOSSIP_SENDER_MAIN, 5000);
-  Plr->ADD_GOSSIP_ITEM( 5, "Ceremonie PVP", GOSSIP_SENDER_MAIN, 3501);
+  //  Plr->ADD_GOSSIP_ITEM( 5, "Ceremonie PVP", GOSSIP_SENDER_MAIN, 3501);
 
   Plr->SEND_GOSSIP_MENU(Plr->GetGossipTextId(pCrea), pCrea->GetGUID());
   return true;

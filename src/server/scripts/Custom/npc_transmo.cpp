@@ -1,0 +1,267 @@
+#include "ScriptPCH.h"
+#include "TransmoMgr.h"
+
+enum Lang
+{
+	GOSSIP_MENU_NOT_ENABLED		= 52000,
+	GOSSIP_MAIN_MENU			= 52001,
+	GOSSIP_REMOVE_TRANSMO		= 52002,
+	GOSSIP_LIST_TRANSMO			= 52003,
+	GOSSIP_NO_ITEM_TO_TRANSMO	= 52004
+};
+
+enum Menu
+{
+};
+
+#define GOSSIP_SENDER_TRANSMO 1
+
+class npc_transmo : public CreatureScript
+{
+public:
+	npc_transmo() : CreatureScript("npc_transmo") {}
+
+	bool OnGossipHello(Player* player, Creature* creature)
+    {
+		if (!sTransmoMgr->IsEnable())
+		{
+			player->SEND_GOSSIP_MENU(GOSSIP_MENU_NOT_ENABLED, creature->GetGUID());
+			return true;
+		}
+
+		for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_TABARD; slot++)
+		{
+			if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+			{
+				if (sTransmoMgr->IsAllowedQuality(item->GetTemplate()->Quality))
+					if (const char* slotName = GetSlotName(slot))
+						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TABARD, slotName, GOSSIP_SENDER_TRANSMO, slot);
+			}
+		}
+
+		player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Reinitialize all", GOSSIP_SENDER_TRANSMO+1, 0, "Are you sure you want to reinitialize the transmogrification on ALL your items?", 0, false);
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Goodbye", GOSSIP_SENDER_TRANSMO+2, 0);
+		player->SEND_GOSSIP_MENU(GOSSIP_MAIN_MENU, creature->GetGUID());
+		return true;
+	}
+
+	bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+		if (!player || !creature)
+			return false;
+
+		player->PlayerTalkClass->ClearMenus();
+		if (!sTransmoMgr->IsEnable())
+		{
+			player->CLOSE_GOSSIP_MENU();
+			return true;
+		}
+
+		switch (sender)
+		{
+		case GOSSIP_SENDER_TRANSMO:
+		{
+			if (Item *olditem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, action))
+			{
+				uint32 guidlow = olditem->GetGUIDLow();
+				if (player->HaveTransmoByItem(olditem->GetGUIDLow()))
+				{
+					if (Item* newSkinItem = player->GetItemByEntry(player->GetTransmoByItem(olditem->GetGUIDLow())))
+					{
+						player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Reinitialize to original skin", GOSSIP_SENDER_TRANSMO+3, guidlow, "Are you sure you want to remove the transmogrification on this item?", 0, false);
+						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Menu", GOSSIP_SENDER_TRANSMO+4, 0);
+						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Goodbye", GOSSIP_SENDER_TRANSMO+2, 0);
+						SendRemoveTransmoNpcText(player, newSkinItem->GetTemplate());
+						player->SEND_GOSSIP_MENU(GOSSIP_REMOVE_TRANSMO, creature->GetGUID());
+						return true;
+					}
+
+					player->RemoveTransmo(olditem->GetGUIDLow());
+				}
+				uint8 itemcount = 0;
+				char token[250] = "\n";
+				if (sTransmoMgr->NeedToken())
+					snprintf(token, 250, "\n\n\n%u x %s", sTransmoMgr->GetTokenCount(), GetItemName(sObjectMgr->GetItemTemplate(sTransmoMgr->GetTokenId()), player->GetSession(), true).c_str());
+				for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+				{
+					if (Item* newitem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+					{
+						if (player->CanTransmo(olditem, newitem))
+						{
+							uint32 newitemEntry = newitem->GetEntry()+10;
+							std::string box =  "You are going to transmogrify this item into:\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nUsing this item will bind it to you and make it non-refundable and non-tradable.\r\nDo you wish to continue ?"+std::string(token);
+							player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, GetItemName(newitem->GetTemplate(), player->GetSession(), true), newitemEntry, guidlow, box, 0, false);
+							++itemcount;
+						}
+					}
+				}
+				for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+				{
+					if (Bag* bag = player->GetBagByPos(i))
+					{
+						for (uint32 j = 0; j < bag->GetBagSize(); j++)
+						{
+							if (Item* newitem = player->GetItemByPos(i, j))
+							{
+								if (player->CanTransmo(olditem, newitem))
+								{
+									uint32 newitemEntry = newitem->GetEntry()+10;
+									std::string box =  "You are going to transmogrify this item into:\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nUsing this item will bind it to you and make it non-refundable and non-tradable.\r\nDo you wish to continue ?"+std::string(token);
+									player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, GetItemName(newitem->GetTemplate(), player->GetSession(), true), newitemEntry, guidlow, box, 0, false);
+									++itemcount;
+								}
+							}
+						}
+					}
+				}
+
+				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Menu", GOSSIP_SENDER_TRANSMO+4, 0);
+				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Goodbye", GOSSIP_SENDER_TRANSMO+2, 0);
+				if (itemcount == 0)
+				{
+					player->SEND_GOSSIP_MENU(GOSSIP_NO_ITEM_TO_TRANSMO, creature->GetGUID());
+					return true;
+				}
+				player->SEND_GOSSIP_MENU(GOSSIP_LIST_TRANSMO, creature->GetGUID());
+				return true;
+			}
+			break;
+		}
+		case GOSSIP_SENDER_TRANSMO+1:
+		{
+			player->RemoveAllTransmo();
+			player->GetSession()->SendAreaTriggerMessage("All items were reinitialized successfully!");
+			break;
+		}
+		case GOSSIP_SENDER_TRANSMO+2:
+		{
+			break;
+		}
+		case GOSSIP_SENDER_TRANSMO+3:
+		{
+			player->RemoveTransmo(action);
+			if (Item* item = player->GetItemByGuid(MAKE_NEW_GUID(action, 0, HIGHGUID_ITEM)))
+				player->GetSession()->SendAreaTriggerMessage("%s was reinitialized successfully!", GetItemName(item->GetTemplate(), player->GetSession(), true).c_str());
+			break;
+		}
+		case GOSSIP_SENDER_TRANSMO+4:
+		{
+			OnGossipHello(player, creature);
+			return true;
+		}
+		default:
+		{
+			if (sTransmoMgr->NeedToken() && (player->GetItemCount(sTransmoMgr->GetTokenId()) < sTransmoMgr->GetTokenCount()))
+			{
+				player->GetSession()->SendNotification("You don't have enough %s", GetItemName(sObjectMgr->GetItemTemplate(sTransmoMgr->GetTokenId()), player->GetSession(), true).c_str());
+				break;
+			}
+			Item *newitem = player->GetItemByEntry(sender-10);
+			Item *olditem = player->GetItemByGuid(MAKE_NEW_GUID(action, 0, HIGHGUID_ITEM));
+			if (!newitem || !olditem)
+			{
+				player->GetSession()->SendNotification("ERROR: have you cheat ?!");
+				break;
+			}
+			if (sTransmoMgr->NeedToken())
+				player->DestroyItemCount(sTransmoMgr->GetTokenId(), sTransmoMgr->GetTokenCount(), true);
+
+			player->AddTransmo(action, newitem->GetEntry());
+			newitem->SetNotRefundable(player);
+			newitem->SetBinding(true);
+			if (const char* slotName = GetSlotName(olditem->GetSlot()))
+				player->GetSession()->SendAreaTriggerMessage("%s transmogrified", slotName);
+			else
+				player->GetSession()->SendAreaTriggerMessage("%s transmogrified", GetItemName(olditem->GetTemplate(), player->GetSession(), true).c_str());
+			break;
+		}
+		}
+
+		player->CLOSE_GOSSIP_MENU();
+		return true;
+	}
+
+private:
+	const char * GetSlotName(uint8 slot)
+    {
+        switch (slot)
+        {
+        case EQUIPMENT_SLOT_HEAD      : return "Head";
+        case EQUIPMENT_SLOT_SHOULDERS : return "Shoulders";
+        case EQUIPMENT_SLOT_BODY      : return "Body";
+        case EQUIPMENT_SLOT_CHEST     : return "Chest";
+        case EQUIPMENT_SLOT_WAIST     : return "Waist";
+        case EQUIPMENT_SLOT_LEGS      : return "Legs";
+        case EQUIPMENT_SLOT_FEET      : return "Feet";
+        case EQUIPMENT_SLOT_WRISTS    : return "Wrists";
+        case EQUIPMENT_SLOT_HANDS     : return "Hands";
+        case EQUIPMENT_SLOT_BACK      : return "Back";
+        case EQUIPMENT_SLOT_MAINHAND  : return "MainHand";
+        case EQUIPMENT_SLOT_OFFHAND   : return "OffHand";
+        case EQUIPMENT_SLOT_RANGED    : return "Ranged";
+        default: return NULL;
+        }
+    }
+
+	std::string GetItemName(const ItemTemplate* itemTemplate, WorldSession* session, bool color = false)
+    {
+        std::string name = itemTemplate->Name1;
+		std::string colorname;
+        int loc_idx = session->GetSessionDbLocaleIndex();
+        if (loc_idx >= 0)
+            if (ItemLocale const* il = sObjectMgr->GetItemLocale(itemTemplate->ItemId))
+                sObjectMgr->GetLocaleString(il->Name, loc_idx, name);
+
+		if (color)
+		{
+			colorname = GetItemColor(itemTemplate->Quality) + "[" + name + "]|r";
+			return colorname;
+		}
+
+        return name;
+    }
+
+	std::string GetItemColor(uint32 quality)
+	{
+		switch(quality)
+        {
+        case ITEM_QUALITY_POOR: return "|cff9d9d9d";
+        case ITEM_QUALITY_NORMAL: return "|cffffffff";
+        case ITEM_QUALITY_UNCOMMON: return "|cff1eff00";
+        case ITEM_QUALITY_RARE: return "|cff0070dd";
+        case ITEM_QUALITY_EPIC: return "|cffa335ee";
+        case ITEM_QUALITY_LEGENDARY: return "|cffff8000";
+        case ITEM_QUALITY_ARTIFACT:
+        case ITEM_QUALITY_HEIRLOOM: return "|cffe6cc80";
+		default: return "|cff9d9d9d";
+        }
+	}
+
+	void SendRemoveTransmoNpcText(Player *player, const ItemTemplate* itemTemplate)
+	{
+		std::stringstream text;
+
+		text << "A transmogrification is already active with:" << std::endl << GetItemName(itemTemplate, player->GetSession(), true);
+
+		WorldPacket data(SMSG_NPC_TEXT_UPDATE, 100);
+
+		data << uint32(GOSSIP_REMOVE_TRANSMO);
+		data << float(0);
+        data << text.str();
+        data << text.str();
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+
+		player->GetSession()->SendPacket(&data);
+	}
+};
+
+void AddSC_npc_transmo()
+{
+    new npc_transmo();
+}

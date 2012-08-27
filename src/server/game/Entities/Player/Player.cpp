@@ -75,6 +75,7 @@
 #include "InstanceScript.h"
 #include <cmath>
 #include "AccountMgr.h"
+#include "../../../scripts/Custom/TransmoMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -5363,7 +5364,12 @@ void Player::CreateCorpse()
     {
         if (m_items[i])
         {
-            iDisplayID = m_items[i]->GetTemplate()->DisplayInfoID;
+	  //transmo <<<<<<<<<<<<<<<<<<
+	  if (HaveTransmoByItem(m_items[i]->GetGUIDLow()))
+	    iDisplayID = GetTransmoByItem(m_items[i]->GetGUIDLow());
+	  else
+	    iDisplayID = m_items[i]->GetTemplate()->DisplayInfoID;
+	  //>>>>>>>>>>>>>>>>>
             iIventoryType = m_items[i]->GetTemplate()->InventoryType;
 
             _cfi =  iDisplayID | (iIventoryType << 24);
@@ -12496,7 +12502,10 @@ void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
 {
     if (pItem)
     {
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetEntry());
+      if (HaveTransmoByItem(pItem->GetGUIDLow()))
+	SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), GetTransmoByItem(pItem->GetGUIDLow()));
+      else
+	SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetEntry());
         SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
         SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 1, pItem->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
     }
@@ -17414,6 +17423,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
     // Loads the jail datas and if jailed it corrects the position to the corresponding jail
     _LoadJail();
+
+    _LoadCustomTransmoPack(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADCUSTOMTRANSMO));
 
     return true;
 }
@@ -25404,4 +25415,141 @@ bool Player::IsInWhisperWhiteList(uint64 guid)
             return true;
     }
     return false;
+}
+
+void Player::_LoadCustomTransmoPack(PreparedQueryResult result)
+{
+  if (!result)
+    return;
+
+        do
+	  {
+	    Field* fields = result->Fetch();
+	    uint32 guidlow = fields[0].GetUInt32();
+
+	    if (!sObjectMgr->GetItemTemplate(fields[1].GetUInt32()))
+	      continue;
+
+	    m_CustomTransmo[guidlow] = fields[1].GetUInt32();
+	    if (Item* item = GetItemByGuid(MAKE_NEW_GUID(guidlow, 0, HIGHGUID_ITEM)))
+	      if (item->IsEquipped())
+		SetVisibleItemSlot(item->GetSlot(), item);
+	  } while (result->NextRow());
+}
+
+bool Player::CanTransmo(Item *oldItem, Item *newItem)
+{
+  if (!sTransmoMgr->IsEnable())
+    return false;
+
+  if (!oldItem || !newItem)
+    return false;
+
+  if (!sTransmoMgr->IsAllowedQuality(oldItem->GetTemplate()->Quality) || !sTransmoMgr->IsAllowedQuality(newItem->GetTemplate()->Quality))
+    return false;
+
+  if (oldItem->GetTemplate()->DisplayInfoID == newItem->GetTemplate()->DisplayInfoID)
+    return false;
+
+  if (HaveTransmoByItem(oldItem->GetGUIDLow()))
+    if (Item* newSkinItem = GetItemByEntry(GetTransmoByItem(oldItem->GetGUIDLow())))
+      if (newSkinItem->GetTemplate()->DisplayInfoID == newItem->GetTemplate()->DisplayInfoID)
+        return false;
+
+  uint16 dest1, dest2;
+  InventoryResult msg = CanEquipItem(NULL_SLOT, dest1, oldItem, true);
+  if (msg != EQUIP_ERR_OK)
+    return false;
+
+  msg = CanEquipItem(dest1, dest2, newItem, true);
+  if (msg != EQUIP_ERR_OK)
+    return false;
+
+  if (oldItem->GetTemplate()->Class == ITEM_CLASS_WEAPON)
+    {
+      if (oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+        return false;
+      if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
+        return false;
+    }
+  else if (oldItem->GetTemplate()->Class == ITEM_CLASS_ARMOR)
+    {
+      if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
+        return false;
+      if (oldItem->GetTemplate()->InventoryType != newItem->GetTemplate()->InventoryType)
+        return false;
+    }
+
+
+  return true;
+}
+bool Player::AddTransmo(uint32 guidlow, uint32 itemId)
+{
+  if (!sTransmoMgr->IsEnable())
+    return false;
+
+  Item* item = GetItemByGuid(MAKE_NEW_GUID(guidlow, 0, HIGHGUID_ITEM));
+  Item* newSkinItem = GetItemByEntry(itemId);
+
+  if (!CanTransmo(item, newSkinItem))
+    return false;
+
+  SQLTransaction trans = CharacterDatabase.BeginTransaction();
+  trans->PAppend("REPLACE INTO character_transmo (guid, itemGuid, itemId) VALUES ('%u', '%u', '%u')", GetGUIDLow(), guidlow, itemId);
+  CharacterDatabase.CommitTransaction(trans);
+
+  m_CustomTransmo[guidlow] = itemId;
+
+  if (item->IsEquipped())
+    {
+      SetVisibleItemSlot(item->GetSlot(), item);
+      PlayDirectSound(3337);
+    }
+
+  return true;
+}
+
+void Player::RemoveTransmo(uint32 guidlow)
+{
+  std::map<uint32, uint32>::iterator itr = m_CustomTransmo.find(guidlow);
+  if (itr != m_CustomTransmo.end())
+    {
+      m_CustomTransmo.erase(itr);
+      SQLTransaction trans = CharacterDatabase.BeginTransaction();
+      trans->PAppend("DELETE FROM character_transmo WHERE guid='%u' AND itemGuid='%u'", GetGUIDLow(), guidlow);
+      CharacterDatabase.CommitTransaction(trans);
+      if (Item* item = GetItemByGuid(MAKE_NEW_GUID(guidlow, 0, HIGHGUID_ITEM)))
+        if (item->IsEquipped())
+          {
+            SetVisibleItemSlot(item->GetSlot(), item);
+            PlayDirectSound(3337);
+          }
+    }
+}
+
+void Player::RemoveAllTransmo()
+{
+  if (!HaveCustomTransmo())
+    return;
+
+  SQLTransaction trans = CharacterDatabase.BeginTransaction();
+  for (std::map<uint32, uint32>::const_iterator itr = m_CustomTransmo.begin(); itr != m_CustomTransmo.end(); itr++)
+    {
+      trans->PAppend("DELETE FROM character_transmo WHERE guid='%u' AND itemGuid='%u'", GetGUIDLow(), itr->first);
+      if (Item* item = GetItemByGuid(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_ITEM)))
+        if (item->IsEquipped())
+          SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (item->GetSlot() * 2), item->GetEntry());
+    }
+  PlayDirectSound(3337);
+  CharacterDatabase.CommitTransaction(trans);
+  m_CustomTransmo.clear();
+}
+
+bool Player::HaveTransmoByItem(uint32 guidlow)
+{
+  std::map<uint32, uint32>::const_iterator itr = m_CustomTransmo.find(guidlow);
+  if (itr != m_CustomTransmo.end())
+    return true;
+
+  return false;
 }

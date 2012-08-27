@@ -827,6 +827,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUSREW       = 29,
     PLAYER_LOGIN_QUERY_LOADINSTANCELOCKTIMES    = 30,
     PLAYER_LOGIN_QUERY_LOADSEASONALQUESTSTATUS  = 31,
+    PLAYER_LOGIN_QUERY_LOADCUSTOMTRANSMO            = 32,
     MAX_PLAYER_LOGIN_QUERY,
 };
 
@@ -2559,6 +2560,21 @@ class Player : public Unit, public GridObject<Player>
             //! TODO: Need a proper calculation for collision height when mounted
         }
 
+	/*********************************************************/
+        /***              CUSTOM TRANSMO SYSTEM                ***/
+        /*********************************************************/
+
+	bool CanTransmo(Item *oldItem, Item *newItem);
+	bool AddTransmo(uint32 guidlow, uint32 itemId);
+	void RemoveTransmo(uint32 guidlow);
+	void RemoveAllTransmo();
+	bool HaveTransmoByItem(uint32 guidlow);
+	bool HaveCustomTransmo() { return !m_CustomTransmo.empty(); };
+	uint32 GetTransmoByItem(uint32 guidlow) { return m_CustomTransmo.find(guidlow)->second; }
+
+	// End of transmo system
+
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -2629,6 +2645,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadGlyphs(PreparedQueryResult result);
         void _LoadTalents(PreparedQueryResult result);
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
+	void _LoadCustomTransmoPack(PreparedQueryResult result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2892,6 +2909,8 @@ class Player : public Unit, public GridObject<Player>
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+
+	std::map<uint32, uint32> m_CustomTransmo;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

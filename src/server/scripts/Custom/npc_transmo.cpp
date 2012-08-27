@@ -39,8 +39,8 @@ public:
 			}
 		}
 
-		player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Reinitialize all", GOSSIP_SENDER_TRANSMO+1, 0, "Are you sure you want to reinitialize the transmogrification on ALL your items?", 0, false);
-		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Goodbye", GOSSIP_SENDER_TRANSMO+2, 0);
+		player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Tout reinitaliser", GOSSIP_SENDER_TRANSMO+1, 0, "Etes-vous sure de vouloir annuler la transmogrification de tous vos items ?", 0, false);
+		player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Aurevoir", GOSSIP_SENDER_TRANSMO+2, 0);
 		player->SEND_GOSSIP_MENU(GOSSIP_MAIN_MENU, creature->GetGUID());
 		return true;
 	}
@@ -68,9 +68,9 @@ public:
 				{
 					if (Item* newSkinItem = player->GetItemByEntry(player->GetTransmoByItem(olditem->GetGUIDLow())))
 					{
-						player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Reinitialize to original skin", GOSSIP_SENDER_TRANSMO+3, guidlow, "Are you sure you want to remove the transmogrification on this item?", 0, false);
+						player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Reinitialiser au skin original", GOSSIP_SENDER_TRANSMO+3, guidlow, "Etes-vous sure de vouloir retirer la transmogrification de cet item ?", 0, false);
 						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Menu", GOSSIP_SENDER_TRANSMO+4, 0);
-						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Goodbye", GOSSIP_SENDER_TRANSMO+2, 0);
+						player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Aurevoir", GOSSIP_SENDER_TRANSMO+2, 0);
 						SendRemoveTransmoNpcText(player, newSkinItem->GetTemplate());
 						player->SEND_GOSSIP_MENU(GOSSIP_REMOVE_TRANSMO, creature->GetGUID());
 						return true;
@@ -89,7 +89,7 @@ public:
 						if (player->CanTransmo(olditem, newitem))
 						{
 							uint32 newitemEntry = newitem->GetEntry()+10;
-							std::string box =  "You are going to transmogrify this item into:\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nUsing this item will bind it to you and make it non-refundable and non-tradable.\r\nDo you wish to continue ?"+std::string(token);
+							std::string box =  "Vous etes sur le point de transmogrifier votre item en :\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nCet item va vous etre lie, vous ne pourrez plus echanger cet item.\r\nVoulez vous continuer ?"/*+std::string(token)*/;
 							player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, GetItemName(newitem->GetTemplate(), player->GetSession(), true), newitemEntry, guidlow, box, 0, false);
 							++itemcount;
 						}
@@ -106,7 +106,7 @@ public:
 								if (player->CanTransmo(olditem, newitem))
 								{
 									uint32 newitemEntry = newitem->GetEntry()+10;
-									std::string box =  "You are going to transmogrify this item into:\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nUsing this item will bind it to you and make it non-refundable and non-tradable.\r\nDo you wish to continue ?"+std::string(token);
+									std::string box =  "Vous etes sur le point de transmogrifier votre item en :\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nCet item va vous etre lie, vous ne pourrez plus echanger cet item.\r\nVoulez vous continuer ?"/*+std::string(token)*/;
 									player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, GetItemName(newitem->GetTemplate(), player->GetSession(), true), newitemEntry, guidlow, box, 0, false);
 									++itemcount;
 								}
@@ -116,7 +116,7 @@ public:
 				}
 
 				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Menu", GOSSIP_SENDER_TRANSMO+4, 0);
-				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Goodbye", GOSSIP_SENDER_TRANSMO+2, 0);
+				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Aurevoir", GOSSIP_SENDER_TRANSMO+2, 0);
 				if (itemcount == 0)
 				{
 					player->SEND_GOSSIP_MENU(GOSSIP_NO_ITEM_TO_TRANSMO, creature->GetGUID());
@@ -130,7 +130,7 @@ public:
 		case GOSSIP_SENDER_TRANSMO+1:
 		{
 			player->RemoveAllTransmo();
-			player->GetSession()->SendAreaTriggerMessage("All items were reinitialized successfully!");
+			player->GetSession()->SendAreaTriggerMessage("Tous vos item ont etes reinitialises avec succes !");
 			break;
 		}
 		case GOSSIP_SENDER_TRANSMO+2:
@@ -141,7 +141,7 @@ public:
 		{
 			player->RemoveTransmo(action);
 			if (Item* item = player->GetItemByGuid(MAKE_NEW_GUID(action, 0, HIGHGUID_ITEM)))
-				player->GetSession()->SendAreaTriggerMessage("%s was reinitialized successfully!", GetItemName(item->GetTemplate(), player->GetSession(), true).c_str());
+				player->GetSession()->SendAreaTriggerMessage("%s a ete reinitialise avec succes !", GetItemName(item->GetTemplate(), player->GetSession(), true).c_str());
 			break;
 		}
 		case GOSSIP_SENDER_TRANSMO+4:
@@ -151,16 +151,16 @@ public:
 		}
 		default:
 		{
-			if (sTransmoMgr->NeedToken() && (player->GetItemCount(sTransmoMgr->GetTokenId()) < sTransmoMgr->GetTokenCount()))
+		  /*			if (sTransmoMgr->NeedToken() && (player->GetItemCount(sTransmoMgr->GetTokenId()) < sTransmoMgr->GetTokenCount()))
 			{
 				player->GetSession()->SendNotification("You don't have enough %s", GetItemName(sObjectMgr->GetItemTemplate(sTransmoMgr->GetTokenId()), player->GetSession(), true).c_str());
 				break;
-			}
+				}*/
 			Item *newitem = player->GetItemByEntry(sender-10);
 			Item *olditem = player->GetItemByGuid(MAKE_NEW_GUID(action, 0, HIGHGUID_ITEM));
 			if (!newitem || !olditem)
 			{
-				player->GetSession()->SendNotification("ERROR: have you cheat ?!");
+				player->GetSession()->SendNotification("ERROR: vous avez tente de tricher, une notification vien d'etre envoyee.");
 				break;
 			}
 			if (sTransmoMgr->NeedToken())
@@ -170,9 +170,9 @@ public:
 			newitem->SetNotRefundable(player);
 			newitem->SetBinding(true);
 			if (const char* slotName = GetSlotName(olditem->GetSlot()))
-				player->GetSession()->SendAreaTriggerMessage("%s transmogrified", slotName);
+				player->GetSession()->SendAreaTriggerMessage("%s transmogrifie", slotName);
 			else
-				player->GetSession()->SendAreaTriggerMessage("%s transmogrified", GetItemName(olditem->GetTemplate(), player->GetSession(), true).c_str());
+				player->GetSession()->SendAreaTriggerMessage("%s transmogrifie", GetItemName(olditem->GetTemplate(), player->GetSession(), true).c_str());
 			break;
 		}
 		}
@@ -186,19 +186,19 @@ private:
     {
         switch (slot)
         {
-        case EQUIPMENT_SLOT_HEAD      : return "Head";
-        case EQUIPMENT_SLOT_SHOULDERS : return "Shoulders";
-        case EQUIPMENT_SLOT_BODY      : return "Body";
-        case EQUIPMENT_SLOT_CHEST     : return "Chest";
-        case EQUIPMENT_SLOT_WAIST     : return "Waist";
-        case EQUIPMENT_SLOT_LEGS      : return "Legs";
-        case EQUIPMENT_SLOT_FEET      : return "Feet";
-        case EQUIPMENT_SLOT_WRISTS    : return "Wrists";
-        case EQUIPMENT_SLOT_HANDS     : return "Hands";
-        case EQUIPMENT_SLOT_BACK      : return "Back";
-        case EQUIPMENT_SLOT_MAINHAND  : return "MainHand";
-        case EQUIPMENT_SLOT_OFFHAND   : return "OffHand";
-        case EQUIPMENT_SLOT_RANGED    : return "Ranged";
+        case EQUIPMENT_SLOT_HEAD      : return "Tete";
+        case EQUIPMENT_SLOT_SHOULDERS : return "Epaules";
+        case EQUIPMENT_SLOT_BODY      : return "Torse";
+        case EQUIPMENT_SLOT_CHEST     : return "Chemise";
+        case EQUIPMENT_SLOT_WAIST     : return "Ceinture";
+        case EQUIPMENT_SLOT_LEGS      : return "Jambes";
+        case EQUIPMENT_SLOT_FEET      : return "Bottes";
+        case EQUIPMENT_SLOT_WRISTS    : return "Poignes";
+        case EQUIPMENT_SLOT_HANDS     : return "Gants";
+        case EQUIPMENT_SLOT_BACK      : return "Dos";
+        case EQUIPMENT_SLOT_MAINHAND  : return "Main droite";
+        case EQUIPMENT_SLOT_OFFHAND   : return "Main gauche";
+        case EQUIPMENT_SLOT_RANGED    : return "Distance";
         default: return NULL;
         }
     }
@@ -241,7 +241,7 @@ private:
 	{
 		std::stringstream text;
 
-		text << "A transmogrification is already active with:" << std::endl << GetItemName(itemTemplate, player->GetSession(), true);
+		text << "Une transmogrification est deja en cours sur :" << std::endl << GetItemName(itemTemplate, player->GetSession(), true);
 
 		WorldPacket data(SMSG_NPC_TEXT_UPDATE, 100);
 

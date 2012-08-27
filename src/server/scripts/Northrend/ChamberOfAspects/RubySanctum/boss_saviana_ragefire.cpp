@@ -175,7 +175,7 @@ public:
 
       void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
       {
-	std::cout << "hit : " << spell->Id << std::endl;
+	//	std::cout << "hit : " << spell->Id << std::endl;
 	switch (spell->Id)
 	  {
 	  case 19801 : //tir tranquilisant

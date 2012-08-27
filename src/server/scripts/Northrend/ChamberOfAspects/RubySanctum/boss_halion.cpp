@@ -246,7 +246,6 @@ public:
 
             if (!pclone || !pclone->isAlive())
             {
-
                 instance->SetData(TYPE_HALION, DONE);
                 //invoca dragones <HALION> al termino del evento. WS-CORE.
                 me->SummonCreature(NPC_DRAGON, 3236.96f, 556.85f, 113.36f, 3.32f);
@@ -313,7 +312,7 @@ public:
             MovementStarted = true;
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
 	  instance->SetData(DATA_HALION_HEALTH_TOTAL, damage);
 	  instance->SetData(DATA_HALION_REAL_DAMAGED_TOTAL, damage);
@@ -321,6 +320,12 @@ public:
 	  if (me->GetHealth() > 1)
 	    {
 	      me->SetHealth(instance->GetData(DATA_HALION_HEALTH_TOTAL));
+	      damage = 0;
+	    }
+	  else
+	    {
+	      if (attacker->ToPlayer())
+		attacker->Kill(me);
 	      damage = 0;
 	    }
         }
@@ -623,7 +628,7 @@ public:
                 DoCast(me, SPELL_TWILIGHT_ENTER);
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage)
         {
 	  instance->SetData(DATA_HALION_HEALTH_TOTAL, damage);
 	  //instance->SetData(DATA_HALION_REAL_DAMAGED_TOTAL, damage);
@@ -631,6 +636,12 @@ public:
 	  if (me->GetHealth() > 1)
 	    {
 	      me->SetHealth(instance->GetData(DATA_HALION_HEALTH_TOTAL));
+	      damage = 0;
+	    }
+	  else
+	    {
+	      if (attacker->ToPlayer())
+		attacker->Kill(me);
 	      damage = 0;
 	    }
         }
@@ -953,7 +964,7 @@ public:
                    for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                     {
                        if (!i->getSource()->IsInMap(me)) continue;
-                       if (i->getSource()->isGameMaster()) continue;
+		       //                       if (i->getSource()->isGameMaster()) continue;
                        if (i->getSource()->isAlive()  && i->getSource()->IsWithinDistInMap(me, range))
                            return true;
                     }
@@ -1367,6 +1378,7 @@ public:
     {
       if (!instance || instance->GetData(TYPE_HALION) != IN_PROGRESS)
 	me->DespawnOrUnsummon();
+      //TODOO ADD A TIMER
       mob_orb_carrierDamage();
       if (!MovementStarted)
 	{
@@ -1568,6 +1580,8 @@ public:
             me->SetInCombatWithZone();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+	    //40681
+
         }
 
         void UpdateAI(const uint32 uiDiff)
@@ -1593,6 +1607,8 @@ public:
                 case 2:
                     // Place summon flames there
                     {
+		      if (IsHeroic())
+			me->SummonCreature(40681, me->GetPositionX(),  me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
                         direction = 2.0f*M_PI*((float)urand(0,15)/16.0f);
                         radius = 0.0f;
                         for(uint8 i = 0; i < RAID_MODE(TARGETS_10,TARGETS_25,TARGETS_10,TARGETS_25); ++i)
@@ -1602,6 +1618,8 @@ public:
                             me->SummonCreature(NPC_METEOR_STRIKE_1, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
                             me->GetNearPoint2D(x, y, radius, direction+M_PI);
                             me->SummonCreature(NPC_METEOR_STRIKE_1, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+			    if (i >= 2 && IsHeroic())
+			      me->SummonCreature(40681, x,  y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
                         }
                     };
 
@@ -1615,6 +1633,8 @@ public:
                             me->SummonCreature(NPC_METEOR_STRIKE_1, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
                             me->GetNearPoint2D(x, y, radius, direction+M_PI);
                             me->SummonCreature(NPC_METEOR_STRIKE_1, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+			    if (i >= 2 && IsHeroic())
+			      me->SummonCreature(40683, x,  y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
                         }
                      };
                      setStage(3);
@@ -1737,11 +1757,14 @@ class spell_halion_fiery_combustion : public SpellScriptLoader
                 {
                     if (Aura *mark = target->GetAura(SPELL_MARK_OF_COMBUSTION))
                     {
-                        int32 bp = 2000 * mark->GetStackAmount();
+		      int32 stacks = mark->GetStackAmount();
+                        int32 bp = 2000 * stacks;
                         target->CastCustomSpell(target, SPELL_COMBUSTION_EXPLODE, &bp, 0, 0, true);
                         if (Creature* halion_real = GetCaster()->ToCreature())
                         {
-                            halion_real->SummonCreature(NPC_COMBUSTION, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+			  if (Creature *c = halion_real->SummonCreature(NPC_COMBUSTION, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+			      for(int32 count = 0; count < stacks; count++)
+				c->CastSpell(c, 70345, true);
                         }
                         target->RemoveAura(SPELL_MARK_OF_COMBUSTION, target->GetGUID());
                     }
@@ -1796,11 +1819,14 @@ class spell_halion_soul_consumption : public SpellScriptLoader
                 {
                     if (Aura *mark = target->GetAura(SPELL_MARK_OF_CONSUMPTION))
                     {
-                        int32 bp = 2000 * mark->GetStackAmount();
+		        int32 stacks =  mark->GetStackAmount();
+                        int32 bp = 2000 * stacks;
                         target->CastCustomSpell(target, SPELL_CONSUMPTION_EXPLODE, &bp, 0, 0, true);
                         if (Creature* halion_twilight = GetCaster()->ToCreature())
                         {
-                            halion_twilight->SummonCreature(NPC_CONSUMPTION, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+			  if (Creature *c = halion_twilight->SummonCreature(NPC_CONSUMPTION, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+			    for(int32 count = 0; count < stacks; count++)
+			      c->CastSpell(c, 70345, true);
                         }
                         target->RemoveAura(SPELL_MARK_OF_CONSUMPTION, target->GetGUID());
                     }
@@ -1846,7 +1872,7 @@ class spell_twilight_cutter : public SpellScriptLoader
                     if(Player* player = i->getSource())
                     {
                         if (!player) continue;
-                        if (player->isGameMaster()) continue;
+			//                        if (player->isGameMaster()) continue;
                         if (!player->HasAura(SPELL_TWILIGHT_ENTER)) continue;
                         if (player->isAlive())
                         {
@@ -1920,6 +1946,55 @@ class npc_D_ws2 : public CreatureScript
         }
 };
 
+
+class npc_Braise : public CreatureScript
+{
+public:
+  npc_Braise() : CreatureScript("npc_Braise") { }
+
+  struct npc_BraiseAI : public ScriptedAI
+  {
+    npc_BraiseAI(Creature *pCreature) : ScriptedAI(pCreature)
+    {
+      instance = me->GetInstanceScript();
+      me->CastSpell(me, 75885, true);
+      CheckInterval = 2000;
+    }
+    
+
+    void Reset()
+    {
+      me->CastSpell(me, 75885, true);
+      CheckInterval = 2000;
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (!UpdateVictim())
+	return;
+      if (CheckInterval <= diff)
+	{
+	  if (Creature *c = me->FindNearestCreature(40681, 15, true))
+	    c->CastSpell(c, 75886, true);
+	  me->RemoveAura(75888);
+	  CheckInterval = 2000;
+	}
+      else CheckInterval -= diff;
+	    
+      DoMeleeAttackIfReady();
+    }
+
+  private:
+    uint32 CheckInterval;
+    InstanceScript* instance;
+  };
+
+  CreatureAI* GetAI(Creature *pCreature) const
+  {
+    return new npc_BraiseAI(pCreature);
+  }
+};
+
 void AddSC_boss_halion()
 {
     new boss_halion_real();
@@ -1938,4 +2013,5 @@ void AddSC_boss_halion()
     new spell_halion_soul_consumption();
     new spell_twilight_cutter();
     new npc_D_ws2();
+    new npc_Braise();
 }

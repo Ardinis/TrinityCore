@@ -509,31 +509,6 @@ class npc_kologarn_arm : public CreatureScript
                 me->SetReactState(REACT_DEFENSIVE);
             }
 
-	  void DamageTaken(Unit* pKiller, uint32 &damage)
-	  {
-	    if (Gripped)
-	      {
-		ArmDamage += damage;
-		int32 dmg = RAID_MODE(100000, 480000);
-            
-		if (ArmDamage >= dmg || damage >= me->GetHealth())
-		  {
-		    for (uint8 n = 0; n < RAID_MODE(1, 3); ++n)
-		      {
-			Unit* pGripTarget = me->GetVehicleKit()->GetPassenger(n);
-			if (pGripTarget && pGripTarget->isAlive())
-			  {
-			    pGripTarget->RemoveAurasDueToSpell(SPELL_STONE_GRIP);
-			    pGripTarget->RemoveAurasDueToSpell(SPELL_STONE_GRIP_STUN);
-			    pGripTarget->_ExitVehicle();
-			    pGripTarget->GetMotionMaster()->MoveJump(1767.80f, -18.38f, 448.808f, 10, 10);
-			  }
-		      }
-		    Gripped = false;
-		  }
-	      }
-	  }
-
             void EnterCombat(Unit* who)
             {
                 me->SetReactState(REACT_AGGRESSIVE);
@@ -542,8 +517,6 @@ class npc_kologarn_arm : public CreatureScript
                 if (kologarn && !kologarn->isInCombat())
                     kologarn->AI()->AttackStart(who);
             }
-	private :
-	  uint32 ArmDamage;
         };
 
         CreatureAI* GetAI(Creature* creature) const

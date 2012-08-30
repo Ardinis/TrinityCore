@@ -291,7 +291,7 @@ class instance_ruby_sanctum : public InstanceMapScript
 
 	  void OnPlayerEnter(Player* player)
 	  {
-	    if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
+	    if (Creature* controller = instance->GetCreature(HalionControllerGUID))
 	      return;
 	    if (Creature* halionController = instance->SummonCreature(NPC_HALION_CONTROLLER, HalionControllerSpawnPos))
 	      halionController->AI()->DoAction(ACTION_INTRO_HALION);

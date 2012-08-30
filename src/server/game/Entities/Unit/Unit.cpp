@@ -559,8 +559,10 @@ void Unit::DealDamageMods(Unit* victim, uint32 &damage, uint32* absorb)
 uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellInfo const* spellProto, bool durabilityLoss)
 {
     if (victim->IsAIEnabled)
-        victim->GetAI()->DamageTaken(this, damage);
-
+      {
+	//        victim->GetAI()->DamageTaken(this, damage);
+        victim->GetAI()->DamageTaken(this, damage,  spellProto);
+      }
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
@@ -3585,7 +3587,7 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint32 dispellerSpellId
         Aura* aura = iter->second;
         if (aura->GetCasterGUID() == casterGUID)
         {
-            DispelInfo dispelInfo(dispeller, dispellerSpellId, chargesRemoved);
+	  DispelInfo dispelInfo(dispeller, this, dispellerSpellId, chargesRemoved);
 
             // Call OnDispel hook on AuraScript
             aura->CallScriptDispel(&dispelInfo);

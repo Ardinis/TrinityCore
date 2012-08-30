@@ -403,6 +403,17 @@ GameObject* SpellScript::GetHitGObj()
     return m_spell->gameObjTarget;
 }
 
+WorldLocation* SpellScript::GetHitDest()
+{
+  if (!IsInEffectHook())
+    {
+      sLog->outError("TSCR: Script: `%s` Spell: `%u`: function SpellScript::GetHitGObj was called, but function has no effect in current hook!", m_scriptName->c_str(), m_scriptSpellId);
+      return NULL;
+    }
+  return m_spell->destTarget;
+}
+
+
 int32 SpellScript::GetHitDamage()
 {
     if (!IsInTargetHook())

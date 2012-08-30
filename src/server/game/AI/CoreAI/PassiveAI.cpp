@@ -65,6 +65,11 @@ void CritterAI::DamageTaken(Unit* /*done_by*/, uint32&)
         me->SetControlled(true, UNIT_STATE_FLEEING);
 }
 
+void CritterAI::DamageTaken(Unit* done_by, uint32& damage, SpellInfo const* /*spellInfo*/)
+{
+  this->DamageTaken(done_by, damage);
+}
+
 void CritterAI::EnterEvadeMode()
 {
     if (me->HasUnitState(UNIT_STATE_FLEEING))

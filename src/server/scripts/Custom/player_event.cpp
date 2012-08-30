@@ -134,8 +134,16 @@ public:
 	      {
 		if (Unit *cameleon = targets.GetUnitTarget())
 		  {
-		    cameleon->CastSpell(pet, 45204, true);
-		    pet->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5);
+		    if (cameleon->GetTypeId() == TYPEID_PLAYER)
+		      {
+			cameleon->CastSpell(pet, 45204, true);
+			pet->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5);
+		      }
+		    else
+		      {
+			player->CastSpell(pet, 45204, true);
+			pet->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5);
+		      }
 		  }
 		else
 		  {

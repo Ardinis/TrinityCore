@@ -560,7 +560,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 {
     if (victim->IsAIEnabled)
       {
-	//        victim->GetAI()->DamageTaken(this, damage);
+	victim->GetAI()->DamageTaken(this, damage);
         victim->GetAI()->DamageTaken(this, damage,  spellProto);
       }
     if (IsAIEnabled)

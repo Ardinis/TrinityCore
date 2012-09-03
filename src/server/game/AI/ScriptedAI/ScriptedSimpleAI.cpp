@@ -154,7 +154,7 @@ void SimpleAI::KilledUnit(Unit* victim)
 
 void SimpleAI::DamageTaken(Unit* attacker, uint32& damage,  SpellInfo const* /*spellInfo*/)
 {
-  me->AI()->DamageTaken(attacker, damage);
+  //  me->AI()->DamageTaken(attacker, damage);
 }
 
 void SimpleAI::DamageTaken(Unit* killer, uint32& damage)

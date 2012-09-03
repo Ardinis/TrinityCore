@@ -152,6 +152,11 @@ void SimpleAI::KilledUnit(Unit* victim)
         DoCast(target, Kill_Spell);
 }
 
+void SimpleAI::DamageTaken(Unit* attacker, uint32& damage,  SpellInfo const* /*spellInfo*/)
+{
+  me->AI()->DamageTaken(attacker, damage);
+}
+
 void SimpleAI::DamageTaken(Unit* killer, uint32& damage)
 {
     //Return if damage taken won't kill us

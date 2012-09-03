@@ -67,7 +67,7 @@ void CritterAI::DamageTaken(Unit* /*done_by*/, uint32&)
 
 void CritterAI::DamageTaken(Unit* done_by, uint32& damage, SpellInfo const* /*spellInfo*/)
 {
-  this->DamageTaken(done_by, damage);
+  me->AI()->DamageTaken(done_by, damage);
 }
 
 void CritterAI::EnterEvadeMode()

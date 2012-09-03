@@ -1361,7 +1361,7 @@ void CreatureEventAI::DamageTaken(Unit* /*done_by*/, uint32& damage)
 
 void CreatureEventAI::DamageTaken(Unit* done_by, uint32& damage, SpellInfo const* /*spellInfo*/)
 {
-  this->DamageTaken(done_by, damage);
+  me->AI()->DamageTaken(done_by, damage);
 }
 
 bool CreatureEventAI::SpawnedEventConditionsCheck(CreatureEventAI_Event const& event)

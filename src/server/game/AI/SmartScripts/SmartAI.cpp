@@ -644,7 +644,7 @@ void SmartAI::DamageTaken(Unit* doneBy, uint32& damage)
 
 void SmartAI::DamageTaken(Unit* doneBy, uint32& damage, SpellInfo const* /*spellInfo*/)
 {
-  this->DamageTaken(doneBy, damage);
+  me->AI()->DamageTaken(doneBy, damage);
 }
 
 void SmartAI::HealReceived(Unit* doneBy, uint32& addhealth)

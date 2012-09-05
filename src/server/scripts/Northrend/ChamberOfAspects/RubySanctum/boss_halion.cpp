@@ -1500,9 +1500,9 @@ class npc_meteor_strike : public CreatureScript
                             controller->AI()->JustSummoned(flame);
 
                         flame->CastSpell(flame, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
-			if (IsHeroic())
+			if (IsHeroic() && _spawnCount > 2)
 			  {
-			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
+			    //			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
 			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
 			  }
                         ++_spawnCount;

@@ -2084,9 +2084,11 @@ public:
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
-		  float p = (AB + BC + AC)/2;
-		  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
-		  if (DC < 3.75f || DC > 52.0f)
+		  //		  float p = (AB + BC + AC)/2;
+		  //	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
+		  //  if (DC < 3.75f || DC > 52.0f)
+		  float dd = AB - (BC + AC);
+		  if (dd >= -10 && dd <= 10)
 		    {
 		      player->DealDamage(player, 20000000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
 

@@ -497,7 +497,7 @@ class boss_halion : public CreatureScript
                         events.ScheduleEvent(EVENT_FLAME_BREATH, 25000);
                         break;
                     case EVENT_TAIL_LASH:
-                        DoCastAOE(SPELL_TAIL_LASH);
+		      //                        DoCastAOE(SPELL_TAIL_LASH);
                         events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
                         break;
                     case EVENT_METEOR_STRIKE:
@@ -668,14 +668,14 @@ class boss_twilight_halion : public CreatureScript
 	      }
 	    else
 	      mui_soul -= diff;
-	    if (mui_tail <= diff)
+	    /*	    if (mui_tail <= diff)
 	      {
 		DoCastAOE(SPELL_TAIL_LASH);
 		events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
 	      }
 	    else
 	      mui_tail -= diff;
-
+	    */
 	  }
 
             void SpellHit(Unit* /*who*/, SpellInfo const* spell)
@@ -1178,8 +1178,8 @@ class npc_orb_carrier : public CreatureScript
                 //! According to sniffs this spell is cast every 1 or 2 seconds.
                 //! However, refreshing it looks bad, so just cast the spell if
                 //! we are not channeling it.
-	      //                if (!me->HasUnitState(UNIT_STATE_CASTING))
-	      //     me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
+	      if (!me->HasUnitState(UNIT_STATE_CASTING))
+		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
 	      if (mui_rotate <= diff)
 		{
 		  me->GetMotionMaster()->MoveRotate(40000, ROTATE_DIRECTION_LEFT);
@@ -2084,14 +2084,17 @@ public:
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
-		  //		  float p = (AB + BC + AC)/2;
-		  //	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
-		  //  if (DC < 3.75f || DC > 52.0f)
-		  float dd = AB - (BC + AC);
-		  if (dd >= -10 && dd <= 10)
+		  		  float p = (AB + BC + AC)/2;
+		  	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
+		    if (DC < 3.75f || DC > 52.0f)
+		      //		  float dd = (AB*AB) - ((BC*BC) + (AC*AC));
+		  // id (dd < 0)
+		  //   dd *= -1;
+		  //  dd = sqrt(dd);
+		  //  if (dd >= 0 && dd <= 20)
 		    {
-		      player->DealDamage(player, 20000000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-
+		      caster->ToCreature()->MonsterSay("find someone tu shoot OMG", LANG_UNIVERSAL, player->GetGUID());
+		      player->DealDamage(player, 20000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
 		    }
 		    //		    target->CastSpell(player, SPELL_TWILIGHT_CUTTER, true);
 		}

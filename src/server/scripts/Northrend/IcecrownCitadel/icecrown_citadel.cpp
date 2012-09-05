@@ -2449,12 +2449,6 @@ public:
     if (!instanceScript)
       return true;
     uint32 spellId =  instanceScript->GetData(DATA_BUFF);
-    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
-    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
-    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
-    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
-    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
-    player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
     switch (action)
       {
       case GOSSIP_ACTION_INFO_DEF+1:
@@ -2484,11 +2478,15 @@ public:
       default:
 	break;
       }
+    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
+    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
+    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
+    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
+    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
+    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
     if (spellId != 0)
-      {
-	instanceScript->SetData(DATA_BUFF, spellId);
-	instanceScript->DoCastSpellOnPlayers(spellId);
-      }
+      instanceScript->DoCastSpellOnPlayers(spellId);
+    instanceScript->SetData(DATA_BUFF, spellId);
     return true;
   }
 

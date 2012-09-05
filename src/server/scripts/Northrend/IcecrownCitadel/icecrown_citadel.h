@@ -138,6 +138,8 @@ enum DataTypes
     DATA_MURADIN_BRONZEBEARD                = 110,
     DATA_GUNSHIP_BATTLE                     = 111,
     GUID_PLAYER_LOCATION                    = 112,
+
+    DATA_BUFF,
 };
 
 enum CreaturesIds

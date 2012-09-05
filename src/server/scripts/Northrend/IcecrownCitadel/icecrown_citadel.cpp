@@ -26,6 +26,7 @@
 #include "SpellAuraEffects.h"
 #include "SmartAI.h"
 #include "icecrown_citadel.h"
+#include "Group.h"
 
 // Weekly quest support
 // * Deprogramming                (DONE)
@@ -2423,6 +2424,12 @@ public:
 
   bool OnGossipHello(Player* player, Creature* creature)
   {
+    if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
+      {
+	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Desole, je ne suis pas le chef de raid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+8);
+	player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
+	return true;
+      }
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 5 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 10 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 15 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
@@ -2431,7 +2438,6 @@ public:
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 30 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "no buff !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
     player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
-
     return true;
   }
 
@@ -2442,6 +2448,7 @@ public:
     InstanceScript* instanceScript = creature->GetInstanceScript();
     if (!instanceScript)
       return true;
+    uint32 spellId =  instanceScript->GetData(DATA_BUFF);
     player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
     player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
     player->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
@@ -2451,25 +2458,36 @@ public:
     switch (action)
       {
       case GOSSIP_ACTION_INFO_DEF+1:
-	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816, true);
+	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816;
 	break;
       case GOSSIP_ACTION_INFO_DEF+2:
-	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818, true);
+	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818;
 	break;
       case GOSSIP_ACTION_INFO_DEF+3:
-	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819, true);
+	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819;
 	break;
       case GOSSIP_ACTION_INFO_DEF+4:
-	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820, true);
+	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820;
 	break;
       case GOSSIP_ACTION_INFO_DEF+5:
-	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821, true);
+	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821;
 	break;
       case GOSSIP_ACTION_INFO_DEF+6:
-	player->CastSpell(player,instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822, true);
+	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822;
+	break;
+      case GOSSIP_ACTION_INFO_DEF+7:
+	spellId = 0;
+	break;
+      case GOSSIP_ACTION_INFO_DEF+8:
+	creature->MonsterSay("OK, je vais attendre le chef de raid", LANG_UNIVERSAL, player->GetGUID());
 	break;
       default:
 	break;
+      }
+    if (spellId != 0)
+      {
+	instanceScript->SetData(DATA_BUFF, spellId);
+	instanceScript->DoCastSpellOnPlayers(spellId);
       }
     return true;
   }

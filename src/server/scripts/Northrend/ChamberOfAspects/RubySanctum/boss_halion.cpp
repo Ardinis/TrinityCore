@@ -1178,8 +1178,8 @@ class npc_orb_carrier : public CreatureScript
                 //! According to sniffs this spell is cast every 1 or 2 seconds.
                 //! However, refreshing it looks bad, so just cast the spell if
                 //! we are not channeling it.
-	      if (!me->HasUnitState(UNIT_STATE_CASTING))
-		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
+	      //	      if (!me->HasUnitState(UNIT_STATE_CASTING))
+	      //		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
 	      if (mui_rotate <= diff)
 		{
 		  me->GetMotionMaster()->MoveRotate(40000, ROTATE_DIRECTION_LEFT);
@@ -2081,6 +2081,8 @@ public:
 	      //	      if (!player->HasAura(SPELL_TWILIGHT_ENTER)) continue;
 	      if (player->isAlive())
 		{
+		  std::cout << "TARGET : X : " << target->GetPositionX() << " Y : " << target->GetPositionY() << std::endl;
+		  std::cout << "CASTER : X : " << caster->GetPositionX() << " Y : " << caster->GetPositionY() << std::endl;
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;

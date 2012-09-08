@@ -1504,7 +1504,7 @@ class npc_meteor_strike : public CreatureScript
 			if (IsHeroic() && _spawnCount > 2)
 			  {
 			    //			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
-			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
+			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_CORPSE_DESPAWN, 25000);
 			  }
                         ++_spawnCount;
                     }

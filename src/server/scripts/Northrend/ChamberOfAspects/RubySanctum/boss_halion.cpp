@@ -1179,7 +1179,6 @@ class npc_orb_carrier : public CreatureScript
                 //! we are not channeling it.
 	      //	      if (!me->HasUnitState(UNIT_STATE_CASTING))
 	      //		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
-	      me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
 	      if (mui_rotate <= diff)
 		{
 		  me->GetMotionMaster()->MoveRotate(40000, ROTATE_DIRECTION_LEFT);

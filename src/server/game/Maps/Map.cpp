@@ -708,6 +708,8 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
     Cell new_cell(x, y);
 
     player->Relocate(x, y, z, orientation);
+    if (player->IsVehicle())
+      player->GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
 
     if (old_cell.DiffGrid(new_cell) || old_cell.DiffCell(new_cell))
     {

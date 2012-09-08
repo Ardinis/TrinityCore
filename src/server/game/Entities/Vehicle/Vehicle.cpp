@@ -496,15 +496,38 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
             ASSERT(passenger->IsInWorld());
             ASSERT(passenger->IsOnVehicle(GetBase()));
             ASSERT(GetSeatForPassenger(passenger));
-	    std::cout << "X : " << x << " pX  : " << passenger->m_movementInfo.t_pos.m_positionX << " Y : " << y << " pY : " <<  passenger->m_movementInfo.t_pos.m_positionY
-		      << " O : " << ang << " pO : " << passenger->m_movementInfo.t_pos.m_orientation << std::endl;
             float px = x + passenger->m_movementInfo.t_pos.m_positionX;
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
             float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
+	    if (ang != 0)
+	      {
+		float nang = (ang  * 360) / 6.3;
+		//		std::cout << nang << std::endl;
+		nang = nang * (3.14 / 180);
+		//		POINT rotate_point(float cx,float cy,float angle,POINT p)
+		//		{
+		  float s = sin(nang);
+		  float c = cos(nang);
+
+		  // translate point back to origin:
+		  px -= x;
+		  py -= y;
+
+		  // rotate point
+		  float xnew = px * c - py * s;
+		  float ynew = px * s + py * c;
+
+		  // translate point back:
+		  px = xnew + x;
+		  py = ynew + y;
+		  //		}
+
+	      }
 	    //	    var x = radius * Math.cos(toRadians(angle * i)) + originX;
 	    //  var y = radius * Math.sin(toRadians(-angle * i)) + originY;
             passenger->UpdatePosition(px, py, pz, po);
+	    //	    std::cout << "X : " << px << " Y : " << py << std::endl;
         }
 }
 

@@ -135,7 +135,7 @@ class boss_high_astromancer_solarian : public CreatureScript
 
                 me->SetArmor(defaultarmor);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->SetVisible(true);
+		//                me->SetVisible(true);
                 me->SetFloatValue(OBJECT_FIELD_SCALE_X, defaultsize);
                 me->SetDisplayId(MODEL_HUMAN);
 

@@ -495,15 +495,11 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
             ASSERT(passenger->IsInWorld());
             ASSERT(passenger->IsOnVehicle(GetBase()));
             ASSERT(GetSeatForPassenger(passenger));
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of 87e1107... begin rewriting passengers position function
             float px = x + passenger->m_movementInfo.t_pos.m_positionX;
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
             float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
-<<<<<<< HEAD
+
 	    if (ang != 0)
 	      {
 		float nang = (ang  * 360) / 6.3;
@@ -517,9 +513,6 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 		px = xnew + x;
 		py = ynew + y;
 	      }
-=======
-
->>>>>>> parent of 87e1107... begin rewriting passengers position function
             passenger->UpdatePosition(px, py, pz, po);
         }
 }

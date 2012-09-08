@@ -1189,7 +1189,7 @@ class npc_orb_carrier : public CreatureScript
 		}
 	      else mui_rotate -= diff;
 
-	      /*	      if (mui_damage <= diff)
+	      /*  if (mui_damage <= diff)
 		{
 		  DamagePlayers();
 		  mui_damage = 200;
@@ -1201,7 +1201,7 @@ class npc_orb_carrier : public CreatureScript
 	  void DamagePlayers()
 	  {
 	    //	    std::cout << "damage players !!!!!" << std::endl;
-	    Vehicle* vehicle = me->GetVehicleKit();
+	    	    Vehicle* vehicle = me->GetVehicleKit();
 	    Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
 	    Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
 	    Position pos;
@@ -1218,11 +1218,11 @@ class npc_orb_carrier : public CreatureScript
 		    {
 		      //		      std::cout << "damage players summon !!!!!" << std::endl;
 		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 15);
+		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 30);
 		    }
 	      }
 
-	    if (!IsHeroic())
+	    /*	    if (!IsHeroic())
 	      return;
 
 	    Unit* eastOrb = vehicle->GetPassenger(SEAT_EAST);
@@ -1240,7 +1240,7 @@ class npc_orb_carrier : public CreatureScript
 		      orbDamage->SetFlying(false);
 		      orbDamage->GetMotionMaster()->MoveTakeoff(1, posEnd, 15);
 		    }
-	      }
+		    }*/
 	  }
 
             void DoAction(int32 const action)
@@ -2087,16 +2087,14 @@ public:
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
-		  		  float p = (AB + BC + AC)/2;
-		  	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
-		    if (DC < 3.75f || DC > 52.0f)
-		      //		  float dd = (AB*AB) - ((BC*BC) + (AC*AC));
-		  // id (dd < 0)
-		  //   dd *= -1;
-		  //  dd = sqrt(dd);
-		  //  if (dd >= 0 && dd <= 20)
+		  //		  		  float p = (AB + BC + AC)/2;
+		  // 	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
+		  //    if (DC < 3.75f || DC > 52.0f)
+		  float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
+		  std::cout << dd << std::endl;
+		  if (dd >= -2 && dd <= 2)
 		    {
-		      caster->ToCreature()->MonsterSay("find someone tu shoot OMG", LANG_UNIVERSAL, player->GetGUID());
+		      caster->ToCreature()->MonsterYell("find someone tu shoot OMG", LANG_UNIVERSAL, player->GetGUID());
 		      player->DealDamage(player, 20000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
 		    }
 		    //		    target->CastSpell(player, SPELL_TWILIGHT_CUTTER, true);

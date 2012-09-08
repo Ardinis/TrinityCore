@@ -2102,8 +2102,8 @@ public:
 	      //	      if (!player->HasAura(SPELL_TWILIGHT_ENTER)) continue;
 	      if (player->isAlive())
 		{
-		  std::cout << "TARGET : X : " << target->GetPositionX() << " Y : " << target->GetPositionY() << std::endl;
-		  std::cout << "CASTER : X : " << caster->GetPositionX() << " Y : " << caster->GetPositionY() << std::endl;
+		  //		  std::cout << "TARGET : X : " << target->GetPositionX() << " Y : " << target->GetPositionY() << std::endl;
+		  //		  std::cout << "CASTER : X : " << caster->GetPositionX() << " Y : " << caster->GetPositionY() << std::endl;
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
@@ -2111,11 +2111,11 @@ public:
 		  // 	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
 		  //    if (DC < 3.75f || DC > 52.0f)
 		  float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
-		  std::cout << dd << std::endl;
+		  // std::cout << dd << std::endl;
 		  if (dd >= -2 && dd <= 2)
 		    {
 		      caster->ToCreature()->MonsterYell("find someone tu shoot OMG", LANG_UNIVERSAL, player->GetGUID());
-		      player->DealDamage(player, 20000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
+		      player->DealDamage(player, 200000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
 		    }
 		    //		    target->CastSpell(player, SPELL_TWILIGHT_CUTTER, true);
 		}

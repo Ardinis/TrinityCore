@@ -32,6 +32,7 @@
 #include "Group.h"
 #include "LFGMgr.h"
 #include "DynamicTree.h"
+#include "Vehicle.h"
 
 union u_map_magic
 {
@@ -747,6 +748,8 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     else
     {
         creature->Relocate(x, y, z, ang);
+	if (creature->IsVehicle())
+	  creature->GetVehicleKit()->RelocatePassengers(x, y, z, ang);
         creature->UpdateObjectVisibility(false);
         RemoveCreatureFromMoveList(creature);
     }

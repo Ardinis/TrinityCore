@@ -37,8 +37,6 @@ class PointMovementGenerator
 
         void MovementInform(T &);
 
-        void unitSpeedChanged() { i_recalculateSpeed = true; }
-
         MovementGeneratorType GetMovementGeneratorType() { return POINT_MOTION_TYPE; }
 
         bool GetDestination(float& x, float& y, float& z) const { x=i_x; y=i_y; z=i_z; return true; }
@@ -46,7 +44,6 @@ class PointMovementGenerator
         uint32 id;
         float i_x, i_y, i_z;
         float speed;
-        bool i_recalculateSpeed;
 };
 
 class AssistanceMovementGenerator
@@ -68,7 +65,7 @@ class EffectMovementGenerator : public MovementGenerator
         void Initialize(Unit &) {}
         void Finalize(Unit &unit);
         void Reset(Unit &) {}
-        bool Update(Unit &u, const uint32);
+        bool Update(Unit &u, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() { return EFFECT_MOTION_TYPE; }
     private:
         uint32 m_Id;

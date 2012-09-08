@@ -98,7 +98,7 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket & recv_data)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
     // Stop the npc if moving
-    creature->StopMoving();
+    creature->GetMotionMaster()->StopMovement(25000);
 
     if (sScriptMgr->OnGossipHello(_player, creature))
         return;

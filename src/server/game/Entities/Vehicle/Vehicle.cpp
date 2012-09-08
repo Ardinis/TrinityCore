@@ -382,18 +382,18 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     }
 
     if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK1))
-    {
-        switch (GetVehicleInfo()->m_ID)
-        {
-            case 342: //Ignis
-            case 335: //XT-002
-			case 380: //Kologarn's Right Arm
-                break;
-            default:
-                unit->AddUnitState(UNIT_STATE_ONVEHICLE);
-                break;
-        }
-    }
+      {
+	switch (GetVehicleInfo()->m_ID)
+	  {
+	  case 342: //Ignis
+	  case 335: //XT-002
+	  case 380: //Kologarn's Right Arm
+	    break;
+	  default:
+	    unit->AddUnitState(UNIT_STATE_ONVEHICLE);
+	    break;
+	  }
+      }
 	
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     unit->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -401,7 +401,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
     unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
     unit->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
-    unit->m_movementInfo.t_pos.m_orientation = unit->GetOrientation();
+    unit->m_movementInfo.t_pos.m_orientation = 0;
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
     unit->m_movementInfo.t_guid = _me->GetGUID();
@@ -489,7 +489,6 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 {
     ASSERT(_me->GetMap());
 
-    // not sure that absolute position calculation is correct, it must depend on vehicle orientation and pitch angle
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
         if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.Passenger))
         {
@@ -503,31 +502,17 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 	    if (ang != 0)
 	      {
 		float nang = (ang  * 360) / 6.3;
-		//		std::cout << nang << std::endl;
 		nang = nang * (3.14 / 180);
-		//		POINT rotate_point(float cx,float cy,float angle,POINT p)
-		//		{
-		  float s = sin(nang);
-		  float c = cos(nang);
-
-		  // translate point back to origin:
-		  px -= x;
-		  py -= y;
-
-		  // rotate point
-		  float xnew = px * c - py * s;
-		  float ynew = px * s + py * c;
-
-		  // translate point back:
-		  px = xnew + x;
-		  py = ynew + y;
-		  //		}
-
+		float s = sin(nang);
+		float c = cos(nang);
+		px -= x;
+		py -= y;
+		float xnew = px * c - py * s;
+		float ynew = px * s + py * c;
+		px = xnew + x;
+		py = ynew + y;
 	      }
-	    //	    var x = radius * Math.cos(toRadians(angle * i)) + originX;
-	    //  var y = radius * Math.sin(toRadians(-angle * i)) + originY;
             passenger->UpdatePosition(px, py, pz, po);
-	    //	    std::cout << "X : " << px << " Y : " << py << std::endl;
         }
 }
 

@@ -1610,6 +1610,8 @@ class npc_living_inferno : public CreatureScript
 
             void JustSummoned(Creature* /*summoner*/)
             {
+		if (!Is25ManRaid())
+		  me->DespawnOrUnsummon();
                 me->SetInCombatWithZone();
                 DoCast(me, SPELL_BLAZING_AURA);
 		//DoZoneInCombat
@@ -1634,6 +1636,8 @@ class npc_living_ember : public CreatureScript
 
             void Reset()
             {
+		if (!Is25ManRaid())
+		  me->DespawnOrUnsummon();
                 _hasEnraged = false;
 		CheckInterval = 2000;
 		DoZoneInCombat();

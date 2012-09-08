@@ -2100,6 +2100,11 @@ public:
 	      //	      if (!player->HasAura(SPELL_TWILIGHT_ENTER)) continue;
 	      if (player->isAlive())
 		{
+<<<<<<< HEAD
+		  //		  std::cout << "TARGET : X : " << target->GetPositionX() << " Y : " << target->GetPositionY() << std::endl;
+		  //		  std::cout << "CASTER : X : " << caster->GetPositionX() << " Y : " << caster->GetPositionY() << std::endl;
+=======
+>>>>>>> parent of 909302e... cs_report
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;

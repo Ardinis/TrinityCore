@@ -1464,6 +1464,7 @@ class npc_meteor_strike : public CreatureScript
             {
                 _range = 5.0f;
                 _spawnCount = 0;
+		sp = 0;
             }
 
             void DoAction(int32 const action)
@@ -1501,10 +1502,12 @@ class npc_meteor_strike : public CreatureScript
                             controller->AI()->JustSummoned(flame);
 
                         flame->CastSpell(flame, SPELL_METEOR_STRIKE_FIRE_AURA_2, true);
-			if (IsHeroic() && _spawnCount > 2)
+			if (IsHeroic() && urand(0, 1))
 			  {
+			    sp++;
 			    //			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
-			    me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_CORPSE_DESPAWN, 25000);
+			    if (sp < 3)
+			      me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_CORPSE_DESPAWN, 25000);
 			  }
                         ++_spawnCount;
                     }
@@ -1517,7 +1520,7 @@ class npc_meteor_strike : public CreatureScript
             InstanceScript* _instance;
             EventMap _events;
             float _range;
-            uint8 _spawnCount;
+	  uint8 _spawnCount, sp;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1609,6 +1612,7 @@ class npc_living_inferno : public CreatureScript
             {
                 me->SetInCombatWithZone();
                 DoCast(me, SPELL_BLAZING_AURA);
+		//DoZoneInCombat
             }
         };
 
@@ -1631,6 +1635,8 @@ class npc_living_ember : public CreatureScript
             void Reset()
             {
                 _hasEnraged = false;
+		CheckInterval = 2000;
+		DoZoneInCombat();
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -1651,12 +1657,22 @@ class npc_living_ember : public CreatureScript
                 }
                 else _enrageTimer -= diff;
 
+		if (CheckInterval <= diff)
+		  {
+		    if (Creature *c = me->FindNearestCreature(40681, 15, true))
+		      c->CastSpell(c, 75886, true);
+		    me->RemoveAura(75888);
+		    CheckInterval = 2000;
+		  }
+		else CheckInterval -= diff;
+
                 DoMeleeAttackIfReady();
             }
 
         private:
             uint32 _enrageTimer;
             bool _hasEnraged;
+	  uint32 CheckInterval;
         };
 
         CreatureAI* GetAI(Creature* creature) const

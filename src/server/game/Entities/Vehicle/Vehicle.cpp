@@ -401,7 +401,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     unit->m_movementInfo.t_pos.m_positionX = veSeat->m_attachmentOffsetX;
     unit->m_movementInfo.t_pos.m_positionY = veSeat->m_attachmentOffsetY;
     unit->m_movementInfo.t_pos.m_positionZ = veSeat->m_attachmentOffsetZ;
-    unit->m_movementInfo.t_pos.m_orientation = 0;
+    unit->m_movementInfo.t_pos.m_orientation = unit->GetOrientation();
     unit->m_movementInfo.t_time = 0; // 1 for player
     unit->m_movementInfo.t_seat = seat->first;
     unit->m_movementInfo.t_guid = _me->GetGUID();
@@ -496,12 +496,14 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
             ASSERT(passenger->IsInWorld());
             ASSERT(passenger->IsOnVehicle(GetBase()));
             ASSERT(GetSeatForPassenger(passenger));
-
+	    std::cout << "X : " << x << " pX  : " << passenger->m_movementInfo.t_pos.m_positionX << " Y : " << y << " pY : " <<  passenger->m_movementInfo.t_pos.m_positionY
+		      << " O : " << ang << " pO : " << passenger->m_movementInfo.t_pos.m_orientation << std::endl;
             float px = x + passenger->m_movementInfo.t_pos.m_positionX;
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
             float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
-
+	    //	    var x = radius * Math.cos(toRadians(angle * i)) + originX;
+	    //  var y = radius * Math.sin(toRadians(-angle * i)) + originY;
             passenger->UpdatePosition(px, py, pz, po);
         }
 }

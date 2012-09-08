@@ -98,7 +98,8 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket & recv_data)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
     // Stop the npc if moving
-    creature->StopMoving();
+    //    creature->GetMotionMaster()->StopMovement();
+        creature->StopMoving();
 
     if (sScriptMgr->OnGossipHello(_player, creature))
         return;
@@ -190,6 +191,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
                 case TYPEID_UNIT:
                     sScriptMgr->OnQuestAccept(_player, (pObject->ToCreature()), qInfo);
                     (pObject->ToCreature())->AI()->sQuestAccept(_player, qInfo);
+		    //		    pObject->ToCreature()->GetMotionMaster()->StartMovement();
                     break;
                 case TYPEID_ITEM:
                 case TYPEID_CONTAINER:

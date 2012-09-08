@@ -26,9 +26,8 @@
 
 /*
 TODO:
-- See if corporeality code can be improved
-- Script adds and surrounding trash
 - Update Texts
+- Correct zone spell YARDS from growing stacks
 */
 
 enum Texts

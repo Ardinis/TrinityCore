@@ -183,7 +183,7 @@ public:
 	    statut = fields[0].GetInt32();
 	    if (statut != 2)
 	      {
-		WorldDatabase.PQuery("UPDATE report_quest SET status = 2 where id='%d'", quest);
+		WorldDatabase.PQuery("UPDATE report_quest SET status = 1 where id='%d'", quest);
 		handler->PSendSysMessage(LANG_REPORT_QUEST_REMOVE_SUCCESS);
 	      }
 	    else

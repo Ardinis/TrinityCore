@@ -181,13 +181,13 @@ public:
 	      return createReport(quest, 1, 1, player->GetGUID(), handler);
 	    Field *fields = result->Fetch();
 	    statut = fields[0].GetInt32();
-	    if (statut != 2)
+	    if (statut != 1)
 	      {
 		WorldDatabase.PQuery("UPDATE report_quest SET status = 1 where id='%d'", quest);
-		handler->PSendSysMessage(LANG_REPORT_QUEST_REMOVE_SUCCESS);
+		handler->PSendSysMessage(LANG_REPORT_QUEST_COMPLETE_SUCCESS);
 	      }
 	    else
-		handler->PSendSysMessage(LANG_REPORT_QUEST_REMOVE_FAIL);
+		handler->PSendSysMessage(LANG_REPORT_QUEST_COMPLETE_FAIL);
 	    return true;
 	  }
       return false;

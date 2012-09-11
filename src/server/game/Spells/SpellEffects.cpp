@@ -404,6 +404,54 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             damage = unitTarget->CountPctFromMaxHealth(30);
                         break;
                     }
+// Ulduar
+					case 62402:
+					case 62400: // MISSILE Leviathan , DPS les joueurs qui sont dans vehicules
+					{
+                        if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetVehicle())
+                        {
+                            damage = 0;
+                            return;
+                        }					
+						break;
+					}
+// Ulduar - dammage entre vehicule.
+                    case 62489: // Pyrite
+					case 62635: // Mortier        
+                    case 65045: // Flamme Goudron
+                    case 65044: // Flamme GOudron
+                    case 62363: // Fusee Anti aerienne					
+                    case 62357: // Canon
+					case 62974: // Cor Sonore
+                    case 62307: // Rocher
+                    {
+						// Hodir Furie
+                        if (unitTarget->HasAura(62297))     
+                            unitTarget->RemoveAura(62297);
+                            
+                        if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            damage = 0;
+                            return;
+                        }
+                        
+                        switch (unitTarget->GetEntry())
+                        {
+                            case 33060: // Engin Siege
+                            case 33067: // Tourelle siege							
+                            case 33109: // Demolisseur
+                            case 33167: // Siege Demolisseur							
+                            case 33062: // Becane	
+                            case 33090: // Nappe Goudron							
+                            case 33189: // Pyrite Liquide
+                                damage = 0;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+// Fin - Ulduar - dammage entre vehicule.
+// Fin - Ulduar.
                     case 20625: // Ritual of Doom Sacrifice
                     case 29142: // Eyesore Blaster
                     case 35139: // Throw Boom's Doom
@@ -1145,47 +1193,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 case 58418:                                 // Portal to Orgrimmar
                 case 58420:                                 // Portal to Stormwind
-                    return;                                 // implemented in EffectScript[0]
-                case 62324: // Throw Passenger
-                {
-                    if (m_targets.HasTraj())
-                    {
-                        if (Vehicle* vehicle = m_caster->GetVehicleKit())
-                            if (Unit* passenger = vehicle->GetPassenger(damage - 1))
-                            {
-                                std::list<Unit*> unitList;
-                                // use 99 because it is 3d search
-                                SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, 33114);
-                                float minDist = 99 * 99;
-                                Unit* target = NULL;
-                                for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
-                                {
-                                    if (Vehicle* seat = (*itr)->GetVehicleKit())
-                                        if (!seat->GetPassenger(0))
-                                            if (Unit* device = seat->GetPassenger(2))
-                                                if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                                                {
-                                                    float dist = (*itr)->GetExactDistSq(m_targets.GetDst());
-                                                    if (dist < minDist)
-                                                    {
-                                                        minDist = dist;
-                                                        target = (*itr);
-                                                    }
-                                                }
-                                }
-                                if (target && target->IsWithinDist2d(m_targets.GetDst(), m_spellInfo->Effects[effIndex].CalcRadius() * 2)) // now we use *2 because the location of the seat is not correct
-                                    passenger->EnterVehicle(target, 0);
-                                else
-                                {
-                                    passenger->ExitVehicle();
-                                    float x, y, z;
-                                    m_targets.GetDst()->GetPosition(x, y, z);
-                                    passenger->GetMotionMaster()->MoveJump(x, y, z, m_targets.GetSpeedXY(), m_targets.GetSpeedZ());
-                                }
-                            }
-                    }
-                    return;
-                }
+                    return;                                 // implemented in EffectScript[0]			
                 case 64385:                                 // Unusual Compass
                 {
                     m_caster->SetOrientation(float(urand(0, 62832)) / 10000.0f);

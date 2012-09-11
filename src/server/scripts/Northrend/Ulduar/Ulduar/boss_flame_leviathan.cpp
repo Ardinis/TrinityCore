@@ -934,7 +934,8 @@ class npc_flame_leviathan_seat : public CreatureScript
             {
 				if(VerifSpawndesTemplate == 0)
 				{
-					vehicle->InstallAllAccessories(true);
+					vehicle->InstallAccessory(NPC_DEFENSE_TURRET,SEAT_TURRET,1,6,30000);
+					vehicle->InstallAccessory(NPC_OVERLOAD_DEVICE,SEAT_DEVICE,1,6,30000);
 					printf("\n oN fait le test 1 fois pour le verif spawn");
 					//if (Creature* turret = me->SummonCreature(NPC_DEFENSE_TURRET,*me))
 					//	turret->EnterVehicle(me, SEAT_TURRET);

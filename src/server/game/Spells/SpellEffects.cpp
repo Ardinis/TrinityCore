@@ -405,15 +405,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         break;
                     }
 // Ulduar
-					case 62902: // Degat = 1 quand pas de 75k :x why ?
-					{
-                        if (damage == 1)
-                        {
-                            damage = 15000;
-                            return;
-                        }					
-						break;
-					}
 					case 62402:
 					case 62400: // MISSILE Leviathan , DPS les joueurs qui sont dans vehicules
 					{

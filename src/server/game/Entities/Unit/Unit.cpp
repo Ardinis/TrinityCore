@@ -559,8 +559,10 @@ void Unit::DealDamageMods(Unit* victim, uint32 &damage, uint32* absorb)
 uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellInfo const* spellProto, bool durabilityLoss)
 {
     if (victim->IsAIEnabled)
-        victim->GetAI()->DamageTaken(this, damage);
-
+      {
+	victim->GetAI()->DamageTaken(this, damage);
+        victim->GetAI()->DamageTaken(this, damage,  spellProto);
+      }
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
@@ -3585,7 +3587,7 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint32 dispellerSpellId
         Aura* aura = iter->second;
         if (aura->GetCasterGUID() == casterGUID)
         {
-            DispelInfo dispelInfo(dispeller, dispellerSpellId, chargesRemoved);
+	  DispelInfo dispelInfo(dispeller, this, dispellerSpellId, chargesRemoved);
 
             // Call OnDispel hook on AuraScript
             aura->CallScriptDispel(&dispelInfo);
@@ -14966,9 +14968,11 @@ void Unit::SendPetAIReaction(uint64 guid)
 
 void Unit::StopMoving()
 {
+  ClearUnitState(UNIT_STATE_MOVING);
+
     // not need send any packets if not in world
-    if (!IsInWorld() || IsStopped())
-        return;
+  if (!IsInWorld())
+    return;
 
     Movement::MoveSplineInit init(*this);
     init.SetFacing(GetOrientation());
@@ -14977,7 +14981,8 @@ void Unit::StopMoving()
 
 bool Unit::IsStopped() const
 {
-    return movespline->Finalized();
+  //    return movespline->Finalized();
+  return !(HasUnitState(UNIT_STATE_MOVING));
 }
 
 void Unit::SendMovementFlagUpdate()
@@ -17532,7 +17537,8 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
         SetOrientation(orientation);
 
     if ((relocated || turn) && IsVehicle())
-        GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
+      GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
+    //      GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 
     return (relocated || turn);
 }

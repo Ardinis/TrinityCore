@@ -492,12 +492,12 @@ enum UnitState
     UNIT_STATE_MOVE            = 0x00100000,
     UNIT_STATE_ROTATING        = 0x00200000,
     UNIT_STATE_EVADE           = 0x00400000,
-    //UNIT_STATE_ROAMING_MOVE    = 0x00800000,
-    //UNIT_STATE_CONFUSED_MOVE   = 0x01000000,
-    //UNIT_STATE_FLEEING_MOVE    = 0x02000000,
-    //UNIT_STATE_CHASE_MOVE      = 0x04000000,
-    //UNIT_STATE_FOLLOW_MOVE     = 0x08000000,
-    //UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE| UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE,
+    UNIT_STATE_ROAMING_MOVE    = 0x00800000,
+    UNIT_STATE_CONFUSED_MOVE   = 0x01000000,
+    UNIT_STATE_FLEEING_MOVE    = 0x02000000,
+    UNIT_STATE_CHASE_MOVE      = 0x04000000,
+    UNIT_STATE_FOLLOW_MOVE     = 0x08000000,
+    UNIT_STATE_MOVING          = UNIT_STATE_ROAMING_MOVE | UNIT_STATE_CONFUSED_MOVE | UNIT_STATE_FLEEING_MOVE| UNIT_STATE_CHASE_MOVE | UNIT_STATE_FOLLOW_MOVE,
     UNIT_STATE_UNATTACKABLE    = (UNIT_STATE_IN_FLIGHT | UNIT_STATE_ONVEHICLE),
     UNIT_STATE_CONTROLLED      = (UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING),
     UNIT_STATE_LOST_CONTROL    = (UNIT_STATE_CONTROLLED/* | UNIT_STATE_JUMPING | UNIT_STATE_CHARGING*/),
@@ -790,13 +790,15 @@ class DispelInfo
 {
 private:
     Unit* const m_dispeller;
+    Unit* const m_dispelled;
     uint32 const m_dispellerSpellId;
     uint8 m_chargesRemoved;
 public:
-    explicit DispelInfo(Unit* _dispeller, uint32 _dispellerSpellId, uint8 _chargesRemoved) :
-    m_dispeller(_dispeller), m_dispellerSpellId(_dispellerSpellId), m_chargesRemoved(_chargesRemoved) {}
+    explicit DispelInfo(Unit* _dispeller, Unit* dispelled, uint32 _dispellerSpellId, uint8 _chargesRemoved) :
+    m_dispeller(_dispeller), m_dispelled(dispelled), m_dispellerSpellId(_dispellerSpellId), m_chargesRemoved(_chargesRemoved) {}
 
     Unit* GetDispeller() { return m_dispeller; }
+    Unit* GetDispelled() { return m_dispelled; }
     uint32 GetDispellerSpellId() { return m_dispellerSpellId; }
     uint8 GetRemovedCharges() { return m_chargesRemoved; }
     void SetRemovedCharges(uint8 amount)

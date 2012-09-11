@@ -988,12 +988,12 @@ class instance_ulduar : public InstanceMapScript
                             }
                             HandleGameObject(KologarnBridgeGUID, false);
                         }
-			/* Due to HordeGuides, the door should be open when the encounter is in progress. (It opens after finishing AoI.)
+			// Due to HordeGuides, the door should be open when the encounter is in progress. (It opens after finishing AoI.)
                         if (state == IN_PROGRESS)
                             HandleGameObject(KologarnDoorGUID, false);
                         else
                             HandleGameObject(KologarnDoorGUID, true);
-			*/
+			
                         break;
                     case BOSS_HODIR:
                         if (state == DONE)

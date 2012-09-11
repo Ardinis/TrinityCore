@@ -382,18 +382,18 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     }
 
     if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK1))
-    {
-        switch (GetVehicleInfo()->m_ID)
-        {
-            case 342: //Ignis
-            case 335: //XT-002
-			case 380: //Kologarn's Right Arm
-                break;
-            default:
-                unit->AddUnitState(UNIT_STATE_ONVEHICLE);
-                break;
-        }
-    }
+      {
+	switch (GetVehicleInfo()->m_ID)
+	  {
+	  case 342: //Ignis
+	  case 335: //XT-002
+	  case 380: //Kologarn's Right Arm
+	    break;
+	  default:
+	    unit->AddUnitState(UNIT_STATE_ONVEHICLE);
+	    break;
+	  }
+      }
 	
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     unit->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -427,7 +427,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
                 _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
 
             // update all passenger's positions
-            RelocatePassengers(_me->GetPositionX(), _me->GetPositionY(), _me->GetPositionZ(), _me->GetOrientation());
+	    //            RelocatePassengers(_me->GetPositionX(), _me->GetPositionY(), _me->GetPositionZ(), _me->GetOrientation());
         }
     }
 
@@ -489,19 +489,29 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 {
     ASSERT(_me->GetMap());
 
-    // not sure that absolute position calculation is correct, it must depend on vehicle orientation and pitch angle
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
         if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.Passenger))
         {
             ASSERT(passenger->IsInWorld());
             ASSERT(passenger->IsOnVehicle(GetBase()));
             ASSERT(GetSeatForPassenger(passenger));
-
             float px = x + passenger->m_movementInfo.t_pos.m_positionX;
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
             float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
-
+	    if (ang != 0)
+	      {
+		float nang = (ang  * 360) / 6.3;
+		nang = nang * (3.14 / 180);
+		float s = sin(nang);
+		float c = cos(nang);
+		px -= x;
+		py -= y;
+		float xnew = px * c - py * s;
+		float ynew = px * s + py * c;
+		px = xnew + x;
+		py = ynew + y;
+	      }
             passenger->UpdatePosition(px, py, pz, po);
         }
 }

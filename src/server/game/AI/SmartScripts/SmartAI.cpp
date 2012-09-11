@@ -642,6 +642,11 @@ void SmartAI::DamageTaken(Unit* doneBy, uint32& damage)
         damage -= mInvinceabilityHpLevel;
 }
 
+void SmartAI::DamageTaken(Unit* doneBy, uint32& damage, SpellInfo const* /*spellInfo*/)
+{
+  //  me->AI()->DamageTaken(doneBy, damage);
+}
+
 void SmartAI::HealReceived(Unit* doneBy, uint32& addhealth)
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_RECEIVE_HEAL, doneBy, addhealth);

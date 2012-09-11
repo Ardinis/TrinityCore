@@ -28,6 +28,7 @@ void AddSC_example_commandscript();
 //custom
 void AddSC_telenpc();
 void AddSC_player_event();
+void AddSC_npc_transmo();
 
 // spells
 void AddSC_deathknight_spell_scripts();
@@ -68,6 +69,7 @@ void AddSC_tele_commandscript();
 void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
 void AddSC_gps_commandscript();
+void AddSC_report_commandscript();
 
 #ifdef SCRIPTS
 //world
@@ -498,11 +500,12 @@ void AddSC_icecrown_citadel_trashmobs();
 void AddSC_icecrown_citadel_teleport();
 void AddSC_instance_icecrown_citadel();
 void AddSC_icecrown_citadel();
-void AddSC_instance_ruby_sanctum();      // Ruby Sanctum
-void AddSC_boss_halion();
+void AddSC_ruby_sanctum(); // ruby sanctum
 void AddSC_boss_baltharus_the_warborn();
 void AddSC_boss_saviana_ragefire();
 void AddSC_boss_general_zarithrian();
+void AddSC_boss_halion();
+void AddSC_instance_ruby_sanctum();
 
 void AddSC_dalaran();
 void AddSC_borean_tundra();
@@ -684,6 +687,7 @@ void AddCommandScripts()
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
     AddSC_gps_commandscript();
+    AddSC_report_commandscript();
 }
 
 void AddWorldScripts()
@@ -1216,11 +1220,12 @@ void AddNorthrendScripts()
     AddSC_icecrown_citadel_teleport();
     AddSC_instance_icecrown_citadel();
     AddSC_icecrown_citadel();
-    AddSC_instance_ruby_sanctum();      // Ruby Sanctum
-    AddSC_boss_halion();
+    AddSC_ruby_sanctum(); // ruby sanctum
     AddSC_boss_baltharus_the_warborn();
     AddSC_boss_saviana_ragefire();
     AddSC_boss_general_zarithrian();
+    AddSC_boss_halion();
+    AddSC_instance_ruby_sanctum();
 
     AddSC_dalaran();
     AddSC_borean_tundra();
@@ -1266,6 +1271,7 @@ void AddCustomScripts()
 #ifdef SCRIPTS
   AddSC_telenpc();
   AddSC_player_event();
+  AddSC_npc_transmo();
     /* This is where custom scripts should be added. */
 
 #endif

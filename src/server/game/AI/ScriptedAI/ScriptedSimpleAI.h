@@ -32,6 +32,7 @@ struct SimpleAI : public ScriptedAI
     void KilledUnit(Unit* /*victim*/);
 
     void DamageTaken(Unit* killer, uint32& damage);
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/,  SpellInfo const* /*spellInfo*/);
 
     void UpdateAI(const uint32 diff);
 

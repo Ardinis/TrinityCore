@@ -185,6 +185,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 GbBattleMageGUID = 0;
                 isPrepared = false;
 		tempete = 0;
+		_buffSelect = ALLIANCE ? 73828 : 73822;
             }
 
             void FillInitialWorldStates(WorldPacket& data)
@@ -204,7 +205,8 @@ class instance_icecrown_citadel : public InstanceMapScript
 	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
 	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
 	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
-	      player->CastSpell(player, player->GetTeam() == ALLIANCE ? 73828 : 73822, true);
+	      if (_buffSelect != 0)
+		player->CastSpell(player, _buffSelect, true);
 	      if (!TeamInInstance)
 		TeamInInstance = player->GetTeam();
 
@@ -664,6 +666,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return HeroicAttempts;
 		case DATA_TEMPETE:
 		  return tempete;
+		case DATA_BUFF:
+		  return _buffSelect;
                     default:
                         break;
                 }
@@ -944,6 +948,9 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (type)
                 {
+		case DATA_BUFF:
+		  _buffSelect = data;
+		  break;
                     case DATA_BONED_ACHIEVEMENT:
                         IsBonedEligible = data ? true : false;
                         break;
@@ -1738,6 +1745,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             bool isPrepared;
 
 	  uint32 tempete;
+	  uint32 _buffSelect;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

@@ -24,7 +24,19 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ObjectMgr.h"
+#include "Common.h"
+#include "DatabaseEnv.h"
+#include "World.h"
+#include "Player.h"
+#include "Opcodes.h"
 #include "Chat.h"
+#include "ObjectAccessor.h"
+#include "Language.h"
+#include "AccountMgr.h"
+#include "SystemConfig.h"
+#include "revision.h"
+#include "Util.h"
+#include "math.h"
 
 class quest_commandscript : public CommandScript
 {

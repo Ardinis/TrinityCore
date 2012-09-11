@@ -58,6 +58,34 @@
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
+SpellDestination::SpellDestination()
+{
+  _position.Relocate(0, 0, 0, 0);
+  _transportGUID = 0;
+  _transportOffset.Relocate(0, 0, 0, 0);
+}
+
+SpellDestination::SpellDestination(float x, float y, float z, float orientation, uint32 mapId)
+{
+  _position.Relocate(x, y, z, orientation);
+  _transportGUID = 0;
+  _position.m_mapId = mapId;
+}
+
+SpellDestination::SpellDestination(Position const& pos)
+{
+  _position.Relocate(pos);
+  _transportGUID = 0;
+}
+
+SpellDestination::SpellDestination(WorldObject const& wObj)
+{
+  _transportGUID = wObj.GetTransGUID();
+  _transportOffset.Relocate(wObj.GetTransOffsetX(), wObj.GetTransOffsetY(), wObj.GetTransOffsetZ(), wObj.GetTransOffsetO());
+  _position.Relocate(wObj);
+  _position.SetOrientation(wObj.GetOrientation());
+}
+
 SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0)
 {
     m_objectTarget = NULL;
@@ -297,6 +325,11 @@ void SpellCastTargets::UpdateTradeSlotItem()
     }
 }
 
+SpellDestination const* SpellCastTargets::GetSrcs() const
+{
+  return &m_src;
+}
+
 Position const* SpellCastTargets::GetSrc() const
 {
     return &m_srcPos;
@@ -304,6 +337,7 @@ Position const* SpellCastTargets::GetSrc() const
 
 void SpellCastTargets::SetSrc(float x, float y, float z)
 {
+  m_src = SpellDestination(x, y, z);
     m_srcPos.Relocate(x, y, z);
     m_srcTransGUID = 0;
     m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
@@ -311,6 +345,7 @@ void SpellCastTargets::SetSrc(float x, float y, float z)
 
 void SpellCastTargets::SetSrc(Position const& pos)
 {
+  m_src = SpellDestination(pos);
     m_srcPos.Relocate(pos);
     m_srcTransGUID = 0;
     m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
@@ -318,6 +353,7 @@ void SpellCastTargets::SetSrc(Position const& pos)
 
 void SpellCastTargets::SetSrc(WorldObject const& wObj)
 {
+  m_src = SpellDestination(wObj);
     uint64 guid = wObj.GetTransGUID();
     m_srcTransGUID = guid;
     m_srcTransOffset.Relocate(wObj.GetTransOffsetX(), wObj.GetTransOffsetY(), wObj.GetTransOffsetZ(), wObj.GetTransOffsetO());
@@ -336,11 +372,17 @@ void SpellCastTargets::ModSrc(Position const& pos)
         m_srcTransOffset.RelocateOffset(offset);
     }
     m_srcPos.Relocate(pos);
+    m_src._position.Relocate(pos);
 }
 
 void SpellCastTargets::RemoveSrc()
 {
     m_targetMask &= ~(TARGET_FLAG_SOURCE_LOCATION);
+}
+
+SpellDestination const* SpellCastTargets::GetDsts() const
+{
+  return &m_dst;
 }
 
 WorldLocation const* SpellCastTargets::GetDst() const
@@ -350,6 +392,7 @@ WorldLocation const* SpellCastTargets::GetDst() const
 
 void SpellCastTargets::SetDst(float x, float y, float z, float orientation, uint32 mapId)
 {
+  m_dst = SpellDestination(x, y, z, orientation, mapId);
     m_dstPos.Relocate(x, y, z, orientation);
     m_dstTransGUID = 0;
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
@@ -359,6 +402,7 @@ void SpellCastTargets::SetDst(float x, float y, float z, float orientation, uint
 
 void SpellCastTargets::SetDst(Position const& pos)
 {
+  m_dst = SpellDestination(pos);
     m_dstPos.Relocate(pos);
     m_dstTransGUID = 0;
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
@@ -366,6 +410,7 @@ void SpellCastTargets::SetDst(Position const& pos)
 
 void SpellCastTargets::SetDst(WorldObject const& wObj)
 {
+  m_dst = SpellDestination(wObj);
     uint64 guid = wObj.GetTransGUID();
     m_dstTransGUID = guid;
     m_dstTransOffset.Relocate(wObj.GetTransOffsetX(), wObj.GetTransOffsetY(), wObj.GetTransOffsetZ(), wObj.GetTransOffsetO());
@@ -392,6 +437,7 @@ void SpellCastTargets::ModDst(Position const& pos)
         m_dstTransOffset.RelocateOffset(offset);
     }
     m_dstPos.Relocate(pos);
+    m_dst._position.Relocate(pos);
 }
 
 void SpellCastTargets::RemoveDst()
@@ -566,6 +612,9 @@ m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharme
 
     CleanupTargetList();
     CleanupEffectExecuteData();
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+      m_destTargets[i] = SpellDestination(*m_caster);
 }
 
 Spell::~Spell()
@@ -745,6 +794,9 @@ void Spell::SelectSpellTargets()
         // some spell effects add target to target map only when target type specified (like SPELL_EFFECT_WEAPON)
         // some spell effects don't add anything to target map (confirmed with sniffs) (like SPELL_EFFECT_DESTROY_ALL_TOTEMS)
         SelectEffectTypeImplicitTargets(i);
+
+	if (m_targets.HasDst())
+	  AddDestTarget(*m_targets.GetDst(), i);
 
         if (m_spellInfo->IsChanneled())
         {
@@ -1163,6 +1215,11 @@ void Spell::AddItemTarget(Item* item, uint32 effectMask)
     target.effectMask = effectMask;
 
     m_UniqueItemInfo.push_back(target);
+}
+
+void Spell::AddDestTarget(SpellDestination const& dest, uint32 effIndex)
+{
+  m_destTargets[effIndex] = dest;
 }
 
 void Spell::DoAllEffectOnTarget(TargetInfo* target)
@@ -4629,6 +4686,7 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
+    destTarget = &m_destTargets[i]._position;
 
     uint8 eff = m_spellInfo->Effects[i].Effect;
 
@@ -6479,6 +6537,26 @@ void Spell::UpdatePointers()
         m_CastItem = m_caster->ToPlayer()->GetItemByGuid(m_castItemGUID);
 
     m_targets.Update(m_caster);
+
+    // cache last transport
+    WorldObject* transport = NULL;
+
+    // update effect destinations (in case of moved transport dest target)
+    for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+      {
+        SpellDestination& dest = m_destTargets[effIndex];
+        if (!dest._transportGUID)
+	  continue;
+
+        if (!transport || transport->GetGUID() != dest._transportGUID)
+	  transport = ObjectAccessor::GetWorldObject(*m_caster, dest._transportGUID);
+
+        if (transport)
+	  {
+            dest._position.Relocate(transport);
+            dest._position.RelocateOffset(dest._transportOffset);
+	  }
+      }
 }
 
 CurrentSpellTypes Spell::GetCurrentContainer() const

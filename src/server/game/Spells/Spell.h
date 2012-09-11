@@ -79,6 +79,18 @@ enum SpellRangeFlag
     SPELL_RANGE_RANGED              = 2,     //hunter range and ranged weapon
 };
 
+struct SpellDestination
+{
+  SpellDestination();
+  SpellDestination(float x, float y, float z, float orientation = 0.0f, uint32 mapId = MAPID_INVALID);
+  SpellDestination(Position const& pos);
+  SpellDestination(WorldObject const& wObj);
+
+  WorldLocation _position;
+  uint64 _transportGUID;
+  Position _transportOffset;
+};
+
 enum SpellNotifyPushType
 {
     PUSH_NONE           = 0,
@@ -128,6 +140,7 @@ class SpellCastTargets
         void SetTradeItemTarget(Player* caster);
         void UpdateTradeSlotItem();
 
+	SpellDestination const* GetSrcs() const;
         Position const* GetSrc() const;
         void SetSrc(float x, float y, float z);
         void SetSrc(Position const& pos);
@@ -135,6 +148,7 @@ class SpellCastTargets
         void ModSrc(Position const& pos);
         void RemoveSrc();
 
+	SpellDestination const* GetDsts() const;
         WorldLocation const* GetDst() const;
         void SetDst(float x, float y, float z, float orientation, uint32 mapId = MAPID_INVALID);
         void SetDst(Position const& pos);
@@ -178,6 +192,9 @@ class SpellCastTargets
         uint64 m_dstTransGUID;
         Position m_dstTransOffset;
         WorldLocation m_dstPos;
+
+	SpellDestination m_src;
+        SpellDestination m_dst;
 
         float m_elevation, m_speed;
         std::string m_strTarget;
@@ -537,6 +554,7 @@ class Spell
         Unit* unitTarget;
         Item* itemTarget;
         GameObject* gameObjTarget;
+	WorldLocation* destTarget;
         int32 damage;
         SpellEffectHandleMode effectHandleMode;
         // used in effects handlers
@@ -597,10 +615,14 @@ class Spell
         };
         std::list<ItemTargetInfo> m_UniqueItemInfo;
 
+	SpellDestination m_destTargets[MAX_SPELL_EFFECTS];
+
         void AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid = true);
         void AddGOTarget(GameObject* target, uint32 effectMask);
         void AddGOTarget(uint64 goGUID, uint32 effectMask);
         void AddItemTarget(Item* item, uint32 effectMask);
+	void AddDestTarget(SpellDestination const& dest, uint32 effIndex);
+
         void DoAllEffectOnTarget(TargetInfo* target);
         SpellMissInfo DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleAura);
         void DoTriggersOnSpellHit(Unit* unit, uint8 effMask);

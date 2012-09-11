@@ -311,7 +311,6 @@ class boss_flame_leviathan : public CreatureScript
                 events.ScheduleEvent(EVENT_PURSUE, 30*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_MISSILE, 2*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_VENT, 20*IN_MILLISECONDS);
-                //events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
                 PerformTowerCheck();
@@ -322,7 +321,6 @@ class boss_flame_leviathan : public CreatureScript
 
             bool HaveActiveTowers() const
             {
-				printf("\n HaveActiveTowers !");
                 return (towerOfFlames || towerOfFrost || towerOfLife || towerOfStorms);
             }
 
@@ -348,33 +346,31 @@ class boss_flame_leviathan : public CreatureScript
                 if (doInstall)
                 {
                     // Seats  position 2 et 3 qui marcherai ! 
-					                   // for (uint8 i = 0; i < RAID_MODE(2, 4); i++)
-					//for (uint8 i = RAID_MODE<uint8>(2, 0); i < 4; ++i)
-     //               {
-					//		if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
-					//		{
-					//			printf("\n HandleAccessorys- Doinstal ! POOOOOOOOOOOOP");
-					//			if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET,*me))
-					//				turret->EnterVehicle(target, SEAT_TURRET);
+					for (uint8 i = RAID_MODE<uint8>(2, 0); i < 4; ++i)
+                    {
+							if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
+							{
+								//if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET,*me))
+								//	turret->EnterVehicle(target, SEAT_TURRET);
 
-					//			if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
-					//				device->EnterVehicle(target, SEAT_DEVICE);
-					//			printf("\n I = %d",i);
+								//if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
+								//	device->EnterVehicle(target, SEAT_DEVICE);
+								printf("\n Pop Siege I = %d",i);
 
-					//			target->EnterVehicle(me, i);
-					//		}
-     //               }
+								target->EnterVehicle(me, i);
+							}
+                    }
 					printf("\n Rien a instal tout est DB!");
-                    //if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
-                    //    cannon->EnterVehicle(me, SEAT_CANNON);
+                    if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
+                        cannon->EnterVehicle(me, SEAT_CANNON);
                 }
                 else
                 {
 					printf("\n HandleAccessorys-else doInstall = FALSEEEEE DEPOPPPPP!");
-					//DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
-					//DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
-					//DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
-					//DespawnCreatures(NPC_SEAT,200.0f);
+					DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
+					DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
+					DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
+					DespawnCreatures(NPC_SEAT,200.0f);
                 }
             }
 
@@ -412,7 +408,6 @@ class boss_flame_leviathan : public CreatureScript
 
             void PerformTowerCheck()
             {
-				printf("\n PerformTowerCheck !");
                 if (HaveActiveTowers())
                 {
                     if (towerOfStorms)
@@ -494,7 +489,6 @@ class boss_flame_leviathan : public CreatureScript
 
             uint32 GetData(uint32 type)
             {
-				printf("\n GetData = %d",type);
                 switch (type)
                 {
                     case DATA_SHUTOUT:
@@ -579,7 +573,6 @@ class boss_flame_leviathan : public CreatureScript
 
 				if (me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
 				{
-					printf("\n SPELL_SYSTEMS_SHUTDOWN  A LAURA!");
 					me->SetReactState(REACT_PASSIVE);
 					me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_STATE_ROOT);
 					return;
@@ -593,8 +586,6 @@ class boss_flame_leviathan : public CreatureScript
 				events.Update(diff);
 				uint32 eventId = events.GetEvent();
 
-				//printf("\n EVENT = %d",eventId);
-
 				if (!me->getVictim())
 					UpdateVictim();
 				
@@ -607,7 +598,7 @@ class boss_flame_leviathan : public CreatureScript
 						if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f))
 							if (target->GetTypeId() == TYPEID_PLAYER || target->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE))
 								me->AddAura(SPELL_PURSUED, target);
-										printf("\n Shutdown = %d ",Shutdown);
+		printf("\n Shutdown = %d ",Shutdown);
                         events.RepeatEvent(30*IN_MILLISECONDS);
 						break;
                     case EVENT_MISSILE:
@@ -651,7 +642,6 @@ class boss_flame_leviathan : public CreatureScript
                         me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
                         me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
 						HandleAccessorys(true);
-                        //events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
 						events.CancelEvent(EVENT_REPAIR);
                         break;
                     case EVENT_THORIMS_HAMMER: // Tower of Storms
@@ -722,8 +712,6 @@ class boss_flame_leviathan : public CreatureScript
                 if (!me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
                     DoBatteringRamIfReady();
 				DoMeleeAttackIfReady();
-
-                // EnterEvadeIfOutOfCombatArea(diff);
             }
 
             //bool CanAIAttack(Unit const* who) const
@@ -928,17 +916,31 @@ class npc_flame_leviathan_seat : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
             }
 
+//        void MoveInLineOfSight(Unit* who)
+//        {
+//			if(!who->IsVehicle() && !who->IsOnVehicle(me) && who->GetTypeId() == TYPEID_PLAYER)
+//			{
+//
+//				//float distance = me->GetDistance(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ() );
+//								//printf("\n Joueur a porter! Distance = %f",distance);
+//				if (me->GetDistance(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ() ) < 16.0f )
+//				{
+//					printf("\n MoveInLineOfSight! -- JOUEUR TOUT PROCHE ! ");
+//					who->EnterVehicle(me,SEAT_PLAYER);
+//				}
+//			}
+//        }
             void UpdateAI(const uint32 diff)
             {
-				printf("\n Update AI du siege");
 				if(VerifSpawndesTemplate == 0)
 				{
+					vehicle->InstallAllAccessories(true);
 					printf("\n oN fait le test 1 fois pour le verif spawn");
-					if (Creature* turret = me->SummonCreature(NPC_DEFENSE_TURRET,*me))
-						turret->EnterVehicle(me, SEAT_TURRET);
+					//if (Creature* turret = me->SummonCreature(NPC_DEFENSE_TURRET,*me))
+					//	turret->EnterVehicle(me, SEAT_TURRET);
 
-					if (Creature* device = me->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
-						device->EnterVehicle(me, SEAT_DEVICE);
+					//if (Creature* device = me->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
+					//	device->EnterVehicle(me, SEAT_DEVICE);
 
 					VerifSpawndesTemplate = 1;
 				}
@@ -1021,101 +1023,6 @@ class npc_flame_leviathan_seat : public CreatureScript
         }
 };
 
-//class npc_flame_leviathan_seat : public CreatureScript
-//{
-//public:
-//    npc_flame_leviathan_seat() : CreatureScript("npc_flame_leviathan_seat") { }
-//
-//    CreatureAI* GetAI(Creature* pCreature) const
-//    {
-//        return new npc_flame_leviathan_seatAI (pCreature);
-//    }
-//
-//    struct npc_flame_leviathan_seatAI : public PassiveAI
-//    {
-//        npc_flame_leviathan_seatAI(Creature* pCreature) : PassiveAI(pCreature), vehicle(pCreature->GetVehicleKit())
-//        {
-//            assert(vehicle);
-//			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-//			me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-//			DieAndRespawn = 0;
-//        }
-//
-//        void Reset()
-//        {
-//            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-//            //me->setActive(true);
-//        }
-//
-//        void MoveInLineOfSight(Unit* who)
-//        {
-//			if(!who->IsVehicle() && !who->IsOnVehicle(me) && who->GetTypeId() == TYPEID_PLAYER)
-//			{
-//
-//				//float distance = me->GetDistance(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ() );
-//								//printf("\n Joueur a porter! Distance = %f",distance);
-//				if (me->GetDistance(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ() ) < 16.0f )
-//				{
-//					printf("\n MoveInLineOfSight! -- JOUEUR TOUT PROCHE ! ");
-//					who->EnterVehicle(me,SEAT_PLAYER);
-//				}
-//			}
-//        }
-//
-//		void UpdateAI(uint32 const /*diff*/) 
-//		{
-//			if(DieAndRespawn == 0)
-//			{
-//				//me->DealDamage(me,me->GetHealth(), NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-//				//me->Respawn();
-//				DieAndRespawn = 1;
-//			}
-//
-//		}
-//
-//        void PassengerBoarded(Unit* who, int8 seatId, bool apply)
-//        {
-//            //if (!me->GetVehicle())
-//            //    return;
-//
-//            if (seatId == SEAT_PLAYER)
-//            {
-//                if (!apply)
-//                    return;
-//                else
-//                    DoScriptText(SAY_PLAYER_RIDING,me);
-//
-//                if (Creature* pTurret = CAST_CRE(vehicle->GetPassenger(SEAT_TURRET)))
-//                {
-//                    pTurret->setFaction(me->GetVehicleBase()->getFaction());
-//                    //pTurret->SetUInt32Value(UNIT_FIELD_FLAGS, 0); // unselectable
-//                    pTurret->AI()->AttackStart(who);
-//                }
-//                if (Unit* pDevice = CAST_CRE(vehicle->GetPassenger(SEAT_DEVICE)))
-//                {
-//                    pDevice->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-//                    pDevice->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-//                }
-//            }
-//            //else //throw passenger bugged, when fixed uncomment this part.
-//            //    if (seatId == SEAT_TURRET)
-//            //    {
-//            //        if (apply)
-//            //            return;
-//            //        if (Unit* device = vehicle->GetPassenger(SEAT_DEVICE))
-//            //        {
-//            //            device->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
-//            //            device->SetUInt32Value(UNIT_FIELD_FLAGS, 0); // unselectable
-//            //        }
-//            //    }
-//        }
-//            private:
-//                int8 DieAndRespawn;
-//				Vehicle* vehicle;
-//    };
-//
-//};
-
 class npc_flame_leviathan_defense_turret : public CreatureScript
 {
     public:
@@ -1123,7 +1030,10 @@ class npc_flame_leviathan_defense_turret : public CreatureScript
 
         struct npc_flame_leviathan_defense_turretAI : public TurretAI
         {
-            npc_flame_leviathan_defense_turretAI(Creature* creature) : TurretAI(creature) {}
+            npc_flame_leviathan_defense_turretAI(Creature* creature) : TurretAI(creature) 
+			{
+				me->SetVisible(true);
+			}
 
             void Reset()
             {
@@ -1135,7 +1045,7 @@ class npc_flame_leviathan_defense_turret : public CreatureScript
             {
                 if (!CanAIAttack(who))
                     damage = 0;
-				printf("\n npc_flame_leviathan_defense_turret - DamageTaken ");
+
                 if (damage >= me->GetHealth())
                     if (Vehicle* seat = me->GetVehicle())
                         if (Unit* device = seat->GetPassenger(SEAT_DEVICE))
@@ -1157,37 +1067,6 @@ class npc_flame_leviathan_defense_turret : public CreatureScript
         }
 };
 
-
-/*
-class npc_flame_leviathan_defense_turret : public CreatureScript
-{
-public:
-    npc_flame_leviathan_defense_turret() : CreatureScript("npc_flame_leviathan_defense_turret") {}
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_flame_leviathan_defense_turretAI(pCreature);
-    }
-
-    struct npc_flame_leviathan_defense_turretAI : public TurretAI
-    {
-        npc_flame_leviathan_defense_turretAI(Creature *c) : TurretAI(c) {}
-
-        void DamageTaken(Unit *who, uint32 &damage)
-        {
-            if(!CanAIAttack(who))
-                damage = 0;
-        }
-
-        bool CanAIAttack(const Unit *who) const
-        {
-            if (who->GetTypeId() != TYPEID_PLAYER || !who->GetVehicle() || who->GetVehicleBase()->GetEntry() != 33114)
-                return false;
-            return true;
-        }
-    };
-};
-*/
 class npc_flame_leviathan_overload_device : public CreatureScript
 {
     public:
@@ -1195,7 +1074,10 @@ class npc_flame_leviathan_overload_device : public CreatureScript
 
         struct npc_flame_leviathan_overload_deviceAI : public PassiveAI
         {
-            npc_flame_leviathan_overload_deviceAI(Creature* creature) : PassiveAI(creature) {}
+            npc_flame_leviathan_overload_deviceAI(Creature* creature) : PassiveAI(creature) 
+			{
+				me->SetVisible(true);
+			}
 
             void InitializeAI()
             {
@@ -1206,7 +1088,6 @@ class npc_flame_leviathan_overload_device : public CreatureScript
 
             void DoAction(const int32 param)
             {
-				printf("\n npc_flame_leviathan_overload_device - DoAction ");
                 if (param == EVENT_SPELLCLICK)
                 {
 					printf("\n npc_flame_leviathan_overload_device - DoAction - EVENT_SPELLCLICK");
@@ -1965,10 +1846,8 @@ class at_RX_214_repair_o_matic_station : public AreaTriggerScript
             {
                 if (Creature* vehicle = player->GetVehicleCreatureBase())
                 {
-					printf("\n STATE BOSS = %d ",instance->GetBossState(BOSS_LEVIATHAN));
                     if (!vehicle->HasAura(SPELL_AUTO_REPAIR))
                     {
-						printf("\n Dans l'AT!");
                         player->MonsterTextEmote(EMOTE_REPAIR, player->GetGUID(), true);
                         player->CastSpell(vehicle, SPELL_AUTO_REPAIR, true);
                         vehicle->SetFullHealth();
@@ -2629,29 +2508,6 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                             {
 								printf("\n unitList");
-        //                        if (Vehicle* seat = (*itr)->GetVehicleKit())
-								//{
-								//	printf("\n  GetVehicleKit()");
-        //                            if (!seat->GetPassenger(0))
-								//	{
-								//		printf("\n  GetPassenger(0)");
-        //                                if (Unit* device = seat->GetPassenger(2))
-								//		{
-								//			printf("\n GetPassenger(2)");
-        //                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-        //                                    {
-								//				printf("\n unitList-  Il a target vehicule");
-        //                                        float dist = (*itr)->GetExactDistSq(targets.GetDst());
-        //                                        if (dist < minDist)
-        //                                        {
-								//					printf("\n unitList-  Il a target vehicule - minDist");
-        //                                            minDist = dist;
-        //                                            target = (*itr);
-        //                                        }
-        //                                    }
-								//		}
-								//	}
-								//}
                                 if (Unit* unit = (*itr)->ToUnit())
                                     if (unit->GetEntry() == NPC_SEAT)
                                         if (Vehicle* seat = unit->GetVehicleKit())

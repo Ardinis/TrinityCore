@@ -41,15 +41,13 @@ enum AuriayaSpells
     SPELL_FERAL_POUNCE_25           = 64669,
     SPELL_SEEPING_FERAL_ESSENCE_10  = 64458,
     SPELL_SEEPING_FERAL_ESSENCE_25  = 64676,
+    SPELL_SEEPING_FERAL_ESSENCE_DAMAGE_10  = 64459,
+    SPELL_SEEPING_FERAL_ESSENCE_DAMAGE_25  = 64675,
     SPELL_SUMMON_ESSENCE            = 64457,
     SPELL_FERAL_ESSENCE             = 64455,
 
     SPELL_FEIGN_DEATH = 71598,
-    // me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH)
-    /*me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
-                        me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
-    */
+
     // Sanctum Sentry
     SPELL_SAVAGE_POUNCE_10          = 64666,
     SPELL_SAVAGE_POUNCE_25          = 64374,
@@ -65,6 +63,7 @@ enum AuriayaSpells
 #define SPELL_FERAL_POUNCE RAID_MODE(SPELL_FERAL_POUNCE_10, SPELL_FERAL_POUNCE_25)
 
 #define SPELL_SEEPING_FERAL_ESSENCE RAID_MODE(SPELL_SEEPING_FERAL_ESSENCE_10, SPELL_SEEPING_FERAL_ESSENCE_25)
+#define SPELL_SEEPING_FERAL_ESSENCE_DAMAGE RAID_MODE(SPELL_SEEPING_FERAL_ESSENCE_DAMAGE_10, SPELL_SEEPING_FERAL_ESSENCE_DAMAGE_25)
 
 #define SPELL_SAVAGE_POUNCE RAID_MODE(SPELL_SAVAGE_POUNCE_10, SPELL_SAVAGE_POUNCE_25)
 #define SPELL_RIP_FLESH RAID_MODE(SPELL_RIP_FLESH_10, SPELL_RIP_FLESH_25)
@@ -331,12 +330,13 @@ class npc_auriaya_seeping_trigger : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
                 me->DespawnOrUnsummon(600000);
                 DoCast(me, SPELL_SEEPING_FERAL_ESSENCE);
+                DoCast(me, SPELL_SEEPING_FERAL_ESSENCE_DAMAGE);
             }
 
             void UpdateAI(uint32 const /*diff*/)
             {
-                if (instance->GetBossState(BOSS_AURIAYA) != IN_PROGRESS)
-                    me->DespawnOrUnsummon();
+	      if (instance->GetBossState(BOSS_AURIAYA) != IN_PROGRESS)
+		me->DespawnOrUnsummon();
             }
 
             private:
@@ -545,15 +545,6 @@ class npc_feral_defender : public CreatureScript
                     }
                 }
                 DoMeleeAttackIfReady();
-            }
-
-            void CorpseRemoved(uint32& /*respawnDelay*/)
-            {
-                if (instance)
-                    if (uint64 auriID = instance->GetData64(BOSS_AURIAYA))
-                        if (Creature* auriaya = ObjectAccessor::GetCreature(*me, auriID))
-                            if (auriaya->IsAIEnabled)
-                                auriaya->AI()->DoAction(ACTION_RESPAWN_DEFENDER);
             }
 
 	private:

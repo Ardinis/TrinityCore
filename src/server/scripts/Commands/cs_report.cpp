@@ -183,13 +183,8 @@ public:
 	    statut = fields[0].GetInt32();
 	    if (statut != 1)
 	      {
-<<<<<<< HEAD
 		WorldDatabase.PQuery("UPDATE report_quest SET status = 1 where id='%d'", quest);
 		handler->PSendSysMessage(LANG_REPORT_QUEST_COMPLETE_SUCCESS);
-=======
-		WorldDatabase.PQuery("UPDATE report_quest SET status = 2 where id='%d'", quest);
-		handler->PSendSysMessage(LANG_REPORT_QUEST_REMOVE_SUCCESS);
->>>>>>> parent of 5bacd43... Revert "Revert "cs_report""
 	      }
 	    else
 		handler->PSendSysMessage(LANG_REPORT_QUEST_COMPLETE_FAIL);

@@ -17538,7 +17538,8 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
 
     if ((relocated || turn) && IsVehicle())
       GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-
+    //      GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
+ 
     return (relocated || turn);
 }
 

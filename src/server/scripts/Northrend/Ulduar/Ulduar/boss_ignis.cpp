@@ -139,8 +139,10 @@ class AchievShatterHelper
                 return; // Nothing to be done
 
             if (gotInformed)                // Check if timer is ok
+	      {
                 if (timer <= limit)
                     achievFulfilled = true;
+	      }
             else                            // First information, start tracking
             {
                 gotInformed = true;

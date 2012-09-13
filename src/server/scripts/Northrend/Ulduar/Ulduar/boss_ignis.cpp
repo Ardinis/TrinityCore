@@ -446,6 +446,7 @@ class npc_iron_construct : public CreatureScript
                 if (me->IsInWater() && !brittled && me->HasAura(SPELL_MOLTEN))
                 {
                     DoCast(SPELL_BRITTLE);
+		    me->CastSpell(me, 62530, true); //damage aura
                     me->RemoveAura(SPELL_MOLTEN);
                     brittled = true;
                 }

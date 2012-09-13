@@ -338,7 +338,8 @@ class boss_steelbreaker : public CreatureScript
                 phase = 0;
 		superChargedCnt = 0;
                 me->RemoveAllAuras();
-                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+		me->ResetLootMode();
+		//                me->RemoveLootMode(LOOT_MODE_DEFAULT);
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
             }
@@ -352,6 +353,7 @@ class boss_steelbreaker : public CreatureScript
                 DoCast(me, SPELL_HIGH_VOLTAGE);
                 events.ScheduleEvent(EVENT_ENRAGE, 900000);
                 events.ScheduleEvent(EVENT_FUSION_PUNCH, 15000);
+		events.ScheduleEvent(EVENT_OVERWHELMING_POWER,  urand(2000, 5000));
                 DoAction(ACTION_UPDATEPHASE);
             }
 
@@ -377,14 +379,13 @@ class boss_steelbreaker : public CreatureScript
                             events.RescheduleEvent(EVENT_STATIC_DISRUPTION, 30000);
                         if (phase >= 3)
                         {
-                            me->ResetLootMode();
                             DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
                             uint32 nextSchedule = 0;
-                            if (events.GetNextEventTime(EVENT_STATIC_DISRUPTION) > 0)   // Note: Function returns 0 if the event isn't scheduled yet.
+			    if (events.GetNextEventTime(EVENT_STATIC_DISRUPTION) > 0)   // Note: Function returns 0 if the event isn't scheduled yet.
                                 nextSchedule = urand(2000, 5000);
                             else 
-                                nextSchedule = urand(20000, 30000);
-                            events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
+			      nextSchedule = urand(20000, 30000);
+			    events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
                         }
                         break;
                 }
@@ -403,24 +404,30 @@ class boss_steelbreaker : public CreatureScript
 		  {
                     events.Reset();
                     summons.DespawnAll();
-                    me->SetLootRecipient(NULL);
 		    DoCastAOE(SPELL_SUPERCHARGE);
                 }
 
-		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
-		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_BRUNDIR) : 0))
-		    if (!Molgeim->isAlive() && !Brundir->isAlive())
-		      {
-			AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
-			if (!pAE)
-			  return;
-			Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-			for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-			  if (Player* player = i->getSource())
-			    if (player->isAlive())
-			      if (player->HasAura(58501))
-				player->CompletedAchievement(pAE);
-		      }
+		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_MOLGEIM) : 0))
+		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_BRUNDIR) : 0))
+		    {
+		      if (!Molgeim->isAlive() && !Brundir->isAlive())
+			{
+			  me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+			  if (!pAE)
+			    return;
+			  Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+			  for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+			    if (Player* player = i->getSource())
+			      if (player->isAlive())
+				if (player->HasAura(58501))
+				  player->CompletedAchievement(pAE);
+			}
+		      else
+			{
+			  me->SetLootRecipient(NULL);
+			}
+		    }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -530,8 +537,8 @@ class boss_steelbreaker : public CreatureScript
                         case EVENT_OVERWHELMING_POWER:
                             if (me->getVictim() && !me->getVictim()->HasAura(SPELL_OVERWHELMING_POWER))
                             {
-			      if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
-				if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_BRUNDIR) : 0))
+			      if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MOLGEIM)))
+				if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRUNDIR)))
 				  if (!Molgeim->isAlive() && !Brundir->isAlive())
 				    {
 				      DoScriptText(SAY_STEELBREAKER_POWER, me);
@@ -649,7 +656,8 @@ class boss_runemaster_molgeim : public CreatureScript
                 phase = 0;
 		superChargedCnt = 0;
                 me->RemoveAllAuras();
-                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+		//                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+		me->ResetLootMode();
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
             }
@@ -684,7 +692,6 @@ class boss_runemaster_molgeim : public CreatureScript
                             events.RescheduleEvent(EVENT_RUNE_OF_DEATH, 30000);
                         if (phase >= 3)
                         {
-                            me->ResetLootMode();
                             events.RescheduleEvent(EVENT_RUNE_OF_SUMMONING, urand(20000, 30000));
                         }
                         break;
@@ -704,25 +711,32 @@ class boss_runemaster_molgeim : public CreatureScript
 		  {
                     events.Reset();
                     summons.DespawnAll();
-                    me->SetLootRecipient(NULL);
 		    DoCastAOE(SPELL_SUPERCHARGE);
                 }
 		if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
-		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BRUNDIR)))
-		    if (!Steelbreaker->isAlive() && !Brundir->isAlive())
-		      {
-			instance->DoCompleteAchievement(RAID_MODE(2939, 2942));
-                        AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
-                        if (!pAE)
-                          return;
-			Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-                          if (Player* player = i->getSource())
-                            if (player->isAlive())
-                              if (player->HasAura(58501))
-                                player->CompletedAchievement(pAE);
-                      }
-
+		  {
+		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRUNDIR)))
+		    {
+		      if (!Steelbreaker->isAlive() && !Brundir->isAlive())
+			{
+			  me->AddLootMode(LOOT_MODE_HARD_MODE_1);
+			  instance->DoCompleteAchievement(RAID_MODE(2939, 2942));
+			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+			  if (!pAE)
+			    return;
+			  Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+			  for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+			    if (Player* player = i->getSource())
+			      if (player->isAlive())
+				if (player->HasAura(58501))
+				  player->CompletedAchievement(pAE);
+			}
+		      else
+			{
+			  me->SetLootRecipient(NULL);
+			}
+		    }
+		  }
             }
 
             void JustSummoned(Creature* summon)
@@ -774,7 +788,7 @@ class boss_runemaster_molgeim : public CreatureScript
 			    {
 			      Position pos;
 			      target->GetPosition(&pos);
-			      me->SummonCreature(32958, pos, TEMPSUMMON_MANUAL_DESPAWN);
+			      me->SummonCreature(33705, pos, TEMPSUMMON_MANUAL_DESPAWN);
 			    }
 			  //                                DoCast(me, SPELL_SUMMON_RUNE_OF_POWER);
                             events.ScheduleEvent(EVENT_RUNE_OF_POWER, 60000);
@@ -797,7 +811,7 @@ class boss_runemaster_molgeim : public CreatureScript
 				target->GetPosition(&pos);
 				player->SummonCreature(32958, pos, TEMPSUMMON_MANUAL_DESPAWN);*/
 				if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
-				  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_BRUNDIR) : 0))
+				  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_BRUNDIR) : 0))
 				    if (!Steelbreaker->isAlive() && !Brundir->isAlive())
 				      DoCast(target, SPELL_RUNE_OF_SUMMONING);
 			      }
@@ -909,7 +923,7 @@ class mob_rune_of_summoning : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-                if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+                if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_MOLGEIM) : 0))
                     Molgeim->AI()->JustSummoned(summon);    // Move ownership, take care that the spawned summon does not know about this
             }
 
@@ -965,16 +979,19 @@ class boss_stormcaller_brundir : public CreatureScript
                 forceLand = false;
                 couldNotDoThat = true;
                 me->RemoveAllAuras();
-                me->RemoveLootMode(LOOT_MODE_DEFAULT);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+		me->ResetLootMode();
+		//                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_WALKING);
                 me->SendMovementFlagUpdate();
-                me->SetSpeed(MOVE_RUN, 1.42857f);
+		//                me->SetSpeed(MOVE_RUN, 1.42857f);
+                me->SetSpeed(MOVE_RUN, 1.12857f);
 
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);  // Should be interruptible unless overridden by spell (Overload)
 		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, false);       // Reset immunity, Brundir can be stunned by default
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+		me->SetReactState(REACT_PASSIVE);
             }
 
             void EnterCombat(Unit* who)
@@ -1031,7 +1048,6 @@ class boss_stormcaller_brundir : public CreatureScript
 			  events.RescheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 25000));
                         if (phase >= 3)
                         {
-                            me->ResetLootMode();
                             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, true);
 			    DoCast(me, SPELL_STORMSHIELD);
                             events.RescheduleEvent(EVENT_LIGHTNING_TENDRILS_START, urand(30000, 40000));
@@ -1054,7 +1070,6 @@ class boss_stormcaller_brundir : public CreatureScript
 		  {
                     events.Reset();
                     summons.DespawnAll();
-                    me->SetLootRecipient(NULL);
 		    DoCastAOE(SPELL_SUPERCHARGE);
 		  }
 
@@ -1062,20 +1077,27 @@ class boss_stormcaller_brundir : public CreatureScript
                 if (me->GetPositionZ() > FLOOR_Z)
 		  me->GetMotionMaster()->MoveFall(); 
 
-		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_MOLGEIM) : 0))
 		  if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
-		    if (!Molgeim->isAlive() || !Steelbreaker->isAlive())
-                      {
-                        AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
-                        if (!pAE)
-                          return;
-			Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-                          if (Player* player = i->getSource())
-                            if (player->isAlive())
-                              if (player->HasAura(58501))
-                                player->CompletedAchievement(pAE);
-                      }
+		    {
+		      if (!Molgeim->isAlive() || !Steelbreaker->isAlive())
+			{
+			  me->AddLootMode(LOOT_MODE_HARD_MODE_1);
+			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+			  if (!pAE)
+			    return;
+			  Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+			  for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+			    if (Player* player = i->getSource())
+			      if (player->isAlive())
+				if (player->HasAura(58501))
+				  player->CompletedAchievement(pAE);
+			}
+		      else
+			{
+			  me->SetLootRecipient(NULL);
+			}
+		    }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1132,7 +1154,7 @@ class boss_stormcaller_brundir : public CreatureScript
                             events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
                             break;
                         case EVENT_LIGHTNING_WHIRL:
-			      if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+			      if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_MOLGEIM) : 0))
 				if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
 				  if (!Molgeim->isAlive() || !Steelbreaker->isAlive())
 				    DoCast(SPELL_LIGHTNING_WHIRL);
@@ -1396,7 +1418,7 @@ class achievement_cant_do_that_while_stunned : public AchievementCriteriaScript
             if (Creature* boss = target->ToCreature())
                 if (boss->AI()->GetData(DATA_I_CHOOSE_YOU_PHASE_CHECK))
                     if (InstanceScript* instance = boss->GetInstanceScript())
-                        if (Creature* brundir = ObjectAccessor::GetCreature(*boss, instance->GetData64(DATA_BRUNDIR)))
+                        if (Creature* brundir = ObjectAccessor::GetCreature(*boss, instance->GetData64(BOSS_BRUNDIR)))
                             if (brundir->AI()->GetData(DATA_CANT_DO_THAT_WHILE_STUNNED))
                                 return true;
 

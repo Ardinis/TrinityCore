@@ -17537,12 +17537,7 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
         SetOrientation(orientation);
 
     if ((relocated || turn) && IsVehicle())
-<<<<<<< HEAD
-      GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
-    //      GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-=======
-        GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
->>>>>>> parent of 909302e... cs_report
+      GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 
     return (relocated || turn);
 }

@@ -339,7 +339,7 @@ class boss_steelbreaker : public CreatureScript
 		superChargedCnt = 0;
                 me->RemoveAllAuras();
 		me->ResetLootMode();
-		//                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+		me->RemoveLootMode(LOOT_MODE_DEFAULT);
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
             }
@@ -656,7 +656,7 @@ class boss_runemaster_molgeim : public CreatureScript
                 phase = 0;
 		superChargedCnt = 0;
                 me->RemoveAllAuras();
-		//                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+		me->RemoveLootMode(LOOT_MODE_DEFAULT);
 		me->ResetLootMode();
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
@@ -980,7 +980,7 @@ class boss_stormcaller_brundir : public CreatureScript
                 couldNotDoThat = true;
                 me->RemoveAllAuras();
 		me->ResetLootMode();
-		//                me->RemoveLootMode(LOOT_MODE_DEFAULT);
+		me->RemoveLootMode(LOOT_MODE_DEFAULT);
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_WALKING);
                 me->SendMovementFlagUpdate();
 		//                me->SetSpeed(MOVE_RUN, 1.42857f);

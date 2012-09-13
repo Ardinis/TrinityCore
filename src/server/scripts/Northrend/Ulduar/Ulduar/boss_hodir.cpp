@@ -184,21 +184,44 @@ class npc_flash_freeze : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim() || me->getVictim()->HasAura(SPELL_BLOCK_OF_ICE) || me->getVictim()->HasAura(SPELL_FLASH_FREEZE_HELPER))
+                if (!UpdateVictim())
                     return;
 
-                if (me->getVictim()->GetGUID() != targetGUID || instance->GetBossState(BOSS_HODIR) != IN_PROGRESS)
+                if (/*me->getVictim()->GetGUID() != targetGUID || */instance->GetBossState(BOSS_HODIR) != IN_PROGRESS)
                     me->DespawnOrUnsummon();
 
                 if (checkDespawnTimer <= diff)
                 {
-                    if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
-                        if (!target->isAlive())
-                            me->DisappearAndDie();
-                    checkDespawnTimer = 2500;
+		  std::cout << "checkDespawnTimer" << std::endl;
+		  if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
+		    {
+		      if (!target->isAlive() || (target->GetTypeId() != TYPEID_PLAYER && 
+						 target->GetEntry() != 32941 &&
+						 target->GetEntry() != 33333 &&
+						 target->GetEntry() != 33325 &&
+						 target->GetEntry() != 32901 &&
+						 target->GetEntry() != 33332 &&
+						 target->GetEntry() != 32950 &&
+						 target->GetEntry() != 33328 &&
+						 target->GetEntry() != 33331 &&
+						 target->GetEntry() != 32946 &&
+						 target->GetEntry() != 32893 &&
+						 target->GetEntry() != 33327 &&
+						 target->GetEntry() != 32948 &&
+						 target->GetEntry() != 33330 &&
+						 target->GetEntry() != 32897 &&
+						 target->GetEntry() != 33326 &&
+						 target->GetEntry() != 32900))
+			{
+			  me->DisappearAndDie();
+			}
+		    }
+		  else
+		    me->DisappearAndDie();
+		  checkDespawnTimer = 2500;
                 }
                 else
-                    checkDespawnTimer -= diff;
+		  checkDespawnTimer -= diff;
             }
 
             void IsSummonedBy(Unit* summoner)
@@ -208,12 +231,33 @@ class npc_flash_freeze : public CreatureScript
                 me->AddThreat(summoner, 250.0f);
                 if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
                 {
-                    DoCast(target, SPELL_BLOCK_OF_ICE, true);
-                    // Prevents to have Ice Block on other place than target is
-                    me->NearTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
-                    if (target->GetTypeId() == TYPEID_PLAYER)
+		  if (target->GetTypeId() == TYPEID_PLAYER ||
+		      target->GetEntry() == 32941 ||
+		      target->GetEntry() == 33333 ||
+		      target->GetEntry() == 33325 ||
+		      target->GetEntry() == 32901 ||
+		      target->GetEntry() == 33332 ||
+		      target->GetEntry() == 32950 ||
+		      target->GetEntry() == 33328 ||
+		      target->GetEntry() == 33331 ||
+		      target->GetEntry() == 32946 ||
+		      target->GetEntry() == 32893 ||
+		      target->GetEntry() == 33327 ||
+		      target->GetEntry() == 32948 ||
+		      target->GetEntry() == 33330 ||
+		      target->GetEntry() == 32897 ||
+		      target->GetEntry() == 33326 ||
+		      target->GetEntry() == 32900)
+		    {
+		      DoCast(target, SPELL_BLOCK_OF_ICE, true);
+		      // Prevents to have Ice Block on other place than target is
+		      me->NearTeleportTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+		      if (target->GetTypeId() == TYPEID_PLAYER)
                         if (Creature* Hodir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_HODIR) : 0))
-                            Hodir->AI()->DoAction(ACTION_CHEESE_THE_FREEZE);
+			  Hodir->AI()->DoAction(ACTION_CHEESE_THE_FREEZE);
+		    }
+		  else
+		    me->DisappearAndDie();
                 }
             }
 
@@ -259,25 +303,30 @@ class npc_ice_block : public CreatureScript
                 }
             }
 
-            void DamageTaken(Unit* who, uint32& /*damage*/)
+	  void DamageTaken(Unit* /*who*/, uint32& /*damage*/)
             {
-                if (Creature* Helper = ObjectAccessor::GetCreature(*me, targetGUID))
-                {
-                    Helper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
 
-                    if (Creature* Hodir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_HODIR) : 0))
-                    {
-                        if (!Hodir->isInCombat())
-                        {
-                            Hodir->SetReactState(REACT_AGGRESSIVE);
-                            Hodir->AI()->DoZoneInCombat();
-                            Hodir->AI()->AttackStart(who);
-                        }
-
-                        Helper->AI()->AttackStart(Hodir);
-                    }
-                }
             }
+
+	  void JustDied(Unit* who)
+	  {
+	    if (Creature* Helper = ObjectAccessor::GetCreature(*me, targetGUID))
+	      {
+		Helper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
+		
+		if (Creature* Hodir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_HODIR) : 0))
+		  {
+		    if (!Hodir->isInCombat())
+		      {
+			Hodir->SetReactState(REACT_AGGRESSIVE);
+			Hodir->AI()->DoZoneInCombat();
+			Hodir->AI()->AttackStart(who);
+		      }
+		    Helper->AddThreat(Hodir, 99999.9f);
+		    Helper->AI()->AttackStart(Hodir);
+		  }
+	      }
+	  }
 
             private:
                 InstanceScript* instance;
@@ -311,11 +360,13 @@ class boss_hodir : public CreatureScript
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
                     if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
                         FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
+		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
+		me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
                 DoScriptText(SAY_AGGRO, me);
                 DoCast(me, SPELL_BITING_COLD, true);
 

@@ -3608,6 +3608,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 73529: // Shadow Trap
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;   // 10yd
                 break;
+	case 62383:
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
+	  break;
             case 74282: // Shadow Trap (searcher)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;   // 3yd
                 break;

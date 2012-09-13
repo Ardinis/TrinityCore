@@ -330,7 +330,7 @@ class boss_ignis : public CreatureScript
 					AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2927, 2928));
 					if (!pAE)
 					  return;
-					player->CompletedAchievement(pAE);
+					p->CompletedAchievement(pAE);
 				      }
 				  }
                                 slagPotGUID = 0;

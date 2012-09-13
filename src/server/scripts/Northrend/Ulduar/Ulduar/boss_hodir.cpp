@@ -361,6 +361,8 @@ class boss_hodir : public CreatureScript
                     if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
                         FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
 		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+	      instance->SetData(DATA_CAILLE, DONE);
+	      instance->SetData(DATA_GARE_GEL, DONE);
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -397,8 +399,10 @@ class boss_hodir : public CreatureScript
                     damage = 0;
                     DoScriptText(SAY_DEATH, me);
                     if (iCouldSayThatThisCacheWasRare)
+		      {
                         instance->SetData(DATA_HODIR_RARE_CACHE, 1);
-
+			instance->DoCompleteAchievement(ACHIEVEMENT_THIS_CACHE_WAS_RARE);
+		      }
                     me->RemoveAllAuras();
                     me->RemoveAllAttackers();
                     me->AttackStop();
@@ -413,6 +417,12 @@ class boss_hodir : public CreatureScript
 
                     me->setFaction(35);
                     me->DespawnOrUnsummon(10000);
+		    if (instance->GetData(DATA_CAILLE) != FAIL)
+		      instance->DoCompleteAchievement(ACHIEVEMENT_GETTING_COLD_IN_HERE);
+		    if (iHaveTheCoolestFriends)
+		      instance->DoCompleteAchievement(ACHIEVEMENT_COOLEST_FRIENDS);
+		    if (instance->GetData(DATA_GARE_GEL) != FAIL)
+		      instance->DoCompleteAchievement(ACHIEVEMENT_CHEESE_THE_FREEZE);
 
                     _JustDied();
                 }
@@ -524,12 +534,16 @@ class boss_hodir : public CreatureScript
                     if (!target || !target->isAlive() || GetClosestCreatureWithEntry(target, NPC_SNOWPACKED_ICICLE, 5.0f))
                         continue;
 
+		    if (target->isTotem())
+		      continue;
+
                     if (target->HasAura(SPELL_FLASH_FREEZE_HELPER) || target->HasAura(SPELL_BLOCK_OF_ICE))
                     {
                         me->CastSpell(target, SPELL_FLASH_FREEZE_KILL, true);
                         continue;
                     }
-
+		    if (target->ToPlayer())
+		      instance->SetData(DATA_GARE_GEL, FAIL);
                     target->CastSpell(target, SPELL_SUMMON_BLOCK_OF_ICE, true);
                 }
             }
@@ -1070,6 +1084,8 @@ public:
                 return;
 
             int32 damage = int32(200 * pow(2.0f, GetStackAmount()));
+	    if (GetStackAmount() > 2 && caster->GetInstanceScript())
+	      caster->GetInstanceScript()->SetData(DATA_CAILLE, FAIL);
             caster->CastCustomSpell(caster, SPELL_BITING_COLD_DAMAGE, &damage, NULL, NULL, true);
 
             if (caster->isMoving())
@@ -1101,6 +1117,7 @@ class achievement_staying_buffed_all_winter : public AchievementCriteriaScript
            return false;
        }
 };
+
 void AddSC_boss_hodir()
 {
     new boss_hodir();

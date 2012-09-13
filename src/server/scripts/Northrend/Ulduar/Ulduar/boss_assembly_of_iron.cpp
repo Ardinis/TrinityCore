@@ -991,7 +991,7 @@ class boss_stormcaller_brundir : public CreatureScript
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-		me->SetReactState(REACT_PASSIVE);
+		//		me->SetReactState(REACT_PASSIVE);
             }
 
             void EnterCombat(Unit* who)

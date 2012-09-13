@@ -56,6 +56,8 @@ enum UlduarBosses
 
     // Hodir
     DATA_HODIR_RARE_CACHE,
+    DATA_CAILLE,
+    DATA_GARE_GEL,
 
     // Collosus (Leviathan)
     DATA_COLOSSUS,               

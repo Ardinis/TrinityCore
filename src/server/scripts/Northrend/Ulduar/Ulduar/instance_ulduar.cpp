@@ -109,6 +109,8 @@ class instance_ulduar : public InstanceMapScript
             uint64 HodirEntranceDoorGUID;
             uint64 HodirChestGUID;
             uint64 HodirRareCacheGUID;
+	  uint32 DataCaille;
+	  uint32 DataGare;
             
             // Mimiron
             uint64 MimironTrainGUID;
@@ -190,6 +192,9 @@ class instance_ulduar : public InstanceMapScript
                 // Pretty please: Use type-safe fill instead of raw memset !   
                 SetBossNumber(MAX_ENCOUNTER);
                 LoadDoorData(doorData);
+
+		DataCaille = 0;
+		DataGare = 0;
 
                 // Leviathan
                 leviathanChestGUID  = 0;
@@ -1085,6 +1090,12 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case DATA_CAILLE :
+		  DataCaille = data;
+		  break;
+		case DATA_GARE_GEL :
+		  DataGare = data;
+		  break;
                     case DATA_COLOSSUS:
                         ColossusData = data;
                         if (data == 2)
@@ -1199,17 +1210,21 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
-                    case DATA_COLOSSUS:
-                        return ColossusData;
-                    case DATA_KEEPER_SUPPORT_YOGG:
-                        return SupportKeeperFlag;
-                    case DATA_HODIR_RARE_CACHE:
-                        return HodirRareCacheData;
-                    case DATA_UNBROKEN:
-                        if (Creature* Leviathan = instance->GetCreature(LeviathanGUID))
-                            return Leviathan->AI()->GetData(type);
-                    default:
-                        break;
+		case DATA_GARE_GEL :
+		  return DataGare;
+		case DATA_CAILLE :
+                  return DataCaille;
+		case DATA_COLOSSUS:
+		  return ColossusData;
+		case DATA_KEEPER_SUPPORT_YOGG:
+		  return SupportKeeperFlag;
+		case DATA_HODIR_RARE_CACHE:
+		  return HodirRareCacheData;
+		case DATA_UNBROKEN:
+		  if (Creature* Leviathan = instance->GetCreature(LeviathanGUID))
+		    return Leviathan->AI()->GetData(type);
+		default:
+		  break;
                 }
                 return 0;
             }

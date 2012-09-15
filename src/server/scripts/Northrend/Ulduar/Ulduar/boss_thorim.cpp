@@ -263,6 +263,7 @@ class npc_thorim_controller : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 gotActivated = false;
+		spawned = false;
             }
 
             void Reset()
@@ -271,9 +272,27 @@ class npc_thorim_controller : public CreatureScript
                 {
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), true); // Open the entrance door.
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), false); // Close the up-way door.   
-                    events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);  
-                }                            
+		    //		    instance->OpenDoor(instance->GetData64(GO_THORIM_LIGHTNING_FIELD));
+		    //  instance->CloseDoor(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS));
+                    events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);
+		    if (!spawned)
+		      {
+			for (uint8 i = 0; i < 6; i++)   // Spawn Pre-Phase Adds
+			  me->SummonCreature(preAddLocations[i].entry, preAddLocations[i].pos, TEMPSUMMON_CORPSE_DESPAWN);
+			spawned = true;
+		      }
+                }
             }
+
+	  void DoAction(int32 const action)
+	  {
+	    if (action != 42)
+	      return;
+	    gotActivated = false;
+	    spawned = false;
+	    summons.DespawnAll();
+	  }
+
 
             void JustSummoned(Creature* summon)
             {
@@ -299,6 +318,8 @@ class npc_thorim_controller : public CreatureScript
                         thorim->AI()->SetGUID(attackTarget, ACTION_PREPHASE_ADDS_DIED);
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), false); // Close the entrance door.
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), true); // Open the up-way door.    
+		    //		    instance->CloseDoor(instance->GetData64(GO_THORIM_LIGHTNING_FIELD));
+		    //  instance->OpenDoor(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS));
                 }
             }
 
@@ -322,9 +343,8 @@ class npc_thorim_controller : public CreatureScript
                                 if (player)
                                     if (!player->isGameMaster())
                                     {                                        
-                                        for (uint8 i = 0; i < 6; i++)   // Spawn Pre-Phase Adds
-                                            me->SummonCreature(preAddLocations[i].entry, preAddLocations[i].pos, TEMPSUMMON_CORPSE_DESPAWN);
-                                        gotActivated = true;                            
+				      summons.DoZoneInCombat();
+				      gotActivated = true;                            
                                     }
                                 if (!gotActivated)
                                     events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);
@@ -335,10 +355,10 @@ class npc_thorim_controller : public CreatureScript
             }
 
             private:
-                bool gotActivated;
-                EventMap events;
-                InstanceScript* instance;
-                SummonList summons;
+	  bool gotActivated, spawned;
+	  EventMap events;
+	  InstanceScript* instance;
+	  SummonList summons;
         };
 
         CreatureAI* GetAI(Creature* c) const
@@ -395,8 +415,10 @@ class boss_thorim : public CreatureScript
                 summonChampion = false;
                 checkTargetTimer = 7000;
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
+		  {
+		    ctrl->AI()->DoAction(42);
                     ctrl->AI()->Reset();
-
+		  }
                 // Respawn Mini Bosses
                 for (uint8 i = DATA_RUNIC_COLOSSUS; i <= DATA_RUNE_GIANT; i++)  // TODO: Check if we can move this, it's a little bit crazy.
                     if (Creature* MiniBoss = ObjectAccessor::GetCreature(*me, instance->GetData64(i)))
@@ -541,10 +563,10 @@ class boss_thorim : public CreatureScript
                             events.ScheduleEvent(EVENT_CHARGE_ORB, urand(15, 20) *IN_MILLISECONDS, 0, PHASE_1);
                             break;
                         case EVENT_SUMMON_WARBRINGER:
-                            me->SummonCreature(ArenaAddEntries[3], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            me->SummonCreature(ArenaAddEntries[3], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000);
                             if (summonChampion)
                             {
-                                me->SummonCreature(ArenaAddEntries[0], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                me->SummonCreature(ArenaAddEntries[0], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000);
                                 summonChampion = false;
                             }
                             else
@@ -552,12 +574,12 @@ class boss_thorim : public CreatureScript
                             events.ScheduleEvent(EVENT_SUMMON_WARBRINGER, 20000, 0, PHASE_1);
                             break;
                         case EVENT_SUMMON_EVOKER:
-                            me->SummonCreature(ArenaAddEntries[2], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                            me->SummonCreature(ArenaAddEntries[2], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000);
                             events.ScheduleEvent(EVENT_SUMMON_EVOKER, urand(23, 27) *IN_MILLISECONDS, 0, PHASE_1);
                             break;
                         case EVENT_SUMMON_COMMONER:
                             for (uint8 n = 0; n < urand(5, 7); ++n)
-                                me->SummonCreature(ArenaAddEntries[1], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+                                me->SummonCreature(ArenaAddEntries[1], Pos[rand()%7], TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000);
                             events.ScheduleEvent(EVENT_SUMMON_COMMONER, 30000, 0, PHASE_1);
                             break;
                         case EVENT_BERSERK_PHASE_1:
@@ -576,7 +598,7 @@ class boss_thorim : public CreatureScript
                             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(7, 15) *IN_MILLISECONDS, 0, PHASE_2);
                             break;
                         case EVENT_TRANSFER_ENERGY:
-                            if (Creature* source = me->SummonCreature(NPC_THORIM_COMBAT_TRIGGER, PosCharge[urand(0, 6)], TEMPSUMMON_TIMED_DESPAWN, 9000))
+                            if (Creature* source = me->SummonCreature(NPC_THORIM_COMBAT_TRIGGER, PosCharge[urand(0, 6)], TEMPSUMMON_TIMED_DESPAWN, 120000))
                                 source->CastSpell(source, SPELL_LIGHTNING_PILLAR, true);
                             events.ScheduleEvent(EVENT_RELEASE_LIGHTNING_CHARGE, 8000, 0, PHASE_2);
                             break;
@@ -597,7 +619,7 @@ class boss_thorim : public CreatureScript
                 // EnterEvadeIfOutOfCombatArea(diff);
             }
 
-            void DoAction(int32 const action)
+	  void DoAction(int32 const action)
             {
                 switch (action)
                 {

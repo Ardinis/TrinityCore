@@ -186,6 +186,8 @@ class instance_ulduar : public InstanceMapScript
             uint8 elderCount;
             bool conSpeedAtory;
 
+	  uint32 armhf;
+
         public:
             void Initialize()
             {
@@ -225,6 +227,7 @@ class instance_ulduar : public InstanceMapScript
                 KologarnChestGUID   = 0;
                 KologarnBridgeGUID  = 0;
                 KologarnDoorGUID    = 0;
+		armhf = 0;
 
                 // Auriaya
                 AuriayaGUID = 0;
@@ -305,6 +308,22 @@ class instance_ulduar : public InstanceMapScript
                 elderCount          = 0;
                 conSpeedAtory       = false;
             }
+
+	  void OpenDoor(uint64 guid)
+	  {
+	    if (!guid)
+	      return;
+	    if (GameObject* go = instance->GetGameObject(guid))
+	      go->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
+	  }
+
+	  void CloseDoor(uint64 guid)
+	  {
+	    if (!guid)
+	      return;
+	    if (GameObject* go = instance->GetGameObject(guid))
+	      go->SetGoState(GO_STATE_READY);
+	  }
 
             void FillInitialWorldStates(WorldPacket& packet)
             {
@@ -1090,6 +1109,9 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case DATA_ARM_HF:
+		  armhf = data;
+		  break;
 		case DATA_CAILLE :
 		  DataCaille = data;
 		  break;
@@ -1201,6 +1223,24 @@ class instance_ulduar : public InstanceMapScript
                     case DATA_BRAIN_DOOR_1 :        return YoggSaronBrainDoor1GUID;
                     case DATA_BRAIN_DOOR_2 :        return YoggSaronBrainDoor2GUID;
                     case DATA_BRAIN_DOOR_3 :        return YoggSaronBrainDoor3GUID;
+
+
+		      // Thorim
+		case GO_THORIM_DARK_IRON_PROTCULLIS:
+		  return ThorimDarkIronPortCullisGUID;
+		case GO_THORIM_CHEST_HERO:
+		case GO_THORIM_CHEST:
+		  return ThorimChestGUID;
+		case GO_THORIM_LIGHTNING_FIELD:
+		  return ThorimLightningFieldGUID;
+		case GO_THORIM_STONE_DOOR:
+		  return StoneDoorGUID;
+		case GO_THORIM_RUNIC_DOOR:
+		  return RunicDoorGUID;
+		case NPC_THORIM:
+		  return ThorimGUID;
+		case NPC_THORIM_CTRL:
+		  return ThorimCtrlGUID;
                 }
 
                 return 0;
@@ -1210,6 +1250,8 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case DATA_ARM_HF :
+		  return armhf;
 		case DATA_GARE_GEL :
 		  return DataGare;
 		case DATA_CAILLE :

@@ -114,6 +114,8 @@ enum UlduarBosses
     DATA_UNIVERSE_GLOBE,
     DATA_ALGALON_TRAPDOOR,
     DATA_BRANN_BRONZEBEARD_ALG,
+
+    DATA_ARM_HF,
 };
 
 enum UlduarBossDeadFlags

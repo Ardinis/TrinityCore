@@ -377,7 +377,7 @@ class boss_freya : public CreatureScript
                 if (EncounterFinished) // May be called during fight if Freya gets outfight... hm, should _not_ happen regularly
                 {
 		  //                    me->setFaction(35);
-                    return;
+		  //                    return;
                 }
                 _Reset();                
                 trioWaveCount = 0;

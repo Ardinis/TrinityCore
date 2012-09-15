@@ -3274,6 +3274,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 16835:
                 spellInfo->DurationIndex = 21;
                 break;
+/*				
+			case 62324: // Throw Passenger
+				spellInfo->Targets |= TARGET_UNIT_CASTER;
+				break;		
+*/				
             case 51735: // Ebon Plague
             case 51734:
             case 51726:

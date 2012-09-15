@@ -336,7 +336,7 @@ class boss_steelbreaker : public CreatureScript
             {
                 _Reset();
                 phase = 0;
-		superChargedCnt = 0;
+				superChargedCnt = 0;
                 me->RemoveAllAuras();
 		me->ResetLootMode();
 		me->RemoveLootMode(LOOT_MODE_DEFAULT);
@@ -373,8 +373,8 @@ class boss_steelbreaker : public CreatureScript
                         DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
                         break;
                     case ACTION_UPDATEPHASE:
-		      phase++;
-                      events.SetPhase(phase); 
+						phase++;
+						events.SetPhase(phase); 
                         if (phase >= 2)
                             events.RescheduleEvent(EVENT_STATIC_DISRUPTION, 30000);
                         if (phase >= 3)
@@ -384,8 +384,9 @@ class boss_steelbreaker : public CreatureScript
 			    if (events.GetNextEventTime(EVENT_STATIC_DISRUPTION) > 0)   // Note: Function returns 0 if the event isn't scheduled yet.
                                 nextSchedule = urand(2000, 5000);
                             else 
-			      nextSchedule = urand(20000, 30000);
-			    events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
+                                nextSchedule = urand(20000, 30000);
+                            events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
+							me->AddLootMode(LOOT_MODE_HARD_MODE_2);
                         }
                         break;
                 }
@@ -396,14 +397,15 @@ class boss_steelbreaker : public CreatureScript
                 DoScriptText(RAND(SAY_STEELBREAKER_DEATH_1, SAY_STEELBREAKER_DEATH_2), me);
                 if (IsEncounterComplete(instance, me))
                 {
-		  _JustDied();
+					_JustDied();
                     PostEncounterStuff(instance);
                     instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CREDIT_MARKER);
                 }
                 else
-		  {
+				{
                     events.Reset();
                     summons.DespawnAll();
+
 		    DoCastAOE(SPELL_SUPERCHARGE);
                 }
 
@@ -411,7 +413,7 @@ class boss_steelbreaker : public CreatureScript
 		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_BRUNDIR) : 0))
 		    {
 		      if (!Molgeim->isAlive() && !Brundir->isAlive())
-			{
+			  {
 			  me->AddLootMode(LOOT_MODE_HARD_MODE_2);
 			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
 			  if (!pAE)
@@ -422,12 +424,10 @@ class boss_steelbreaker : public CreatureScript
 			      if (player->isAlive())
 				if (player->HasAura(58501))
 				  player->CompletedAchievement(pAE);
-			}
+			  }
 		      else
-			{
-			  me->SetLootRecipient(NULL);
-			}
-		    }
+				me->SetLootRecipient(NULL);
+		     }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -443,15 +443,15 @@ class boss_steelbreaker : public CreatureScript
                 switch (spell->Id)
                 {
                     case SPELL_SUPERCHARGE:
-		      me->SetHealth(me->GetMaxHealth()); 
-		      events.RescheduleEvent(EVENT_FUSION_PUNCH, 15000);
-		      superChargedCnt++;
-                        DoAction(ACTION_UPDATEPHASE);
-			// Crazy hack, but since - whyever - stacking does not work automatically when the casts are fired from different NPCs...
-			// Note that it also does not work if the same NPC tries to cast the spell twice (as used in last commit)
-			if (Aura* charge = me->GetAura(SPELL_SUPERCHARGE))                           
-                            charge->SetStackAmount(std::min<uint8>(2, superChargedCnt));
-                        break;
+						me->SetHealth(me->GetMaxHealth()); 
+						events.RescheduleEvent(EVENT_FUSION_PUNCH, 15000);
+						superChargedCnt++;
+						DoAction(ACTION_UPDATEPHASE);
+						// Crazy hack, but since - whyever - stacking does not work automatically when the casts are fired from different NPCs...
+						// Note that it also does not work if the same NPC tries to cast the spell twice (as used in last commit)
+						if (Aura* charge = me->GetAura(SPELL_SUPERCHARGE))                           
+							charge->SetStackAmount(std::min<uint8>(2, superChargedCnt));
+						break;
                     case SPELL_ELECTRICAL_CHARGE_TRIGGERED:
                         if (!me->isInCombat())
                             me->RemoveAurasDueToSpell(SPELL_ELECTRICAL_CHARGE_TRIGGERED);
@@ -557,7 +557,7 @@ class boss_steelbreaker : public CreatureScript
 
             private:
                 uint32 phase;
-	  uint8 superChargedCnt;
+				uint8 superChargedCnt;
         };
 
         CreatureAI* GetAI(Creature* creature) const

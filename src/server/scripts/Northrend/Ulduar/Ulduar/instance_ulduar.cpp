@@ -708,6 +708,9 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case GO_LEVIATHAN_GATE:
                         LeviathanGateGUID = gameObject->GetGUID();
+						//if (GetBossState(BOSS_LEVIATHAN) == IN_PROGRESS)
+						//	gameObject->SetGoState(GO_STATE_ACTIVE);
+
                         if (GetBossState(BOSS_LEVIATHAN) == DONE)
                             gameObject->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
                         break;

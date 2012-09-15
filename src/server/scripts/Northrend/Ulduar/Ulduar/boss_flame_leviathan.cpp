@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- *
+ * 
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or (at your
@@ -21,6 +21,15 @@
  *          requires more work involving area triggers.
  *          if reached brann speaks through his radio..
  */
+
+
+/* Improve By Gabii - Paragon Server - Last Update : 15/09/2012 */
+
+
+/* ---	TODO List :		---
+* Fix Emplacement des Passagers 0 (player), 1(Tourrelle), 2 (device). Visuellement + veritable position.
+* Fix Spell Du bouclier du vehicule ( absorbe constamment...)
+*/
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -58,7 +67,9 @@ enum Spells
     //TOWER Additional SPELLS
     SPELL_THORIMS_HAMMER           = 62912, // Tower of Storms // 62911 should trigger it, but it doesn't in the proper place
     SPELL_MIMIRONS_INFERNO         = 62909, // Tower of Flames
+	SPELL_MIMIRONS_INFERNO_DAMAGE  = 62910,
     SPELL_HODIRS_FURY              = 62533, // Tower of Frost
+	SPELL_HODIRS_FURY_DAMAGE	   = 62297,
     SPELL_FREYAS_WARD              = 62907, // Tower of Nature // 62906 should trigger it, but it doesn't in the proper place
     SPELL_FREYA_SUMMONS            = 62947, // Tower of Nature
     //TOWER ap & health spells
@@ -162,9 +173,9 @@ enum Vehicles
     VEHICLE_DEMOLISHER    = 33109,
 };
 
-#define EMOTE_PURSUE      "Flame Leviathan pursues $N."
-#define EMOTE_OVERLOAD    "Flame Leviathan's circuits overloaded."
-#define EMOTE_REPAIR      "Automatic repair sequence initiated."
+#define EMOTE_PURSUE      "Le Leviathan des Flammes poursuit $N."
+#define EMOTE_OVERLOAD    "Surchage des circuits du Leviathan des Flammes."
+#define EMOTE_REPAIR      "Initialisation de la sequence de reparation automatique."
 #define _DATA_SHUTOUT      29112912 // 2911, 2912 are achievement IDs   // TODO: Maybe get rid of those two defines
 #define _DATA_ORBIT_ACHIEVEMENTS    1
 
@@ -278,8 +289,9 @@ class boss_flame_leviathan : public CreatureScript
                 ASSERT(vehicle);
                 if (!me->isDead())
                     Reset();
-                Shutdown = 0;
+                Shutdown = pursueTarget = SpawnFreyaAdd = SpeechFreya = SpeechThorims = SpeechHodirs = TestCrash = 0;
                 // Note: I'll consider those as active on start, since this is causally correct.
+
                 towerOfStorms = towerOfLife = towerOfFlames = towerOfFrost = true;  // Towers
                 Shutout = Unbroken = true;                                          // Achievs
                 checkUnbrokenOnReset = false;
@@ -289,27 +301,30 @@ class boss_flame_leviathan : public CreatureScript
 
             void Reset()
             {
+
                 _Reset();
-                Shutdown = 0;
                 Pursued = false;
-                pursueTarget = 0;
+                Shutdown = pursueTarget = SpawnFreyaAdd = SpeechFreya = SpeechThorims = SpeechHodirs = TestCrash =0;
+				HandleAccessorys(false);
                 me->SetReactState(REACT_DEFENSIVE);
                 if (checkUnbrokenOnReset) // A fight was already performed, the raid got wiped before starting this Reset() call -> Unbroken can only be done on first try!
                     SetData(DATA_UNBROKEN, 0);
+				instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_PURSUED);
             }
 
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();
                 me->SetReactState(REACT_PASSIVE);   // Enforce react-type, unless PURSUE gehts active.
-                events.ScheduleEvent(EVENT_PURSUE, 1);
-                events.ScheduleEvent(EVENT_MISSILE, urand(1500, 4*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_PURSUE, 30*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_MISSILE, 2*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_VENT, 20*IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
                 PerformTowerCheck();
+				HandleAccessorys(true);
                 checkUnbrokenOnReset = true;
+				DoScriptText(SAY_AGGRO, me);
             }
 
             bool HaveActiveTowers() const
@@ -336,53 +351,47 @@ class boss_flame_leviathan : public CreatureScript
             {
                 if (doInstall)
                 {
-                    // Seats
-                    for (uint8 i = RAID_MODE(2, 0); i < 4; ++i)
+					for (uint8 i = RAID_MODE<uint8>(2, 0); i < 4; ++i)
                     {
-                        if (Creature* seat = me->SummonCreature(NPC_SEAT, *me))
-                        {
-                            if (Creature* turret = me->SummonCreature(NPC_DEFENSE_TURRET, *me))
-                                turret->EnterVehicle(seat, SEAT_TURRET);
+							if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
+							{
+								target->EnterVehicle(me, i);
 
-                            if (Creature* device = me->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
-                                device->EnterVehicle(seat, SEAT_DEVICE);
+								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+									turret->EnterVehicle(target, SEAT_TURRET);
 
-                            seat->EnterVehicle(me, i);
-                        }
+								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+									device->EnterVehicle(target, SEAT_DEVICE);
+							}
+                    }
 
-                        // Cannon
-                        if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
-                            cannon->EnterVehicle(me, SEAT_CANNON);
-                    }                        
+                    if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
+                        cannon->EnterVehicle(me, SEAT_CANNON);
                 }
                 else
                 {
-                    for (uint8 i = 0; i < 4; ++i)         
-                    {
-                        if (Unit* seat = vehicle->GetPassenger(i))
-                        {
-                            if (seat->ToCreature() && seat->GetVehicleKit())
-                            {
-                                if (Unit* turret = seat->GetVehicleKit()->GetPassenger(SEAT_TURRET))
-                                    if (Creature* c = turret->ToCreature())
-                                        c->DespawnOrUnsummon(1000);
-
-                                if (Unit* device = seat->GetVehicleKit()->GetPassenger(SEAT_DEVICE))
-                                    if (Creature* c = device->ToCreature())
-                                        c->DespawnOrUnsummon(1000);
-
-                                seat->ToCreature()->DespawnOrUnsummon(500);
-                            }
-
-                            // Cannon
-                            if (Unit* cannon = vehicle->GetPassenger(SEAT_CANNON))
-                                if (Creature* c = cannon->ToCreature())
-                                    c->DespawnOrUnsummon(500);
-                        }
-                    }                                                                  
+					DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
+					DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
+					DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
+					DespawnCreatures(NPC_SEAT,200.0f);
                 }
             }
 
+			void DespawnCreatures(uint32 entry, float distance)
+			{
+				std::list<Creature*> m_pCreatures;
+				GetCreatureListWithEntryInGrid(m_pCreatures, me, entry, distance);
+     
+				if (m_pCreatures.empty())
+					return;
+     
+				for(std::list<Creature*>::iterator iter = m_pCreatures.begin(); iter != m_pCreatures.end(); ++iter)
+				{
+					(*iter)->DespawnOrUnsummon();
+					(*iter)->RemoveCorpse();
+					(*iter)->RemoveFromWorld();
+				}
+			}
             // Here: used for placing players
             void SetGUID(uint64 guid, int32 /*id*/ = 0)
             {
@@ -406,25 +415,33 @@ class boss_flame_leviathan : public CreatureScript
                 {
                     if (towerOfStorms)
                     {
-                        me->AddAura(SPELL_BUFF_TOWER_OF_STORMS, me);
+						if (!me->HasAura(SPELL_BUFF_TOWER_OF_STORMS))
+							me->CastSpell(me, SPELL_BUFF_TOWER_OF_STORMS, true);
+
                         events.ScheduleEvent(EVENT_THORIMS_HAMMER, 35*IN_MILLISECONDS);
                     }
 
                     if (towerOfFlames)
                     {
-                        me->AddAura(SPELL_BUFF_TOWER_OF_FLAMES, me);
+						if (!me->HasAura(SPELL_BUFF_TOWER_OF_FLAMES))
+							me->CastSpell(me, SPELL_BUFF_TOWER_OF_FLAMES, true);
+
                         events.ScheduleEvent(EVENT_MIMIRONS_INFERNO, 70*IN_MILLISECONDS);
                     }
 
                     if (towerOfFrost)
                     {
-                        me->AddAura(SPELL_BUFF_TOWER_OF_FR0ST, me);
+						if (!me->HasAura(SPELL_BUFF_TOWER_OF_FR0ST))
+							me->CastSpell(me, SPELL_BUFF_TOWER_OF_FR0ST, true);
+
                         events.ScheduleEvent(EVENT_HODIRS_FURY, 105*IN_MILLISECONDS);
                     }
 
                     if (towerOfLife)
                     {
-                        me->AddAura(SPELL_BUFF_TOWER_OF_LIFE, me);
+						if (!me->HasAura(SPELL_BUFF_TOWER_OF_LIFE))
+							me->CastSpell(me, SPELL_BUFF_TOWER_OF_LIFE, true);
+
                         events.ScheduleEvent(EVENT_FREYAS_WARD, 140*IN_MILLISECONDS);
                     }
 
@@ -432,7 +449,6 @@ class boss_flame_leviathan : public CreatureScript
                 }
                 else
                     DoScriptText(SAY_TOWER_NONE, me);
-                    //DoScriptText(SAY_AGGRO, me);
             }
 
             void JustDied(Unit* /*victim*/)
@@ -462,12 +478,6 @@ class boss_flame_leviathan : public CreatureScript
 
                 switch (spell->Id)
                 {
-                    case SPELL_START_THE_ENGINE:
-                        HandleAccessorys(true); // Replaces vehicle->InstallAllAccessories(false);
-                        break;
-                    case SPELL_ELECTROSHOCK:
-                        me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                        break;
                     case SPELL_OVERLOAD_CIRCUIT:
                         ++Shutdown;
                         break;
@@ -496,14 +506,53 @@ class boss_flame_leviathan : public CreatureScript
                 if (id == DATA_UNBROKEN) Unbroken = static_cast<bool>(data);
             }
 
+			void RestartWhenCrash()
+			{
+				int8 NbrColossusMort = 0;
+				std::list<Creature*> NpcColossus;
+				GetCreatureListWithEntryInGrid(NpcColossus, me, 33237, 200.0f);
+     
+				if (NpcColossus.empty())
+					return;
+     
+				for(std::list<Creature*>::iterator iter = NpcColossus.begin(); iter != NpcColossus.end(); ++iter)
+				{
+					if( (*iter)->isDead() )
+						NbrColossusMort++;
+				}
+
+				if(NbrColossusMort == 2)
+                    instance->SetData(DATA_COLOSSUS, 2);
+				
+				return;
+			}
+
             void UpdateAI(uint32 const diff)
             {
-	      return ;
-	      if (!UpdateVictim() /*|| !CheckInRoom()*/)
-                    return;
+				if(TestCrash == 0)
+				{
+					RestartWhenCrash();
+					TestCrash = 1;
+				}
 
-                events.Update(diff);
+				if (!me->isInCombat())
+					return;
 
+				if(Unit* Lacible = me->getVictim())
+				{
+					if(Lacible->GetDisplayId() == 24914)
+					{
+						HandleAccessorys(false);
+						_Reset();
+						return;
+					}
+				}
+
+				if (me->getThreatManager().isThreatListEmpty())
+				{
+					EnterEvadeMode();
+					return;
+				}
                 // Check for shutdown initialization
                 if (Shutdown == RAID_MODE(TWO_SEATS, FOUR_SEATS))
                 {
@@ -514,90 +563,142 @@ class boss_flame_leviathan : public CreatureScript
                     return;
                 }
 
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_PURSUE:
-                            DoScriptText(RAND(SAY_TARGET_1, SAY_TARGET_2, SAY_TARGET_3), me);
-                            DoCast(SPELL_PURSUED);  // Will select target in spellscript
-                            events.ScheduleEvent(EVENT_PURSUE, 35*IN_MILLISECONDS);         // Note: Spell-cooldown is 35 seconds
-                            break;
-                        case EVENT_MISSILE:
-                            DoCast(me, SPELL_MISSILE_BARRAGE, true);
-                            events.ScheduleEvent(EVENT_MISSILE, 2*IN_MILLISECONDS);
-                            break;
-                        case EVENT_VENT:
-                            DoCastAOE(SPELL_FLAME_VENTS);
-                            events.ScheduleEvent(EVENT_VENT, 20*IN_MILLISECONDS);
-                            break;
-                        case EVENT_SPEED:
-                            DoCastAOE(SPELL_GATHERING_SPEED);
-                            events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
-                            break;
-                        case EVENT_SUMMON:
-                            if (summons.size() < 15)
-                                if (Creature* lift = DoSummonFlyer(NPC_MECHANOLIFT, me, 30.0f, 50.0f, 0))
-                                    lift->GetMotionMaster()->MoveRandom(100);
-                            events.ScheduleEvent(EVENT_SUMMON, 2*IN_MILLISECONDS);
-                            break;
-                        case EVENT_SHUTDOWN:
-                            DoScriptText(RAND(SAY_OVERLOAD_1, SAY_OVERLOAD_2, SAY_OVERLOAD_3), me);
-                            me->StopMoving();
-                            me->MonsterTextEmote(EMOTE_OVERLOAD, 0, true);
-                            me->CastSpell(me, SPELL_SYSTEMS_SHUTDOWN, true);
-                                
-                            // Achievement fails once SHUTDOWN got active
-                            Shutout = false;
-                            events.ScheduleEvent(EVENT_REPAIR, 4*IN_MILLISECONDS);
-                            events.DelayEvents(20 * IN_MILLISECONDS, 0);
-                            break;
-                        case EVENT_REPAIR:
-                            me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
-                            me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
-                            events.ScheduleEvent(EVENT_SHUTDOWN, 150*IN_MILLISECONDS);
-                            break;
-                        case EVENT_THORIMS_HAMMER: // Tower of Storms
-                            for (uint8 i = 0; i < RAID_MODE(7, 15); i++)
-                            {
-                                Position pos = Misc[0];                                
-                                pos.m_positionX += frand(-100, 105);
-                                pos.m_positionY += frand(-95, 95);
-                                if (Creature* thorimBeacon = DoSummon(NPC_THORIM_BEACON, pos, 20*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
-                                    thorimBeacon->GetMotionMaster()->MoveRandom(100);
-                            }
-                            DoScriptText(SAY_TOWER_STORM, me);
-                            break;
-                        case EVENT_MIMIRONS_INFERNO: // Tower of Flames
-                            me->SummonCreature(NPC_MIMIRON_BEACON, InfernoStart);
-                            DoScriptText(SAY_TOWER_FLAME, me);
-                            break;
-                        case EVENT_HODIRS_FURY:      // Tower of Frost
-                            for (uint8 i = 0; i < 7; i++)   // TODO: Check where this "7" comes from
-                            {
-                                if (Creature* hodir = DoSummon(NPC_HODIR_BEACON, me, 50.0f, 0))
-                                    hodir->GetMotionMaster()->MoveRandom(100);
-                            }
-                            DoScriptText(SAY_TOWER_FROST, me);
-                            break;
-                        case EVENT_FREYAS_WARD:    // Tower of Nature
-                            DoScriptText(SAY_TOWER_NATURE, me);
-                            for (int32 i = 0; i < 4; i++)   // TODO: Check where this "4" comes from
-                                me->SummonCreature(NPC_FREYA_BEACON, FreyaBeacons[i]);
+				if (me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
+				{
+					me->SetReactState(REACT_PASSIVE);
+					me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_STATE_ROOT);
+					return;
+				}
+				else
+				{
+					me->SetReactState(REACT_AGGRESSIVE);
+					me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_STATE_ROOT);
+				}
+				
+				events.Update(diff);
+				uint32 eventId = events.GetEvent();
 
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                                DoCast(target, SPELL_FREYAS_WARD);
-                            break;
-                    }
+				if (!me->getVictim())
+					UpdateVictim();
+				
+                switch (eventId)
+                {
+					case 0: break;
+                    case EVENT_PURSUE:
+                        DoScriptText(RAND(SAY_TARGET_1, SAY_TARGET_2, SAY_TARGET_3), me);
+
+						if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f))
+							if (target->GetTypeId() == TYPEID_PLAYER || target->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE))
+								me->AddAura(SPELL_PURSUED, target);
+
+                        events.RepeatEvent(30*IN_MILLISECONDS);
+						break;
+                    case EVENT_MISSILE:
+						if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 400.0f))
+							DoCast(pTarget, SPELL_MISSILE_BARRAGE);
+
+						events.RepeatEvent(2*IN_MILLISECONDS);
+                        break;
+                    case EVENT_VENT:
+                        DoCastAOE(SPELL_FLAME_VENTS);
+                        events.RepeatEvent(20*IN_MILLISECONDS);
+                        break;
+                    case EVENT_SPEED:
+                        DoCastAOE(SPELL_GATHERING_SPEED);
+                        events.RepeatEvent(15*IN_MILLISECONDS);
+						break;
+                    case EVENT_SUMMON:
+                        if (summons.size() < 15)
+                            if (Creature* lift = DoSummonFlyer(NPC_MECHANOLIFT, me, 30.0f, 50.0f, 0))
+                                lift->GetMotionMaster()->MoveRandom(100);
+
+						events.RepeatEvent(2*IN_MILLISECONDS);
+                        break;
+                    case EVENT_SHUTDOWN:
+                        DoScriptText(RAND(SAY_OVERLOAD_1, SAY_OVERLOAD_2, SAY_OVERLOAD_3), me);
+						HandleAccessorys(false);
+                        me->StopMoving();
+                        me->MonsterTextEmote(EMOTE_OVERLOAD, 0, true);
+                        me->CastSpell(me, SPELL_SYSTEMS_SHUTDOWN, true);
+                                
+                        // Achievement fails once SHUTDOWN got active
+                        Shutout = false;
+						events.CancelEvent(EVENT_SHUTDOWN);
+						events.ScheduleEvent(EVENT_REPAIR, 20*IN_MILLISECONDS);
+						break;
+                    case EVENT_REPAIR:
+                        me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
+                        me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
+						HandleAccessorys(true);
+						events.CancelEvent(EVENT_REPAIR);
+                        break;
+                    case EVENT_THORIMS_HAMMER: // Tower of Storms
+						if(SpeechThorims == 0)
+						{
+							DoScriptText(SAY_TOWER_STORM, me);
+							SpeechThorims = 1;
+						}
+                        for (uint8 i = 0; i < RAID_MODE(7, 15); i++)
+                        {
+                            Position pos = Misc[0];                                
+                            pos.m_positionX += frand(-100, 105);
+                            pos.m_positionY += frand(-95, 95);
+                            if (Creature* thorimBeacon = DoSummon(NPC_THORIM_BEACON, pos, 20*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
+                                thorimBeacon->GetMotionMaster()->MoveRandom(100);
+                        }
+						events.RepeatEvent(40*IN_MILLISECONDS);
+                        break;
+                    case EVENT_MIMIRONS_INFERNO: // Tower of Flames
+                        me->SummonCreature(NPC_MIMIRON_BEACON, InfernoStart);
+                        DoScriptText(SAY_TOWER_FLAME, me);
+						events.CancelEvent(EVENT_MIMIRONS_INFERNO);
+                        break;
+                    case EVENT_HODIRS_FURY:      // Tower of Frost
+						if(SpeechHodirs == 0)
+						{
+							DoScriptText(SAY_TOWER_FROST, me);
+							SpeechHodirs = 1;
+						}
+                        for (uint8 i = 0; i < RAID_MODE(5, 7); i++)
+                        {
+                            Position pos = Misc[0];                                
+                            pos.m_positionX += frand(-100, 105);
+                            pos.m_positionY += frand(-95, 95);
+                            if (Creature* hodir = DoSummon(NPC_HODIR_BEACON, pos, 20*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN ))
+                                hodir->GetMotionMaster()->MoveRandom(100);
+                        }
+						events.RepeatEvent(40*IN_MILLISECONDS);
+                        break;
+                    case EVENT_FREYAS_WARD:    // Tower of Nature
+						{
+							if(SpeechFreya == 0)
+							{
+								DoScriptText(SAY_TOWER_NATURE, me);
+								SpeechFreya = 1;
+							}
+							if(SpawnFreyaAdd == 4)
+								SpawnFreyaAdd = 0;
+							if (Creature* AddFreya = me->SummonCreature(NPC_FREYA_BEACON, FreyaBeacons[SpawnFreyaAdd]))
+							{
+								DoCast(AddFreya,SPELL_FREYA_S_WARD_EFFECT_1,true) ;
+								DoCast(AddFreya,SPELL_FREYA_S_WARD_EFFECT_2,true) ;
+							}
+							SpawnFreyaAdd++;
+							events.RepeatEvent(20*IN_MILLISECONDS);
+							break;
+						}
+					default:
+						events.PopEvent();
+						break;
                 }
 
                 if (!me->HasAura(SPELL_SYSTEMS_SHUTDOWN))
                     DoBatteringRamIfReady();
-
-                // EnterEvadeIfOutOfCombatArea(diff);
+				DoMeleeAttackIfReady();
             }
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
@@ -621,27 +722,28 @@ class boss_flame_leviathan : public CreatureScript
                 }
             }
 
+			void KilledUnit(Unit* Victim)
+			{
+				if (!(rand()%5))
+					DoScriptText(SAY_SLAY, me);
+			}
+
             void DoAction(int32 const action)
             {
                 // Stripped numeric dependency
                 if (action == ACTION_TOWER_OF_FLAMES_DESTROYED || action == ACTION_TOWER_OF_FROST_DESTROYED || action == ACTION_TOWER_OF_LIFE_DESTROYED || action == ACTION_TOWER_OF_STORM_DESTROYED) // Tower destruction, debuff leviathan loot and reduce active tower count
                 {
                     if (me->HasLootMode(LOOT_MODE_DEFAULT | LOOT_MODE_HARD_MODE_1 | LOOT_MODE_HARD_MODE_2 | LOOT_MODE_HARD_MODE_3 | LOOT_MODE_HARD_MODE_4) && GetActiveTowersCount() == 4)
-                    {
                         me->RemoveLootMode(LOOT_MODE_HARD_MODE_4);
-                    }
+
                     if (me->HasLootMode(LOOT_MODE_DEFAULT | LOOT_MODE_HARD_MODE_1 | LOOT_MODE_HARD_MODE_2 | LOOT_MODE_HARD_MODE_3) && GetActiveTowersCount() == 3)
-                    {
                         me->RemoveLootMode(LOOT_MODE_HARD_MODE_3);
-                    }
+
                     if (me->HasLootMode(LOOT_MODE_DEFAULT | LOOT_MODE_HARD_MODE_1 | LOOT_MODE_HARD_MODE_2) && GetActiveTowersCount() == 2)
-                    {
                         me->RemoveLootMode(LOOT_MODE_HARD_MODE_2);
-                    }
+
                     if (me->HasLootMode(LOOT_MODE_DEFAULT | LOOT_MODE_HARD_MODE_1) && GetActiveTowersCount() == 1)
-                    {
                         me->RemoveLootMode(LOOT_MODE_HARD_MODE_1);
-                    }
                 }
 
                 switch (action)
@@ -677,7 +779,7 @@ class boss_flame_leviathan : public CreatureScript
                         break;
                     case ACTION_OVERLOAD_CIRCUIT:
                         ++Shutdown; // Overloading is performed by "me", but it's expensive.
-                        if (Shutdown == RAID_MODE(2, 4)) // Corresponding to TWO_SEATS and FOUR_SEATS
+                        if (Shutdown == RAID_MODE(2, 4))
                         {
                             Shutdown = 0;
                             Shutout = false;
@@ -714,7 +816,7 @@ class boss_flame_leviathan : public CreatureScript
 
                 uint64 pursueTarget;
                 Vehicle* vehicle;
-                uint8 Shutdown;
+                uint8 Shutdown, SpawnFreyaAdd, SpeechFreya, SpeechThorims, SpeechHodirs, TestCrash;
                 bool towerOfStorms, towerOfLife, towerOfFlames, towerOfFrost, Shutout, Unbroken, Pursued, checkUnbrokenOnReset;
         };
 
@@ -735,32 +837,34 @@ class npc_flame_leviathan_defense_cannon : public CreatureScript
 
             void Reset()
             {
-                NapalmTimer = 5*IN_MILLISECONDS;
+                NapalmTimer = 15*IN_MILLISECONDS;
                 DoCast(me, AURA_STEALTH_DETECTION);
             }
 
-            void UpdateAI(uint32 const diff)
+            void UpdateAI(const uint32 diff)
             {
-                if (!UpdateVictim())
-                    return;
+				if (!me->getVictim())
+					UpdateVictim();
 
                 if (NapalmTimer <= diff)
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        if (CanAIAttack(target))
-                            DoCast(target, SPELL_NAPALM, true);
-                    NapalmTimer = 5*IN_MILLISECONDS;
+					if (Unit* target = me->SelectNearestTarget(200.0f))
+
+						if (CanAIAttack(target))
+							DoCast(target, SPELL_NAPALM, true);
+
+                    NapalmTimer = 10*IN_MILLISECONDS;
                 }
                 else
                     NapalmTimer -= diff;
             }
 
-            bool CanAIAttack(Unit const* who) const
-            {
-                if (who->GetTypeId() != TYPEID_PLAYER || !who->GetVehicle() || who->GetVehicleBase()->GetEntry() == NPC_SEAT)
-                    return false;
-                return true;
-            }
+			bool CanAIAttack(Unit const* who) const
+			{
+				if (who->GetTypeId() == TYPEID_PLAYER)
+					return false;
+				return true;
+			}
 
             private:
                 uint32 NapalmTimer;
@@ -781,9 +885,10 @@ class npc_flame_leviathan_seat : public CreatureScript
         {
             npc_flame_leviathan_seatAI(Creature* creature) : ScriptedAI(creature), vehicle(creature->GetVehicleKit())
             {
-                ASSERT(vehicle);                
+                ASSERT(vehicle);
+				me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
             }
-        
+
             void Reset()
             {
                 me->SetReactState(REACT_PASSIVE);
@@ -795,15 +900,15 @@ class npc_flame_leviathan_seat : public CreatureScript
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_MISSILE_BARRAGE, apply);
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_BATTERING_RAM, apply);
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_LASH, apply);
-                target->ApplySpellImmune(0, IMMUNITY_ID, 62912, apply); // Thorims Hammer
-                target->ApplySpellImmune(0, IMMUNITY_ID, 62910, apply); // Mimirons Inferno
-                target->ApplySpellImmune(0, IMMUNITY_ID, 62297, apply); // Hodirs Fury
+                target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_THORIMS_HAMMER, apply); // Thorims Hammer
+                target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_MIMIRONS_INFERNO_DAMAGE, apply); // Mimirons Inferno
+                target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_HODIRS_FURY_DAMAGE, apply); // Hodirs Fury
             }
 
             void PassengerBoarded(Unit* who, int8 seatId, bool apply)
-            {               
+            {
                 if (!me->GetVehicle())
-                    return;                               
+                    return;
 
                 if (seatId == SEAT_PLAYER)
                 {
@@ -815,8 +920,8 @@ class npc_flame_leviathan_seat : public CreatureScript
                         who->CastSpell(who, SPELL_SMOKE_TRAIL, true);
                         who->StopMoving();
                         who->GetMotionMaster()->MoveKnockbackFrom(me->GetPositionX() + 20.0f, me->GetPositionY(), me->GetPositionZ() + 30.0f, 5.0f);
-                        return;                        
-                    }                        
+                        return;
+                    }
                     else
                     {
                         me->AddAura(SPELL_FORCE_REACTION, who);
@@ -869,7 +974,10 @@ class npc_flame_leviathan_defense_turret : public CreatureScript
 
         struct npc_flame_leviathan_defense_turretAI : public TurretAI
         {
-            npc_flame_leviathan_defense_turretAI(Creature* creature) : TurretAI(creature) {}
+            npc_flame_leviathan_defense_turretAI(Creature* creature) : TurretAI(creature) 
+			{
+				me->SetVisible(true);
+			}
 
             void Reset()
             {
@@ -888,10 +996,12 @@ class npc_flame_leviathan_defense_turret : public CreatureScript
                             device->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
+
             bool CanAIAttack(Unit const* who) const
             {
                 if (who->GetTypeId() != TYPEID_PLAYER || !who->GetVehicle() || who->GetVehicleBase()->GetEntry() != NPC_SEAT)
                     return false;
+
                 return true;
             }
         };
@@ -909,11 +1019,16 @@ class npc_flame_leviathan_overload_device : public CreatureScript
 
         struct npc_flame_leviathan_overload_deviceAI : public PassiveAI
         {
-            npc_flame_leviathan_overload_deviceAI(Creature* creature) : PassiveAI(creature) {}
+            npc_flame_leviathan_overload_deviceAI(Creature* creature) : PassiveAI(creature) 
+			{
+				me->SetVisible(true);
+			}
 
             void InitializeAI()
             {
                 me->setActive(true);
+				me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+				me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
             }
 
             void DoAction(const int32 param)
@@ -1130,7 +1245,8 @@ class npc_pool_of_tar : public CreatureScript
 
             void Reset()
             {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE); // Check if this also prevents SpellHit
+				me->SetVisible(false);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 me->CastSpell(me, SPELL_TAR_PASSIVE, true);                
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -1211,94 +1327,66 @@ class npc_colossus : public CreatureScript
 
 class npc_thorims_hammer : public CreatureScript
 {
-    enum ThorimsHammerEvents
-    {
-        EVENT_LIGHTNING_SKYBEAM,        // urand(2, 10) *IN_MILLISECONDS
-        EVENT_SUMMON_THORIMS_BEACON,    // 4*IN_MILLISECONDS after previous event
-        EVENT_DROP_AURAS_AND_WAIT,      // same
-        // 30 seconds of waiting
-        EVENT_IDLE
-    };
+	public:
+	npc_thorims_hammer() : CreatureScript("npc_thorims_hammer") { }
 
-    public:
-        npc_thorims_hammer() : CreatureScript("npc_thorims_hammer") {}
+	struct npc_thorims_hammerAI : public Scripted_NoMovementAI
+	{
+		npc_thorims_hammerAI(Creature* creature) : Scripted_NoMovementAI(creature)
+		{
+			me->setActive(true);
+			me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+			me->SetReactState(REACT_PASSIVE);
+			me->AddAura(SPELL_LIGHTNING_SKYBEAM, me);
+		}
 
-        struct npc_thorims_hammerAI : public Scripted_NoMovementAI
-        {
-            npc_thorims_hammerAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+		void Reset()
+		{
+			_timer = urand(2, 10) *IN_MILLISECONDS;
+			_action = 1;
+		}
 
-            void Reset()
-            {
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                dedicatedTarget = 0;                
-            }
+		void UpdateAI(uint32 const diff)
+		{
+			if (_timer <= diff)
+			{
+				switch (_action)
+				{
+					case 1:
+						me->AddAura(SPELL_LIGHTNING_SKYBEAM, me);
+						++_action;
+						_timer = 4*IN_MILLISECONDS;
+						break;
+					case 2:
+						if (Creature* trigger = DoSummonFlyer(NPC_THORIM_TARGET_BEACON, me, 50.0f, 0, 10*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
+						{
+							trigger->SetDisplayId(trigger->GetCreatureInfo()->Modelid2);
+							trigger->CastSpell(me, SPELL_THORIMS_HAMMER, true);
+						}
+						++_action;
+						_timer = 4*IN_MILLISECONDS;
+						break;
+					case 3:
+						me->RemoveAllAuras();
+						_timer = 30*IN_MILLISECONDS;
+						break;
+					}
+				}
+				else
+					_timer -= diff;
+		}
 
-            void MoveInLineOfSight(Unit* who)
-            {
-                if (dedicatedTarget != 0)
-                    return;
+			private:
+			uint32 _action;
+			uint32 _timer;
+		};
 
-                if (who->GetTypeId() == TYPEID_PLAYER && me->IsInRange(who, 0, 10, false))
-                {
-                    if (events.GetNextEventTime(EVENT_IDLE) > 0)    // Idle time not yet completed.
-                        return;
-
-                    events.ScheduleEvent(EVENT_LIGHTNING_SKYBEAM, urand(2, 10) *IN_MILLISECONDS);
-                    dedicatedTarget = who->GetGUID();
-                }
-            }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!me->HasAura(AURA_DUMMY_BLUE))
-                    me->CastSpell(me, AURA_DUMMY_BLUE, true);
-                
-                events.Update(diff);
-                while (uint32 event = events.ExecuteEvent())
-                {
-                    switch (event)
-                    {
-                        case EVENT_LIGHTNING_SKYBEAM:
-                            me->AddAura(SPELL_LIGHTNING_SKYBEAM, me);
-                            events.ScheduleEvent(EVENT_SUMMON_THORIMS_BEACON, 3*IN_MILLISECONDS);
-                            break;
-                        case EVENT_SUMMON_THORIMS_BEACON:
-                            if (Creature* trigger = DoSummonFlyer(NPC_THORIM_TARGET_BEACON, me, 50.0f, 0, 3*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
-                            {
-                                // TODO: Check if this kind of target selection is correct. The spell does nothing by cast on self or on others, only
-                                // the spell that it trigger (69112) does.
-                                if (Unit* unit = ObjectAccessor::GetUnit(*me, dedicatedTarget))
-                                {
-                                    trigger->CastSpell(unit, SPELL_THORIMS_HAMMER, true);
-                                    dedicatedTarget = 0;
-                                }     
-                                events.ScheduleEvent(EVENT_DROP_AURAS_AND_WAIT, 4*IN_MILLISECONDS);                           
-                            }
-                            break;
-                        case EVENT_DROP_AURAS_AND_WAIT:
-                            me->RemoveAllAuras();
-                            events.ScheduleEvent(EVENT_IDLE, 30*IN_MILLISECONDS);
-                        case EVENT_IDLE:
-                            // Do nothing :D Just a control dummy
-                            break;
-                    }
-                }
-
-                UpdateVictim();
-            }
-
-            private:
-                uint64 dedicatedTarget;
-                EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_thorims_hammerAI(creature);
-        }
+	CreatureAI* GetAI(Creature* creature) const
+	{
+		return new npc_thorims_hammerAI(creature);
+	}
 };
-
 class npc_mimirons_inferno : public CreatureScript
 {
     public:
@@ -1306,13 +1394,15 @@ class npc_mimirons_inferno : public CreatureScript
 
         struct npc_mimirons_infernoAI : public npc_escortAI
         {
-            npc_mimirons_infernoAI(Creature* creature) : npc_escortAI(creature) {}
+            npc_mimirons_infernoAI(Creature* creature) : npc_escortAI(creature) 
+			{
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_PASSIVE);			
+				me->AddAura(SPELL_RED_SKYBEAM, me);
+			}
 
             void Reset()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                me->CastSpell(me, AURA_DUMMY_YELLOW, true);
-                me->SetReactState(REACT_PASSIVE);
                 infernoTimer = 2*IN_MILLISECONDS;
             }        
 
@@ -1328,19 +1418,15 @@ class npc_mimirons_inferno : public CreatureScript
                 {
                     if (infernoTimer <= diff)
                     {
-                        if (Creature* trigger = DoSummonFlyer(NPC_MIMIRON_TARGET_BEACON, me, 30.0f, 0, 2*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
-                        {
-                            // TODO: Check if this works properly, the spell's target selection is somehow curious oÔ
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
-                                trigger->CastSpell(target, SPELL_MIMIRONS_INFERNO, true);
+                        if (Creature* trigger = DoSummonFlyer(NPC_MIMIRON_TARGET_BEACON, me, 20.0f, 0, 6*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
+						{
+							trigger->SetDisplayId(trigger->GetCreatureInfo()->Modelid2);
+							trigger->CastSpell(trigger->GetPositionX(),trigger->GetPositionY(),trigger->GetPositionZ()-20, SPELL_MIMIRONS_INFERNO_DAMAGE, true);
                             infernoTimer = 2*IN_MILLISECONDS;
                         }
                     }
                     else
                         infernoTimer -= diff;
-
-                    if (!me->HasAura(AURA_DUMMY_YELLOW))
-                        me->CastSpell(me, AURA_DUMMY_YELLOW, true);
                 }
             }
         private:
@@ -1352,104 +1438,68 @@ class npc_mimirons_inferno : public CreatureScript
             return new npc_mimirons_infernoAI(creature);
         }
 };
-
 class npc_hodirs_fury : public CreatureScript
 {
-    enum HodirsFuryEvents
+public:
+    npc_hodirs_fury() : CreatureScript("npc_hodirs_fury") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        EVENT_SELECT_TARGET_AND_FOLLOW,
-        EVENT_STOP_FOLLOWING,
-        EVENT_SUMMON_HODIRS_BEACON
+        return new  npc_hodirs_furyAI(pCreature);
+    }
+
+    struct npc_hodirs_furyAI : public ScriptedAI
+    {
+        npc_hodirs_furyAI(Creature* pCreature) : ScriptedAI (pCreature)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+			me->setActive(true);
+			me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+        }
+
+        uint32 uiTargetChangeTimer;
+        uint32 uiHodirFuryTimer;
+
+        void Reset()
+        {
+			me->AddAura(SPELL_BLUE_SKYBEAM, me);
+            uiTargetChangeTimer = 2*IN_MILLISECONDS;
+            DoZoneInCombat();
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (me->GetDistance2d(who->GetPositionX(), who->GetPositionY()) < 3.0f && who->IsVehicle() )
+            {
+                if (Creature* targetBeacon = me->SummonCreature(NPC_HODIR_TARGET_BEACON, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+70, 0, TEMPSUMMON_TIMED_DESPAWN, 20*IN_MILLISECONDS))
+				{
+					targetBeacon->SetDisplayId(targetBeacon->GetCreatureInfo()->Modelid2);
+                    targetBeacon->CastSpell(me, SPELL_HODIRS_FURY_DAMAGE, true);
+				}
+                uiHodirFuryTimer = urand(7*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+            }
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (uiHodirFuryTimer > diff)
+                uiHodirFuryTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            if (uiTargetChangeTimer <= diff)
+            {
+                if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+                    me->GetMotionMaster()->MoveChase(pTarget);
+
+                uiTargetChangeTimer = urand(4*IN_MILLISECONDS, 7*IN_MILLISECONDS);
+            } else uiTargetChangeTimer -= diff;
+        }
     };
 
-    public:
-        npc_hodirs_fury() : CreatureScript("npc_hodirs_fury") {}
-
-        struct npc_hodirs_furyAI : public ScriptedAI
-        {
-            npc_hodirs_furyAI(Creature* creature) : ScriptedAI(creature) {}
-
-            void Reset()
-            {   
-	      //                me->setActive(true);
-	      //                me->SetReactState(REACT_PASSIVE);
-                me->AddAura(SPELL_BLUE_SKYBEAM, me);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-                events.ScheduleEvent(EVENT_SELECT_TARGET_AND_FOLLOW, 3*IN_MILLISECONDS);
-		player = NULL;
-            }
-
-	  void MoveInLineOfSight(Unit* who)
-	  {
-	    if (who->GetTypeId() == TYPEID_PLAYER && me->IsInRange(who, 0, 10))
-	      {
-		if (Creature* trigger = DoSummonFlyer(NPC_HODIR_TARGET_BEACON, me, 30.0f, 0, 1000, TEMPSUMMON_TIMED_DESPAWN))
-		  trigger->CastSpell(who->ToPlayer(), SPELL_HODIRS_FURY, true);
-	      }
-	  }
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (!me->HasAura(AURA_DUMMY_GREEN))
-                    me->CastSpell(me, AURA_DUMMY_GREEN, true);
-                events.Update(diff);
-                while (uint32 event = events.ExecuteEvent())
-                {
-                    switch (event)
-                    {
-                        case EVENT_SELECT_TARGET_AND_FOLLOW:
-			  if (Player *target = me->FindNearestPlayer(10))
-                            {
-			      player = target;
-			      dedicatedTarget = target->GetGUID();
-			      me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-			      events.ScheduleEvent(EVENT_STOP_FOLLOWING, 5*IN_MILLISECONDS);
-                            }
-                            else
-                                events.ScheduleEvent(EVENT_SELECT_TARGET_AND_FOLLOW, 3*IN_MILLISECONDS);
-                            break;
-                        case EVENT_STOP_FOLLOWING:
-                            if (player)
-                            {
-                                if (me->IsInRange(player, 0.0f, 3.0f, false))
-                                {
-                                    me->GetMotionMaster()->Clear();
-                                    me->GetMotionMaster()->MoveIdle();
-                                    events.ScheduleEvent(EVENT_SUMMON_HODIRS_BEACON, 3*IN_MILLISECONDS);                                    
-                                }
-                                else
-                                    events.ScheduleEvent(EVENT_STOP_FOLLOWING, 5*IN_MILLISECONDS);
-                            }
-                            else
-                            {
-                                dedicatedTarget = 0;
-                                events.ScheduleEvent(EVENT_SELECT_TARGET_AND_FOLLOW, 3*IN_MILLISECONDS);
-                            }                            
-                            break;
-                        case EVENT_SUMMON_HODIRS_BEACON:
-			  if (Creature* trigger = DoSummonFlyer(NPC_HODIR_TARGET_BEACON, me, 30.0f, 0, 1000, TEMPSUMMON_TIMED_DESPAWN))
-			    trigger->CastSpell(player, SPELL_HODIRS_FURY, true);
-			  me->DespawnOrUnsummon();
-			  player = NULL;
-			  events.ScheduleEvent(EVENT_SELECT_TARGET_AND_FOLLOW, 7*IN_MILLISECONDS);
-			  break;
-                    }
-                }
-                UpdateVictim();
-            }
-
-            private:
-                uint64 dedicatedTarget;
-                EventMap events;
-	  Player *player;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_hodirs_furyAI(creature);
-        }
 };
-
 class npc_freyas_ward : public CreatureScript
 {
     public:
@@ -1470,25 +1520,11 @@ class npc_freyas_ward : public CreatureScript
             
             void UpdateAI(uint32 const diff)
             {
-                if (summonTimer <= diff)
-                {
-                    if (Creature* trigger = DoSummonFlyer(NPC_FREYA_BEACON, me, 50.0f, 0, 10*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
-                    {
-                        // TODO: Check if this is the correct spell, only the triggered one does something :o
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f))
-                            trigger->CastSpell(target, SPELL_FREYAS_WARD, true);
-                        summonTimer = 30*IN_MILLISECONDS;
-                    }
-                    else
-                        summonTimer = 5*IN_MILLISECONDS;
-                }
-                else
-                    summonTimer -= diff;
-
                 if (!me->HasAura(AURA_DUMMY_GREEN))
                     me->CastSpell(me, AURA_DUMMY_GREEN, true);
 
-                UpdateVictim();
+				if (!UpdateVictim())
+					return;
             }
 
             private:
@@ -1500,7 +1536,6 @@ class npc_freyas_ward : public CreatureScript
             return new npc_freyas_wardAI(creature);
         }
 };
-
 class npc_freya_ward_of_life : public CreatureScript
 {
     public:
@@ -1514,14 +1549,15 @@ class npc_freya_ward_of_life : public CreatureScript
             {
                 me->setActive(true);
                 lashTimer = urand(2, 8) *IN_MILLISECONDS;
-                me->GetMotionMaster()->MoveRandom(100);
+                if (Unit* target = me->FindNearestPlayer(200.0f))
+                    me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
             }
 
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;
-
+				
                 if (lashTimer <= diff)
                 {
                     DoCast(SPELL_LASH);
@@ -2172,8 +2208,6 @@ class spell_pursued : public SpellScriptLoader
 // This spell break the ice tomb of SPELL_HODIRS_FURY
 class spell_leviathan_blaze_flames_effect : public SpellScriptLoader
 {
-    enum { SPELL_HODIRS_FURY_TRIGGERED = 62297 };
-
     public:
         spell_leviathan_blaze_flames_effect() : SpellScriptLoader("spell_leviathan_blaze_flames_effect") {}
 
@@ -2190,8 +2224,8 @@ class spell_leviathan_blaze_flames_effect : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-                if (GetHitUnit()->HasAura(SPELL_HODIRS_FURY_TRIGGERED))
-                    GetHitUnit()->RemoveAura(SPELL_HODIRS_FURY_TRIGGERED);
+                if (GetHitUnit()->HasAura(SPELL_HODIRS_FURY_DAMAGE))
+                    GetHitUnit()->RemoveAura(SPELL_HODIRS_FURY_DAMAGE);
             }
 
             void SetDamage()
@@ -2316,6 +2350,7 @@ class spell_auto_repair : public SpellScriptLoader
 
                 // For achievement
                 instance->SetData(DATA_UNBROKEN, 0);
+				
             }
 
             void Register()
@@ -2382,7 +2417,6 @@ class spell_systems_shutdown : public SpellScriptLoader
         }
 };
 
-// TODO: This spell has to be tested before it can be decided whether it will be taken or not
 class spell_vehicle_throw_passenger : public SpellScriptLoader
 {
     public:
@@ -2392,19 +2426,13 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
         {
             PrepareSpellScript(spell_vehicle_throw_passenger_SpellScript);
 
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                if(!sSpellMgr->GetSpellInfo(62324))
-                    return false;
-                return true;
-            }
-
-            void HandleScript(SpellEffIndex effIndex)
+            void HandleDummyHit(SpellEffIndex effIndex)
             {
                 Spell* baseSpell = GetSpell();
                 SpellCastTargets targets = baseSpell->m_targets;
                 int32 damage = GetEffectValue();
                 if (targets.HasTraj())
+				{
                     if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
                         if (Unit* passenger = vehicle->GetPassenger(damage - 1))
                         {
@@ -2415,21 +2443,33 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                             Unit* target = NULL;
                             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                             {
-                                if (Vehicle* seat = (*itr)->GetVehicleKit())
-                                    if (!seat->GetPassenger(0))
-                                        if (Unit* device = seat->GetPassenger(2))
-                                            if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                                            {
-                                                float dist = (*itr)->GetExactDistSq(targets.GetDst());
-                                                if (dist < minDist)
-                                                {
-                                                    minDist = dist;
-                                                    target = (*itr);
-                                                }
-                                            }
+                                if (Unit* unit = (*itr)->ToUnit())
+                                    if (unit->GetEntry() == NPC_SEAT)
+                                        if (Vehicle* seat = unit->GetVehicleKit())
+										{
+                                            if (!seat->GetPassenger(0))	
+											{
+                                                if (Unit* device = seat->GetPassenger(2))
+												{
+                                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                                                    {
+                                                        float dist = unit->GetExactDistSq(targets.GetDst());
+                                                        if (dist < minDist)
+                                                        {
+                                                            minDist = dist;
+                                                            target = unit;
+                                                        }
+                                                    }
+												}
+											}
+										}
                             }
-                            if (target && target->IsWithinDist2d(targets.GetDst(), GetSpellInfo()->Effects[effIndex].CalcRadius() * 2)) // now we use *2 because the location of the seat is not correct
-                                passenger->EnterVehicle(target, 0);
+                            if (target)
+							{
+								passenger->ExitVehicle();
+                                passenger->EnterVehicle(target, SEAT_PLAYER);
+								passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+							}
                             else
                             {
                                 passenger->ExitVehicle();
@@ -2438,11 +2478,12 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                                 passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
                             }
                         }
+				}
             }
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_vehicle_throw_passenger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+				OnEffectHit += SpellEffectFn(spell_vehicle_throw_passenger_SpellScript::HandleDummyHit, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -2476,8 +2517,13 @@ class spell_freyas_ward_summon : public SpellScriptLoader
                     if (InstanceScript* instance = caster->GetInstanceScript())
                         if (Creature* leviathan = ObjectAccessor::GetCreature(*caster, instance->GetData64(BOSS_LEVIATHAN)))
                             for (uint8 i = 0; i < urand(3, 5); ++i)
-                                leviathan->SummonCreature(NPC_WRITHING_LASHER, GetTargetDest()->GetPositionX(), GetTargetDest()->GetPositionY(),
-                                GetTargetDest()->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 3000);
+							{
+								Position pos;
+								leviathan->GetPosition(&pos);
+								leviathan->GetRandomNearPosition(pos, float(urand(5, 80)));
+								leviathan->SummonCreature(NPC_WRITHING_LASHER,pos,TEMPSUMMON_CORPSE_DESPAWN, 3000);
+							}
+			
             }
 
             void HandleSummon(SpellEffIndex effIndex)

@@ -3465,6 +3465,14 @@ void SpellMgr::LoadDbcDataCorrections()
             case 70814: // Saber Lash (Lord Marrowgar)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;    // 5yd
                 break;
+	case 62217:
+	case 62451:
+	case 62865:
+	case 62922:
+	case 53235:
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;    // 5yd
+	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS;    // 5yd
+	  break;
             case 69075: // Bone Storm (Lord Marrowgar)
             case 70834: // Bone Storm (Lord Marrowgar)
             case 70835: // Bone Storm (Lord Marrowgar)

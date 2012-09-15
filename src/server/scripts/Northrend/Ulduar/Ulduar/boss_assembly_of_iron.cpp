@@ -407,6 +407,21 @@ class boss_steelbreaker : public CreatureScript
                     me->SetLootRecipient(NULL);
 					DoCastAOE(SPELL_SUPERCHARGE);
                 }       
+
+				if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+				  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_BRUNDIR) : 0))
+					if (!Molgeim->isAlive() && !Brundir->isAlive())
+					  {
+					AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+					if (!pAE)
+					  return;
+					Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+					for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+					  if (Player* player = i->getSource())
+						if (player->isAlive())
+						  if (player->HasAura(58501))
+						player->CompletedAchievement(pAE);
+					  }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -516,9 +531,14 @@ class boss_steelbreaker : public CreatureScript
                         case EVENT_OVERWHELMING_POWER:
                             if (me->getVictim() && !me->getVictim()->HasAura(SPELL_OVERWHELMING_POWER))
                             {
-                                DoScriptText(SAY_STEELBREAKER_POWER, me);
-                                DoCastVictim(SPELL_OVERWHELMING_POWER);
-                                events.ScheduleEvent(EVENT_OVERWHELMING_POWER, RAID_MODE(60000, 35000));
+			      if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+				if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_BRUNDIR) : 0))
+				  if (!Molgeim->isAlive() && !Brundir->isAlive())
+				    {
+				      DoScriptText(SAY_STEELBREAKER_POWER, me);
+				      DoCastVictim(SPELL_OVERWHELMING_POWER);
+				    }
+			      events.ScheduleEvent(EVENT_OVERWHELMING_POWER, RAID_MODE(60000, 35000));
                             }
                             else
                                 events.ScheduleEvent(EVENT_OVERWHELMING_POWER, 2000);                                                       
@@ -688,6 +708,22 @@ class boss_runemaster_molgeim : public CreatureScript
                     me->SetLootRecipient(NULL);
 		    DoCastAOE(SPELL_SUPERCHARGE);
                 }
+		if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
+		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BRUNDIR)))
+		    if (!Steelbreaker->isAlive() && !Brundir->isAlive())
+		      {
+			instance->DoCompleteAchievement(RAID_MODE(2939, 2942));
+                        AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+                        if (!pAE)
+                          return;
+			Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                          if (Player* player = i->getSource())
+                            if (player->isAlive())
+                              if (player->HasAura(58501))
+                                player->CompletedAchievement(pAE);
+                      }
+
             }
 
             void JustSummoned(Creature* summon)
@@ -735,10 +771,13 @@ class boss_runemaster_molgeim : public CreatureScript
                             DoCast(SPELL_BERSERK);
                             break;
                         case EVENT_RUNE_OF_POWER:
-                            if (Unit* target = DoSelectLowestHpFriendly(60)) // Removed dead-check, function does not return dead allies                                                  
-                                DoCast(target, SPELL_SUMMON_RUNE_OF_POWER);
-                            else
-                                DoCast(me, SPELL_SUMMON_RUNE_OF_POWER);
+			  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+			    {
+			      Position pos;
+			      target->GetPosition(&pos);
+			      me->SummonCreature(32958, pos, TEMPSUMMON_MANUAL_DESPAWN);
+			    }
+			  //                                DoCast(me, SPELL_SUMMON_RUNE_OF_POWER);
                             events.ScheduleEvent(EVENT_RUNE_OF_POWER, 60000);
                             break;
                         case EVENT_SHIELD_OF_RUNES:
@@ -754,7 +793,15 @@ class boss_runemaster_molgeim : public CreatureScript
                         case EVENT_RUNE_OF_SUMMONING:
                             DoScriptText(SAY_MOLGEIM_SUMMON, me);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                                DoCast(target, SPELL_RUNE_OF_SUMMONING);
+			      {
+				/*				Position pos;
+				target->GetPosition(&pos);
+				player->SummonCreature(32958, pos, TEMPSUMMON_MANUAL_DESPAWN);*/
+				if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
+				  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_BRUNDIR) : 0))
+				    if (!Steelbreaker->isAlive() && !Brundir->isAlive())
+				      DoCast(target, SPELL_RUNE_OF_SUMMONING);
+			      }
                             events.ScheduleEvent(EVENT_RUNE_OF_SUMMONING, urand(35000, 45000));
                             break;
                     }
@@ -808,6 +855,7 @@ class mob_lightning_elemental : public CreatureScript
             mob_lightning_elementalAI(Creature* creature) : ScriptedAI(creature)
             {
                 me->SetInCombatWithZone();
+		castDone = false;
             }
 
             void EnterCombat(Unit* /* target */)
@@ -824,8 +872,9 @@ class mob_lightning_elemental : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+		//                if (me->IsWithinMeleeRange(me->getVictim()) && !castDone)
 
-                if (me->IsWithinMeleeRange(me->getVictim()) && !castDone)
+		if (me->GetDistance(me->getVictim()) <= 3.0f && !castDone) 
                 {
                     me->CastSpell(me, SPELL_LIGHTNING_BLAST, true);
                     me->DespawnOrUnsummon(500);
@@ -848,10 +897,11 @@ class mob_rune_of_summoning : public CreatureScript
     public:
         mob_rune_of_summoning() : CreatureScript("mob_rune_of_summoning") {}
 
-        struct mob_rune_of_summoningAI : public ScriptedAI
+        struct mob_rune_of_summoningAI : public Scripted_NoMovementAI
         {
-            mob_rune_of_summoningAI(Creature* creature) : ScriptedAI(creature)
+            mob_rune_of_summoningAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
+		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 me->AddAura(SPELL_RUNE_OF_SUMMONING_VIS, me);
                 summonCount = 0;
                 summonTimer = 2000;
@@ -1012,6 +1062,21 @@ class boss_stormcaller_brundir : public CreatureScript
                 // Prevent to have Brundir somewhere in the air when he die in Air phase
                 if (me->GetPositionZ() > FLOOR_Z)
 		  me->GetMotionMaster()->MoveFall(); 
+
+		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+		  if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
+		    if (!Molgeim->isAlive() || !Steelbreaker->isAlive())
+                      {
+                        AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+                        if (!pAE)
+                          return;
+			Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+                          if (Player* player = i->getSource())
+                            if (player->isAlive())
+                              if (player->HasAura(58501))
+                                player->CompletedAchievement(pAE);
+                      }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1068,7 +1133,10 @@ class boss_stormcaller_brundir : public CreatureScript
                             events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
                             break;
                         case EVENT_LIGHTNING_WHIRL:
-                            DoCast(SPELL_LIGHTNING_WHIRL);
+			      if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_MOLGEIM) : 0))
+				if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
+				  if (!Molgeim->isAlive() || !Steelbreaker->isAlive())
+				    DoCast(SPELL_LIGHTNING_WHIRL);
                             events.ScheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 20000));
                             break;
                         case EVENT_THREAT_WIPE:

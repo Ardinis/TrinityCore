@@ -3603,9 +3603,19 @@ void SpellMgr::LoadDbcDataCorrections()
             case 73530: // Shadow Trap (visual)
                 spellInfo->DurationIndex = 28;          // 5 seconds
                 break;
+	case 64458 : //auriaya black zone
+	case 64676 :
+	case 64459 :
+	case 64675 :
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; 
+	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; 
+	  break;
             case 73529: // Shadow Trap
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;   // 10yd
                 break;
+	case 62383:
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
+	  break;
             case 74282: // Shadow Trap (searcher)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;   // 3yd
                 break;

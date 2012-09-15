@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
- *
+ * 
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or (at your
@@ -21,6 +21,15 @@
  *          requires more work involving area triggers.
  *          if reached brann speaks through his radio..
  */
+
+
+/* Improve By Gabii - Paragon Server - Last Update : 15/09/2012 */
+
+
+/* ---	TODO List :		---
+* Fix Emplacement des Passagers 0 (player), 1(Tourrelle), 2 (device). Visuellement + veritable position.
+* Fix Spell Du bouclier du vehicule ( absorbe constamment...)
+*/
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -305,7 +314,6 @@ class boss_flame_leviathan : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
-				printf("\n Enter combat !");
                 _EnterCombat();
                 me->SetReactState(REACT_PASSIVE);   // Enforce react-type, unless PURSUE gehts active.
                 events.ScheduleEvent(EVENT_PURSUE, 30*IN_MILLISECONDS);
@@ -331,7 +339,6 @@ class boss_flame_leviathan : public CreatureScript
                 if (towerOfFrost)   ++count;
                 if (towerOfLife)    ++count;
                 if (towerOfStorms)  ++count;
-				printf("\n GetActiveTowersCount : count = %d !",count);
                 return count;
             }
 
@@ -342,31 +349,27 @@ class boss_flame_leviathan : public CreatureScript
 
             void HandleAccessorys(bool doInstall)
             {
-				printf("\n HandleAccessorys ! doInstall = %d ", doInstall);
                 if (doInstall)
                 {
-                    // Seats  position 2 et 3 qui marcherai ! 
 					for (uint8 i = RAID_MODE<uint8>(2, 0); i < 4; ++i)
                     {
 							if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
 							{
-								//if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET,*me))
-								//	turret->EnterVehicle(target, SEAT_TURRET);
-
-								//if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
-								//	device->EnterVehicle(target, SEAT_DEVICE);
-								printf("\n Pop Siege I = %d",i);
-
 								target->EnterVehicle(me, i);
+
+								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+									turret->EnterVehicle(target, SEAT_TURRET);
+
+								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+									device->EnterVehicle(target, SEAT_DEVICE);
 							}
                     }
-					printf("\n Rien a instal tout est DB!");
+
                     if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
                         cannon->EnterVehicle(me, SEAT_CANNON);
                 }
                 else
                 {
-					printf("\n HandleAccessorys-else doInstall = FALSEEEEE DEPOPPPPP!");
 					DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
 					DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
 					DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
@@ -394,7 +397,7 @@ class boss_flame_leviathan : public CreatureScript
             {
                 if (!me->isInCombat())
                     return;
-				printf("\n SETGUID-DEDANS !");
+
                 if (Player* passenger = ObjectAccessor::GetPlayer(*me, guid))
                     for (uint8 i = RAID_MODE(2, 0); i < 4; ++i)
                         if (Unit* seat = vehicle->GetPassenger(i))
@@ -475,12 +478,6 @@ class boss_flame_leviathan : public CreatureScript
 
                 switch (spell->Id)
                 {
-                    //case SPELL_START_THE_ENGINE:
-                    //    HandleAccessorys(true); // Replaces vehicle->InstallAllAccessories(false);
-                    //    break;
-                    //case SPELL_ELECTROSHOCK:
-                    //    me->InterruptSpell(CURRENT_CHANNELED_SPELL);
-                    //    break;
                     case SPELL_OVERLOAD_CIRCUIT:
                         ++Shutdown;
                         break;
@@ -546,7 +543,6 @@ class boss_flame_leviathan : public CreatureScript
 					if(Lacible->GetDisplayId() == 24914)
 					{
 						HandleAccessorys(false);
-						//DespawnCreatures(NPC_SEAT,400.0f);
 						_Reset();
 						return;
 					}
@@ -598,13 +594,13 @@ class boss_flame_leviathan : public CreatureScript
 						if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 300.0f))
 							if (target->GetTypeId() == TYPEID_PLAYER || target->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE))
 								me->AddAura(SPELL_PURSUED, target);
-		printf("\n Shutdown = %d ",Shutdown);
+
                         events.RepeatEvent(30*IN_MILLISECONDS);
 						break;
                     case EVENT_MISSILE:
 						if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 400.0f))
 							DoCast(pTarget, SPELL_MISSILE_BARRAGE);
-                        //DoCast(me, SPELL_MISSILE_BARRAGE, true);
+
 						events.RepeatEvent(2*IN_MILLISECONDS);
                         break;
                     case EVENT_VENT:
@@ -631,14 +627,10 @@ class boss_flame_leviathan : public CreatureScript
                                 
                         // Achievement fails once SHUTDOWN got active
                         Shutout = false;
-						//events.ScheduleEvent(EVENT_REPAIR, 4*IN_MILLISECONDS);
-                        //events.DelayEvents(20 * IN_MILLISECONDS, 0);
 						events.CancelEvent(EVENT_SHUTDOWN);
 						events.ScheduleEvent(EVENT_REPAIR, 20*IN_MILLISECONDS);
-						////events.RepeatEvent(150*IN_MILLISECONDS);  -> Faut pas le repeat , c'est au joueur de detruire les tourelles et de cast 2 (ou 4) Provoquer une surcharge
-                        break;
+						break;
                     case EVENT_REPAIR:
-						printf("\n EVENT REPAIR -1");
                         me->MonsterTextEmote(EMOTE_REPAIR, 0, true);
                         me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
 						HandleAccessorys(true);
@@ -647,7 +639,6 @@ class boss_flame_leviathan : public CreatureScript
                     case EVENT_THORIMS_HAMMER: // Tower of Storms
 						if(SpeechThorims == 0)
 						{
-							printf("\n EVENT_THORIMS_HAMMER !");
 							DoScriptText(SAY_TOWER_STORM, me);
 							SpeechThorims = 1;
 						}
@@ -662,7 +653,6 @@ class boss_flame_leviathan : public CreatureScript
 						events.RepeatEvent(40*IN_MILLISECONDS);
                         break;
                     case EVENT_MIMIRONS_INFERNO: // Tower of Flames
-						printf("\n EVENT_MIMIRONS_INFERNO !");
                         me->SummonCreature(NPC_MIMIRON_BEACON, InfernoStart);
                         DoScriptText(SAY_TOWER_FLAME, me);
 						events.CancelEvent(EVENT_MIMIRONS_INFERNO);
@@ -670,7 +660,6 @@ class boss_flame_leviathan : public CreatureScript
                     case EVENT_HODIRS_FURY:      // Tower of Frost
 						if(SpeechHodirs == 0)
 						{
-							printf("\n EVENT_HODIRS_FURY !");
 							DoScriptText(SAY_TOWER_FROST, me);
 							SpeechHodirs = 1;
 						}
@@ -688,11 +677,9 @@ class boss_flame_leviathan : public CreatureScript
 						{
 							if(SpeechFreya == 0)
 							{
-								printf("\n EVENT_FREYAS_WARD !");
 								DoScriptText(SAY_TOWER_NATURE, me);
 								SpeechFreya = 1;
 							}
-							//printf("\n SpawnFreyaAdd = %d",SpawnFreyaAdd);
 							if(SpawnFreyaAdd == 4)
 								SpawnFreyaAdd = 0;
 							if (Creature* AddFreya = me->SummonCreature(NPC_FREYA_BEACON, FreyaBeacons[SpawnFreyaAdd]))
@@ -713,13 +700,6 @@ class boss_flame_leviathan : public CreatureScript
                     DoBatteringRamIfReady();
 				DoMeleeAttackIfReady();
             }
-
-            //bool CanAIAttack(Unit const* who) const
-            //{
-            //    if (!who->GetVehicle())
-            //        return false;
-            //    return true;
-            //}
 
             void SpellHitTarget(Unit* target, SpellInfo const* spell)
             {
@@ -799,7 +779,7 @@ class boss_flame_leviathan : public CreatureScript
                         break;
                     case ACTION_OVERLOAD_CIRCUIT:
                         ++Shutdown; // Overloading is performed by "me", but it's expensive.
-                        if (Shutdown == RAID_MODE(2, 4)) // Corresponding to TWO_SEATS and FOUR_SEATS
+                        if (Shutdown == RAID_MODE(2, 4))
                         {
                             Shutdown = 0;
                             Shutout = false;
@@ -828,7 +808,6 @@ class boss_flame_leviathan : public CreatureScript
                         Unit* target = ObjectAccessor::GetUnit(*me, pursueTarget);
                         if (me->IsWithinCombatRange(target, 30.0f))
                         {
-							printf("\n Do BatteringRam IF Ready");
                             DoCast(target, SPELL_BATTERING_RAM);
                             me->resetAttackTimer();
                         }
@@ -908,7 +887,6 @@ class npc_flame_leviathan_seat : public CreatureScript
             {
                 ASSERT(vehicle);
 				me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-				VerifSpawndesTemplate = 0;
             }
 
             void Reset()
@@ -916,36 +894,6 @@ class npc_flame_leviathan_seat : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
             }
 
-//        void MoveInLineOfSight(Unit* who)
-//        {
-//			if(!who->IsVehicle() && !who->IsOnVehicle(me) && who->GetTypeId() == TYPEID_PLAYER)
-//			{
-//
-//				//float distance = me->GetDistance(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ() );
-//								//printf("\n Joueur a porter! Distance = %f",distance);
-//				if (me->GetDistance(who->GetPositionX(), who->GetPositionY(), who->GetPositionZ() ) < 16.0f )
-//				{
-//					printf("\n MoveInLineOfSight! -- JOUEUR TOUT PROCHE ! ");
-//					who->EnterVehicle(me,SEAT_PLAYER);
-//				}
-//			}
-//        }
-            void UpdateAI(const uint32 diff)
-            {
-				if(VerifSpawndesTemplate == 0)
-				{
-					vehicle->InstallAccessory(NPC_DEFENSE_TURRET,SEAT_TURRET,1,6,30000);
-					vehicle->InstallAccessory(NPC_OVERLOAD_DEVICE,SEAT_DEVICE,1,6,30000);
-					printf("\n oN fait le test 1 fois pour le verif spawn");
-					//if (Creature* turret = me->SummonCreature(NPC_DEFENSE_TURRET,*me))
-					//	turret->EnterVehicle(me, SEAT_TURRET);
-
-					//if (Creature* device = me->SummonCreature(NPC_OVERLOAD_DEVICE, *me))
-					//	device->EnterVehicle(me, SEAT_DEVICE);
-
-					VerifSpawndesTemplate = 1;
-				}
-			}
             void SetImmunitys(Unit* target, bool apply)
             {
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_PURSUED, apply);
@@ -964,12 +912,10 @@ class npc_flame_leviathan_seat : public CreatureScript
 
                 if (seatId == SEAT_PLAYER)
                 {
-					printf("\n SeatID = 0 player ");
                     SetImmunitys(who, apply);
 
                     if (!apply) // i.e. kick player out
                     {
-						printf("\n PassengerBoarded -> !Seat  ");
                         who->RemoveAurasDueToSpell(SPELL_FORCE_REACTION);
                         who->CastSpell(who, SPELL_SMOKE_TRAIL, true);
                         who->StopMoving();
@@ -984,7 +930,6 @@ class npc_flame_leviathan_seat : public CreatureScript
 
                     if (Creature* turret = me->GetVehicleKit()->GetPassenger(SEAT_TURRET)->ToCreature())
                     {
-						printf("\n PassengerBoarded -> Target Turret.  ");
                         turret->setFaction(me->GetVehicleBase()->getFaction());
                         turret->SetUInt32Value(UNIT_FIELD_FLAGS, 0); // unselectable
                         if (CreatureAI* ai = turret->AI())
@@ -993,7 +938,6 @@ class npc_flame_leviathan_seat : public CreatureScript
 
                     if (Creature* device = me->GetVehicleKit()->GetPassenger(SEAT_DEVICE)->ToCreature())
                     {
-						printf("\n PassengerBoarded -> Target DEVICE.  ");
                         device->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
                         device->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     }
@@ -1015,7 +959,6 @@ class npc_flame_leviathan_seat : public CreatureScript
 
             private:
                 Vehicle* vehicle;
-				int8 VerifSpawndesTemplate;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1052,6 +995,7 @@ class npc_flame_leviathan_defense_turret : public CreatureScript
                         if (Unit* device = seat->GetPassenger(SEAT_DEVICE))
                             device->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
+
 
             bool CanAIAttack(Unit const* who) const
             {
@@ -1091,7 +1035,6 @@ class npc_flame_leviathan_overload_device : public CreatureScript
             {
                 if (param == EVENT_SPELLCLICK)
                 {
-					printf("\n npc_flame_leviathan_overload_device - DoAction - EVENT_SPELLCLICK");
                     if (me->GetVehicle())
                     {
                         if (InstanceScript* myInst = me->GetInstanceScript())
@@ -1130,7 +1073,6 @@ class npc_flame_leviathan_safety_container : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-				printf("\n npc_flame_leviathan_safety_container - JustDied");
                 float x, y, z;
                 me->GetPosition(x, y, z);
                 z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
@@ -1479,16 +1421,12 @@ class npc_mimirons_inferno : public CreatureScript
                         if (Creature* trigger = DoSummonFlyer(NPC_MIMIRON_TARGET_BEACON, me, 20.0f, 0, 6*IN_MILLISECONDS, TEMPSUMMON_TIMED_DESPAWN))
 						{
 							trigger->SetDisplayId(trigger->GetCreatureInfo()->Modelid2);
-							//trigger->AddAura(SPELL_MIMIRONS_INFERNO,trigger); // Va droit au lieu
 							trigger->CastSpell(trigger->GetPositionX(),trigger->GetPositionY(),trigger->GetPositionZ()-20, SPELL_MIMIRONS_INFERNO_DAMAGE, true);
                             infernoTimer = 2*IN_MILLISECONDS;
                         }
                     }
                     else
                         infernoTimer -= diff;
-
-                    //if (!me->HasAura(AURA_DUMMY_YELLOW))
-                    //    me->CastSpell(me, AURA_DUMMY_YELLOW, true);
                 }
             }
         private:
@@ -1550,8 +1488,7 @@ public:
 
             if (!UpdateVictim())
                 return;
-				//if (!me->getVictim())  // a la place de ce q'il y a ci dessus
-				//	UpdateVictim();
+
             if (uiTargetChangeTimer <= diff)
             {
                 if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM))
@@ -2491,7 +2428,6 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
 
             void HandleDummyHit(SpellEffIndex effIndex)
             {
-				printf("\n HandleDummyHit");
                 Spell* baseSpell = GetSpell();
                 SpellCastTargets targets = baseSpell->m_targets;
                 int32 damage = GetEffectValue();
@@ -2500,7 +2436,6 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                     if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
                         if (Unit* passenger = vehicle->GetPassenger(damage - 1))
                         {
-							printf("\n PASSAGERDEBUT");
                             std::list<Unit*> unitList;
                             // use 99 because it is 3d search
                             SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, NPC_SEAT);
@@ -2508,25 +2443,19 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                             Unit* target = NULL;
                             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                             {
-								printf("\n unitList");
                                 if (Unit* unit = (*itr)->ToUnit())
                                     if (unit->GetEntry() == NPC_SEAT)
                                         if (Vehicle* seat = unit->GetVehicleKit())
 										{
-											printf("\n  GetVehicleKit()");
                                             if (!seat->GetPassenger(0))	
 											{
-												printf("\n  GetPassenger(0)");
                                                 if (Unit* device = seat->GetPassenger(2))
 												{
-													printf("\n GetPassenger(2)");
                                                     if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                                                     {
-														printf("\n unitList-  Il a target vehicule");
                                                         float dist = unit->GetExactDistSq(targets.GetDst());
                                                         if (dist < minDist)
                                                         {
-															printf("\n unitList-  Il a target vehicule - minDist");
                                                             minDist = dist;
                                                             target = unit;
                                                         }
@@ -2535,17 +2464,14 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
 											}
 										}
                             }
-							printf("\n HandleScript- MILLIEU");
-                            if (target /*&& target->IsWithinDist2d(targets.GetDst(), GetSpellInfo()->Effects[effIndex].CalcRadius() * 2)*/) // now we use *2 because the location of the seat is not correct
+                            if (target)
 							{
-								printf("\n Ya une target ! TARGET = %d", target->GetEntry());
 								passenger->ExitVehicle();
                                 passenger->EnterVehicle(target, SEAT_PLAYER);
 								passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
 							}
                             else
                             {
-								printf("\n HandleScript- else");
                                 passenger->ExitVehicle();
                                 float x, y, z;
                                 targets.GetDst()->GetPosition(x, y, z);
@@ -2595,8 +2521,6 @@ class spell_freyas_ward_summon : public SpellScriptLoader
 								Position pos;
 								leviathan->GetPosition(&pos);
 								leviathan->GetRandomNearPosition(pos, float(urand(5, 80)));
-                                //leviathan->SummonCreature(NPC_WRITHING_LASHER, GetTargetDest()->GetPositionX(), GetTargetDest()->GetPositionY(),
-                                //GetTargetDest()->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN, 3000);
 								leviathan->SummonCreature(NPC_WRITHING_LASHER,pos,TEMPSUMMON_CORPSE_DESPAWN, 3000);
 							}
 			

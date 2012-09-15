@@ -139,8 +139,10 @@ class AchievShatterHelper
                 return; // Nothing to be done
 
             if (gotInformed)                // Check if timer is ok
+	      {
                 if (timer <= limit)
                     achievFulfilled = true;
+	      }
             else                            // First information, start tracking
             {
                 gotInformed = true;
@@ -323,6 +325,16 @@ class boss_ignis : public CreatureScript
                             if (Unit* slagPotTarget = ObjectAccessor::GetUnit(*me, slagPotGUID))
                             {
                                 slagPotTarget->ExitVehicle();
+				if (Player *p = slagPotTarget->ToPlayer())
+				  {
+				    if (p->isAlive())
+				      {
+					AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2927, 2928));
+					if (!pAE)
+					  return;
+					p->CompletedAchievement(pAE);
+				      }
+				  }
                                 slagPotGUID = 0;
                             }
                             break;

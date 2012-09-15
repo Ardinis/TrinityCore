@@ -198,6 +198,7 @@ class boss_sindragosa : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MYSTIC_BUFFET);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ASPHYXIATION);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FROST_AURA, false);
+		me->SetHomePosition(SindragosaLandPos);
             }
 
             void Reset()
@@ -224,6 +225,7 @@ class boss_sindragosa : public CreatureScript
                     me->SetFlying(true);
                     me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                 }
+		me->SetHomePosition(SindragosaLandPos);
             }
 
             void JustDied(Unit* killer)

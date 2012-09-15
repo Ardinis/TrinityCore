@@ -56,6 +56,8 @@ enum UlduarBosses
 
     // Hodir
     DATA_HODIR_RARE_CACHE,
+    DATA_CAILLE,
+    DATA_GARE_GEL,
 
     // Collosus (Leviathan)
     DATA_COLOSSUS,               
@@ -112,6 +114,8 @@ enum UlduarBosses
     DATA_UNIVERSE_GLOBE,
     DATA_ALGALON_TRAPDOOR,
     DATA_BRANN_BRONZEBEARD_ALG,
+
+    DATA_ARM_HF,
 };
 
 enum UlduarBossDeadFlags

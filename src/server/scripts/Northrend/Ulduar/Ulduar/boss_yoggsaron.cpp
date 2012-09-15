@@ -645,10 +645,12 @@ class GetNearestPlayers : std::binary_function<std::list<Player*>&, Creature*, v
                 for (MapRefManager::const_iterator it = players.begin(); it != players.end() && counter < __cap; ++it, counter++)
                 {
                     if (__distance != 0.0f) // Check range enabled if __distance is no 0.0f
+		      {
                         if (base->GetDistance2d(it->getSource()) <= __distance)
                         {
                             listp.push_back(it->getSource());
                         }
+		      }
                     else
                         listp.push_back(it->getSource());
 
@@ -1294,6 +1296,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                             for(Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                                 if (Player* player = itr->getSource())
                                     if (player->isAlive())
+				      {
                                         if (!remove)
                                         {
                                             me->AddAura(SPELL_SANITY, player);
@@ -1303,6 +1306,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                                         {
                                             player->RemoveAurasDueToSpell(SPELL_SANITY);
                                         }
+				      }
                     }
             }
 
@@ -1697,8 +1701,10 @@ class boss_sara : public CreatureScript
                     return 5000;
 
                 if (EventNpcSpeaching[speachindex+part].npc_entry != NPC_YOGG_SARON)          // Why differ at this point ?
+		  {
                     if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))                        
                         npcguid = ctrl->AI()->GetGUID(EventNpcSpeaching[speachindex+part].npc_entry);
+		  }
                 else
                     npcguid = guidYogg;
 
@@ -2251,8 +2257,10 @@ class boss_brain_of_yogg_saron : public CreatureScript
             void Reset()
             {
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+		  {
                     if (ctrl->isInCombat())
                         EnterCombat(ctrl->getVictim());
+		  }
                 else
                     return;
             }
@@ -2502,20 +2510,24 @@ class boss_yogg_saron : public CreatureScript
                             else
                                 me->CastSpell(me, SPELL_SUMMON_CURRUPTOR_TENTACLE, true);
                             if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+			      {
                                 if (ctrl->AI()->GetData(DATA_BRAIN_EVT_CNT) < 4)
                                     events.ScheduleEvent(EVENT_TENTACLE, urand(5000, 10000), 0, PHASE_BRAIN);
                                 else
                                     events.ScheduleEvent(EVENT_TENTACLE, urand(2000, 5000), 0, PHASE_BRAIN);  
+			      }
                             else
                                 events.ScheduleEvent(EVENT_TENTACLE, urand(3500, 7500), 0, PHASE_BRAIN);
                             break;
                         case EVENT_TENTACLE_1:
                             me->CastSpell(me, SPELL_SUMMON_CRUSHER_TENTACLE, true);
                             if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
+			      {
                                 if (ctrl->AI()->GetData(DATA_BRAIN_EVT_CNT) < 4)
                                     events.ScheduleEvent(EVENT_TENTACLE_1, urand(30000, 40000), 0, PHASE_BRAIN);
                                 else
                                     events.ScheduleEvent(EVENT_TENTACLE_1, urand(10000, 15000), 0, PHASE_BRAIN);  
+			      }
                             else
                                 events.ScheduleEvent(EVENT_TENTACLE_1, urand(20000, 27500), 0, PHASE_BRAIN);
                             break; 
@@ -2860,6 +2872,7 @@ class npc_sanity_well : public CreatureScript
             {
                 if (mover)
                     if (mover->ToPlayer())
+		      {
                         if (me->IsWithinDist2d(mover, 6.0f))
                         {
                             if (!mover->HasAura(SPELL_SANITY_WELL_DEBUFF))
@@ -2870,6 +2883,7 @@ class npc_sanity_well : public CreatureScript
                             if (mover->HasAura(SPELL_SANITY_WELL_DEBUFF))
                                 mover->RemoveAurasDueToSpell(SPELL_SANITY_WELL_DEBUFF);
                         }
+		      }
             }
 
             void UpdateAI(const uint32 diff)

@@ -399,6 +399,7 @@ class boss_thorim : public CreatureScript
                     me->setFaction(35);
                     return;
 		}
+		sif = NULL;
 		isEnterCombat = false;
                 if (gotAddsWiped)
                     DoScriptText(SAY_WIPE, me);
@@ -445,9 +446,8 @@ class boss_thorim : public CreatureScript
 
                 gotEncounterFinished = true;
                 DoScriptText(SAY_DEATH, me);
-                me->setFaction(35);
-                me->DespawnOrUnsummon(7000);
-
+		if (sif)
+		  sif->DespawnOrUnsummon();
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
                     ctrl->DespawnOrUnsummon();
 
@@ -464,7 +464,9 @@ class boss_thorim : public CreatureScript
 		me->DespawnOrUnsummon();
 		instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), true); // Open the entrance door.
 		instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), false); // Close the up-way door.   
-		//                _JustDied();
+                me->setFaction(35);
+                me->DespawnOrUnsummon(7000);
+		_JustDied();
             }
 
             void EnterCombat(Unit* who)
@@ -473,7 +475,7 @@ class boss_thorim : public CreatureScript
 		return;
 	      isEnterCombat = true;
                 DoScriptText(SAY_AGGRO_1, me);
-		//                _EnterCombat();
+		_EnterCombat();
 
                 // Spawn Thunder Orbs
 		orbList.clear();
@@ -716,7 +718,7 @@ class boss_thorim : public CreatureScript
                         {
                             HardMode = true;
                             // Summon Sif
-                            me->SummonCreature(NPC_SIF, 2149.27f, -260.55f, 419.69f, 2.527f, TEMPSUMMON_CORPSE_DESPAWN);
+                            sif = me->SummonCreature(NPC_SIF, 2149.27f, -260.55f, 419.69f, 2.527f, TEMPSUMMON_CORPSE_DESPAWN);
                             // Achievement Siffed
                             if (instance)
                                 instance->DoCompleteAchievement(ACHIEVEMENT_SIFFED);
@@ -739,6 +741,7 @@ class boss_thorim : public CreatureScript
                 bool gotEncounterFinished;
                 bool summonChampion;
                 Position homePosition;
+	  Creature *sif;
 	  std::list<Creature* > orbList;
 	  bool isEnterCombat;
         };

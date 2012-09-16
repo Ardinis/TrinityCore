@@ -415,15 +415,15 @@ class boss_hodir : public CreatureScript
                     me->SetControlled(true, UNIT_STATE_STUNNED);
                     me->CombatStop(true);
 
-                    me->setFaction(35);
-                    me->DespawnOrUnsummon(10000);
+		    me->setFaction(35);
+		    me->DespawnOrUnsummon(10000);
 		    if (instance->GetData(DATA_CAILLE) != FAIL)
 		      instance->DoCompleteAchievement(ACHIEVEMENT_GETTING_COLD_IN_HERE);
 		    if (iHaveTheCoolestFriends)
 		      instance->DoCompleteAchievement(ACHIEVEMENT_COOLEST_FRIENDS);
 		    if (instance->GetData(DATA_GARE_GEL) != FAIL)
 		      instance->DoCompleteAchievement(ACHIEVEMENT_CHEESE_THE_FREEZE);
-
+                    //me->DespawnOrUnsummon();
                     _JustDied();
                 }
             }

@@ -1635,6 +1635,25 @@ class npc_leviathan_player_vehicle : public CreatureScript
 #define GOSSIP_ITEM_1  "Activate secondary defensive systems"
 #define GOSSIP_ITEM_2  "Confirmed"
 
+#define SAY_DELLORAH_1  "J'ai entendu parler d'un gardien du savoir d'Ulduar dont la description vous correspondrait. Est-ce que vous avez un role similaire ?"
+#define SAY_KEEPER_1    "J'ai ete construit comme structure de stockage des informations essentielles concernant ce complexe. Mes fonctions principales incluent la notification du statut des systemes de defense frontaux et l'evaluation du statut de l'entite que ce complexe doit emprisonner."
+#define SAY_DELLORAH_2  "Systemes de defense frontaux ? Est-ce qu'il y a quelque chose que Brann devrait savoir avant d'envoyer des gens a l'assault du complexe ?"
+#define SAY_DELLORAH_3  "Pouvez-vous detailler la nature de ces systemes de defense ?"
+#define SAY_KEEPER_2    "L'acces a l'interieur du complexe est actuellement restreint. Les postes defensifs primaires sont actifs. Les postes defensifs secondaires sont actuellement non-actifs."
+#define SAY_KEEPER_3    "Compromission du complexe detectee. Protocole de securite d'urgence active. Requete acceptee."
+#define SAY_DELLORAH_4  "Compris. Au moins, nous n'avons pas besoin de nous occuper des positions orbitales."
+#define SAY_DELLORAH_5  "Rhydian, il faut avertir Brann et l'archimage Pentarus de l'existence de ces defenses, sur-le-champ."
+#define SAY_KEEPER_4    "Les postes de defense primaires incluent des assemblages de fer et des balises tempetes qui genereront des assemblages supplementaires selon les besoins. Les systemes secondaires incluent l'installation de defense orbitale."
+#define SAY_DELLORAH_6  "Et vous avez parle d'une entite prisonniere ? Quels sont la nature et le statut de cette entite ?"
+#define SAY_KEEPER_5    "Entite designee : Yogg-Saron. Niveau de securite compromis. Statut operationnel de la prison inconnu. Contact preventif des gardiens impossible."
+#define SAY_DELLORAH_7  "Yogg-Saron est ici ? Ne dites plus rien, on a deja les mains pleines."
+#define SAY_DELLORAH_8  "Mais... Mais qu'avez-vous fait, $N ? Brann ! BRAAAANNNN !"
+#define SAY_DELLORAH_9  "Brann ! $N vient d'activer le systeme de defense orbitale ! Si on ne sort pas vite d'ici, on va se faire carboniser !"
+
+
+#define ACTION_START_EVENT 4241
+#define ACTION_HARD_MODE_EVENT 4242
+
 class npc_lorekeeper : public CreatureScript
 {
     public:
@@ -1642,7 +1661,34 @@ class npc_lorekeeper : public CreatureScript
 
         struct npc_lorekeeperAI : public ScriptedAI
         {
-            npc_lorekeeperAI(Creature* creature) : ScriptedAI(creature) {}
+	  npc_lorekeeperAI(Creature* creature) : ScriptedAI(creature) 
+	  {
+	    eventStep = 0;
+	    mui_eventChange = 7000;
+	    eventPreStart = false;
+	    guid = 0;
+	    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	    _introDone = false;
+	  }
+
+	  void MoveInLineOfSight(Unit* who)
+	  {
+	    if (!_introDone && me->IsWithinDistInMap(who, 10.0f))
+	      {
+		if (who->GetTypeId() == TYPEID_PLAYER)
+		  {
+		    guid = who->GetGUID();
+		    DoAction(ACTION_START_EVENT);
+		    _introDone = true;
+		  }
+	      }
+	  }
+
+	  void SetGUID(uint64 g, int32 type)
+	  {
+	    guid = g;
+	  }
+
 
             void DoAction(int32 const action)
             {
@@ -1657,7 +1703,90 @@ class npc_lorekeeper : public CreatureScript
                         DoSummon(VEHICLE_DEMOLISHER, PosDemolisher[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
                     return;
                 }
+		else if (action == ACTION_START_EVENT)
+		  eventPreStart = true;
+		else if (action == ACTION_HARD_MODE_EVENT)
+		  {
+		    dellorah = me->FindNearestCreature(33701, 30);
+		    if (!dellorah)
+		      return;
+		    dellorah->MonsterYell(SAY_DELLORAH_8 ,LANG_UNIVERSAL, guid);
+		    dellorah->MonsterYell(SAY_DELLORAH_9 ,LANG_UNIVERSAL, guid);
+		  }
             }
+
+	  void UpdateAI(uint32 const diff)
+	  {
+	    if (mui_eventChange <= diff)
+	      {
+		mui_eventChange = 7000;
+		dellorah = me->FindNearestCreature(33701, 30);
+		if (!dellorah)
+		  return;
+		if (eventPreStart)
+		  {
+		    switch (eventStep)
+		      {
+		      case 0:
+			dellorah->MonsterSay(SAY_DELLORAH_1 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 1:
+			me->MonsterSay(SAY_KEEPER_1, LANG_UNIVERSAL, 0); 
+			break;
+		      case 2:
+			dellorah->MonsterSay(SAY_DELLORAH_2 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 3:
+			me->MonsterSay(SAY_KEEPER_2, LANG_UNIVERSAL, 0); 
+			break;
+		      case 4:
+			dellorah->MonsterSay(SAY_DELLORAH_3 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 5:
+			me->MonsterSay(SAY_KEEPER_3, LANG_UNIVERSAL, 0); 
+			break;
+		      case 6:
+			me->MonsterSay(SAY_KEEPER_4, LANG_UNIVERSAL, 0); 
+			break;
+		      case 7:
+			dellorah->MonsterSay(SAY_DELLORAH_4 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 8:
+			dellorah->MonsterSay(SAY_DELLORAH_5 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 9:
+			dellorah->MonsterSay(SAY_DELLORAH_6 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 10:
+			me->MonsterSay(SAY_KEEPER_5, LANG_UNIVERSAL, 0); 
+			break;
+		      case 11:
+			dellorah->MonsterSay(SAY_DELLORAH_7 ,LANG_UNIVERSAL, 0);
+			eventPreStart = false;
+			eventStep = 0;
+			me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+			DoAction(ACTION_SPAWN_VEHICLES);
+			break;
+		      default:
+			eventPreStart = false;
+			eventStep = 0;
+			me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+			break;
+		      }
+		    eventStep++;
+		  }
+	      }
+	    else
+	      mui_eventChange -= diff;
+	  }
+
+	private :
+	  uint32 eventStep;
+	  uint32 mui_eventChange;
+	  bool eventPreStart;
+	  Creature *dellorah;
+	  uint64 guid;
+	  bool _introDone;
         };
 
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
@@ -1687,7 +1816,8 @@ class npc_lorekeeper : public CreatureScript
                     {
                         leviathan->AI()->DoAction(ACTION_ACTIVATE_HARD_MODE);
                         creature->SetVisible(false);
-                        creature->AI()->DoAction(ACTION_SPAWN_VEHICLES); // spawn the vehicles
+			//                        creature->AI()->DoAction(ACTION_SPAWN_VEHICLES); // spawn the vehicles
+                        creature->AI()->DoAction(ACTION_HARD_MODE_EVENT); // spawn the vehicles
                         if (Creature* Delorah = creature->FindNearestCreature(NPC_DELORAH, 1000, true))
                         {
                             if (Creature* Brann = creature->FindNearestCreature(NPC_BRANN_BRONZBEARD, 1000, true))
@@ -2432,53 +2562,53 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                 SpellCastTargets targets = baseSpell->m_targets;
                 int32 damage = GetEffectValue();
                 if (targets.HasTraj())
-				{
+		  {
                     if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
-                        if (Unit* passenger = vehicle->GetPassenger(damage - 1))
+		      if (Unit* passenger = vehicle->GetPassenger(damage - 1))
                         {
-                            std::list<Unit*> unitList;
-                            // use 99 because it is 3d search
-                            SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, NPC_SEAT);
-                            float minDist = 99 * 99;
-                            Unit* target = NULL;
-                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+			  std::list<Unit*> unitList;
+			  // use 99 because it is 3d search
+			  SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, NPC_SEAT);
+			  float minDist = 99 * 99;
+			  Unit* target = NULL;
+			  for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                             {
-                                if (Unit* unit = (*itr)->ToUnit())
-                                    if (unit->GetEntry() == NPC_SEAT)
-                                        if (Vehicle* seat = unit->GetVehicleKit())
-										{
-                                            if (!seat->GetPassenger(0))	
-											{
-                                                if (Unit* device = seat->GetPassenger(2))
-												{
-                                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                                                    {
-                                                        float dist = unit->GetExactDistSq(targets.GetDst());
-                                                        if (dist < minDist)
-                                                        {
-                                                            minDist = dist;
-                                                            target = unit;
-                                                        }
-                                                    }
-												}
-											}
-										}
+			      if (Unit* unit = (*itr)->ToUnit())
+				if (unit->GetEntry() == NPC_SEAT)
+				  if (Vehicle* seat = unit->GetVehicleKit())
+				    {
+				      if (!seat->GetPassenger(0))	
+					{
+					  if (Unit* device = seat->GetPassenger(2))
+					    {
+					      if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+						{
+						  float dist = unit->GetExactDistSq(targets.GetDst());
+						  if (dist < minDist)
+						    {
+						      minDist = dist;
+						      target = unit;
+						    }
+						}
+					    }
+					}
+				    }
                             }
-                            if (target)
-							{
-								passenger->ExitVehicle();
-                                passenger->EnterVehicle(target, SEAT_PLAYER);
-								passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
-							}
-                            else
+			  if (target)
+			    {
+			      passenger->ExitVehicle();
+			      passenger->EnterVehicle(target, SEAT_PLAYER);
+			      passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+			    }
+			  else
                             {
-                                passenger->ExitVehicle();
-                                float x, y, z;
-                                targets.GetDst()->GetPosition(x, y, z);
-                                passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
+			      passenger->ExitVehicle();
+			      float x, y, z;
+			      targets.GetDst()->GetPosition(x, y, z);
+			      passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
                             }
                         }
-				}
+		  }
             }
 
             void Register()

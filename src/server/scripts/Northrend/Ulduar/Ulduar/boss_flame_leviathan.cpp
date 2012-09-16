@@ -2030,6 +2030,93 @@ public:
   }
 };
 
+class npc_tower_ulduar : public CreatureScript
+{
+public:
+  npc_tower_ulduar() : CreatureScript("npc_tower_ulduar") { }
+
+  struct npc_tower_ulduarAI : public Scripted_NoMovementAI
+  {
+    npc_tower_ulduarAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+      instance = pCreature->GetInstanceScript();
+    }
+
+    InstanceScript* instance;
+    GameObject *portal;
+    bool portalDead;
+    uint32 mui_go_state;
+
+    void Reset() 
+    {
+      portalDead = false;
+      mui_go_state = 1000;
+      if (portal = me->FindNearestGameObject(194415, 3.0f))
+	return;
+      portal = me->SummonGameObject(194415, me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(),  me->GetOrientation(), 0, 0, 0, 0, 7*DAY);   
+
+      for (int i = 0; i < RAID_MODE(12, 15); i++)
+	DoSumAdd();
+    }
+
+    void DoSumAdd()
+    {
+      if (me->GetPositionY() > -40)
+	me->SummonCreature(33236, CalculateRandomLocation(me->GetPositionX() -20, 20), CalculateRandomLocation(me->GetPositionY() - 25, 20), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+      else
+	me->SummonCreature(33236, CalculateRandomLocation(me->GetPositionX() - 20, 20), CalculateRandomLocation2(me->GetPositionY() + 25, 20), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+    }
+
+    float CalculateRandomLocation(float Loc, uint32 radius)
+    {
+      float coord = Loc;
+      coord -= rand()%radius;
+      return coord;
+    }
+
+    float CalculateRandomLocation2(float Loc, uint32 radius)
+    {
+      float coord = Loc;
+      coord += rand()%radius;
+      return coord;
+    }
+
+    void DamageTaken(Unit* who, uint32 &damage)
+    {
+      damage = 0;
+    }
+
+    void SummonedCreatureDies(Creature* summon, Unit* killer)
+    {
+      if (!portalDead)
+	{
+	  if (Creature *c = me->SummonCreature(33236, me->GetPositionX() -20, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+	    c->AI()->DoZoneInCombat();
+	}
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (portalDead)
+	return;
+      if (mui_go_state <= diff)
+	{
+	  //	  std::cout << "portal : " << portal->GetDestructibleState() << std::endl;
+	  if (portal->GetDestructibleState() == 2)
+	    portalDead = true;
+	  mui_go_state = 1000;
+	}
+      else
+	mui_go_state -= diff;
+    }
+  };
+
+  CreatureAI* GetAI(Creature* pCreature) const    
+  {
+    return new npc_tower_ulduarAI(pCreature);
+  }
+};
+
 class at_RX_214_repair_o_matic_station : public AreaTriggerScript
 {
     public:
@@ -2915,8 +3002,10 @@ void AddSC_boss_flame_leviathan()
     new npc_freyas_ward();                          // 33367
     new npc_freya_ward_of_life();                   // 34275
     new npc_leviathan_player_vehicle();            
+
     new npc_lorekeeper();                           // 33686
     new npc_brann_bronzebeard(); 
+    new npc_tower_ulduar();
 
     new at_RX_214_repair_o_matic_station();         // Area-Trigger 5369/5423
     new go_ulduar_tower();                          // 194375: Tower of Life; 194371: Tower of Flames; 194370: Tower of Frost; 194377: Tower of Storms

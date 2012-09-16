@@ -3405,44 +3405,78 @@ class spell_hodir_protective_gaze : public SpellScriptLoader
                 return sSpellMgr->GetSpellInfo(SPELL_FLASH_FREEZE_COOLDOWN);
             }
 
-            void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                std::list<Unit*> targetList;
-                aurEff->GetTargetList(targetList);
+    //        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    //        {
+    //            std::list<Unit*> targetList;
+    //            aurEff->GetTargetList(targetList);
 
-                for(std::list<Unit*>::iterator iter = targetList.begin(); iter != targetList.end(); ++iter)
-                    if(!(*iter)->ToPlayer() && (*iter)->GetGUID() != GetCasterGUID())
-                        (*iter)->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+    //            for(std::list<Unit*>::iterator iter = targetList.begin(); iter != targetList.end(); ++iter)
+    //                if(!(*iter)->ToPlayer() && (*iter)->GetGUID() != GetCasterGUID())
+    //                    (*iter)->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+    //        }
+
+    //        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+    //        {
+    //            // Set absorbtion amount to unlimited
+    //            amount = std::numeric_limits<int32>::max();
+				//printf("\n CalculateAmount = %d",amount);
+    //        }
+
+    //        void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+    //        {
+				//printf("\n Absorbe");
+    //            Unit* target = GetTarget();
+    //            if (dmgInfo.GetDamage() < target->GetHealth())
+    //                return;
+				//printf("\n Absorbe - 1 ");
+    //            target->CastSpell(target, SPELL_FLASH_FREEZE, true);
+				//printf("\n Absorbe - 2 ");
+    //            // absorb hp till 1 hp
+    //            absorbAmount = dmgInfo.GetDamage() - target->GetHealth() + 1;
+				//printf("\n Absorbe - 3 ");
+    //            // Remove Aura from Hodir
+    //            if (GetCaster()) 
+    //                if (GetCaster()->ToCreature())
+				//	{
+				//		printf("\n Absorbe - IL REMOVE LAURA A HODIR ");
+    //                    GetCaster()->ToCreature()->RemoveAurasDueToSpell(SPELL_HODIRS_PROTECTIVE_GAZE);
+				//	}
+    //        }
+
+            void HandleOnEffectAbsorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            {
+                sLog->outString("Our aura is now absorbing damage done to us!");
+                // absorb whole damage done to us
+                absorbAmount = dmgInfo.GetDamage();
             }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            void HandleAfterEffectAbsorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
-                // Set absorbtion amount to unlimited
-                amount = std::numeric_limits<int32>::max();
-            }
-
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
-            {
+                sLog->outString("Our aura has absorbed %u damage!", absorbAmount);
                 Unit* target = GetTarget();
-                if (dmgInfo.GetDamage() < target->GetHealth())
+                if (absorbAmount < target->GetHealth())
                     return;
-
+				printf("\n Absorbe - 1 ");
                 target->CastSpell(target, SPELL_FLASH_FREEZE, true);
-
+				printf("\n Absorbe - 2 ");
                 // absorb hp till 1 hp
                 absorbAmount = dmgInfo.GetDamage() - target->GetHealth() + 1;
-
+				printf("\n Absorbe - 3 ");
                 // Remove Aura from Hodir
                 if (GetCaster()) 
                     if (GetCaster()->ToCreature())
+					{
+						printf("\n Absorbe - IL REMOVE LAURA A HODIR ");
                         GetCaster()->ToCreature()->RemoveAurasDueToSpell(SPELL_HODIRS_PROTECTIVE_GAZE);
+					}
             }
-
             void Register()
             {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hodir_protective_gaze_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::Absorb, EFFECT_0);
-                OnEffectApply += AuraEffectApplyFn(spell_hodir_protective_gaze_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+                //DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hodir_protective_gaze_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+                //OnEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::Absorb, EFFECT_0);
+                //OnEffectApply += AuraEffectApplyFn(spell_hodir_protective_gaze_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+                OnEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::HandleOnEffectAbsorb, EFFECT_0);
+                AfterEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::HandleAfterEffectAbsorb, EFFECT_0);
             }
         };
 

@@ -383,11 +383,17 @@ class boss_hodir : public CreatureScript
 
 	  void MoveInLineOfSight(Unit* who)
 	  {
+	    if (instance->GetBossState(BOSS_HODIR) == IN_PROGRESS)
+	      return ;
             if (me->GetDistance2d(who->GetPositionX(), who->GetPositionY()) < 20.0f)
 	      {
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
-                    if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
+		  {
+		    if (me->FindNearestCreature(Entry[n], 10))
+		      ;//TODOO ADD A RESPAWN OR SOMETHING LIKE THAT OF HODIR ISN'T HERE;
+		    else if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
                         FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
+		  }
 	      }
 	  }
 

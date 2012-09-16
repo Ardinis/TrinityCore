@@ -353,14 +353,9 @@ class boss_hodir : public CreatureScript
 
             void Reset()
             {
-                _Reset();
-                me->SetReactState(REACT_PASSIVE);
-
-                // Note: NPC translation alliance -> horde is performed by OnCreatureCreate (instance-script)
-                for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
-                    if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
-                        FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
-		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+	      _Reset();
+	      me->SetReactState(REACT_PASSIVE);
+	      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
 	      instance->SetData(DATA_CAILLE, DONE);
 	      instance->SetData(DATA_GARE_GEL, DONE);
             }
@@ -385,6 +380,16 @@ class boss_hodir : public CreatureScript
                 events.ScheduleEvent(EVENT_RARE_CACHE, 240000);
                 events.ScheduleEvent(EVENT_BERSERK, 480000);
             }
+
+	  void MoveInLineOfSight(Unit* who)
+	  {
+            if (me->GetDistance2d(who->GetPositionX(), who->GetPositionY()) < 20.0f)
+	      {
+                for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
+                    if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
+                        FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
+	      }
+	  }
 
             void KilledUnit(Unit* /*who*/)
             {

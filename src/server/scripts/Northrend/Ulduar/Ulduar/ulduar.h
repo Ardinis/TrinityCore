@@ -227,6 +227,8 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
 
 enum UlduarGameObjects
 {
+  GO_ULDUAR_DOME = 194484,
+
     GO_IRON_COUNCIL_ENTRANCE    = 194554,
     GO_ARCHIVUM_DOOR            = 194556,
 

@@ -2208,7 +2208,7 @@ void AddSC_boss_halion()
     new npc_meteor_strike();
     new npc_combustion_consumption();
     new npc_orb_carrier();
-    new npc_orb_carrier_damage();
+    //    new npc_orb_carrier_damage();
     new npc_living_inferno();
     new npc_living_ember();
 

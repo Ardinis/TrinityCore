@@ -377,5 +377,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_t10_restoration_4p_bonus();
     new spell_dru_starfall_aoe();
     new spell_dru_swift_flight_passive();
-    new spell_dru_starfall_dummy();
+    //    new spell_dru_starfall_dummy();
 }

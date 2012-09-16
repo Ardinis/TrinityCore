@@ -382,7 +382,7 @@ class boss_hodir : public CreatureScript
                 events.ScheduleEvent(EVENT_FREEZE, 25000);
                 events.ScheduleEvent(EVENT_BLOWS, urand(60000, 65000));
                 events.ScheduleEvent(EVENT_FLASH_FREEZE, 45000);
-                events.ScheduleEvent(EVENT_RARE_CACHE, 180000);
+                events.ScheduleEvent(EVENT_RARE_CACHE, 240000);
                 events.ScheduleEvent(EVENT_BERSERK, 480000);
             }
 

@@ -486,6 +486,10 @@ class npc_feral_defender : public CreatureScript
 			me->AttackStop();
 		      }
 		  }
+		else
+		  {
+		    instance->DoCompleteAchievement(RAID_MODE(3076, 3077));
+		  }
 	      }
 	  }
 

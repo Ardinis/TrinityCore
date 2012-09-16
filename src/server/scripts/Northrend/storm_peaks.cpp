@@ -989,5 +989,5 @@ void AddSC_storm_peaks()
 	new npc_captive_protodrake;
     new npc_icefang;
     new npc_hyldsmeet_protodrake;
-    new npc_hodir_drake_mount;
+    //    new npc_hodir_drake_mount;
 }

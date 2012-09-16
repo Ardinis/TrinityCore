@@ -202,5 +202,5 @@ public:
 void AddSC_isle_of_conquest()
 {
     new npc_four_car_garage();
-    new bosses_isle_of_conquest();
+    //    new bosses_isle_of_conquest();
 }

@@ -568,6 +568,56 @@ class spell_festergut_gaseous_blight : public SpellScriptLoader
         }
 };
 
+
+class spell_69278 : public SpellScriptLoader
+{
+public:
+  spell_69278() : SpellScriptLoader("spell_69278") { }
+
+  class spell_69278AuraScript : public AuraScript
+  {
+    PrepareAuraScript(spell_69278AuraScript);
+
+    bool Validate(SpellInfo const* /*spellEntry*/)
+    {
+      return true;
+    }
+
+    void HandleOnEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+      sLog->outString("Aura Effect is about to be removed from target!");
+      if (Unit* target = GetTarget())
+	if (target->HasAura(69290))
+	  target->AddAura(69290, target);
+      // this hook allows you to prevent execution of AuraEffect handler, or to replace it with your own handler
+      //PreventDefaultAction();
+    }
+
+    void HandleAfterEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+      sLog->outString("Aura Effect has just been just removed from target!");
+      if (Unit* target = GetTarget())
+	if (target->HasAura(69290))
+	  target->AddAura(69290, target);
+    }
+
+
+    void Register()
+    {
+      OnEffectRemove += AuraEffectRemoveFn(spell_69278AuraScript::HandleOnEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+      AfterEffectRemove += AuraEffectRemoveFn(spell_69278AuraScript::HandleAfterEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+
+  };
+
+  // function which creates AuraScript
+  AuraScript* GetAuraScript() const
+  {
+    return new spell_69278AuraScript();
+  }
+};
+
+
 void AddSC_boss_festergut()
 {
     new boss_festergut();
@@ -578,4 +628,5 @@ void AddSC_boss_festergut()
     new achievement_flu_shot_shortage();
     new spell_stinky_plague_stench();
 	new spell_festergut_gaseous_blight();
+	new spell_69278();
 }

@@ -1635,6 +1635,25 @@ class npc_leviathan_player_vehicle : public CreatureScript
 #define GOSSIP_ITEM_1  "Activate secondary defensive systems"
 #define GOSSIP_ITEM_2  "Confirmed"
 
+#define SAY_DELLORAH_1  "J'ai entendu parler d'un gardien du savoir d'Ulduar dont la description vous correspondrait. Est-ce que vous avez un role similaire ?"
+#define SAY_KEEPER_1    "J'ai ete construit comme structure de stockage des informations essentielles concernant ce complexe. Mes fonctions principales incluent la notification du statut des systemes de defense frontaux et l'evaluation du statut de l'entite que ce complexe doit emprisonner."
+#define SAY_DELLORAH_2  "Systemes de defense frontaux ? Est-ce qu'il y a quelque chose que Brann devrait savoir avant d'envoyer des gens a l'assault du complexe ?"
+#define SAY_DELLORAH_3  "Pouvez-vous detailler la nature de ces systemes de defense ?"
+#define SAY_KEEPER_2    "L'acces a l'interieur du complexe est actuellement restreint. Les postes defensifs primaires sont actifs. Les postes defensifs secondaires sont actuellement non-actifs."
+#define SAY_KEEPER_3    "Compromission du complexe detectee. Protocole de securite d'urgence active. Requete acceptee."
+#define SAY_DELLORAH_4  "Compris. Au moins, nous n'avons pas besoin de nous occuper des positions orbitales."
+#define SAY_DELLORAH_5  "Rhydian, il faut avertir Brann et l'archimage Pentarus de l'existence de ces defenses, sur-le-champ."
+#define SAY_KEEPER_4    "Les postes de defense primaires incluent des assemblages de fer et des balises tempetes qui genereront des assemblages supplementaires selon les besoins. Les systemes secondaires incluent l'installation de defense orbitale."
+#define SAY_DELLORAH_6  "Et vous avez parle d'une entite prisonniere ? Quels sont la nature et le statut de cette entite ?"
+#define SAY_KEEPER_5    "Entite designee : Yogg-Saron. Niveau de securite compromis. Statut operationnel de la prison inconnu. Contact preventif des gardiens impossible."
+#define SAY_DELLORAH_7  "Yogg-Saron est ici ? Ne dites plus rien, on a deja les mains pleines."
+#define SAY_DELLORAH_8  "Mais... Mais qu'avez-vous fait, $N ? Brann ! BRAAAANNNN !"
+#define SAY_DELLORAH_9  "Brann ! $N vient d'activer le systeme de defense orbitale ! Si on ne sort pas vite d'ici, on va se faire carboniser !"
+
+
+#define ACTION_START_EVENT 4241
+#define ACTION_HARD_MODE_EVENT 4242
+
 class npc_lorekeeper : public CreatureScript
 {
     public:
@@ -1642,22 +1661,132 @@ class npc_lorekeeper : public CreatureScript
 
         struct npc_lorekeeperAI : public ScriptedAI
         {
-            npc_lorekeeperAI(Creature* creature) : ScriptedAI(creature) {}
+	  npc_lorekeeperAI(Creature* creature) : ScriptedAI(creature) 
+	  {
+	    eventStep = 0;
+	    mui_eventChange = 7000;
+	    eventPreStart = false;
+	    guid = 0;
+	    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	    _introDone = false;
+	  }
+
+	  void MoveInLineOfSight(Unit* who)
+	  {
+	    if (!_introDone && me->IsWithinDistInMap(who, 10.0f))
+	      {
+		if (who->GetTypeId() == TYPEID_PLAYER)
+		  {
+		    guid = who->GetGUID();
+		    DoAction(ACTION_START_EVENT);
+		    _introDone = true;
+		  }
+	      }
+	  }
+
+	  void SetGUID(uint64 g, int32 type)
+	  {
+	    guid = g;
+	  }
+
 
             void DoAction(int32 const action)
             {
                 // Start encounter
                 if (action == ACTION_SPAWN_VEHICLES)
                 {
-                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+		  /*                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
                         DoSummon(VEHICLE_SIEGE, PosSiege[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
                     for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
                         DoSummon(VEHICLE_CHOPPER, PosChopper[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
                     for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
-                        DoSummon(VEHICLE_DEMOLISHER, PosDemolisher[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+		    DoSummon(VEHICLE_DEMOLISHER, PosDemolisher[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);*/
                     return;
                 }
+		else if (action == ACTION_START_EVENT)
+		  eventPreStart = true;
+		else if (action == ACTION_HARD_MODE_EVENT)
+		  {
+		    dellorah = me->FindNearestCreature(33701, 30);
+		    if (!dellorah)
+		      return;
+		    dellorah->MonsterYell(SAY_DELLORAH_8 ,LANG_UNIVERSAL, guid);
+		    dellorah->MonsterYell(SAY_DELLORAH_9 ,LANG_UNIVERSAL, guid);
+		  }
             }
+
+	  void UpdateAI(uint32 const diff)
+	  {
+	    if (mui_eventChange <= diff)
+	      {
+		mui_eventChange = 7000;
+		dellorah = me->FindNearestCreature(33701, 30);
+		if (!dellorah)
+		  return;
+		if (eventPreStart)
+		  {
+		    switch (eventStep)
+		      {
+		      case 0:
+			dellorah->MonsterSay(SAY_DELLORAH_1 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 1:
+			me->MonsterSay(SAY_KEEPER_1, LANG_UNIVERSAL, 0); 
+			break;
+		      case 2:
+			dellorah->MonsterSay(SAY_DELLORAH_2 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 3:
+			me->MonsterSay(SAY_KEEPER_2, LANG_UNIVERSAL, 0); 
+			break;
+		      case 4:
+			dellorah->MonsterSay(SAY_DELLORAH_3 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 5:
+			me->MonsterSay(SAY_KEEPER_3, LANG_UNIVERSAL, 0); 
+			break;
+		      case 6:
+			me->MonsterSay(SAY_KEEPER_4, LANG_UNIVERSAL, 0); 
+			break;
+		      case 7:
+			dellorah->MonsterSay(SAY_DELLORAH_4 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 8:
+			dellorah->MonsterSay(SAY_DELLORAH_5 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 9:
+			dellorah->MonsterSay(SAY_DELLORAH_6 ,LANG_UNIVERSAL, 0);
+			break;
+		      case 10:
+			me->MonsterSay(SAY_KEEPER_5, LANG_UNIVERSAL, 0); 
+			break;
+		      case 11:
+			dellorah->MonsterSay(SAY_DELLORAH_7 ,LANG_UNIVERSAL, 0);
+			eventPreStart = false;
+			eventStep = 0;
+			me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+			DoAction(ACTION_SPAWN_VEHICLES);
+			break;
+		      default:
+			eventPreStart = false;
+			eventStep = 0;
+			me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+			break;
+		      }
+		    eventStep++;
+		  }
+	      }
+	    else
+	      mui_eventChange -= diff;
+	  }
+
+	private :
+	  uint32 eventStep;
+	  uint32 mui_eventChange;
+	  bool eventPreStart;
+	  Creature *dellorah;
+	  uint64 guid;
+	  bool _introDone;
         };
 
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
@@ -1687,7 +1816,8 @@ class npc_lorekeeper : public CreatureScript
                     {
                         leviathan->AI()->DoAction(ACTION_ACTIVATE_HARD_MODE);
                         creature->SetVisible(false);
-                        creature->AI()->DoAction(ACTION_SPAWN_VEHICLES); // spawn the vehicles
+			//                        creature->AI()->DoAction(ACTION_SPAWN_VEHICLES); // spawn the vehicles
+                        creature->AI()->DoAction(ACTION_HARD_MODE_EVENT); // spawn the vehicles
                         if (Creature* Delorah = creature->FindNearestCreature(NPC_DELORAH, 1000, true))
                         {
                             if (Creature* Brann = creature->FindNearestCreature(NPC_BRANN_BRONZBEARD, 1000, true))
@@ -1725,53 +1855,267 @@ class npc_lorekeeper : public CreatureScript
 
 //enable hardmode
 ////npc_brann_bronzebeard this requires more work involving area triggers. if reached this guy speaks through his radio..
-//#define GOSSIP_ITEM_1  "xxxxx"
-//#define GOSSIP_ITEM_2  "xxxxx"
-//
-/*
+#define TYPE_ULDUAR_EVENT 3132
+#define NPC_PENTARUS 33624
+#define GOSSIP_ITEM_BRANN_3         "Nous sommes pret !"
+#define SAY_BRANN_1                 "Pentarus, vous l'avez entendue. Que vos mages levent le bouclier pour laisser passer ces braves ames !"
+#define SAY_PENTARUS_1              "Bien sur, Brann, nous allons faire tomber ce bouclier pour un moment."
+#define SAY_BRANN_2                 "OK ! C'est parti. Tous a vos machines, j'vous causerai d'ici avec la radio !"
+#define SAY_PENTARUS_2              "Mages du Kirin Tor, au signal de Brann, levez le bouclier ! Defendez la plate-forme et nos allies de vos vies ! Pour Dalaran !"
+#define SAY_BRANN_3                 "Nos allies sont prets. Levez le bouclier et faites place !"
+#define SAY_BRANN_4                 "On a apercu des nains de fer qui sortaient des fortins a la base des piliers juste devant vous ! Detruisez les fortins, ca les obligera a s'replier !" //15794
+
 class npc_brann_bronzebeard : public CreatureScript
 {
 public:
-    npc_brann_bronzebeard() : CreatureScript("npc_brann_bronzebeard") { }
+  npc_brann_bronzebeard() : CreatureScript("npc_brann_bronzebeard") { }
 
-    //bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
-    //{
-    //    player->PlayerTalkClass->ClearMenus();
-    //    switch(uiAction)
-    //    {
-    //        case GOSSIP_ACTION_INFO_DEF+1:
-    //            if (player)
-    //            {
-    //                player->PrepareGossipMenu(creature);
-    //
-    //                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-    //                player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-    //            }
-    //            break;
-    //        case GOSSIP_ACTION_INFO_DEF+2:
-    //            if (player)
-    //                player->CLOSE_GOSSIP_MENU();
-    //            if (Creature* Lorekeeper = creature->FindNearestCreature(NPC_LOREKEEPER, 1000, true)) //lore keeper of lorgannon
-    //                Lorekeeper->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-    //            break;
-    //    }
-    //    return true;
-    //}
-    //bool OnGossipHello(Player* player, Creature* creature)
-    //{
-    //    InstanceScript* instance = creature->GetInstanceScript();
-    //    if (instance && instance->GetData(BOSS_LEVIATHAN) !=DONE)
-    //    {
-    //        player->PrepareGossipMenu(creature);
-    //
-    //        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-    //        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-    //    }
-    //    return true;
-    //}
-    //
-}
-*/
+  struct npc_brann_bronzebeardAI : public npc_escortAI
+  {
+    npc_brann_bronzebeardAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+      instance = pCreature->GetInstanceScript();
+    }
+
+    InstanceScript* instance;
+        
+    bool bSteppingBrann;
+    uint32 uiStepBrann;
+    uint32 uiPhaseTimerBrann;
+        
+    void Reset() 
+    {   
+      uiPhaseTimerBrann = 1000;  
+      bSteppingBrann = false;
+      uiStepBrann = 0;
+    }
+
+    void JumpToNextStepBrann(uint32 uiTimerBrann)
+    {
+      uiPhaseTimerBrann = uiTimerBrann;
+      ++uiStepBrann;
+    }
+        
+    void WaypointReached(uint32 uiPointId)
+    {
+    }
+
+    void SetData(uint32 id, uint32 data)
+    {
+      switch(id)
+        {
+	case TYPE_ULDUAR_EVENT:
+	  switch(data)
+	    {
+	    case 4:
+	      uiPhaseTimerBrann = 0;
+	      bSteppingBrann = true;
+	      uiStepBrann    = 0;
+	      break;
+	    }
+	  break;
+	default:
+	  break;
+	}
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      npc_escortAI::UpdateAI(diff);
+
+      if (bSteppingBrann)
+	{
+	  if (uiPhaseTimerBrann <= diff)
+	    {
+	      switch(uiStepBrann)
+		{
+		case 0:
+		  me->MonsterYell(SAY_BRANN_1, LANG_UNIVERSAL, 0);
+		  me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+		  JumpToNextStepBrann(3000);
+		  break;
+		case 1:
+		  if (Unit* pPentarus = me->FindNearestCreature(NPC_PENTARUS, 20.0f))
+		    pPentarus->MonsterYell(SAY_PENTARUS_1, LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(3000);
+		  break;
+		case 2:
+		  me->MonsterSay(SAY_BRANN_2, LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(8000);
+		  break;
+		case 3:
+		  if (Unit* pIngenieur = me->FindNearestCreature(33626, 50.0f))
+		    pIngenieur->GetMotionMaster()->MovePoint(0, -777.336f,-45.084f,429.843f);
+		  if (Unit* pBataille = me->FindNearestCreature(33662, 50.0f))
+		    {
+		      pBataille->GetMotionMaster()->MovePoint(0, -686.287f,-67.053f,427.960f);
+		      pBataille->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY1H);
+		    }
+		  if (Unit* pMage = me->FindNearestCreature(33672, 50.0f))
+		    {
+		      pMage->GetMotionMaster()->MovePoint(0, -701.350f,-51.397f,429.483f);
+		      pMage->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY1H);
+		    }
+		  if (Unit* pPentarus = me->FindNearestCreature(NPC_PENTARUS, 20.0f))
+		    {
+		      pPentarus->GetMotionMaster()->MovePoint(0, -686.287f,-34.389f,427.960f);
+		      pPentarus->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY1H);
+		    }
+		  me->GetMotionMaster()->MovePoint(0, -673.477f,-52.912f,426.130f);
+		  JumpToNextStepBrann(1500);
+		  break;
+		case 4:
+		  if (Unit* pPentarus = me->FindNearestCreature(NPC_PENTARUS, 50.0f))
+		    pPentarus->MonsterYell(SAY_PENTARUS_2, LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(5000);
+		  break;
+		case 5:
+		  me->MonsterYell(SAY_BRANN_3, LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(4000);
+		  break;
+		case 6:
+		  if (me->FindNearestGameObject(194484, 250.0f))
+		    {
+		      me->CastSpell(me,69900,true);
+		      me->FindNearestGameObject(GO_ULDUAR_DOME, 250.0f)->RemoveFromWorld();
+		      me->FindNearestGameObject(7000001, 250.0f)->RemoveFromWorld();
+		    }
+		  JumpToNextStepBrann(1500);
+		  break;
+		case 7:
+		  me->MonsterSay(SAY_BRANN_4, LANG_UNIVERSAL, 0);
+		  bSteppingBrann = false;
+                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+                        DoSummon(VEHICLE_SIEGE, PosSiege[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+                        DoSummon(VEHICLE_CHOPPER, PosChopper[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+                    for (int32 i = 0; i < RAID_MODE(2, 5); ++i)
+                        DoSummon(VEHICLE_DEMOLISHER, PosDemolisher[i], 3000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+		  break;
+		}
+	    } else uiPhaseTimerBrann -= diff;
+	  
+	  if (!UpdateVictim())
+	    return;
+	  
+	  DoMeleeAttackIfReady();
+	}
+    }
+  };
+
+  bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+  {
+    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_ITEM_BRANN_3,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF);
+    pPlayer->SEND_GOSSIP_MENU(100003, pCreature->GetGUID());
+        
+    return true;
+  }
+
+  bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+  {
+    switch(uiAction)
+      {
+      case GOSSIP_ACTION_INFO_DEF:
+	pCreature->AI()->SetData(TYPE_ULDUAR_EVENT, 4);
+	pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	pPlayer->CLOSE_GOSSIP_MENU();
+	break;
+      }
+    return true;
+  }
+ 
+  CreatureAI* GetAI(Creature* pCreature) const    
+  {
+    return new npc_brann_bronzebeardAI(pCreature);
+  }
+};
+
+class npc_tower_ulduar : public CreatureScript
+{
+public:
+  npc_tower_ulduar() : CreatureScript("npc_tower_ulduar") { }
+
+  struct npc_tower_ulduarAI : public Scripted_NoMovementAI
+  {
+    npc_tower_ulduarAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+      instance = pCreature->GetInstanceScript();
+    }
+
+    InstanceScript* instance;
+    GameObject *portal;
+    bool portalDead;
+    uint32 mui_go_state;
+
+    void Reset() 
+    {
+      portalDead = false;
+      mui_go_state = 1000;
+      if (portal = me->FindNearestGameObject(194415, 3.0f))
+	return;
+      portal = me->SummonGameObject(194415, me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(),  me->GetOrientation(), 0, 0, 0, 0, 7*DAY);   
+
+      for (int i = 0; i < RAID_MODE(12, 15); i++)
+	DoSumAdd();
+    }
+
+    void DoSumAdd()
+    {
+      if (me->GetPositionY() > -40)
+	me->SummonCreature(33236, CalculateRandomLocation(me->GetPositionX() -20, 20), CalculateRandomLocation(me->GetPositionY() - 25, 20), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+      else
+	me->SummonCreature(33236, CalculateRandomLocation(me->GetPositionX() - 20, 20), CalculateRandomLocation2(me->GetPositionY() + 25, 20), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN);
+    }
+
+    float CalculateRandomLocation(float Loc, uint32 radius)
+    {
+      float coord = Loc;
+      coord -= rand()%radius;
+      return coord;
+    }
+
+    float CalculateRandomLocation2(float Loc, uint32 radius)
+    {
+      float coord = Loc;
+      coord += rand()%radius;
+      return coord;
+    }
+
+    void DamageTaken(Unit* who, uint32 &damage)
+    {
+      damage = 0;
+    }
+
+    void SummonedCreatureDies(Creature* summon, Unit* killer)
+    {
+      if (!portalDead)
+	{
+	  if (Creature *c = me->SummonCreature(33236, me->GetPositionX() -20, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+	    c->AI()->DoZoneInCombat();
+	}
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (portalDead)
+	return;
+      if (mui_go_state <= diff)
+	{
+	  //	  std::cout << "portal : " << portal->GetDestructibleState() << std::endl;
+	  if (portal->GetDestructibleState() == 2)
+	    portalDead = true;
+	  mui_go_state = 1000;
+	}
+      else
+	mui_go_state -= diff;
+    }
+  };
+
+  CreatureAI* GetAI(Creature* pCreature) const    
+  {
+    return new npc_tower_ulduarAI(pCreature);
+  }
+};
 
 class at_RX_214_repair_o_matic_station : public AreaTriggerScript
 {
@@ -2432,53 +2776,53 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                 SpellCastTargets targets = baseSpell->m_targets;
                 int32 damage = GetEffectValue();
                 if (targets.HasTraj())
-				{
+		  {
                     if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
-                        if (Unit* passenger = vehicle->GetPassenger(damage - 1))
+		      if (Unit* passenger = vehicle->GetPassenger(damage - 1))
                         {
-                            std::list<Unit*> unitList;
-                            // use 99 because it is 3d search
-                            SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, NPC_SEAT);
-                            float minDist = 99 * 99;
-                            Unit* target = NULL;
-                            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+			  std::list<Unit*> unitList;
+			  // use 99 because it is 3d search
+			  SearchAreaTarget(unitList, 99, PUSH_DST_CENTER, SPELL_TARGETS_ENTRY, NPC_SEAT);
+			  float minDist = 99 * 99;
+			  Unit* target = NULL;
+			  for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                             {
-                                if (Unit* unit = (*itr)->ToUnit())
-                                    if (unit->GetEntry() == NPC_SEAT)
-                                        if (Vehicle* seat = unit->GetVehicleKit())
-										{
-                                            if (!seat->GetPassenger(0))	
-											{
-                                                if (Unit* device = seat->GetPassenger(2))
-												{
-                                                    if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                                                    {
-                                                        float dist = unit->GetExactDistSq(targets.GetDst());
-                                                        if (dist < minDist)
-                                                        {
-                                                            minDist = dist;
-                                                            target = unit;
-                                                        }
-                                                    }
-												}
-											}
-										}
+			      if (Unit* unit = (*itr)->ToUnit())
+				if (unit->GetEntry() == NPC_SEAT)
+				  if (Vehicle* seat = unit->GetVehicleKit())
+				    {
+				      if (!seat->GetPassenger(0))	
+					{
+					  if (Unit* device = seat->GetPassenger(2))
+					    {
+					      if (!device->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+						{
+						  float dist = unit->GetExactDistSq(targets.GetDst());
+						  if (dist < minDist)
+						    {
+						      minDist = dist;
+						      target = unit;
+						    }
+						}
+					    }
+					}
+				    }
                             }
-                            if (target)
-							{
-								passenger->ExitVehicle();
-                                passenger->EnterVehicle(target, SEAT_PLAYER);
-								passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
-							}
-                            else
+			  if (target)
+			    {
+			      passenger->ExitVehicle();
+			      passenger->EnterVehicle(target, SEAT_PLAYER);
+			      passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+			    }
+			  else
                             {
-                                passenger->ExitVehicle();
-                                float x, y, z;
-                                targets.GetDst()->GetPosition(x, y, z);
-                                passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
+			      passenger->ExitVehicle();
+			      float x, y, z;
+			      targets.GetDst()->GetPosition(x, y, z);
+			      passenger->GetMotionMaster()->MoveJump(x, y, z, targets.GetSpeedXY(), targets.GetSpeedZ());
                             }
                         }
-				}
+		  }
             }
 
             void Register()
@@ -2658,8 +3002,11 @@ void AddSC_boss_flame_leviathan()
     new npc_freyas_ward();                          // 33367
     new npc_freya_ward_of_life();                   // 34275
     new npc_leviathan_player_vehicle();            
+
     new npc_lorekeeper();                           // 33686
-    // new npc_brann_bronzebeard(); 
+    new npc_brann_bronzebeard(); 
+    new npc_tower_ulduar();
+
     new at_RX_214_repair_o_matic_station();         // Area-Trigger 5369/5423
     new go_ulduar_tower();                          // 194375: Tower of Life; 194371: Tower of Flames; 194370: Tower of Frost; 194377: Tower of Storms
 

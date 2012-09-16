@@ -377,9 +377,10 @@ class boss_freya : public CreatureScript
                 if (EncounterFinished) // May be called during fight if Freya gets outfight... hm, should _not_ happen regularly
                 {
 		  //                    me->setFaction(35);
-                    return;
+		  //                    return;
                 }
                 _Reset();                
+		sp = 0;
                 trioWaveCount = 0;
                 trioWaveController = 0;
                 elderCount = 0;                
@@ -563,13 +564,16 @@ class boss_freya : public CreatureScript
                             break;
                         case EVENT_NATURE_BOMB:
                         {
-                            // On every player
-                            std::list<Player*> PlayerList;
-                            Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
-                            Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
-                            me->VisitNearbyWorldObject(50.0f, searcher);
-                            for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+			  if (sp > 6)
+			    {
+			      // On every player
+			      std::list<Player*> PlayerList;
+			      Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+			      Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
+			      me->VisitNearbyWorldObject(50.0f, searcher);
+			      for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
                                 (*itr)->CastSpell(*itr, SPELL_SUMMON_NATURE_BOMB, true);
+			    }
                             events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 12000));
                             break;
                         }
@@ -582,8 +586,10 @@ class boss_freya : public CreatureScript
                             if (Aura * aura = me->GetAura(SPELL_ATTUNED_TO_NATURE)) // This is change to phase 2: All stacks are down! On first visit, this prevents the event from being performed.
                                 if (aura->GetStackAmount() > 0)
                                 {
+				  if (sp < 6)
                                     SpawnWave();
-                                    events.ScheduleEvent(EVENT_WAVE, WAVE_TIME);
+				  sp++;
+				  events.ScheduleEvent(EVENT_WAVE, WAVE_TIME);
                                 }                            
                             break;
                         case EVENT_EONAR_GIFT:
@@ -864,6 +870,8 @@ class boss_freya : public CreatureScript
                 bool trioDefeated[2];
                 bool random[3];
                 bool EncounterFinished;
+
+	  uint32 sp;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1638,7 +1646,7 @@ class npc_sun_beam : public CreatureScript
             void InitializeAI()
             {
                 me->SetReactState(REACT_PASSIVE);
-                DoCast(SPELL_FREYA_UNSTABLE_ENERGY);
+		//                DoCast(SPELL_FREYA_UNSTABLE_ENERGY);
             }
 
             void Reset()
@@ -1647,8 +1655,9 @@ class npc_sun_beam : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetDisplayId(MODEL_INVISIBLE);
-                me->DespawnOrUnsummon(12000);
-                DoCast(me, SPELL_FREYA_UNSTABLE_ENERGY_VISUAL, true); // visual
+	      me->DespawnOrUnsummon();
+		//                me->DespawnOrUnsummon(12000);
+		//      DoCast(me, SPELL_FREYA_UNSTABLE_ENERGY_VISUAL, true); // visual
             }
 
             void UpdateAI(uint32 const diff)    // hm... behavior correct ?
@@ -1734,6 +1743,8 @@ class npc_eonars_gift : public CreatureScript
 
             void InitializeAI()
             {                
+	      //	      me->SetMaxHealth(RAID_MODE(19950, 40000));
+	      //  me->SetHealth(RAID_MODE(19950, 40000));
                 DoCast(me, SPELL_GROW);
                 DoCast(me, SPELL_PHEROMONES, true);
                 DoCast(me, SPELL_EONAR_VISUAL, true);
@@ -1744,15 +1755,16 @@ class npc_eonars_gift : public CreatureScript
                 lifeBindersGiftTimer = 12000;
             }
 
+
             void UpdateAI(uint32 const diff)
             {
-	      if (_instance)
+	      /*	      if (_instance)
 		  {
                     if (_instance->GetBossState(BOSS_FREYA) != IN_PROGRESS)
                         me->DisappearAndDie();
 		  }
                 else 
-                    me->DisappearAndDie();
+		me->DisappearAndDie();*/
                 
                 if (lifeBindersGiftTimer <= diff)
                 {

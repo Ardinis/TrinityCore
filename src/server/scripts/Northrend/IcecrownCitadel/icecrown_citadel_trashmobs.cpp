@@ -2729,8 +2729,8 @@ void AddSC_icecrown_citadel_trashmobs()
         new npc_deathspeaker_attendant_25man_icc();
         new npc_deathspeaker_zealot_icc();
         new npc_deathspeaker_high_priest_icc();
-        new npc_valkyr_herald_10man_icc();
-        new npc_valkyr_herald_25man_icc();
+	//        new npc_valkyr_herald_10man_icc();
+	//  new npc_valkyr_herald_25man_icc();
         new npc_blighted_abomination_icc();
         new npc_vengeful_fleshreapert_icc();
         new npc_plague_scientist_icc();

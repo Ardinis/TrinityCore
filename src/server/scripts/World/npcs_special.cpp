@@ -3778,5 +3778,5 @@ void AddSC_npcs_special()
     new npc_argent_squire();	
     new npc_artuis();
     new vehicle_knight_gryphon();
-	new npc_risen_ally();
+    //	new npc_risen_ally();
 }

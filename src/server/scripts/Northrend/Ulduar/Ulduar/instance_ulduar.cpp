@@ -702,6 +702,10 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (gameObject->GetEntry())
                 {
+		case GO_ULDUAR_DOME:
+		  gameObject->EnableCollision(true);
+		  break;
+
                     // Leviathan related
                     case GO_LEVIATHAN_DOOR:
                         AddDoor(gameObject, true);

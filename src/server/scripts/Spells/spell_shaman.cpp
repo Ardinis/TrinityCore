@@ -606,7 +606,7 @@ void AddSC_shaman_spell_scripts()
 	new spell_sha_earthen_power();
     new spell_sha_bloodlust();
     new spell_sha_heroism();
-    new spell_sha_ancestral_awakening_proc();
+    //    new spell_sha_ancestral_awakening_proc();
     new spell_sha_cleansing_totem_pulse();
     new spell_sha_healing_stream_totem();
     new spell_sha_mana_spring_totem();

@@ -500,5 +500,5 @@ void AddSC_wintergrasp()
     new npc_wg_ally_battle_mage();
     new npc_wg_horde_battle_mage();
     new go_wg_veh_teleporter();
-    new spell_summon_vehicle_wintergrasp();
+    //    new spell_summon_vehicle_wintergrasp();
 }

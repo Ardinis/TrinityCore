@@ -1100,12 +1100,12 @@ public:
 void AddSC_icecrown()
 {
   new npc_arete();
-  new npc_squire_david();
-  new npc_squire_danny();
-  new npc_argent_valiant();
+  //  new npc_squire_david();
+  // new npc_squire_danny();
+  // new npc_argent_valiant();
   new npc_guardian_pavilion();
   new npc_vereth_the_cunning();
   new npc_tournament_training_dummy();
-  new npc_training_dummy_argent();
+  // new npc_training_dummy_argent();
   new npc_valiant();
 }

@@ -3405,26 +3405,21 @@ class spell_hodir_protective_gaze : public SpellScriptLoader
                 return sSpellMgr->GetSpellInfo(SPELL_FLASH_FREEZE_COOLDOWN);
             }
 
-            void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            void HandleOnEffectAbsorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
-                std::list<Unit*> targetList;
-                aurEff->GetTargetList(targetList);
 
-                for(std::list<Unit*>::iterator iter = targetList.begin(); iter != targetList.end(); ++iter)
-                    if(!(*iter)->ToPlayer() && (*iter)->GetGUID() != GetCasterGUID())
-                        (*iter)->RemoveAurasDueToSpell(GetSpellInfo()->Id);
-            }
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
-            {
-                // Set absorbtion amount to unlimited
-                amount = std::numeric_limits<int32>::max();
-            }
-
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
-            {
+                // absorb whole damage done to us
                 Unit* target = GetTarget();
                 if (dmgInfo.GetDamage() < target->GetHealth())
+					absorbAmount = 0;
+				else
+					absorbAmount = dmgInfo.GetDamage();
+            }
+
+            void HandleAfterEffectAbsorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+            {
+                Unit* target = GetTarget();
+                if (absorbAmount < target->GetHealth())
                     return;
 
                 target->CastSpell(target, SPELL_FLASH_FREEZE, true);
@@ -3437,12 +3432,10 @@ class spell_hodir_protective_gaze : public SpellScriptLoader
                     if (GetCaster()->ToCreature())
                         GetCaster()->ToCreature()->RemoveAurasDueToSpell(SPELL_HODIRS_PROTECTIVE_GAZE);
             }
-
             void Register()
             {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hodir_protective_gaze_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::Absorb, EFFECT_0);
-                OnEffectApply += AuraEffectApplyFn(spell_hodir_protective_gaze_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+                OnEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::HandleOnEffectAbsorb, EFFECT_0);
+                AfterEffectAbsorb += AuraEffectAbsorbFn(spell_hodir_protective_gaze_AuraScript::HandleAfterEffectAbsorb, EFFECT_0);
             }
         };
 

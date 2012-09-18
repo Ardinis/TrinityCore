@@ -12,7 +12,7 @@ UPDATE `creature_template` SET `ScriptName`='npc_liquid_pyrite' WHERE `entry`=33
 UPDATE `creature_template` SET `ScriptName`='npc_freya_ward_of_life' WHERE `entry`=34275;
 -- Part 1.1: Mimirons Inferno Bunny - it should walk around.
 DELETE FROM `waypoints` WHERE `entry`=33370;
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+REPLACE INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
 (33370, 1, 266.689, -33.391, 409.99, 'Mimirons Inferno - Waypoint of dummy'),
 (33370, 2, 379.158, -33.318, 409.81, 'Mimirons Inferno - Waypoint of dummy 2'),
 (33370, 3, 266.611, -133.387, 409.81, 'Mimirons Inferno - Waypoint of dummy 3'),
@@ -21,8 +21,8 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 
 -- Part 2: Areatrigger. These are the triggers at the repair stations (194261,194262).
 DELETE FROM `areatrigger_scripts` WHERE `entry` IN (5369, 5423);
-INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES (5369, 'at_RX_214_repair_o_matic_station');
-INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES (5423, 'at_RX_214_repair_o_matic_station');
+REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES (5369, 'at_RX_214_repair_o_matic_station');
+REPLACE INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES (5423, 'at_RX_214_repair_o_matic_station');
 
 -- Part 3: Updates for achievement criterias... to avoid DISTINCT-selection during load :s
 UPDATE `achievement_criteria_data` SET `ScriptName`='achievement_unbroken_25' WHERE `criteria_id`=10045 AND `type`=11;
@@ -37,7 +37,7 @@ UPDATE `achievement_criteria_data` SET `ScriptName`='achievement_orbit_uary_25' 
 
 -- Part 4: Spells
 DELETE FROM `spell_script_names` WHERE `spell_id` IN (64979, 65044, 62907, 63847, 64677);
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+REPLACE INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (64979, 'spell_anti_air_rocket'),
 (65044, 'spell_leviathan_blaze_flames_effect'),
 (62907, 'spell_freyas_ward_summon'),
@@ -48,7 +48,7 @@ UPDATE `spell_script_names` SET `ScriptName`='spell_pursued' WHERE `spell_id`=62
 
 -- Part 5: Game-objects: Replaced them if position is incorrect.
 DELETE FROM `gameobject` WHERE `id` IN (194261, 194262);
-INSERT INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
+REPLACE INTO `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES
 (194261, 603, 3, 1, 130.553, -128.063, 409.804, 2.87979, 0, 0, 0, 1, 180, 255, 1),
 (194261, 603, 3, 1, 138.516, 56.1078, 409.804, 2.87979, 0, 0, 0, 1, 180, 255, 1),
 (194262, 603, 3, 1, 131.895, -128.264, 409.804, 0, 0, 0, 0, 1, 180, 255, 1),

@@ -148,30 +148,36 @@ class boss_general_vezax : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SHADOW_CRASH:
+			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             if (Unit* target = CheckPlayersInRange(RAID_MODE(4, 9), 15.0f, 50.0f))
                                 DoCast(target, SPELL_SHADOW_CRASH);
                             events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(8000, 12000));
                             break;
                         case EVENT_SEARING_FLAMES:
+			  //			  me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                             DoCastAOE(SPELL_SEARING_FLAMES);
                             events.ScheduleEvent(EVENT_SEARING_FLAMES, urand(14000, 17500));
                             break;
                         case EVENT_MARK_OF_THE_FACELESS:
+			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             if (Unit* target = CheckPlayersInRange(RAID_MODE(4, 9), 15.0f, 50.0f))
                                 DoCast(target, SPELL_MARK_OF_THE_FACELESS);                                
                             events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));  
                             break;
                         case EVENT_SURGE_OF_DARKNESS:
+			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             DoScriptText(EMOTE_SURGE_OF_DARKNESS, me);
                             DoScriptText(SAY_SURGE_OF_DARKNESS, me);
                             DoCast(me, SPELL_SURGE_OF_DARKNESS);
                             events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, urand(50000, 70000));
                             break;
                         case EVENT_SUMMON_SARONITE_VAPOR:
+			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             DoCast(me, SPELL_SUMMON_SARONITE_VAPORS, true);   // Spells summons 33488 in a random place in 40 meters                            
                             events.ScheduleEvent(EVENT_SUMMON_SARONITE_VAPOR, urand(30000, 35000));
                             break;
                         case EVENT_BERSERK:
+			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             DoScriptText(SAY_BERSERK, me);
                             DoCast(me, SPELL_BERSERK);
                             break;
@@ -391,6 +397,7 @@ class npc_saronite_vapors : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true); 
                 me->SetReactState(REACT_PASSIVE);
+		isPassive = false;
             }
 
             void Reset()
@@ -427,6 +434,9 @@ class npc_saronite_vapors : public CreatureScript
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
+		    if (isPassive)
+		      return;
+                    isPassive = true;
                     me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->Clear(false);
                     me->GetMotionMaster()->MoveIdle();
@@ -445,6 +455,7 @@ class npc_saronite_vapors : public CreatureScript
             private:
                 InstanceScript* instance;
                 EventMap events;
+	  bool isPassive;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -513,14 +524,14 @@ public:
     }
 };
 
-class spell_mark_of_the_faceless : public SpellScriptLoader
+class spell_mark_of_the_faceless_aura : public SpellScriptLoader
 {
-    public:
-        spell_mark_of_the_faceless() : SpellScriptLoader("spell_mark_of_the_faceless") {}        
+public:
+  spell_mark_of_the_faceless_aura() : SpellScriptLoader("spell_mark_of_the_faceless_aura") {}  
 
-        class spell_mark_of_the_faceless_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_mark_of_the_faceless_AuraScript);
+  class spell_mark_of_the_faceless_auraAuraScript : public AuraScript
+  {
+    PrepareAuraScript(spell_mark_of_the_faceless_auraAuraScript);
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
@@ -537,13 +548,13 @@ class spell_mark_of_the_faceless : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_mark_of_the_faceless_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+	      OnEffectPeriodic += AuraEffectPeriodicFn(spell_mark_of_the_faceless_auraAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_mark_of_the_faceless_AuraScript();
+	  return new spell_mark_of_the_faceless_auraAuraScript();
         }
 };
 
@@ -571,6 +582,158 @@ public:
     {
         return new spell_mark_of_the_faceless_drain_SpellScript();
     }
+};
+
+class spell_saronite_vapors : public SpellScriptLoader  // Spell 63323
+{
+public:
+  spell_saronite_vapors() : SpellScriptLoader("spell_saronite_vapors") {}
+  
+  class spell_saronite_vapors_AuraScript : public AuraScript
+  {
+    PrepareAuraScript(spell_saronite_vapors_AuraScript);
+    
+
+    void HandleEffectPeriodicUpdate(AuraEffect* aurEff)
+    {                
+      std::cout << "test" << std::endl;
+      if (Unit* target = GetTarget())
+	if (Player* player = target->ToPlayer())
+	  {
+	    if (player->GetDistance(basePos) > 8.0f) // Max. range: 8 yards
+	      {
+      std::cout << "test return wtf" << std::endl;
+		player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
+		return;
+	      }                        
+	    
+	    uint8 stackCount = 0;
+	    if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))                        
+	      
+	      stackCount = vaporaura->GetStackAmount() + 1; // #old stacks +1 (which will be applied now)
+	    else
+	      stackCount = 1; // On first apply.
+	    /* Due to Hordeguides, the first 8 stacks lead to mana-gain as mentioned below:
+                            1 -> 100        2^0
+                            2 -> 200        2^1
+                            3 -> 400        2^2
+                            4 -> 800        2^3
+                            5 -> 1600       2^4
+                            6 -> 3200       2^5
+                            7 -> 6400       2^6
+                            8 -> 12800      2^7
+                            [...]
+                            Thus, formula for mana-gain is 100 * (2^(stackAmount-1)),
+                            which results in 2*100*(2^(stackAmount-1)) for health damage.
+                            Since I don't like pow(), we will use a left-shift for that, which results in:
+                            managain:       100 << (stackAmount-1)
+                            healthdamage:   2*managain
+
+                        */
+	    int32 manaGain = std::max( 100 << (stackCount-1), 0 ); // just for the case...
+	    uint32 healthDamage = 2*manaGain; 
+                            
+	    std::cout << "test mana : " << manaGain << " healthdamage : " << healthDamage << std::endl;
+	    // Possibly, the modifications below could be done by spells (63338, 63337), but they don't work yet. CastCustomSpell(...) would be an option.
+	    // Emulates shadow damage by spell, which is missing - due to wowhead, this should be reducible shadow-damage.
+	    player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW); // Emulates 63338                        
+
+	    player->ModifyPower(POWER_MANA, manaGain); // Emulates 63337                  
+
+                        /*
+                            S.th. like 
+                            player->CastCustomSpell(63338, SPELLVALUE_BASE_POINT0, healthDamage, player, true);
+                            player->CastCustomSpell(63337, SPELLVALUE_BASE_POINT0, manaGain, player, true);
+                            doesn't work yet, dunno why
+                        */
+	    return; // Avoid prevention mentioned below.
+	  }
+      PreventDefaultAction(); // Do nothing in case there's no target or the target is not a player                         
+    }
+
+
+    void HandleEffectPeriodic(AuraEffect const * aurEff)
+    {                
+      std::cout << "test" << std::endl;
+      if (Unit* target = GetTarget())
+	if (Player* player = target->ToPlayer())
+	  {
+	    if (player->GetDistance(basePos) > 8.0f) // Max. range: 8 yards
+	      {
+		std::cout << "test return wtf" << std::endl;
+		player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
+		return;
+	      }                        
+	    
+	    uint8 stackCount = 0;
+	    if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))                        
+	      
+	      stackCount = vaporaura->GetStackAmount() + 1; // #old stacks +1 (which will be applied now)
+	    else
+	      stackCount = 1; // On first apply.
+	    /* Due to Hordeguides, the first 8 stacks lead to mana-gain as mentioned below:
+	       1 -> 100        2^0
+	       2 -> 200        2^1
+	       3 -> 400        2^2
+	       4 -> 800        2^3
+	       5 -> 1600       2^4
+	       6 -> 3200       2^5
+	       7 -> 6400       2^6
+	       8 -> 12800      2^7
+	       [...]
+	       Thus, formula for mana-gain is 100 * (2^(stackAmount-1)),
+	       which results in 2*100*(2^(stackAmount-1)) for health damage.
+	       Since I don't like pow(), we will use a left-shift for that, which results in:
+	       managain:       100 << (stackAmount-1)
+	       healthdamage:   2*managain
+	       
+	    */
+	    int32 manaGain = std::max( 100 << (stackCount-1), 0 ); // just for the case...
+	    uint32 healthDamage = 2*manaGain; 
+            
+	    std::cout << "test mana : " << manaGain << " healthdamage : " << healthDamage << std::endl;
+	    // Possibly, the modifications below could be done by spells (63338, 63337), but they don't work yet. CastCustomSpell(...) would be an option.
+	    // Emulates shadow damage by spell, which is missing - due to wowhead, this should be reducible shadow-damage.
+	    player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW); // Emulates 63338                        
+
+	    player->ModifyPower(POWER_MANA, manaGain); // Emulates 63337                  
+
+	    /*
+	      S.th. like 
+	      player->CastCustomSpell(63338, SPELLVALUE_BASE_POINT0, healthDamage, player, true);
+	      player->CastCustomSpell(63337, SPELLVALUE_BASE_POINT0, manaGain, player, true);
+	      doesn't work yet, dunno why
+	    */
+	    return; // Avoid prevention mentioned below.
+	  }
+      PreventDefaultAction(); // Do nothing in case there's no target or the target is not a player                         
+    }
+
+
+    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+      std::cout << "apply" << std::endl;
+      if (Unit* caster = GetCaster())
+	caster->GetPosition(&basePos);
+    }
+
+    void Register()
+    {
+      OnEffectApply += AuraEffectApplyFn(spell_saronite_vapors_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+      //      OnEffectPeriodic += AuraEffectPeriodicFn(spell_saronite_vapors_AuraScript::HandleUpdatePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+      //      OnEffectPeriodic += AuraEffectUpdatePeriodicFn(spell_saronite_vapors_AuraScript::HandleUpdatePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+      OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_saronite_vapors_AuraScript::HandleEffectPeriodicUpdate, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    OnEffectPeriodic += AuraEffectPeriodicFn(spell_saronite_vapors_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+
+  private:
+    Position basePos;
+  };
+
+  AuraScript* GetAuraScript() const
+  {
+    return new spell_saronite_vapors_AuraScript();
+  }
 };
 
 /************************************************************************/
@@ -617,7 +780,8 @@ void AddSC_boss_general_vezax()
 
     new spell_aura_of_despair_aura();
     new spell_mark_of_the_faceless_drain();
-    new spell_mark_of_the_faceless();
+    new spell_mark_of_the_faceless_aura();
+    new spell_saronite_vapors();
 
     new achievement_shadowdodger("achievement_shadowdodger");       // 10m 10173 (2996)
     new achievement_shadowdodger("achievement_shadowdodger_25");    // 25m 10306 (2997)

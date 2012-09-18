@@ -1752,6 +1752,9 @@ class npc_lorekeeper : public CreatureScript
 			dellorah->MonsterSay(SAY_DELLORAH_4 ,LANG_UNIVERSAL, 0);
 			break;
 		      case 8:
+			if (Creature *ry = me->FindNearestCreature(33696, 30))
+			  if (Creature* Brann = me->FindNearestCreature(NPC_BRANN_BRONZBEARD, 1000, true))
+			    ry->GetMotionMaster()->MovePoint(0, Brann->GetPositionX()+4, Brann->GetPositionY(), Brann->GetPositionZ());
 			dellorah->MonsterSay(SAY_DELLORAH_5 ,LANG_UNIVERSAL, 0);
 			break;
 		      case 9:

@@ -419,7 +419,7 @@ class boss_freya : public CreatureScript
             {
                 if (amount >= me->GetHealth())
                 {
-                    amount = 0;
+		  //                    amount = 0;
                     EncounterPostProgress();
                 }
             }
@@ -564,16 +564,18 @@ class boss_freya : public CreatureScript
                             break;
                         case EVENT_NATURE_BOMB:
                         {
-			  if (sp > 6)
-			    {
-			      // On every player
-			      std::list<Player*> PlayerList;
-			      Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
-			      Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
-			      me->VisitNearbyWorldObject(50.0f, searcher);
-			      for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-                                (*itr)->CastSpell(*itr, SPELL_SUMMON_NATURE_BOMB, true);
-			    }
+			  //			  if (sp >= 6)
+			  if (Aura * aura = me->GetAura(SPELL_ATTUNED_TO_NATURE)) // This is change to phase 2: All stacks are down! On first visit, this prevents the event from being performed.
+			    if (aura->GetStackAmount() > 0)
+			      {
+				// On every player
+				std::list<Player*> PlayerList;
+				Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+				Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
+				me->VisitNearbyWorldObject(50.0f, searcher);
+				for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+				  (*itr)->CastSpell(*itr, SPELL_SUMMON_NATURE_BOMB, true);
+			      }
                             events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 12000));
                             break;
                         }
@@ -1748,6 +1750,7 @@ class npc_eonars_gift : public CreatureScript
                 DoCast(me, SPELL_GROW);
                 DoCast(me, SPELL_PHEROMONES, true);
                 DoCast(me, SPELL_EONAR_VISUAL, true);
+		Reset();
             }
 
             void Reset()
@@ -1771,7 +1774,7 @@ class npc_eonars_gift : public CreatureScript
                     me->RemoveAurasDueToSpell(SPELL_GROW);
                     DoCast(SPELL_LIFEBINDERS_GIFT);
                     me->DespawnOrUnsummon(2500);
-                    // lifeBindersGiftTimer = 12000;   // Wt... ? Cannot cast after being despawned...
+                    lifeBindersGiftTimer = 12000;
                 }
                 else
                     lifeBindersGiftTimer -= diff;

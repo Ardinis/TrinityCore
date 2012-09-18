@@ -393,11 +393,11 @@ class boss_thorim : public CreatureScript
 
             void Reset()
             {
-                gotEncounterFinished = gotEncounterFinished || (instance->GetBossState(BOSS_THORIM) == DONE);
+	      //                gotEncounterFinished = gotEncounterFinished || (instance->GetBossState(BOSS_THORIM) == DONE);
 		if (gotEncounterFinished) // May be called during fight if Thorim gets outfight... hm, should _not_ happen regularly
                 {
-                    me->setFaction(35);
-                    return;
+		  //                    me->setFaction(35);
+		    //                    return;
 		}
 		sif = NULL;
 		isEnterCombat = false;
@@ -417,6 +417,7 @@ class boss_thorim : public CreatureScript
                 checkTargetTimer = 7000;
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
 		  {
+		    ctrl->Respawn();
 		    ctrl->AI()->DoAction(42);
                     ctrl->AI()->Reset();
 		  }
@@ -691,8 +692,9 @@ class boss_thorim : public CreatureScript
             {
                 if (damage >= me->GetHealth())
                 {
-                    damage = 0;
+		  //                    damage = 0;
                     EncounterPostProgress();
+		    return;
                 }
 
                 if (phase == PHASE_1 && attacker && instance)

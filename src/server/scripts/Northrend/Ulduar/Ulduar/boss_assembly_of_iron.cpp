@@ -361,7 +361,6 @@ class boss_steelbreaker : public CreatureScript
             {
                 if (type == DATA_I_CHOOSE_YOU_PHASE_CHECK)
                     return (phase >= 3) ? 1 : 0;
-
                 return 0;
             }
 
@@ -373,22 +372,22 @@ class boss_steelbreaker : public CreatureScript
                         DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
                         break;
                     case ACTION_UPDATEPHASE:
-						phase++;
-						events.SetPhase(phase); 
-                        if (phase >= 2)
-                            events.RescheduleEvent(EVENT_STATIC_DISRUPTION, 30000);
-                        if (phase >= 3)
+		      phase++;
+		      events.SetPhase(phase); 
+		      if (phase >= 2)
+			events.RescheduleEvent(EVENT_STATIC_DISRUPTION, 30000);
+		      if (phase >= 3)
                         {
-                            DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
-                            uint32 nextSchedule = 0;
-			    if (events.GetNextEventTime(EVENT_STATIC_DISRUPTION) > 0)   // Note: Function returns 0 if the event isn't scheduled yet.
-                                nextSchedule = urand(2000, 5000);
-                            else 
-                                nextSchedule = urand(20000, 30000);
-                            events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
-							me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+			  DoCast(me, SPELL_ELECTRICAL_CHARGE, true);
+			  uint32 nextSchedule = 0;
+			  if (events.GetNextEventTime(EVENT_STATIC_DISRUPTION) > 0)   // Note: Function returns 0 if the event isn't scheduled yet.
+			    nextSchedule = urand(2000, 5000);
+			  else 
+			    nextSchedule = urand(20000, 30000);
+			  events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
+			  me->AddLootMode(LOOT_MODE_HARD_MODE_2);
                         }
-                        break;
+		      break;
                 }
             }
 
@@ -396,38 +395,40 @@ class boss_steelbreaker : public CreatureScript
             {
                 DoScriptText(RAND(SAY_STEELBREAKER_DEATH_1, SAY_STEELBREAKER_DEATH_2), me);
                 if (IsEncounterComplete(instance, me))
-                {
-					_JustDied();
+		  {
+		    _JustDied();
                     PostEncounterStuff(instance);
                     instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_CREDIT_MARKER);
-                }
+		  }
                 else
-				{
+		  {
                     events.Reset();
                     summons.DespawnAll();
-
 		    DoCastAOE(SPELL_SUPERCHARGE);
-                }
+		  }
 
-		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_MOLGEIM) : 0))
-		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_BRUNDIR) : 0))
-		    {
-		      if (!Molgeim->isAlive() && !Brundir->isAlive())
+		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MOLGEIM)))
+		  {
+		    if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRUNDIR)))
+		      {
+			if (!Molgeim->isAlive() && !Brundir->isAlive())
 			  {
-			  me->AddLootMode(LOOT_MODE_HARD_MODE_2);
-			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
-			  if (!pAE)
-			    return;
-			  Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-			  for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-			    if (Player* player = i->getSource())
-			      if (player->isAlive())
-				if (player->HasAura(58501))
-				  player->CompletedAchievement(pAE);
+			    std::cout << "HARD MODE WIN !!!!!!!!!!!!!!!!!!!!" << std::endl;
+			    me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+			    AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+			    if (!pAE)
+			      return;
+			    Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+			    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+			      if (Player* player = i->getSource())
+				if (player->isAlive())
+				  if (player->HasAura(58501))
+				    player->CompletedAchievement(pAE);
 			  }
-		      else
-				me->SetLootRecipient(NULL);
-		     }
+			else
+			  me->SetLootRecipient(NULL);
+		      }
+		  }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -443,19 +444,19 @@ class boss_steelbreaker : public CreatureScript
                 switch (spell->Id)
                 {
                     case SPELL_SUPERCHARGE:
-						me->SetHealth(me->GetMaxHealth()); 
-						events.RescheduleEvent(EVENT_FUSION_PUNCH, 15000);
-						superChargedCnt++;
-						DoAction(ACTION_UPDATEPHASE);
-						// Crazy hack, but since - whyever - stacking does not work automatically when the casts are fired from different NPCs...
-						// Note that it also does not work if the same NPC tries to cast the spell twice (as used in last commit)
-						if (Aura* charge = me->GetAura(SPELL_SUPERCHARGE))                           
-							charge->SetStackAmount(std::min<uint8>(2, superChargedCnt));
-						break;
-                    case SPELL_ELECTRICAL_CHARGE_TRIGGERED:
-                        if (!me->isInCombat())
-                            me->RemoveAurasDueToSpell(SPELL_ELECTRICAL_CHARGE_TRIGGERED);
-                        break;
+		      me->SetHealth(me->GetMaxHealth()); 
+		      events.RescheduleEvent(EVENT_FUSION_PUNCH, 15000);
+		      superChargedCnt++;
+		      DoAction(ACTION_UPDATEPHASE);
+		      // Crazy hack, but since - whyever - stacking does not work automatically when the casts are fired from different NPCs...
+		      // Note that it also does not work if the same NPC tries to cast the spell twice (as used in last commit)
+		      if (Aura* charge = me->GetAura(SPELL_SUPERCHARGE))                           
+			charge->SetStackAmount(std::min<uint8>(2, superChargedCnt));
+		      break;
+		case SPELL_ELECTRICAL_CHARGE_TRIGGERED:
+		  if (!me->isInCombat())
+		    me->RemoveAurasDueToSpell(SPELL_ELECTRICAL_CHARGE_TRIGGERED);
+		  break;
                 }
             }
 
@@ -715,27 +716,27 @@ class boss_runemaster_molgeim : public CreatureScript
                 }
 		if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
 		  {
-		  if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRUNDIR)))
-		    {
-		      if (!Steelbreaker->isAlive() && !Brundir->isAlive())
-			{
-			  me->AddLootMode(LOOT_MODE_HARD_MODE_1);
-			  instance->DoCompleteAchievement(RAID_MODE(2939, 2942));
-			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
-			  if (!pAE)
-			    return;
-			  Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-			  for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-			    if (Player* player = i->getSource())
-			      if (player->isAlive())
-				if (player->HasAura(58501))
-				  player->CompletedAchievement(pAE);
-			}
-		      else
-			{
-			  me->SetLootRecipient(NULL);
-			}
-		    }
+		    if (Creature* Brundir = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRUNDIR)))
+		      {
+			if (!Steelbreaker->isAlive() && !Brundir->isAlive())
+			  {
+			    me->AddLootMode(LOOT_MODE_HARD_MODE_1);
+			    instance->DoCompleteAchievement(RAID_MODE(2939, 2942));
+			    AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+			    if (!pAE)
+			      return;
+			    Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+			    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+			      if (Player* player = i->getSource())
+				if (player->isAlive())
+				  if (player->HasAura(58501))
+				    player->CompletedAchievement(pAE);
+			  }
+			else
+			  {
+			    me->SetLootRecipient(NULL);
+			  }
+		      }
 		  }
             }
 
@@ -1077,27 +1078,29 @@ class boss_stormcaller_brundir : public CreatureScript
                 if (me->GetPositionZ() > FLOOR_Z)
 		  me->GetMotionMaster()->MoveFall(); 
 
-		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_MOLGEIM) : 0))
-		  if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
-		    {
-		      if (!Molgeim->isAlive() || !Steelbreaker->isAlive())
-			{
-			  me->AddLootMode(LOOT_MODE_HARD_MODE_1);
-			  AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
-			  if (!pAE)
-			    return;
-			  Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-			  for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-			    if (Player* player = i->getSource())
-			      if (player->isAlive())
-				if (player->HasAura(58501))
-				  player->CompletedAchievement(pAE);
-			}
-		      else
-			{
-			  me->SetLootRecipient(NULL);
-			}
-		    }
+		if (Creature* Molgeim = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MOLGEIM)))
+		  {
+		    if (Creature* Steelbreaker = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_STEELBREAKER)))
+		      {
+			if (!Molgeim->isAlive() && !Steelbreaker->isAlive())
+			  {
+			    me->AddLootMode(LOOT_MODE_HARD_MODE_1);
+			    AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
+			    if (!pAE)
+			      return;
+			    Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
+			    for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+			      if (Player* player = i->getSource())
+				if (player->isAlive())
+				  if (player->HasAura(58501))
+				    player->CompletedAchievement(pAE);
+			  }
+			else
+			  {
+			    me->SetLootRecipient(NULL);
+			  }
+		      }
+		  }
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1456,6 +1459,275 @@ class spell_supercharge : public SpellScriptLoader
         }
 };
 
+#define NPC_ARCHIVUM_CONSOLE 500000
+
+#define ACTION_START_EVENT_1 42
+#define ACTION_START_EVENT_2 43
+#define ACTION_START_EVENT_3 44
+
+#define FREYA_IMAGE 33876
+#define HODIR_IMAGE 33879
+#define MIMIRON_IMAGE 33880
+#define THORIM_IMAGE 33878
+
+Position const ImagesPos      = {1435.80f, 118.83f, 426.40f, 6.1318f};
+
+class npc_brann_algalon : public CreatureScript
+{
+public:
+  npc_brann_algalon() : CreatureScript("npc_brann_algalon") {}
+
+  struct npc_brann_algalonAI : public ScriptedAI
+  {
+    npc_brann_algalonAI(Creature* creature) : ScriptedAI(creature)
+    {
+      eventStep = 0;
+      mui_eventChange = 7000;
+      eventPreStart = false;
+      eventPreStart2 = false;
+      eventPreStart3 = false;
+      guid = 0;
+      _introDone = false;
+      brannStep = 0;
+      consoleStep = 0;
+    }
+
+    void DoAction(int32 const action)
+    {
+      if (action == ACTION_START_EVENT_1)
+	{
+	  eventPreStart = true;
+	  consoleStep = 0;
+	  brannStep = 0;
+	}
+      else if (action == ACTION_START_EVENT_2)
+	{
+	  eventPreStart2 = true;
+	  consoleStep = 10;
+	  brannStep = 10;
+	}
+      else if (action == ACTION_START_EVENT_3)
+	{
+	  eventPreStart3 = true;
+	  consoleStep = 16;
+	  brannStep = 0;
+	}
+    }
+
+    void MoveInLineOfSight(Unit* who)
+    {
+      if (!_introDone && me->IsWithinDistInMap(who, 5.0f))
+	{
+	  if (who->GetTypeId() == TYPEID_PLAYER)
+	    {
+	      guid = who->GetGUID();
+	      DoAction(ACTION_START_EVENT_1);
+	      _introDone = true;
+	    }
+	}
+    }
+
+    void UpdateAI(uint32 const diff)
+    {
+      if (mui_eventChange <= diff)
+	{
+	  mui_eventChange = 7000;
+	  console = me->FindNearestCreature(NPC_ARCHIVUM_CONSOLE, 30);
+	  if (!console)
+	    return;
+	  if (eventPreStart)
+	    {
+	      switch (eventStep)
+		{
+		case 0:
+		case 2:
+		case 4:
+		  Talk(brannStep);
+		  brannStep++;
+		  break;
+		case 5:
+		case 7:
+		case 9:
+		case 11:
+		case 13:
+		case 15:
+		case 19:
+		  mui_eventChange = 12000;
+		  Talk(brannStep);
+		  brannStep++;
+		  break;
+		case 1:
+		case 3:
+		case 6:
+		case 8:
+		case 12:
+		case 14:
+		  mui_eventChange = 12000;
+		  console->AI()->Talk(consoleStep);
+		  consoleStep++;
+		  break;
+		case 16:
+		  console->AI()->Talk(consoleStep);
+		  mui_eventChange = 10000;
+		  consoleStep++;
+		  break;
+		case 17:
+		case 18:
+		  console->AI()->Talk(consoleStep);
+		  mui_eventChange = 5000;
+		  consoleStep++;
+		  break;
+		case 10:
+		  console->AI()->Talk(consoleStep);
+		  mui_eventChange = 25000;
+		  consoleStep++;
+		  break;
+		default:
+		  eventPreStart = false;
+		  eventStep = 0;
+		  consoleStep = 0;
+		  brannStep = 0;
+		  DoAction(ACTION_START_EVENT_2);
+		  return;
+		}
+	      eventStep++;
+	    }
+	  else if (eventPreStart2)
+	    {
+	      switch (eventStep)
+                {
+		case 0:
+		case 2:
+		case 7:
+		case 10:
+		  Talk(brannStep);
+		  mui_eventChange = 7000;
+		  brannStep++;
+		  break;
+		case 4:
+		  Talk(brannStep);
+		  mui_eventChange = 15000;
+		  brannStep++;
+		  break;
+		case 1:
+		case 3:
+		case 5:
+		case 6:
+		  console->AI()->Talk(consoleStep);
+		  mui_eventChange = 7000;
+		  consoleStep++;
+		  break;
+		case 8:
+		case 9:
+		  console->AI()->Talk(consoleStep);
+		  mui_eventChange = 12000;
+		  consoleStep++;
+		  break;
+		default :
+		  eventPreStart2 = false;
+		  eventStep = 0;
+		  consoleStep = 0;
+		  brannStep = 0;
+		  DoAction(ACTION_START_EVENT_3);
+		  return;
+		}
+	      eventStep++;
+	    }
+	  else if (eventPreStart3)
+	    {
+	      switch (eventStep)
+                {
+		case 0:
+		  if (sumImage = me->SummonCreature(FREYA_IMAGE, ImagesPos, TEMPSUMMON_MANUAL_DESPAWN))
+		    sumImage->GetMotionMaster()->MoveRotate(20000, ROTATE_DIRECTION_LEFT);
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		  console->AI()->Talk(consoleStep);
+		  consoleStep++;
+		  mui_eventChange = 6000;
+		  /*freya*/
+		  break;
+		case 7:
+		  if (sumImage)
+		    sumImage->DespawnOrUnsummon();
+		  if (sumImage = me->SummonCreature(HODIR_IMAGE, ImagesPos, TEMPSUMMON_MANUAL_DESPAWN))
+		    sumImage->GetMotionMaster()->MoveRotate(20000, ROTATE_DIRECTION_LEFT);
+		case 8:
+		case 9:
+		case 10:
+		case 11:
+		  console->AI()->Talk(consoleStep);
+		  consoleStep++;
+		  mui_eventChange = 6000;
+		  /*hodir*/
+		  break;
+		case 12:
+		  if (sumImage)
+		    sumImage->DespawnOrUnsummon();
+		  if (sumImage = me->SummonCreature(MIMIRON_IMAGE, ImagesPos, TEMPSUMMON_MANUAL_DESPAWN))
+		    sumImage->GetMotionMaster()->MoveRotate(20000, ROTATE_DIRECTION_LEFT);
+		case 13:
+		case 14:
+		case 15:
+		case 16:
+		  console->AI()->Talk(consoleStep);
+		  consoleStep++;
+		  mui_eventChange = 6000;
+		  /*mimiron*/
+		  break;
+		case 17:
+		  if (sumImage)
+		    sumImage->DespawnOrUnsummon();
+		  if (sumImage = me->SummonCreature(THORIM_IMAGE, ImagesPos, TEMPSUMMON_MANUAL_DESPAWN))
+		    sumImage->GetMotionMaster()->MoveRotate(20000, ROTATE_DIRECTION_LEFT);
+		case 18:
+		case 19:
+		case 20:
+		  console->AI()->Talk(consoleStep);
+		  consoleStep++;
+		  mui_eventChange = 6000;
+		  /*thorim*/
+		  break;
+		default :
+		  if (sumImage)
+		    sumImage->DespawnOrUnsummon();
+		  sumImage = NULL;
+		  eventPreStart3 = false;
+		  eventStep = 0;
+		  consoleStep = 0;
+		  brannStep = 0;
+		  return;
+		}
+	      eventStep++;
+	    }
+	}
+      else
+	mui_eventChange -= diff;
+    }
+
+  private :
+    uint32 eventStep;
+    uint32 mui_eventChange;
+    bool eventPreStart, eventPreStart2, eventPreStart3;
+    Creature *console;
+    uint64 guid;
+    bool _introDone;
+    uint32 brannStep, consoleStep;
+    Creature *sumImage;
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_brann_algalonAI(creature);
+  }
+};
+
+
+
 void AddSC_boss_assembly_of_iron()
 {
     new boss_steelbreaker();
@@ -1475,6 +1747,8 @@ void AddSC_boss_assembly_of_iron()
     new achievement_but_i_am_on_your_side("achievement_but_i_am_on_your_side_25");
     new achievement_cant_do_that_while_stunned("achievement_cant_do_that_while_stunned");
     new achievement_cant_do_that_while_stunned("achievement_cant_do_that_while_stunned_25");
+
+    new npc_brann_algalon();
 }
 
 // Steelbreaker

@@ -83,6 +83,7 @@ enum Spells
    SPELL_FROST_BOMB_VISUAL                     = 64624,
    SPELL_FROST_BOMB_EXPLOSION_10               = 64626,
    SPELL_FROST_BOMB_EXPLOSION_25               = 65333,
+   SPELL_LASER_BARRAGE			       = 63274,
 
    SPELL_P3WX2_LASER_BARRAGE                   = 63293, // Casted through SPELL_SPINNING_UP
    SPELL_RAPID_BURST                           = 63382,
@@ -357,8 +358,7 @@ class boss_mimiron : public CreatureScript
                 me->CombatStop(true);
                 if (instance)
                 {
-					instance->SetBossState(BOSS_MIMIRON, DONE);
-
+		  instance->SetBossState(BOSS_MIMIRON, DONE);
                      if (gotHardMode)
                         me->SummonGameObject(RAID_MODE(CACHE_OF_INNOVATION_HARDMODE_10, CACHE_OF_INNOVATION_HARDMODE_25), 2744.65f, 2569.46f,
                         364.314f, 3.14159f, 0, 0, 0.7f, 0.7f, 604800);
@@ -496,8 +496,8 @@ class boss_mimiron : public CreatureScript
                             case PHASE_INTRO:
                                 if (instance)
                                 {
-									me->SetName("Mimiron");
-									DoScriptText(gotHardMode ? SAY_HARDMODE_ON : SAY_AGGRO, me);
+				  me->SetName("Mimiron");
+				  DoScriptText(gotHardMode ? SAY_HARDMODE_ON : SAY_AGGRO, me);
                                 }
                                 events.ScheduleEvent(EVENT_STEP_3, 2*IN_MILLISECONDS, 0, PHASE_INTRO);
                                 break;
@@ -527,16 +527,16 @@ class boss_mimiron : public CreatureScript
                         switch (phase)
                         {
                             case PHASE_INTRO:
-								if(instance)
-								{
-                                    if (Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
-                                        me->EnterVehicle(Leviathan, 4);
-								}
-								me->SetName("Computer");
-                                events.ScheduleEvent(EVENT_STEP_4, 2*IN_MILLISECONDS, 0, PHASE_INTRO);
-                                break;
+			      if(instance)
+				{
+				  if (Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
+				    me->EnterVehicle(Leviathan, 4);
+				}
+			      me->SetName("Computer");
+			      events.ScheduleEvent(EVENT_STEP_4, 2*IN_MILLISECONDS, 0, PHASE_INTRO);
+			      break;
                             case PHASE_VX001_ACTIVATION:
-                                if (instance)
+			      if (instance)
                                     instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_READY);
                                 events.ScheduleEvent(EVENT_STEP_4, 5*IN_MILLISECONDS, 0, PHASE_VX001_ACTIVATION);
                                 break;
@@ -544,8 +544,12 @@ class boss_mimiron : public CreatureScript
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
                                 if (instance)
                                 {
-                                    if (Creature* AerialUnit = me->SummonCreature(NPC_AERIAL_COMMAND_UNIT, 2744.65f, 2569.46f, 380, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
-                                        AerialUnit->SetVisible(true);
+				  //                                    if (Creature* AerialUnit = me->SummonCreature(NPC_AERIAL_COMMAND_UNIT, 2744.65f, 2569.46f, 380, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+				  if (Creature* AerialUnit =  ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT)))
+				    {
+				      AerialUnit->SetVisible(true);
+				      AerialUnit->SetReactState(REACT_AGGRESSIVE);
+				    }
                                 }
                                 events.ScheduleEvent(EVENT_STEP_4, 5*IN_MILLISECONDS, 0, PHASE_AERIAL_ACTIVATION);
                                 break;
@@ -577,10 +581,12 @@ class boss_mimiron : public CreatureScript
                             case PHASE_VX001_ACTIVATION:
                                 if (instance)
                                 {
-                                    if (Creature* VX_001 = me->SummonCreature(NPC_VX_001, 2744.65f, 2569.46f, 364.397f, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+				  //                                    if (Creature* VX_001 = me->SummonCreature(NPC_VX_001, 2744.65f, 2569.46f, 364.397f, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+				  if (Creature* VX_001 =  ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001)))
                                     {
                                         instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE_ALTERNATIVE);
-                                        VX_001->SetVisible(true);
+					VX_001->SetVisible(true);
+										VX_001->SetReactState(REACT_AGGRESSIVE);
                                         for (uint8 n = 5; n < 7; ++n)
                                         {
                                             if (Creature* Rocket = me->SummonCreature(NPC_ROCKET, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
@@ -880,7 +886,6 @@ class boss_mimiron : public CreatureScript
                         break;
                     case DO_ACTIVATE_AERIAL:
                         phase = PHASE_AERIAL_ACTIVATION;
-
                         events.SetPhase(phase);
                         events.ScheduleEvent(EVENT_STEP_1, 5000, 0, phase);
                         break;
@@ -1363,6 +1368,7 @@ class boss_vx_001 : public CreatureScript
         enum Events
         {
             EVENT_RAPID_BURST                   = 1,
+	    EVENT_PRE_LASER_BARRAGE,
             EVENT_LASER_BARRAGE,
             EVENT_LASER_BARRAGE_END,
             EVENT_ROCKET_STRIKE,
@@ -1382,6 +1388,8 @@ class boss_vx_001 : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_PASSIVE);
+		Reset();
             }            
 
             void Reset()
@@ -1426,9 +1434,11 @@ class boss_vx_001 : public CreatureScript
                 }
 
                 events.ScheduleEvent(EVENT_RAPID_BURST, 2500, 0, PHASE_VX001_SOLO__GLOBAL_2);
-                events.ScheduleEvent(EVENT_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2);
+		events.ScheduleEvent(EVENT_PRE_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2); // Not works in phase 4 :(
+		events.ScheduleEvent(EVENT_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2);
                 events.ScheduleEvent(EVENT_ROCKET_STRIKE, 20000, 0, PHASE_VX001_SOLO__GLOBAL_2);
                 events.ScheduleEvent(EVENT_HEAT_WAVE, urand(8000, 10000), 0, PHASE_VX001_SOLO__GLOBAL_2);
+                me->SetReactState(REACT_PASSIVE);
             }
 
             void DoAction(int32 const action)
@@ -1437,6 +1447,8 @@ class boss_vx_001 : public CreatureScript
                 {
                     case DO_START_VX001:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetReactState(REACT_AGGRESSIVE);
+			me->SetVisible(true);
                         phase = PHASE_VX001_SOLO__GLOBAL_2;
                         events.SetPhase(phase);
                         DoZoneInCombat();
@@ -1446,8 +1458,8 @@ class boss_vx_001 : public CreatureScript
                             DoCast(me, SPELL_EMERGENCY_MODE, true);
                         me->SetHealth( (me->GetMaxHealth() >> 1) );
                         phase = PHASE_VX001_ASSEMBLED__GLOBAL_4;
-						if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
-							Mimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
+			if (Creature* Mimiron = me->GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
+			  Mimiron->AI()->DoAction(DO_ACTIVATE_DEATH_TIMER);
                         events.SetPhase(phase);
                     case DO_VX001_SELF_REPAIR_END:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);                
@@ -1534,116 +1546,135 @@ class boss_vx_001 : public CreatureScript
 
                 events.Update(diff);
 
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
+		//                    return;
 
-                if (spinning)
-                {
+		if (spinning)
+		  {
                     if (spinTimer <= diff)
-                    {
+		      {
                         float orient = me->GetOrientation() + (direction ? M_PI/60.0f : -M_PI/60.0f);
                         if (Creature* leviathan = me->GetVehicleCreatureBase())
-                        {
+			  {
                             leviathan->SetFacingTo(orient);
                             me->SetOrientation(orient);
-                        }
+			  }
                         else
-                            me->SetFacingTo(orient);
+			  me->SetFacingTo(orient);
+                        me->SendMovementFlagUpdate(); // Hope this will work...
 
                         float x, y;
                         me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
                         if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 500))
-                            me->SetTarget(temp->GetGUID());
-
+			  me->SetTarget(temp->GetGUID());
+			std::cout << "spinning" << std::endl;
                         spinTimer = 250;
-                    }
+		      }
                     else
-                        spinTimer -= diff;
-                }
+		      spinTimer -= diff;
+		  }
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+		  {
+		    //		    return ;
+		    me->ClearUnitState(UNIT_STATE_CASTING);
+		  }
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
-                        case EVENT_RAPID_BURST:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                if (Creature* BurstTarget = me->SummonCreature(NPC_BURST_TARGET, *target, TEMPSUMMON_TIMED_DESPAWN, 3100))
-                                    DoCast(BurstTarget, SPELL_RAPID_BURST);
-                            events.RescheduleEvent(EVENT_RAPID_BURST, 5000, 0, PHASE_VX001_SOLO__GLOBAL_2);
-                            break;
-                        case EVENT_LASER_BARRAGE:
-                            me->SetReactState(REACT_PASSIVE);
-                            if (Creature* leviathan = me->GetVehicleCreatureBase())
-                            {
-                                float orient = float(2 * M_PI * rand_norm());
-                                leviathan->CastSpell(leviathan, SPELL_SELF_STUN, true); // temporary
-                                leviathan->SetFacingTo(orient);
-                                me->SetOrientation(orient);
-                            }
-                            direction = RAND(true, false);
-                            spinning = true;
-                            DoCast(SPELL_SPINNING_UP);
-                            events.DelayEvents(15000);
-                            events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000, 0, phase);
-                            events.RescheduleEvent(EVENT_LASER_BARRAGE_END, 14000, 0, phase);
-                            break;
-                        case EVENT_LASER_BARRAGE_END:
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            if (me->getVictim())
-                                AttackStart(me->getVictim());
-                            else
-                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                                    AttackStart(target);
-                            spinning = false;
-                            break;
-                        case EVENT_ROCKET_STRIKE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+		    case EVENT_RAPID_BURST:
+		      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+			if (Creature* BurstTarget = me->SummonCreature(NPC_BURST_TARGET, *target, TEMPSUMMON_TIMED_DESPAWN, 3100))
+			  {
+			    //			    me->SetReactState(REACT_AGGRESSIVE);
+			    std::cout << "RAPIDBURST" << std::endl;
+			    			    me->SetFacingToObject(BurstTarget);
+			    			    DoCast(BurstTarget, SPELL_RAPID_BURST);
+						    //DoCastAOE(SPELL_RAPID_BURST);
+			  }
+		      events.RescheduleEvent(EVENT_RAPID_BURST, 5000, 0, PHASE_VX001_SOLO__GLOBAL_2);
+		      break;
+		    case EVENT_LASER_BARRAGE:
+		      std::cout << "EVENT LASER" << std::endl;
+		      SetCombatMovement(false);
+		      me->SetReactState(REACT_PASSIVE);
+		      SetCombatMovement(false);
+		      if (Creature* leviathan = me->GetVehicleCreatureBase())
+			{
+			  float orient = float(2 * M_PI * rand_norm());
+			  leviathan->CastSpell(leviathan, SPELL_SELF_STUN, true); // temporary
+			  leviathan->SetFacingTo(orient);
+			  me->SetOrientation(orient);
+			}
+		      direction = RAND(true, false);
+		      spinning = true;
+		      DoCast(SPELL_SPINNING_UP); // The triggered spells should be casted on another target, seem to be self-casted 63274,66490
+		      events.DelayEvents(15000);
+		      events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000, 0, phase);
+		      events.RescheduleEvent(EVENT_LASER_BARRAGE_END, 14000, 0, phase);
+		      break;
+		    case EVENT_LASER_BARRAGE_END:
+		      me->SetReactState(REACT_AGGRESSIVE);
+		      if (me->getVictim())
+			AttackStart(me->getVictim());
+		      else
+			if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+			  AttackStart(target);
+		      spinning = false;
+		      break;
+		    case EVENT_ROCKET_STRIKE:
+		      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+			{
+			  Position destination;
+			  target->GetPosition(&destination);
+			  if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+			    {
+			            if (Unit* missile = me->GetVehicleKit()->GetPassenger(5))
+			      	me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
+			        c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
+			    }
+			}
+		      if (phase == PHASE_VX001_ASSEMBLED__GLOBAL_4)
+			if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+			  {
+			    Position destination;
+			    target->GetPosition(&destination);
+			    if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
 			      {
-				Position destination;
-				target->GetPosition(&destination);
-				if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
-				  {
-				    if (Unit* missile = me->GetVehicleKit()->GetPassenger(5))
-				      me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
-				    c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
-				  }
-			      }
-                            if (phase == PHASE_VX001_ASSEMBLED__GLOBAL_4)
-                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-				  {
-				    Position destination;
-				    target->GetPosition(&destination);
-				    if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
-				      {
-					if (Unit* missile = me->GetVehicleKit()->GetPassenger(6))
-					  me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
+								if (Unit* missile = me->GetVehicleKit()->GetPassenger(6))
+				  me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
 					c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
-				      }
-				  }
-                            events.RescheduleEvent(EVENT_ROCKET_STRIKE, urand(20000, 25000), 0, phase);
-                            break;
-                        case EVENT_HEAT_WAVE:
-                            DoCastAOE(SPELL_HEAT_WAVE);
-                            events.RescheduleEvent(EVENT_HEAT_WAVE, 10000, 0, PHASE_VX001_SOLO__GLOBAL_2);
-                            break;
-                        case EVENT_HAND_PULSE:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast(target, SPELL_HAND_PULSE);
-                            events.RescheduleEvent(EVENT_HAND_PULSE, urand(3000, 4000), 0 , PHASE_VX001_ASSEMBLED__GLOBAL_4);
-                            break;
-                        case EVENT_FROST_BOMB:
-                            if (me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))  // TODO: Check if npc is spawned correctly
-                            {
-                                DoCast(SPELL_FROSTBOMB);
-                                events.RescheduleEvent(EVENT_FROST_BOMB, 45000, 0, phase);
-                            }
-                            else
-                                events.RescheduleEvent(EVENT_FROST_BOMB, 5000, 0, phase);
-                            break;
-                        case EVENT_FLAME_SUPPRESSANT_VX001:
-                            DoCastAOE(SPELL_FLAME_SUPPRESSANT_VX001);
-                            events.RescheduleEvent(EVENT_FLAME_SUPPRESSANT_VX001, 10000, 0, PHASE_VX001_SOLO__GLOBAL_2);
-                            break;
+			      }
+			  }
+		      events.RescheduleEvent(EVENT_ROCKET_STRIKE, urand(20000, 25000), 0, phase);
+		      break;
+		    case EVENT_HEAT_WAVE:
+		      std::cout << "EVENT_HEAT_WAVE" << std::endl;
+		      		      DoCastAOE(SPELL_HEAT_WAVE);
+		      events.RescheduleEvent(EVENT_HEAT_WAVE, 10000, 0, PHASE_VX001_SOLO__GLOBAL_2);
+		      break;
+		    case EVENT_HAND_PULSE:
+		      std::cout << "EVENT_HAND_PULSE" << std::endl;
+		       if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+		      	DoCast(target, SPELL_HAND_PULSE);
+		      events.RescheduleEvent(EVENT_HAND_PULSE, urand(3000, 4000), 0 , PHASE_VX001_ASSEMBLED__GLOBAL_4);
+		      break;
+		    case EVENT_FROST_BOMB:
+		      std::cout << "EVENT_FROST_BOMB" << std::endl;
+		      if (me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))  // TODO: Check if npc is spawned correctly
+			{
+			    DoCast(SPELL_FROSTBOMB);
+			  events.RescheduleEvent(EVENT_FROST_BOMB, 45000, 0, phase);
+			}
+		      else
+			events.RescheduleEvent(EVENT_FROST_BOMB, 5000, 0, phase);
+		      break;
+		    case EVENT_FLAME_SUPPRESSANT_VX001:
+		      std::cout << "EVENT_FLAME_SUPPRESSANT_VX001" << std::endl;
+		        DoCastAOE(SPELL_FLAME_SUPPRESSANT_VX001);
+		      events.RescheduleEvent(EVENT_FLAME_SUPPRESSANT_VX001, 10000, 0, PHASE_VX001_SOLO__GLOBAL_2);
+		      break;
                     }
                 }
             }
@@ -1842,6 +1873,8 @@ class boss_aerial_unit : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetUnitMovementFlags(MOVEMENTFLAG_FLYING);
+                me->SetReactState(REACT_PASSIVE);
+		Reset();
             }
 
             void Reset()
@@ -1904,6 +1937,7 @@ class boss_aerial_unit : public CreatureScript
                     case DO_START_AERIAL:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
                         me->SetReactState(REACT_AGGRESSIVE);
+			me->SetVisible(true);
                         phase = PHASE_AERIAL_SOLO__GLOBAL_3;
                         events.SetPhase(PHASE_AERIAL_SOLO__GLOBAL_3);
                         DoZoneInCombat();

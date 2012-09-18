@@ -383,8 +383,8 @@ class boss_hodir : public CreatureScript
 
 	  void MoveInLineOfSight(Unit* who)
 	  {
-	    if (instance->GetBossState(BOSS_HODIR) == IN_PROGRESS)
-	      return ;
+	    //	    if (instance->GetBossState(BOSS_HODIR) == IN_PROGRESS)
+	    //  return ;
             if (me->GetDistance2d(who->GetPositionX(), who->GetPositionY()) < 20.0f)
 	      {
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
@@ -407,7 +407,7 @@ class boss_hodir : public CreatureScript
             {
                 if (damage >= me->GetHealth())
                 {
-                    damage = 0;
+		  //                    damage = 0;
                     DoScriptText(SAY_DEATH, me);
                     if (iCouldSayThatThisCacheWasRare)
 		      {
@@ -426,8 +426,8 @@ class boss_hodir : public CreatureScript
                     me->SetControlled(true, UNIT_STATE_STUNNED);
                     me->CombatStop(true);
 
-		    me->setFaction(35);
-		    me->DespawnOrUnsummon(10000);
+		    //		    me->setFaction(35);
+		    //  me->DespawnOrUnsummon(10000);
 		    if (instance->GetData(DATA_CAILLE) != FAIL)
 		      instance->DoCompleteAchievement(ACHIEVEMENT_GETTING_COLD_IN_HERE);
 		    if (iHaveTheCoolestFriends)

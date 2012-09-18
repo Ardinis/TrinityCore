@@ -797,8 +797,14 @@ class mob_life_spark : public CreatureScript
                 {
                     if (me->IsWithinMeleeRange(me->getVictim()))
                     {
-                        DoCast(me->getVictim(), SPELL_SHOCK);
-                        shockTimer = TIMER_SHOCK;
+		      if (Unit *target = me->getVictim())
+			{
+			  DoCast(target, SPELL_SHOCK);
+			  me->SetReactState(REACT_PASSIVE);
+			  me->ClearUnitState(UNIT_STATE_CASTING);
+			  me->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+			}
+		      shockTimer = TIMER_SHOCK;
                     }
                 }
                 else shockTimer -= diff;

@@ -566,7 +566,7 @@ class boss_freya : public CreatureScript
                         {
 			  //			  if (sp >= 6)
 			  if (Aura * aura = me->GetAura(SPELL_ATTUNED_TO_NATURE)) // This is change to phase 2: All stacks are down! On first visit, this prevents the event from being performed.
-			    if (aura->GetStackAmount() > 0)
+			    if (aura->GetStackAmount() == 0)
 			      {
 				// On every player
 				std::list<Player*> PlayerList;

@@ -348,36 +348,44 @@ class boss_hodir : public CreatureScript
         {
             boss_hodirAI(Creature* creature) : BossAI(creature, BOSS_HODIR)
             {
-                me->SetReactState(REACT_PASSIVE);
             }            
 
             void Reset()
             {
 	      _Reset();
-	      me->SetReactState(REACT_PASSIVE);
 	      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
 	      instance->SetData(DATA_CAILLE, DONE);
 	      instance->SetData(DATA_GARE_GEL, DONE);
+	      summonAddVerif = false;
+	      doCbt = false;
+	      //  iCouldSayThatThisCacheWasRare = false;
             }
 
             void EnterCombat(Unit* /*who*/)
             {
+	      if (!summonAddVerif)
+		return;
+
                 _EnterCombat();
 		me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
                 DoScriptText(SAY_AGGRO, me);
                 DoCast(me, SPELL_BITING_COLD, true);
 
-                gettingColdInHereTimer = 2000;
-                gettingColdInHere = true;
-                cheeseTheFreeze = true;
-                iHaveTheCoolestFriends = true;
-                iCouldSayThatThisCacheWasRare = true;
+		if (!doCbt)
+		  {
+		    gettingColdInHereTimer = 2000;
+		    gettingColdInHere = true;
+		    cheeseTheFreeze = true;
+		    iHaveTheCoolestFriends = true;
+		    iCouldSayThatThisCacheWasRare = true;
+		  }
+		doCbt = true;
 
                 events.ScheduleEvent(EVENT_ICICLE, 2000);
                 events.ScheduleEvent(EVENT_FREEZE, 25000);
                 events.ScheduleEvent(EVENT_BLOWS, urand(60000, 65000));
                 events.ScheduleEvent(EVENT_FLASH_FREEZE, 45000);
-                events.ScheduleEvent(EVENT_RARE_CACHE, 240000);
+                events.ScheduleEvent(EVENT_RARE_CACHE, 180000);
                 events.ScheduleEvent(EVENT_BERSERK, 480000);
             }
 
@@ -385,14 +393,18 @@ class boss_hodir : public CreatureScript
 	  {
 	    //	    if (instance->GetBossState(BOSS_HODIR) == IN_PROGRESS)
 	    //  return ;
-            if (me->GetDistance2d(who->GetPositionX(), who->GetPositionY()) < 20.0f)
+	    std::cout << "MVLOF" << std::endl;
+            if (!summonAddVerif && me->IsWithinDistInMap(who, 10.0f) && who->GetTypeId() == TYPEID_PLAYER)
 	      {
+		std::cout << "MVLOF SUMMON" << std::endl;
                 for (uint8 n = 0; n < FRIENDS_COUNT; ++n)
 		  {
-		    if (me->FindNearestCreature(Entry[n], 10))
-		      ;//TODOO ADD A RESPAWN OR SOMETHING LIKE THAT OF HODIR ISN'T HERE;
-		    else if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
-                        FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
+		    //		    if (me->FindNearestCreature(Entry[n], 10))
+		    //		      ;//TODOO ADD A RESPAWN OR SOMETHING LIKE THAT OF HODIR ISN'T HERE;
+		    if (Creature* FrozenHelper = me->SummonCreature(Entry[n], SummonPositions[n], TEMPSUMMON_MANUAL_DESPAWN))
+		      FrozenHelper->CastSpell(FrozenHelper, SPELL_SUMMON_FLASH_FREEZE_HELPER, true);
+		    summonAddVerif = true;
+		    me->SetReactState(REACT_PASSIVE);
 		  }
 	      }
 	  }
@@ -411,6 +423,7 @@ class boss_hodir : public CreatureScript
                     DoScriptText(SAY_DEATH, me);
                     if (iCouldSayThatThisCacheWasRare)
 		      {
+			std::cout << "HODIR HARD MODE DONE" << std::endl;
                         instance->SetData(DATA_HODIR_RARE_CACHE, 1);
 			instance->DoCompleteAchievement(ACHIEVEMENT_THIS_CACHE_WAS_RARE);
 		      }
@@ -565,6 +578,8 @@ class boss_hodir : public CreatureScript
                 bool cheeseTheFreeze;
                 bool iHaveTheCoolestFriends;
                 bool iCouldSayThatThisCacheWasRare;
+	  bool summonAddVerif;
+	  bool doCbt;
         };
 
         CreatureAI* GetAI(Creature* creature) const

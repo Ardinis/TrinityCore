@@ -566,18 +566,20 @@ class boss_freya : public CreatureScript
                         {
 			  //			  if (sp >= 6)
 			  if (Aura * aura = me->GetAura(SPELL_ATTUNED_TO_NATURE)) // This is change to phase 2: All stacks are down! On first visit, this prevents the event from being performed.
-			    if (aura->GetStackAmount() == 0)
+			    if (aura->GetStackAmount() > 0)
 			      {
-				// On every player
-				std::list<Player*> PlayerList;
-				Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
-				Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
-				me->VisitNearbyWorldObject(50.0f, searcher);
-				for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-				  (*itr)->CastSpell(*itr, SPELL_SUMMON_NATURE_BOMB, true);
+				events.ScheduleEvent(EVENT_NATURE_BOMB, urand(1000, 2000));
+				return ;
 			      }
-                            events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 12000));
-                            break;
+			  // On every player
+			  std::list<Player*> PlayerList;
+			  Trinity::AnyPlayerInObjectRangeCheck checker(me, 50.0f);
+			  Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, PlayerList, checker);
+			  me->VisitNearbyWorldObject(50.0f, searcher);
+			  for (std::list<Player*>::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+			    (*itr)->CastSpell(*itr, SPELL_SUMMON_NATURE_BOMB, true);
+			  events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 12000));
+			  break;
                         }
                         case EVENT_UNSTABLE_ENERGY:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
@@ -1744,9 +1746,7 @@ class npc_eonars_gift : public CreatureScript
 	  npc_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript()) {}
 
             void InitializeAI()
-            {                
-	      //	      me->SetMaxHealth(RAID_MODE(19950, 40000));
-	      //  me->SetHealth(RAID_MODE(19950, 40000));
+            {
                 DoCast(me, SPELL_GROW);
                 DoCast(me, SPELL_PHEROMONES, true);
                 DoCast(me, SPELL_EONAR_VISUAL, true);

@@ -1483,12 +1483,11 @@ class boss_vx_001 : public CreatureScript
                     damage = 0;
                     spinning = false;
                     me->InterruptNonMeleeSpells(true);
-					me->GetMotionMaster()->Clear(true);
+		    me->GetMotionMaster()->Clear(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-					me->SetReactState(REACT_PASSIVE);
+		    me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    //me->SetHealth(me->GetMaxHealth());
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
 
                     switch (phase)
@@ -1529,7 +1528,6 @@ class boss_vx_001 : public CreatureScript
                     case SPELL_ROCKET_STRIKE:
                         if (!target || !spell)
                             return;
-
                         if (Player* player = target->ToPlayer())
                             if (spell->Id == SPELL_ROCKET_STRIKE)
                                 if (InstanceScript* instance = me->GetInstanceScript())
@@ -1546,8 +1544,6 @@ class boss_vx_001 : public CreatureScript
 
                 events.Update(diff);
 
-		//                    return;
-
 		if (spinning)
 		  {
                     if (spinTimer <= diff)
@@ -1560,13 +1556,11 @@ class boss_vx_001 : public CreatureScript
 			  }
                         else
 			  me->SetFacingTo(orient);
-                        me->SendMovementFlagUpdate(); // Hope this will work...
-
+                        me->SendMovementFlagUpdate();
                         float x, y;
                         me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
                         if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 500))
 			  me->SetTarget(temp->GetGUID());
-			std::cout << "spinning" << std::endl;
                         spinTimer = 250;
 		      }
                     else
@@ -1575,7 +1569,6 @@ class boss_vx_001 : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
 		  {
-		    //		    return ;
 		    me->ClearUnitState(UNIT_STATE_CASTING);
 		  }
 
@@ -1587,16 +1580,13 @@ class boss_vx_001 : public CreatureScript
 		      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
 			if (Creature* BurstTarget = me->SummonCreature(NPC_BURST_TARGET, *target, TEMPSUMMON_TIMED_DESPAWN, 3100))
 			  {
-			    //			    me->SetReactState(REACT_AGGRESSIVE);
-			    std::cout << "RAPIDBURST" << std::endl;
-			    			    me->SetFacingToObject(BurstTarget);
-			    			    DoCast(BurstTarget, SPELL_RAPID_BURST);
-						    //DoCastAOE(SPELL_RAPID_BURST);
+			    me->SetFacingToObject(BurstTarget);
+			    DoCast(BurstTarget, SPELL_RAPID_BURST);
+			    //DoCastAOE(SPELL_RAPID_BURST);
 			  }
 		      events.RescheduleEvent(EVENT_RAPID_BURST, 5000, 0, PHASE_VX001_SOLO__GLOBAL_2);
 		      break;
 		    case EVENT_LASER_BARRAGE:
-		      std::cout << "EVENT LASER" << std::endl;
 		      SetCombatMovement(false);
 		      me->SetReactState(REACT_PASSIVE);
 		      SetCombatMovement(false);
@@ -1642,37 +1632,33 @@ class boss_vx_001 : public CreatureScript
 			    target->GetPosition(&destination);
 			    if (Creature *c = me->SummonCreature(38569, destination, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
 			      {
-								if (Unit* missile = me->GetVehicleKit()->GetPassenger(6))
+				if (Unit* missile = me->GetVehicleKit()->GetPassenger(6))
 				  me->CastSpell(target, SPELL_ROCKET_STRIKE, true);
-					c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
+				c->CastSpell(c, SPELL_ROCKET_STRIKE_AURA, true);
 			      }
 			  }
 		      events.RescheduleEvent(EVENT_ROCKET_STRIKE, urand(20000, 25000), 0, phase);
 		      break;
 		    case EVENT_HEAT_WAVE:
-		      std::cout << "EVENT_HEAT_WAVE" << std::endl;
-		      		      DoCastAOE(SPELL_HEAT_WAVE);
+		      DoCastAOE(SPELL_HEAT_WAVE);
 		      events.RescheduleEvent(EVENT_HEAT_WAVE, 10000, 0, PHASE_VX001_SOLO__GLOBAL_2);
 		      break;
 		    case EVENT_HAND_PULSE:
-		      std::cout << "EVENT_HAND_PULSE" << std::endl;
-		       if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+		      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
 		      	DoCast(target, SPELL_HAND_PULSE);
 		      events.RescheduleEvent(EVENT_HAND_PULSE, urand(3000, 4000), 0 , PHASE_VX001_ASSEMBLED__GLOBAL_4);
 		      break;
 		    case EVENT_FROST_BOMB:
-		      std::cout << "EVENT_FROST_BOMB" << std::endl;
 		      if (me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))  // TODO: Check if npc is spawned correctly
 			{
-			    DoCast(SPELL_FROSTBOMB);
+			  DoCast(SPELL_FROSTBOMB);
 			  events.RescheduleEvent(EVENT_FROST_BOMB, 45000, 0, phase);
 			}
 		      else
 			events.RescheduleEvent(EVENT_FROST_BOMB, 5000, 0, phase);
 		      break;
 		    case EVENT_FLAME_SUPPRESSANT_VX001:
-		      std::cout << "EVENT_FLAME_SUPPRESSANT_VX001" << std::endl;
-		        DoCastAOE(SPELL_FLAME_SUPPRESSANT_VX001);
+		      DoCastAOE(SPELL_FLAME_SUPPRESSANT_VX001);
 		      events.RescheduleEvent(EVENT_FLAME_SUPPRESSANT_VX001, 10000, 0, PHASE_VX001_SOLO__GLOBAL_2);
 		      break;
                     }

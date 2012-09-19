@@ -42,7 +42,8 @@ class instance_ruby_sanctum : public InstanceMapScript
                 SavianaRagefireGUID      = 0;
                 HalionGUID               = 0;
                 TwilightHalionGUID       = 0;
-                OrbCarrierGUID           = 0;
+                OrbCarrierGUID[0]        = 0;
+                OrbCarrierGUID[1]        = 0;
                 OrbRotationFocusGUID     = 0;
                 HalionControllerGUID     = 0;
                 CombatStalkerGUID        = 0;
@@ -59,6 +60,7 @@ class instance_ruby_sanctum : public InstanceMapScript
 		hallionRealDamageTotal = 0;
 		hallionTwilightDamageTotal = 0;
 		corpo = 0;
+		OrbCnt = 0;
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -84,7 +86,10 @@ class instance_ruby_sanctum : public InstanceMapScript
                         HalionControllerGUID = creature->GetGUID();
                         break;
                     case NPC_ORB_CARRIER:
-                        OrbCarrierGUID = creature->GetGUID();
+                        OrbCarrierGUID[OrbCnt] = creature->GetGUID();
+			OrbCnt++;
+			if (OrbCnt >= 2)
+			  OrbCnt = 0;
                         break;
                     case NPC_ORB_ROTATION_FOCUS:
                         OrbRotationFocusGUID = creature->GetGUID();
@@ -212,7 +217,9 @@ class instance_ruby_sanctum : public InstanceMapScript
                     case DATA_TWILIGHT_HALION:
                         return TwilightHalionGUID;
                     case DATA_ORB_CARRIER:
-                        return OrbCarrierGUID;
+                        return OrbCarrierGUID[0];
+                    case DATA_ORB_CARRIER_HM:
+                        return OrbCarrierGUID[1];
                     case DATA_ORB_ROTATION_FOCUS:
                         return OrbRotationFocusGUID;
                     case DATA_HALION_CONTROLLER:
@@ -428,7 +435,7 @@ class instance_ruby_sanctum : public InstanceMapScript
             uint64 HalionGUID;
             uint64 TwilightHalionGUID;
             uint64 HalionControllerGUID;
-            uint64 OrbCarrierGUID;
+            uint64 OrbCarrierGUID[2];
             uint64 OrbRotationFocusGUID;
             uint64 CrystalChannelTargetGUID;
             uint64 XerestraszaGUID;
@@ -445,6 +452,8 @@ class instance_ruby_sanctum : public InstanceMapScript
 	  uint32 hallionRealDamageTotal;
 	  uint32 hallionTwilightDamageTotal;
 	  uint32 corpo;
+
+	  uint8 OrbCnt;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

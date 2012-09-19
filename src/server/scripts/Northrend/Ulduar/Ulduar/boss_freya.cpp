@@ -1738,99 +1738,100 @@ class npc_healthy_spore : public CreatureScript
 
 class npc_eonars_gift : public CreatureScript
 {
-    public:
-        npc_eonars_gift() : CreatureScript("npc_eonars_gift") {}
+public:
+  npc_eonars_gift() : CreatureScript("npc_eonars_gift") {}
 
-        struct npc_eonars_giftAI : public Scripted_NoMovementAI
-        {
-	  npc_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript()) {}
+  struct npc_eonars_giftAI : public Scripted_NoMovementAI
+  {
+    npc_eonars_giftAI(Creature* creature) : Scripted_NoMovementAI(creature), _instance(creature->GetInstanceScript()) {}
 
-            void InitializeAI()
-            {
-                DoCast(me, SPELL_GROW);
-                DoCast(me, SPELL_PHEROMONES, true);
-                DoCast(me, SPELL_EONAR_VISUAL, true);
-		Reset();
-            }
+    void InitializeAI()
+    {
+      DoCast(me, SPELL_PHEROMONES, true);
+      DoCast(me, SPELL_EONAR_VISUAL, true);
+      me->ClearUnitState(UNIT_STATE_CASTING);
+      DoCast(me, SPELL_GROW);
+      Reset();
+    }
 
-            void Reset()
-            {
-                lifeBindersGiftTimer = 12000;
-            }
+    void Reset()
+    {
+      lifeBindersGiftTimer = 12000;
+    }
 
 
-            void UpdateAI(uint32 const diff)
-            {
-	      /*	      if (_instance)
-		  {
-                    if (_instance->GetBossState(BOSS_FREYA) != IN_PROGRESS)
-                        me->DisappearAndDie();
-		  }
-                else 
-		me->DisappearAndDie();*/
+    void UpdateAI(uint32 const diff)
+    {
+      /*	      if (_instance)
+		      {
+		      if (_instance->GetBossState(BOSS_FREYA) != IN_PROGRESS)
+		      me->DisappearAndDie();
+		      }
+		      else 
+		      me->DisappearAndDie();*/
                 
-                if (lifeBindersGiftTimer <= diff)
-                {
-                    me->RemoveAurasDueToSpell(SPELL_GROW);
-                    DoCast(SPELL_LIFEBINDERS_GIFT);
-                    me->DespawnOrUnsummon(2500);
-                    lifeBindersGiftTimer = 12000;
-                }
-                else
-                    lifeBindersGiftTimer -= diff;
-            }
+      if (lifeBindersGiftTimer <= diff)
+	{
+	  me->RemoveAurasDueToSpell(SPELL_GROW);
+	  DoCast(SPELL_LIFEBINDERS_GIFT);
+	  me->DespawnOrUnsummon(2500);
+	  lifeBindersGiftTimer = 12000;
+	}
+      else
+	lifeBindersGiftTimer -= diff;
+    }
 
-            private:
-                uint32 lifeBindersGiftTimer;
-	  InstanceScript* _instance;
-        };
+  private:
+    uint32 lifeBindersGiftTimer;
+    InstanceScript* _instance;
+  };
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetUlduarAI<npc_eonars_giftAI>(creature);
-        }
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return GetUlduarAI<npc_eonars_giftAI>(creature);
+  }
 };
 
 class npc_nature_bomb : public CreatureScript
 {
-    public:
-        npc_nature_bomb() : CreatureScript("npc_nature_bomb") {}
+public:
+  npc_nature_bomb() : CreatureScript("npc_nature_bomb") {}
 
-        struct npc_nature_bombAI : public Scripted_NoMovementAI
-        {
-            npc_nature_bombAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
+  struct npc_nature_bombAI : public Scripted_NoMovementAI
+  {
+    npc_nature_bombAI(Creature* creature) : Scripted_NoMovementAI(creature) {}
 
-            void Reset()
-            {
-                bombTimer = urand(8000, 10000);
-                DoCast(SPELL_OBJECT_BOMB);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
+    void Reset()
+    {
+      bombTimer = urand(8000, 10000);
+      DoCast(SPELL_OBJECT_BOMB);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    }
 
-            void UpdateAI(uint32 const diff)
-            {
-                if (bombTimer <= diff)
-                {
-                    if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_NATURE_BOMB, 1.0f))
-                    {
-                        go->SetGoState(GO_STATE_ACTIVE);
-                        DoCast(me, SPELL_NATURE_BOMB);
-                        // me->RemoveGameObject(go, true);
-                        me->RemoveFromWorld();
-                    }
-                }
-                else
-                    bombTimer -= diff;
-            }
+    void UpdateAI(uint32 const diff)
+    {
+      if (bombTimer <= diff)
+	{
+	  if (GameObject* go = me->FindNearestGameObject(GAMEOBJECT_NATURE_BOMB, 1.0f))
+	    {
+	      go->SetGoState(GO_STATE_ACTIVE);
+	      DoCast(me, SPELL_NATURE_BOMB);
+	      // me->RemoveGameObject(go, true);
+	      me->RemoveFromWorld();
+	    }
+	}
+      else
+	bombTimer -= diff;
+    }
 
-            private:
-                uint32 bombTimer;
-        };
+  private:
+    uint32 bombTimer;
+  };
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetUlduarAI<npc_nature_bombAI>(creature);
-        }
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return GetUlduarAI<npc_nature_bombAI>(creature);
+  }
 };
 
 class npc_unstable_sun_beam : public CreatureScript

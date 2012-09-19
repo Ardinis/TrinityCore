@@ -165,8 +165,9 @@ class spell_hun_chimera_shot : public SpellScriptLoader
                                 ApplyPctN(basePoint, TickCount * 60);
                             }
                             // Scorpid Sting - Attempts to Disarm the target for 10 sec. This effect cannot occur more than once per 1 minute.
-                            else if (familyFlag[0] & 0x00008000)
-                                spellId = HUNTER_SPELL_CHIMERA_SHOT_SCORPID;
+                            //else if (familyFlag[0] & 0x00008000)
+                            else if (familyFlag[0] & 0x8000)
+								spellId = HUNTER_SPELL_CHIMERA_SHOT_SCORPID;
                             // ?? nothing say in spell desc (possibly need addition check)
                             //if (familyFlag & 0x0000010000000000LL || // dot
                             //    familyFlag & 0x0000100000000000LL)   // stun
@@ -193,11 +194,11 @@ class spell_hun_chimera_shot : public SpellScriptLoader
                     aura->RefreshDuration();
                 }
             }
-            if (spellId && caster->ToPlayer() && !caster->ToPlayer()->HasSpellCooldown(spellId))
+            if (spellId && caster->ToPlayer())
            {
-               if (spellId == HUNTER_SPELL_CHIMERA_SHOT_SCORPID)
+               if (spellId == HUNTER_SPELL_CHIMERA_SHOT_SCORPID && !caster->ToPlayer()->HasSpellCooldown(spellId))
                {
-                   unitTarget->CastSpell(unitTarget, spellId, true);
+                   caster->CastSpell(unitTarget, spellId, true);
                    // Scorpid Sting - Add 1 minute cooldown
                    caster->ToPlayer()->AddSpellCooldown(spellId,0,uint32(time(NULL) + 60));
                }

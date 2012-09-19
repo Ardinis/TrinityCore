@@ -148,6 +148,7 @@ class instance_ulduar : public InstanceMapScript
 
             // Yogg-Saron
             uint64 YoggSaronCtrlGUID;
+            uint64 YoggSaronBrainGUID;
             uint64 YoggSaronGUID;
             uint64 SaraGUID;
             uint64 YoggSaronDoorGUID;
@@ -187,6 +188,8 @@ class instance_ulduar : public InstanceMapScript
             bool conSpeedAtory;
 
 	  uint32 armhf;
+
+	  uint32 yoggiEncounter;
 
         public:
             void Initialize()
@@ -307,6 +310,8 @@ class instance_ulduar : public InstanceMapScript
                 CountdownTimer      = 1*MINUTE*IN_MILLISECONDS;
                 elderCount          = 0;
                 conSpeedAtory       = false;
+
+		yoggiEncounter = 0;
             }
 
 	  void OpenDoor(uint64 guid)
@@ -681,6 +686,9 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case NPC_YOGGSARON_CTRL:
                         YoggSaronCtrlGUID = creature->GetGUID();
+                        break;
+                    case NPC_YOGGSARON_BRAIN:
+                        YoggSaronBrainGUID = creature->GetGUID();
                         break;
 
                     // Algalon
@@ -1116,6 +1124,9 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case BOSS_YOGGSARON :
+                  yoggiEncounter = data;
+		  break;
 		case DATA_ARM_HF:
 		  armhf = data;
 		  break;
@@ -1225,6 +1236,7 @@ class instance_ulduar : public InstanceMapScript
 
                     // Yogg-Saron
                     case NPC_YOGGSARON_CTRL:        return YoggSaronCtrlGUID;
+                    case NPC_YOGGSARON_BRAIN:        return YoggSaronBrainGUID;
                     case BOSS_YOGGSARON:            return YoggSaronGUID;
                     case BOSS_SARA:                 return SaraGUID;
                     case DATA_BRAIN_DOOR_1 :        return YoggSaronBrainDoor1GUID;
@@ -1257,6 +1269,8 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case BOSS_YOGGSARON :
+		  return yoggiEncounter;
 		case DATA_ARM_HF :
 		  return armhf;
 		case DATA_GARE_GEL :

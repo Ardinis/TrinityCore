@@ -44,7 +44,9 @@ enum DataTypes
     DATA_ZARITHRIAN_SPAWN_STALKER_1         = 8,
     DATA_ZARITHRIAN_SPAWN_STALKER_2         = 9,
     DATA_HALION_CONTROLLER                  = 10,
+
     DATA_ORB_CARRIER                        = 11,
+
     DATA_ORB_ROTATION_FOCUS                 = 12,
     DATA_BURNING_TREE_1                     = 13,
     DATA_BURNING_TREE_2                     = 14,
@@ -53,6 +55,9 @@ enum DataTypes
     DATA_FLAME_RING                         = 17,
     DATA_TWILIGHT_FLAME_RING                = 18,
     DATA_COMBAT_STALKER                     = 19,
+
+    DATA_ORB_CARRIER_HM,
+
     DATA_CORPO,
     DATA_HALION_REAL_DAMAGED_INIT,
     DATA_HALION_TWILIGHT_DAMAGED_INIT,

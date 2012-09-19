@@ -152,6 +152,7 @@ enum Events
     EVENT_CHECK_CORPOREALITY    = 14,
     EVENT_SHADOW_PULSARS_SHOOT  = 15,
     EVENT_TRIGGER_BERSERK       = 16,
+    EVENT_SHADOW_PULSARS_SHOOT_END  = 17,
 };
 
 enum Actions
@@ -293,66 +294,37 @@ struct generic_halionAI : public BossAI
 
     bool CheckCombatState()
     {
-      //	      std::cout << "check ????" << std::endl;
         if (instance->GetBossState(DATA_HALION) == IN_PROGRESS)
         {
             if (events.GetPhaseMask() & PHASE_ONE_MASK) // Phase one
             {
-	      //	      std::cout << "check 1" << std::endl;
                 if (!UpdateVictim())
                     return false;
             }
             else //if ((events.GetPhaseMask() & PHASE_TWO_MASK) || (events.GetPhaseMask() &  PHASE_THREE_MASK)) // Phase two or three
-            {
-	      //	      std::cout << "check 2" << std::endl;
-                if (!FindPossibleTarget())
-                    return false;
-            }
+	      {
+		if (!FindPossibleTarget())
+		  return false;
+	      }
         }
-        else
-        {
-	  //	      std::cout << "check 3" << std::endl;
-            if (!UpdateVictim())
-                return false;
-        }
-
+        else if (!UpdateVictim())
+	    return false;
         return true;
     }
 
     bool FindPossibleTarget()
     {
-      /*        std::list<HostileReference*> hostileList = me->getThreatManager().getThreatList();
-
-        for (std::list<HostileReference*>::const_iterator itr = hostileList.begin(); itr != hostileList.end(); ++itr)
-            if (Unit* target = (*itr)->getTarget())
-                if (target->GetTypeId() == TYPEID_PLAYER)
-                    if (me->canSeeOrDetect(target, true) && me->IsValidAttackTarget(target))
-		      if (target->isAlive())
-		      return true;*/
-
       Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
       for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
 	if (Player* player = i->getSource())
 	  if (player->isAlive())
 	    return true;
         if (Creature* halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
-	  {
-	    //	    halion->AI()->Reset();
             halion->AI()->EnterEvadeMode();
-	    //            halion->AI()->Reset();
-	  }
         if (Creature* twilightHalion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_TWILIGHT_HALION)))
-	  {
-	    //	    twilightHalion->AI()->Reset();
             twilightHalion->AI()->EnterEvadeMode();
-	    //            twilightHalion->AI()->Reset();
-	  }
         if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
-	  {
-	    //	    controller->AI()->Reset();
             controller->AI()->EnterEvadeMode();
-	    //	    controller->AI()->Reset();
-	  }
         return false;
     }
 };
@@ -936,93 +908,24 @@ class npc_halion_controller : public CreatureScript
                                     halion->CastSpell(halion, SPELL_BERSERK, true);
                             break;
                         case EVENT_SHADOW_PULSARS_SHOOT:
+			    _events.CancelEvent(EVENT_SHADOW_PULSARS_SHOOT);
+                            _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT_END, 5000);   // 9 sec channel duration, every 20th second
+                            if (Creature* orbCarrier = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_CARRIER)))
+                                orbCarrier->AI()->DoAction(ACTION_PREPARE_SHOOT);
+                            break;
+                        case EVENT_SHADOW_PULSARS_SHOOT_END:
                             if (Creature* twilightHalion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_TWILIGHT_HALION)))
                                 twilightHalion->AI()->Talk(SAY_SPHERE_PULSE);
-
                             if (Creature* orbCarrier = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_CARRIER)))
                                 orbCarrier->AI()->DoAction(ACTION_SHOOT);
-
-                            _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 29000);   // 9 sec channel duration, every 20th second
-                            break;
+			    if (Is25ManRaid() && IsHeroic())
+			      if (Creature* orbCarrierHm = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_CARRIER_HM)))
+				orbCarrierHm->AI()->DoAction(ACTION_SHOOT);
+			    _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 29000);
+			    _events.CancelEvent(EVENT_SHADOW_PULSARS_SHOOT_END);
+			  break;
                         case EVENT_CHECK_CORPOREALITY:
                         {
-			  /*                            // Todo: Rework all this.
-                            bool canUpdate = false;
-                            if (MaterialDamageTaken != 0 && TwilightDamageTaken != 0)
-                            {
-                                if (MaterialDamageTaken >= 1.02f * TwilightDamageTaken)
-                                {
-                                    TwilightDamageTaken = MaterialDamageTaken = 0;
-                                    canUpdate = (materialCorporealityValue != 0);
-                                    if (canUpdate)
-                                        materialCorporealityValue -= 10;
-                                }
-                                else if (TwilightDamageTaken >= 1.02f * MaterialDamageTaken)
-                                {
-                                    TwilightDamageTaken = MaterialDamageTaken = 0;
-                                    canUpdate = (materialCorporealityValue != 100);
-                                    if (canUpdate)
-                                        materialCorporealityValue += 10;
-                                }
-                            }
-                            else
-                            {
-                                if (Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_HALION)))
-                                {
-                                    if (Creature* twilightHalion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_TWILIGHT_HALION)))
-                                    {
-                                        twilightHalion->CastSpell(halion, SPELL_TWILIGHT_MENDING);
-
-                                        // TODO: I bet this is wrong
-                                        Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
-                                        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-                                            if (Player* player = i->getSource())
-                                                Talk(EMOTE_REGENERATE, player->GetGUID());
-                                    }
-                                }
-                                _events.ScheduleEvent(EVENT_CHECK_CORPOREALITY, 15000);
-                                break;
-                            }
-
-                            if (canUpdate)
-                            {
-                                for (uint8 i = DATA_HALION; i <= DATA_TWILIGHT_HALION; i++)
-                                {
-                                    uint32 spellID = GetSpell(materialCorporealityValue, (i == DATA_TWILIGHT_HALION));
-                                    Creature* halion = ObjectAccessor::GetCreature(*me, _instance->GetData64(i));
-
-                                    if (spellID == 0 || !halion)
-                                        continue;
-
-                                    RemoveCorporeality(halion, (i == DATA_TWILIGHT_HALION));
-                                    halion->CastSpell(halion, spellID, true);
-                                }
-
-                                _instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_MATERIAL, materialCorporealityValue);
-                                _instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_TWILIGHT, (100 - materialCorporealityValue));
-
-                                Map::PlayerList const &playersList = me->GetMap()->GetPlayers();
-                                for (Map::PlayerList::const_iterator i = playersList.begin(); i != playersList.end(); ++i)
-                                {
-                                    if (Player* player = i->getSource())
-                                    {
-                                        if (materialCorporealityValue > 50) // Range is 0 ... 100
-                                        {
-                                            if (player->HasAura(SPELL_TWILIGHT_REALM))
-                                                Talk(EMOTE_TWILIGHT_OUT_TWILIGHT, player->GetGUID());
-                                            else
-                                                Talk(EMOTE_PHYSICAL_IN_PHYSICAL, player->GetGUID());
-                                        }
-                                        else
-                                        {
-                                            if (player->HasAura(SPELL_TWILIGHT_REALM))
-                                                Talk(EMOTE_TWILIGHT_IN_TWILIGHT, player->GetGUID());
-                                            else
-                                                Talk(EMOTE_PHYSICAL_OUT_PHYSICAL, player->GetGUID());
-                                        }
-                                    }
-				    }*/
-			  //                            }
 			  _events.ScheduleEvent(EVENT_CHECK_CORPOREALITY, 15000);
 			  break;
 			}
@@ -1050,7 +953,7 @@ class npc_halion_controller : public CreatureScript
                                 _events.ScheduleEvent(EVENT_TRIGGER_BERSERK, 8 * MINUTE * IN_MILLISECONDS);
                                 break;
                             case PHASE_TWO:
-                                _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 10000); // Fix the timer
+                                _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 30000); // Fix the timer
                                 if (Creature* twilightHalion = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_TWILIGHT_HALION)))
                                     twilightHalion->AI()->SetData(DATA_FIGHT_PHASE, PHASE_TWO);
                                 break;
@@ -1174,9 +1077,7 @@ class npc_orb_carrier : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                //! According to sniffs this spell is cast every 1 or 2 seconds.
-                //! However, refreshing it looks bad, so just cast the spell if
-                //! we are not channeling it.
+	      // from sniff but dont work yet on trinitycore
 	      //	      if (!me->HasUnitState(UNIT_STATE_CASTING))
 	      //		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
 	      me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
@@ -1188,6 +1089,7 @@ class npc_orb_carrier : public CreatureScript
 		}
 	      else mui_rotate -= diff;
 
+	      //debug mod
 	      /*  if (mui_damage <= diff)
 		{
 		  DamagePlayers();
@@ -1199,8 +1101,7 @@ class npc_orb_carrier : public CreatureScript
 
 	  void DamagePlayers()
 	  {
-	    //	    std::cout << "damage players !!!!!" << std::endl;
-	    	    Vehicle* vehicle = me->GetVehicleKit();
+	    Vehicle* vehicle = me->GetVehicleKit();
 	    Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
 	    Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
 	    Position pos;
@@ -1215,80 +1116,52 @@ class npc_orb_carrier : public CreatureScript
 		    southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
 		  if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
 		    {
-		      //		      std::cout << "damage players summon !!!!!" << std::endl;
 		      orbDamage->SetFlying(false);
 		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 30);
 		    }
 	      }
-
-	    /*	    if (!IsHeroic())
-	      return;
-
-	    Unit* eastOrb = vehicle->GetPassenger(SEAT_EAST);
-	    Unit* westOrb = vehicle->GetPassenger(SEAT_WEST);
-	    if (eastOrb && westOrb)
-	      {
-		eastOrb->GetPosition(&pos);
-		westOrb->GetPosition(&posEnd);
-		if (eastOrb->GetTypeId() != TYPEID_UNIT || westOrb->GetTypeId() != TYPEID_UNIT)
-		  return;
-		if (eastOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
-		    westOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
-		  if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
-		    {
-		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1, posEnd, 15);
-		    }
-		    }*/
 	  }
 
-            void DoAction(int32 const action)
-            {
-                if (action == ACTION_SHOOT)
-                {
-                    Vehicle* vehicle = me->GetVehicleKit();
-                    Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
-                    Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
-                    if (southOrb && northOrb)
-                    {
-                        if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
-                            return;
+	  void DoAction(int32 const action)
+	  {
+	    Unit* southOrb = NULL;
+	    Unit* northOrb = NULL;
+	    if (Vehicle* vehicle = me->GetVehicleKit())
+	      {
+		southOrb = vehicle->GetPassenger(SEAT_SOUTH);
+		northOrb = vehicle->GetPassenger(SEAT_NORTH);
+	      }
+	    switch (action)
+	      {
+	      case ACTION_PREPARE_SHOOT :
+		northOrb->ToCreature()->AI()->Talk(EMOTE_WARN_LASER);
+		break;
+	      case ACTION_SHOOT :
+		{
+		  if (southOrb && northOrb)
+		    {
+		      if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
+			return;
+		      northOrb->CastSpell(northOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
+		      southOrb->CastSpell(southOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
+		      northOrb->CastSpell(southOrb, SPELL_TWILIGHT_CUTTER, false);
+		    }
+		  break;
+		}
+	      default :
+		break;
+	      }
+	  }
 
-                        northOrb->ToCreature()->AI()->Talk(EMOTE_WARN_LASER);
-                        northOrb->CastSpell(northOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
-                        southOrb->CastSpell(southOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
-                        northOrb->CastSpell(southOrb, SPELL_TWILIGHT_CUTTER, false);
-                    }
-
-                    if (!IsHeroic())
-                        return;
-		    if (Creature *c = me->FindNearestCreature(me->GetEntry(), 50.0f))
-		      {
-			Unit* eastOrb = c->GetVehicleKit()->GetPassenger(SEAT_SOUTH);
-			Unit* westOrb = c->GetVehicleKit()->GetPassenger(SEAT_NORTH);
-			if (eastOrb && westOrb)
-			  {
-			    if (eastOrb->GetTypeId() != TYPEID_UNIT || westOrb->GetTypeId() != TYPEID_UNIT)
-			      return;
-			    if (eastOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
-				westOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
-			      c->AI()->DoAction(ACTION_SHOOT);
-			    /*                        eastOrb->CastSpell(eastOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
-						      westOrb->CastSpell(westOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
-						      eastOrb->CastSpell(westOrb, SPELL_TWILIGHT_CUTTER, false);*/
-			  }
-		      }
-                }
-            }
 	private :
 	  uint32 mui_rotate;
 	  uint32 mui_damage;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetRubySanctumAI<npc_orb_carrierAI>(creature);
-        }
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return GetRubySanctumAI<npc_orb_carrierAI>(creature);
+  }
 };
 
 
@@ -1635,7 +1508,7 @@ class npc_living_ember : public CreatureScript
 
             void Reset()
             {
-		if (!Is25ManRaid())
+	      //		if (!Is25ManRaid())
 		  me->DespawnOrUnsummon();
                 _hasEnraged = false;
 		CheckInterval = 2000;
@@ -1657,6 +1530,7 @@ class npc_living_ember : public CreatureScript
                 {
                     _hasEnraged = true;
                     DoCast(me, SPELL_BERSERK);
+		    _enrageTimer = 20000;
                 }
                 else _enrageTimer -= diff;
 
@@ -2085,7 +1959,6 @@ public:
 
       Unit* target = GetTarget();
       Unit* caster = GetCaster();
-      //		  std::cout << "gogogogogogo ?????" << std::endl;
       if (!target || !caster)
 	return;
 
@@ -2095,28 +1968,18 @@ public:
 	{
 	  if(Player* player = i->getSource())
 	    {
-	      //	  std::cout << "gogogogogogo ?" << std::endl;
 	      if (!player) continue;
-	      //  if (player->isGameMaster()) continue;
-	      //	      if (!player->HasAura(SPELL_TWILIGHT_ENTER)) continue;
 	      if (player->isAlive())
 		{
-		  //		  std::cout << "TARGET : X : " << target->GetPositionX() << " Y : " << target->GetPositionY() << std::endl;
-		  //		  std::cout << "CASTER : X : " << caster->GetPositionX() << " Y : " << caster->GetPositionY() << std::endl;
 		  float AB = caster->GetDistance2d(target)+1;
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
-		  //		  		  float p = (AB + BC + AC)/2;
-		  // 	  float DC = (2*sqrt(p*(p-AB)*(p-BC)*(p-AC)))/AB;
-		  //    if (DC < 3.75f || DC > 52.0f)
 		  float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
-		  // std::cout << dd << std::endl;
-		  if (dd >= -2 && dd <= 2)
+		  if (dd >= -0.5f && dd <= 0.5f)
 		    {
-		      caster->ToCreature()->MonsterYell("find someone tu shoot OMG", LANG_UNIVERSAL, player->GetGUID());
+		      caster->ToCreature()->MonsterYell(" $N you were shoot by me mouahahah", LANG_UNIVERSAL, player->GetGUID());
 		      player->DealDamage(player, 200000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
 		    }
-		    //		    target->CastSpell(player, SPELL_TWILIGHT_CUTTER, true);
 		}
 	    }
 	}

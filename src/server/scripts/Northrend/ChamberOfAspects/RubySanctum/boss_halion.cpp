@@ -168,6 +168,7 @@ enum Actions
 
     // Orb Carrier
     ACTION_SHOOT                = 6,
+    ACTION_PREPARE_SHOOT,
 };
 
 enum Phases

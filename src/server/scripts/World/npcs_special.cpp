@@ -1803,6 +1803,44 @@ public:
 };
 /* Fin fete des brasseurs */
 
+/* jour des pirates */
+#define    SPELL_AURA_PIRATE 50517
+#define GOSSIP_DRINK   "A la santee des pirates !"
+#define GOSSIP_PUNISH   "Je hai les pirates !"
+
+class npc_demeza : public CreatureScript
+{
+public:
+    npc_demeza() : CreatureScript("npc_demeza") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+      printf("hello boy !\n");
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_DRINK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_PUNISH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+      player->SEND_GOSSIP_MENU(9647, creature->GetGUID());
+      return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        {
+	  creature->CastSpell(player, SPELL_AURA_PIRATE, true);
+        }
+
+        if (uiAction == GOSSIP_ACTION_INFO_DEF+2)
+        {
+	  player->TeleportTo(0, -14422.505859f, 528.839844f, 386.005806f, 0.627286f);
+        }
+
+        return true;
+    }
+};
+
+/* fin jour des pirates */
+
 /*####
 ## npc_winter_reveler
 ####*/
@@ -3991,6 +4029,7 @@ void AddSC_npcs_special()
 	new npc_brewfest_keg_thrower();
 	new npc_brewfest_keg_receiver();
 	new npc_brewfest_ram_master();
+	new npc_demeza();
     new npc_snake_trap;
     new npc_mirror_image;
     new npc_ebon_gargoyle;

@@ -1241,11 +1241,14 @@ class npc_pool_of_tar : public CreatureScript
 
         struct npc_pool_of_tarAI : public PassiveAI
         {
-            npc_pool_of_tarAI(Creature* creature) : PassiveAI(creature) {}
+            npc_pool_of_tarAI(Creature* creature) : PassiveAI(creature) 
+			{
+				me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+			}
 
             void Reset()
             {
-				me->SetVisible(false);
+				//me->SetVisible(false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 me->CastSpell(me, SPELL_TAR_PASSIVE, true);                
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -1593,6 +1596,9 @@ class npc_leviathan_player_vehicle : public CreatureScript
                 // TODO: Check where this id comes from.
                 if (VehicleSeatEntry* vehSeat = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(3013)))
                     vehSeat->m_flags &= ~VEHICLE_SEAT_FLAG_UNK1;
+
+				me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, false);
+				me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DAZE, false);
             }
 
             void PassengerBoarded(Unit* unit, int8 seat, bool apply)
@@ -2613,20 +2619,22 @@ class spell_load_into_catapult : public SpellScriptLoader
 
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Unit* owner = GetOwner()->ToUnit();
-                if (!owner)
+				Unit* ownerVehicle = GetOwner()->FindNearestCreature(VEHICLE_DEMOLISHER,0.5f,true);
+
+                if (!ownerVehicle)
                     return;
 
-                owner->CastSpell(owner, SPELL_PASSENGER_LOADED, true);
+                ownerVehicle->CastSpell(ownerVehicle, SPELL_PASSENGER_LOADED, true);
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Unit* owner = GetOwner()->ToUnit();
-                if (!owner)
+                Unit* ownerVehicle = GetOwner()->FindNearestCreature(VEHICLE_DEMOLISHER,1.0f,true);
+
+                if (!ownerVehicle)
                     return;
 
-                owner->RemoveAurasDueToSpell(SPELL_PASSENGER_LOADED);
+                ownerVehicle->RemoveAurasDueToSpell(SPELL_PASSENGER_LOADED);
             }
 
             void Register()
@@ -2662,7 +2670,7 @@ class spell_auto_repair : public SpellScriptLoader
 
             void CheckCooldownForTarget()
             {
-                if (GetHitUnit()->HasAuraEffect(SPELL_AUTO_REPAIR, EFFECT_2))   // Check presence of dummy aura indicating cooldown
+                if (!GetHitUnit()->HasAura(SPELL_AUTO_REPAIR) && GetHitUnit()->HasAuraEffect(SPELL_AUTO_REPAIR, EFFECT_2))   // Check presence of dummy aura indicating cooldown
                 {
                     PreventHitEffect(EFFECT_0);
                     PreventHitDefaultEffect(EFFECT_1);
@@ -2681,6 +2689,8 @@ class spell_auto_repair : public SpellScriptLoader
                 Vehicle* vehicle = GetHitUnit()->GetVehicleKit();
                 if (!vehicle)
                     return;
+                if (GetHitUnit()->HasAura(SPELL_AUTO_REPAIR))
+					return;
 
                 Player* driver = vehicle->GetPassenger(0) ? vehicle->GetPassenger(0)->ToPlayer() : NULL;
                 if (!driver)

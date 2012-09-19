@@ -405,10 +405,13 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         break;
                     }
 // Ulduar
+					case 64851: // rune enflammer
+					case 64847:
+					case 64870: // explo lave
 					case 62402:
 					case 62400: // MISSILE Leviathan , DPS les joueurs qui sont dans vehicules
 					{
-                        if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetVehicle())
+                        if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetVehicle() && unitTarget->GetMapId() == 603)
                         {
                             damage = 0;
                             return;

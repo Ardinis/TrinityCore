@@ -48,19 +48,19 @@ enum Yells
     SAY_YS_HELP                                 = -1603259,
 };
 
-#define SAY_TIME_1                              "This zone will be destroyed in 10 minutes!"
-#define SAY_TIME_2                              "This zone will be destroyed in 9 minutes!"         //soundid 15416  and below
-#define SAY_TIME_3                              "This zone will be destroyed in 8 minutes!"
-#define SAY_TIME_4                              "This zone will be destroyed in 7 minutes!"
-#define SAY_TIME_5                              "This zone will be destroyed in 6 minutes!"
-#define SAY_TIME_6                              "This zone will be destroyed in 5 minutes!"
-#define SAY_TIME_7                              "This zone will be destroyed in 4 minutes!"
-#define SAY_TIME_8                              "This zone will be destroyed in 3 minutes!"
-#define SAY_TIME_9                              "This zone will be destroyed in 2 minutes!"
-#define SAY_TIME_10                             "This zone will be destroyed in 1 minute!"
-#define SAY_TIME_UP                             "End of the self-destruction-frequence. Have a nice day!"
-#define SAY_TIME_CANCEL                         "Self-destruction-frequence abborded. Transmitter code A905."
-#define SAY_ALARM_HARD_MODE                     "Self-destruction-frequence initalized!"
+#define SAY_TIME_1                              "Auto-destruction dans 10 minutes !"
+#define SAY_TIME_2                              "Auto-destruction dans 9 minutes !"
+#define SAY_TIME_3                              "Auto-destruction dans 8 minutes !"
+#define SAY_TIME_4                              "Auto-destruction dans 7 minutes !"
+#define SAY_TIME_5                              "Auto-destruction dans 6 minutes !"
+#define SAY_TIME_6                              "Auto-destruction dans 5 minutes !"
+#define SAY_TIME_7                              "Auto-destruction dans 4 minutes !"
+#define SAY_TIME_8                              "Auto-destruction dans 3 minutes !"
+#define SAY_TIME_9                              "Auto-destruction dans 3 minutes !"
+#define SAY_TIME_10                             "Auto-destruction dans 1 minute !"
+#define SAY_TIME_UP                             "Fin de la sequence d'auto-destruction. Passez une bonne journee !"
+#define SAY_TIME_CANCEL                         "Auto-destruction annulee. Transmition du code A905."
+#define SAY_ALARM_HARD_MODE                     "Auto-destruction initialisee."
 
 enum Spells
 {
@@ -447,7 +447,6 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_FLAME:
-		      me->MonsterYell("EVENT_FLAME", LANG_UNIVERSAL, 0);
 		      for (uint8 i = 0; i < 3; ++i)
 			if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
 			  DoCast(target, SPELL_SUMMON_FLAMES_INITIAL, true);
@@ -456,8 +455,8 @@ class boss_mimiron : public CreatureScript
                     case EVENT_STEP_1:
                         switch (phase)
                         {
-                            case PHASE_INTRO:
-								if(gotHardMode)
+			case PHASE_INTRO:
+			  if(gotHardMode)
                                 {
                                     me->SetName("Computer");
                                     me->MonsterYell(SAY_ALARM_HARD_MODE, LANG_UNIVERSAL, 0);
@@ -905,10 +904,8 @@ class boss_mimiron : public CreatureScript
                         break;
                     case DO_INCREASE_FLAME_COUNT:
                         ++flameCount;
-			std::cout << "DO_INCREASE_FLAME_COUNT : " << flameCount << std::endl;
                         break;
                     case DO_DECREASE_FLAME_COUNT:
-			std::cout << "DO_DECREASE_FLAME_COUNT : " << flameCount << std::endl;
                         if (flameCount)
                             --flameCount;
                         break;
@@ -1306,9 +1303,8 @@ class npc_proximity_mine : public CreatureScript
 		return;
 	      if (!boomLocked)
 		if (who->ToPlayer())
-		  if (me->IsWithinDistInMap(who, 0.5f) /*&& !who->ToPlayer()->isGameMaster()*/)
+		  if (me->IsWithinDistInMap(who, 0.5f) && !who->ToPlayer()->isGameMaster())
 		    {
-		      //std::cout << "BOOM !!!!!" << std::endl;
 		      DoCastAOE(SPELL_EXPLOSION);
 		      boomLocked = true;
 		      me->DespawnOrUnsummon(200);
@@ -1330,17 +1326,16 @@ class npc_proximity_mine : public CreatureScript
 	      else
 		uist -= diff;
 
-	      /*                if (uiBoomTimer <= diff)
+	      if (uiBoomTimer <= diff)
                 {
                     if (!boomLocked)
                     {
-		      //std::cout << "BOOM TIMER !!!!!" << std::endl;
                         DoCastAOE(SPELL_EXPLOSION);
                         me->DespawnOrUnsummon(200);
                         boomLocked = true;
                     }                    
                 }
-                else uiBoomTimer -= diff;*/
+	      else uiBoomTimer -= diff;
             }
 
             private:
@@ -1525,9 +1520,10 @@ class boss_vx_001 : public CreatureScript
             {
                 switch (spell->Id)
                 {
-                    case SPELL_FROSTBOMB:
-                        me->SummonCreature(NPC_FROST_BOMB, *target, TEMPSUMMON_TIMED_DESPAWN, 11000);
-                        break;
+		case SPELL_FROSTBOMB:
+		  if (Creature *targets = me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))
+		    me->SummonCreature(NPC_FROST_BOMB, *targets, TEMPSUMMON_TIMED_DESPAWN, 11000);
+		  break;
                     case SPELL_ROCKET_STRIKE:
                         if (!target || !spell)
                             return;
@@ -1652,7 +1648,7 @@ class boss_vx_001 : public CreatureScript
 		      events.RescheduleEvent(EVENT_HAND_PULSE, urand(3000, 4000), 0 , PHASE_VX001_ASSEMBLED__GLOBAL_4);
 		      break;
 		    case EVENT_FROST_BOMB:
-		      if (me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))  // TODO: Check if npc is spawned correctly
+		      if (Creature *target = me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))
 			{
 			  DoCast(SPELL_FROSTBOMB);
 			  events.RescheduleEvent(EVENT_FROST_BOMB, 45000, 0, phase);
@@ -1708,7 +1704,6 @@ class npc_rocket_strike_target : public CreatureScript
             {
                 if (!spell)
                     return;
-		//		//std::cout << "SPELL HIT : " << spell->Id << std::endl;
 		if (spell->Id == 64064)
 		  {
 		    uiBoom = 5000;
@@ -1899,7 +1894,6 @@ class boss_aerial_unit : public CreatureScript
             {
                 if (!caster || !spell)
                     return;
-		//std::cout << "SPELL HIT : " << spell->Id << std::endl;
                 if (spell->Id == SPELL_SELF_REPAIR)
                     DoAction(DO_AERIAL_SELF_REPAIR_END);
                 if (Creature* Mimiron = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MIMIRON)))
@@ -2197,6 +2191,7 @@ class npc_emergency_bot : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->SetReactState(REACT_PASSIVE);                
+		Reset();
             }
 
             void Reset()
@@ -2483,6 +2478,7 @@ class npc_frost_bomb : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);                
+		Reset();
             }
 
             void Reset()

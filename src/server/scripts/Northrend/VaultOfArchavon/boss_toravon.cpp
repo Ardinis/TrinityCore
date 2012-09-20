@@ -88,7 +88,13 @@ class boss_toravon : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FROZEN_ORB:
-                            me->CastCustomSpell(SPELL_FROZEN_ORB, SPELLVALUE_MAX_TARGETS, 1, me);
+			  //                            me->CastCustomSpell(SPELL_FROZEN_ORB, SPELLVALUE_MAX_TARGETS, 1, me);
+			  if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+			    {
+			      Position pos;
+			      target->GetPosition(&pos);
+			      me->SummonCreature(MOB_FROZEN_ORB, pos, TEMPSUMMON_DEAD_DESPAWN);
+			    }
                             events.ScheduleEvent(EVENT_FROZEN_ORB, 38000);
                             break;
                         case EVENT_WHITEOUT:

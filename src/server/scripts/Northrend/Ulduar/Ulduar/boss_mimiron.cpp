@@ -73,7 +73,8 @@ enum Spells
    SPELL_FLAME_SUPPRESSANT_MK                  = 64570,
    SPELL_NAPALM_SHELL_10                       = 63666,
    SPELL_NAPALM_SHELL_25                       = 65026,
-   SPELL_PLASMA_BLAST                          = 62977,
+   SPELL_PLASMA_BLAST_10                          = 62997,
+   SPELL_PLASMA_BLAST_25                          = 64529,
    SPELL_PROXIMITY_MINES                       = 63027,
    SPELL_SHOCK_BLAST                           = 63631,
    SPELL_EXPLOSION                             = 66351,
@@ -127,6 +128,7 @@ enum Spells
 #define SPELL_NAPALM_SHELL RAID_MODE(SPELL_NAPALM_SHELL_10, SPELL_NAPALM_SHELL_25)
 #define SPELL_HEAT_WAVE RAID_MODE(SPELL_HEAT_WAVE_10, SPELL_HEAT_WAVE_25)
 #define SPELL_HAND_PULSE RAID_MODE(SPELL_HAND_PULSE_10, SPELL_HAND_PULSE_25)
+#define SPELL_PLASMA_BLAST RAID_MODE(SPELL_PLASMA_BLAST_10, SPELL_PLASMA_BLAST_25)
 
 enum Actions
 {

@@ -757,8 +757,6 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 me->SetFlying(true);
                 me->SetVisible(false);
-                guidYogg = 0;
-                guidYoggBrain = 0;
 		Reset();
             }
 
@@ -852,7 +850,6 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 switch (summon->GetEntry())
                 {
                     case NPC_YOGG_SARON:
-                        guidYogg = summon->GetGUID();
                         summon->SetReactState(REACT_PASSIVE);
                         summon->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                         summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -860,7 +857,6 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         summon->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 20.0f);
                         return;
                     case NPC_BRAIN_OF_YOGG_SARON:
-                        guidYoggBrain = summon->GetGUID();
                         summon->setActive(true);
                         summon->SetFloatValue(UNIT_FIELD_COMBATREACH, 25.0f);
                         summon->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 25.0f);
@@ -930,12 +926,10 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 if (Creature* yogg = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_YOGGSARON)))
                     yogg->DespawnOrUnsummon();
 
-                if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
+                if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_BRAIN)))
                     yoggbrain->DespawnOrUnsummon();
 
                 usedMindcontrol = false;
-                guidYogg = 0;
-                guidYoggBrain = 0;
                 lastBrainAction = Actions(0);
                 listEventNPCs.clear();
                 guidEventSkulls.DespawnAll();
@@ -1169,7 +1163,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                         break;
                 }
 
-                if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
+                if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_BRAIN)))
                 {
                     yoggbrain->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     yoggbrain->CastSpell(yoggbrain, SPELL_INDUCE_MADNESS, false);   // Takes about one minute; Corresponding event is scheduled in UpdateAI
@@ -1269,7 +1263,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                     if (Creature* yogg = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_YOGGSARON)))
                         yogg->AI()->DoAction(ACTION_APPLY_SHATTERED_ILLUSIONS);
 
-                    if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
+                    if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_BRAIN)))
                         yoggbrain->AI()->DoAction(ACTION_APPLY_SHATTERED_ILLUSIONS);
 
                     if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
@@ -1294,7 +1288,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
             {
                 if (myPhase == PHASE_BRAIN)
                 {
-                    if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
+                    if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_BRAIN)))
                         yoggbrain->AI()->DoAction(causedByPhaseChange? ACTION_REMOVE_SHATTERED_ILLUSIONS_PHASE_CHANGE : ACTION_REMOVE_SHATTERED_ILLUSIONS);
 
                     if (Creature* yogg = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_YOGGSARON)))
@@ -1433,7 +1427,7 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                             sara->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_YOGG);
                         if (Creature* yogg = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_YOGGSARON)))
                             yogg->AI()->SetData(ACTION_DO_CHANGE_PHASE, PHASE_YOGG);
-                        if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, guidYoggBrain))
+                        if (Creature* yoggbrain = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_BRAIN)))
                             yoggbrain->InterruptNonMeleeSpells(true);
                         OnRemove_ShatteredIllusions(true);
                         break;
@@ -1447,8 +1441,6 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
                 SummonList guidEventTentacles;
                 SummonList guidEventSkulls;
                 bool usedMindcontrol;
-                uint64 guidYogg;
-                uint64 guidYoggBrain;
                 //uint32 keeperActiveCnt;
 
                 // Phase 2
@@ -1899,8 +1891,6 @@ class boss_sara : public CreatureScript
             private:
                 BossPhase myPhase;
 
-                uint64 guidYogg;
-                uint64 guidYoggBrain;
 
 
                 // Phase 1

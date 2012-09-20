@@ -248,6 +248,8 @@ class boss_rotface : public CreatureScript
 			    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -MUTATED_INFECTION);
 			    if (!target)
 			      target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -MUTATED_INFECTION);
+			    if (target == me->getVictim())
+			      target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -MUTATED_INFECTION);
 			    if (target)
 			      me->CastCustomSpell(SPELL_MUTATED_INFECTION, SPELLVALUE_MAX_TARGETS, 1, target, false);
 			    events.ScheduleEvent(EVENT_MUTATED_INFECTION, 14000);

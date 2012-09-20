@@ -78,3 +78,8 @@ UPDATE `gameobject` SET `spawnMask` = 3 WHERE `id` = 194905 AND `map` = 603;
 UPDATE `creature_template` SET `modelid1`='28469',`modelid2`='28469',`modelid4`='28469' WHERE (`entry`='33143')  ;
 UPDATE `creature_template` SET `modelid1`='11686' WHERE (`entry`='33370');
 UPDATE `creature_template` SET `modelid1`='24914' WHERE (`entry`='33114');
+
+UPDATE creature_template SET faction_A = 16 , faction_H = 16 where entry = 33142;
+UPDATE creature_template SET vehicleId= 340 where entry = 33113; -- Avant 387
+UPDATE creature_template SET vehicleId= 341 where entry = 33114;
+UPDATE `creature_template` SET `speed_run`='2' , `speed_walk`='2' WHERE `entry` IN ('34014', '34166');

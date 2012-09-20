@@ -116,6 +116,12 @@ enum UlduarBosses
     DATA_BRANN_BRONZEBEARD_ALG,
 
     DATA_ARM_HF,
+
+    TYPE_ALGALON,
+    DATA_YOGGSARON,
+    DATA_ALGALON_INTRO,
+    DATA_ALGALON_TIMER,
+    DATA_BRANN_ALGALON,
 };
 
 enum UlduarBossDeadFlags
@@ -174,7 +180,6 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_YOGGSARON_CTRL          = 29224,
     NPC_YOGGSARON_BRAIN         = 33890,
     NPC_SARA                    = 33134,
-    NPC_ALGALON                 = 32871,
 
     // Mimiron
     NPC_LEVIATHAN_MKII           = 33432,
@@ -286,16 +291,6 @@ enum UlduarGameObjects
     GO_RAZOR_HARPOON_4          = 194519,
     GO_RAZOR_BROKEN_HARPOON     = 194565,
 
-    GO_ALGALON_ACCESS           = 194628,
-    GO_ALGALON_DOOR_1           = 194911,
-    GO_ALGALON_DOOR_2           = 194767,
-    GO_ALGALON_PLATFORM         = 194715,
-    GO_ALGALON_GLOBE            = 194148,
-    GO_ALGALON_BRIDGE           = 194253,
-    GO_ALGALON_B_VISUAL         = 194716,
-    GO_ALGALON_B_DOOR           = 194910,
-    GO_GIFT_OF_THE_OBSERVER_10  = 194821,
-    GO_GIFT_OF_THE_OBSERVER_25  = 194822,
     // Dummies - not yet in db
     GO_LEVIATHAN_CHEST_10       = 555555,
     GO_LEVIATHAN_CHEST_25       = 444444
@@ -444,5 +439,33 @@ class PlayerOrPetCheck
             return false;
         }
 };
+
+enum UlduarNPCsGO
+  {
+    NPC_ALGALON                 = 32871,
+    NPC_BRANN_ALGALON           = 34064,
+    GO_ALGALON_DOOR             = 194767,
+    GO_ALGALON_FLOOR_COM        = 194715,
+    GO_ALGALON_FLOOR_OOC        = 194716,
+    GO_ALGALON_GLOBE            = 194148,
+    GO_ALGALON_BRIDGE           = 194253,
+    GO_ALGALON_INVISDOOR        = 194910,
+    GO_ALGALON_CONSOLE          = 194628,
+    GO_GIFT_OF_THE_OBSERVER     = 194821
+  };
+
+
+enum UlduarWorldStates
+  {
+    WORLDSTATE_SHOW_TIMER       = 4132,
+    WORLDSTATE_ALGALON_TIMER    = 4131
+  };
+
+
+enum UlduarSharedActions
+  {
+    ACTION_ALGALON_ASCEND      = -123460 //Wipe Raid, don't respawn
+  };
+
 
 #endif

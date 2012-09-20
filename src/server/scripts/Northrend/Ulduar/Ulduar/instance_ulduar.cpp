@@ -156,15 +156,24 @@ class instance_ulduar : public InstanceMapScript
             uint64 YoggSaronBrainDoor2GUID;
             uint64 YoggSaronBrainDoor3GUID;
 
-            // Algalon
-            uint64 AlgalonGUID;
-            uint64 AlgalonBridgeGUID;
-            uint64 AlgalonBridgeVisualGUID;
-            uint64 AlgalonBridgeDoorGUID;
-            uint64 AlgalonGlobeGUID;
-            uint64 AlgalonDoor1GUID;
-            uint64 AlgalonDoor2GUID;
-            uint64 AlgalonAccessGUID;
+	  // Algalon
+	  uint64 uiAlgalonGUID;
+	  uint64 AlgalonBrannGUID;
+	  uint64 AlgalonDoorGUID;
+	  uint64 AlgalonFloorOOCGUID;
+	  uint64 AlgalonFloorCOMGUID;
+	  uint64 AlgalonBridgeGUID;
+	  uint64 AlgalonGlobeGUID;
+	  uint64 AlgalonForceFieldGUID;
+	  uint32 AlgalonIntroDone;
+	  uint32 SignalTimerState;
+	  uint32 SignalTimer;
+	  uint32 SignalTimerMinutes;
+	  uint32 uiAlgalonCountdown;
+	  uint32 uiAlgalonKillCount;
+	  uint32 uiCountdownTimer;
+
+	  uint32 uiEncounter[MAX_ENCOUNTER];
 
             // Creatures
             uint64 KeeperGUIDs[3];
@@ -173,17 +182,14 @@ class instance_ulduar : public InstanceMapScript
             uint32 ColossusData;
             uint32 SupportKeeperFlag;
             uint32 PlayerDeathFlag;
-            uint32 AlgalonKillCount;
 
             uint32 TeamInInstance;
             uint32 HodirRareCacheData;
-            uint32 AlgalonCountdown;
             //   62 - not ready to engage, i.e. Yogg-Saron is still alive
             //   61 - ready to engage, not engaged yet
             // < 61 - engaged, timer running
             //    0 - failed
 
-            uint32 CountdownTimer;
             uint8 elderCount;
             bool conSpeedAtory;
 
@@ -285,15 +291,24 @@ class instance_ulduar : public InstanceMapScript
                 YoggSaronBrainDoor2GUID = 0;
                 YoggSaronBrainDoor3GUID = 0;
 
-                // Algalon
-                AlgalonGUID             = 0;
-                AlgalonBridgeGUID       = 0;
-                AlgalonBridgeVisualGUID = 0;
-                AlgalonBridgeDoorGUID   = 0;
-                AlgalonGlobeGUID        = 0;
-                AlgalonDoor1GUID        = 0;
-                AlgalonDoor2GUID        = 0;
-                AlgalonAccessGUID       = 0;
+
+		// Algalon
+		memset(uiEncounter, 0, sizeof(uiEncounter));
+		uiAlgalonGUID             = 0;
+		AlgalonBrannGUID          = 0;
+		AlgalonDoorGUID           = 0;
+		AlgalonBridgeGUID         = 0;
+		AlgalonGlobeGUID          = 0;
+		AlgalonFloorOOCGUID       = 0;
+		AlgalonFloorCOMGUID       = 0;
+		AlgalonForceFieldGUID     = 0;
+		SignalTimerState          = NOT_STARTED;
+		SignalTimer               = 0;
+		SignalTimerMinutes        = 0;
+		uiAlgalonKillCount        = 0;
+		uiAlgalonCountdown        = 62;
+		uiCountdownTimer          = 1*MINUTE*IN_MILLISECONDS;
+		AlgalonIntroDone = false;
 
                 // Creatures
                 std::fill(KeeperGUIDs, KeeperGUIDs + 3, 0);
@@ -302,17 +317,42 @@ class instance_ulduar : public InstanceMapScript
                 ColossusData        = 0;
                 SupportKeeperFlag   = 0;
                 PlayerDeathFlag     = 0;
-                AlgalonKillCount    = 0;
 
                 TeamInInstance      = 0;
                 HodirRareCacheData  = 0;
-                AlgalonCountdown    = 62; // See above why
-                CountdownTimer      = 1*MINUTE*IN_MILLISECONDS;
                 elderCount          = 0;
                 conSpeedAtory       = false;
 
 		yoggiEncounter = 0;
             }
+
+	  void Update(uint32 diff)
+	  {
+	    if (SignalTimerState == IN_PROGRESS)
+	      {
+		if (SignalTimer <= diff)
+		  {
+		    --SignalTimerMinutes;
+		    SignalTimer = 60000;
+		    if (SignalTimerMinutes)
+		      {
+			DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 1);
+			DoUpdateWorldState(WORLDSTATE_ALGALON_TIMER, SignalTimerMinutes);
+		      }
+		    else
+		      {
+			SignalTimerState = FAIL;
+			DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 0);
+			if (Creature* Algalon = instance->GetCreature(uiAlgalonGUID))
+			  Algalon->AI()->DoAction(ACTION_ALGALON_ASCEND);
+			SetBossState(TYPE_ALGALON, FAIL);
+		      }
+		    SaveToDB();
+		  }
+		else
+		  SignalTimer -= diff;
+	      }
+	  }
 
 	  void OpenDoor(uint64 guid)
 	  {
@@ -330,12 +370,6 @@ class instance_ulduar : public InstanceMapScript
 	      go->SetGoState(GO_STATE_READY);
 	  }
 
-            void FillInitialWorldStates(WorldPacket& packet)
-            {
-                packet << static_cast<uint32>(WORLD_STATE_ALGALON_TIMER_ENABLED) << static_cast<uint32>(AlgalonCountdown && AlgalonCountdown < 61);
-                packet << static_cast<uint32>(WORLD_STATE_ALGALON_DESPAWN_TIMER) << static_cast<uint32>(std::min<uint32>(AlgalonCountdown, 60)); // cast to uint32 required since std::min returns const uint32&
-            }            
-
             void OnPlayerEnter(Player* player)
             {
                 if (!TeamInInstance)
@@ -348,10 +382,12 @@ class instance_ulduar : public InstanceMapScript
                 {
                     if (GetBossState(UlduarBosses(i)) == IN_PROGRESS)
                     {
-                        if (i == BOSS_ALGALON)
-                            ++AlgalonKillCount; // Something happens to Algalon on player death, thus count them
                         PlayerDeathFlag |= BossId_2_PlayerDiedFlag[i][1];
                     }                                               
+		    if (uiEncounter[TYPE_ALGALON] == IN_PROGRESS)
+		      {
+			uiAlgalonKillCount++; // He feeds on your tears
+		      }
                 }  
             }
 
@@ -506,6 +542,17 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (creature->GetEntry())
                 {
+		case NPC_ALGALON:
+		  uiAlgalonGUID = creature->GetGUID();
+		  if (AlgalonIntroDone && !SignalTimerMinutes)
+		    creature->DespawnOrUnsummon();
+		  creature->setActive(true);
+		  return;
+		case NPC_BRANN_ALGALON:
+		  AlgalonBrannGUID = creature->GetGUID();
+		  creature->setActive(true);
+		  return;
+
                     // Misc. guys
                     case NPC_RUNIC_COLOSSUS:
                         RunicColossusGUID = creature->GetGUID();
@@ -691,18 +738,6 @@ class instance_ulduar : public InstanceMapScript
                         YoggSaronBrainGUID = creature->GetGUID();
                         break;
 
-                    // Algalon
-                    case NPC_ALGALON:
-                        AlgalonGUID = creature->GetGUID();
-                        creature->SetReactState(REACT_DEFENSIVE);   // Maybe move this to script
-                        if (AlgalonCountdown < 62)
-                        { 
-                            creature->setFaction(7);
-                            creature->setActive(true);
-                        }
-                        else
-                            creature->SetVisible(false);
-                        break;                  
                 }
             }
 
@@ -710,6 +745,46 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (gameObject->GetEntry())
                 {
+		case GO_ALGALON_DOOR:
+		  AlgalonDoorGUID = gameObject->GetGUID();
+		  gameObject->SetGoState(GO_STATE_READY);
+		  if (AlgalonIntroDone)
+		    gameObject->SetGoState(GO_STATE_ACTIVE);
+		  break;
+		case GO_ALGALON_FLOOR_OOC:
+		  AlgalonFloorOOCGUID = gameObject->GetGUID();
+		  gameObject->SetGoState(GO_STATE_READY);
+		  gameObject->setActive(true);
+		  gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
+		  break;
+		case GO_ALGALON_FLOOR_COM:
+		  AlgalonFloorCOMGUID = gameObject->GetGUID();
+		  gameObject->SetGoState(GO_STATE_ACTIVE);
+		  gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
+		  break;
+		case GO_ALGALON_BRIDGE:
+		  AlgalonBridgeGUID = gameObject->GetGUID();
+		  gameObject->SetGoState(GO_STATE_READY);
+		  gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
+		  break;
+		case GO_ALGALON_GLOBE:
+		  AlgalonGlobeGUID = gameObject->GetGUID();
+		  HandleGameObject(0, false, gameObject);
+		  gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
+		  break;
+		case GO_ALGALON_INVISDOOR:
+		  AlgalonForceFieldGUID = gameObject->GetGUID();
+		  AddDoor(gameObject, true);
+		  gameObject->SetGoState(GO_STATE_ACTIVE);
+		  gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
+		  break;
+		case GO_ALGALON_CONSOLE:
+		  if (AlgalonIntroDone)
+		    {
+		      gameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+		    }
+		  break;
+
 		case GO_ULDUAR_DOME:
 		  gameObject->EnableCollision(true);
 		  break;
@@ -876,42 +951,6 @@ class instance_ulduar : public InstanceMapScript
                         HandleGameObject(NULL, false, gameObject);
                         break;
 
-                    // Algalon related
-                    case GO_ALGALON_PLATFORM:
-                        HandleGameObject(NULL, false, gameObject);
-                        break;
-                    case GO_ALGALON_BRIDGE:
-                        AlgalonBridgeGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
-                        break;
-                    case GO_ALGALON_B_VISUAL:
-                        AlgalonBridgeVisualGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
-                        break;
-                    case GO_ALGALON_B_DOOR:
-                        AlgalonBridgeDoorGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, true, gameObject);
-                        break;
-                    case GO_ALGALON_GLOBE:
-                        AlgalonGlobeGUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, false, gameObject);
-                        break;
-                    case GO_ALGALON_DOOR_1:
-                        AlgalonDoor1GUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, AlgalonCountdown < 62 ? true : false, gameObject);
-                        break;
-                    case GO_ALGALON_DOOR_2:
-                        AlgalonDoor2GUID = gameObject->GetGUID();
-                        HandleGameObject(NULL, AlgalonCountdown < 62 ? true : false, gameObject);
-                        break;
-                    case GO_ALGALON_ACCESS:
-                        AlgalonAccessGUID = gameObject->GetGUID();
-                        if (AlgalonCountdown < 62)
-                        {
-                            gameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                            gameObject->SetGoState(GO_STATE_ACTIVE);
-                        }
-                        break;
                 }
             }
 
@@ -957,6 +996,9 @@ class instance_ulduar : public InstanceMapScript
                 if (!InstanceScript::SetBossState(type, state))
                     return false;
                 
+		if (uiEncounter[type] != DONE)
+		  uiEncounter[type] = state;
+
                 if (UlduarBosses(type) <= BOSS_ALGALON)
                     if (GetBossState(UlduarBosses(type)) != DONE)
                         InstanceScript::SetBossState(UlduarBosses(type), state);
@@ -966,6 +1008,25 @@ class instance_ulduar : public InstanceMapScript
 
                 switch (type)
                 {
+		case TYPE_ALGALON :
+		  if (state == IN_PROGRESS)
+		    {
+		      HandleGameObject(AlgalonDoorGUID, false);     // Close Door
+		      HandleGameObject(AlgalonFloorOOCGUID, true);  // Makes bridge disappear
+		      HandleGameObject(AlgalonFloorCOMGUID, false); // Makes round combat floor appear
+		      HandleGameObject(AlgalonBridgeGUID, true);    // Removes collision from bridge
+		      HandleGameObject(AlgalonGlobeGUID,true);      // "Roomchanging"
+		      HandleGameObject(AlgalonForceFieldGUID,false);// Invisible Forcefield, prevents escape
+		    }
+		  else
+		    {
+		      HandleGameObject(AlgalonDoorGUID, true);
+		      HandleGameObject(AlgalonFloorOOCGUID, false);
+		      HandleGameObject(AlgalonFloorCOMGUID, true);
+		      HandleGameObject(AlgalonBridgeGUID, false);
+		      HandleGameObject(AlgalonGlobeGUID,false);
+		      HandleGameObject(AlgalonForceFieldGUID,true);
+		    }
                     case BOSS_LEVIATHAN:
                         for (std::list<uint64>::iterator i = LeviathanDoorGUIDList.begin(); i != LeviathanDoorGUIDList.end(); ++i)
                         {
@@ -1054,53 +1115,6 @@ class instance_ulduar : public InstanceMapScript
 			    gameObject->SetGoState(state == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
                         }
                         break;
-                    case BOSS_ALGALON:
-                        switch (state)
-                        {
-                            case SPECIAL:
-                                if (Creature* algalon = instance->GetCreature(AlgalonGUID))
-                                {
-                                    algalon->setFaction(7);
-                                    algalon->setActive(true);
-                                    algalon->SetVisible(true);
-                                    DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
-                                    DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, 60);
-                                }
-                                HandleGameObject(AlgalonDoor1GUID, true);
-                                HandleGameObject(AlgalonDoor2GUID, true);
-                                AlgalonCountdown = 61;
-                                SaveToDB();
-                                break;
-                            case NOT_STARTED:
-                                HandleGameObject(AlgalonGlobeGUID, false);
-                                HandleGameObject(AlgalonBridgeGUID, false);
-                                HandleGameObject(AlgalonBridgeVisualGUID, false);
-                                HandleGameObject(AlgalonBridgeDoorGUID, true);
-                                break;
-                            case IN_PROGRESS:
-                                if (AlgalonCountdown > 60)
-                                {
-                                    AlgalonCountdown = 60;
-                                    DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
-                                    DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, AlgalonCountdown);
-                                    SaveToDB();
-                                }
-                                HandleGameObject(AlgalonGlobeGUID, true);
-                                HandleGameObject(AlgalonBridgeGUID, true);
-                                HandleGameObject(AlgalonBridgeVisualGUID, true);
-                                HandleGameObject(AlgalonBridgeDoorGUID, false);
-                                break;
-                            case DONE:
-                                AlgalonCountdown = 0;
-                                DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 0);
-                                SaveToDB();
-                                HandleGameObject(AlgalonGlobeGUID, false);
-                                HandleGameObject(AlgalonBridgeGUID, false);
-                                HandleGameObject(AlgalonBridgeVisualGUID, false);
-                                HandleGameObject(AlgalonBridgeDoorGUID, true);
-                                break;
-                        }
-                        break;
                 }
                 if (GetBossState(BOSS_FREYA) == DONE &&
                     GetBossState(BOSS_MIMIRON) == DONE &&
@@ -1124,6 +1138,34 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case DATA_ALGALON_INTRO:
+		  AlgalonIntroDone = data;
+		  SaveToDB();
+		  break;
+		case DATA_ALGALON_TIMER:
+		  {
+		    if (SignalTimerState == data)
+		      break;
+		    switch (data)
+		      {
+		      case IN_PROGRESS:
+			SignalTimer = 60000;
+			SignalTimerMinutes = 60;
+			DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 1);
+			DoUpdateWorldState(WORLDSTATE_ALGALON_TIMER , SignalTimerMinutes);
+			break;
+		      case DONE:
+			SignalTimer = 0;
+			SignalTimerMinutes = 0;
+			DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 0);
+			break;
+		      default:
+			break;
+		      }
+		    SignalTimerState = data;
+		    SaveToDB();
+		    break;
+		  }
 		case BOSS_YOGGSARON :
                   yoggiEncounter = data;
 		  break;
@@ -1187,7 +1229,10 @@ class instance_ulduar : public InstanceMapScript
             uint64 GetData64(uint32 data)
             {
                 switch (data)
-                {                    
+                {
+		   case TYPE_ALGALON:               return uiAlgalonGUID;
+		   case GO_ALGALON_DOOR:            return AlgalonDoorGUID;
+		   case NPC_BRANN_ALGALON:	    return AlgalonBrannGUID;
                     case BOSS_IGNIS:                return IgnisGUID;                 
                     case BOSS_KOLOGARN:             return KologarnGUID;
                     case BOSS_AURIAYA:              return AuriayaGUID;      
@@ -1195,7 +1240,6 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_THORIM:               return ThorimGUID;
                     case BOSS_FREYA:                return FreyaGUID;
                     case BOSS_VEZAX:                return VezaxGUID;
-                    case BOSS_ALGALON:              return AlgalonGUID;                   
 
                     // Leviathan
                     case BOSS_LEVIATHAN:            return LeviathanGUID;
@@ -1269,6 +1313,10 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+		case DATA_ALGALON_INTRO:
+		  return AlgalonIntroDone;
+		case DATA_ALGALON_TIMER:
+		  return SignalTimerState;
 		case BOSS_YOGGSARON :
 		  return yoggiEncounter;
 		case DATA_ARM_HF :
@@ -1292,12 +1340,19 @@ class instance_ulduar : public InstanceMapScript
                 return 0;
             }
 
+	  void FillInitialWorldStates(WorldPacket& data)
+	  {
+	    data << uint32(WORLDSTATE_SHOW_TIMER)            << uint32(SignalTimerState == IN_PROGRESS);
+	    data << uint32(WORLDSTATE_ALGALON_TIMER)         << uint32(SignalTimerMinutes ? SignalTimerMinutes : 60);
+	  }
+
+
             std::string GetSaveData()
             {
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << "U U " << GetBossSaveData() << GetData(DATA_COLOSSUS) << " " << PlayerDeathFlag << " " << AlgalonCountdown;
+                saveStream << "U U " << GetBossSaveData() << GetData(DATA_COLOSSUS) << " " << PlayerDeathFlag << " " << uiAlgalonCountdown;
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -1331,37 +1386,12 @@ class instance_ulduar : public InstanceMapScript
 
                     loadStream >> ColossusData;
                     loadStream >> PlayerDeathFlag;
-                    loadStream >> AlgalonCountdown;
+		    loadStream >> uiAlgalonCountdown;
                 }
                 OUT_LOAD_INST_DATA_COMPLETE;
             }
 
-            // Here: Only handles Algalon's timer
-            void Update(uint32 diff)
-            {
-                // Note: AlgalonCountdown goes down to 61 once the encounter got started
-                if (AlgalonCountdown > 0 && AlgalonCountdown < 61)
-                {
-                    if (CountdownTimer < diff)
-                    {
-                        AlgalonCountdown--;
 
-                        if (AlgalonCountdown)
-                        {
-                            DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
-                            DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, AlgalonCountdown);
-                        }
-                        else
-                        {
-                            if (Creature* algalon = instance->GetCreature(AlgalonGUID))
-                                algalon->AI()->DoAction(1);
-                        }
-                        SaveToDB();
-                        CountdownTimer += 1*MINUTE*IN_MILLISECONDS;
-                    }
-                    CountdownTimer -= diff;
-                }
-            }
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

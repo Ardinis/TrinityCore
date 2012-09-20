@@ -3580,18 +3580,22 @@ class npc_keeper_help : public CreatureScript
                         case NPC_HELP_KEEPER_FREYA:
                             DoScriptText(SAY_FREYA_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, FREYA_SUPPORT);
+			    player->SummonCreature(NPC_KEEPER_FREYA, KeeperSpawnLocation[1], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                         case NPC_HELP_KEEPER_MIMIRON:
                             DoScriptText(SAY_MIMIRON_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, MIMIRON_SUPPORT);
+			    player->SummonCreature(NPC_KEEPER_MIMIRON, KeeperSpawnLocation[0], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                         case NPC_HELP_KEEPER_THORIM:
                             DoScriptText(SAY_THORIM_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, THORIM_SUPPORT);
+			    player->SummonCreature(NPC_KEEPER_THORIM, KeeperSpawnLocation[2], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                         case NPC_HELP_KEEPER_HODIR:
                             DoScriptText(SAY_HODIR_HELP, creature, player);
                             instance->SetData(DATA_ADD_HELP_FLAG, HODIR_SUPPORT);
+			    player->SummonCreature(NPC_KEEPER_HODIR, KeeperSpawnLocation[3], TEMPSUMMON_MANUAL_DESPAWN);
                             break;
                     }
                 }

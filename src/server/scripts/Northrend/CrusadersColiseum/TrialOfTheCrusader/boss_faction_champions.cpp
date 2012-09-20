@@ -542,7 +542,7 @@ public:
                             DoCast(target, SPELL_THORNS);
                         break;
                 }
-                m_uiCommonTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(1*IN_MILLISECONDS, 5*IN_MILLISECONDS);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);
@@ -822,7 +822,7 @@ public:
                         DoCast(me, SPELL_MANA_BURN);
                         break;
                 }
-                m_uiCommonTimer = urand(5*IN_MILLISECONDS, 10*IN_MILLISECONDS);
+                m_uiCommonTimer = urand(1*IN_MILLISECONDS, 5*IN_MILLISECONDS);
             } else m_uiCommonTimer -= uiDiff;
 
             boss_faction_championsAI::UpdateAI(uiDiff);

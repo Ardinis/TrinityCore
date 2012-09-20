@@ -987,6 +987,7 @@ public:
       _impaledguid = 0;
       _isEventInProgress = false;
       me->SetFlying(false);
+      _introDone = false;
       me->SetUnitMovementFlags(MOVEMENTFLAG_HOVER);
     }
 
@@ -1214,7 +1215,7 @@ public:
     
   private:
     uint64 _impaledguid;
-    bool _isEventInProgress;
+    bool _isEventInProgress, _introDone;
   };
 
   CreatureAI* GetAI(Creature* creature) const

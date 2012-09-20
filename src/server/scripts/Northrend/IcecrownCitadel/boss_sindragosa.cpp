@@ -199,6 +199,7 @@ class boss_sindragosa : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ASPHYXIATION);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FROST_AURA, false);
 		me->SetHomePosition(SindragosaLandPos);
+		me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void Reset()
@@ -226,6 +227,7 @@ class boss_sindragosa : public CreatureScript
                     me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                 }
 		me->SetHomePosition(SindragosaLandPos);
+		me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void JustDied(Unit* killer)
@@ -283,7 +285,7 @@ class boss_sindragosa : public CreatureScript
 
                         me->setActive(true);
                         me->SetSpeed(MOVE_FLIGHT, 4.0f);
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+			//                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         float moveTime = me->GetExactDist(&SindragosaFlyPos) / (me->GetSpeed(MOVE_FLIGHT) * 0.001f);
                         me->m_Events.AddEvent(new FrostwyrmLandEvent(*me, SindragosaLandPos), me->m_Events.CalculateTime(uint64(moveTime) + 250));
                         me->GetMotionMaster()->MovePoint(POINT_FROSTWYRM_FLY_IN, SindragosaFlyPos);

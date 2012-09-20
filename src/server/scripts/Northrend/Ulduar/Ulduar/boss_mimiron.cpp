@@ -447,11 +447,12 @@ class boss_mimiron : public CreatureScript
                         }
                         break;
                     case EVENT_FLAME:
-                        for (uint8 i = 0; i < 3; ++i)
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast(target, SPELL_SUMMON_FLAMES_INITIAL, true);
-                        events.ScheduleEvent(EVENT_FLAME, 30000);
-                        break;
+		      me->MonsterYell("EVENT_FLAME", LANG_UNIVERSAL, 0);
+		      for (uint8 i = 0; i < 3; ++i)
+			if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+			  DoCast(target, SPELL_SUMMON_FLAMES_INITIAL, true);
+		      events.ScheduleEvent(EVENT_FLAME, 30000);
+		      break;
                     case EVENT_STEP_1:
                         switch (phase)
                         {
@@ -904,8 +905,10 @@ class boss_mimiron : public CreatureScript
                         break;
                     case DO_INCREASE_FLAME_COUNT:
                         ++flameCount;
+			std::cout << "DO_INCREASE_FLAME_COUNT : " << flameCount << std::endl;
                         break;
                     case DO_DECREASE_FLAME_COUNT:
+			std::cout << "DO_DECREASE_FLAME_COUNT : " << flameCount << std::endl;
                         if (flameCount)
                             --flameCount;
                         break;
@@ -2425,6 +2428,7 @@ class npc_mimiron_flame_spread : public CreatureScript
                 instance = me->GetInstanceScript();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_DISABLE_MOVE);
                 me->SetReactState(REACT_PASSIVE);                
+		Reset();
             }
 
             void Reset()
@@ -2452,8 +2456,8 @@ class npc_mimiron_flame_spread : public CreatureScript
 
             void UpdateAI(uint32 const /*diff*/)
             {
-                if (instance && instance->GetBossState(BOSS_MIMIRON) != IN_PROGRESS)
-                    me->DespawnOrUnsummon();
+	      if (instance && instance->GetBossState(BOSS_MIMIRON) != IN_PROGRESS)
+		me->DespawnOrUnsummon();
             }
 
             private:

@@ -851,7 +851,7 @@ public:
 
                     if (m_uiMassiveCrashTimer <= uiDiff)
                     {
-                        me->GetMotionMaster()->MoveJump(ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 10.0f, 20.0f); // 1: Middle of the room
+                        me->GetMotionMaster()->MoveJump(ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 20.0f, 20.0f); // 1: Middle of the room
                         m_uiStage = 7; //Invalid (Do nothing more than move)
                         m_uiMassiveCrashTimer = 30*IN_MILLISECONDS;
                     } else m_uiMassiveCrashTimer -= uiDiff;
@@ -891,7 +891,7 @@ public:
                             me->GetMotionMaster()->MoveJump(2*me->GetPositionX()-m_fTrampleTargetX,
                                 2*me->GetPositionY()-m_fTrampleTargetY,
                                 me->GetPositionZ(),
-                                10.0f, 20.0f); // 2: Hop Backwards
+                                20.0f, 20.0f); // 2: Hop Backwards
                             m_uiStage = 7; //Invalid (Do nothing more than move)
                         } else m_uiStage = 6;
                     } else m_uiTrampleTimer -= uiDiff;

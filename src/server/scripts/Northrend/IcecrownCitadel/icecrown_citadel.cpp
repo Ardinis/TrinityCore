@@ -990,6 +990,16 @@ public:
       me->SetUnitMovementFlags(MOVEMENTFLAG_HOVER);
     }
 
+    void MoveInLineOfSight(Unit* who)
+    {
+      if (!_introDone && me->IsWithinDistInMap(who, 10.0f))
+	{
+	  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); // JUST BECAUSE I THING FLAG IS SPAWN WITH SMART OR SOMETHIONG LIKE THAT
+	  me->SetReactState(REACT_AGGRESSIVE);
+	  _introDone = true;
+	}
+    }
+
     void JustDied(Unit* /*killer*/)
     {
       if (_impaledguid)

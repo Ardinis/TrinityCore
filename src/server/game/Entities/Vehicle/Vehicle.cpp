@@ -498,8 +498,7 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
             float px = x + passenger->m_movementInfo.t_pos.m_positionX;
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
-            float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
-/*			
+            float po = ang + passenger->m_movementInfo.t_pos.m_orientation;		
 	    if (ang != 0)
 	      {
 		float nang = (ang  * 360) / 6.3;
@@ -512,8 +511,7 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 		float ynew = px * s + py * c;
 		px = xnew + x;
 		py = ynew + y;
-	      }
-*/		  
+	      }  
             passenger->UpdatePosition(px, py, pz, po);
         }
 }

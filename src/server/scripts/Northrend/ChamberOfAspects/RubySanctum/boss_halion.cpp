@@ -426,10 +426,14 @@ class boss_halion : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_ONE_MASK)
                     return;
 
+
+
 		if (!spellInfo || spellInfo->Id != SPELL_COPY_DAMAGE)
                 {
                     if (!DealDamageToOtherHalion(instance->GetData64(DATA_TWILIGHT_HALION), spellInfo ? spellInfo->SchoolMask : SPELL_SCHOOL_MASK_SHADOW, damage))
                         return;
+
+		    DoZoneInCombat();
 
                     // Keep track of damage taken
                     if (events.GetPhaseMask() & PHASE_THREE_MASK)
@@ -1091,13 +1095,13 @@ class npc_orb_carrier : public CreatureScript
 	      else mui_rotate -= diff;
 
 	      //debug mod
-	      /*  if (mui_damage <= diff)
+	      if (mui_damage <= diff)
 		{
 		  DamagePlayers();
 		  mui_damage = 200;
 		}
 	      else
-	      mui_damage -= diff;*/
+	      mui_damage -= diff;
             }
 
 	  void DamagePlayers()
@@ -1976,10 +1980,10 @@ public:
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
 		  float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
-		  if (dd >= -0.5f && dd <= 0.5f)
+		  if (dd == 0)
 		    {
 		      caster->ToCreature()->MonsterYell(" $N you were shoot by me mouahahah", LANG_UNIVERSAL, player->GetGUID());
-		      player->DealDamage(player, 200000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
+		      //		      player->DealDamage(player, 200000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
 		    }
 		}
 	    }
@@ -2072,7 +2076,7 @@ void AddSC_boss_halion()
     new npc_meteor_strike();
     new npc_combustion_consumption();
     new npc_orb_carrier();
-    //    new npc_orb_carrier_damage();
+    new npc_orb_carrier_damage();
     new npc_living_inferno();
     new npc_living_ember();
 

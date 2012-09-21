@@ -351,30 +351,31 @@ class boss_flame_leviathan : public CreatureScript
             {
                 if (doInstall)
                 {
-					for (uint8 i = RAID_MODE<uint8>(2, 0); i < 4; ++i)
+		  for (uint8 i = RAID_MODE<uint8>(2, 0); i < 4; ++i)
                     {
-							if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
-							{
-								target->EnterVehicle(me, i);
+		      if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
+			{
+			  target->EnterVehicle(me, i);
+			  me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+			  if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+			    turret->EnterVehicle(target, SEAT_TURRET);
 
-								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
-									turret->EnterVehicle(target, SEAT_TURRET);
-
-								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
-									device->EnterVehicle(target, SEAT_DEVICE);
-							}
+			  if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+			    device->EnterVehicle(target, SEAT_DEVICE);
+			  target->GetVehicleKit()->RelocatePassengers(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+			}
                     }
 
-                    if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
-                        cannon->EnterVehicle(me, SEAT_CANNON);
+		  if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
+		    cannon->EnterVehicle(me, SEAT_CANNON);
                 }
                 else
-                {
-					DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
-					DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
-					DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
-					DespawnCreatures(NPC_SEAT,200.0f);
-                }
+		  {
+		    DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
+		    DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
+		    DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
+		    DespawnCreatures(NPC_SEAT,200.0f);
+		  }
             }
 
 			void DespawnCreatures(uint32 entry, float distance)
@@ -1987,7 +1988,7 @@ public:
 		    {
 		      me->CastSpell(me,69900,true);
 		      me->FindNearestGameObject(GO_ULDUAR_DOME, 250.0f)->RemoveFromWorld();
-		      me->FindNearestGameObject(7000001, 250.0f)->RemoveFromWorld();
+		      //		      me->FindNearestGameObject(7000001, 250.0f)->RemoveFromWorld();
 		    }
 		  JumpToNextStepBrann(1500);
 		  break;

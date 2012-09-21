@@ -355,8 +355,10 @@ class boss_flame_leviathan : public CreatureScript
                     {
 							if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
 							{
+								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 								target->EnterVehicle(me, i);
-
+								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+								
 								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
 									turret->EnterVehicle(target, SEAT_TURRET);
 
@@ -887,6 +889,7 @@ class npc_flame_leviathan_seat : public CreatureScript
             {
                 ASSERT(vehicle);
 				me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
+				VerifSpawndesTemplate = 0;
             }
 
             void Reset()
@@ -904,6 +907,18 @@ class npc_flame_leviathan_seat : public CreatureScript
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_MIMIRONS_INFERNO_DAMAGE, apply); // Mimirons Inferno
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_HODIRS_FURY_DAMAGE, apply); // Hodirs Fury
             }
+
+            void UpdateAI(const uint32 diff)
+            {
+				if(VerifSpawndesTemplate == 0)
+				{
+					vehicle->InstallAccessory(NPC_DEFENSE_TURRET,SEAT_TURRET,1,6,30000);
+					vehicle->InstallAccessory(NPC_OVERLOAD_DEVICE,SEAT_DEVICE,1,6,30000);
+					printf("\n oN fait le test 1 fois pour le verif spawn");
+
+					VerifSpawndesTemplate = 1;
+				}
+			}
 
             void PassengerBoarded(Unit* who, int8 seatId, bool apply)
             {
@@ -959,6 +974,7 @@ class npc_flame_leviathan_seat : public CreatureScript
 
             private:
                 Vehicle* vehicle;
+				int8 VerifSpawndesTemplate;
         };
 
         CreatureAI* GetAI(Creature* creature) const

@@ -357,6 +357,7 @@ class boss_flame_leviathan : public CreatureScript
 							{
 								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 								target->EnterVehicle(me, i);
+								me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
 								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 								
 								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
@@ -364,19 +365,21 @@ class boss_flame_leviathan : public CreatureScript
 
 								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
 									device->EnterVehicle(target, SEAT_DEVICE);
+								target->GetVehicleKit()->RelocatePassengers(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 							}
                     }
 
-                    if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
-                        cannon->EnterVehicle(me, SEAT_CANNON);
+					if (Creature* cannon = me->SummonCreature(NPC_DEFENSE_CANNON, *me))
+						cannon->EnterVehicle(me, SEAT_CANNON);
                 }
                 else
-                {
+				{
 					DespawnCreatures(NPC_DEFENSE_CANNON,200.0f);
 					DespawnCreatures(NPC_OVERLOAD_DEVICE,200.0f);
 					DespawnCreatures(NPC_DEFENSE_TURRET,200.0f);
 					DespawnCreatures(NPC_SEAT,200.0f);
-                }
+				}
             }
 
 			void DespawnCreatures(uint32 entry, float distance)
@@ -2003,7 +2006,7 @@ public:
 		    {
 		      me->CastSpell(me,69900,true);
 		      me->FindNearestGameObject(GO_ULDUAR_DOME, 250.0f)->RemoveFromWorld();
-		      me->FindNearestGameObject(7000001, 250.0f)->RemoveFromWorld();
+		      //		      me->FindNearestGameObject(7000001, 250.0f)->RemoveFromWorld();
 		    }
 		  JumpToNextStepBrann(1500);
 		  break;

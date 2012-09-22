@@ -73,7 +73,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
         }
         else
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "SMSG_CALENDAR_SEND_CALENDAR: No Invite found with id [" UI64FMTD "]", *it);
+            sLog->outError( "SMSG_CALENDAR_SEND_CALENDAR: No Invite found with id [" UI64FMTD "]", *it);
             data << uint64(0);
             data << uint64(0);
             data << uint8(0);
@@ -92,14 +92,14 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
             data << uint64(*it);
             data << calendarEvent->GetTitle();
             data << uint32(calendarEvent->GetType());
-            data.AppendPackedTime(calendarEvent->GetTime());
+	    data << uint32(secsToTimeBitFields(calendarEvent->GetTime()));
             data << uint32(calendarEvent->GetFlags());
             data << uint32(calendarEvent->GetDungeonId());
             data.appendPackGUID(calendarEvent->GetCreatorGUID());
         }
         else
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "SMSG_CALENDAR_SEND_CALENDAR: No Event found with id [" UI64FMTD "]", *it);
+            sLog->outError( "SMSG_CALENDAR_SEND_CALENDAR: No Event found with id [" UI64FMTD "]", *it);
             data << uint64(0);
             data << uint8(0);
             data << uint32(0);
@@ -111,7 +111,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
     }
 
     data << uint32(cur_time);                              // server time
-    data.AppendPackedTime(cur_time);                       // server time
+    data << uint32(secsToTimeBitFields(cur_time));                       // server time
 
     uint32 counter = 0;
     size_t p_counter = data.wpos();
@@ -254,7 +254,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 
         if (inviteCount != 1 || invitee != guid)
         {
-            sLog->outError(LOG_FILTER_NETWORKIO, "HandleCalendarAddEvent: [" UI64FMTD
+            sLog->outError( "HandleCalendarAddEvent: [" UI64FMTD
                  "]: More than one invite (%d) or Invitee  [" UI64FMTD
                  "] differs", guid, inviteCount, invitee);
             return;
@@ -620,8 +620,8 @@ void WorldSession::SendCalendarEvent(CalendarEvent const& calendarEvent, Calenda
     data << uint32(calendarEvent.GetMaxInvites());
     data << int32(calendarEvent.GetDungeonId());
     data << uint32(calendarEvent.GetFlags());
-    data.AppendPackedTime(calendarEvent.GetTime());
-    data.AppendPackedTime(calendarEvent.GetTimeZoneTime());
+    data << uint32(secsToTimeBitFields(calendarEvent.GetTime()));
+    data << uint32(secsToTimeBitFields(calendarEvent.GetTimeZoneTime()));
     data << uint32(calendarEvent.GetGuildId());
 
     CalendarInviteIdList const& invites = calendarEvent.GetInviteIdList();
@@ -649,7 +649,7 @@ void WorldSession::SendCalendarEvent(CalendarEvent const& calendarEvent, Calenda
             data << uint8(0) << uint8(0) << uint8(0) << uint8(0)
                 << uint64(0) << uint32(0) << uint8(0);
 
-            sLog->outError(LOG_FILTER_NETWORKIO, "SendCalendarEvent: No Invite found with id [" UI64FMTD "]", *it);
+            sLog->outError( "SendCalendarEvent: No Invite found with id [" UI64FMTD "]", *it);
         }
     }
     SendPacket(&data);
@@ -698,7 +698,7 @@ void WorldSession::SendCalendarEventInviteAlert(CalendarEvent const& calendarEve
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_ALERT);
     data << uint64(eventId);
     data << calendarEvent.GetTitle().c_str();
-    data.AppendPackedTime(calendarEvent.GetTime());
+    data << uint32(secsToTimeBitFields(calendarEvent.GetTime()));
     data << uint32(calendarEvent.GetFlags());
     data << uint32(calendarEvent.GetType());
     data << uint32(calendarEvent.GetDungeonId());
@@ -723,9 +723,9 @@ void WorldSession::SendCalendarEventUpdateAlert(CalendarEvent const& calendarEve
         calendarEvent.GetTitle().size() + calendarEvent.GetDescription().size() + 1 + 4 + 4);
     data << uint8(sendEventType);
     data << uint64(eventId);
-    data.AppendPackedTime(calendarEvent.GetTime());
+    data << uint32(secsToTimeBitFields(calendarEvent.GetTime()));
     data << uint32(calendarEvent.GetFlags());
-    data.AppendPackedTime(calendarEvent.GetTime());
+    data << uint32(secsToTimeBitFields(calendarEvent.GetTime()));
     data << uint8(calendarEvent.GetType());
     data << uint32(calendarEvent.GetDungeonId());
     data << calendarEvent.GetTitle().c_str();
@@ -748,7 +748,7 @@ void WorldSession::SendCalendarEventRemovedAlert(CalendarEvent const& calendarEv
     WorldPacket data(SMSG_CALENDAR_EVENT_REMOVED_ALERT, 1 + 8 + 1);
     data << uint8(1); // FIXME: If true does not SignalEvent(EVENT_CALENDAR_ACTION_PENDING)
     data << uint64(eventId);
-    data.AppendPackedTime(eventTime);
+    data << uint32(secsToTimeBitFields(eventTime));
     SendPacket(&data);
 }
 
@@ -774,11 +774,11 @@ void WorldSession::SendCalendarEventStatus(CalendarEvent const& calendarEvent, C
     WorldPacket data(SMSG_CALENDAR_EVENT_STATUS, 8 + 8 + 4 + 4 + 1 + 1 + 4);
     data.appendPackGUID(invitee);
     data << uint64(eventId);
-    data.AppendPackedTime(eventTime);
+    data << uint32(secsToTimeBitFields(eventTime));
     data << uint32(flags);
     data << uint8(status);
     data << uint8(rank);
-    data.AppendPackedTime(statusTime);
+    data << uint32(secsToTimeBitFields(statusTime));
     SendPacket(&data);
 }
 
@@ -816,7 +816,7 @@ void WorldSession::SendCalendarEventInviteRemoveAlert(CalendarEvent const& calen
 
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_REMOVED_ALERT, 8 + 4 + 4 + 1);
     data << uint64(eventId);
-    data.AppendPackedTime(eventTime);
+    data << uint32(secsToTimeBitFields(eventTime));
     data << uint32(flags);
     data << uint8(status);
     SendPacket(&data);
@@ -883,7 +883,7 @@ void WorldSession::SendCalendarRaidLockout(InstanceSave const* save, bool add)
     if (add)
     {
         data.SetOpcode(SMSG_CALENDAR_RAID_LOCKOUT_ADDED);
-        data.AppendPackedTime(currTime);
+        data << uint32(secsToTimeBitFields(currTime));
     }
 
     data << uint32(save->GetMapId());
@@ -905,7 +905,7 @@ void WorldSession::SendCalendarRaidLockoutUpdated(InstanceSave const* save)
     time_t cur_time = time_t(time(NULL));
 
     WorldPacket data(SMSG_CALENDAR_RAID_LOCKOUT_UPDATED, 4 + 4 + 4 + 4 + 8);
-    data.AppendPackedTime(cur_time);
+    data << uint32(secsToTimeBitFields(cur_time));
     data << uint32(save->GetMapId());
     data << uint32(save->GetDifficulty());
     data << uint32(0); // Amount of seconds that has changed to the reset time

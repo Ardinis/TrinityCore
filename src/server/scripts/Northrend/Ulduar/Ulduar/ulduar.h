@@ -229,6 +229,8 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_IRONROOT_LASHER          = 33526,
     NPC_NATURES_BLADE            = 33527,
     NPC_GUARDIAN_OF_LIFE         = 33528,
+
+    NPC_BRANN_EVENT_START_ULDU = 33579,
 };
 
 enum UlduarGameObjects

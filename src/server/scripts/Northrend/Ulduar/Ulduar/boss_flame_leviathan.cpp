@@ -230,6 +230,8 @@ enum Actions
     ACTION_START_OUTRO,
 };
 
+#define TYPE_ULDUAR_EVENT 3132
+
 Position const Misc[]=
 {
     {266.689f, -33.391f, 409.99f, 0.0f},    // Thorim Beacon bunnys
@@ -337,19 +339,27 @@ class boss_flame_leviathan : public CreatureScript
 		DoScriptText(SAY_AGGRO, me);
             }
 
+	  void JustReachedHome()
+	  {
+	    if (Creature* Brann =  ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_BRANN_EVENT_START_ULDU)))
+	      Brann->AI()->SetData(TYPE_ULDUAR_EVENT, 5);
+	  }
+
 	  void Outro()
 	  {
+	    if (Creature* BrannIntro =  ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_BRANN_EVENT_START_ULDU)))
+	      BrannIntro->AI()->SetData(TYPE_ULDUAR_EVENT, 6);
 	    if (Creature* MachineBrann = me->SummonCreature(VOLANTE_BRANN_OUTRO, 140.0f, -37.0f, 460.0f, 6.2f))
 	      {
 		MachineBrann->SetFlying(true);
 		MachineBrann->SetSpeed(MOVE_RUN , 2.0f);
 		MachineBrann->SetSpeed(MOVE_WALK , 2.0f);
 		MachineBrann->SetSpeed(MOVE_FLIGHT , 2.0f);
-		if (Creature* Brann = me->SummonCreature(NPC_BRANN_OUTRO, 140.0f, -37.0f, 460.0f, 6.2f))
+		if (Creature* BrannOutro = me->SummonCreature(NPC_BRANN_OUTRO, 140.0f, -37.0f, 460.0f, 6.2f))
 		  {
 		    float x, y, z;
 		    me->GetPosition(x, y, z);
-		    Brann->EnterVehicle(MachineBrann);
+		    BrannOutro->EnterVehicle(MachineBrann);
 		    //		z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
 		    MachineBrann->GetMotionMaster()->MovePoint(ACTION_START_OUTRO, x - 10, y - 10, z + 1);
 		  }
@@ -2025,7 +2035,6 @@ class npc_lorekeeper : public CreatureScript
 
 //enable hardmode
 ////npc_brann_bronzebeard this requires more work involving area triggers. if reached this guy speaks through his radio..
-#define TYPE_ULDUAR_EVENT 3132
 #define NPC_PENTARUS 33624
 #define GOSSIP_ITEM_BRANN_3         "Nous sommes pret !"
 #define SAY_BRANN_1                 "Pentarus, vous l'avez entendue. Que vos mages levent le bouclier pour laisser passer ces braves ames !"
@@ -2042,16 +2051,16 @@ public:
 
   struct npc_brann_bronzebeardAI : public npc_escortAI
   {
-    npc_brann_bronzebeardAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_brann_bronzebeardAI(Creature* pCreature) : npc_escortAI(pCreature), summons(pCreature)
     {
       instance = pCreature->GetInstanceScript();
     }
 
     InstanceScript* instance;
-        
     bool bSteppingBrann;
     uint32 uiStepBrann;
     uint32 uiPhaseTimerBrann;
+    SummonList summons;
         
     void Reset() 
     {   
@@ -2070,6 +2079,11 @@ public:
     {
     }
 
+    void JustSummoned(Creature* summon)
+    {
+      summons.Summon(summon);
+    }
+
     void SetData(uint32 id, uint32 data)
     {
       switch(id)
@@ -2081,6 +2095,25 @@ public:
 	      uiPhaseTimerBrann = 0;
 	      bSteppingBrann = true;
 	      uiStepBrann    = 0;
+	      break;
+	    case 5:
+	      uiPhaseTimerBrann = 0;
+              bSteppingBrann = false;
+              uiStepBrann    = 0;
+	      summons.DespawnAll();
+	      me->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pIngenieur = me->FindNearestCreature(33626, 1000.0f))
+		pIngenieur->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pBataille = me->FindNearestCreature(33662, 1000.0f))
+		pBataille->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pMage = me->FindNearestCreature(33672, 1000.0f))
+		pMage->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pPentarus = me->FindNearestCreature(NPC_PENTARUS, 1000.0f))
+		pPentarus->GetMotionMaster()->MoveTargetedHome();
+	      me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	      break;
+	    case 6:
+	      summons.DespawnAll();
 	      break;
 	    }
 	  break;

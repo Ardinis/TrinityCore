@@ -73,6 +73,8 @@ class instance_ulduar : public InstanceMapScript
             uint64 LeviathanGateGUID;
             std::list<uint64> LeviathanDoorGUIDList;
 
+	  uint64 uiBrannGUID;
+
             // Ignis
             uint64 IgnisGUID;
 
@@ -211,6 +213,8 @@ class instance_ulduar : public InstanceMapScript
                 leviathanChestGUID  = 0;
                 LeviathanGUID       = 0;
                 LeviathanGateGUID   = 0;
+
+		uiBrannGUID = 0;
 
                 // Ignis
                 IgnisGUID = 0;
@@ -542,6 +546,9 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (creature->GetEntry())
                 {
+		case NPC_BRANN_EVENT_START_ULDU:
+		  uiBrannGUID = creature->GetGUID();
+		  break;
 		case NPC_ALGALON:
 		  uiAlgalonGUID = creature->GetGUID();
 		  if (AlgalonIntroDone && !SignalTimerMinutes)
@@ -1230,9 +1237,10 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (data)
                 {
-		   case TYPE_ALGALON:               return uiAlgalonGUID;
-		   case GO_ALGALON_DOOR:            return AlgalonDoorGUID;
-		   case NPC_BRANN_ALGALON:	    return AlgalonBrannGUID;
+		    case NPC_BRANN_EVENT_START_ULDU :   return uiBrannGUID;
+		    case TYPE_ALGALON:              return uiAlgalonGUID;
+		    case GO_ALGALON_DOOR:           return AlgalonDoorGUID;
+		    case NPC_BRANN_ALGALON:	    return AlgalonBrannGUID;
                     case BOSS_IGNIS:                return IgnisGUID;                 
                     case BOSS_KOLOGARN:             return KologarnGUID;
                     case BOSS_AURIAYA:              return AuriayaGUID;      

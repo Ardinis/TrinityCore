@@ -124,7 +124,7 @@ uint64 CalendarMgr::GetFreeInviteId()
 
 void CalendarMgr::LoadFromDB()
 {
-  
+
     uint32 count = 0;
     //                                                       0   1        2      3            4     5        6          7      8           9
     if (QueryResult result = CharacterDatabase.Query("SELECT id, creator, title, description, type, dungeon, eventtime, flags, repeatable, time2 FROM calendar_events"))
@@ -177,7 +177,6 @@ void CalendarMgr::LoadFromDB()
         while (result->NextRow());
 
     sLog->outString( ">> Loaded %u calendar Invites", count);
-    
 }
 
 void CalendarMgr::SaveToDB()
@@ -190,10 +189,10 @@ void CalendarMgr::SaveToDB()
   	uint64 eventId = (*itr).first;
 	CalendarEvent& calendarEvent = _events[eventId];
 	uint64 creatorGUID = calendarEvent.GetCreatorGUID();
-  std::cout << "billi 2" << std::endl;  
+	std::cout << "billi 2" << std::endl;
 	std::string title = calendarEvent.GetTitle();
 	std::string description = calendarEvent.GetDescription();
-  std::cout << "billi 3" << std::endl;  
+	std::cout << "billi 3" << std::endl;
 	uint8 type = calendarEvent.GetType();
 	int32 dungeonId = calendarEvent.GetDungeonId();
 	uint32 time = calendarEvent.GetTime();
@@ -201,7 +200,7 @@ void CalendarMgr::SaveToDB()
 	bool repeatable = calendarEvent.GetRepeatable();
 	uint32 timeZoneTime = calendarEvent.GetTimeZoneTime();
 
-	//    CharacterDatabase.PExecute("INSERT INTO calendar_events (id, creator, title, description, type, dungeon, eventtime, flags, repeatable, time2) VALUES ('%u', '%u', '%s', '%s', '%u', '%d', '%u', '%u', '%u', '%u')", eventId,  calendarEvent.GetCreatorGUID(), calendarEvent.GetTitle(), calendarEvent.GetDescription(), calendarEvent.GetType(), calendarEvent.GetDungeonId(), calendarEvent.GetTime(), calendarEvent.GetFlags(), calendarEvent.GetRepeatable(), calendarEvent.GetTimeZoneTime());
+	CharacterDatabase.PExecute("INSERT INTO calendar_events (id, creator, title, description, type, dungeon, eventtime, flags, repeatable, time2) VALUES (%u, %u, '%s', '%s', %u, %d, %u, %u, %u, %u)", eventId, calendarEvent.GetCreatorGUID(), calendarEvent.GetTitle(), calendarEvent.GetDescription(), calendarEvent.GetType(), calendarEvent.GetDungeonId(), calendarEvent.GetTime(), calendarEvent.GetFlags(), (calendarEvent.GetRepeatable() ? 1 : 0), calendarEvent.GetTimeZoneTime());
 	++count;
       }
     sLog->outString( ">> Saved %u calendar events", count);

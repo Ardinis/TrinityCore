@@ -329,6 +329,14 @@ bool ChatHandler::HandleRecupCommand(const char* /*args*/)
 	      uint16 skill_level = static_cast<uint16>(atoi(my_skill[1]));
 	      uint16 skill_max = perso->GetMaxSkillValueForLevel();
 	      uint16 skill_step = perso->GetSkillStep(skill_id);
+
+	      QueryResult r_prof = WebDatabase.PQuery("SELECT spell FROM profession_spell WHERE skill = %u", skill_id);
+	      if (r_prof)
+	      {
+		Field *prof_fields = r_prof->Fetch();
+		if (uint32 spell_id = prof_fields[0].GetUInt32())
+		  perso->learnSpell(spell_id, false);
+	      }
 	      perso->SetSkill(skill_id, skill_step, skill_level, skill_max);
 	    }
 	  }
@@ -352,6 +360,7 @@ bool ChatHandler::HandleRecupCommand(const char* /*args*/)
 	    }
 	  }
       }
+
       WebDatabase.PExecute("UPDATE recups SET status=4 WHERE id=%u", r_guid);
       perso->SaveToDB();
       PSendSysMessage(LANG_RECUP_DONE);

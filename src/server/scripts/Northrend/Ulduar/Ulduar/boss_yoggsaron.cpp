@@ -2138,7 +2138,7 @@ class npc_yogg_saron_tentacle : public CreatureScript
 			  if (Player* target =  me->FindNearestPlayer(10.0f, true)) //i think 20 yards is better, know need just somes adjustement need to see raid test result
 			    {
 			      //				target->EnterVehicle(me);
-			      target->CastSpell(me, SPELL_LUNGE, true);
+			      //			      target->CastSpell(me, SPELL_LUNGE, true);
 			    }
 			  break;
                     }

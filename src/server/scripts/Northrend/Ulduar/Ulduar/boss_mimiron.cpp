@@ -1199,6 +1199,7 @@ class boss_leviathan_mk_turret : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+		instance = me->GetInstanceScript();
             }
 
             void Reset()
@@ -1241,6 +1242,8 @@ class boss_leviathan_mk_turret : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+		if (instance && instance->GetBossState(BOSS_MIMIRON) != IN_PROGRESS)
+		  return;
 
                 if (napalmShellTimer <= diff)
                 {
@@ -1252,8 +1255,10 @@ class boss_leviathan_mk_turret : public CreatureScript
                     napalmShellTimer -= diff;
             }
 
-            private:
-                uint32 napalmShellTimer;
+	private:
+	  uint32 napalmShellTimer;
+	  InstanceScript* instance;
+
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -2494,6 +2499,7 @@ class npc_frost_bomb : public CreatureScript
                 if (frostTimer <= diff)
                 {
                     DoCast(me, RAID_MODE(SPELL_FROST_BOMB_EXPLOSION_10, SPELL_FROST_BOMB_EXPLOSION_25), true);
+		    me->DespawnOrUncummon();
                     frostTimer = 10000;
                 }
                 else frostTimer -= diff;

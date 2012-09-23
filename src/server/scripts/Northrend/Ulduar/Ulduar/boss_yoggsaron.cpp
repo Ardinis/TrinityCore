@@ -2094,7 +2094,7 @@ class npc_yogg_saron_tentacle : public CreatureScript
                         DoCast(SPELL_FOCUS_ANGER);
                         break;
                     case CONSTRICTOR_TENTACLE:
-                        tentacleSpellTimer = urand(20000,30000);
+                        tentacleSpellTimer = 1000;
                         break;
                 }
             }
@@ -2135,7 +2135,7 @@ class npc_yogg_saron_tentacle : public CreatureScript
 			    DoCast(target, RAND(SPELL_DRAINING_POISON, SPELL_BLACK_PLAGUE, SPELL_APATHY, SPELL_CURSE_OF_DOOM), false);
 			  break;
                         case CONSTRICTOR_TENTACLE:
-			  if (Player* target =  me->FindNearestPlayer(20.0f, true)) //i think 20 yards is better, know need just somes adjustement need to see raid test result
+			  if (Player* target =  me->FindNearestPlayer(10.0f, true)) //i think 20 yards is better, know need just somes adjustement need to see raid test result
 			    {
 			      //				target->EnterVehicle(me);
 			      target->CastSpell(me, SPELL_LUNGE, true);

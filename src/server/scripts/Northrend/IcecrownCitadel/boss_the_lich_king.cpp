@@ -1606,7 +1606,7 @@ class npc_valkyr_shadowguard : public CreatureScript
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
 		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
+		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
 		mui_check = 3000;
 		mui_check2 = 3000;
             }

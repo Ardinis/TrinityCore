@@ -394,18 +394,21 @@ class boss_flame_leviathan : public CreatureScript
                     {
 							if (Creature* target = me->SummonCreature(NPC_SEAT, *me))
 							{
-								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 								target->EnterVehicle(me, i);
 								me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+								//printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
 								
-								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, *target))
+								{
 									turret->EnterVehicle(target, SEAT_TURRET);
+									//printf("\n Position TOURRETE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,turret->GetPositionX(), turret->GetPositionY(), turret->GetPositionZ());
+								}
 
-								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()))
+								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, *target))
+								{
 									device->EnterVehicle(target, SEAT_DEVICE);
-								target->GetVehicleKit()->RelocatePassengers(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
-								printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+									//printf("\n Position DEVICE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,device->GetPositionX(), device->GetPositionY(), device->GetPositionZ());
+								}
 							}
                     }
 
@@ -420,6 +423,32 @@ class boss_flame_leviathan : public CreatureScript
 					DespawnCreatures(NPC_SEAT,200.0f);
 				}
             }
+
+			//void BoucleRelocate(uint32 entry, float distance)
+			//{
+			//	std::list<Creature*> m_pCreatures;
+			//	GetCreatureListWithEntryInGrid(m_pCreatures, me, entry, distance);
+   //  
+			//	if (m_pCreatures.empty())
+			//		return;
+   //  
+			//	for(std::list<Creature*>::iterator iter = m_pCreatures.begin(); iter != m_pCreatures.end(); ++iter)
+			//	{
+			//		me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+			//	}
+
+			//	WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
+			//	SendPacketToPlayers(&data);
+			//}
+
+            //void SendPacketToPlayers(WorldPacket const* data) const
+            //{
+            //    Map::PlayerList const& players = me->GetMap()->GetPlayers();
+            //    if (!players.isEmpty())
+            //        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            //            if (Player* player = itr->getSource())
+            //                player->GetSession()->SendPacket(data);
+            //}
 
 			void DespawnCreatures(uint32 entry, float distance)
 			{
@@ -623,7 +652,18 @@ class boss_flame_leviathan : public CreatureScript
 					me->SetReactState(REACT_AGGRESSIVE);
 					me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_STATE_ROOT);
 				}
-				
+
+				if(me->HasAura(SPELL_FLAME_VENTS))
+				{
+					me->AddUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
+					me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+				}
+				else
+				{
+					me->ClearUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT);
+					me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+				}
+
 				events.Update(diff);
 				uint32 eventId = events.GetEvent();
 
@@ -661,6 +701,8 @@ class boss_flame_leviathan : public CreatureScript
                             if (Creature* lift = DoSummonFlyer(NPC_MECHANOLIFT, me, 30.0f, 50.0f, 0))
                                 lift->GetMotionMaster()->MoveRandom(100);
 
+						//BoucleRelocate(NPC_OVERLOAD_DEVICE,200.0f);
+						//BoucleRelocate(NPC_DEFENSE_TURRET,200.0f);
 						events.RepeatEvent(2*IN_MILLISECONDS);
                         break;
                     case EVENT_SHUTDOWN:
@@ -1044,7 +1086,6 @@ class npc_flame_leviathan_seat : public CreatureScript
             {
                 ASSERT(vehicle);
 				me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-				VerifSpawndesTemplate = 0;
             }
 
             void Reset()
@@ -1063,17 +1104,6 @@ class npc_flame_leviathan_seat : public CreatureScript
                 target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_HODIRS_FURY_DAMAGE, apply); // Hodirs Fury
             }
 
-            void UpdateAI(const uint32 diff)
-            {
-				if(VerifSpawndesTemplate == 0)
-				{
-					vehicle->InstallAccessory(NPC_DEFENSE_TURRET,SEAT_TURRET,1,6,30000);
-					vehicle->InstallAccessory(NPC_OVERLOAD_DEVICE,SEAT_DEVICE,1,6,30000);
-					printf("\n oN fait le test 1 fois pour le verif spawn");
-
-					VerifSpawndesTemplate = 1;
-				}
-			}
 
             void PassengerBoarded(Unit* who, int8 seatId, bool apply)
             {
@@ -1129,7 +1159,6 @@ class npc_flame_leviathan_seat : public CreatureScript
 
             private:
                 Vehicle* vehicle;
-				int8 VerifSpawndesTemplate;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1767,15 +1796,22 @@ class npc_leviathan_player_vehicle : public CreatureScript
                 // TODO: Check where this id comes from.
                 if (VehicleSeatEntry* vehSeat = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(3013)))
                     vehSeat->m_flags &= ~VEHICLE_SEAT_FLAG_UNK1;
+            }
 
+            void SetImmunitys(Unit* target, bool apply)
+            {
 				me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, false);
 				me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DAZE, false);
+				me->ApplySpellImmune(0, IMMUNITY_ID, 62845, apply);
             }
 
             void PassengerBoarded(Unit* unit, int8 seat, bool apply)
             {
                 if (!unit->ToPlayer() || seat != 0)
                     return;
+
+                if (seat == SEAT_PLAYER)
+                    SetImmunitys(unit, apply);
 
                 if (apply)
                     unit->CastSpell(me, SPELL_GEAR_SCALING, true);
@@ -2824,7 +2860,7 @@ class spell_load_into_catapult : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Unit* ownerVehicle = GetOwner()->FindNearestCreature(VEHICLE_DEMOLISHER,1.0f,true);
+                Unit* ownerVehicle = GetOwner()->FindNearestCreature(VEHICLE_DEMOLISHER,0.5f,true);
 
                 if (!ownerVehicle)
                     return;
@@ -3020,6 +3056,9 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
 			    {
 			      passenger->ExitVehicle();
 			      passenger->EnterVehicle(target, SEAT_PLAYER);
+				  if( Creature* device = target->FindNearestCreature(NPC_OVERLOAD_DEVICE,3.0f,true))
+					  device->AI()->DoAction(EVENT_SPELLCLICK);
+
 			      passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
 			    }
 			  else

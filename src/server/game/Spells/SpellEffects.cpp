@@ -409,6 +409,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 					case 64847:
 					case 64870: // explo lave
 					case 62402:
+					case 62625: // heurt terrestre.
 					case 62400: // MISSILE Leviathan , DPS les joueurs qui sont dans vehicules
 					{
                         if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetVehicle() && unitTarget->GetMapId() == 603)

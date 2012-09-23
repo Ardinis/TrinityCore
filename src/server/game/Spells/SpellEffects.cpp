@@ -5333,16 +5333,17 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 62482: // Grab Crate
                 {
 		  if (unitTarget)
-		    {
-		      if (Vehicle *seat = m_caster->GetVehicleKit())
-			{
-			  if (Creature *oldContainer = dynamic_cast<Creature*>(seat->GetPassenger(1)))
-			    oldContainer->DisappearAndDie();
-			  // TODO: a hack, range = 11, should after some time cast, otherwise too far
-			  unitTarget->CastSpell(seat->GetBase(), 62496, true);
-			  unitTarget->EnterVehicle(m_caster, 1);
-			}
-		    }
+                    {
+		      if (Unit* seat = m_caster->GetVehicleBase())
+                        {
+			  if (Unit* parent = seat->GetVehicleBase())
+                            {
+			      // TODO: a hack, range = 11, should after some time cast, otherwise too far
+			      m_caster->CastSpell(parent, 62496, true);
+			      unitTarget->CastSpell(parent, m_spellInfo->Effects[EFFECT_0].CalcValue());
+                            }
+                        }
+                    }
                     return;
                 }
                 case 60123: // Lightwell

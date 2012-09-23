@@ -768,6 +768,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_POSITION)
         *data << (uint16) player->GetPositionX() << (uint16) player->GetPositionY();
 
+
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
         uint64 auramask = player->GetAuraUpdateMaskForRaid();
@@ -776,7 +777,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         {
             if (auramask & (uint64(1) << i))
             {
-                AuraApplication const* aurApp = pet->GetVisibleAura(i);
+                AuraApplication const* aurApp = player->GetVisibleAura(i);
                 *data << uint32(aurApp ? aurApp->GetBase()->GetId() : 0);
                 *data << uint8(1);
             }
@@ -784,6 +785,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     }
 
     Pet* pet = player->GetPet();
+
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
     {
         if (pet)
@@ -864,7 +866,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             {
                 if (auramask & (uint64(1) << i))
                 {
-                    AuraApplication const* aurApp = player->GetVisibleAura(i);
+                    AuraApplication const* aurApp = pet->GetVisibleAura(i);
                     *data << uint32(aurApp ? aurApp->GetBase()->GetId() : 0);
                     *data << uint8(1);
                 }

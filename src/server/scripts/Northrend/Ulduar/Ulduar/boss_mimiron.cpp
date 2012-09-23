@@ -2499,7 +2499,7 @@ class npc_frost_bomb : public CreatureScript
                 if (frostTimer <= diff)
                 {
                     DoCast(me, RAID_MODE(SPELL_FROST_BOMB_EXPLOSION_10, SPELL_FROST_BOMB_EXPLOSION_25), true);
-		    me->DespawnOrUncummon();
+		    me->DespawnOrUnsummon();
                     frostTimer = 10000;
                 }
                 else frostTimer -= diff;

@@ -126,7 +126,7 @@ class boss_general_vezax : public CreatureScript
                 DoScriptText(SAY_AGGRO, me);
                 DoCast(me, SPELL_AURA_OF_DESPAIR);
                 events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(8000, 10000));
-                events.ScheduleEvent(EVENT_SEARING_FLAMES, 12000);
+                events.ScheduleEvent(EVENT_SEARING_FLAMES, 6000);
                 events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 40000));
                 events.ScheduleEvent(EVENT_SUMMON_SARONITE_VAPOR, 30000);
                 events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, 60000);
@@ -148,36 +148,30 @@ class boss_general_vezax : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SHADOW_CRASH:
-			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             if (Unit* target = CheckPlayersInRange(RAID_MODE(4, 9), 15.0f, 50.0f))
                                 DoCast(target, SPELL_SHADOW_CRASH);
                             events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(8000, 12000));
                             break;
                         case EVENT_SEARING_FLAMES:
-			  //			  me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
                             DoCastAOE(SPELL_SEARING_FLAMES);
                             events.ScheduleEvent(EVENT_SEARING_FLAMES, urand(14000, 17500));
                             break;
                         case EVENT_MARK_OF_THE_FACELESS:
-			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             if (Unit* target = CheckPlayersInRange(RAID_MODE(4, 9), 15.0f, 50.0f))
                                 DoCast(target, SPELL_MARK_OF_THE_FACELESS);                                
                             events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));  
                             break;
                         case EVENT_SURGE_OF_DARKNESS:
-			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             DoScriptText(EMOTE_SURGE_OF_DARKNESS, me);
                             DoScriptText(SAY_SURGE_OF_DARKNESS, me);
                             DoCast(me, SPELL_SURGE_OF_DARKNESS);
                             events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, urand(50000, 70000));
                             break;
                         case EVENT_SUMMON_SARONITE_VAPOR:
-			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             DoCast(me, SPELL_SUMMON_SARONITE_VAPORS, true);   // Spells summons 33488 in a random place in 40 meters                            
                             events.ScheduleEvent(EVENT_SUMMON_SARONITE_VAPOR, urand(30000, 35000));
                             break;
                         case EVENT_BERSERK:
-			  //me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                             DoScriptText(SAY_BERSERK, me);
                             DoCast(me, SPELL_BERSERK);
                             break;

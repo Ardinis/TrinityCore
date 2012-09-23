@@ -1757,9 +1757,9 @@ class boss_sara : public CreatureScript
                         // Events in PHASE_SARA
                         case EVENT_SUMMON_GUARDIAN:
                             {
-                                if(Creature* target = GetRandomEntryTarget(NPC_OMINOUS_CLOUD, 500.0f))
-                                    target->CastSpell(target, SPELL_SUMMON_GUARDIAN, true);
-                                events.ScheduleEvent(EVENT_SUMMON_GUARDIAN, 15000, 0, PHASE_SARA);
+			      if (Creature* target = GetRandomEntryTarget(NPC_OMINOUS_CLOUD, 500.0f))
+				target->CastSpell(target, SPELL_SUMMON_GUARDIAN, true);
+			      events.ScheduleEvent(EVENT_SUMMON_GUARDIAN, 20000, 0, PHASE_SARA);
                             }
                             break;
                         case EVENT_SARAHS_HELP:
@@ -1890,8 +1890,8 @@ class npc_ominous_cloud : public CreatureScript
 
             void MoveInLineOfSight(Unit* target)
             {
-                if(instance && instance->GetData(BOSS_YOGGSARON) == IN_PROGRESS)
-                    if(target && me->GetDistance2d(target) <= 20.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && !target->HasAura(SPELL_FLASH_FREEZE))
+                if (instance && instance->GetData(BOSS_YOGGSARON) == IN_PROGRESS)
+                    if (target && me->GetDistance2d(target) <= 5.0f && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && !target->HasAura(SPELL_FLASH_FREEZE))
                         TriggerGuardianSpawn();
             }
 
@@ -2094,7 +2094,7 @@ class npc_yogg_saron_tentacle : public CreatureScript
                         DoCast(SPELL_FOCUS_ANGER);
                         break;
                     case CONSTRICTOR_TENTACLE:
-                        tentacleSpellTimer = urand(20000,30000);
+                        tentacleSpellTimer = 1000;
                         break;
                 }
             }
@@ -2135,10 +2135,11 @@ class npc_yogg_saron_tentacle : public CreatureScript
 			    DoCast(target, RAND(SPELL_DRAINING_POISON, SPELL_BLACK_PLAGUE, SPELL_APATHY, SPELL_CURSE_OF_DOOM), false);
 			  break;
                         case CONSTRICTOR_TENTACLE:
-			  if (Player* target =  me->FindNearestPlayer(20.0f, true)) //i think 20 yards is better, know need just somes adjustement need to see raid test result
+			  if (Player* target =  me->FindNearestPlayer(10.0f, true)) //i think 20 yards is better, know need just somes adjustement need to see raid test result
 			    {
 			      //				target->EnterVehicle(me);
 			      target->CastSpell(me, SPELL_LUNGE, true);
+			      target->ClearUnitState(UNIT_STATE_ONVEHICLE);
 			    }
 			  break;
                     }
@@ -2552,12 +2553,12 @@ class boss_yogg_saron : public CreatureScript
                             if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_YOGGSARON_CTRL)))
 			      {
                                 if (ctrl->AI()->GetData(DATA_BRAIN_EVT_CNT) < 4)
-                                    events.ScheduleEvent(EVENT_TENTACLE, urand(5000, 10000), 0, PHASE_BRAIN);
+                                    events.ScheduleEvent(EVENT_TENTACLE, urand(10000, 15000), 0, PHASE_BRAIN);
                                 else
-                                    events.ScheduleEvent(EVENT_TENTACLE, urand(2000, 5000), 0, PHASE_BRAIN);
+                                    events.ScheduleEvent(EVENT_TENTACLE, urand(5000, 10000), 0, PHASE_BRAIN);
 			      }
                             else
-                                events.ScheduleEvent(EVENT_TENTACLE, urand(3500, 7500), 0, PHASE_BRAIN);
+                                events.ScheduleEvent(EVENT_TENTACLE, urand(5500, 9500), 0, PHASE_BRAIN);
                             break;
                         case EVENT_TENTACLE_1:
                             me->CastSpell(me, SPELL_SUMMON_CRUSHER_TENTACLE, true);

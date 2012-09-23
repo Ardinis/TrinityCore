@@ -24,6 +24,7 @@
 #define POINT_OUTRO                     1
 #define DATA_HERALD						2
 
+
 enum Factions
 {
     FACTION_NEUTRAL     =   15,
@@ -253,7 +254,6 @@ class boss_algalon : public CreatureScript
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                     uiStep = 0;
                     fightintro = true;
-                    return;
                 }
             }
 
@@ -289,6 +289,7 @@ class boss_algalon : public CreatureScript
 
             void Reset()
             {   
+	      std::cout << "RESET" << std::endl;
                 intro = false;
                 fightintro = false;
                 sendreplycode = false;
@@ -352,7 +353,6 @@ class boss_algalon : public CreatureScript
             {
                 if(Damage > me->GetHealth())
                     Damage = me->GetHealth() - 1;
-
             }
             void JumpToNextStep(uint32 uiTimer)
             {
@@ -571,8 +571,10 @@ class boss_algalon : public CreatureScript
                     case 5:
                         if (Creature* Brann = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_BRANN_ALGALON)))
                             Brann->AI()->DoAction(ACTION_BRANN_LEAVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS,  UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
+			//                        me->RemoveFlag(UNIT_FIELD_FLAGS,  UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                         intro = false;
+			fightintro = true;
+			uiStep = 0;
                         break;
                     }
                 }
@@ -612,6 +614,7 @@ class boss_algalon : public CreatureScript
                         break;
                     case 3:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED );
+			me->SetReactState(REACT_AGGRESSIVE);
                         Phase = PHASE_1;
                         fightintro = false;
                         me->SetInCombatWithZone();
@@ -1152,7 +1155,10 @@ class mob_algalon_asteroid_trigger : public CreatureScript
 
         struct mob_algalon_asteroid_triggerAI : public PassiveAI
         {
-            mob_algalon_asteroid_triggerAI(Creature *creature) : PassiveAI(creature) {}
+            mob_algalon_asteroid_triggerAI(Creature *creature) : PassiveAI(creature) 
+	  {
+	    Reset();
+	  }
 
             uint32 Event_Timer;
             uint8 Event_Phase;
@@ -1197,7 +1203,10 @@ class mob_brann_algalon : public CreatureScript
 
         struct mob_brann_algalonAI : public PassiveAI
         {
-            mob_brann_algalonAI(Creature *creature) : PassiveAI(creature) {}
+            mob_brann_algalonAI(Creature *creature) : PassiveAI(creature) 
+	  {
+	    Reset();
+	  }
 
             uint8 CurrWP;
             uint32 delay;

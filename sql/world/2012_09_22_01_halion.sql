@@ -1,0 +1,10 @@
+UPDATE creature_template SET ScriptName = "npc_baltharus_the_warborn_clone" WHERE entry = 39899;
+UPDATE creature_template SET ScriptName = "boss_saviana_ragefire" WHERE entry = 39747;
+UPDATE creature_template SET ScriptName = "boss_general_zarithrian" WHERE entry = 39746;
+UPDATE creature_template SET ScriptName = "npc_onyx_flamecaller" WHERE entry = 39814;
+UPDATE creature_template SET ScriptName = "npc_living_inferno" WHERE entry = 40681;
+UPDATE creature_template SET ScriptName = "npc_living_ember" WHERE entry = 40683;
+UPDATE creature_template SET ScriptName = "npc_orb_carrier_damage" WHERE entry = 8852000;
+UPDATE gameobject_template SET ScriptName = "go_halion_portal_twilight" WHERE entry = 202794;
+UPDATE gameobject_template SET ScriptName = "go_halion_portal_twilight" WHERE entry = 202795;
+UPDATE gameobject_template SET ScriptName = "go_halion_portal_real" WHERE entry = 202796;

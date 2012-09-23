@@ -127,6 +127,13 @@ enum Creatures
     NPC_BRANN_BRONZBEARD           = 33579,
     NPC_DELORAH                    = 33701,
     NPC_ULDUAR_GAUNTLET_GENERATOR  = 33571, // Trigger tied to towers
+
+
+    //Outro
+
+    VOLANTE_BRANN_OUTRO = 34120,
+    NPC_BRANN_OUTRO = 34119,
+    NPC_RHYDIAN_OURTO = 33696,
 };
 
 enum Towers
@@ -210,7 +217,7 @@ enum Actions
     ACTION_ACTIVATE_HARD_MODE        = 5,
     ACTION_SPAWN_VEHICLES            = 6,
     ACTION_START_ENCOUNTER           = 10,
-    ACTION_OVERLOAD_CIRCUIT          = 11
+    ACTION_OVERLOAD_CIRCUIT          = 11,
 
     /* Also used, are settled in ulduar.h
     ACTION_TOWER_OF_STORM_DESTROYED  = 1,
@@ -218,7 +225,12 @@ enum Actions
     ACTION_TOWER_OF_FLAMES_DESTROYED = 3,
     ACTION_TOWER_OF_LIFE_DESTROYED   = 4,
     */
+
+    //OUTRO LEVIATHAN
+    ACTION_START_OUTRO,
 };
+
+#define TYPE_ULDUAR_EVENT 3132
 
 Position const Misc[]=
 {
@@ -322,10 +334,37 @@ class boss_flame_leviathan : public CreatureScript
                 events.ScheduleEvent(EVENT_SPEED, 15*IN_MILLISECONDS);
                 events.ScheduleEvent(EVENT_SUMMON, 1*IN_MILLISECONDS);
                 PerformTowerCheck();
-				HandleAccessorys(true);
+		HandleAccessorys(true);
                 checkUnbrokenOnReset = true;
-				DoScriptText(SAY_AGGRO, me);
+		DoScriptText(SAY_AGGRO, me);
             }
+
+	  void JustReachedHome()
+	  {
+	    if (Creature* Brann =  ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_BRANN_EVENT_START_ULDU)))
+	      Brann->AI()->SetData(TYPE_ULDUAR_EVENT, 5);
+	  }
+
+	  void Outro()
+	  {
+	    if (Creature* BrannIntro =  ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_BRANN_EVENT_START_ULDU)))
+	      BrannIntro->AI()->SetData(TYPE_ULDUAR_EVENT, 6);
+	    if (Creature* MachineBrann = me->SummonCreature(VOLANTE_BRANN_OUTRO, 140.0f, -37.0f, 460.0f, 6.2f))
+	      {
+		MachineBrann->SetFlying(true);
+		MachineBrann->SetSpeed(MOVE_RUN , 2.0f);
+		MachineBrann->SetSpeed(MOVE_WALK , 2.0f);
+		MachineBrann->SetSpeed(MOVE_FLIGHT , 2.0f);
+		if (Creature* BrannOutro = me->SummonCreature(NPC_BRANN_OUTRO, 140.0f, -37.0f, 460.0f, 6.2f))
+		  {
+		    float x, y, z;
+		    me->GetPosition(x, y, z);
+		    BrannOutro->EnterVehicle(MachineBrann);
+		    //		z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
+		    MachineBrann->GetMotionMaster()->MovePoint(ACTION_START_OUTRO, x - 10, y - 10, z + 1);
+		  }
+	      }
+	  }
 
             bool HaveActiveTowers() const
             {
@@ -503,6 +542,7 @@ class boss_flame_leviathan : public CreatureScript
                             case 2: go->AddLootMode(LOOT_MODE_HARD_MODE_2);
                             case 1: go->AddLootMode(LOOT_MODE_HARD_MODE_1);
                         }
+		Outro();
             }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
@@ -871,6 +911,118 @@ class boss_flame_leviathan : public CreatureScript
         {
             return GetUlduarAI<boss_flame_leviathanAI>(creature);
         }
+};
+
+
+class npc_brann_bronzebeard_outro : public CreatureScript
+{
+public:
+  npc_brann_bronzebeard_outro() : CreatureScript("npc_brann_bronzebeard_outro") { }
+
+  struct npc_brann_bronzebeard_outroAI : public npc_escortAI
+  {
+    npc_brann_bronzebeard_outroAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+      instance = pCreature->GetInstanceScript();
+    }
+
+    InstanceScript* instance;
+        
+    bool bSteppingBrann;
+    uint32 uiStepBrann;
+    uint32 uiPhaseTimerBrann;
+        
+    void Reset() 
+    {   
+      uiPhaseTimerBrann = 20000;  
+      bSteppingBrann = true;
+      uiStepBrann = 0;
+      me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    }
+
+    void WaypointReached(uint32 /*pointId*/) {}
+
+    void JumpToNextStepBrann(uint32 uiTimerBrann)
+    {
+      uiPhaseTimerBrann = uiTimerBrann;
+      ++uiStepBrann;
+    }
+        
+    void UpdateAI(const uint32 diff)
+    {
+      npc_escortAI::UpdateAI(diff);
+
+      if (bSteppingBrann)
+	{
+	  if (uiPhaseTimerBrann <= diff)
+	    {
+	      switch(uiStepBrann)
+		{
+		case 0:
+		  {
+		  if (Creature* Rhydian = me->SummonCreature(NPC_RHYDIAN_OURTO, *me))
+		    {
+		      float x, y, z;
+		      me->GetPosition(x, y, z);
+		      //	  z = me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, z);
+		      Rhydian->GetMotionMaster()->MovePoint(0, x + 1, y + 1, z);
+		      Rhydian->SetFacingToObject(me);
+		    }
+		  if (Unit* Rhydian = me->FindNearestCreature(NPC_RHYDIAN_OURTO, 20.0f))
+		    Rhydian->MonsterYell("Our friends fought well, Brann, but we're not done yet.", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(5000);
+		  break;
+		  }
+		case 1:
+		  me->MonsterYell("Perhaps so, but it's only a matter of time until we break back into Ulduar. Any luck finding a way to teleport inside?", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(7000);
+		  break;
+		case 2:
+		  if (Unit* Rhydian = me->FindNearestCreature(NPC_RHYDIAN_OURTO, 20.0f))
+		    Rhydian->MonsterYell("None at all. I suspect it has something to do with that giant mechanical construct that our scouts spotted in front of the gate.", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(8000);
+		  break;
+		case 3:
+		  me->MonsterYell("What about the plated proto-drake and the fire giant that were spotted nearby? Think your mages can handle those?", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(8000);
+		  break;
+		case 4:
+		  if (Unit* Rhydian = me->FindNearestCreature(NPC_RHYDIAN_OURTO, 20.0f))
+		    Rhydian->MonsterYell("The Kirin Tor can't possibly spare any additional resources to take on anything that size. We may not have to though.", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(7000);
+		  break;
+		case 5:
+		  if (Unit* Rhydian = me->FindNearestCreature(NPC_RHYDIAN_OURTO, 20.0f))
+		    Rhydian->MonsterYell("We can sneak past them. As long as we can take down that construct in front of the gate, we should be able to get inside.", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(7000);
+		  break;
+		case 6:
+		  me->MonsterYell("Sneak? What do you think we are, marmots?", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(5000);
+		  break;
+		case 7:
+		  if (Unit* Rhydian = me->FindNearestCreature(NPC_RHYDIAN_OURTO, 20.0f))
+		    Rhydian->MonsterYell(" We're hunting an old god, Brann.", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(4000);
+		  break;
+		case 8:
+		  me->MonsterYell("Fine. If our allies are going to be the ones getting their hands dirty, we'll leave it to them to decide how to proceed.", LANG_UNIVERSAL, 0);
+		  JumpToNextStepBrann(5000);
+		  break;
+		default :
+		  bSteppingBrann = false;
+		  break;
+		}
+	    } else uiPhaseTimerBrann -= diff;  
+	}
+    }
+
+  };
+
+  CreatureAI* GetAI(Creature* pCreature) const    
+  {
+    return new npc_brann_bronzebeard_outroAI(pCreature);
+  }
 };
 
 class npc_flame_leviathan_defense_cannon : public CreatureScript
@@ -1919,7 +2071,6 @@ class npc_lorekeeper : public CreatureScript
 
 //enable hardmode
 ////npc_brann_bronzebeard this requires more work involving area triggers. if reached this guy speaks through his radio..
-#define TYPE_ULDUAR_EVENT 3132
 #define NPC_PENTARUS 33624
 #define GOSSIP_ITEM_BRANN_3         "Nous sommes pret !"
 #define SAY_BRANN_1                 "Pentarus, vous l'avez entendue. Que vos mages levent le bouclier pour laisser passer ces braves ames !"
@@ -1936,16 +2087,16 @@ public:
 
   struct npc_brann_bronzebeardAI : public npc_escortAI
   {
-    npc_brann_bronzebeardAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_brann_bronzebeardAI(Creature* pCreature) : npc_escortAI(pCreature), summons(pCreature)
     {
       instance = pCreature->GetInstanceScript();
     }
 
     InstanceScript* instance;
-        
     bool bSteppingBrann;
     uint32 uiStepBrann;
     uint32 uiPhaseTimerBrann;
+    SummonList summons;
         
     void Reset() 
     {   
@@ -1964,6 +2115,11 @@ public:
     {
     }
 
+    void JustSummoned(Creature* summon)
+    {
+      summons.Summon(summon);
+    }
+
     void SetData(uint32 id, uint32 data)
     {
       switch(id)
@@ -1975,6 +2131,25 @@ public:
 	      uiPhaseTimerBrann = 0;
 	      bSteppingBrann = true;
 	      uiStepBrann    = 0;
+	      break;
+	    case 5:
+	      uiPhaseTimerBrann = 0;
+              bSteppingBrann = false;
+              uiStepBrann    = 0;
+	      summons.DespawnAll();
+	      me->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pIngenieur = me->FindNearestCreature(33626, 1000.0f))
+		pIngenieur->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pBataille = me->FindNearestCreature(33662, 1000.0f))
+		pBataille->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pMage = me->FindNearestCreature(33672, 1000.0f))
+		pMage->GetMotionMaster()->MoveTargetedHome();
+	      if (Unit* pPentarus = me->FindNearestCreature(NPC_PENTARUS, 1000.0f))
+		pPentarus->GetMotionMaster()->MoveTargetedHome();
+	      me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	      break;
+	    case 6:
+	      summons.DespawnAll();
 	      break;
 	    }
 	  break;
@@ -2041,7 +2216,8 @@ public:
 		  if (me->FindNearestGameObject(194484, 250.0f))
 		    {
 		      me->CastSpell(me,69900,true);
-		      me->FindNearestGameObject(GO_ULDUAR_DOME, 250.0f)->RemoveFromWorld();
+		      if (GameObject *gob = me->FindNearestGameObject(GO_ULDUAR_DOME, 250.0f))
+			gob->RemoveFromWorld();
 		      //		      me->FindNearestGameObject(7000001, 250.0f)->RemoveFromWorld();
 		    }
 		  JumpToNextStepBrann(1500);
@@ -3077,6 +3253,7 @@ void AddSC_boss_flame_leviathan()
     new npc_lorekeeper();                           // 33686
     new npc_brann_bronzebeard(); 
     new npc_tower_ulduar();
+    new npc_brann_bronzebeard_outro();
 
     new at_RX_214_repair_o_matic_station();         // Area-Trigger 5369/5423
     new go_ulduar_tower();                          // 194375: Tower of Life; 194371: Tower of Flames; 194370: Tower of Frost; 194377: Tower of Storms

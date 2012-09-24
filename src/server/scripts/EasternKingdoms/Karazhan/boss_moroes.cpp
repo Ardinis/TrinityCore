@@ -324,8 +324,8 @@ struct boss_moroes_guestAI : public ScriptedAI
 
     boss_moroes_guestAI(Creature* c) : ScriptedAI(c)
     {
-        for (uint8 i = 0; i < 4; ++i)
-            GuestGUID[i] = 0;
+      memset(AddId, 0, sizeof(AddId));
+      memset(AddGUID, 0, sizeof(AddGUID));
 
         instance = c->GetInstanceScript();
     }
@@ -341,16 +341,10 @@ struct boss_moroes_guestAI : public ScriptedAI
         if (!instance)
             return;
 
-        uint64 MoroesGUID = instance->GetData64(DATA_MOROES);
-        Creature* Moroes = (Unit::GetCreature((*me), MoroesGUID));
-        if (Moroes)
-        {
-            for (uint8 i = 0; i < 4; ++i)
-            {
-                uint64 GUID = CAST_AI(boss_moroes::boss_moroesAI, Moroes->AI())->AddGUID[i];
-                if (GUID)
-                    GuestGUID[i] = GUID;
-            }
+	if (Creature* Moroes = Unit::GetCreature(*me, instance->GetData64(DATA_MOROES)))
+	  for (uint8 i = 0; i < 4; ++i)
+	    if (uint64 GUID = CAST_AI(boss_moroes::boss_moroesAI, Moroes->AI())->AddGUID[i])
+	      GuestGUID[i] = GUID;
         }
     }
 

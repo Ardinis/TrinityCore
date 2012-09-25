@@ -234,7 +234,7 @@ public:
                 m_uiStaggeringStompTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiStaggeringStompTimer -= uiDiff;
 
-	    if (m_uiThrowTimer <= diff)
+	    if (m_uiThrowTimer <= uiDiff)
 	      {
                 for (uint8 i = 0; i < 4; ++i)
 		  {
@@ -244,12 +244,12 @@ public:
                         pSnobold->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         pSnobold->ToCreature()->SetReactState(REACT_AGGRESSIVE);
                         pSnobold->ToCreature()->AI()->DoAction(ACTION_DISABLE_FIRE_BOMB);
-                        Talk(EMOTE_SNOBOLLED);
+			//                        Talk(EMOTE_SNOBOLLED);
                         break;
 		      }
 		  }
                 m_uiThrowTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-	      } else m_uiThrowTimer -= diff;
+	      } else m_uiThrowTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
@@ -370,9 +370,9 @@ public:
 	  {
 	    if (!target->isAlive())
 	      {
-		if (instance)
+		if (m_pInstance)
 		  {
-		    Unit* gormok = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_GORMOK));
+		    Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
 		    if (gormok && gormok->isAlive())
 		      {
 			SetCombatMovement(false);
@@ -428,7 +428,7 @@ public:
 	      }
 	  }
 
-	if (instance->GetData(TYPE_NORTHREND_BEASTS) == FAIL)
+	if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == FAIL)
 	  me->DespawnOrUnsummon();
 
 	// do melee attack only when not on Gormoks back

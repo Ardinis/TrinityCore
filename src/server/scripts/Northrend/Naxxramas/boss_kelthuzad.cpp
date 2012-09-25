@@ -75,6 +75,7 @@ enum Event
 
     EVENT_PHASE,
     EVENT_MORTAL_WOUND,
+    EVENT_FRENZY,
 };
 
 enum Spells

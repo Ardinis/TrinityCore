@@ -83,7 +83,7 @@ enum BossSpells
     SPELL_RISING_ANGER      = 66636,
     //Snobold
     SPELL_SNOBOLLED         = 66406,
-    SPELL_BATTER            = 66408,
+    SPELL_BATTER            = 66407, //66408
     SPELL_FIRE_BOMB         = 66313,
     SPELL_FIRE_BOMB_1       = 66317,
     SPELL_FIRE_BOMB_DOT     = 66318,
@@ -299,8 +299,6 @@ public:
             m_uiBatterTimer = 5000;
             m_uiHeadCrackTimer = 25000;
 
-	    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_HEAD_CRACK, 25*IN_MILLISECONDS);
 
             m_uiTargetGUID = 0;
             m_bTargetDied = false;
@@ -313,14 +311,11 @@ public:
 
         void EnterCombat(Unit *pWho)
         {
-            m_uiTargetGUID = pWho->GetGUID();
-            me->TauntApply(pWho);
-            DoCast(pWho, SPELL_SNOBOLLED);
         }
 
         void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
         {
-            if (pDoneBy->GetGUID()==m_uiTargetGUID)
+            if (pDoneBy->GetGUID() == m_uiTargetGUID)
                 uiDamage = 0;
         }
 
@@ -354,10 +349,40 @@ public:
 	  {
 	  case ACTION_ENABLE_FIRE_BOMB:
 	    events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+	    events.CancelEvent(EVENT_BATTER);
+            events.CancelEvent(EVENT_HEAD_CRACK);
+	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 	    break;
 	  case ACTION_DISABLE_FIRE_BOMB:
 	    events.CancelEvent(EVENT_FIRE_BOMB);
+	    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_HEAD_CRACK, 1*IN_MILLISECONDS);
+	    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 	    break;
+	  }
+      }
+
+      void BackToGornock()
+      {
+	if (m_pInstance)
+	  {
+	    Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
+	    if (gormok && gormok->isAlive())
+	      {
+		SetCombatMovement(false);
+		m_bTargetDied = true;
+
+		for (uint8 i = 0; i < 4; i++)
+		  {
+		    if (!gormok->GetVehicleKit()->GetPassenger(i))
+		      {
+			me->EnterVehicle(gormok, i);
+			m_uiTargetGUID = 0;
+			DoAction(ACTION_ENABLE_FIRE_BOMB);
+			break;
+		      }
+		  }
+	      }
 	  }
       }
 
@@ -366,38 +391,9 @@ public:
 	if (!UpdateVictim() || m_bTargetDied)
 	  return;
 
-	if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
-	  {
-	    if (!target->isAlive())
-	      {
-		if (m_pInstance)
-		  {
-		    Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
-		    if (gormok && gormok->isAlive())
-		      {
-			SetCombatMovement(false);
-			m_bTargetDied = true;
-
-			for (uint8 i = 0; i < 4; i++)
-			  {
-			    if (!gormok->GetVehicleKit()->GetPassenger(i))
-			      {
-				me->EnterVehicle(gormok, i);
-				DoAction(ACTION_ENABLE_FIRE_BOMB);
-				break;
-			      }
-			  }
-		      }
-		    else if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0))
-		      {
-			m_uiTargetGUID = target2->GetGUID();
-			me->GetMotionMaster()->MoveJump(target2->GetPositionX(), target2->GetPositionY(), target2->GetPositionZ(), 15.0f, 15.0f);
-		      }
-		  }
-	      }
-	  }
-
 	events.Update(diff);
+
+	//what the hell dont work !!!
 
 	if (me->HasUnitState(UNIT_STATE_CASTING))
 	  return;
@@ -415,15 +411,39 @@ public:
 		events.ScheduleEvent(EVENT_FIRE_BOMB, 20*IN_MILLISECONDS);
 		return;
 	      case EVENT_HEAD_CRACK:
-		// commented out while SPELL_SNOBOLLED gets fixed
-		//if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
-		DoCastVictim(SPELL_HEAD_CRACK);
-		events.ScheduleEvent(EVENT_HEAD_CRACK, 30*IN_MILLISECONDS);
+		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+		  {
+		    if (Player *player = target->ToPlayer())
+		      {
+			if (target->GetVehicleKit())
+			  if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
+			    return;
+			m_uiTargetGUID = player->GetGUID();
+			player->CreateVehicleKit(444, 0);
+			me->EnterVehicle(player, 0);
+			me->AddAura(SPELL_HEAD_CRACK, player);
+			//			me->MonsterYell("i am billi bob and i try to reach youre head !", LANG_UNIVERSAL, 0);
+			me->ClearUnitState(UNIT_STATE_ONVEHICLE);
+			if (player->GetVehicleKit())
+			  {
+			    player->GetVehicleKit()->RelocatePassengers(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+			    me->SendMovementFlagUpdate();
+			  }
+			events.CancelEvent(EVENT_HEAD_CRACK);
+		      }
+		  }
+		events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
 		return;
 	      case EVENT_BATTER:
-		//if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
-		DoCastVictim(SPELL_BATTER);
-		events.ScheduleEvent(EVENT_BATTER, 10*IN_MILLISECONDS);
+		if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
+		  {
+		    target->AddAura(SPELL_BATTER, target);
+		    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
+		    if (!target->isAlive())
+		      BackToGornock();
+		  }
+		else
+		  events.ScheduleEvent(EVENT_BATTER, 2*IN_MILLISECONDS);
 		return;
 	      }
 	  }
@@ -431,8 +451,7 @@ public:
 	if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == FAIL)
 	  me->DespawnOrUnsummon();
 
-	// do melee attack only when not on Gormoks back
-	if (!me->GetVehicleBase())
+	if (!me->GetVehicleBase() && !m_uiTargetGUID)
 	  DoMeleeAttackIfReady();
       }
     private:

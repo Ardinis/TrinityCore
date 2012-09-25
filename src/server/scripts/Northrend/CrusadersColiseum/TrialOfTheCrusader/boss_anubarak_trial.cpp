@@ -231,6 +231,13 @@ public:
             DoScriptText(SAY_DEATH, me);
             if (m_instance)
                 m_instance->SetData(TYPE_ANUBARAK, DONE);
+
+	    std::list<Creature*> AddList;
+	    me->GetCreatureListWithEntryInGrid(AddList, NPC_FROST_SPHERE, 150.0f);
+	    me->GetCreatureListWithEntryInGrid(AddList, NPC_BURROWER, 150.0f);
+	    if (!AddList.empty())
+	      for (std::list<Creature*>::iterator itr = AddList.begin(); itr != AddList.end(); itr++)
+		(*itr)->DespawnOrUnsummon();
         }
 
         void JustSummoned(Creature* summoned)

@@ -325,7 +325,7 @@ public:
 
             switch (uiId)
             {
-                case 0: // JUMP!? Fuck! THAT'S BEEZARR! Would someone PLEASE make MotionMaster->Move* work better?
+                case 0 :
                     if (m_bTargetDied)
                         me->DespawnOrUnsummon();
                     break;
@@ -417,7 +417,10 @@ public:
 		      {
 			if (target->GetVehicleKit())
 			  if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
-			    return;
+			    {
+			      events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
+			      return;
+			    }
 			m_uiTargetGUID = player->GetGUID();
 			player->CreateVehicleKit(444, 0);
 			me->EnterVehicle(player, 0);
@@ -429,6 +432,8 @@ public:
 			    player->GetVehicleKit()->RelocatePassengers(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
 			    me->SendMovementFlagUpdate();
 			  }
+			//35
+			//			me->HandleEmoteCommand(35);
 			events.CancelEvent(EVENT_HEAD_CRACK);
 		      }
 		  }

@@ -4006,6 +4006,479 @@ class npc_risen_ally : public CreatureScript
         };
 };
 
+class npc_brew : public CreatureScript
+{
+public:
+  npc_brew() : CreatureScript("npc_brew") { }
+
+  struct npc_brewAI : public ScriptedAI
+  {
+    npc_brewAI(Creature* creature) : ScriptedAI(creature)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetVisible(false);
+    }
+
+    uint32 waves;
+
+    void Reset()
+    {
+      waves = 0;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (waves <= uiDiff)
+        {
+	  if (me->GetEntry() == 8000002)
+            me->SummonCreature(8000001,  me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 3000000);
+          else
+            me->SummonCreature(9000001,  me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 3000000);
+
+          waves = 1800000;
+          //      waves = 400000;
+        }
+      else waves -= uiDiff;
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_brewAI(creature);
+  }
+};
+
+class npc_sum_brew : public CreatureScript
+{
+public:
+  npc_sum_brew() : CreatureScript("npc_sum_brew") { }
+
+  struct npc_sum_brewAI : public ScriptedAI
+  {
+    npc_sum_brewAI(Creature* creature) : ScriptedAI(creature)
+    {
+    }
+
+    uint32 move, move2;
+    float x[3],y[3],z[3];
+
+    void Reset()
+    {
+      if (me->GetEntry() == 8000003)
+        {
+          x[0] = -5159.65;
+          y[0] = -630.11;
+          z[0] = 397.50;
+          x[1] = -5147.03;
+          y[1] = -577.77;
+          z[1] = 397.27;
+          x[2] = -5185.09;
+          y[2] = -599.90;
+          z[2] = 397.27;
+        }
+      else
+        {
+          x[0] = 1184.29;
+          y[0] = -4275.24;
+          z[0] = 21.19;
+          x[1] = 1221.62;
+          y[1] = -4297.02;
+          z[1] = 21.19;
+          x[2] = 1185.37;
+          y[2] = -4313.25;
+	  z[2] = 21.29;
+        }
+      int a = rand() % 3;
+      me->GetMotionMaster()->MovePoint(42, x[a], y[a], z[a]);
+      move = 10000000;
+      move2 = 10000000;
+    }
+
+    void MovementInform(uint32 type, uint32 id)
+    {
+      switch(id)
+        {
+        case 42:
+          {
+            move = 3000 + rand() % 10000;
+            break;
+          }
+        case 43:
+          {
+            move2 = 3000 + rand() % 10000;
+            break;
+          }
+        }
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell)
+    {
+      if (caster)
+	caster->Kill(me);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (move <= uiDiff)
+        {
+	  float _x, _y, _z;
+	  if (me->GetEntry() == 8000003)
+	    {
+	      _x = -5159.35;
+	      _y = -596.81;
+	      _z = 398.17;
+	    }
+	  else
+	    {
+	      _x = 1199.87;
+	      _y = -4298.49;
+	      _z =  21.36;
+	    }
+	  me->GetMotionMaster()->MovePoint(43, _x, _y, _z);
+          move = 10000000;
+        }
+      else move -= uiDiff;
+      if (move2 <= uiDiff)
+        {
+          int a = rand() % 3;
+          me->GetMotionMaster()->MovePoint(42, x[a], y[a], z[a]);
+          move2 = 10000000;
+        }
+      else move2 -= uiDiff;
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_sum_brewAI(creature);
+  }
+};
+
+enum Mobs
+  {
+    NPC_D          = 8000003,
+    NPC_H          = 9000003,
+    GOB_MOLE_MACHINE                = 194316,
+    GOB_MOLE_MACHINE_SUCCESS                = 8000000
+  };
+
+
+class npc_brew_attak_trigger : public CreatureScript
+{
+public:
+  npc_brew_attak_trigger() : CreatureScript("npc_brew_attak_trigger") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_brew_attak_triggerAI (pCreature);
+  }
+
+  struct npc_brew_attak_triggerAI : public Scripted_NoMovementAI
+  {
+    npc_brew_attak_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), summons(pCreature)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetVisible(false);
+    }
+
+    GameObject* MoleMachine;
+    uint32 SummonTimer, sumCount;
+    uint32 SummonEndTimer;
+    uint32 SEndTimer, sum;
+    std::list<Creature *> summoned;
+    uint32 checkSuccess;
+    bool succ, end;
+    SummonList summons;
+
+    void Reset()
+    {
+      sumCount = 4;
+      succ = false;
+      end = false;
+      checkSuccess = 10000;
+      SEndTimer = 240000;
+      MoleMachine = me->SummonGameObject(GOB_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+                                         float(urand(0, 6)), 0, 0, 0, 0, 300000);
+      if (MoleMachine)
+        MoleMachine->SetGoState(GO_STATE_ACTIVE);
+      SummonTimer = 0;
+      SummonEndTimer = 900000;
+    }
+
+    void JustSummoned(Creature* summon)
+    {
+      summons.Summon(summon);
+      if (sumCount == 1 && (summon->GetEntry() == NPC_D || summon->GetEntry() == NPC_H))
+        summoned.push_back(summon);
+    }
+
+    bool checkEndEvent()
+    {
+      if (!summoned.empty())
+        {
+          for (std::list<Creature *>::iterator it = summoned.begin(); it != summoned.end(); it++)
+            {
+              if ((*it)->isAlive())
+                {
+                  return false;
+                }
+            }
+        }
+      return true;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      //      if (!UpdateVictim())
+      //        return;
+
+      if (SummonEndTimer <= uiDiff)
+        {
+          SummonEndTimer = 0;
+          me->DespawnOrUnsummon();
+        }
+      else
+        SummonEndTimer -= uiDiff;
+
+      if (!end && !succ)
+	if (SEndTimer <= uiDiff)
+	  {
+	    if (checkEndEvent())
+	      {
+		succ = true;
+		printf("omg ces cons de joueurs ont reussis ><\n");
+		me->SummonGameObject(GOB_MOLE_MACHINE_SUCCESS, me->GetPositionX() + 10, me->GetPositionY() + 10, me->GetPositionZ(),
+				     float(urand(0, 6)), 0, 0, 0, 0, 600000);
+	      }
+	    else
+              printf("fail de l'event!!!!!!!! ><\n");
+	    summons.DespawnAll();
+	    SEndTimer = 100000;
+	    end = true;
+	  }
+	else
+	  SEndTimer -= uiDiff;
+
+      if (!succ && !end)
+	if (SummonTimer <= uiDiff)
+	  {
+	    float x = me->GetPositionX();
+	    float y = me->GetPositionY();
+	    float z = me->GetPositionZ() + 1;
+	    if (sumCount > 0)
+	      {
+		printf("summon !\n");
+		if (me->GetEntry() == 8000001)
+		  {
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+		else
+		  {
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+	      }
+	    sumCount--;
+	    SummonTimer = 60000;
+	  }
+	else SummonTimer -= uiDiff;
+    }
+  };
+
+};
+class npc_brew_attak_trigger2 : public CreatureScript
+{
+public:
+  npc_brew_attak_trigger2() : CreatureScript("npc_brew_attak_trigger2") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_brew_attak_trigger2AI (pCreature);
+  }
+
+  struct npc_brew_attak_trigger2AI : public Scripted_NoMovementAI
+  {
+    npc_brew_attak_trigger2AI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), summons(pCreature)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetVisible(false);
+    }
+
+    GameObject* MoleMachine;
+    uint32 SummonTimer, sumCount;
+    uint32 SummonEndTimer;
+    uint32 SEndTimer, sum;
+    std::list<Creature *> summoned;
+    uint32 checkSuccess;
+    bool succ, end;
+    SummonList summons;
+
+    void Reset()
+    {
+      sumCount = 4;
+      succ = false;
+      end = false;
+      checkSuccess = 10000;
+      SEndTimer = 240000;
+      MoleMachine = me->SummonGameObject(GOB_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+                                         float(urand(0, 6)), 0, 0, 0, 0, 300000);
+      if (MoleMachine)
+        MoleMachine->SetGoState(GO_STATE_ACTIVE);
+      SummonTimer = 0;
+      SummonEndTimer = 900000;
+    }
+    void JustSummoned(Creature* summon)
+    {
+      summons.Summon(summon);
+      if (sumCount == 1 && (summon->GetEntry() == NPC_D || summon->GetEntry() == NPC_H))
+        summoned.push_back(summon);
+    }
+
+    bool checkEndEvent()
+    {
+      if (!summoned.empty())
+        {
+          for (std::list<Creature *>::iterator it = summoned.begin(); it != summoned.end(); it++)
+            {
+              if ((*it)->isAlive())
+                {
+                  return false;
+                }
+              else
+		printf("its dead");
+            }
+        }
+      return true;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      //      if (!UpdateVictim())
+      //        return;
+
+      if (SummonEndTimer <= uiDiff)
+        {
+          SummonEndTimer = 0;
+          me->DespawnOrUnsummon();
+        }
+      else
+        SummonEndTimer -= uiDiff;
+
+      if (!end && !succ)
+	if (SEndTimer <= uiDiff)
+	  {
+	    if (checkEndEvent())
+	      {
+		succ = true;
+		printf("omg ces cons de joueurs ont reussis ><\n");
+		me->SummonGameObject(GOB_MOLE_MACHINE_SUCCESS, me->GetPositionX() + 10, me->GetPositionY() + 10, me->GetPositionZ(),
+				     float(urand(0, 6)), 0, 0, 0, 0, 600000);
+	      }
+	    else
+              printf("fail de l'event!!!!!!!! ><\n");
+	    summons.DespawnAll();
+	    SEndTimer = 100000;
+	    end = true;
+	  }
+	else
+	  SEndTimer -= uiDiff;
+
+      if (!succ && !end)
+	if (SummonTimer <= uiDiff)
+	  {
+	    float x = me->GetPositionX();
+	    float y = me->GetPositionY();
+	    float z = me->GetPositionZ() + 1;
+	    if (sumCount > 0)
+	      {
+		printf("summon !\n");
+		if (me->GetEntry() == 8000001)
+		  {
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+		else
+		  {
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+	      }
+	    sumCount--;
+	    SummonTimer = 60000;
+	  }
+	else SummonTimer -= uiDiff;
+    }
+  };
+
+};
+
+class npc_cervoise : public CreatureScript
+{
+public:
+  npc_cervoise(): CreatureScript("npc_cervoise"){}
+
+  struct npc_cervoiseAI : public ScriptedAI
+  {
+    npc_cervoiseAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      pCreature->setFaction(35); //wrong faction in db?
+    }
+
+    void Reset()
+    {
+    }
+
+    void JustDied(Unit* /*killer*/)
+    {
+      me->Respawn();
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell)
+    {
+      if (caster)
+        {
+          caster->Kill(me);
+          caster->ToPlayer()->KilledMonsterCredit(24108, 1);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+    }
+
+  };
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_cervoiseAI (pCreature);
+  }
+};
+
 
 void AddSC_npcs_special()
 {
@@ -4030,6 +4503,11 @@ void AddSC_npcs_special()
 	new npc_brewfest_keg_receiver();
 	new npc_brewfest_ram_master();
 	new npc_demeza();
+	new npc_brew();
+	new npc_sum_brew();
+	new npc_brew_attak_trigger();
+	new npc_brew_attak_trigger2();
+	new npc_cervoise();
     new npc_snake_trap;
     new npc_mirror_image;
     new npc_ebon_gargoyle;

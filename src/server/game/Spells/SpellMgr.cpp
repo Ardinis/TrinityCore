@@ -3714,6 +3714,35 @@ void SpellMgr::LoadDbcDataCorrections()
 			case 53648:
 			  spellInfo->EffectSpellClassMask[0] = flag96(0x00000000, 0x00000000, 0x00000020);
 			  break;				
+	case 2378: // Minor Fortitude
+	  spellInfo->manaCost = 0;
+	  spellInfo->manaPerSecond = 0;
+	  break;
+	case 18754: // Improved succubus - problems with apply if target is pet
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER; // it's affects duration of seduction, let's minimize affection
+	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.22; // reduce cast time of seduction by 22%
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  break;
+	case 18755:
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.44; // reduce cast time of seduction by 44%
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  break;
+	case 18756:
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.66; // reduce cast time of seduction by 66%
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  break;
+	case 45524: // Chains of Ice
+	  spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+	  break;
+	case 66359: // Mistress' Kiss
+	case 67073:
+	case 67074:
+	case 67075:
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+	  break;
             default:
                 break;
         }

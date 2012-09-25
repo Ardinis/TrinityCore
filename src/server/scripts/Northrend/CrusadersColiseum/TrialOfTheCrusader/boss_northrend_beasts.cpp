@@ -31,6 +31,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
+#include "Vehicle.h"
 
 enum Yells
 {
@@ -44,6 +45,12 @@ enum Yells
     SAY_TRAMPLE_STARE    = -1649020,
     SAY_TRAMPLE_FAIL     = -1649021,
     SAY_TRAMPLE_START    = -1649022,
+};
+
+enum MyActions
+{
+    ACTION_ENABLE_FIRE_BOMB = 1,
+    ACTION_DISABLE_FIRE_BOMB,
 };
 
 enum Equipment
@@ -131,14 +138,14 @@ public:
         uint32 m_uiImpaleTimer;
         uint32 m_uiStaggeringStompTimer;
         SummonList Summons;
-        uint32 m_uiSummonTimer;
+      uint32 m_uiThrowTimer;
         uint32 m_uiSummonCount;
 
         void Reset()
         {
             m_uiImpaleTimer = urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             m_uiStaggeringStompTimer = 15*IN_MILLISECONDS;
-            m_uiSummonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);;
+	    m_uiThrowTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
 
             if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
                 GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
@@ -167,7 +174,25 @@ public:
         {
             me->SetInCombatWithZone();
             m_pInstance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_IN_PROGRESS);
+	    for (uint8 i = 0; i < 4; i++)
+           {
+                if (Creature* pSnobold = DoSpawnCreature(NPC_SNOBOLD_VASSAL, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                {
+                  pSnobold->EnterVehicle(me, i);
+                   pSnobold->SetInCombatWithZone();
+                   pSnobold->AI()->DoAction(ACTION_ENABLE_FIRE_BOMB);
+               }
+            }
         }
+
+      void DamageTaken(Unit* /*who*/, uint32& damage)
+      {
+	// despawn the remaining passengers on death
+	if (damage >= me->GetHealth())
+	  for (uint8 i = 0; i < 4; ++i)
+	    if (Unit* pSnobold = me->GetVehicleKit()->GetPassenger(i))
+	      pSnobold->ToCreature()->DespawnOrUnsummon();
+      }
 
         void JustSummoned(Creature* summon)
         {
@@ -209,15 +234,22 @@ public:
                 m_uiStaggeringStompTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiStaggeringStompTimer -= uiDiff;
 
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                if (m_uiSummonCount > 0)
-                {
-                    me->SummonCreature(NPC_SNOBOLD_VASSAL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN);
-                    DoScriptText(SAY_SNOBOLLED, me);
-                }
-                m_uiSummonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            } else m_uiSummonTimer -= uiDiff;
+	    if (m_uiThrowTimer <= diff)
+	      {
+                for (uint8 i = 0; i < 4; ++i)
+		  {
+                    if (Unit* pSnobold = me->GetVehicleKit()->GetPassenger(i))
+		      {
+                        pSnobold->ExitVehicle();
+                        pSnobold->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        pSnobold->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                        pSnobold->ToCreature()->AI()->DoAction(ACTION_DISABLE_FIRE_BOMB);
+                        Talk(EMOTE_SNOBOLLED);
+                        break;
+		      }
+		  }
+                m_uiThrowTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+	      } else m_uiThrowTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -238,6 +270,14 @@ public:
 
     struct mob_snobold_vassalAI : public ScriptedAI
     {
+
+      enum MyEvents
+	{
+	  EVENT_FIRE_BOMB = 1,
+	  EVENT_BATTER,
+	  EVENT_HEAD_CRACK,
+	};
+
         mob_snobold_vassalAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
@@ -259,12 +299,16 @@ public:
             m_uiBatterTimer = 5000;
             m_uiHeadCrackTimer = 25000;
 
+	    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_HEAD_CRACK, 25*IN_MILLISECONDS);
+
             m_uiTargetGUID = 0;
             m_bTargetDied = false;
             if (m_pInstance)
                 m_uiBossGUID = m_pInstance->GetData64(NPC_GORMOK);
             //Workaround for Snobold
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
+	    //            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
+	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
         void EnterCombat(Unit *pWho)
@@ -304,64 +348,96 @@ public:
                 m_pInstance->SetData(DATA_SNOBOLD_COUNT, DECREASE);
         }
 
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (m_bTargetDied || !UpdateVictim())
-                return;
+      void DoAction(int32 const action)
+      {
+	switch (action)
+	  {
+	  case ACTION_ENABLE_FIRE_BOMB:
+	    events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+	    break;
+	  case ACTION_DISABLE_FIRE_BOMB:
+	    events.CancelEvent(EVENT_FIRE_BOMB);
+	    break;
+	  }
+      }
 
-            if (Unit* pTarget = Unit::GetPlayer(*me, m_uiTargetGUID))
-            {
-                if (!pTarget->isAlive())
-                {
-                    if (m_pInstance)
-                    {
-                        Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
-                        if (gormok && gormok->isAlive())
-                        {
-                            SetCombatMovement(false);
-                            m_bTargetDied = true;
-                            me->GetMotionMaster()->MoveJump(gormok->GetPositionX(), gormok->GetPositionY(), gormok->GetPositionZ(), 15.0f, 15.0f);
-                        }
-                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        {
-                            m_uiTargetGUID = target->GetGUID();
-                            me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 15.0f, 15.0f);
-                        }
-                    }
-                }
-            }
+      void UpdateAI(uint32 const diff)
+      {
+	if (!UpdateVictim() || m_bTargetDied)
+	  return;
 
-            if (m_uiFireBombTimer < uiDiff)
-            {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+	if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
+	  {
+	    if (!target->isAlive())
+	      {
+		if (instance)
 		  {
-                    DoCast(pTarget, SPELL_FIRE_BOMB);
-		    me->SummonCreature(8888888, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 99999999);
+		    Unit* gormok = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_GORMOK));
+		    if (gormok && gormok->isAlive())
+		      {
+			SetCombatMovement(false);
+			m_bTargetDied = true;
+
+			for (uint8 i = 0; i < 4; i++)
+			  {
+			    if (!gormok->GetVehicleKit()->GetPassenger(i))
+			      {
+				me->EnterVehicle(gormok, i);
+				DoAction(ACTION_ENABLE_FIRE_BOMB);
+				break;
+			      }
+			  }
+		      }
+		    else if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0))
+		      {
+			m_uiTargetGUID = target2->GetGUID();
+			me->GetMotionMaster()->MoveJump(target2->GetPositionX(), target2->GetPositionY(), target2->GetPositionZ(), 15.0f, 15.0f);
+		      }
 		  }
-                m_uiFireBombTimer = 20000;
-            }
-            else m_uiFireBombTimer -= uiDiff;
+	      }
+	  }
 
-            if (m_uiBatterTimer < uiDiff)
-            {
-                if (Unit *pTarget = Unit::GetPlayer(*me, m_uiTargetGUID))
-                    DoCast(pTarget, SPELL_BATTER);
-                m_uiBatterTimer = 10000;
-            }
-            else m_uiBatterTimer -= uiDiff;
+	events.Update(diff);
 
-            if (m_uiHeadCrackTimer < uiDiff)
-            {
-                if (Unit *pTarget = Unit::GetPlayer(*me, m_uiTargetGUID))
-                    DoCast(pTarget, SPELL_HEAD_CRACK);
-                m_uiHeadCrackTimer = 35000;
-            }
-            else m_uiHeadCrackTimer -= uiDiff;
+	if (me->HasUnitState(UNIT_STATE_CASTING))
+	  return;
 
-            DoMeleeAttackIfReady();
-        }
+	while (uint32 event = events.ExecuteEvent())
+	  {
+	    switch (event)
+	      {
+	      case EVENT_FIRE_BOMB:
+		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+		  {
+		    DoCast(target, SPELL_FIRE_BOMB, true);
+		    me->SummonCreature(8888888, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 99999999);
+		  }
+		events.ScheduleEvent(EVENT_FIRE_BOMB, 20*IN_MILLISECONDS);
+		return;
+	      case EVENT_HEAD_CRACK:
+		// commented out while SPELL_SNOBOLLED gets fixed
+		//if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
+		DoCastVictim(SPELL_HEAD_CRACK);
+		events.ScheduleEvent(EVENT_HEAD_CRACK, 30*IN_MILLISECONDS);
+		return;
+	      case EVENT_BATTER:
+		//if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
+		DoCastVictim(SPELL_BATTER);
+		events.ScheduleEvent(EVENT_BATTER, 10*IN_MILLISECONDS);
+		return;
+	      }
+	  }
+
+	if (instance->GetData(TYPE_NORTHREND_BEASTS) == FAIL)
+	  me->DespawnOrUnsummon();
+
+	// do melee attack only when not on Gormoks back
+	if (!me->GetVehicleBase())
+	  DoMeleeAttackIfReady();
+      }
+    private:
+      EventMap events;
     };
-
 };
 
 

@@ -205,7 +205,7 @@ class npc_announcer_toc10 : public CreatureScript
                         return true;
 
                     if (GameObject* floor = GameObject::GetGameObject(*player, instanceScript->GetData64(GO_ARGENT_COLISEUM_FLOOR)))
-		      floor->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+		      floor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
 
                     creature->CastSpell(creature, 69016, false);
 
@@ -321,7 +321,7 @@ class boss_lich_king_toc : public CreatureScript
                             break;
                         case 5080:
                             if (GameObject* pGoFloor = m_pInstance->instance->GetGameObject(m_pInstance->GetData64(GO_ARGENT_COLISEUM_FLOOR)))
-			      pGoFloor->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+			      pGoFloor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
                             me->CastSpell(me, 69016, false);
                             if (m_pInstance) m_pInstance->SetData(TYPE_LICH_KING, DONE);
                             Creature* pTemp = Unit::GetCreature((*me), m_pInstance->GetData64(NPC_ANUBARAK));
@@ -789,10 +789,12 @@ class npc_tirion_toc : public CreatureScript
                             m_pInstance->SetData(TYPE_EVENT, 0);
                             break;
                         case 6000:
-                            me->NearTeleportTo(AnubarakLoc[0].GetPositionX(), AnubarakLoc[0].GetPositionY(), AnubarakLoc[0].GetPositionZ(), 4.0f);
-                            m_uiUpdateTimer = 20000;
-                            m_pInstance->SetData(TYPE_EVENT, 6005);
-                            break;
+			  me->SummonCreature(NPC_TIRION_FORDRING, EndSpawnLoc[0].GetPositionX(), EndSpawnLoc[0].GetPositionY(), EndSpawnLoc[0].GetPositionZ());
+                          me->SummonCreature(NPC_ARGENT_MAGE, EndSpawnLoc[1].GetPositionX(), EndSpawnLoc[1].GetPositionY(), EndSpawnLoc[1].GetPositionZ());
+			  me->SummonGameObject(GO_PORTAL_TO_DALARAN, EndSpawnLoc[2].GetPositionX(), EndSpawnLoc[2].GetPositionY(), EndSpawnLoc[2].GetPositionZ(), 5, 0, 0, 0, 0, 0);
+			  m_uiUpdateTimer = 20000;
+			  m_pInstance->SetData(TYPE_EVENT, 6005);
+			  break;
                         case 6005:
                             DoScriptText(SAY_STAGE_4_06, me);
                             m_uiUpdateTimer = 20000;

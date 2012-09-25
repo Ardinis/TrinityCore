@@ -218,9 +218,9 @@ public:
             {
 	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.f, true, -SPELL_LORD_HITTIN))
                 {
-                    DoScriptText(EMOTE_INCINERATE, me, pTarget);
+                    DoScriptText(EMOTE_INCINERATE, me, target);
                     DoScriptText(SAY_INCINERATE, me);
-                    DoCast(pTarget, SPELL_INCINERATE_FLESH);
+                    DoCast(target, SPELL_INCINERATE_FLESH);
                 }
                 m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiIncinerateFleshTimer -= uiDiff;
@@ -235,8 +235,8 @@ public:
             {
 	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.f, true, -SPELL_LORD_HITTIN))
                 {
-                    DoScriptText(EMOTE_LEGION_FLAME, me, pTarget);
-                    DoCast(pTarget, SPELL_LEGION_FLAME);
+                    DoScriptText(EMOTE_LEGION_FLAME, me, target);
+                    DoCast(target, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             } else m_uiLegionFlameTimer -= uiDiff;
@@ -579,7 +579,7 @@ public:
             if (IsHeroic() && m_uiMistressKissTimer <= uiDiff)
             {
 	      if (Unit* target = SelectEnemyCaster(false))
-                    DoCast(pTarget, SPELL_MISTRESS_KISS);
+                    DoCast(target, SPELL_MISTRESS_KISS);
                 m_uiMistressKissTimer = 30*IN_MILLISECONDS;
             } else m_uiMistressKissTimer -= uiDiff;
 

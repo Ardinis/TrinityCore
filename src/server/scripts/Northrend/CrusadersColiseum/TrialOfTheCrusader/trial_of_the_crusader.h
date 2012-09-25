@@ -229,7 +229,7 @@ enum eCreature
 enum eGameObject
 {
   GO_PORTAL                    = 202079,
-  GO_PORTAL_TO_DALARAN        = 195682,
+  GO_PORTAL_TO_DALARAN        = 202079, //195682,
 
     GO_CRUSADERS_CACHE_10       = 195631,
     GO_CRUSADERS_CACHE_25       = 195632,

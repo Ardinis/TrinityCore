@@ -1706,25 +1706,29 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
             }
-
 	    if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
 	      {
-		if (!caster)
+                if (!caster)
 		  break;
 
-		// Improved devotion aura
-		if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
-		  if (apply)
-		    caster->CastSpell(target, 63514, true);
-		  else target->RemoveAura(63514);
-		// 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
-		// Not allow for Retribution Aura (prevent stacking)
-		if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
-		  if (apply)
-		    caster->CastSpell(target, 63531, true);
-		  else target->RemoveAura(63531);
+                // Improved devotion aura
+                if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
+		  {
+                    if (apply)
+		      caster->CastSpell(target, 63514, true);
+                    else
+		      target->RemoveAura(63514);
+		  }
+                // 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
+                // Not allow for Retribution Aura (prevent stacking)
+                if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
+		  {
+                    if (apply)
+		      caster->CastSpell(target, 63531, true);
+                    else
+		      target->RemoveAura(63531);
+		  }
 	      }
-
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)

@@ -78,6 +78,7 @@ enum BossSpells
     SPELL_MISTRESS_KISS         = 66336,
     SPELL_FEL_INFERNO           = 67047,
     SPELL_FEL_STREAK            = 66494,
+    SPELL_LORD_HITTIN                 = 66326, 
     SPELL_BERSERK               = 64238,
 };
 
@@ -208,14 +209,14 @@ public:
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+	      if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.f, true, -SPELL_LORD_HITTIN))
                     DoCast(pTarget, SPELL_FEL_LIGHTING);
                 m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.f, true, -SPELL_LORD_HITTIN))
                 {
                     DoScriptText(EMOTE_INCINERATE, me, pTarget);
                     DoScriptText(SAY_INCINERATE, me);
@@ -232,7 +233,7 @@ public:
 
             if (m_uiLegionFlameTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.f, true, -SPELL_LORD_HITTIN))
                 {
                     DoScriptText(EMOTE_LEGION_FLAME, me, pTarget);
                     DoCast(pTarget, SPELL_LEGION_FLAME);

@@ -384,6 +384,9 @@ struct boss_twin_baseAI : public ScriptedAI
         if (!m_pInstance || !UpdateVictim())
             return;
 
+	if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
         if (m_pInstance->GetData(DATA_HEALTH_TWIN_SHARED) != 0)
             me->SetHealth(m_pInstance->GetData(DATA_HEALTH_TWIN_SHARED));
         else

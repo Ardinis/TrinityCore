@@ -2910,7 +2910,9 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                 m_AutoRepeatFirstCast = true;
             }
-            AddUnitState(UNIT_STATE_CASTING);
+	    if (pSpell && pSpell->m_spellInfo)
+	      if (pSpell->m_spellInfo->CalcCastTime(this) > 0)
+		AddUnitState(UNIT_STATE_CASTING);
         } break;
 
         case CURRENT_CHANNELED_SPELL:

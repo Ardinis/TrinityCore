@@ -3743,6 +3743,9 @@ void SpellMgr::LoadDbcDataCorrections()
 	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
 	  spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
 	  break;
+	case 24259: // Spell Lock silence
+	  spellInfo->speed = 80;
+	  break;
             default:
                 break;
         }

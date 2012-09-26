@@ -3059,9 +3059,6 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
 			    {
 			      passenger->ExitVehicle();
 			      passenger->EnterVehicle(target, SEAT_PLAYER);
-				  if( Creature* device = target->FindNearestCreature(NPC_OVERLOAD_DEVICE,3.0f,true))
-					  device->AI()->DoAction(EVENT_SPELLCLICK);
-
 			      passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
 			    }
 			  else

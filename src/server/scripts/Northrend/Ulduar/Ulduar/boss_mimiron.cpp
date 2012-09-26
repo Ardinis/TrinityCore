@@ -2608,12 +2608,12 @@ void AddSC_boss_mimiron()
     new achievement_firefighter("achievement_firefighter_25");  // Achiev 3189 / Criteria 10463
 
     // TODO: Find correct criterias for the following achievements:
-    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
-    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
-    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
-    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
-    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
-    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
+    //    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
+    //  new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
+    //  new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
+    //  new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
+    //  new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
+    // new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
 }
 
 #undef SPELL_NAPALM_SHELL

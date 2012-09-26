@@ -536,6 +536,6 @@ void AddSC_item_scripts()
     new item_trident_of_nazjan();
     new item_captured_frog();
     new item_egg_proto_stolen();
-    new item_brewfest_sampler;
+    //    new item_brewfest_sampler;
     new item_brewfest_ram_reins;
 }

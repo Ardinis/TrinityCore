@@ -628,5 +628,5 @@ void AddSC_boss_festergut()
     new achievement_flu_shot_shortage();
     new spell_stinky_plague_stench();
 	new spell_festergut_gaseous_blight();
-	new spell_69278();
+	//	new spell_69278();
 }

@@ -23,7 +23,7 @@
  */
 
 
-/* Improve By Gabii - Paragon Server - Last Update : 15/09/2012 */
+/* Improve By Gabii - Paragon Server - Last Update : 23/09/2012 */
 
 
 /* ---	TODO List :		---
@@ -397,16 +397,18 @@ class boss_flame_leviathan : public CreatureScript
 								target->EnterVehicle(me, i);
 								me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
 								//printf("\n Position SIEGE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-								
+								target->SendMovementFlagUpdate();
 								if (Creature* turret = target->SummonCreature(NPC_DEFENSE_TURRET, *target))
 								{
 									turret->EnterVehicle(target, SEAT_TURRET);
+									turret->SendMovementFlagUpdate();
 									//printf("\n Position TOURRETE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,turret->GetPositionX(), turret->GetPositionY(), turret->GetPositionZ());
 								}
-
+								
 								if (Creature* device = target->SummonCreature(NPC_OVERLOAD_DEVICE, *target))
 								{
 									device->EnterVehicle(target, SEAT_DEVICE);
+									device->SendMovementFlagUpdate();
 									//printf("\n Position DEVICE %d : PositionX = %.2f PositionY = %.2f PositionZ = %.2f",i,device->GetPositionX(), device->GetPositionY(), device->GetPositionZ());
 								}
 							}
@@ -424,31 +426,32 @@ class boss_flame_leviathan : public CreatureScript
 				}
             }
 
-			//void BoucleRelocate(uint32 entry, float distance)
-			//{
-			//	std::list<Creature*> m_pCreatures;
-			//	GetCreatureListWithEntryInGrid(m_pCreatures, me, entry, distance);
-   //  
-			//	if (m_pCreatures.empty())
-			//		return;
-   //  
-			//	for(std::list<Creature*>::iterator iter = m_pCreatures.begin(); iter != m_pCreatures.end(); ++iter)
-			//	{
-			//		me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-			//	}
+			void BoucleRelocate(uint32 entry, float distance)
+			{
+				std::list<Creature*> m_pCreatures;
+				GetCreatureListWithEntryInGrid(m_pCreatures, me, entry, distance);
+     
+				if (m_pCreatures.empty())
+					return;
+     
+				for(std::list<Creature*>::iterator iter = m_pCreatures.begin(); iter != m_pCreatures.end(); ++iter)
+				{
+					me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+					(*iter)->SendMovementFlagUpdate();
+				}
 
-			//	WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
-			//	SendPacketToPlayers(&data);
-			//}
+				WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA, 0);
+				SendPacketToPlayers(&data);
+			}
 
-            //void SendPacketToPlayers(WorldPacket const* data) const
-            //{
-            //    Map::PlayerList const& players = me->GetMap()->GetPlayers();
-            //    if (!players.isEmpty())
-            //        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-            //            if (Player* player = itr->getSource())
-            //                player->GetSession()->SendPacket(data);
-            //}
+            void SendPacketToPlayers(WorldPacket const* data) const
+            {
+                Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                if (!players.isEmpty())
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        if (Player* player = itr->getSource())
+                            player->GetSession()->SendPacket(data);
+            }
 
 			void DespawnCreatures(uint32 entry, float distance)
 			{
@@ -701,8 +704,8 @@ class boss_flame_leviathan : public CreatureScript
                             if (Creature* lift = DoSummonFlyer(NPC_MECHANOLIFT, me, 30.0f, 50.0f, 0))
                                 lift->GetMotionMaster()->MoveRandom(100);
 
-						//BoucleRelocate(NPC_OVERLOAD_DEVICE,200.0f);
-						//BoucleRelocate(NPC_DEFENSE_TURRET,200.0f);
+						BoucleRelocate(NPC_OVERLOAD_DEVICE,200.0f);
+						BoucleRelocate(NPC_DEFENSE_TURRET,200.0f);
 						events.RepeatEvent(2*IN_MILLISECONDS);
                         break;
                     case EVENT_SHUTDOWN:
@@ -3056,9 +3059,6 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
 			    {
 			      passenger->ExitVehicle();
 			      passenger->EnterVehicle(target, SEAT_PLAYER);
-				  if( Creature* device = target->FindNearestCreature(NPC_OVERLOAD_DEVICE,3.0f,true))
-					  device->AI()->DoAction(EVENT_SPELLCLICK);
-
 			      passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
 			    }
 			  else

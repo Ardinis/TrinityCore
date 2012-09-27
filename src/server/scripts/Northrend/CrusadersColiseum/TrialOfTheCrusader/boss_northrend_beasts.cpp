@@ -463,11 +463,6 @@ public:
 	      case EVENT_BATTER:
 		if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
 		  {
-		    if (!me->IsOnVehicle(target))
-		      {
-			me->DespawnOrUnsummon();
-			return;
-		      }
 		    target->AddAura(SPELL_BATTER, target);
 		    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
 		    if (!target->isAlive())

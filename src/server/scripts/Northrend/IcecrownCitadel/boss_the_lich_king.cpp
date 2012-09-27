@@ -2146,6 +2146,7 @@ class npc_spirit_bomb : public CreatureScript
         {
             npc_spirit_bombAI(Creature* creature) : CreatureAI(creature)
             {
+	      me->SetReactState(REACT_DEFENSIVE);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)

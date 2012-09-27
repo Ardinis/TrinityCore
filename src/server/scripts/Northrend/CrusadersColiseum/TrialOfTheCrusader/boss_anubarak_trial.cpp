@@ -710,7 +710,7 @@ public:
             m_uiTargetGUID = 0;
         }
 
-		bool CanAIAttack(Unit const* victim) const
+      bool CanAIAttack(Unit const* victim) const
         {
             return victim->GetTypeId() == TYPEID_PLAYER;
         }

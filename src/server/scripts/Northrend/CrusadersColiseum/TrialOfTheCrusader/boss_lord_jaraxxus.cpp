@@ -180,9 +180,6 @@ public:
             if (!UpdateVictim())
                 return;
 
-	    if (me->HasUnitState(UNIT_STATE_CASTING))
-	      return;
-
             if (m_uiSummonInfernalEruptionTimer <= uiDiff)
             {
                 DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
@@ -211,7 +208,7 @@ public:
             {
 	      if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.f, true, -SPELL_LORD_HITTIN))
                     DoCast(pTarget, SPELL_FEL_LIGHTING);
-                m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+	      m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)

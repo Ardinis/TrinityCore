@@ -522,6 +522,32 @@ public:
     }
 };
 
+enum eTrousseAbo
+{
+  NPC_ABO = 23575,
+  SPELL_POSSES = 530,
+  ITEM_ABO = 33613,
+  SPELL_DEAD = 42167,
+};
+
+
+class item_trousse_confection_abo : public ItemScript
+{
+public:
+    item_trousse_confection_abo() : ItemScript("item_trousse_confection_abo") { }
+
+    bool OnUse(Player* player, Item* pItem, const SpellCastTargets & /*pTargets*/)
+    {
+      //      if (pPlayer->GetAreaId() != 3994)
+      //	return false;
+      if (Creature *c = player->FindNearestCreature(NPC_ABO, 10))
+	c->DespawnOrUnsummon();
+      if (Creature* c = player->SummonCreature(NPC_ABO, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ() + 2, player->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+	player->CastSpell(c, SPELL_POSSES, true);
+      return true;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -536,6 +562,7 @@ void AddSC_item_scripts()
     new item_trident_of_nazjan();
     new item_captured_frog();
     new item_egg_proto_stolen();
-    //    new item_brewfest_sampler;
-    new item_brewfest_ram_reins;
+    //    new item_brewfest_sampler();
+    new item_brewfest_ram_reins();
+    new item_trousse_confection_abo();
 }

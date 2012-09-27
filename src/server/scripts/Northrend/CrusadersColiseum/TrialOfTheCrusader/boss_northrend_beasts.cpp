@@ -145,7 +145,7 @@ public:
         {
             m_uiImpaleTimer = urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             m_uiStaggeringStompTimer = 15*IN_MILLISECONDS;
-	    m_uiThrowTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+	    m_uiThrowTimer = urand(1*IN_MILLISECONDS, 5*IN_MILLISECONDS);
 
             if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
                 GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
@@ -248,7 +248,7 @@ public:
                         break;
 		      }
 		  }
-                m_uiThrowTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
+                m_uiThrowTimer = urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS);
 	      } else m_uiThrowTimer -= uiDiff;
 
             DoMeleeAttackIfReady();

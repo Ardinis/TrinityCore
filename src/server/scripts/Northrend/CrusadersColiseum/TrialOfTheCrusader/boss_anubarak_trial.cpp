@@ -509,7 +509,7 @@ public:
 
 	    if (m_uiT <= uiDiff)
 	      {
-		if (Unit *target = me->GetVictim())
+		if (Unit *target = me->getVictim())
 		  target->AddAura(65775, target);
 		m_uiT = 1000;
 	      }

@@ -307,6 +307,7 @@ public:
             //Workaround for Snobold
 	    //            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
 	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+	    mui_checkEnd = 1000;
         }
 
         void EnterCombat(Unit *pWho)
@@ -348,13 +349,13 @@ public:
 	switch (action)
 	  {
 	  case ACTION_ENABLE_FIRE_BOMB:
-	    events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+	    events.CancelEvent(EVENT_FIRE_BOMB);
 	    events.CancelEvent(EVENT_BATTER);
             events.CancelEvent(EVENT_HEAD_CRACK);
 	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 	    break;
 	  case ACTION_DISABLE_FIRE_BOMB:
-	    events.CancelEvent(EVENT_FIRE_BOMB);
+	    events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
 	    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_HEAD_CRACK, 1*IN_MILLISECONDS);
 	    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -386,10 +387,30 @@ public:
 	  }
       }
 
+      bool CheckEnd()
+      {
+	Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
+	if (gormok && !gormok->isAlive())
+	  return true;
+	return false;
+      }
+
       void UpdateAI(uint32 const diff)
       {
 	if (!UpdateVictim() || m_bTargetDied)
 	  return;
+
+	if (mui_checkEnd <= diff)
+	  {
+	    if (CheckEnd())
+	      {
+		me->DespawnOrUnsummon();
+		return ;
+	      }
+	    mui_checkEnd = 1000;
+	  }
+	else
+	  mui_checkEnd -= diff;
 
 	events.Update(diff);
 
@@ -442,6 +463,11 @@ public:
 	      case EVENT_BATTER:
 		if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
 		  {
+		    if (!me->IsOnVehicle(target))
+		      {
+			me->DespawnOrUnsummon();
+			return;
+		      }
 		    target->AddAura(SPELL_BATTER, target);
 		    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
 		    if (!target->isAlive())
@@ -461,6 +487,7 @@ public:
       }
     private:
       EventMap events;
+      uint32 mui_checkEnd;
     };
 };
 

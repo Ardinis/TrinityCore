@@ -969,14 +969,8 @@ public:
     {
       me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
       me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-    }
-
-    void InitializeAI()
-    {
-      if (!me->isDead())
-	Reset();
-      
-      me->SetReactState(REACT_PASSIVE);
+      me->SetReactState(REACT_DEFENSIVE);
+      Reset();
     }
 
     void Reset()
@@ -1064,7 +1058,7 @@ public:
     {
       _JustReachedHome();
       me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
-      me->SetReactState(REACT_PASSIVE);
+      me->SetReactState(REACT_DEFENSIVE);
       me->SetFlying(false);
     }
 
@@ -1273,12 +1267,13 @@ class npc_crok_scourgebane : public CreatureScript
 
             void Reset()
             {
-                _events.Reset();
-                _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, urand(7500, 12500));
-                _events.ScheduleEvent(EVENT_DEATH_STRIKE, urand(25000, 30000));
-                me->SetReactState(REACT_DEFENSIVE);
-                _didUnderTenPercentText = false;
-                _wipeCheckTimer = 1000;
+	      me->GetMotionMaster()->MoveTargetedHome();
+	      _events.Reset();
+	      _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, urand(7500, 12500));
+	      _events.ScheduleEvent(EVENT_DEATH_STRIKE, urand(25000, 30000));
+	      me->SetReactState(REACT_DEFENSIVE);
+	      _didUnderTenPercentText = false;
+	      _wipeCheckTimer = 1000;
             }
 
             void DoAction(int32 const action)
@@ -1418,21 +1413,17 @@ class npc_crok_scourgebane : public CreatureScript
                 {
                     _wipeCheckTimer = 1000;
                     Player* player = NULL;
-                    Trinity::AnyPlayerInObjectRangeCheck check(me, 60.0f);
+                    Trinity::AnyPlayerInObjectRangeCheck check(me, 300.0f);
                     Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, player, check);
-                    me->VisitNearbyWorldObject(60.0f, searcher);
+                    me->VisitNearbyWorldObject(300.0f, searcher);
                     // wipe
                     if (!player)
                     {
-                        damage *= 100;
-                        if (damage >= me->GetHealth())
-                        {
-                            FrostwingGauntletRespawner respawner;
-                            Trinity::CreatureWorker<FrostwingGauntletRespawner> worker(me, respawner);
-                            me->VisitNearbyGridObject(333.0f, worker);
-                            Talk(SAY_CROK_DEATH);
-                        }
-                        return;
+		      FrostwingGauntletRespawner respawner;
+		      Trinity::CreatureWorker<FrostwingGauntletRespawner> worker(me, respawner);
+		      me->VisitNearbyGridObject(333.0f, worker);
+		      Talk(SAY_CROK_DEATH);
+		      return;
                     }
                 }
 
@@ -1749,9 +1740,9 @@ class npc_captain_brandon : public CreatureScript
 
         struct npc_captain_brandonAI : public npc_argent_captainAI
         {
-            npc_captain_brandonAI(Creature* creature) : npc_argent_captainAI(creature)
-			{
-			}
+	  npc_captain_brandonAI(Creature* creature) : npc_argent_captainAI(creature)
+	  {
+	  }
 
             void Reset()
             {

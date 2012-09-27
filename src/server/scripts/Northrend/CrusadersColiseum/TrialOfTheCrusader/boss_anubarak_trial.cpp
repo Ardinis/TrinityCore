@@ -471,12 +471,14 @@ public:
         InstanceScript* m_instance;
 
         uint32 m_uiDeterminationTimer;
+      uint32 m_uiT;
 
         void Reset()
         {
+	  m_uiT = 1000;
             me->SetCorpseDelay(0);
             m_uiDeterminationTimer = urand(5*IN_MILLISECONDS, 60*IN_MILLISECONDS);
-            DoCast(me, SPELL_ACID_MANDIBLE);
+	    //            DoCast(me, SPELL_ACID_MANDIBLE);
             me->SetInCombatWithZone();
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                 me->AddThreat(target, 20000.0f);
@@ -504,6 +506,15 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
+	    if (m_uiT <= uiDiff)
+	      {
+		if (Unit *target = me->GetVictim())
+		  target->AddAura(65775, target);
+		m_uiT = 1000;
+	      }
+	    else
+	      m_uiT -= uiDiff;
 
             /* Bosskillers don't recognize */
             if (m_uiDeterminationTimer <= uiDiff)

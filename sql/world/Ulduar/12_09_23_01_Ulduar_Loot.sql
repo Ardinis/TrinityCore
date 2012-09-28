@@ -1508,3 +1508,18 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, 
 ('27090','46110','70','1','0','1','1'),
 ('27090','45814','-100','1','0','1','1');
 
+-- Hodir Loot , 10 & 25 , Avec HF 
+DELETE FROM gameobject WHERE id IN(194200, 194201,194307,194308) ;
+INSERT INTO gameobject
+   (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`)
+VALUES
+(194307, 603, 1, 1, 1966.43, -203.906, 432.687, -0.90757, 0, 0, 0, 1, -604800, 255, 1),
+(194308, 603, 2, 1, 1966.43, -203.906, 432.687, -0.90757, 0, 0, 0, 1, -604800, 255, 1),
+(194200, 603, 1, 1, 2004.65, -209.028, 432.687, 1.91458, 0, 0, 0.817635, 0.575738, 604800, 100, 1),
+(194201, 603, 2, 1, 2004.65, -209.028, 432.687, 1.91458, 0, 0, 0.817635, 0.575738, 604800, 100, 1);
+
+UPDATE `gameobject_template` SET `flags` = 16 WHERE `entry` = 194201;
+UPDATE gameobject_loot_template SET lootmode = 1 WHERE entry = 26950 AND lootmode = 2;
+
+
+

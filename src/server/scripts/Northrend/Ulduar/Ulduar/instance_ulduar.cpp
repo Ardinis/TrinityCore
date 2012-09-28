@@ -1085,11 +1085,13 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_KOLOGARN:
                         if (state == DONE)
                         {
+/*						
                             if (GameObject* gameObject = instance->GetGameObject(KologarnChestGUID))
                             {
                                 gameObject->SetRespawnTime(gameObject->GetRespawnDelay());
                                 gameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                             }
+*/							
                             HandleGameObject(KologarnBridgeGUID, false);
                         }
 			// Due to HordeGuides, the door should be open when the encounter is in progress. (It opens after finishing AoI.)

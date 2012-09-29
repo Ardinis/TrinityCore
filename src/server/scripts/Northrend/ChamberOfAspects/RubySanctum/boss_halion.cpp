@@ -318,7 +318,7 @@ struct generic_halionAI : public BossAI
       Map::PlayerList const & playerList = me->GetMap()->GetPlayers();
       for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
 	if (Player* player = i->getSource())
-	  if (player->isAlive())
+	  if (player->isAlive() && !player->isGameMaster())
 	    return true;
         if (Creature* halion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION)))
             halion->AI()->EnterEvadeMode();
@@ -1060,6 +1060,7 @@ class npc_orb_carrier : public CreatureScript
             {
                 ASSERT(creature->GetVehicleKit());
 		mui_rotate = 1000;
+		mui_relocate = 1500;
 		me->SetPhaseMask(0x20, true);
 		me->Respawn();
 		me->SetPhaseMask(0x20, true);
@@ -1085,7 +1086,15 @@ class npc_orb_carrier : public CreatureScript
 	      // from sniff but dont work yet on trinitycore
 	      //	      if (!me->HasUnitState(UNIT_STATE_CASTING))
 	      //		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
-	      me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+
+	      if (mui_relocate <= diff)
+		{
+		  me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+		  mui_relocate = 500;
+		}
+	      else
+		mui_relocate -= diff;
+
 	      if (mui_rotate <= diff)
 		{
 		  me->GetMotionMaster()->MoveRotate(40000, ROTATE_DIRECTION_LEFT);
@@ -1094,14 +1103,13 @@ class npc_orb_carrier : public CreatureScript
 		}
 	      else mui_rotate -= diff;
 
-	      //debug mod
 	      if (mui_damage <= diff)
 		{
 		  DamagePlayers();
-		  mui_damage = 200;
+		  mui_damage = 100;
 		}
 	      else
-	      mui_damage -= diff;
+		mui_damage -= diff;
             }
 
 	  void DamagePlayers()
@@ -1122,7 +1130,7 @@ class npc_orb_carrier : public CreatureScript
 		  if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
 		    {
 		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 30);
+		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 60);
 		    }
 	      }
 	  }
@@ -1161,6 +1169,7 @@ class npc_orb_carrier : public CreatureScript
 	private :
 	  uint32 mui_rotate;
 	  uint32 mui_damage;
+	  uint32 mui_relocate;
         };
 
   CreatureAI* GetAI(Creature* creature) const
@@ -1980,11 +1989,6 @@ public:
 		  float BC = caster->GetDistance2d(player)+1;
 		  float AC = target->GetDistance2d(player)+1;
 		  float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
-		  if (dd == 0)
-		    {
-		      caster->ToCreature()->MonsterYell(" $N you were shoot by me mouahahah", LANG_UNIVERSAL, player->GetGUID());
-		      //		      player->DealDamage(player, 200000, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-		    }
 		}
 	    }
 	}

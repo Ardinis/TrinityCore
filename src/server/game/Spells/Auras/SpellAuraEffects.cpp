@@ -1606,7 +1606,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
 	  // Use the new aura to see on what stance the target will be
 
             uint32 newStance = (1<<((newAura ? newAura->GetMiscValue() : 0)-1));
-           
+
 
             // If the stances are not compatible with the spell, remove it
 
@@ -3134,7 +3134,7 @@ void AuraEffect::HandleModPossess(AuraApplication const* aurApp, uint8 mode, boo
         target->RemoveCharmedBy(caster);
 		caster->ToPlayer()->SetMover(caster);
     }
-		
+
 }
 
 // only one spell has this aura
@@ -4803,7 +4803,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case 52916: // Honor Among Thieves
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
-                            target->CastSpell(spellTarget, 51699, true);
+			  if (spellTarget && spellTarget->ToPlayer() && spellTarget->isInCombat())
+			    if (spellTarget->ToPlayer()->HasSpellCooldown(51699) == 0)
+			    {
+			      if (caster)
+				caster->CastSpell(spellTarget, 51699, true);
+			      spellTarget->ToPlayer()->AddSpellCooldown(51699, 0, uint32(time(NULL) + 1));
+			    }
                    break;
                 case 28832: // Mark of Korth'azz
                 case 28833: // Mark of Blaumeux

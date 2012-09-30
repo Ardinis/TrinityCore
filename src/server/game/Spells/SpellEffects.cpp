@@ -694,19 +694,19 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 			      switch (combo)
 			      {
 			      case 1:
-				damage += irand((165 + ((481 * combo) + ap * 0.091)),(493 + ((481 * combo) + ap * 0.091)));
+				damage += irand((497 + ((370 * combo) + ap * 0.03)), 751 + ((370 * combo) + ap * 0.07));
 				break;
 			      case 2:
-				damage += irand((165 + ((481 * combo) + ap * 0.182)),(493 + ((481 * combo) + ap * 0.182)));
+				damage += irand((497 + ((370 * combo) + ap * 0.06)), 751 + ((370 * combo) + ap * 0.14));
 				break;
 			      case 3:
-				damage += irand((165 + ((481 * combo) + ap * 0.273)),(493 + ((481 * combo) + ap * 0.273)));
+				damage += irand((497 + ((370 * combo) + ap * 0.09)), 751 + ((370 * combo) + ap * 0.21));
 				break;
 			      case 4:
-				damage += irand((165 + ((481 * combo) + ap * 0.364)),(493 + ((481 * combo) + ap * 0.364)));
+				damage += irand((497 + ((370 * combo) + ap * 0.12)), 751 + ((370 * combo) + ap * 0.28));
 				break;
 			      case 5:
-				damage += irand((165 + ((481 * combo) + ap * 0.455)),(493 + ((481 * combo) + ap * 0.455)));
+				damage += irand((497 + ((370 * combo) + ap * 0.15)), 751 + ((370 * combo) + ap * 0.35));
 				break;
 			      default :
 				damage += int32(ap * combo * 0.091f);

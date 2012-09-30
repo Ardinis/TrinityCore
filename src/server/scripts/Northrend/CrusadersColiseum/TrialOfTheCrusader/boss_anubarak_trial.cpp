@@ -510,6 +510,7 @@ public:
 	    if (m_uiT <= uiDiff)
 	      {
 		if (Unit *target = me->getVictim())
+		  if (me->IsWithinDistInMap(target, 2.0f))
 		  target->AddAura(65775, target);
 		m_uiT = 1000;
 	      }

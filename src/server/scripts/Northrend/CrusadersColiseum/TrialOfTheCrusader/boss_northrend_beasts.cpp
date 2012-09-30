@@ -439,10 +439,11 @@ public:
 			if (target->GetVehicleKit())
 			  if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
 			    {
-			      //			      gormok->AI->Say(SAY_SNOBOLLED, );
+
 			      events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
 			      return;
 			    }
+			DoScriptText(SAY_SNOBOLLED, me, player);
 			m_uiTargetGUID = player->GetGUID();
 			player->CreateVehicleKit(444, 0);
 			me->EnterVehicle(player, 0);

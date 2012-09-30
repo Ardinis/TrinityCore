@@ -2120,13 +2120,13 @@ bool SpellMgr::IsCCSpell(SpellInfo const *spellProto, uint8 EffMask)
 {
        if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER ||
                spellProto->SpellFamilyName == SPELLFAMILY_GENERIC)
-               return false; 
-       
+               return false;
+
        for (uint8 effIndex = 0; effIndex<MAX_SPELL_EFFECTS; ++effIndex)
        {
                if (EffMask && !(EffMask & (1<<effIndex)))
-				   continue;    
-        
+				   continue;
+
                switch(spellProto->Effects[effIndex].ApplyAuraName)
                {
 				case SPELL_AURA_MOD_CONFUSE:
@@ -3266,7 +3266,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
 			case 55689: // Glyph of Shadow (to prevent glyph aura loss)
 				spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_NEED_SHAPESHIFT;
-				break;				
+				break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;
                 break;
@@ -3274,11 +3274,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 16835:
                 spellInfo->DurationIndex = 21;
                 break;
-/*				
+/*
 			case 62324: // Throw Passenger
 				spellInfo->Targets |= TARGET_UNIT_CASTER;
-				break;		
-*/				
+				break;
+*/
             case 51735: // Ebon Plague
             case 51734:
             case 51726:
@@ -3631,12 +3631,15 @@ void SpellMgr::LoadDbcDataCorrections()
 	case 64676 :
 	case 64459 :
 	case 64675 :
-	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; 
-	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; 
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
+	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS;
 	  break;
             case 73529: // Shadow Trap
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;   // 10yd
                 break;
+	case 74629:
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;   // 10yd
+	  break;
 	case 62383:
 	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
 	  break;
@@ -3686,7 +3689,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
-            case 51678: // WintergraspSiegeEngine Ram set radius of damage for units to 5 yards 
+            case 51678: // WintergraspSiegeEngine Ram set radius of damage for units to 5 yards
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_KNOCK_BACK
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_SCHOOL_DAMAGE
                 spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // SPELL_EFFECT_WMO_DAMAGE, Huck but it must be -> Fortress towers are much bigger than original WMO damage radius of spell
@@ -3708,12 +3711,12 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
 			case 53651:
 			    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
-				break;		
+				break;
 			case 53379: // Swift Retribution
 			case 53484:
 			case 53648:
 			  spellInfo->EffectSpellClassMask[0] = flag96(0x00000000, 0x00000000, 0x00000020);
-			  break;				
+			  break;
 	case 2378: // Minor Fortitude
 	  spellInfo->manaCost = 0;
 	  spellInfo->manaPerSecond = 0;
@@ -3752,7 +3755,7 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->SpellFamilyName)
         {
-            case SPELLFAMILY_HUNTER: // Monstrous Bite Error target spell 
+            case SPELLFAMILY_HUNTER: // Monstrous Bite Error target spell
                 if (spellInfo->SpellIconID == 599)
                     spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
                 else

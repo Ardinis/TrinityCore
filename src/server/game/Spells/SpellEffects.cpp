@@ -416,37 +416,37 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         {
                             damage = 0;
                             return;
-                        }					
+                        }
 						break;
 					}
 // Ulduar - dammage entre vehicule.
                     case 62489: // Pyrite
-					case 62635: // Mortier        
+					case 62635: // Mortier
                     case 65045: // Flamme Goudron
                     case 65044: // Flamme GOudron
-                    case 62363: // Fusee Anti aerienne					
+                    case 62363: // Fusee Anti aerienne
                     case 62357: // Canon
 					case 62974: // Cor Sonore
                     case 62307: // Rocher
                     {
 						// Hodir Furie
-                        if (unitTarget->HasAura(62297))     
+                        if (unitTarget->HasAura(62297))
                             unitTarget->RemoveAura(62297);
-                            
+
                         if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() == TYPEID_PLAYER)
                         {
                             damage = 0;
                             return;
                         }
-                        
+
                         switch (unitTarget->GetEntry())
                         {
                             case 33060: // Engin Siege
-                            case 33067: // Tourelle siege							
+                            case 33067: // Tourelle siege
                             case 33109: // Demolisseur
-                            case 33167: // Siege Demolisseur							
-                            case 33062: // Becane	
-                            case 33090: // Nappe Goudron							
+                            case 33167: // Siege Demolisseur
+                            case 33062: // Becane
+                            case 33090: // Nappe Goudron
                             case 33189: // Pyrite Liquide
                                 damage = 0;
                             default:
@@ -690,7 +690,28 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         {
                             float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                             //damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
-							damage += int32(ap * combo * 0.091f);
+			    if (m_caster && m_caster->getLevel() == 80)
+			      switch (combo)
+			      {
+			      case 1:
+				damage += irand((165 + ((481 * combo) + ap * 0.091)),(493 + ((481 * combo) + ap * 0.091)));
+				break;
+			      case 2:
+				damage += irand((165 + ((481 * combo) + ap * 0.182)),(493 + ((481 * combo) + ap * 0.182)));
+				break;
+			      case 3:
+				damage += irand((165 + ((481 * combo) + ap * 0.273)),(493 + ((481 * combo) + ap * 0.273)));
+				break;
+			      case 4:
+				damage += irand((165 + ((481 * combo) + ap * 0.364)),(493 + ((481 * combo) + ap * 0.364)));
+				break;
+			      case 5:
+				damage += irand((165 + ((481 * combo) + ap * 0.455)),(493 + ((481 * combo) + ap * 0.455)));
+				break;
+			      default :
+				damage += int32(ap * combo * 0.091f);
+				break;
+			      }
 
                             // Eviscerate and Envenom Bonus Damage (item set effect)
 							if (AuraEffect const * aurEffB = m_caster->GetAuraEffect(37169, EFFECT_0, m_caster->GetGUID()))
@@ -834,7 +855,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         return;
                     unitTarget->ToCreature()->setDeathState(JUST_ALIVED);
                     return;
-                }		
+                }
                 case 12162:                                 // Deep wounds
                 case 12850:                                 // (now good common check for this spells)
                 case 12868:
@@ -865,7 +886,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     damage = damage / ticks;
                     m_caster->CastCustomSpell(unitTarget, 12721, &damage, NULL, NULL, true);
                     return;
-                }				
+                }
                 case 13567:                                 // Dummy Trigger
                 {
                     // can be used for different aura triggering, so select by aura
@@ -1197,7 +1218,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 case 58418:                                 // Portal to Orgrimmar
                 case 58420:                                 // Portal to Stormwind
-                    return;                                 // implemented in EffectScript[0]			
+                    return;                                 // implemented in EffectScript[0]
                 case 64385:                                 // Unusual Compass
                 {
                     m_caster->SetOrientation(float(urand(0, 62832)) / 10000.0f);
@@ -1273,13 +1294,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 int32 bp0 = damage;
                 m_caster->CastCustomSpell(unitTarget, 50783, &bp0, NULL, NULL, true, 0);
                 //return;
-             
+
 				// Item - Warrior T10 Melee 4P Bonus
 				if (Aura * aura = m_caster->GetAura(46916))
 					if (aura->GetCharges())
 					{
-						m_caster->ToPlayer()->RestoreSpellMods(this, 46916);                       
-						aura->DropCharge();      
+						m_caster->ToPlayer()->RestoreSpellMods(this, 46916);
+						aura->DropCharge();
 					}
 				break;
             }
@@ -1315,8 +1336,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 				if (Aura * aura = m_caster->GetAura(52437))
 					if (aura->GetCharges())
 					{
-						m_caster->ToPlayer()->RestoreSpellMods(this, 52437);                       
-						//aura->DropCharge();      
+						m_caster->ToPlayer()->RestoreSpellMods(this, 52437);
+						//aura->DropCharge();
 					}
                 break;
             }
@@ -4344,7 +4365,7 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
                 if (m_originalCaster)
                 {
                     int32 duration = m_originalCaster->ModSpellDuration(m_spellInfo, unitTarget, m_originalCaster->CalcSpellDuration(m_spellInfo), false, 1 << effIndex);
-                    unitTarget->ProhibitSpellSchool(curSpellInfo->GetSchoolMask(), duration/*GetSpellDuration(m_spellInfo)*/);				
+                    unitTarget->ProhibitSpellSchool(curSpellInfo->GetSchoolMask(), duration/*GetSpellDuration(m_spellInfo)*/);
                 }
                 ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo->Id);
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
@@ -4595,11 +4616,11 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 					//return;
 					//if (unitTarget->GetAura(62719))
 					//	unitTarget->RemoveAuraFromStack(62719);
-				
+
 					//if(unitTarget->GetAura(64100))
 					//	unitTarget->RemoveAuraFromStack(64100);
 					//return;
-				 //}					
+				 //}
      //           // Shield-Breaker - Argent Tournament
      //           case 64595:
      //               if(m_caster->GetOwner())

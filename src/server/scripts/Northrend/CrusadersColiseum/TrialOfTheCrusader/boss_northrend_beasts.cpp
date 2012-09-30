@@ -439,6 +439,7 @@ public:
 			if (target->GetVehicleKit())
 			  if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
 			    {
+			      //			      gormok->AI->Say(SAY_SNOBOLLED, );
 			      events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
 			      return;
 			    }
@@ -464,7 +465,7 @@ public:
 		if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
 		  {
 		    target->AddAura(SPELL_BATTER, target);
-		    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
+		    events.ScheduleEvent(EVENT_BATTER, 3*IN_MILLISECONDS);
 		    if (!target->isAlive())
 		      BackToGornock();
 		  }
@@ -1114,7 +1115,7 @@ public:
 	    }
 	}
     }
-    
+
     void UpdateAI(const uint32 uiDiff)
     {
       if (m_uiBomb < uiDiff)
@@ -1123,7 +1124,7 @@ public:
 	  m_uiBomb = 2000;
 	}
       else m_uiBomb -= uiDiff;
-      
+
       if (!me->HasAura(SPELL_FIRE_BOMB_DOT))
 	me->DespawnOrUnsummon();
     }

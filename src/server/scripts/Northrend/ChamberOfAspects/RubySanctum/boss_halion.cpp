@@ -1255,7 +1255,7 @@ public:
       if (mui_damage <= diff)
 	{
 	  mob_orb_carrierDamage();
-	  mui_damage = 500;
+	  mui_damage = 100;
 	}
       else
 	mui_damage -= diff;
@@ -2074,7 +2074,7 @@ void AddSC_boss_halion()
 {
     new boss_halion();
     new boss_twilight_halion();
-    
+
     new npc_halion_controller();
     new npc_meteor_strike_initial();
     new npc_meteor_strike();

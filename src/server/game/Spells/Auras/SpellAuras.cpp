@@ -43,7 +43,7 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
     ASSERT(GetTarget() && GetBase());
 
     if (GetBase()->CanBeSentToClient())
-    {	
+    {
 		uint32 MaximumAura = MAX_AURAS;
 
 		if(GetBase()->GetId() == 32223)
@@ -378,7 +378,7 @@ void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount)
                 }
             }
         }
-    }	
+    }
 }
 
 Aura::~Aura()
@@ -1492,8 +1492,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // check cooldown
                         if (caster->GetTypeId() == TYPEID_PLAYER)
                         {
-			  if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()) <= 10)
-			    break;
+			  if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
+			    if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()) <= 10)
+			      break;
                             // and add if needed
                             caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, uint32(time(NULL) + 12));
                         }
@@ -1849,18 +1850,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                 switch(m_effects[i]->GetMiscValue())
                 {
-                    case 5:  
-                        spell_immune = 55357; 
-                        break;                    
-                    case 7: 
-                    case 11: 
-                        spell_immune = 55378; 
+                    case 5:
+                        spell_immune = 55357;
                         break;
-                    case 9:  
+                    case 7:
+                    case 11:
+                        spell_immune = 55378;
+                        break;
+                    case 9:
                         spell_immune = 55366;
                         break;
-                    case 12: 
-                        spell_immune = 55358; 
+                    case 12:
+                        spell_immune = 55358;
                         break;
                     default:
                         break;
@@ -1872,9 +1873,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
         }
-}               
+}
 
-	
+
 bool Aura::CanBeAppliedOn(Unit* target)
 {
     // unit not in world or during remove from world
@@ -2582,4 +2583,3 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* /*caster*
         }
     }
 }
-

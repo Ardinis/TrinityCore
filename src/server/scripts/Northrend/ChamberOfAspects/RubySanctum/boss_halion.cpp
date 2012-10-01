@@ -506,7 +506,10 @@ class boss_halion : public CreatureScript
             void SetData(uint32 index, uint32 value)
             {
                 if (index == DATA_FIGHT_PHASE)
+		{
+		  DoResetThreat();
                     events.SetPhase(value);
+		}
             }
 
             uint32 GetData(uint32 index)
@@ -979,7 +982,6 @@ class npc_halion_controller : public CreatureScript
                                     uint32 spellID = GetSpell(materialCorporealityValue, (itr == DATA_TWILIGHT_HALION));
                                     if (spellID != 0)
                                         halion->CastSpell(halion, spellID, false);
-
                                     halion->AI()->SetData(DATA_FIGHT_PHASE, PHASE_THREE);
 
                                     if (itr == DATA_TWILIGHT_HALION)

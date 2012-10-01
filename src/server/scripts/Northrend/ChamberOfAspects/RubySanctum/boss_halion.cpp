@@ -1099,7 +1099,7 @@ class npc_orb_carrier : public CreatureScript
 
 	      if (mui_rotate <= diff)
 		{
-		  me->GetMotionMaster()->MoveRotate(40000, ROTATE_DIRECTION_LEFT);
+		  me->GetMotionMaster()->MoveRotate(45000, ROTATE_DIRECTION_LEFT);
 		  mui_rotate =  40000;
 		  mui_rotate -= diff;
 		}
@@ -1132,7 +1132,7 @@ class npc_orb_carrier : public CreatureScript
 		  if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
 		    {
 		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 40);
+		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 50);
 		    }
 	      }
 	  }

@@ -3749,6 +3749,12 @@ void SpellMgr::LoadDbcDataCorrections()
 	case 24259: // Spell Lock silence
 	  spellInfo->speed = 80;
 	  break;
+	case 20254: // Improved Concentration Aura (Rank 1) works with any used Aura, not just Concentration Aura
+	case 20255: // Improved Concentration Aura (Rank 2)
+	case 20256: // Improved Concentration Aura (Rank 2)
+	  spellInfo->EffectSpellClassMask[EFFECT_1] = flag96(0x04020048, 0x00000010, 0x00000020);
+	  spellInfo->EffectSpellClassMask[EFFECT_2] = flag96(0x04020048, 0x00000010, 0x00000020);
+	  break;
             default:
                 break;
         }

@@ -1394,7 +1394,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
-            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, m_attackType, m_spellInfo, m_triggeredByAuraSpell);		
+            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
 	}
     // Do damage and triggers
     else if (m_damage > 0)
@@ -1809,8 +1809,8 @@ bool Spell::UpdateChanneledTargetList()
 
     //If target has Grounding totem aura and totem is not in range of channeling spell
     if (Unit *Ttarget = m_targets.GetUnitTarget())
-      if (!m_spellInfo->Effects[0].IsAreaAuraEffect() && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && m_spellInfo->IsChanneled())       
-	if (Ttarget->GetEntry() == 5925)          
+      if (!m_spellInfo->Effects[0].IsAreaAuraEffect() && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && m_spellInfo->IsChanneled())
+	if (Ttarget->GetEntry() == 5925)
 	  range += 31;
 
     for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -4817,6 +4817,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_AFFECTING_COMBAT;
 
 	if ((m_spellInfo->Id == 4987 || (m_spellInfo->Category == 12 && m_spellInfo->SpellIconID == 47))
+	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
+	  return SPELL_FAILED_NOTHING_TO_DISPEL;
+
+	if ((m_spellInfo->Id == 527
 	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
 	  return SPELL_FAILED_NOTHING_TO_DISPEL;
 

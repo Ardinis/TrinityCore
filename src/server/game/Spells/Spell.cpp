@@ -4820,7 +4820,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
 	  return SPELL_FAILED_NOTHING_TO_DISPEL;
 
-	if ((m_spellInfo->Id == 527
+	if (m_spellInfo->Id == 527
 	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
 	  return SPELL_FAILED_NOTHING_TO_DISPEL;
 

@@ -170,8 +170,9 @@ class boss_general_zarithrian : public CreatureScript
                             DoCast(me, SPELL_INTIMIDATING_ROAR, true);
                             events.ScheduleEvent(EVENT_INTIMIDATING_ROAR, 42000);
                         case EVENT_CLEAVE:
-                            DoCastVictim(SPELL_CLEAVE_ARMOR);
-                            events.ScheduleEvent(EVENT_CLEAVE, 15000);
+			  me->CastSpell(me->getVictim(), SPELL_CLEAVE_ARMOR, true);
+			  //                            DoCastVictim(SPELL_CLEAVE_ARMOR);
+			  events.ScheduleEvent(EVENT_CLEAVE, 10000);
                             break;
                         default:
                             break;

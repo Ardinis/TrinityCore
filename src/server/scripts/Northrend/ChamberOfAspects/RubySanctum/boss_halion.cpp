@@ -923,7 +923,7 @@ class npc_halion_controller : public CreatureScript
                                 twilightHalion->AI()->Talk(SAY_SPHERE_PULSE);
                             if (Creature* orbCarrier = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_CARRIER)))
                                 orbCarrier->AI()->DoAction(ACTION_SHOOT);
-			    if (Is25ManRaid() && IsHeroic())
+			    if (IsHeroic())
 			      if (Creature* orbCarrierHm = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORB_CARRIER_HM)))
 				orbCarrierHm->AI()->DoAction(ACTION_SHOOT);
 			    _events.ScheduleEvent(EVENT_SHADOW_PULSARS_SHOOT, 29000);

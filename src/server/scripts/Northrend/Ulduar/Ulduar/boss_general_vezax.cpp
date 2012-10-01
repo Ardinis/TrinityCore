@@ -110,7 +110,7 @@ class boss_general_vezax : public CreatureScript
 
         struct boss_general_vezaxAI : public BossAI
         {
-            boss_general_vezaxAI(Creature* creature) : BossAI(creature, BOSS_VEZAX) {}            
+            boss_general_vezaxAI(Creature* creature) : BossAI(creature, BOSS_VEZAX) {}
 
             void Reset()
             {
@@ -158,8 +158,8 @@ class boss_general_vezax : public CreatureScript
                             break;
                         case EVENT_MARK_OF_THE_FACELESS:
                             if (Unit* target = CheckPlayersInRange(RAID_MODE(4, 9), 15.0f, 50.0f))
-                                DoCast(target, SPELL_MARK_OF_THE_FACELESS);                                
-                            events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));  
+                                DoCast(target, SPELL_MARK_OF_THE_FACELESS);
+                            events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));
                             break;
                         case EVENT_SURGE_OF_DARKNESS:
                             DoScriptText(EMOTE_SURGE_OF_DARKNESS, me);
@@ -168,7 +168,7 @@ class boss_general_vezax : public CreatureScript
                             events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, urand(50000, 70000));
                             break;
                         case EVENT_SUMMON_SARONITE_VAPOR:
-                            DoCast(me, SPELL_SUMMON_SARONITE_VAPORS, true);   // Spells summons 33488 in a random place in 40 meters                            
+                            DoCast(me, SPELL_SUMMON_SARONITE_VAPORS, true);   // Spells summons 33488 in a random place in 40 meters
                             events.ScheduleEvent(EVENT_SUMMON_SARONITE_VAPOR, urand(30000, 35000));
                             break;
                         case EVENT_BERSERK:
@@ -194,10 +194,11 @@ class boss_general_vezax : public CreatureScript
                 {
                     case NPC_SARONITE_VAPOR:
                         if (summons.size() >= 6) // summons include both vapors and saronite animus, but since the animus was not spawned yet...
-                        {                                                                                  
-                            events.CancelEvent(EVENT_SUMMON_SARONITE_VAPOR);    // Should always be cancelled after six vapors got spawned
-                            if (!vaporKilled && notHardModed)                   // If animus was not spawned yet and no vapor got killed yet...
-                                DoCast(SPELL_SUMMON_SARONITE_ANIMUS);
+                        {
+			  summons.DespawnAll();
+			  events.CancelEvent(EVENT_SUMMON_SARONITE_VAPOR);    // Should always be cancelled after six vapors got spawned
+			  if (!vaporKilled && notHardModed)                   // If animus was not spawned yet and no vapor got killed yet...
+			    DoCast(SPELL_SUMMON_SARONITE_ANIMUS);
                         }
                         break;
                     case NPC_SARONITE_ANIMUS:
@@ -208,7 +209,7 @@ class boss_general_vezax : public CreatureScript
                         DoCast(SPELL_SARONITE_BARRIER);
                         me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                         break;
-                }                
+                }
                 DoZoneInCombat(summoned);
             }
 
@@ -246,7 +247,7 @@ class boss_general_vezax : public CreatureScript
                         return shadowDodger ? 1 : 0;
                     // Hardmode-condition: !notHardModed <=> Saronite Animus dead; vaporSummonedCount>=6 <=> Saronite Animus summoned; !vaporKilled <=> one or more vapors got killed
                     case DATA_SMELL_OF_SARONITE:
-                        return summons.size()>=6 && !notHardModed && !vaporKilled ? 1 : 0; 
+                        return summons.size()>=6 && !notHardModed && !vaporKilled ? 1 : 0;
                 }
                 return 0;
             }
@@ -254,7 +255,7 @@ class boss_general_vezax : public CreatureScript
             void DoAction(int32 const action)
             {
                 switch (action)
-                {   
+                {
                     case ACTION_VAPORS_DIE:
                         vaporKilled = true;
                         break;
@@ -387,9 +388,9 @@ class npc_saronite_vapors : public CreatureScript
                 DoScriptText(EMOTE_VAPORS, me);
 		instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true); 
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true); 
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
 		me->SetReactState(REACT_PASSIVE);
 		me->ClearUnitState(UNIT_STATE_CASTING);
 		me->GetMotionMaster()->MoveRandom(30.0f);
@@ -562,7 +563,7 @@ public:
 class spell_mark_of_the_faceless_aura : public SpellScriptLoader
 {
 public:
-  spell_mark_of_the_faceless_aura() : SpellScriptLoader("spell_mark_of_the_faceless_aura") {}  
+  spell_mark_of_the_faceless_aura() : SpellScriptLoader("spell_mark_of_the_faceless_aura") {}
 
   class spell_mark_of_the_faceless_auraAuraScript : public AuraScript
   {
@@ -623,14 +624,14 @@ class spell_saronite_vapors : public SpellScriptLoader  // Spell 63323
 {
 public:
   spell_saronite_vapors() : SpellScriptLoader("spell_saronite_vapors") {}
-  
+
   class spell_saronite_vapors_AuraScript : public AuraScript
   {
     PrepareAuraScript(spell_saronite_vapors_AuraScript);
-    
+
 
     void HandleEffectPeriodic(AuraEffect const * aurEff)
-    {                
+    {
       if (Unit* target = GetTarget())
 	if (Player* player = target->ToPlayer())
 	  {
@@ -638,11 +639,11 @@ public:
 	      {
 		player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
 		return;
-	      }                        
-	    
+	      }
+
 	    uint8 stackCount = 0;
-	    if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))                        
-	      
+	    if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))
+
 	      stackCount = vaporaura->GetStackAmount() + 1; // #old stacks +1 (which will be applied now)
 	    else
 	      stackCount = 1; // On first apply.
@@ -661,26 +662,26 @@ public:
 	       Since I don't like pow(), we will use a left-shift for that, which results in:
 	       managain:       100 << (stackAmount-1)
 	       healthdamage:   2*managain
-	       
+
 	    */
 	    int32 manaGain = std::max( 100 << (stackCount-1), 0 ); // just for the case...
-	    uint32 healthDamage = 2*manaGain; 
-            
+	    uint32 healthDamage = 2*manaGain;
+
 	    // Possibly, the modifications below could be done by spells (63338, 63337), but they don't work yet. CastCustomSpell(...) would be an option.
 	    // Emulates shadow damage by spell, which is missing - due to wowhead, this should be reducible shadow-damage.
-	    player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW); // Emulates 63338                        
+	    player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW); // Emulates 63338
 
-	    player->ModifyPower(POWER_MANA, manaGain); // Emulates 63337                  
+	    player->ModifyPower(POWER_MANA, manaGain); // Emulates 63337
 
 	    /*
-	      S.th. like 
+	      S.th. like
 	      player->CastCustomSpell(63338, SPELLVALUE_BASE_POINT0, healthDamage, player, true);
 	      player->CastCustomSpell(63337, SPELLVALUE_BASE_POINT0, manaGain, player, true);
 	      doesn't work yet, dunno why
 	    */
 	    return; // Avoid prevention mentioned below.
 	  }
-      PreventDefaultAction(); // Do nothing in case there's no target or the target is not a player                         
+      PreventDefaultAction(); // Do nothing in case there's no target or the target is not a player
     }
 
 
@@ -756,6 +757,6 @@ void AddSC_boss_general_vezax()
 
     new achievement_shadowdodger("achievement_shadowdodger");       // 10m 10173 (2996)
     new achievement_shadowdodger("achievement_shadowdodger_25");    // 25m 10306 (2997)
-    new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning");     // 10m 10451 (3181) 
+    new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning");     // 10m 10451 (3181)
     new achievement_i_love_the_smell_of_saronite_in_the_morning("achievement_i_love_the_smell_of_saronite_in_the_morning_25");  // 25m 10462 (3188)
 }

@@ -389,7 +389,7 @@ public:
             renewTimer        = urand(2000, 5000);
 
             if (Creature* memory = Unit::GetCreature(*me, memoryGUID))
-                memory->DespawnOrUnsummon(1000);
+                memory->DespawnOrUnsummon();
 
             memoryGUID = 0;
 
@@ -450,20 +450,22 @@ public:
                 BindPlayersToInstance(me);
 
                 if (Creature* memory = Unit::GetCreature(*me, memoryGUID))
-                    memory->DespawnOrUnsummon(1000);
+                    memory->DespawnOrUnsummon();
             }
 
             if (!shielded && HealthBelowPct(25))
             {
+		if (Creature* memory = Unit::GetCreature(*me, memoryGUID))
+		  return;
+                shielded = true;
                 me->InterruptNonMeleeSpells(true);
                 DoCastAOE(SPELL_HOLY_NOVA, false);
                 DoCast(me, SPELL_SHIELD);
                 //DoCastAOE(SPELL_SUMMON_MEMORY, false);
                 //DoCastAOE(SPELL_CONFESS, false);
-                Talk(SAY_PALETRESS_SUMMON_MEMORY);	
+                Talk(SAY_PALETRESS_SUMMON_MEMORY);
 
-                shielded = true;
-                switch(urand(0, 24))
+                switch (urand(0, 24))
                 {
                     case 0: me->SummonCreature(NPC_MEMORY_ALGALON, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
                         break;
@@ -515,7 +517,7 @@ public:
                         break;
                     case 24: me->SummonCreature(NPC_MEMORY_ARCHIMONDE, 0.0f, 0.0f, 0.0f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
                         break;
-                }				
+                }
             }
         }
 

@@ -83,7 +83,7 @@ struct mob_obsidian_sanctum_trashAI : public ScriptedAI
     {
         DoAttackerAreaInCombat(who, 100);
         Unit *ptarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
-        if(ptarget)
+        if (ptarget)
             SendAttacker(ptarget);
     }
     void KilledUnit(Unit *victim){}
@@ -129,10 +129,11 @@ struct mob_obsidian_sanctum_trashAI : public ScriptedAI
         {
             if(SartharionCheck_Timer < diff)
             {
-                if(Creature* sarth = Creature::GetCreature((*me),pInstance->GetData64(DATA_SARTHARION)))
+                if (Creature* sarth = Creature::GetCreature((*me),pInstance->GetData64(DATA_SARTHARION)))
                 {
-                    if(sarth->getVictim())
-                        me->AI()->AttackStart(sarth->getVictim());
+                    if (sarth->getVictim())
+		      me->GetMotionMaster()->MovePoint(0, sarth->GetPositionX(), sarth->GetPositionY(), sarth->GetPositionZ());
+		    //  me->AI()->AttackStart(sarth->getVictim());
                 }
                 SartharionCheck_Timer = 5000;
             }else SartharionCheck_Timer -= diff;

@@ -109,6 +109,7 @@ class boss_lord_marrowgar : public CreatureScript
                 events.ScheduleEvent(EVENT_COLDFLAME, 5000, EVENT_GROUP_SPECIAL);
                 events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(45000, 50000));
                 events.ScheduleEvent(EVENT_ENRAGE, 600000);
+		instance->SetData(DATA_TEMPETE, NOT_STARTED);
                 _boneSlice = false;
 		_bstorm = false;
 		_endstorm = false;
@@ -137,6 +138,7 @@ class boss_lord_marrowgar : public CreatureScript
                 _JustReachedHome();
                 instance->SetBossState(DATA_LORD_MARROWGAR, FAIL);
                 instance->SetData(DATA_BONED_ACHIEVEMENT, uint32(true));    // reset
+		instance->SetData(DATA_TEMPETE, NOT_STARTED);
             }
 
             void KilledUnit(Unit* victim)

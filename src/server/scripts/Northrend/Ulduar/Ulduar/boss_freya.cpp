@@ -369,45 +369,53 @@ class boss_freya : public CreatureScript
 
         struct boss_freyaAI : public BossAI
         {
-            boss_freyaAI(Creature* creature) : BossAI(creature, BOSS_FREYA) {}            
+            boss_freyaAI(Creature* creature) : BossAI(creature, BOSS_FREYA) 
+			{
+				pInstance = creature->GetInstanceScript();
+				if (pInstance)
+					EncounterFinished = (pInstance->GetBossState(BOSS_FREYA) == DONE);
+			}            
 
             void Reset()
             {
-                EncounterFinished = EncounterFinished || (instance->GetBossState(BOSS_FREYA) == DONE);
-                if (EncounterFinished) // May be called during fight if Freya gets outfight... hm, should _not_ happen regularly
+                if (EncounterFinished) // May be called during fight if Freya gets outfight... hm, should _not_ happen regularly // Resolu , ne sera en fonction 35 QUE si freya est déjà down, en gros, si elle est mort et qu'un mj la respawn.
                 {
-		  //                    me->setFaction(35);
-		  //                    return;
+					me->setFaction(35);
                 }
-                _Reset();                
-		sp = 0;
-                trioWaveCount = 0;
-                trioWaveController = 0;
-                elderCount = 0;                
+				else
+				{
+					if (pInstance)
+						pInstance->SetBossState(BOSS_FREYA, NOT_STARTED);
+					_Reset();                
+					sp = 0;
+					trioWaveCount = 0;
+					trioWaveController = 0;
+					elderCount = 0;                
 
-                for (uint8 i = 0; i < 3; ++i)
-                    for (uint8 n = 0; n < 2; ++n)
-                        ElementalGUID[i][n] = 0;
-                for (uint8 i = 0; i < 6; ++i)
-                    for (uint8 n = 0; n < 2; ++n)
-                        deforestation[i][n] = 0;
-                for (uint8 n = 0; n < 2; ++n)
-                {
-                    checkElementalAlive[n] = true;
-                    trioDefeated[n] = false;
-                }
-                for (uint8 n = 0; n < 3; ++n)
-                    random[n] = false;
+					for (uint8 i = 0; i < 3; ++i)
+						for (uint8 n = 0; n < 2; ++n)
+							ElementalGUID[i][n] = 0;
+					for (uint8 i = 0; i < 6; ++i)
+						for (uint8 n = 0; n < 2; ++n)
+							deforestation[i][n] = 0;
+					for (uint8 n = 0; n < 2; ++n)
+					{
+						checkElementalAlive[n] = true;
+						trioDefeated[n] = false;
+					}
+					for (uint8 n = 0; n < 3; ++n)
+						random[n] = false;
 
-                for (uint8 n = 0; n < 3; ++n)
-                {
-                    if (Creature* elder = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRIGHTLEAF + n)))
-                        if (elder->isAlive())
-                        {
-                            elder->ResetLootMode();
-                            elder->AI()->EnterEvadeMode();
-                        }
-                }               
+					for (uint8 n = 0; n < 3; ++n)
+					{
+						if (Creature* elder = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_BRIGHTLEAF + n)))
+							if (elder->isAlive())
+							{
+								elder->ResetLootMode();
+								elder->AI()->EnterEvadeMode();
+							}
+					}
+				}				
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -874,6 +882,7 @@ class boss_freya : public CreatureScript
                 bool trioDefeated[2];
                 bool random[3];
                 bool EncounterFinished;
+				InstanceScript* pInstance;
 
 	  uint32 sp;
         };

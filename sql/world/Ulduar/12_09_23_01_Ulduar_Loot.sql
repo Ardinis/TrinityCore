@@ -1367,7 +1367,6 @@ INSERT INTO `reference_loot_template` (`entry`,`item`,`ChanceOrQuestChance`,`loo
 (@Reference,46045,0,1,1,1,1); -- Pulsar Gloves
 
 
-
 -- Ajout BLood : 
 -- Drop des fragment de Valanyr sur les boss (creature).
 

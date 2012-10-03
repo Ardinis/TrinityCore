@@ -5692,7 +5692,7 @@ SpellCastResult Spell::CheckCasterAuras() const
     // We use bitmasks so the loop is done only once and not on every aura check below.
     if (m_spellInfo->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
     {
-        for (uint i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (m_spellInfo->Effects[i].ApplyAuraName == SPELL_AURA_SCHOOL_IMMUNITY)
                 school_immune |= uint32(m_spellInfo->Effects[i].MiscValue);

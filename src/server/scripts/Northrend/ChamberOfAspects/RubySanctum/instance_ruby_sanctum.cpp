@@ -307,6 +307,8 @@ class instance_ruby_sanctum : public InstanceMapScript
 	      return;
 	    //	    if (Creature* hallion = instance->GetCreature(HalionGUID))
 	    //   return ;
+	    if (GetBossState(DATA_HALION) == DONE)
+	      return ;
 
 	    if (Creature* controller = instance->GetCreature(HalionControllerGUID))
 	      return;

@@ -6718,36 +6718,54 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 break;
             }
             // Light's Beacon - Beacon of Light
-            if (dummySpell->Id == 53651)
-            {
-                if (this->GetTypeId() != TYPEID_PLAYER)
-                    return false;
-                // Check Party/Raid Group
-                if (Group *group = this->ToPlayer()->GetGroup())
-                {
-                    for (GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-                    {
-                        Player* Member = itr->getSource();
+	    if (dummySpell->Id == 53651)
+	    {
+	      if (!victim)
+		return false;
+	      triggered_spell_id = 0;
+	      Unit* beaconTarget = NULL;
+	      if (GetTypeId() != TYPEID_PLAYER)
+	      {
+		beaconTarget = triggeredByAura->GetBase()->GetCaster();
+		if (beaconTarget == this || !(beaconTarget->GetAura(53563, victim->GetGUID())))
+		  return false;
+		basepoints0 = int32(damage);
+		triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+	      }
+	      else
+	      {    // Check Party/Raid Group
+		if (Group* group = ToPlayer()->GetGroup())
+		{
+		  for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+		  {
+		    if (Player* member = itr->getSource())
+		    {
+		      // check if it was heal by paladin which casted this beacon of light
+		      if (member->GetAura(53563, victim->GetGUID()))
+		      {
+			// do not proc when target of beacon of light is healed
+			if (member == this)
+			  return false;
 
-                        // check if it was heal by paladin which casted this beacon of light
-                        if (Aura const * aura = Member->GetAura(53563, victim->GetGUID()))
-                        {
-                            Unit* beaconTarget = Member;
+			beaconTarget = member;
+			basepoints0 = int32(damage);
+			triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+			break;
+		      }
+		    }
+		  }
+		}
+	      }
 
-                            // do not proc when target of beacon of light is healed
-                            if (beaconTarget == this)
-                                return false;
+	      if (triggered_spell_id && beaconTarget)
+	      {
+		victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
+		return true;
+	      }
 
-                            basepoints0 = int32(damage);
-                            triggered_spell_id = 53652;
-                            victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
-                            return true;
-                        }
-                    }
-                }
-                else
-                    return false;
-            }
+	      return false;
+	    }
+
             // Judgements of the Wise
             if (dummySpell->SpellIconID == 3017)
             {
@@ -6766,6 +6784,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 CastCustomSpell(target, triggered_spell_id, &basepoints0, &basepoints0, NULL, true, castItem, triggeredByAura);
                 return true;
             }
+
             // Sacred Shield
             if (dummySpell->SpellFamilyFlags[1] & 0x80000)
             {
@@ -6784,13 +6803,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
                 }
                 else if (damage > 0)
-				{
-                    triggered_spell_id = 58597;
-					target = this;
-					break;
-				}
-				else
-                    return false;
+		{
+		  triggered_spell_id = 58597;
+		  target = this;
+		  break;
+		}
+		else
+		  return false;
 
 
                 // Item - Paladin T8 Holy 4P Bonus
@@ -6832,8 +6851,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Judgement of Light
                 case 20185:
                 {
-					if (!victim)
-						return false;
+		  if (!victim)
+		    return false;
 
                     // 2% of base mana
                     basepoints0 = int32(victim->CountPctFromMaxHealth(2));

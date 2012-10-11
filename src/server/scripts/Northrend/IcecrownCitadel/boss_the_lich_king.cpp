@@ -518,13 +518,12 @@ class boss_the_lich_king : public CreatureScript
 
             void EnterCombat(Unit* target)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : LICH KING <!>");
-			if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
+	      if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
                 {
                     EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
                     return;
-		    }
+		}
 
                 me->setActive(true);
                 DoZoneInCombat();
@@ -2787,7 +2786,7 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 unitList.clear();
                 unitList.push_back(_target);
 		//		GetCaster()->UpdatePosition(_target->GetPositionX(),
-		//				_target->GetPositionY(), 
+		//				_target->GetPositionY(),
 		//			    _target->GetPositionZ() + 10, 0, true);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
             }

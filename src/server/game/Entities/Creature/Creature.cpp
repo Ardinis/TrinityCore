@@ -1650,8 +1650,8 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo)
     if (!spellInfo)
         return false;
 
-    // Spells that don't have effectMechanics.
-    if (!spellInfo->HasAnyEffectMechanic() && GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
+    // Creature is immune to main mechanic of the spell
+    if (GetCreatureTemplate()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
         return true;
 
     // This check must be done instead of 'if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))' for not break
@@ -2199,7 +2199,7 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
     return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || HasCategoryCooldown(spell_id);
 }
 
-void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) 
+void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
 {
     time_t curTime = time(NULL);
     for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
@@ -2223,10 +2223,10 @@ void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs
         if ((idSchoolMask & spellInfo->GetSchoolMask()) && GetCreatureSpellCooldownDelay(unSpellId) < unTimeMs)
         {
            _AddCreatureSpellCooldown(unSpellId, curTime + unTimeMs/IN_MILLISECONDS);
-           if(UnitAI *ai = GetAI()) 
+           if(UnitAI *ai = GetAI())
 	     ai->SpellInterrupted(unSpellId, unTimeMs);
        }
-        
+
     }
 }
 

@@ -1421,8 +1421,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 caster->ToPlayer()->CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
         }
 
-        caster->DealSpellDamage(&damageInfo, true);
-
         // Haunt
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
         {
@@ -1430,6 +1428,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             aurEff->SetAmount(CalculatePctU(aurEff->GetAmount(), damageInfo.damage));
         }
         m_damage = damageInfo.damage;
+        caster->DealSpellDamage(&damageInfo, true);
+
        // Cobra Strikes (can't find any other way that may work)
        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags[1] & 0x10000000)
            if (Unit * owner = caster->GetOwner())

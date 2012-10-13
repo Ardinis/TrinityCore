@@ -1562,16 +1562,16 @@ void Player::Update(uint32 p_time)
     {
         time_t localtime;
         localtime = time(NULL);
-		
+
         if (m_jail_release <= localtime)
         {
             m_jail_isjailed = false;
             m_jail_release = 0;
 
             _SaveJail();
-            
+
             sWorld->SendWorldText(LANG_JAIL_CHAR_FREE, GetName());
-            
+
 			CastSpell(this,8690,false);
 
             return;
@@ -1594,14 +1594,14 @@ void Player::Update(uint32 p_time)
                     sObjectMgr->m_jailconf_horde_y, sObjectMgr->m_jailconf_horde_z, sObjectMgr->m_jailconf_horde_o);
                 return;
             }
-			
+
         }
     }
-	
+
 	if (m_jail_warning == true)
 	{
 		m_jail_warning  = false;
-		
+
 		if (sObjectMgr->m_jailconf_warn_player == m_jail_times || sObjectMgr->m_jailconf_warn_player <= m_jail_times)
 		{
 			if ((sObjectMgr->m_jailconf_max_jails-1 == m_jail_times-1) && sObjectMgr->m_jailconf_ban-1)
@@ -1612,7 +1612,7 @@ void Player::Update(uint32 p_time)
 			{
 				ChatHandler(this).PSendSysMessage(LANG_JAIL_WARNING, m_jail_times , sObjectMgr->m_jailconf_max_jails);
 			}
-		        
+
 		}
 				return;
 	}
@@ -1621,9 +1621,9 @@ if (m_jail_amnestie == true && sObjectMgr->m_jailconf_amnestie > 0)
 	m_jail_amnestie =false;
 	time_t localtime;
     localtime    = time(NULL);
-	
+
 	if (localtime >  m_jail_amnestietime)
-	{   
+	{
 		CharacterDatabase.PExecute("DELETE FROM `jail` WHERE `guid` = '%u'",GetGUIDLow());
 		ChatHandler(this).PSendSysMessage(LANG_JAIL_AMNESTII);
 	}
@@ -3066,9 +3066,9 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     uint8 level = getLevel();
 
     sScriptMgr->OnGivePlayerXP(this, xp, victim);
-	
+
     if(level < 66 && GetMapId() == 571)
-        return;	
+        return;
 
     // Favored experience increase START
     uint32 zone = GetZoneId();
@@ -5846,9 +5846,14 @@ float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
     return m_auraBaseMod[modGroup][FLAT_MOD] * m_auraBaseMod[modGroup][PCT_MOD];
 }
 
+float Player::GetShieldBlockValuePctMod() const
+{
+  return m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
+}
+
 uint32 Player::GetShieldBlockValue() const
 {
-    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) * 0.5f - 10)*m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
+    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) * 0.5f - 10) * GetShieldBlockValuePctMod();
 
     value = (value < 0) ? 0 : value;
 
@@ -8229,7 +8234,7 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
 	// don't apply mod if item is broken or cannot be used
 	if (item->IsBroken() || !CanUseAttackType(attackType))
 		return;
-	
+
     // generic not weapon specific case processes in aura code
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
         return;
@@ -9253,7 +9258,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             break;
          default:
             NumberOfFields = 12;
-            break;			
+            break;
     }
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+(NumberOfFields*8)));
@@ -9804,7 +9809,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(4132) << uint32(0);              // 9  WORLDSTATE_SHOW_CRATES
                 data << uint32(4131) << uint32(0);              // 10 WORLDSTATE_CRATES_REVEALED
             }
-            break;			
+            break;
 	    // The Ruby Sanctum
        case 4987:
            if (instance && mapid == 724)
@@ -11609,7 +11614,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
 				//don't allow warrior and rogue class 100% ARP 100% crit chance exploit
 				if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR))
 					return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-				
+
                 // May be here should be more stronger checks; STUNNED checked
                 // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
                 if (HasUnitState(UNIT_STATE_STUNNED))
@@ -17500,7 +17505,7 @@ void Player::_LoadJail(void)
             TeleportTo(sObjectMgr->m_jailconf_horde_m, sObjectMgr->m_jailconf_horde_x,
                 sObjectMgr->m_jailconf_horde_y, sObjectMgr->m_jailconf_horde_z, sObjectMgr->m_jailconf_horde_o);
         }
-         
+
         sWorld->SendWorldText(LANG_JAIL_CHAR_TELE, GetName());
     }
 }

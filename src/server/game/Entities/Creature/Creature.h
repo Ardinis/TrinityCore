@@ -519,6 +519,11 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type);
         CreatureAI* AI() const { return (CreatureAI*)i_AI; }
 
+	float GetShieldBlockValuePctMod() const
+	{
+	  return 1.0f;
+	}
+
         void SetWalk(bool enable);
         void SetLevitate(bool enable);
 

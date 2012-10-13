@@ -112,24 +112,6 @@ inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
     var *= (apply ? (100.0f + val) / 100.0f : 100.0f / (100.0f + val));
 }
 
-template <class T, class U>
-  inline T CalculatePct(T base, U pct)
-   {
-       return T(base * static_cast<float>(pct) / 100.0f);
-   }
-
-template <class T, class U>
-  inline T AddPct(T &base, U pct)
-{
-  return base += CalculatePct(base, pct);
-}
-
-template <class T, class U>
-  inline T ApplyPct(T &base, U pct)
-{
-  return base = CalculatePct(base, pct);
-}
-
 // Percentage calculation
 template <class T>
 inline T CalculatePctF(T base, float pct)

@@ -1669,7 +1669,7 @@ public:
             Player *pPlayer = who->ToPlayer();
             if (!pPlayer)
                 return;
-            if (pPlayer->HasAura(SPELL_BREWFEST_RAM) 
+            if (pPlayer->HasAura(SPELL_BREWFEST_RAM)
                 && me->GetDistance(pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ()) <= 25.0f
                 && !pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1))
             {
@@ -1694,7 +1694,7 @@ enum eBrewfestKegReceiver
     SPELL_CREATE_TICKETS            = 44501,
     QUEST_THERE_AND_BACK_AGAIN_A    = 11122,
     QUEST_THERE_AND_BACK_AGAIN_H    = 11412,
-    NPC_BREWFEST_DELIVERY_BUNNY     = 24337   
+    NPC_BREWFEST_DELIVERY_BUNNY     = 24337
 };
 
 class npc_brewfest_keg_receiver : public CreatureScript
@@ -1710,14 +1710,14 @@ public:
             Player *pPlayer = who->ToPlayer();
             if (!pPlayer)
                 return;
-            if (pPlayer->HasAura(SPELL_BREWFEST_RAM) 
+            if (pPlayer->HasAura(SPELL_BREWFEST_RAM)
                 && me->GetDistance(pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ()) <= 5.0f
-                && pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1)) 
+                && pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1))
             {
                 pPlayer->CastSpell(me,SPELL_THROW_KEG,true);
                 pPlayer->DestroyItemCount(ITEM_BREWFEST_KEG,1,true);
                 pPlayer->GetAura(SPELL_BREWFEST_RAM)->SetDuration(pPlayer->GetAura(SPELL_BREWFEST_RAM)->GetDuration() + 30000);
-                if (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+                if (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                     || pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H))
                 {
                     pPlayer->CastSpell(pPlayer,SPELL_CREATE_TICKETS,true);
@@ -1725,9 +1725,9 @@ public:
                 else
                 {
                     pPlayer->KilledMonsterCredit(NPC_BREWFEST_DELIVERY_BUNNY,0);
-                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE) 
+                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE)
                         pPlayer->AreaExploredOrEventHappens(QUEST_THERE_AND_BACK_AGAIN_A);
-                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE) 
+                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE)
                         pPlayer->AreaExploredOrEventHappens(QUEST_THERE_AND_BACK_AGAIN_H);
                     if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_COMPLETE
                         || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_COMPLETE)
@@ -1760,20 +1760,20 @@ public:
         if (pCreature->isQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-            if (pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM) 
-                && !pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+            if (pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM)
+                && !pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                 && !pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H)
                 && (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE
                 || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE))
                 pPlayer->RemoveSpellCooldown(SPELL_BREWFEST_SUMMON_RAM);
-            if (!pPlayer->HasAura(SPELL_BREWFEST_RAM) && ((pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE 
-            || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE 
-            || (!pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM) && 
-                (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+            if (!pPlayer->HasAura(SPELL_BREWFEST_RAM) && ((pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE
+            || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE
+            || (!pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM) &&
+                (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                 || pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H))))))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RAM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-            if ((pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+            if ((pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                 || pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H))
                 && !pPlayer->HasItemCount(33306,1,true))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RAM_REINS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -1789,7 +1789,7 @@ public:
         pPlayer->PlayerTalkClass->SendCloseGossip();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
-            if (pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1)) 
+            if (pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1))
                 pPlayer->DestroyItemCount(ITEM_BREWFEST_KEG,1,true);
             pPlayer->CastSpell(pPlayer,SPELL_BREWFEST_SUMMON_RAM,true);
             pPlayer->AddSpellCooldown(SPELL_BREWFEST_SUMMON_RAM,0,time(NULL) + 18*60*60);
@@ -2164,7 +2164,7 @@ public:
             {
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     me->CastStop();
-                me->AI()->EnterEvadeMode();  
+                me->AI()->EnterEvadeMode();
                 return;
             }
 
@@ -2431,21 +2431,15 @@ public:
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void DamageTaken(Unit* /*killer*/, uint32& damage)
-        {
-            if (me->isSummon())
-                if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND) && damage >= me->GetHealth())
-                        owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
-        }
+      void JustDied(Unit* killer)
+      {
+	if (me->isSummon())
+	  if (Unit* owner = me->ToTempSummon()->GetSummoner())
+	    if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
+	      owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
 
-        void UpdateAI(uint32 const /*diff*/)
-        {
-            if (!UpdateVictim())
-                return;
+      }
 
-            DoMeleeAttackIfReady();
-        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -2609,7 +2603,7 @@ public:
 
 				if (urand(0,90) == 90)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-				
+
                 player->PlayerTalkClass->SendGossipMenu(TEXT_WORMHOLE, creature->GetGUID());
             }
         }
@@ -3515,7 +3509,7 @@ public:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pennon de champion de Lune-d'Argent", GOSSIP_SENDER_MAIN, SPELL_SILVERMOON_PENNANT);
         if (pPlayer->GetQuestRewardStatus(QUEST_CHAMP_THUNDERBLUFF))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pennon de champion des Pitons-de-Tonnerre", GOSSIP_SENDER_MAIN, SPELL_THUNDERBLUFF_PENNANT);
- 
+
         //Alliance
         if (pPlayer->GetQuestRewardStatus(QUEST_CHAMP_DARNASSUS))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pennon de champion de Darnassus", GOSSIP_SENDER_MAIN, SPELL_DARNASSUS_PENNANT);
@@ -3640,7 +3634,7 @@ public:
     }
 };
 
-const Position movePosition[] = 
+const Position movePosition[] =
 {
     { 8539.276367f, 624.307678f, 563.883545f, 0.0f },
     { 8607.274414f, 796.302795f, 597.421082f, 0.0f },
@@ -3660,7 +3654,7 @@ public:
 
     struct vehicle_knight_gryphonAI : VehicleAI
     {
-        vehicle_knight_gryphonAI(Creature *c) : VehicleAI(c) 
+        vehicle_knight_gryphonAI(Creature *c) : VehicleAI(c)
         {
             MovingStarted = false;
             curPoint = 8;
@@ -3682,7 +3676,7 @@ public:
                         me->GetMotionMaster()->MovePoint(curPoint,movePosition[curPoint]);
                     else  {
                         if (me->GetCharmer())
-                            if (me->GetCharmer()->ToPlayer()) 
+                            if (me->GetCharmer()->ToPlayer())
                             {
                                 me->GetCharmer()->ToPlayer()->KilledMonsterCredit(me->GetEntry(),0);
                                 me->GetCharmer()->ToPlayer()->ExitVehicle();
@@ -3778,7 +3772,7 @@ public:
         if (ArtuisGob.empty())
 			me->SummonGameObject(190777, 5619.55f, 3776.31f, -94.513f, 2.39f, 0.0f, 0.0f, 0.0f, 0.0f, 180000))//despawn apres 3 minutes apres pop.
 */
-		
+
 		Summons.DespawnAll();
     }
 
@@ -3836,7 +3830,7 @@ public:
 				m_uibolt = 2000;
 			}
 			else m_uibolt -= diff;
-	  
+
 			if (m_uijav <= diff)
 			{
 				DoCast(me->getVictim(), GIVRE_JAVELOT, true);
@@ -3925,7 +3919,7 @@ class npc_risen_ally : public CreatureScript
 
 	            me->SetUInt32Value(UNIT_FIELD_LEVEL, pCreature->getLevel());
 	            me->SetUInt32Value(UNIT_FIELD_RESISTANCES, pCreature->GetUInt32Value(UNIT_FIELD_RESISTANCES));
-	           
+
 				//me->SetSheath(SHEATH_STATE_MELEE);
 				me->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
 				me->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
@@ -3934,7 +3928,7 @@ class npc_risen_ally : public CreatureScript
 				me->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
 
 				uint32 petlevel = pCreature->getLevel();
-			
+
 				pCreature->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
 			    pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
 
@@ -3992,7 +3986,7 @@ class npc_risen_ally : public CreatureScript
 				{
 				   me->SetLevel(creator->getLevel());
 				   me->setFaction(creator->getFaction());
-				}			
+				}
             }
 
             void UpdateAI(const uint32 diff)
@@ -4524,7 +4518,7 @@ void AddSC_npcs_special()
     new npc_earth_elemental();
     new npc_firework();
     new npc_spring_rabbit();
-    new npc_argent_squire();	
+    new npc_argent_squire();
     new npc_artuis();
     //    new vehicle_knight_gryphon();
     //	new npc_risen_ally();

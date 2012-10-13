@@ -6762,8 +6762,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
 	      if (triggered_spell_id && beaconTarget)
 	      {
-		if (caster)
-		  caster->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
+		if (this)
+		  this->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
 		return true;
 	      }
 

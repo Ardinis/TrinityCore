@@ -161,10 +161,12 @@ namespace Movement
 
     inline void MoveSplineInit::SetFacing(Vector3 const& spot)
     {
-        args.facing.f.x = spot.x;
-        args.facing.f.y = spot.y;
-        args.facing.f.z = spot.z;
-        args.flags.EnableFacingPoint();
+      TransportPathTransform transform(unit);
+      Vector3 finalSpot = transform(spot);
+      args.facing.f.x = finalSpot.x;
+      args.facing.f.y = finalSpot.y;
+      args.facing.f.z = finalSpot.z;
+      args.flags.EnableFacingPoint();
     }
 }
 #endif // TRINITYSERVER_MOVESPLINEINIT_H

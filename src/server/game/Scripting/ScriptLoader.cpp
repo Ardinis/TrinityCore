@@ -31,6 +31,7 @@ void AddSC_player_event();
 void AddSC_npc_transmo();
 
 // spells
+void AddSC_pet_spell_scripts();
 void AddSC_deathknight_spell_scripts();
 void AddSC_druid_spell_scripts();
 void AddSC_generic_spell_scripts();
@@ -650,6 +651,7 @@ void AddExampleScripts()
 
 void AddSpellScripts()
 {
+  AddSC_pet_spell_scripts();
     AddSC_deathknight_spell_scripts();
     AddSC_druid_spell_scripts();
     AddSC_generic_spell_scripts();

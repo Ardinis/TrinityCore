@@ -667,20 +667,26 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
-            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
-            {
-                // Replenishment (0.2% from max)
-                // Infinite Replenishment
-                if (m_spellInfo->SpellIconID == 3184 && m_spellInfo->SpellVisual[0] == 12495)
-                    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.2f;
-            }
-            // Innervate
-            else if (m_spellInfo->Id == 29166)
-                ApplyPctF(amount, float(GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA)) / GetTotalTicks());
-            // Owlkin Frenzy
-            else if (m_spellInfo->Id == 48391)
-                ApplyPctU(amount, GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA));
-            break;
+	{
+	  switch (m_spellInfo->Id)
+	  {
+	  case 57669: // Replenishment (0.2% from max)
+	    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.002f;
+	    break;
+	  case 61782: // Infinite Replenishment
+	    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.0025f;
+	    break;
+	  case 29166: // Innervate
+	    ApplyPctF(amount, float(GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA)) / GetTotalTicks());
+	    break;
+	  case 48391: // Owlkin Frenzy
+	    ApplyPctU(amount, GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA));
+	    break;
+	  default :
+	    break;
+	  }
+	  break;
+	}
         case SPELL_AURA_PERIODIC_HEAL:
             if (!caster)
                 break;

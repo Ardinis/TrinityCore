@@ -379,6 +379,13 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
+	  float multiplier;
+
+	  bool Load()
+	  {
+	    multiplier = 1.0f;
+	    return true;
+	  }
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
@@ -389,17 +396,35 @@ class spell_dk_scourge_strike : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    int32 bp = CalculatePctN(GetHitDamage(), GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()));
-                    caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-                }
-            }
+	      Unit* caster = GetCaster();
+	      if (Unit* unitTarget = GetHitUnit())
+	      {
+		multiplier = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()) / 100.f);
+		// Death Knight T8 Melee 4P Bonus
+		if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_ITEM_T8_MELEE_4P_BONUS, EFFECT_0))
+		  AddPct(multiplier, aurEff->GetAmount());
+	      }
+
+	    }
+
+	  void HandleAfterHit()
+	  {
+	    Unit* caster = GetCaster();
+	    if (Unit* unitTarget = GetHitUnit())
+	    {
+	      int32 bp = GetHitDamage() * multiplier;
+
+	      if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
+		AddPct(bp, aurEff->GetAmount());
+
+	      caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
+	    }
+	  }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+		AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
             }
         };
 

@@ -336,6 +336,7 @@ void FleeingMovementGenerator<Player>::Finalize(Player &owner)
 {
     owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner.ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
+    owner.StopMoving();
 }
 
 template<>
@@ -422,4 +423,3 @@ bool TimedFleeingMovementGenerator::Update(Unit & owner, const uint32 time_diff)
     // This is done instead of casting Unit& to Creature& and call parent method, then we can use Unit directly
     return MovementGeneratorMedium< Creature, FleeingMovementGenerator<Creature> >::Update(owner, time_diff);
 }
-

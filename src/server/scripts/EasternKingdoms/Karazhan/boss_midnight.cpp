@@ -79,8 +79,14 @@ public:
 
         void Reset()
         {
-            ResetTimer = 2000;
-        }
+	  ResetTimer = 0;
+	}
+
+      void EnterEvadeMode()
+      {
+	ScriptedAI::EnterEvadeMode();
+	ResetTimer = 2000;
+      }
 
         void EnterCombat(Unit* /*who*/) {}
 

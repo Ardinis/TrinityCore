@@ -2696,7 +2696,7 @@ public:
     void UpdateAI(uint32 const diff)
     {
       if (_events.Empty())
-	return;
+      	return;
 
       _events.Update(diff);
 
@@ -2734,7 +2734,7 @@ public:
     void RelocateDest()
     {
       static Position const offset = {0.0f, 0.0f, 200.0f, 0.0f};
-      const_cast<WorldLocation*>(GetExplTargetDest())->RelocateOffset(offset);
+      const_cast<WorldLocation*>(GetTargetDest())->RelocateOffset(offset);
     }
 
     void Register()
@@ -2748,59 +2748,6 @@ public:
     return new spell_icc_soul_missile_SpellScript();
   }
 };
-
-
-class spell_icc_sprit_alarm : public SpellScriptLoader
-{
-public:
-  spell_icc_sprit_alarm() : SpellScriptLoader("spell_icc_sprit_alarm") { }
-
-  class spell_icc_sprit_alarm_SpellScript : public SpellScript
-  {
-    PrepareSpellScript(spell_icc_sprit_alarm_SpellScript);
-
-    void HandleEvent(SpellEffIndex effIndex)
-    {
-      PreventHitDefaultEffect(effIndex);
-      uint32 trapId = 0;
-      switch (GetSpellInfo()->Effects[effIndex].MiscValue)
-      {
-      case EVENT_AWAKEN_WARD_1:
-	trapId = GO_SPIRIT_ALARM_1;
-	break;
-      case EVENT_AWAKEN_WARD_2:
-	trapId = GO_SPIRIT_ALARM_2;
-	break;
-      case EVENT_AWAKEN_WARD_3:
-	trapId = GO_SPIRIT_ALARM_3;
-	break;
-      case EVENT_AWAKEN_WARD_4:
-	trapId = GO_SPIRIT_ALARM_4;
-	break;
-      default:
-	return;
-      }
-
-      if (GameObject* trap = GetCaster()->FindNearestGameObject(trapId, 5.0f))
-	trap->SetRespawnTime(trap->GetGOInfo()->trap.autoCloseTime);
-
-      std::list<Creature*> wards;
-      GetCaster()->GetCreatureListWithEntryInGrid(wards, NPC_DEATHBOUND_WARD, 150.0f);
-      wards.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
-      for (std::list<Creature*>::iterator itr = wards.begin(); itr != wards.end(); ++itr)
-      {
-	if ((*itr)->isAlive() && (*itr)->HasAura(SPELL_STONEFORM))
-	{
-	  (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
-	  (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
-	  if (Unit* target = (*itr)->SelectNearestTarget(150.0f))
-	    (*itr)->AI()->AttackStart(target);
-	  break;
-	}
-      }
-    }
-
-
 
 void AddSC_icecrown_citadel()
 {

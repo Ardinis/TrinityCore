@@ -361,6 +361,8 @@ class EventMap : private std::map<uint32, uint32>
             ScheduleEvent(eventId, time, groupId, phase);
         }
 
+	bool Empty() {return empty();}
+
         // Reschedules closest event
         void RepeatEvent(uint32 time)
         {
@@ -638,4 +640,3 @@ inline Creature* CreatureAI::DoSummonFlyer(uint32 entry, WorldObject* obj, float
 }
 
 #endif
-

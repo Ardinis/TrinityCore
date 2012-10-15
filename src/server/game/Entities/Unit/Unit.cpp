@@ -6794,39 +6794,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 return true;
             }
 
-            // Sacred Shield
-            if (dummySpell->SpellFamilyFlags[1] & 0x80000)
-            {
-                if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
-                {
-                    if (procSpell->SpellFamilyName == SPELLFAMILY_PALADIN && (procSpell->SpellFamilyFlags[0] & 0x40000000))
-                    {
-                        basepoints0 = damage / 12;
-
-                        if (basepoints0)
-                            CastCustomSpell(this, 66922, &basepoints0, NULL, NULL, true, 0, triggeredByAura, victim->GetGUID());
-
-                        return true;
-                    }
-                    else
-                        return false;
-                }
-                else if (damage > 0)
-		{
-		  triggered_spell_id = 58597;
-		  target = this;
-		  break;
-		}
-		else
-		  return false;
-
-
-                // Item - Paladin T8 Holy 4P Bonus
-                if (Unit* caster = triggeredByAura->GetCaster())
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
-                        cooldown = aurEff->GetAmount();
-				break;
-            }
             // Righteous Vengeance
             if (dummySpell->SpellIconID == 3025)
             {
@@ -6847,6 +6814,23 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
+	      // Sacred Shield
+	      case 53601:
+	      {
+	        if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
+		  return false;
+
+	        if (damage > 0)
+		  triggered_spell_id = 58597;
+
+	        // Item - Paladin T8 Holy 4P Bonus
+	        if (Unit* caster = triggeredByAura->GetCaster())
+		  if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
+		    cooldown = aurEff->GetAmount();
+
+	        target = this;
+	        break;
+	      }
                 // Heart of the Crusader
                 case 20335: // rank 1
                     triggered_spell_id = 21183;

@@ -123,7 +123,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
 
     // no or incorrect quest giver
     if (!pObject || (pObject->GetTypeId() != TYPEID_PLAYER && !pObject->hasQuest(quest)) ||
-        (pObject->GetTypeId() == TYPEID_PLAYER &&  && pObject != _player && !pObject->ToPlayer()->CanShareQuest(quest)))
+        (pObject->GetTypeId() == TYPEID_PLAYER && pObject != _player && !pObject->ToPlayer()->CanShareQuest(quest)))
     {
         _player->PlayerTalkClass->SendCloseGossip();
         _player->SetDivider(0);

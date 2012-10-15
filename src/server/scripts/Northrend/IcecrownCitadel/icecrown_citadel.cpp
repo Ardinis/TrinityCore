@@ -161,6 +161,9 @@ enum Spells
     SPELL_FEL_IRON_BOMB_UNDEAD      = 71787,
     SPELL_MACHINE_GUN_UNDEAD        = 71788,
     SPELL_ROCKET_LAUNCH_UNDEAD      = 71786,
+
+    // Invisible Stalker (Float, Uninteractible, LargeAOI)
+    SPELL_SOUL_MISSILE              = 72585,
 };
 
 // Helper defines
@@ -251,11 +254,15 @@ enum EventTypes
     EVENT_RUPERT_FEL_IRON_BOMB          = 52,
     EVENT_RUPERT_MACHINE_GUN            = 53,
     EVENT_RUPERT_ROCKET_LAUNCH          = 54,
-	
+
 	// Sindragosas Ward
 	EVENT_SUB_WAVE_1                    = 55,
 	EVENT_SUB_WAVE_2                    = 56,
 	EVENT_UPDATE_CHECK                  = 57,
+
+    // Invisible Stalker (Float, Uninteractible, LargeAOI)
+    EVENT_SOUL_MISSILE                  = 58,
+
 };
 
 enum DataTypesICC
@@ -999,7 +1006,7 @@ public:
     {
       if (_impaledguid)
 	RemoveSpike();
-      
+
       _JustDied();
       Talk(SAY_SVALNA_DEATH);
 
@@ -1023,7 +1030,7 @@ public:
       _EnterCombat();
       if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
 	crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
-      events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);	
+      events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
       events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 30000));
     }
 
@@ -1053,7 +1060,7 @@ public:
 	  break;
 	}
     }
-    
+
     void JustReachedHome()
     {
       _JustReachedHome();
@@ -1101,31 +1108,31 @@ public:
 	  DoCastAOE(SPELL_ETHER_EXPLOSION);
 	}
     }
-    
+
     void MovementInform(uint32 type, uint32 id)
     {
       if (type != EFFECT_MOTION_TYPE || id != POINT_LAND)
 	return;
-      
+
       _isEventInProgress = false;
       me->setActive(false);
       me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
       me->SetFlying(false);
     }
-    
+
     void RemoveSpike()
     {
       if (!_impaledguid)
 	return;
-      
+
       if (Player* _impaled = ObjectAccessor::GetPlayer(*me , _impaledguid))
 	{
 	  _impaled->RemoveAurasDueToSpell(VEHICLE_SPELL_RIDE_HARDCODED);
 	  _impaled->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR);
 	  _impaledguid = 0;
 	}
-    }			
-			
+    }
+
     void SpellHitTarget(Unit* target, SpellInfo const* spell)
     {
       switch (spell->Id)
@@ -1151,15 +1158,15 @@ public:
     {
       if (!UpdateVictim() && !_isEventInProgress)
 	return;
-      
+
       events.Update(diff);
-      
+
       if (me->HasUnitState(UNIT_STATE_CASTING))
 	return;
 
-      if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))	
+      if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))
 	RemoveSpike();
-      
+
       while (uint32 eventId = events.ExecuteEvent())
 	{
 	  switch (eventId)
@@ -1178,7 +1185,7 @@ public:
 	    case EVENT_SVALNA_COMBAT:
 	      me->SetFlying(false);
 	      me->SetReactState(REACT_DEFENSIVE);
-	      DoCast(me, SPELL_DIVINE_SURGE, true);							
+	      DoCast(me, SPELL_DIVINE_SURGE, true);
 	      Talk(SAY_SVALNA_AGGRO);
 	      break;
 	    case EVENT_IMPALING_SPEAR:
@@ -1203,10 +1210,10 @@ public:
 	      break;
 	    }
 	}
-      
+
       DoMeleeAttackIfReady();
     }
-    
+
   private:
     uint64 _impaledguid;
     bool _isEventInProgress, _introDone;
@@ -2572,8 +2579,8 @@ class npc_ess_disjointe : public CreatureScript
             {
 	      CastTimer = 10000;
 	      classPlayer = 0;
-	      me->SetHealth(RAID_MODE(126000, 315000, 126000, 315000)); 
-	      me->SetMaxHealth(RAID_MODE(126000, 315000, 126000, 315000)); 
+	      me->SetHealth(RAID_MODE(126000, 315000, 126000, 315000));
+	      me->SetMaxHealth(RAID_MODE(126000, 315000, 126000, 315000));
             }
 
             void DoAction(int32 const action)
@@ -2588,7 +2595,7 @@ class npc_ess_disjointe : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-		
+
 		if (CastTimer <= diff)
 		  {
 		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -2666,6 +2673,135 @@ class npc_ess_disjointe : public CreatureScript
         }
 };
 
+class npc_arthas_teleport_visual : public CreatureScript
+{
+public:
+  npc_arthas_teleport_visual() : CreatureScript("npc_arthas_teleport_visual") { }
+
+  struct npc_arthas_teleport_visualAI : public NullCreatureAI
+  {
+    npc_arthas_teleport_visualAI(Creature* creature) : NullCreatureAI(creature), _instance(creature->GetInstanceScript())
+    {
+    }
+
+    void Reset()
+    {
+      _events.Reset();
+      if (_instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE &&
+	  _instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE &&
+	  _instance->GetBossState(DATA_SINDRAGOSA) == DONE)
+	_events.ScheduleEvent(EVENT_SOUL_MISSILE, urand(1000, 6000));
+    }
+
+    void UpdateAI(uint32 const diff)
+    {
+      if (_events.Empty())
+	return;
+
+      _events.Update(diff);
+
+      if (_events.ExecuteEvent() == EVENT_SOUL_MISSILE)
+      {
+	DoCastAOE(SPELL_SOUL_MISSILE);
+	_events.ScheduleEvent(EVENT_SOUL_MISSILE, urand(5000, 7000));
+      }
+    }
+
+  private:
+    InstanceScript* _instance;
+    EventMap _events;
+  };
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    // Distance from the center of the spire
+    if (creature->GetExactDist2d(4357.052f, 2769.421f) < 100.0f && creature->GetHomePosition().GetPositionZ() < 315.0f)
+      return GetIcecrownCitadelAI<npc_arthas_teleport_visualAI>(creature);
+
+    // Default to no script
+    return NULL;
+  }
+};
+
+class spell_icc_soul_missile : public SpellScriptLoader
+{
+public:
+  spell_icc_soul_missile() : SpellScriptLoader("spell_icc_soul_missile") { }
+
+  class spell_icc_soul_missile_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_icc_soul_missile_SpellScript);
+
+    void RelocateDest()
+    {
+      static Position const offset = {0.0f, 0.0f, 200.0f, 0.0f};
+      const_cast<WorldLocation*>(GetExplTargetDest())->RelocateOffset(offset);
+    }
+
+    void Register()
+    {
+      OnCast += SpellCastFn(spell_icc_soul_missile_SpellScript::RelocateDest);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_icc_soul_missile_SpellScript();
+  }
+};
+
+
+class spell_icc_sprit_alarm : public SpellScriptLoader
+{
+public:
+  spell_icc_sprit_alarm() : SpellScriptLoader("spell_icc_sprit_alarm") { }
+
+  class spell_icc_sprit_alarm_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_icc_sprit_alarm_SpellScript);
+
+    void HandleEvent(SpellEffIndex effIndex)
+    {
+      PreventHitDefaultEffect(effIndex);
+      uint32 trapId = 0;
+      switch (GetSpellInfo()->Effects[effIndex].MiscValue)
+      {
+      case EVENT_AWAKEN_WARD_1:
+	trapId = GO_SPIRIT_ALARM_1;
+	break;
+      case EVENT_AWAKEN_WARD_2:
+	trapId = GO_SPIRIT_ALARM_2;
+	break;
+      case EVENT_AWAKEN_WARD_3:
+	trapId = GO_SPIRIT_ALARM_3;
+	break;
+      case EVENT_AWAKEN_WARD_4:
+	trapId = GO_SPIRIT_ALARM_4;
+	break;
+      default:
+	return;
+      }
+
+      if (GameObject* trap = GetCaster()->FindNearestGameObject(trapId, 5.0f))
+	trap->SetRespawnTime(trap->GetGOInfo()->trap.autoCloseTime);
+
+      std::list<Creature*> wards;
+      GetCaster()->GetCreatureListWithEntryInGrid(wards, NPC_DEATHBOUND_WARD, 150.0f);
+      wards.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+      for (std::list<Creature*>::iterator itr = wards.begin(); itr != wards.end(); ++itr)
+      {
+	if ((*itr)->isAlive() && (*itr)->HasAura(SPELL_STONEFORM))
+	{
+	  (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
+	  (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
+	  if (Unit* target = (*itr)->SelectNearestTarget(150.0f))
+	    (*itr)->AI()->AttackStart(target);
+	  break;
+	}
+      }
+    }
+
+
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -2696,4 +2832,6 @@ void AddSC_icecrown_citadel()
     new npc_buff_icc();
     new npc_val_icc();
     new npc_ess_disjointe();
+    new npc_arthas_teleport_visual();
+    new spell_icc_soul_missile();
 }

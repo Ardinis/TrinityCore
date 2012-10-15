@@ -122,7 +122,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 		 	    SaurfangAllianceSmithGUID = 0;
 		 	    SaurfangAllianceSellerGUID = 0;
 			    SaurfangHordeSmithGUID = 0;
-			    SaurfangHordeSellerGUID = 0;				
+			    SaurfangHordeSellerGUID = 0;
                 LadyDeathwisperElevatorGUID = 0;
                 DeathbringerSaurfangGUID = 0;
                 DeathbringerSaurfangDoorGUID = 0;
@@ -151,6 +151,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 SindragosaGUID = 0;
                 SpinestalkerGUID = 0;
                 RimefangGUID = 0;
+		TheLichKingTeleportGUID = 0;
                 uiDreamwalkerCache = 0;
                 TheLichKingGUID = 0;
                 HighlordTirionFordringGUID = 0;
@@ -228,22 +229,22 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
-				    case 37936:                                                    
+				    case 37936:
 					 	   SaurfangHordeSmithGUID = creature->GetGUID();
 						   creature->SetVisible(false);
 						   break;
-				    case 37935:                                                     
+				    case 37935:
 						   SaurfangHordeSellerGUID = creature->GetGUID();
 						   creature->SetVisible(false);
 						   break;
-				    case 37904:                                                   
+				    case 37904:
 						   SaurfangAllianceSellerGUID = creature->GetGUID();
 						   creature->SetVisible(false);
 						   break;
-				    case 37903:                                                    
+				    case 37903:
 						   SaurfangAllianceSmithGUID = creature->GetGUID();
 						   creature->SetVisible(false);
-						   break;				
+						   break;
                     case NPC_KOR_KRON_GENERAL:
                         if (TeamInInstance == ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER, ALLIANCE);
@@ -350,6 +351,12 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_RIMEFANG:
                         RimefangGUID = creature->GetGUID();
                         break;
+		case NPC_INVISIBLE_STALKER:
+                        // Teleporter visual at center
+                        if (creature->GetExactDist2d(4357.052f, 2769.421f) < 10.0f)
+			  creature->CastSpell(creature, SPELL_ARTHAS_TELEPORTER_CEREMONY, false);
+			break;
+
                     case NPC_THE_LICH_KING:
                         TheLichKingGUID = creature->GetGUID();
                         break;
@@ -360,7 +367,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_TERENAS_MENETHIL_FROSTMOURNE_H:
                         TerenasMenethilGUID = creature->GetGUID();
                         break;
-					case NPC_SINDRAGOSAS_WARD:	
+					case NPC_SINDRAGOSAS_WARD:
 						SindragosasWardGUID = creature->GetGUID();
 						break;
                     //Gunship: Asignaciones
@@ -469,7 +476,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 						   break;
 				    case 201886:
 						   SaurfangHordeTent2GUID = go->GetGUID();
-						   break;				
+						   break;
                     case GO_DOODAD_ICECROWN_ICEWALL02:
                     case GO_ICEWALL:
                     case GO_LORD_MARROWGAR_S_ENTRANCE:
@@ -566,6 +573,11 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DRINK_ME:
                         PutricideTableGUID = go->GetGUID();
                         break;
+		case GO_SCOURGE_TRANSPORTER_LK:
+		  TheLichKingTeleportGUID = go->GetGUID();
+		  if (GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && GetBossState(DATA_SINDRAGOSA) == DONE)
+		    go->SetGoState(GO_STATE_ACTIVE);
+		  break;
                     case GO_ARTHAS_PLATFORM:
                         // this enables movement at The Frozen Throne, when printed this value is 0.000000f
                         // however, when represented as integer client will accept only this value
@@ -700,7 +712,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 				    case GO_SAURFANG_ANVIL:
 						   return SaurfangAnvilGUID;
 				    case GO_SAURFANG_FORGE:
-						   return SaurfangForgeGUID;				
+						   return SaurfangForgeGUID;
                     case DATA_DEATHBRINGER_SAURFANG:
                         return DeathbringerSaurfangGUID;
                     case DATA_SAURFANG_EVENT_NPC:
@@ -799,7 +811,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                             }
                         }
                         break;
-// ******* OJO ********* AQUI FALTA EL CASE DE GUNSHIP 
+// ******* OJO ********* AQUI FALTA EL CASE DE GUNSHIP
 // a saber que se hace luego que se acaba, si se spamea algo, se les da un logro
 // les aparecemos algun npc o alguna cosa estilo wowrean.
                     case DATA_DEATHBRINGER_SAURFANG:
@@ -852,6 +864,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_PROFESSOR_PUTRICIDE:
                         HandleGameObject(PlagueSigilGUID, state != DONE);
+			if (state == DONE)
+			  CheckLichKingAvailability();
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -866,6 +880,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                         HandleGameObject(BloodwingSigilGUID, state != DONE);
+			if (state == DONE)
+			  CheckLichKingAvailability();
 			if(GameObject *go = instance->GetGameObject(BloodwingSigilGUID))
 			  {
 			    if (state != DONE)
@@ -893,6 +909,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_SINDRAGOSA:
                         HandleGameObject(FrostwingSigilGUID, state != DONE);
+			if (state == DONE)
+			  CheckLichKingAvailability();
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -1279,6 +1297,28 @@ class instance_icecrown_citadel : public InstanceMapScript
                 return false;
             }
 
+	  void CheckLichKingAvailability()
+	  {
+	    if (GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && GetBossState(DATA_SINDRAGOSA) == DONE)
+	    {
+	      if (GameObject* teleporter = instance->GetGameObject(TheLichKingTeleportGUID))
+	      {
+		teleporter->SetGoState(GO_STATE_ACTIVE);
+
+		std::list<Creature*> stalkers;
+		GetCreatureListWithEntryInGrid(stalkers, teleporter, NPC_INVISIBLE_STALKER, 100.0f);
+		if (stalkers.empty())
+		  return;
+
+		stalkers.sort(Trinity::ObjectDistanceOrderPred(teleporter));
+		stalkers.front()->CastSpell((Unit*)NULL, SPELL_ARTHAS_TELEPORTER_CEREMONY, false);
+		stalkers.pop_front();
+		for (std::list<Creature*>::iterator itr = stalkers.begin(); itr != stalkers.end(); ++itr)
+		  (*itr)->AI()->Reset();
+	      }
+	    }
+	  }
+
             std::string GetSaveData()
             {
                 OUT_SAVE_INST_DATA;
@@ -1614,7 +1654,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                             t->AddNPCPassengerInInstance(NPC_GB_SKYBREAKER_MORTAR_SOLDIER, -20.9583f, 14.8875f, 20.4428f, 4.77865f);
                         }
                     }
-                
+
                     if(th = sMapMgr->LoadTransportInMap(instance,GO_ORGRIM_S_HAMMER_HORDE_ICC, 77800))
                     {
                         th->AddNPCPassengerInInstance(NPC_GB_ORGRIMS_HAMMER, 1.845810f, 1.268872f, 34.526218f, 1.5890f);
@@ -1670,7 +1710,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 		    uint64 SaurfangAllianceSmithGUID;
 		    uint64 SaurfangAllianceSellerGUID;
 		    uint64 SaurfangHordeSmithGUID;
-		    uint64 SaurfangHordeSellerGUID;			
+		    uint64 SaurfangHordeSellerGUID;
             uint64 LadyDeathwisperElevatorGUID;
             uint64 DeathbringerSaurfangGUID;
             uint64 DeathbringerSaurfangDoorGUID;
@@ -1699,6 +1739,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 SindragosaGUID;
             uint64 SpinestalkerGUID;
             uint64 RimefangGUID;
+	  uint64 TheLichKingTeleportGUID;
             uint64 uiDreamwalkerCache;
             uint64 TheLichKingGUID;
             uint64 HighlordTirionFordringGUID;

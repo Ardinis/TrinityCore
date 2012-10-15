@@ -245,7 +245,6 @@ m_HostileRefManager(this)
     m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
 
     _focusSpell = NULL;
-    _targetLocked = false;
 }
 
 ////////////////////////////////////////////////////////////
@@ -388,6 +387,9 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
         Movement::Location loc = movespline->ComputePosition();
+
+	if (HasUnitState(UNIT_STATE_CANNOT_TURN))
+	  loc.orientation = GetOrientation();
 
         if (GetTypeId() == TYPEID_PLAYER)
             ((Player*)this)->UpdatePosition(loc.x,loc.y,loc.z,loc.orientation);
@@ -17844,4 +17846,33 @@ void Unit::SetFacingToObject(WorldObject* pObject)
 
     // TODO: figure out under what conditions creature will move towards object instead of facing it where it currently is.
     SetFacingTo(GetAngle(pObject));
+}
+
+void Unit::FocusTarget(Spell const* focusSpell, uint64 target)
+{
+  // already focused
+  if (_focusSpell)
+    return;
+
+  _focusSpell = focusSpell;
+  SetUInt64Value(UNIT_FIELD_TARGET, target);
+  if (focusSpell->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_DONT_TURN_DURING_CAST)
+    AddUnitState(UNIT_STATE_ROTATING);
+}
+
+
+void Unit::ReleaseFocus(Spell const* focusSpell)
+{
+  // focused to something else
+  if (focusSpell != _focusSpell)
+    return;
+
+  _focusSpell = NULL;
+  if (Unit* victim = getVictim())
+    SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
+  else
+    SetUInt64Value(UNIT_FIELD_TARGET, 0);
+
+  if (focusSpell->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_DONT_TURN_DURING_CAST)
+    ClearUnitState(UNIT_STATE_ROTATING);
 }

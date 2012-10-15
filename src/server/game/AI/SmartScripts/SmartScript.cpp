@@ -2697,13 +2697,14 @@ void SmartScript::InitTimer(SmartScriptHolder& e)
         case SMART_EVENT_UPDATE:
         case SMART_EVENT_UPDATE_IC:
         case SMART_EVENT_UPDATE_OOC:
+	  RecalcTimer(e, e.event.minMaxRepeat.min, e.event.minMaxRepeat.max);
         case SMART_EVENT_OOC_LOS:
         case SMART_EVENT_IC_LOS:
-            RecalcTimer(e, e.event.minMaxRepeat.min, e.event.minMaxRepeat.max);
-            break;
+	  RecalcTimer(e, e.event.los.cooldownMin, e.event.los.cooldownMax);
+	  break;
         default:
-            e.active = true;
-            break;
+	  e.active = true;
+	  break;
     }
 }
 void SmartScript::RecalcTimer(SmartScriptHolder& e, uint32 min, uint32 max)

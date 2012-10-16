@@ -45,7 +45,7 @@ class spell_item_trigger_spell : public SpellScriptLoader
             {
                 if (!sSpellMgr->GetSpellInfo(_triggeredSpellId))
                     return false;
-				
+
                 return true;
             }
 
@@ -84,11 +84,11 @@ class spell_item_deviate_fish : public SpellScriptLoader
 {
     public:
         spell_item_deviate_fish() : SpellScriptLoader("spell_item_deviate_fish") { }
-		
+
         class spell_item_deviate_fish_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_item_deviate_fish_SpellScript);
-			
+
             bool Load()
             {
                 return GetCaster()->GetTypeId() == TYPEID_PLAYER;
@@ -1832,7 +1832,7 @@ class spell_item_unusual_compass : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 caster->SetOrientation(frand(0.0f, 62832.0f) / 10000.0f);
-                caster->SendMovementFlagUpdate();
+                caster->SendMovementFlagUpdate(true);
             }
 
             void Register()

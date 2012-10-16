@@ -476,7 +476,7 @@ class boss_halion : public CreatureScript
                         events.ScheduleEvent(EVENT_FLAME_BREATH, 25000);
                         break;
                     case EVENT_TAIL_LASH:
-		      //                        DoCastAOE(SPELL_TAIL_LASH);
+		      DoCastAOE(SPELL_TAIL_LASH);
                         events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
                         break;
                     case EVENT_METEOR_STRIKE:
@@ -651,14 +651,14 @@ class boss_twilight_halion : public CreatureScript
 	      }
 	    else
 	      mui_soul -= diff;
-	    /*	    if (mui_tail <= diff)
+	    if (mui_tail <= diff)
 	      {
 		DoCastAOE(SPELL_TAIL_LASH);
 		events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
 	      }
 	    else
 	      mui_tail -= diff;
-	    */
+
 	  }
 
             void SpellHit(Unit* /*who*/, SpellInfo const* spell)

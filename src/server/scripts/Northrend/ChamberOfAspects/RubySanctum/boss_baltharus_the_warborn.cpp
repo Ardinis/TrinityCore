@@ -245,9 +245,6 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
             void JustDied(Unit* killer)
             {
                 // This is here because DamageTaken wont trigger if the damage is deadly.
-                if (_instance)
-                    if (Creature* baltharus = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_BALTHARUS_THE_WARBORN)))
-                        killer->Kill(baltharus);
             }
 
             void UpdateAI(uint32 const diff)

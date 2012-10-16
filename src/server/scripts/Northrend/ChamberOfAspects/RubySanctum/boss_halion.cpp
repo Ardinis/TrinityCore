@@ -654,7 +654,7 @@ class boss_twilight_halion : public CreatureScript
 	    if (mui_tail <= diff)
 	      {
 		DoCastAOE(SPELL_TAIL_LASH);
-		events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
+		mui_tail = 10000;
 	      }
 	    else
 	      mui_tail -= diff;

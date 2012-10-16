@@ -7338,7 +7338,7 @@ bool Spell::CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMo
         (*scritr)->_PrepareScriptCall(hookType);
         for (; effItr != effEndItr ; ++effItr)
             // effect execution can be prevented
-            if (!(*scritr)->_IsEffectPrevented(effIndex) && (*effItr).IsEffectAffected(m_spellInfo, effIndex))
+	  if (!(*scritr)->_IsEffectPrevented(effIndex) && (*effItr).IsEffectAffected(m_spellInfo, effIndex))
                 (*effItr).Call(*scritr, effIndex);
 
         if (!preventDefault)

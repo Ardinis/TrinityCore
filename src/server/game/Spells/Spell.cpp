@@ -5051,6 +5051,13 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (castResult != SPELL_CAST_OK)
         return castResult;
 
+    if (m_spellInfo && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags[0] & 0x8000000) // Mocking Blow
+    {
+      if (Unit* target = m_targets.GetUnitTarget())
+	if (target->IsImmunedToSpellEffect(m_spellInfo, EFFECT_1) || target->GetTypeId() == TYPEID_PLAYER)
+	  return SPELL_FAILED_BAD_TARGETS;
+    }
+
     for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
         // for effects of spells that have only one target

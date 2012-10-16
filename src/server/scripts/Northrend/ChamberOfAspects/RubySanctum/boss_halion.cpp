@@ -74,6 +74,9 @@ enum Spells
     SPELL_CONSUMPTION_DAMAGE_AURA       = 74803,
 
     // Twilight Halion
+    //    SPELL_DUSK_SHROUD = 75483,
+    SPELL_DUSK_SHROUD = 75476,
+
     SPELL_DARK_BREATH                   = 74806,
 
     SPELL_MARK_OF_CONSUMPTION           = 74795,
@@ -562,6 +565,7 @@ class boss_twilight_halion : public CreatureScript
 		mui_dark_breath = urand(10000, 15000);
 		mui_soul = 20000;
 		mui_tail = 10000;
+		me->AddAura(SPELL_DUSK_SHROUD, me);
             }
 
             void KilledUnit(Unit* victim)

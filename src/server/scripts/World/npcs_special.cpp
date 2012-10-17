@@ -5193,7 +5193,6 @@ public:
   bool OnGossipHello(Player* player, Creature* me)
   {
     player->PrepareQuestMenu(me->GetGUID());
-
     if (Creature* horseman = me->GetCreature(*me, _headlessHoresemanGUID))
     {
       QuestMenu &qm = player->PlayerTalkClass->GetQuestMenu();
@@ -5235,7 +5234,9 @@ public:
   bool OnQuestAccept(Player* player, Creature* me, Quest const* quest)
   {
     if (!(me->GetAreaId() == 87 || me->GetAreaId() == 362))
+    {
       return true;
+    }
 
     if (quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_A || quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_H)
     {

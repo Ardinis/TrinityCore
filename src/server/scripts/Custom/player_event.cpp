@@ -1,91 +1,74 @@
 #include "ScriptMgr.h"
+#include "GameEventMgr.h"
 
+enum EventMorph
+{
+  HALLOWEEN = 12,
+  MIDSUMMER_FIRE_FESTIVAL = 1,
+  WINTER_VEIL = 2,
+};
 
 class player_event : public PlayerScript
 {
     public:
-        player_event() : PlayerScript("player_event") 
-  { 
+        player_event() : PlayerScript("player_event")
+  {
   }
 
 
-  /*  void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg)
+  void Transmform(std::string& msg, Player* player)
   {
-    if (msg.find("murloc") != std::string::npos)
+    if (IsEventActive((uint16)HALLOWEEN))
+    {
+      if (msg.find("goule") != std::string::npos)
       {
-	uint16 display_id = 21723;
+	uint16 display_id = 414;
 	player->SetDisplayId(display_id);
       }
-    if (msg.find("grml") != std::string::npos)
+      if (msg.find("sorciere") != std::string::npos)
       {
-	uint16 display_id = 25149;
+	uint16 display_id = 984;
 	player->SetDisplayId(display_id);
       }
-    if (msg.find("grognie") != std::string::npos)
+      if (msg.find("fantome") != std::string::npos)
       {
-	uint16 display_id = 29348;
+	uint16 display_id = 146;
 	player->SetDisplayId(display_id);
       }
-    if (msg.find("bourbie") != std::string::npos)
+      if (msg.find("citrouille") != std::string::npos)
       {
-	uint16 display_id = 15369;
+	uint16 display_id = 21822;
 	player->SetDisplayId(display_id);
       }
-    if (msg.find("gloubie") != std::string::npos)
-      {
-	uint16 display_id = 15984;
-	player->SetDisplayId(display_id);
-      }
-    if (msg.find("demorph") != std::string::npos)
-      player->SetDisplayId(player->GetNativeDisplayId());
+      if (msg.find("demorph") != std::string::npos)
+	player->SetDisplayId(player->GetNativeDisplayId());
+    }
+  }
+
+  void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg)
+  {
+    Transmform(msg, player);
   }
 
   void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg, Player* receiver)
   {
-    if (msg.find("murloc") != std::string::npos)
-      {
-	uint16 display_id = 21723;
-	player->SetDisplayId(display_id);
-      }
-    if (msg.find("demorph") != std::string::npos)
-      player->SetDisplayId(player->GetNativeDisplayId());
+    Transmform(msg, player);
   }
 
   void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg, Group* group)
   {
-    if (msg.find("murloc") != std::string::npos)
-      {
-	uint16 display_id = 21723;
-	player->SetDisplayId(display_id);
-      }
-    if (msg.find("demorph") != std::string::npos)
-      player->SetDisplayId(player->GetNativeDisplayId());
+    Transmform(msg, player);
   }
 
   void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg, Guild* guild)
   {
-    if (msg.find("murloc") != std::string::npos)
-      {
-	uint16 display_id = 21723;
-	player->SetDisplayId(display_id);
-      }
-    if (msg.find("demorph") != std::string::npos)
-      player->SetDisplayId(player->GetNativeDisplayId());
+    Transmform(msg, player);
   }
 
   void OnChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel)
   {
-    if (msg.find("murloc") != std::string::npos)
-      {
-	uint16 display_id = 21723;
-	player->SetDisplayId(display_id);
-      }
-    if (msg.find("demorph") != std::string::npos)
-      player->SetDisplayId(player->GetNativeDisplayId());
-      }*/
-
-
-
+    Transmform(msg, player);
+  }
 };
 
 #define NPC_CUSTOM_PACK_ENTRY 10000000

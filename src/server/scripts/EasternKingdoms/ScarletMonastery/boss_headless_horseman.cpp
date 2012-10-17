@@ -62,10 +62,10 @@ static Position flightPos[]=
 
 static char const* Text[]=
 {
-    "Horseman rise...",
-    "Your time is nigh...",
-    "You felt death once...",
-    "Now, know demise!"
+    "Le cavalier sans tete revien...",
+    "Votre fin est proche...",
+    "Vous sentez la mort...",
+    "Maintenant goutez la mort !"
 };
 
 #define EMOTE_LAUGH   "Headless Horseman laughs."

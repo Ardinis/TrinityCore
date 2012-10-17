@@ -402,7 +402,7 @@ public:
 
 	if (mui_checkEnd <= diff)
 	  {
-	    if (CheckEnd())
+	    if (CheckEnd() || me->GetPositionZ() < 393.9f)
 	      {
 		me->DespawnOrUnsummon();
 		return ;
@@ -465,6 +465,7 @@ public:
 	      case EVENT_BATTER:
 		if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
 		  {
+		    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
 		    target->AddAura(SPELL_BATTER, target);
 		    events.ScheduleEvent(EVENT_BATTER, 3*IN_MILLISECONDS);
 		    if (!target->isAlive())

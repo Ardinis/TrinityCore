@@ -26,7 +26,7 @@
 class Player;
 class Group;
 
-class LFGScripts: public GroupScript, public PlayerScript
+class LFGScripts: public GroupScript, public PlayerScript, public GameEventScript
 {
     public:
         LFGScripts();
@@ -43,4 +43,8 @@ class LFGScripts: public GroupScript, public PlayerScript
         void OnLogout(Player* player);
         void OnLogin(Player* player);
         void OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent);
+
+		// GameEvent Hooks
+		void OnEventStart(uint16 event_id);
+		void OnEventStop(uint16 event_id);
 };

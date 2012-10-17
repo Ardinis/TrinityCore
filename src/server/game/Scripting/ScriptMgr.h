@@ -795,6 +795,23 @@ class GroupScript : public ScriptObject
         virtual void OnDisband(Group* /*group*/) { }
 };
 
+class GameEventScript : public ScriptObject
+{
+    protected:
+
+        GameEventScript(const char* name);
+
+    public:
+
+        bool IsDatabaseBound() const { return false; }
+
+        // Called when a event is started
+        virtual void OnEventStart(uint16 /*event_id*/) { }
+
+        // Called when a event is stopped
+        virtual void OnEventStop(uint16 /*event_id*/) { }
+};
+
 // Placed here due to ScriptRegistry::AddScript dependency.
 #define sScriptMgr ACE_Singleton<ScriptMgr, ACE_Null_Mutex>::instance()
 
@@ -1016,6 +1033,10 @@ class ScriptMgr
         void OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method, uint64 kicker, const char* reason);
         void OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
         void OnGroupDisband(Group* group);
+
+	public: /* GameEventScript */
+		void OnGameEventStart(uint16 event_id);
+        void OnGameEventStop(uint16 event_id);
 
     public: /* Scheduled scripts */
 

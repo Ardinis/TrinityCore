@@ -267,6 +267,12 @@ class LFGMgr
         void RewardDungeonDoneFor(const uint32 dungeonId, Player* player);
         LfgReward const* GetRandomDungeonReward(uint32 dungeon, uint8 level);
 
+		// Seasonals
+		void LoadSeasonals();
+		bool IsActifSeasonalDungeon(uint32 dungeonId);
+		bool IsSeasonalDungeon(uint32 dungeonId);
+		bool isHolidayHaveSeasonalDungeon(HolidayIds id);
+
         // Queue
         void Join(Player* player, uint8 roles, const LfgDungeonSet& dungeons, const std::string& comment);
         void Leave(Player* player, Group* grp = NULL);
@@ -286,6 +292,7 @@ class LFGMgr
         void OfferContinue(Group* grp);
 
         void InitializeLockedDungeons(Player* player);
+		void InitializeLockedDungeonsForAllPlayers();
 
         void _LoadFromDB(Field* fields, uint64 guid);
         void _SaveToDB(uint64 guid, uint32 db_guid);
@@ -350,6 +357,8 @@ class LFGMgr
         LfgDungeonMap m_CachedDungeonMap;                  ///< Stores all dungeons by groupType
         // Reward System
         LfgRewardMap m_RewardMap;                          ///< Stores rewards for random dungeons
+		// Seasonals system
+		std::map<uint32, uint32> m_SeasonalsDungeonHoliday;
         // Queue
         LfgQueueInfoMap m_QueueInfoMap;                    ///< Queued groups
         LfgGuidListMap m_currentQueue;                     ///< Ordered list. Used to find groups

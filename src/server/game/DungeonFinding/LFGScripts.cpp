@@ -27,7 +27,7 @@
 #include "LFGScripts.h"
 #include "LFGMgr.h"
 
-LFGScripts::LFGScripts(): GroupScript("LFGScripts"), PlayerScript("LFGScripts") {}
+LFGScripts::LFGScripts(): GroupScript("LFGScripts"), PlayerScript("LFGScripts"), GameEventScript("LFGScripts") {}
 
 void LFGScripts::OnAddMember(Group* group, uint64 guid)
 {
@@ -172,4 +172,28 @@ void LFGScripts::OnBindToInstance(Player* player, Difficulty difficulty, uint32 
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (mapEntry->IsDungeon() && difficulty > DUNGEON_DIFFICULTY_NORMAL)
         sLFGMgr->InitializeLockedDungeons(player);
+}
+
+void LFGScripts::OnEventStart(uint16 event_id)
+{
+	GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
+	GameEventData const& eventData = events[event_id];
+	if (!eventData.isValid())
+		return;
+
+	if (eventData.holiday_id != HOLIDAY_NONE)
+		if (sLFGMgr->isHolidayHaveSeasonalDungeon(eventData.holiday_id))
+			sLFGMgr->InitializeLockedDungeonsForAllPlayers();
+}
+
+void LFGScripts::OnEventStop(uint16 event_id)
+{
+	GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
+	GameEventData const& eventData = events[event_id];
+	if (!eventData.isValid())
+		return;
+
+	if (eventData.holiday_id != HOLIDAY_NONE)
+		if (sLFGMgr->isHolidayHaveSeasonalDungeon(eventData.holiday_id))
+			sLFGMgr->InitializeLockedDungeonsForAllPlayers();
 }

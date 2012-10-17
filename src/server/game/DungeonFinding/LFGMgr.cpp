@@ -70,6 +70,8 @@ LFGMgr::~LFGMgr()
 
     for (LfgRoleCheckMap::iterator it = m_RoleChecks.begin(); it != m_RoleChecks.end(); ++it)
         delete it->second;
+
+	m_SeasonalsDungeonHoliday.clear();
 }
 
 void LFGMgr::_LoadFromDB(Field* fields, uint64 guid)
@@ -184,6 +186,79 @@ void LFGMgr::LoadRewards()
 
     sLog->outString(">> Loaded %u lfg dungeon rewards in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
+}
+
+void LFGMgr::LoadSeasonals()
+{
+	uint32 oldMSTime = getMSTime();
+
+	m_SeasonalsDungeonHoliday.clear();
+
+	QueryResult result = WorldDatabase.Query("SELECT dungeonId, holiday FROM lfg_holiday_dungeon");
+
+    if (!result)
+    {
+        sLog->outErrorDb(">> Loaded 0 lfg seasonals dungeons. DB table `lfg_holiday_dungeon` is empty!");
+        sLog->outString();
+        return;
+    }
+
+    uint32 count = 0;
+
+	Field* fields = NULL;
+    do
+    {
+        fields = result->Fetch();
+        uint32 dungeonId = fields[0].GetUInt32();
+        uint32 holiday   = fields[1].GetUInt32();
+
+		if (!sLFGDungeonStore.LookupEntry(dungeonId))
+        {
+            sLog->outErrorDb("Dungeon %u specified in table `lfg_holiday_dungeon` does not exist!", dungeonId);
+            continue;
+        }
+        if (!sHolidaysStore.LookupEntry(holiday))
+		{
+            sLog->outErrorDb("Dungeon %u specified an invalid holiday(%u) in table `lfg_holiday_dungeon`!", dungeonId, holiday);
+            continue;
+        }
+
+		m_SeasonalsDungeonHoliday[dungeonId] = holiday;
+        ++count;
+    } while (result->NextRow());
+
+    sLog->outString(">> Loaded %u lfg seasonals dungeons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
+}
+
+bool LFGMgr::IsActifSeasonalDungeon(uint32 dungeonId)
+{
+	std::map<uint32, uint32>::const_iterator itr = m_SeasonalsDungeonHoliday.find(dungeonId);
+	if (itr != m_SeasonalsDungeonHoliday.end())
+		return IsHolidayActive(HolidayIds(itr->second));
+
+	return false;
+}
+
+bool LFGMgr::IsSeasonalDungeon(uint32 dungeonId)
+{
+	std::map<uint32, uint32>::const_iterator itr = m_SeasonalsDungeonHoliday.find(dungeonId);
+	if (itr != m_SeasonalsDungeonHoliday.end())
+		return true;
+
+	return false;
+}
+
+bool LFGMgr::isHolidayHaveSeasonalDungeon(HolidayIds id)
+{
+	for (std::map<uint32, uint32>::const_iterator itr = m_SeasonalsDungeonHoliday.begin(); 
+		itr != m_SeasonalsDungeonHoliday.end(); itr++)
+	{
+		if (HolidayIds(itr->second) == id)
+			return true;
+	}
+
+	return false;
 }
 
 void LFGMgr::Update(uint32 diff)
@@ -439,6 +514,8 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             locktype = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
         else if (dungeon->maxlevel < level)
             locktype = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
+		else if (IsSeasonalDungeon(dungeon->ID) && !IsActifSeasonalDungeon(dungeon->ID))
+			locktype = LFG_LOCKSTATUS_NOT_IN_SEASON;
         else if (locktype == LFG_LOCKSTATUS_OK && ar)
         {
             if (ar->achievement && !player->GetAchievementMgr().HasAchieved(ar->achievement))
@@ -461,13 +538,24 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
             locktype = LFG_LOCKSTATUS_TOO_HIGH_GEAR_SCORE;
             locktype = LFG_LOCKSTATUS_ATTUNEMENT_TOO_LOW_LEVEL;
             locktype = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
-            locktype = LFG_LOCKSTATUS_NOT_IN_SEASON; // Need list of instances and needed season to open
         */
 
         if (locktype != LFG_LOCKSTATUS_OK)
             lock[dungeon->Entry()] = locktype;
     }
     SetLockedDungeons(guid, lock);
+}
+
+/*
+	Generate the dungeon lock map for all players
+*/
+void LFGMgr::InitializeLockedDungeonsForAllPlayers()
+{
+	for (LfgPlayerDataMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); itr++)
+	{
+		if (Player *player = ObjectAccessor::FindPlayer(itr->first))
+			InitializeLockedDungeons(player);
+	}
 }
 
 /**

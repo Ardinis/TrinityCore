@@ -103,7 +103,7 @@ float SpellImplicitTargetInfo::CalcDirectionAngle() const
         case TARGET_DIR_LEFT:
             return static_cast<float>(M_PI/2);
         case TARGET_DIR_FRONT_RIGHT:
-            return static_cast<float>(M_PI/4);
+            return static_cast<float>(-M_PI/4);
         case TARGET_DIR_BACK_RIGHT:
             return static_cast<float>(-3*M_PI/4);
         case TARGET_DIR_BACK_LEFT:

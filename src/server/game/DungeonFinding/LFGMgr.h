@@ -142,6 +142,7 @@ typedef std::map<uint64, LfgProposalPlayer*> LfgProposalPlayerMap;
 typedef std::map<uint32, LfgPlayerBoot*> LfgPlayerBootMap;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataMap;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataMap;
+typedef std::map<uint32, Position> LfgEntrancePositionMap;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
 struct LfgJoinResultData
@@ -284,6 +285,7 @@ class LFGMgr
         void UpdateProposal(uint32 proposalId, uint64 guid, bool accept);
 
         // Teleportation
+		void LoadEntrancePositions();
         void TeleportPlayer(Player* player, bool out, bool fromOpcode = false);
 
         // Vote kick
@@ -355,6 +357,7 @@ class LFGMgr
         uint32 m_NumWaitTimeHealer;                        ///< Num of players used to calc healers wait time
         uint32 m_NumWaitTimeDps;                           ///< Num of players used to calc dps wait time
         LfgDungeonMap m_CachedDungeonMap;                  ///< Stores all dungeons by groupType
+		LfgEntrancePositionMap m_entrancePositions;        ///< Stores special entrance positions
         // Reward System
         LfgRewardMap m_RewardMap;                          ///< Stores rewards for random dungeons
 		// Seasonals system

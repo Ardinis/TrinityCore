@@ -188,6 +188,39 @@ void LFGMgr::LoadRewards()
     sLog->outString();
 }
 
+void LFGMgr::LoadEntrancePositions()
+{
+	uint32 oldMSTime = getMSTime();
+	m_entrancePositions.clear();
+
+	QueryResult result = WorldDatabase.Query("SELECT dungeonId, position_x, position_y, position_z, orientation FROM lfg_entrances");
+
+	if (!result)
+	{
+		sLog->outErrorDb(">> Loaded 0 lfg entrance positions. DB table `lfg_entrances` is empty!");
+		sLog->outString();
+		return;
+	}
+
+	uint32 count = 0;
+
+	do
+	{
+		Field* fields = result->Fetch();
+		uint32 dungeonId = fields[0].GetUInt32();
+		Position pos;
+		pos.m_positionX = fields[1].GetFloat();
+		pos.m_positionY = fields[2].GetFloat();
+		pos.m_positionZ = fields[3].GetFloat();
+		pos.m_orientation = fields[4].GetFloat();
+		m_entrancePositions[dungeonId] = pos;
+		++count;
+	} while (result->NextRow());
+
+	sLog->outString(">> Loaded %u lfg entrance positions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+	sLog->outString();
+}
+
 void LFGMgr::LoadSeasonals()
 {
 	uint32 oldMSTime = getMSTime();
@@ -1886,19 +1919,27 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
 
             if (!mapid)
             {
-                AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map);
-                if (!at)
+				LfgEntrancePositionMap::const_iterator itr = m_entrancePositions.find(dungeon->ID);
+				if (itr != m_entrancePositions.end())
+				{
+					mapid = dungeon->map;
+					x = itr->second.GetPositionX();
+					y = itr->second.GetPositionY();
+					z = itr->second.GetPositionZ();
+					orientation = itr->second.GetOrientation();
+				}
+                else if (AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(dungeon->map))
                 {
-                    sLog->outError("LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "]: No areatrigger found for map: %u difficulty: %u", player->GetGUID(), dungeon->map, dungeon->difficulty);
-                    error = LFG_TELEPORTERROR_INVALID_LOCATION;
-                }
-                else
-                {
-                    mapid = at->target_mapId;
+					mapid = at->target_mapId;
                     x = at->target_X;
                     y = at->target_Y;
                     z = at->target_Z;
                     orientation = at->target_Orientation;
+                }
+                else
+                {
+                    sLog->outError("LfgMgr::TeleportPlayer: Failed to teleport [" UI64FMTD "]: No areatrigger found for map: %u difficulty: %u", player->GetGUID(), dungeon->map, dungeon->difficulty);
+                    error = LFG_TELEPORTERROR_INVALID_LOCATION;
                 }
             }
 
@@ -1967,9 +2008,9 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     ClearState(guid);
     SetState(guid, LFG_STATE_FINISHED_DUNGEON);
 
-    // Give rewards only if its a random dungeon
+    // Give rewards only if its a random dungeon or actif seasonal dungeon
     LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(rDungeonId);
-    if (!dungeon || dungeon->type != LFG_TYPE_RANDOM)
+    if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM && !sLFGMgr->IsActifSeasonalDungeon(dungeon->ID)))
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] dungeon %u is not random", guid, rDungeonId);
         return;

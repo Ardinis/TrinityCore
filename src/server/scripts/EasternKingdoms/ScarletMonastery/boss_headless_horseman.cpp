@@ -116,7 +116,7 @@ class boss_headless_horseman : public CreatureScript
                 summonTimer = 1*IN_MILLISECONDS;
                 conflagTimer = 4*IN_MILLISECONDS;
 
-                me->SummonGameObject(GO_PUMPKIN_SHRINE, 1776.27f, 1348.74f, 20.4116f, 0, 0, 0, 0.00518764f, -0.999987f, 0);
+                me->SummonGameObject(GO_PUMPKIN_SHRINE, 1776.27f, 1348.74f, 20.4116f, 0, 0, 0, 0.00518764f, -0.999987f, 604800);
                 DoCast(me, SPELL_HEAD, true);
             }
 

@@ -5024,7 +5024,8 @@ public:
 	  ++wpCount;
 
 	pointReached = true;
-      } else if (id == FIRE_NODES_PER_AREA && firesOut)
+      }
+      else if (id == FIRE_NODES_PER_AREA && firesOut)
       {
 	me->ExitVehicle();
 	me->SetReactState(REACT_AGGRESSIVE);
@@ -5065,6 +5066,7 @@ public:
 	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
 	      if (Player* player = me->GetPlayer(*me, *i))
 		player->CastSpell(player, SPELL_QUESTS_CREDITS, true);
+	  me->DespawnOrUnsummon(10000);
 	  return;
 	}
 
@@ -5240,7 +5242,8 @@ public:
 
     if (quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_A || quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_H)
     {
-      Creature* horseman = me->GetCreature(*me, _headlessHoresemanGUID);
+      Creature* horseman = me->FindNearestCreature(NPC_SHADE_HORSEMAN, 100);
+      //me->GetCreature(*me, _headlessHoresemanGUID);
 
       if (!horseman)
       {

@@ -40,6 +40,42 @@ class player_event : public PlayerScript
 	uint16 display_id = 21822;
 	player->SetDisplayId(display_id);
       }
+      if (msg.find("vampire") != std::string::npos)
+      {
+	uint16 display_id = 25338;
+	player->SetDisplayId(display_id);
+      }
+      if (msg.find("zombie") != std::string::npos)
+      {
+	uint16 display_id = 10256;
+	player->SetDisplayId(display_id);
+      }
+      if (msg.find("chauve souris") != std::string::npos)
+      {
+	uint16 display_id = 11071;
+	player->SetDisplayId(display_id);
+      }
+      if (msg.find("squelette") != std::string::npos)
+      {
+	uint16 display_id = 11403;
+	player->SetDisplayId(display_id);
+      }
+      if (msg.find("garou") != std::string::npos)
+      {
+	uint16 display_id = 26787;
+	player->SetDisplayId(display_id);
+      }
+      if (msg.find("araigne") != std::string::npos)
+      {
+	uint16 display_id = 1087;
+	player->SetDisplayId(display_id);
+      }
+      if (msg.find("liche") != std::string::npos)
+      {
+	uint16 display_id = 7919;
+	player->SetDisplayId(display_id);
+      }
+
       if (msg.find("demorph") != std::string::npos)
 	player->SetDisplayId(player->GetNativeDisplayId());
     }

@@ -20,7 +20,7 @@
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "icecrown_citadel.h"
-#include "../../../collision/Management/VMapFactory.h"   
+#include "../../../collision/Management/VMapFactory.h"
 
 enum Texts
 {
@@ -191,7 +191,7 @@ class boss_sindragosa : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_TARGET);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_DUMMY);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_UNTARGETABLE);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_DAMAGE); 
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_DAMAGE);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_BEACON);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_BREATH_P1);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_BREATH_P2);
@@ -531,7 +531,7 @@ class boss_sindragosa : public CreatureScript
 			      float myX, myY, myZ;
 			      me->GetPosition(myX, myY, myZ);
 			      Position pos;
-			    
+
 			      VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
 			      int tryNumber = 0;
 			      while (tryNumber++ < 50)
@@ -544,7 +544,7 @@ class boss_sindragosa : public CreatureScript
                                     destY = float(rand_norm()) * 36.23f + 2457.64f;
 				  destZ = 205.0f; // random number close to ground, get exact in next call
 				  me->UpdateGroundPositionZ(destX, destY, destZ);
-				  
+
 				  std::list<Creature*> tomb_creatures;
 				  GetCreatureListWithEntryInGrid(tomb_creatures, me, NPC_ICE_TOMB, 150.0f);
 				  std::list<Unit*> tombs;
@@ -613,7 +613,7 @@ class boss_sindragosa : public CreatureScript
                         {
                             me->RemoveAurasDueToSpell(SPELL_BUFFET_VULNERABILITY);
                             if (_isThirdPhase)
-                                if (!me->HasAura(SPELL_MYSTIC_BUFFET)) 
+                                if (!me->HasAura(SPELL_MYSTIC_BUFFET))
                                 {
                                     DoCast(me, SPELL_MYSTIC_BUFFET, true);
                                 }
@@ -748,7 +748,7 @@ class npc_spinestalker : public CreatureScript
                 _events.ScheduleEvent(EVENT_BELLOWING_ROAR, urand(20000, 25000));
                 _events.ScheduleEvent(EVENT_CLEAVE_SPINESTALKER, urand(10000, 15000));
                 _events.ScheduleEvent(EVENT_TAIL_SWEEP, urand(8000, 12000));
-
+		me->SetReactState(REACT_PASSIVE);
                 if (_instance->GetData(DATA_SPINESTALKER) != 255)
                 {
                     me->SetFlying(true);
@@ -772,11 +772,10 @@ class npc_spinestalker : public CreatureScript
             {
                 if (action == ACTION_START_FROSTWYRM)
                 {
-				sLog->outError(" <!> LANCEMENT SCRIPT : SPINESTALKER <!>");
                     _instance->SetData(DATA_SPINESTALKER, 255);
                     if (me->isDead())
                         return;
-
+		    me->SetReactState(REACT_AGGRESSIVE);
                     me->setActive(true);
                     me->SetSpeed(MOVE_FLIGHT, 2.0f);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -884,6 +883,7 @@ class npc_rimefang : public CreatureScript
                 _events.ScheduleEvent(EVENT_FROST_BREATH_RIMEFANG, urand(12000, 15000));
                 _events.ScheduleEvent(EVENT_ICY_BLAST, urand(30000, 35000));
                 _icyBlastCounter = 0;
+		me->SetReactState(REACT_PASSIVE);
 
                 if (_instance->GetData(DATA_RIMEFANG) != 255)
                 {
@@ -908,11 +908,10 @@ class npc_rimefang : public CreatureScript
             {
                 if (action == ACTION_START_FROSTWYRM)
                 {
-				sLog->outError(" <!> LANCEMENT SCRIPT : RIMEFANG <!>");
                     _instance->SetData(DATA_RIMEFANG, 255);
                     if (me->isDead())
                         return;
-
+		    me->SetReactState(REACT_AGGRESSIVE);
                     me->setActive(true);
                     me->SetSpeed(MOVE_FLIGHT, 2.0f);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
@@ -1446,13 +1445,13 @@ class spell_sindragosa_icy_grip : public SpellScriptLoader
 				PreventHitDefaultEffect(effIndex);
 				if (Unit *pUnit = GetCaster())
 				{
-					if (pUnit->isAlive() 
-						&& !GetHitUnit()->HasAura(SPELL_FROST_BEACON) 
+					if (pUnit->isAlive()
+						&& !GetHitUnit()->HasAura(SPELL_FROST_BEACON)
 						&& !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P1)
 						&& !GetHitUnit()->HasAura(71056)
 						&& !GetHitUnit()->HasAura(71057)
 						&& !GetHitUnit()->HasAura(71058)
-						&& !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P2) 
+						&& !GetHitUnit()->HasAura(SPELL_FROST_BREATH_P2)
 						&& !GetHitUnit()->HasAura(73062)
 						&& !GetHitUnit()->HasAura(73063)
 						&& !GetHitUnit()->HasAura(73064))
@@ -1683,7 +1682,7 @@ class at_sindragosa_lair : public AreaTriggerScript
 					if (!instance->GetData(DATA_RIMEFANG))
 						if (rimefang)
 							rimefang->AI()->DoAction(ACTION_START_FROSTWYRM);
-							
+
 					if (instance->GetBossState(DATA_SINDRAGOSA) != DONE && rimefang && spinestalker)
 					{
 						if (spinestalker->isAlive() || rimefang->isAlive())

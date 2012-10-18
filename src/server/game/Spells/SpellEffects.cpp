@@ -714,8 +714,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 			      }
 
                             // Eviscerate and Envenom Bonus Damage (item set effect)
-							if (AuraEffect const * aurEffB = m_caster->GetAuraEffect(37169, EFFECT_0, m_caster->GetGUID()))
-								damage += combo * aurEffB->GetAmount();
+			    if (AuraEffect const * aurEffB = m_caster->GetAuraEffect(37169, EFFECT_0, m_caster->GetGUID()))
+			      damage += combo * aurEffB->GetAmount();
                         }
                     }
                 }

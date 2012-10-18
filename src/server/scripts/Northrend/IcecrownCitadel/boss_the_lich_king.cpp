@@ -1440,6 +1440,8 @@ class npc_shambling_horror_icc : public CreatureScript
             npc_shambling_horror_iccAI(Creature* creature) : ScriptedAI(creature)
             {
                 _frenzied = false;
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -1509,6 +1511,8 @@ class npc_raging_spirit : public CreatureScript
             npc_raging_spiritAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -1585,6 +1589,8 @@ class npc_valkyr_shadowguard : public CreatureScript
             npc_valkyr_shadowguardAI(Creature* creature) : ScriptedAI(creature),
                 _grabbedPlayer(0), _instance(creature->GetInstanceScript())
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -2087,6 +2093,8 @@ class npc_spirit_warden : public CreatureScript
             npc_spirit_wardenAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -2146,6 +2154,8 @@ class npc_spirit_bomb : public CreatureScript
             npc_spirit_bombAI(Creature* creature) : CreatureAI(creature)
             {
 	      me->SetReactState(REACT_DEFENSIVE);
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)

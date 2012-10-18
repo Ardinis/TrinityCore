@@ -1516,7 +1516,7 @@ void GameObject::Use(Unit* user)
 
             Player* player = user->ToPlayer();
 
-            if (player->CanUseBattlegroundObject())
+            if (player->CanUseBattlegroundObject(this))
             {
                 // in battleground check
                 Battleground* bg = player->GetBattleground();
@@ -1524,6 +1524,8 @@ void GameObject::Use(Unit* user)
                     return;
                 if (player->GetVehicle())
                     return;
+		player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+		player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
                 // BG flag click
                 // AB:
                 // 15001
@@ -1556,14 +1558,19 @@ void GameObject::Use(Unit* user)
 
             Player* player = user->ToPlayer();
 
-            if (player->CanUseBattlegroundObject())
+            if (player->CanUseBattlegroundObject(this))
             {
                 // in battleground check
                 Battleground* bg = player->GetBattleground();
                 if (!bg)
                     return;
+
                 if (player->GetVehicle())
                     return;
+
+		player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+		player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+
                 // BG flag dropped
                 // WS:
                 // 179785 - Silverwing Flag

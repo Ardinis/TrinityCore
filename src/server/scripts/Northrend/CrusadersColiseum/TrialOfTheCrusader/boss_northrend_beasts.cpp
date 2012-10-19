@@ -152,20 +152,27 @@ public:
                 m_uiSummonCount = 5;
             else
                 m_uiSummonCount = 4;
-
+            if (m_pInstance)
+	      m_pInstance->DoRemoveAurasDueToSpellOnPlayers(66406);
             Summons.DespawnAll();
         }
 
         void JustDied(Unit* /*pKiller*/)
         {
             if (m_pInstance)
+	    {
                 m_pInstance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_DONE);
+		m_pInstance->DoRemoveAurasDueToSpellOnPlayers(66406);
+	    }
         }
 
         void JustReachedHome()
         {
             if (m_pInstance)
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+	    {
+	      m_pInstance->DoRemoveAurasDueToSpellOnPlayers(66406);
+	      m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+	    }
 	    m_pInstance->SetData(DATA_PAUSE, NOT_STARTED);
             me->DespawnOrUnsummon();
         }
@@ -299,7 +306,6 @@ public:
             m_uiBatterTimer = 5000;
             m_uiHeadCrackTimer = 25000;
 
-
             m_uiTargetGUID = 0;
             m_bTargetDied = false;
             if (m_pInstance)
@@ -432,6 +438,7 @@ public:
 		events.ScheduleEvent(EVENT_FIRE_BOMB, 20*IN_MILLISECONDS);
 		return;
 	      case EVENT_HEAD_CRACK:
+		events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
 		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
 		  {
 		    if (Player *player = target->ToPlayer())
@@ -447,7 +454,8 @@ public:
 			m_uiTargetGUID = player->GetGUID();
 			player->CreateVehicleKit(444, 0);
 			me->EnterVehicle(player, 0);
-			me->AddAura(SPELL_HEAD_CRACK, player);
+			//			if (me->GetExactDist2d(player) <= 1)
+			me->AddAura(66406, player);
 			//			me->MonsterYell("i am billi bob and i try to reach youre head !", LANG_UNIVERSAL, 0);
 			me->ClearUnitState(UNIT_STATE_ONVEHICLE);
 			if (player->GetVehicleKit())
@@ -460,10 +468,12 @@ public:
 			events.CancelEvent(EVENT_HEAD_CRACK);
 		      }
 		  }
-		events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
 		return;
 	      case EVENT_BATTER:
-		if (Unit* target = Unit::GetPlayer(*me, m_uiTargetGUID))
+		//		if (Player* target = me->FindNearestPlayer(3))
+		if (Unit *target = Unit::GetPlayer(*me, m_uiTargetGUID))
+		{
+		  //		  if (me->GetExactDist2d(target) <= 2)
 		  {
 		    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
 		    target->AddAura(SPELL_BATTER, target);
@@ -471,6 +481,7 @@ public:
 		    if (!target->isAlive())
 		      BackToGornock();
 		  }
+		}
 		else
 		  events.ScheduleEvent(EVENT_BATTER, 2*IN_MILLISECONDS);
 		return;

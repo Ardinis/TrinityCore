@@ -694,19 +694,19 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 			      switch (combo)
 			      {
 			      case 1:
-				damage = (497 + ((370 * combo) + ap * 0.03));
+				damage = (497 + ((370 * combo) + ap * 0.07));
 				break;
 			      case 2:
-				damage = (497 + ((370 * combo) + ap * 0.06));
+				damage = (497 + ((370 * combo) + ap * 0.14));
 				break;
 			      case 3:
-				damage = (497 + ((370 * combo) + ap * 0.09));
+				damage = (497 + ((370 * combo) + ap * 0.21));
 				break;
 			      case 4:
-				damage = (497 + ((370 * combo) + ap * 0.12));
+				damage = (497 + ((370 * combo) + ap * 0.28));
 				break;
 			      case 5:
-				damage = (497 + ((370 * combo) + ap * 0.15));
+				damage = (497 + ((370 * combo) + ap * 0.35));
 				break;
 			      default :
 				damage += 0;

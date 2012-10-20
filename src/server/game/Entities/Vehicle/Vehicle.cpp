@@ -150,7 +150,8 @@ void Vehicle::Uninstall()
     sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::Uninstall Entry: %u, GuidLow: %u", _creatureEntry, _me->GetGUIDLow());
     RemoveAllPassengers();
 
-    if (GetBase()->GetTypeId() == TYPEID_UNIT)
+    if (GetBase())
+      if (GetBase()->GetTypeId() == TYPEID_UNIT)
         sScriptMgr->OnUninstall(this);
 }
 
@@ -394,7 +395,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
 	    break;
 	  }
       }
-	
+
     unit->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     unit->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
     VehicleSeatEntry const* veSeat = seat->second.SeatInfo;
@@ -498,7 +499,7 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
             float px = x + passenger->m_movementInfo.t_pos.m_positionX;
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
-            float po = ang + passenger->m_movementInfo.t_pos.m_orientation;		
+            float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
 	    if (ang != 0)
 	      {
 		float nang = (ang  * 360) / 6.3;
@@ -511,7 +512,7 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
 		float ynew = px * s + py * c;
 		px = xnew + x;
 		py = ynew + y;
-	      }  
+	      }
             passenger->UpdatePosition(px, py, pz, po);
         }
 }

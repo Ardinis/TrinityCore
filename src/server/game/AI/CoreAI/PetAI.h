@@ -58,4 +58,5 @@ class PetAI : public CreatureAI
         void DoAttack(Unit* target, bool chase);
         bool CanAttack(Unit* target);
 };
+
 #endif

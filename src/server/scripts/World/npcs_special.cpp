@@ -5256,6 +5256,57 @@ public:
   }
 };
 
+
+class npc_raise_ally : public CreatureScript
+{
+public:
+    npc_raise_ally() : CreatureScript("npc_raise_ally") { }
+
+    struct npc_raise_ally_AI : public ScriptedAI
+    {
+      npc_raise_ally_AI(Creature* c) : ScriptedAI(c) { Reset(); }
+
+        void Reset()
+        {
+	  if (me->ToTempSummon())
+	    if (me->ToTempSummon()->GetSummoner())
+	    {
+	      int health = me->ToTempSummon()->GetSummoner()->GetMaxHealth() * 60 / 100;
+	      int mana = me->ToTempSummon()->GetSummoner()->GetMaxPower(POWER_MANA) * 20 / 100;
+	      if (mana <= 0)
+		mana = 10000;
+	      me->SetMaxHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
+	      me->SetHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
+	      me->SetMaxPower(POWER_ENERGY, mana);
+	      me->SetPower(POWER_ENERGY, mana);
+	      //	      me->SetEnergy(100);
+	    }
+        }
+
+      void JustDied(Unit* /*who*/)
+      {
+	if (me->ToTempSummon())
+	  if (me->ToTempSummon()->GetSummoner())
+	    me->ToTempSummon()->GetSummoner()->Kill(me->ToTempSummon()->GetSummoner());
+      }
+
+        void EnterCombat(Unit* /*who*/) {}
+
+        void UpdateAI(uint32 const diff)
+        {
+        }
+
+      void ReceiveEmote(Player* player, uint32 emote)
+      {
+         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_raise_ally_AI(creature);
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -5313,4 +5364,6 @@ void AddSC_npcs_special()
     new npc_halloween_fire();
     new npc_shade_horseman();
     new npc_halloween_orphan_matron();
+
+    new npc_raise_ally();
 }

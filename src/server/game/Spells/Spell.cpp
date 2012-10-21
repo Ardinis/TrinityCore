@@ -4570,18 +4570,13 @@ void Spell::TakeRunePower(bool didHit)
 	  if (didHit)
 	  {
 	    cooldownRunes = player->GetRuneBaseCooldown(i);
-	    std::cout << cooldownRunes << std::endl;
-	    std::cout << player->m_reduceCoolDown[i] << std::endl;
 	    if (player->reduceRuneCoolDown[i])
-	      if (player->m_reduceCoolDown[i] > 0)
+	      if (time(0) - player->m_reduceCoolDown[i] < 3)
 		cooldownRunes -= 2000;
-	    std::cout << cooldownRunes << std::endl;
 	    player->reduceRuneCoolDown[i] = false;
 	  }
             player->SetRuneCooldown(i, cooldownRunes);
             player->SetLastUsedRune(rune);
-	    player->reduceRuneCoolDown[rune] = true;
-	    player->m_reduceCoolDown[rune] = 2000;
             runeCost[rune]--;
         }
     }
@@ -4590,32 +4585,31 @@ void Spell::TakeRunePower(bool didHit)
 
     if (runeCost[RUNE_DEATH] > 0)
     {
-        for (uint32 i = 0; i < MAX_RUNES; ++i)
-        {
-            RuneType rune = player->GetCurrentRune(i);
-            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
-            {
-	      uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
-	      if (didHit)
-	      {
-		cooldownRunes = player->GetRuneBaseCooldown(i);
-		if ( player->reduceRuneCoolDown[i])
-		  if ( player->m_reduceCoolDown[i] > 0)
-		    cooldownRunes -= 2000;
-		player->reduceRuneCoolDown[i] = false;
-	      }
-	      player->SetRuneCooldown(i, cooldownRunes);
-                player->SetLastUsedRune(rune);
-                runeCost[rune]--;
+      for (uint32 i = 0; i < MAX_RUNES; ++i)
+      {
+	RuneType rune = player->GetCurrentRune(i);
+	if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
+	{
+	  uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
+	  if (didHit)
+	  {
+	    cooldownRunes = player->GetRuneBaseCooldown(i);
+	    if (player->reduceRuneCoolDown[i])
+	      if (time(0) - player->m_reduceCoolDown[i] < 3)
+		cooldownRunes -= 2000;
+	    player->reduceRuneCoolDown[i] = false;
+	  }
+	  player->SetRuneCooldown(i, cooldownRunes);
+	  player->SetLastUsedRune(rune);
+	  runeCost[rune]--;
+	  // keep Death Rune type if missed
+	  if (didHit)
+	    player->RestoreBaseRune(i);
 
-                // keep Death Rune type if missed
-                if (didHit)
-                    player->RestoreBaseRune(i);
-
-                if (runeCost[RUNE_DEATH] == 0)
-                    break;
-            }
-        }
+	  if (runeCost[RUNE_DEATH] == 0)
+	    break;
+	}
+      }
     }
 
     // you can gain some runic power when use runes

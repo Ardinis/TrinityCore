@@ -861,7 +861,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
       reduceRuneCoolDown[i] = false;
-      m_reduceCoolDown[i] = 2000;
+      m_reduceCoolDown[i] = time(0);
     }
 
     m_lastFallTime = 0;
@@ -2569,10 +2569,15 @@ void Player::RegenerateAll()
       for (uint8 i = 0; i < MAX_RUNES; ++i)
 	if (uint32 cd = GetRuneCooldown(i))
 	{
-	  if (reduceRuneCoolDown[i])
-	    m_reduceCoolDown[i] -= m_regenTimer;
-	  if (m_reduceCoolDown[i] > 0)
-	    m_reduceCoolDown[i] = 0;
+	  //	  if (reduceRuneCoolDown[i])
+	  //  m_reduceCoolDown[i] -= m_regenTimer;
+	  // if (m_reduceCoolDown[i] > 0)
+	  //  m_reduceCoolDown[i] = 0;
+	  if (cd < m_regenTimer && cd > 0)
+	  {
+	    reduceRuneCoolDown[i] = true;
+	    m_reduceCoolDown[i] = time(0);
+	  }
 	  SetRuneCooldown(i, (cd > m_regenTimer) ? cd - m_regenTimer : 0);
 	}
     if (m_regenTimerCount >= 2000)

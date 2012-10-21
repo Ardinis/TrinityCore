@@ -844,6 +844,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     SpellCastTargets targets;
 
     // selection by spell family
+
+
     switch (m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -3069,28 +3071,34 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     // however so far noone found a generic check to find all of those (there's no related data in summonproperties.dbc
     // and in spell attributes, possibly we need to add a table for those)
     // so here's a list of MiscValueB values, which is currently most generic check
+
     switch (properties->Id)
     {
-        case 64:
-        case 61:
-        case 1101:
-        case 66:
-        case 648:
-        case 2301:
-        case 1061:
-        case 1261:
-        case 629:
-        case 181:
-        case 715:
-        case 1562:
-        case 833:
-        case 1161:
-            numSummons = (damage > 0) ? damage : 1;
-            break;
-        default:
-            numSummons = 1;
-            break;
+    case 64:
+    case 61:
+    case 1101:
+    case 66:
+    case 648:
+    case 2301:
+    case 1061:
+    case 1261:
+    case 629:
+    case 181:
+    case 715:
+    case 1562:
+    case 833:
+    case 1161:
+      numSummons = (damage > 0) ? damage : 1;
+      break;
+    case 713:
+      numSummons = irand(2, 4);
+      break;
+    default:
+      numSummons = 1;
+      break;
     }
+
+    //    m_caster->GetMap()->SummonCreature(28017, pos, properties, duration);
 
     switch (properties->Category)
     {

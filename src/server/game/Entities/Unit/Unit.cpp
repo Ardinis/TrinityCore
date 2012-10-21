@@ -8706,6 +8706,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             }
             case SPELLFAMILY_DEATHKNIGHT:
             {
+                if (auraSpellInfo->Id == 50421)             // Scent of Blood
+                {
+                    CastSpell(this, 50422, true);
+                    RemoveAuraFromStack(auraSpellInfo->Id);
+                    return false;
+                }
                 // Acclimation
                 if (auraSpellInfo->SpellIconID == 1930)
                 {

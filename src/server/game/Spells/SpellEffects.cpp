@@ -4274,13 +4274,15 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             // Heart Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x1000000)
             {
-                AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()));
-
-                if(pPet)
-                    AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() *(unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())));
-                else
-                    AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() *(unitTarget->GetDiseasesByCaster(m_caster->GetGUID())));
-                break;
+	      float bonusPct = m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID());
+	      if (AuraEffect const* aurEff = m_caster->GetAuraEffect(64736, EFFECT_0)) // Death Knight T8 Melee 4P Bonus
+		AddPct(bonusPct, aurEff->GetAmount());
+	      AddPctN(totalDamagePercentMod, bonusPct);
+	      if (pPet)
+		AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() *(unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())));
+	      else
+		AddPctN(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() *(unitTarget->GetDiseasesByCaster(m_caster->GetGUID())));
+	      break;
             }
             break;
         }

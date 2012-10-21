@@ -4566,8 +4566,22 @@ void Spell::TakeRunePower(bool didHit)
         RuneType rune = player->GetCurrentRune(i);
         if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
         {
-            player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+	  uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
+	  if (didHit)
+	  {
+	    cooldownRunes = player->GetRuneBaseCooldown(i);
+	    std::cout << cooldownRunes << std::endl;
+	    std::cout << player->m_reduceCoolDown[i] << std::endl;
+	    if (player->reduceRuneCoolDown[i])
+	      if (player->m_reduceCoolDown[i] > 0)
+		cooldownRunes -= 2000;
+	    std::cout << cooldownRunes << std::endl;
+	    player->reduceRuneCoolDown[i] = false;
+	  }
+            player->SetRuneCooldown(i, cooldownRunes);
             player->SetLastUsedRune(rune);
+	    player->reduceRuneCoolDown[rune] = true;
+	    player->m_reduceCoolDown[rune] = 2000;
             runeCost[rune]--;
         }
     }
@@ -4581,7 +4595,16 @@ void Spell::TakeRunePower(bool didHit)
             RuneType rune = player->GetCurrentRune(i);
             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
             {
-                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+	      uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
+	      if (didHit)
+	      {
+		cooldownRunes = player->GetRuneBaseCooldown(i);
+		if ( player->reduceRuneCoolDown[i])
+		  if ( player->m_reduceCoolDown[i] > 0)
+		    cooldownRunes -= 2000;
+		player->reduceRuneCoolDown[i] = false;
+	      }
+	      player->SetRuneCooldown(i, cooldownRunes);
                 player->SetLastUsedRune(rune);
                 runeCost[rune]--;
 

@@ -2832,6 +2832,7 @@ class Player : public Unit, public GridObject<Player>
 
         DeclinedName *m_declinedname;
         Runes *m_runes;
+
         EquipmentSets m_EquipmentSets;
 
         bool CanAlwaysSee(WorldObject const* obj) const;
@@ -2839,6 +2840,10 @@ class Player : public Unit, public GridObject<Player>
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
         uint8 m_grantableLevels;
+
+ public :
+	bool reduceRuneCoolDown[MAX_RUNES];
+	uint32 m_reduceCoolDown[MAX_RUNES];
 
     private:
         // internal common parts for CanStore/StoreItem functions

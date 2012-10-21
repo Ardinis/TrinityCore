@@ -858,6 +858,11 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_isActive = true;
 
     m_runes = NULL;
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+    {
+      reduceRuneCoolDown[i] = false;
+      m_reduceCoolDown[i] = 2000;
+    }
 
     m_lastFallTime = 0;
     m_lastFallZ = 0;
@@ -2555,17 +2560,21 @@ void Player::RegenerateAll()
     //    return;
 
     m_regenTimerCount += m_regenTimer;
-
     Regenerate(POWER_ENERGY);
 
     Regenerate(POWER_MANA);
 
     // Runes act as cooldowns, and they don't need to send any data
     if (getClass() == CLASS_DEATH_KNIGHT)
-        for (uint8 i = 0; i < MAX_RUNES; ++i)
-            if (uint32 cd = GetRuneCooldown(i))
-                SetRuneCooldown(i, (cd > m_regenTimer) ? cd - m_regenTimer : 0);
-
+      for (uint8 i = 0; i < MAX_RUNES; ++i)
+	if (uint32 cd = GetRuneCooldown(i))
+	{
+	  if (reduceRuneCoolDown[i])
+	    m_reduceCoolDown[i] -= m_regenTimer;
+	  if (m_reduceCoolDown[i] > 0)
+	    m_reduceCoolDown[i] = 0;
+	  SetRuneCooldown(i, (cd > m_regenTimer) ? cd - m_regenTimer : 0);
+	}
     if (m_regenTimerCount >= 2000)
     {
         // Not in combat or they have regeneration
@@ -2637,7 +2646,9 @@ void Player::Regenerate(Powers power)
         case POWER_RUNE:
 	  for(uint32 i = 0; i < MAX_RUNES; ++i)
 	    if(uint8 cd = GetRuneCooldown(i))
+	    {
 	      SetRuneCooldown(i, cd - 1);
+	    }
 	  break;
         case POWER_FOCUS:
         case POWER_HAPPINESS:
@@ -23783,6 +23794,8 @@ void Player::InitRunes()
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
+      reduceRuneCoolDown[i] = false;
+      m_reduceCoolDown[i] = 2000;
         SetBaseRune(i, runeSlotTypes[i]);                              // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                           // init current types
         SetRuneCooldown(i, 0);                                         // reset cooldowns

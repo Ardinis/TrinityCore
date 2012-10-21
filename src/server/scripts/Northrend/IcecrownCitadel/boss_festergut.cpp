@@ -112,7 +112,6 @@ class boss_festergut : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-				sLog->outError(" <!> LANCEMENT SCRIPT : FESTERGUT <!>");
                 if (!instance->CheckRequiredBosses(DATA_FESTERGUT, who->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -308,7 +307,6 @@ class npc_stinky_icc : public CreatureScript
 
             void EnterCombat(Unit* /*target*/)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : STINKY <!>");
                 DoCast(me, SPELL_PLAGUE_STENCH);
             }
 

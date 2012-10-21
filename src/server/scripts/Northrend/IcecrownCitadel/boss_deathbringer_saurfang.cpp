@@ -333,7 +333,6 @@ class boss_deathbringer_saurfang : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-				sLog->outError(" <!> LANCEMENT SCRIPT : SAURCROC <!>");
                 if (!instance->CheckRequiredBosses(DATA_DEATHBRINGER_SAURFANG, who->ToPlayer()))
                 {
                     EnterEvadeMode();

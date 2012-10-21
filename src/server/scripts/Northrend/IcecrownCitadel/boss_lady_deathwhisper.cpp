@@ -265,7 +265,6 @@ class boss_lady_deathwhisper : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : DamE MURMEMORT <!>");
                 if (!instance->CheckRequiredBosses(DATA_LADY_DEATHWHISPER, who->ToPlayer()))
                 {
                     EnterEvadeMode();

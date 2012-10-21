@@ -239,7 +239,6 @@ class boss_sindragosa : public CreatureScript
 
            void EnterCombat(Unit* victim)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : SINDRAGOSA <!>");
                 if (!instance->CheckRequiredBosses(DATA_SINDRAGOSA, victim->ToPlayer()))
                 {
                     EnterEvadeMode();

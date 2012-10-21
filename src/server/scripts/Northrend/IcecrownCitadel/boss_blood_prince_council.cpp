@@ -195,7 +195,6 @@ class boss_blood_council_controller : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-				sLog->outError(" <!> LANCEMENT SCRIPT : PRINCE DE SANG CONSEIL !!!<!>");
                 if (instance->GetBossState(DATA_BLOOD_PRINCE_COUNCIL) == IN_PROGRESS)
                     return;
 

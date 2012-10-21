@@ -7310,14 +7310,13 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
 
         if (summon->GetEntry() == 27893)
         {
-			summon->DespawnOrUnsummon(1);
-            //if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
-            //{
-            //    summon->SetDisplayId(11686);
-            //    summon->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
-            //}
-            //else
-            //    summon->SetDisplayId(1126);
+            if (uint32 weapon = m_caster->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID))
+            {
+                summon->SetDisplayId(11686);
+                summon->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, weapon);
+            }
+            else
+                summon->SetDisplayId(1126);
         }
 
         summon->AI()->EnterEvadeMode();

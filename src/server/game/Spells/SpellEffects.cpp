@@ -4202,13 +4202,12 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 if (pPet && m_caster->getVictim())
                 {
                     pPet->CastSpell(m_caster->getVictim(),m_spellInfo->Effects[EFFECT_2].CalcValue(),true);
-                    Aura *aur=m_caster->getVictim()->GetAura(m_spellInfo->Effects[EFFECT_2].CalcValue(),pPet->GetGUID());
-
-                    if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
-                    {
+                    if (Aura *aur=m_caster->getVictim()->GetAura(m_spellInfo->Effects[EFFECT_2].CalcValue(),pPet->GetGUID()))
+		      if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
+		      {
                         aur->SetMaxDuration(epidemic->GetAmount()+aur->GetMaxDuration());
                         aur->SetDuration(aur->GetMaxDuration());
-                    }
+		      }
                 }
 
                 break;

@@ -93,6 +93,8 @@ class spell_mage_cold_snap : public SpellScriptLoader
                 const SpellCooldowns& cm = caster->GetSpellCooldownMap();
                 for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
                 {
+		  if (sSpellMgr)
+		  {
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
                     if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
@@ -103,6 +105,9 @@ class spell_mage_cold_snap : public SpellScriptLoader
                     }
                     else
                         ++itr;
+		  }
+		  else
+		    ++itr;
                 }
             }
 

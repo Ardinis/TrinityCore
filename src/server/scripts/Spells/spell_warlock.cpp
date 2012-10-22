@@ -55,13 +55,15 @@ class spell_warl_demonic_empowerment : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_SUCCUBUS) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELGUARD) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELHUNTER) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_IMP))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_SUCCUBUS) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_VOIDWALKER) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELGUARD) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_FELHUNTER) || !sSpellMgr->GetSpellInfo(WARLOCK_DEMONIC_EMPOWERMENT_IMP))
                     return false;
                 return true;
             }
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 if (Creature* targetCreature = GetHitCreature())
                 {
                     if (targetCreature->isPet())
@@ -120,13 +122,15 @@ class spell_warl_create_healthstone : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R1) || !sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R2))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R1) || !sSpellMgr->GetSpellInfo(WARLOCK_IMPROVED_HEALTHSTONE_R2))
                     return false;
                 return true;
             }
 
             void HandleScriptEffect(SpellEffIndex effIndex)
             {
+	      if (!sSpellMgr)
+		return;
                 if (Unit* unitTarget = GetHitUnit())
                 {
                     uint32 rank = 0;
@@ -267,6 +271,8 @@ public:
         PrepareSpellScript(spell_warl_shadow_bite_SpellScript)
         bool Validate(SpellInfo const * /*spellEntry*/)
         {
+	  if (!sSpellMgr)
+	    return false;
             if (!sSpellMgr->GetSpellInfo(WARLOCK_FELHUNTER_SHADOWBITE_R1))
                 return false;
             if (!sSpellMgr->GetSpellInfo(WARLOCK_FELHUNTER_SHADOWBITE_R2))

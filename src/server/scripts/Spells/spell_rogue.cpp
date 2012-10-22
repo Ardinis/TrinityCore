@@ -45,7 +45,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(ROGUE_SPELL_CHEAT_DEATH_COOLDOWN))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(ROGUE_SPELL_CHEAT_DEATH_COOLDOWN))
                     return false;
                 return true;
             }
@@ -154,7 +154,7 @@ class spell_rog_preparation : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(ROGUE_SPELL_GLYPH_OF_PREPARATION))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(ROGUE_SPELL_GLYPH_OF_PREPARATION))
                     return false;
                 return true;
             }
@@ -163,6 +163,8 @@ class spell_rog_preparation : public SpellScriptLoader
             {
                 Player* caster = GetCaster()->ToPlayer();
 
+		if (!sSpellMgr)
+		  return;
                 //immediately finishes the cooldown on certain Rogue abilities
                 const SpellCooldowns& cm = caster->GetSpellCooldownMap();
                 for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
@@ -217,7 +219,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(ROGUE_SPELL_PREY_ON_THE_WEAK))
+            if (!sSpellMgr || !sSpellMgr->GetSpellInfo(ROGUE_SPELL_PREY_ON_THE_WEAK))
                 return false;
             return true;
         }
@@ -266,7 +268,7 @@ class spell_rog_shiv : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(ROGUE_SPELL_SHIV_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(ROGUE_SPELL_SHIV_TRIGGERED))
                     return false;
                 return true;
             }
@@ -319,7 +321,8 @@ class spell_rog_deadly_poison : public SpellScriptLoader
             {
                 if (_stackAmount < 5)
                     return;
-
+		if (!sSpellMgr)
+		  return;
                 Player* player = GetCaster()->ToPlayer();
 
                 if (Unit* target = GetHitUnit())

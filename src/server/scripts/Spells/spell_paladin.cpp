@@ -84,6 +84,8 @@ class spell_pal_ardent_defender : public SpellScriptLoader
             void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Unit* victim = GetTarget();
+		if (!victim || !aurEff || !victim->ToPlayer())
+		  return ;
                 int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
                 uint32 allowedHealth = victim->CountPctFromMaxHealth(35);
                 // If damage kills us

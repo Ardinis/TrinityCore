@@ -1880,6 +1880,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
         }
+    if (apply)
+    {
+      for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+      {
+	if (!GetSpellInfo() || !GetSpellInfo()->Effects[i].Effect || !GetSpellInfo()->Effects[i].ApplyAuraName)
+	  continue;
+	if (GetEffect(i))
+	{
+	  GetEffect(i)->SetDamageBonus(caster->SpellDamageBonus(target, m_spellInfo, GetEffect(i)->GetAmount(), DOT, GetStackAmount()) - GetEffect(i)->GetAmount());
+	  GetEffect(i)->SetHealingBonus(caster->SpellHealingBonus(target, GetSpellInfo(), GetEffect(i)->GetAmount(), DOT, GetStackAmount()) - GetEffect(i)->GetAmount());
+	}
+      }
+    }
+
 }
 
 

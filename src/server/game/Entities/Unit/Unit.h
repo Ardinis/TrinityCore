@@ -2022,7 +2022,8 @@ class Unit : public WorldObject
         int32 SpellBaseHealingBonusForVictim(SpellSchoolMask schoolMask, Unit* pVictim);
         uint32 SpellDamageBonus(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
         uint32 SpellDamageBonusDone(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
-	uint32 SpellDamageBonusTaken(SpellInfo const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);
+	uint32 SpellDamageBonusTaken(Unit *caster, SpellInfo const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);
+	int32 SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask);
 	float CalculateDefaultCoefficient(SpellInfo const *spellInfo, DamageEffectType damagetype);
 
         uint32 SpellHealingBonus(Unit* pVictim, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1);

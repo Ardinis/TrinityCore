@@ -6264,9 +6264,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     {
       //        damage = caster->SpellDamageBonus(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 	damage += damageBonus;
-	if (target)
-	  damage = target->SpellDamageBonusTaken(GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-
+	if (target && caster)
+	  damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
         {

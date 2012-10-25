@@ -59,7 +59,7 @@ class spell_hun_aspect_of_the_beast : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET))
                     return false;
                 return true;
             }
@@ -232,7 +232,7 @@ class spell_hun_invigoration : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_INVIGORATION_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_SPELL_INVIGORATION_TRIGGERED))
                     return false;
                 return true;
             }
@@ -268,7 +268,7 @@ class spell_hun_last_stand_pet : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_LAST_STAND_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_LAST_STAND_TRIGGERED))
                     return false;
                 return true;
             }
@@ -304,7 +304,7 @@ class spell_hun_masters_call : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellEntry)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_MASTERS_CALL_TRIGGERED) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_0].CalcValue()) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_1].CalcValue()))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_SPELL_MASTERS_CALL_TRIGGERED) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_0].CalcValue()) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_1].CalcValue()))
                     return false;
                 return true;
             }
@@ -369,6 +369,8 @@ class spell_hun_readiness : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 Player* caster = GetCaster()->ToPlayer();
                 // immediately finishes the cooldown on your other Hunter abilities except Bestial Wrath
                 const SpellCooldowns& cm = caster->ToPlayer()->GetSpellCooldownMap();
@@ -456,7 +458,7 @@ class spell_hun_sniper_training : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_R1) || !sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_BUFF_R1))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_R1) || !sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_BUFF_R1))
                     return false;
                 return true;
             }
@@ -464,6 +466,8 @@ class spell_hun_sniper_training : public SpellScriptLoader
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
+		if (!sSpellMgr)
+		  return;
                 if (aurEff->GetAmount() <= 0)
                 {
                     Unit* caster = GetCaster();
@@ -521,7 +525,7 @@ class spell_hun_pet_heart_of_the_phoenix : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED) || !sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED) || !sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF))
                     return false;
                 return true;
             }
@@ -568,7 +572,7 @@ class spell_hun_pet_carrion_feeder : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED))
                     return false;
                 return true;
             }

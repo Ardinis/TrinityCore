@@ -84,6 +84,8 @@ class spell_pal_ardent_defender : public SpellScriptLoader
             void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Unit* victim = GetTarget();
+		if (!victim || !aurEff || !victim->ToPlayer())
+		  return ;
                 int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
                 uint32 allowedHealth = victim->CountPctFromMaxHealth(35);
                 // If damage kills us
@@ -138,7 +140,7 @@ class spell_pal_blessing_of_faith : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_DRUID) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PALADIN) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PRIEST) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_SHAMAN))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_DRUID) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PALADIN) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PRIEST) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_SHAMAN))
                     return false;
                 return true;
             }
@@ -187,7 +189,7 @@ class spell_pal_blessing_of_sanctuary : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF))
                     return false;
                 return true;
             }
@@ -232,7 +234,7 @@ class spell_pal_guarded_by_the_light : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_DIVINE_PLEA))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_DIVINE_PLEA))
                     return false;
                 return true;
             }
@@ -266,6 +268,8 @@ class spell_pal_holy_shock : public SpellScriptLoader
             PrepareSpellScript(spell_pal_holy_shock_SpellScript)
             bool Validate(SpellInfo const* spellEntry)
             {
+	      if (!sSpellMgr)
+		return false;
                 if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_HOLY_SHOCK_R1))
                     return false;
 
@@ -282,6 +286,8 @@ class spell_pal_holy_shock : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 Unit* caster = GetCaster();
                 if (Unit* unitTarget = GetHitUnit())
                 {
@@ -327,6 +333,8 @@ class spell_pal_judgement_of_command : public SpellScriptLoader
             PrepareSpellScript(spell_pal_judgement_of_command_SpellScript)
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 if (Unit* unitTarget = GetHitUnit())
                     if (SpellInfo const* spell_proto = sSpellMgr->GetSpellInfo(GetEffectValue()))
                         GetCaster()->CastSpell(unitTarget, spell_proto, true, NULL);
@@ -356,7 +364,7 @@ public:
        PrepareAuraScript(spell_pal_sacred_shield_AuraScript)
        bool Validate(SpellInfo const* /*entry*/)
        {
-           if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_SACRED_SHIELD_EFFECT))
+           if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_SACRED_SHIELD_EFFECT))
                return false;
            return true;
        }
@@ -391,7 +399,7 @@ class spell_pal_righteous_defense : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_RIGHTEOUS_DEFENCE))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_RIGHTEOUS_DEFENCE))
                     return false;
                 return true;
             }
@@ -428,7 +436,7 @@ class spell_pal_divine_storm : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /* spell */)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_DUMMY))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_DUMMY))
                     return false;
                 return true;
             }
@@ -468,7 +476,7 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /* spell */)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_HEAL))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_HEAL))
                     return false;
                 return true;
             }

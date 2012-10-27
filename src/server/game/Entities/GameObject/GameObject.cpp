@@ -1924,7 +1924,8 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
 void GameObject::SetLootState(LootState state, Unit* unit)
 {
     m_lootState = state;
-    AI()->OnStateChanged(state, unit);
+    if (AI())
+      AI()->OnStateChanged(state, unit);
     if (m_model)
     {
         // startOpen determines whether we are going to add or remove the LoS on activation

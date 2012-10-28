@@ -4590,10 +4590,18 @@ void Spell::TakeRunePower(bool didHit)
 	RuneType rune = player->GetCurrentRune(i);
 	if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
 	{
-	  player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+	  uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
+	  if (didHit)
+	  {
+	    cooldownRunes = player->GetRuneBaseCooldown(i);
+	    if (player->reduceRuneCoolDown[i])
+	      if (time(0) - player->m_reduceCoolDown[i] < 3)
+		cooldownRunes -= 2000;
+	    player->reduceRuneCoolDown[i] = false;
+	  }
+	  player->SetRuneCooldown(i, cooldownRunes);
 	  player->SetLastUsedRune(rune);
 	  runeCost[rune]--;
-
 	  // keep Death Rune type if missed
 	  if (didHit)
 	    player->RestoreBaseRune(i);

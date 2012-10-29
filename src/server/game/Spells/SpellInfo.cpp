@@ -2561,3 +2561,32 @@ bool SpellInfo::_IsPositiveTarget(uint32 targetA, uint32 targetB)
         return _IsPositiveTarget(targetB, 0);
     return true;
 }
+
+uint32 SpellInfo::GetMaxTicks() const
+{
+  int32 DotDuration = GetDuration();
+  if (DotDuration == 0)
+    return 1;
+
+  // 200% limit
+  if (DotDuration > 30000)
+    DotDuration = 30000;
+
+  uint8 x = 0;
+  for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+  {
+    if (Effects[j].Effect == SPELL_EFFECT_APPLY_AURA && (
+            Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
+            Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_HEAL ||
+            Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_LEECH))
+    {
+      x = j;
+      break;
+    }
+  }
+
+  if (Effects[x].Amplitude != 0)
+    return DotDuration / Effects[x].Amplitude;
+
+  return 6;
+}

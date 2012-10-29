@@ -550,7 +550,7 @@ public:
         Map* map = go->GetMap();
         if (!map->IsDungeon())
             return true;
-d
+
         Map::PlayerList const &PlayerList = map->GetPlayers();
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         {

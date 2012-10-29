@@ -140,9 +140,9 @@ public:
         return new boss_reliquary_of_soulsAI (creature);
     }
 
-    struct boss_reliquary_of_soulsAI : public ScriptedAI
+    struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
     {
-        boss_reliquary_of_soulsAI(Creature* c) : ScriptedAI(c)
+        boss_reliquary_of_soulsAI(Creature* c) : Scripted_NoMovementAI(c)
         {
             instance = c->GetInstanceScript();
             EssenceGUID = 0;

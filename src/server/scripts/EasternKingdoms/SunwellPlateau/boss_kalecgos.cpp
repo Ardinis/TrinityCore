@@ -60,6 +60,7 @@ enum Spells
     AURA_SPECTRAL_INVISIBILITY                   = 44801,
     AURA_DEMONIC_VISUAL                          = 44800,
 
+    SPELL_SPECTRAL_BLAST_PORTAL                         = 44866,
     SPELL_SPECTRAL_BLAST                         = 44869,
     SPELL_TELEPORT_SPECTRAL                      = 46019,
     SPELL_ARCANE_BUFFET                          = 45018,
@@ -317,7 +318,10 @@ public:
                     advance(i, rand()%targetList.size());
                     if ((*i))
                     {
-                        (*i)->CastSpell((*i), SPELL_SPECTRAL_BLAST, true);
+		      //SPELL_SPECTRAL_BLAST
+		      me->CastSpell((*i), SPELL_SPECTRAL_BLAST_PORTAL);
+		      //                        (*i)->CastSpell((*i), SPELL_TELEPORT_SPECTRAL, true);
+		      //		(*i)->CastSpell((*i), AURA_SPECTRAL_EXHAUSTION, true);
                         SpectralBlastTimer = 20000+rand()%5000;
                     } else SpectralBlastTimer = 1000;
                 } else SpectralBlastTimer -= diff;
@@ -546,7 +550,7 @@ public:
         Map* map = go->GetMap();
         if (!map->IsDungeon())
             return true;
-
+d
         Map::PlayerList const &PlayerList = map->GetPlayers();
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         {
@@ -607,8 +611,8 @@ public:
             }
             if (KalecGUID)
             {
-                if (Creature* Kalec = Unit::GetCreature(*me, KalecGUID))
-                    Kalec->setDeathState(JUST_DIED);
+	      if (Creature* Kalec = me->FindNearestCreature(MOB_KALEC, 100, true))
+		Kalec->setDeathState(JUST_DIED);
                 KalecGUID = 0;
             }
 
@@ -626,7 +630,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
-            if (Creature* Kalec = me->SummonCreature(MOB_KALEC, me->GetPositionX() + 10, me->GetPositionY() + 5, me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 0))
+            if (Creature* Kalec = me->SummonCreature(MOB_KALEC, me->GetPositionX() + 10, me->GetPositionY() + 5, me->GetPositionZ(), 0))
             {
                 KalecGUID = Kalec->GetGUID();
                 me->CombatStart(Kalec);
@@ -712,7 +716,7 @@ public:
 
             if (CheckTimer <= diff)
             {
-                Creature* Kalec = Unit::GetCreature(*me, KalecGUID);
+	      Creature* Kalec = me->FindNearestCreature(MOB_KALEC, 100, true);
                 if (!Kalec || (Kalec && !Kalec->isAlive()))
                 {
                     if (Creature* Kalecgos = Unit::GetCreature(*me, KalecgosGUID))

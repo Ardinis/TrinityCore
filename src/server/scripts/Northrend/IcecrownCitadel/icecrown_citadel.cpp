@@ -1266,10 +1266,10 @@ class npc_crok_scourgebane : public CreatureScript
             {
                 SetDespawnAtEnd(false);
                 SetDespawnAtFar(false);
-                _isEventActive = false;
                 _isEventDone = _instance->GetBossState(DATA_SISTER_SVALNA) == DONE;
                 _didUnderTenPercentText = false;
 		me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+		Reset();
             }
 
             void Reset()
@@ -1281,7 +1281,37 @@ class npc_crok_scourgebane : public CreatureScript
 	      me->SetReactState(REACT_DEFENSIVE);
 	      _didUnderTenPercentText = false;
 	      _wipeCheckTimer = 1000;
+	      me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	      _aliveTrash.clear();
+	      me->GetMap()->LoadGrid(4356.71f, 2484.33f);
+	      std::list<Creature*> temp;
+	      FrostwingVrykulSearcher check(me, 900.0f);
+	      Trinity::CreatureListSearcher<FrostwingVrykulSearcher> searcher(me, temp, check);
+	      me->VisitNearbyGridObject(900.0f, searcher);
+	      float minY = 2484.0f;
+	      float maxY = 2673.0f;
+	      for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+	      {
+		if ((*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
+		{
+		  (*itr)->Respawn();
+		  (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+		  (*itr)->SetReactState(REACT_PASSIVE);
+		}
+	      }
+	      _isEventActive = false;
+                    _isEventDone = _instance->GetBossState(DATA_SISTER_SVALNA) == DONE;
+                    me->setActive(false);
+                    _aliveTrash.clear();
+                    _currentWPid = 0;
+	      me->SetReactState(REACT_PASSIVE);
             }
+
+	  void JustDied(Unit* /*killer*/)
+	  {
+	    me->Respawn();
+	    Reset();
+	  }
 
             void DoAction(int32 const action)
             {
@@ -1302,8 +1332,11 @@ class npc_crok_scourgebane : public CreatureScript
                     _events.ScheduleEvent(EVENT_START_PATHING, 37000);
                     me->setActive(true);
                     for (uint32 i = 0; i < 4; ++i)
-                        if (Creature* crusader = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_CAPTAIN_ARNATH + i)))
-                            crusader->AI()->DoAction(ACTION_START_GAUNTLET);
+		      if (Creature* crusader = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_CAPTAIN_ARNATH + i)))
+		      {
+			crusader->AI()->DoAction(ACTION_START_GAUNTLET);
+			crusader->Respawn();
+		      }
                 }
                 else if (action == ACTION_RESET_EVENT)
                 {
@@ -1341,6 +1374,7 @@ class npc_crok_scourgebane : public CreatureScript
                 {
                     // pause pathing until trash pack is cleared
                     case 0:
+		      me->SetReactState(REACT_AGGRESSIVE);
                         Talk(SAY_CROK_COMBAT_WP_0);
                         if (!_aliveTrash.empty())
                             SetEscortPaused(true);
@@ -1399,8 +1433,12 @@ class npc_crok_scourgebane : public CreatureScript
 
                         _aliveTrash.clear();
                         for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
-                            if ((*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
-                                _aliveTrash.insert((*itr)->GetGUID());
+			  if ((*itr)->isAlive() && (*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
+			  {
+			    (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+			    (*itr)->SetReactState(REACT_AGGRESSIVE);
+			    _aliveTrash.insert((*itr)->GetGUID());
+			  }
                         break;
                     }
                     // at waypoints 1 and 2 she kills one captain

@@ -324,6 +324,21 @@ public:
             if (me->HasUnitState(UNIT_STATE_CASTING))
               return;
 
+            if (HealthBelowPct(30) && m_uiStage == 0 && !m_bReachedPhase3)
+            {
+                m_bReachedPhase3 = true;
+                DoCastAOE(SPELL_LEECHING_SWARM);
+                DoScriptText(EMOTE_LEECHING_SWARM, me);
+                DoScriptText(SAY_LEECHING_SWARM, me);
+		return ;
+            }
+
+            if (m_uiBerserkTimer <= uiDiff && !me->HasAura(SPELL_BERSERK))
+            {
+                DoCast(me, SPELL_BERSERK);
+		return;
+            } else m_uiBerserkTimer -= uiDiff;
+
             switch (m_uiStage)
             {
                 case 0:
@@ -431,19 +446,6 @@ public:
                     m_uiSummonFrostSphereTimer = urand(20, 30)*IN_MILLISECONDS;
                 } else m_uiSummonFrostSphereTimer -= uiDiff;
             }
-
-            if (HealthBelowPct(30) && m_uiStage == 0 && !m_bReachedPhase3)
-            {
-                m_bReachedPhase3 = true;
-                DoCastAOE(SPELL_LEECHING_SWARM);
-                DoScriptText(EMOTE_LEECHING_SWARM, me);
-                DoScriptText(SAY_LEECHING_SWARM, me);
-            }
-
-            if (m_uiBerserkTimer <= uiDiff && !me->HasAura(SPELL_BERSERK))
-            {
-                DoCast(me, SPELL_BERSERK);
-            } else m_uiBerserkTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }

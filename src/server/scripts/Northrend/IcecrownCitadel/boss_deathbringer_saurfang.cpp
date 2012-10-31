@@ -319,6 +319,7 @@ class boss_deathbringer_saurfang : public CreatureScript
             void Reset()
             {
                 _Reset();
+                events.Reset();
                 events.SetPhase(PHASE_COMBAT);
                 _frenzied = false;
                 me->SetPower(POWER_ENERGY, 0);
@@ -330,6 +331,11 @@ class boss_deathbringer_saurfang : public CreatureScript
                 me->RemoveAurasDueToSpell(SPELL_BERSERK);
                 me->RemoveAurasDueToSpell(SPELL_FRENZY);
 		me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
+                events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 40000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_BOILING_BLOOD, 15500, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_BLOOD_NOVA, 17000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, 3000, 0, PHASE_COMBAT);
             }
 
             void EnterCombat(Unit* who)
@@ -609,6 +615,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
                             Talk(SAY_BERSERK);
+			    events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
                             break;
                         default:
                             break;

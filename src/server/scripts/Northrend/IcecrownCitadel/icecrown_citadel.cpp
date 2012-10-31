@@ -2008,9 +2008,11 @@ class npc_impaling_spear : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-      if (Player *pl2 = creature->FindNearestPlayer(2))
-	if (pl2->GetGUID() == player->GetGUID())
-	  return false;
+      if (creature->ToTempSummon())
+	if (Unit *p = creature->ToTempSummon()->GetSummoner())
+	  if (Player *pl2 = p->ToPlayer())
+	    if (pl2->GetGUID() == player->GetGUID())
+	      return false;
       player->AddItem(50307, 1);
       creature->DespawnOrUnsummon(100);
       return true;

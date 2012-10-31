@@ -718,7 +718,7 @@ class npc_blood_beast : public CreatureScript
 	      mui_freeze = 3000;
 	      defreeze = false;
 	      me->SetReactState(REACT_PASSIVE);
-	      mui_freeze2 = 3000;
+	      mui_freeze2 = 2000;
 	  }
 
 	  void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
@@ -764,9 +764,10 @@ class npc_blood_beast : public CreatureScript
 		    me->DeleteThreatList();
 		    me->SetInCombatWith(target);
 		    target->SetInCombatWith(me);
-		    DoStartMovement(target);
+		    //		    DoStartMovement(target);
+		  me->AI()->AttackStart(target);
 		    me->AddThreat(target, 100000000.0f * 9.0f);
-		    mui_freeze2 = 3000;
+		    mui_freeze2 = 2000;
 		  }
 		  defreeze = true;
 		}
@@ -781,7 +782,8 @@ class npc_blood_beast : public CreatureScript
 		  me->DeleteThreatList();
 		  me->SetInCombatWith(target);
 		  target->SetInCombatWith(me);
-		  DoStartMovement(target);
+		  me->AI()->AttackStart(target);
+		  //  DoStartMovement(target);
 		  me->AddThreat(target, 100000000.0f * 9.0f);
 		}
 	      }

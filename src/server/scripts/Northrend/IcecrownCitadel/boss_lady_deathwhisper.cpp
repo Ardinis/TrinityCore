@@ -229,6 +229,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
                 events.SetPhase(PHASE_ONE);
                 _waveCounter = 0;
+		_shaderCount = 0;
                 _nextVengefulShadeTargetGUID = 0;
                 _darnavanGUID = 0;
                 DoCast(me, SPELL_SHADOW_CHANNELING);
@@ -342,6 +343,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, FAIL);
 
                 summons.DespawnAll();
+		_shaderCount = 0;
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))
                 {
                     darnavan->DespawnOrUnsummon();
@@ -478,13 +480,25 @@ class boss_lady_deathwhisper : public CreatureScript
                             events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(9000, 13000), 0, PHASE_TWO);
                             break;
                         case EVENT_P2_SUMMON_SHADE:
+			{
                             if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
                             {
                                 _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
                                 DoCast(shadeTarget, SPELL_SUMMON_SHADE);
                             }
-                            events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(18000, 23000), 0, PHASE_TWO);
+			    int shaderCount = RAID_MODE(1, 2, 1, 3);
+			    if (_shaderCount + 1 < shaderCount)
+			    {
+			      _shaderCount++;
+			      events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, 100, 0, PHASE_TWO);
+			    }
+			    else
+			    {
+			      _shaderCount = 0;
+			      events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(10000, 13000), 0, PHASE_TWO);
+			    }
                             break;
+			}
                         case EVENT_P2_SUMMON_WAVE:
                             SummonWaveP2();
                             events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, 45000, 0, PHASE_TWO);
@@ -619,6 +633,7 @@ class boss_lady_deathwhisper : public CreatureScript
             uint32 _waveCounter;
             uint8 const _dominateMindCount;
             bool _introDone;
+	  int _shaderCount;
         };
 
         CreatureAI* GetAI(Creature* creature) const

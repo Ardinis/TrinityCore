@@ -5607,6 +5607,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     else
                         ++iter;
                 }
+		// prepare fix for Judgment of Light
                 if (spellId1)
                     m_caster->CastSpell(unitTarget, spellId1, true);
                 if (spellId2)

@@ -78,7 +78,7 @@ enum BossSpells
     SPELL_MISTRESS_KISS         = 66336,
     SPELL_FEL_INFERNO           = 67047,
     SPELL_FEL_STREAK            = 66494,
-    SPELL_LORD_HITTIN                 = 66326, 
+    SPELL_LORD_HITTIN                 = 66326,
     SPELL_BERSERK               = 64238,
 };
 
@@ -576,7 +576,8 @@ public:
             if (IsHeroic() && m_uiMistressKissTimer <= uiDiff)
             {
 	      if (Unit* target = SelectEnemyCaster(false))
-                    DoCast(target, SPELL_MISTRESS_KISS);
+		me->CastCustomSpell(SPELL_MISTRESS_KISS, SPELLVALUE_MAX_TARGETS, 1, target, true);
+	      //                    DoCast(target, SPELL_MISTRESS_KISS);
                 m_uiMistressKissTimer = 30*IN_MILLISECONDS;
             } else m_uiMistressKissTimer -= uiDiff;
 

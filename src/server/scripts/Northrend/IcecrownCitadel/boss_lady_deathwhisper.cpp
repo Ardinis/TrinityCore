@@ -400,8 +400,11 @@ class boss_lady_deathwhisper : public CreatureScript
                     target = SelectTarget(SELECT_TARGET_RANDOM);                        // Wave adds
 
                 summon->AI()->AttackStart(target);                                      // CAN be NULL
-		if (summon->GetEntry() == NPC_VENGEFUL_SHAD)
+		if (summon->GetEntry() == NPC_VENGEFUL_SHADE)
+		{
+		  summon->SetReactState(REACT_PASSIVE);
 		  summon->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+		}
 		if (summon->GetEntry() == NPC_REANIMATED_FANATIC)
                     summon->AI()->DoCast(summon, SPELL_FANATIC_S_DETERMINATION);
                 else if (summon->GetEntry() == NPC_REANIMATED_ADHERENT)

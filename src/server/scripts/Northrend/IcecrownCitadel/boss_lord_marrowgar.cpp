@@ -105,7 +105,7 @@ class boss_lord_marrowgar : public CreatureScript
                 me->RemoveAurasDueToSpell(SPELL_BONE_STORM);
                 me->RemoveAurasDueToSpell(SPELL_BERSERK);
                 events.ScheduleEvent(EVENT_ENABLE_BONE_SLICE, 10000);
-                events.ScheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(10000, 15000), EVENT_GROUP_SPECIAL);
+                events.ScheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(12000, 15000), EVENT_GROUP_SPECIAL);
                 events.ScheduleEvent(EVENT_COLDFLAME, 5000, EVENT_GROUP_SPECIAL);
                 events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(45000, 50000));
                 events.ScheduleEvent(EVENT_ENRAGE, 600000);

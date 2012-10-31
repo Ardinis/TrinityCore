@@ -108,6 +108,7 @@ class boss_festergut : public CreatureScript
                         gasDummy->RemoveAurasDueToSpell(gaseousBlightVisual[i]);
                     }
                 }
+		_gazSpore = 0;
             }
 
             void EnterCombat(Unit* who)
@@ -142,6 +143,7 @@ class boss_festergut : public CreatureScript
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_FESTERGUT, FAIL);
+		_gazSpore = 0;
             }
 
             void EnterEvadeMode()
@@ -228,8 +230,17 @@ class boss_festergut : public CreatureScript
                         case EVENT_GAS_SPORE:
                             Talk(EMOTE_WARN_GAS_SPORE);
                             Talk(EMOTE_GAS_SPORE);
-                            me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 3, 2, 3), me);
-                            events.ScheduleEvent(EVENT_GAS_SPORE, urand(40000, 45000));
+                            me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, 1, me, -SPELL_GAS_SPORE);
+			    if (_gazSpore <  RAID_MODE<int32>(1, 2, 1, 2))
+			    {
+			      events.ScheduleEvent(EVENT_GAS_SPORE, 200);
+			      _gazSpore++;
+			    }
+			    else
+			    {
+			      _gazSpore = 0;
+			      events.ScheduleEvent(EVENT_GAS_SPORE, urand(40000, 45000));
+			    }
                             events.RescheduleEvent(EVENT_VILE_GAS, urand(28000, 35000));
                             break;
                         case EVENT_GASTRIC_BLOAT:
@@ -276,6 +287,7 @@ class boss_festergut : public CreatureScript
             uint64 _gasDummyGUID;
             uint32 _maxInoculatedStack;
             uint32 _inhaleCounter;
+	  int _gazSpore;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -450,10 +462,16 @@ class spell_festergut_blighted_spores : public SpellScriptLoader
 
             void ExtraEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                GetTarget()->CastSpell(GetTarget(), SPELL_INOCULATED, true);
-                if (InstanceScript* instance = GetTarget()->GetInstanceScript())
-                    if (Creature* festergut = ObjectAccessor::GetCreature(*GetTarget(), instance->GetData64(DATA_FESTERGUT)))
-                        festergut->AI()->SetData(DATA_INOCULATED_STACK, GetStackAmount());
+	      //	std::cout << "thats good !" << std::endl;
+	      if (GetTarget()->ToPlayer())
+		if (GetTarget()->ToPlayer()->HasSpellCooldown(SPELL_INOCULATED))
+		  return ;
+	      GetTarget()->CastSpell(GetTarget(), SPELL_INOCULATED, true);
+	      if (GetTarget()->ToPlayer())
+		GetTarget()->ToPlayer()->AddSpellCooldown(SPELL_INOCULATED, 0, uint32 (time(NULL) + 3));
+	      if (InstanceScript* instance = GetTarget()->GetInstanceScript())
+		if (Creature* festergut = ObjectAccessor::GetCreature(*GetTarget(), instance->GetData64(DATA_FESTERGUT)))
+		  festergut->AI()->SetData(DATA_INOCULATED_STACK, GetStackAmount());
             }
 
             void Register()

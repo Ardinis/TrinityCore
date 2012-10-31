@@ -203,9 +203,24 @@ class mob_corrupted_soul_fragment : public CreatureScript
                 instance = me->GetInstanceScript();
             }
 
+	  void InitializeAI()
+	  {
+            if (instance)
+            {
+	      uint64 BronjahmGUID = instance->GetData64(DATA_BRONJAHM);
+	      if (Creature* Bronjahm = Unit::GetCreature(*me, BronjahmGUID))
+	      {
+		me->SetReactState(REACT_PASSIVE);
+		me->GetMotionMaster()->Clear();
+		me->GetMotionMaster()->MoveFollow(Bronjahm, Bronjahm->GetObjectSize(), 0.0f);
+	      }
+
+            }
+	  }
+
             void MovementInform(uint32 type, uint32 id)
             {
-                if (type != CHASE_MOTION_TYPE)
+                if (type == CHASE_MOTION_TYPE)
                     return;
 
                 if (instance)
@@ -280,7 +295,14 @@ class spell_bronjahm_consume_soul : public SpellScriptLoader
             void HandleScript(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                GetHitUnit()->CastSpell(GetHitUnit(), GetEffectValue(), true);
+		if ( GetCaster()->GetMap()->GetSpawnMode() == 1) // heroic
+		{
+		  GetHitUnit()->CastSpell(GetHitUnit(), 69047, true); //use heroic heal instead
+		}
+		else
+		{
+		  GetHitUnit()->CastSpell(GetHitUnit(), GetEffectValue(), true); //use one from script
+		}
             }
 
             void Register()

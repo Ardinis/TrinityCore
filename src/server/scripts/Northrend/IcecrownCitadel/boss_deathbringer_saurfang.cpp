@@ -358,7 +358,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 _introDone = true;
 
                 Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 30000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 40000, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BOILING_BLOOD, 15500, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BLOOD_NOVA, 17000, 0, PHASE_COMBAT);
@@ -418,10 +418,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
 
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
-                    summon->AI()->AttackStart(target);
-
-                if (IsHeroic())
+	       if (IsHeroic())
                 {
                     summon->AddAura(SPELL_SCENT_OF_BLOOD_TRIGGERED,summon);
 					std::list<Unit*> playerList;
@@ -716,23 +713,88 @@ class npc_blood_beast : public CreatureScript
 				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
             }
 
+	  void Reset()
+	  {
+	      mui_freeze = 3000;
+	      defreeze = false;
+	      me->SetReactState(REACT_PASSIVE);
+	      mui_freeze2 = 3000;
+	  }
+
 	  void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
 	  {
 	    //place for fix blood beast damage
+
 	  }
 
             void IsSummonedBy(Unit* summoner)
             {
             }
 
+	  Unit* SelectEnemyCaster()
+	  {
+	    Map::PlayerList const &tList = me->GetMap()->GetPlayers();
+	    Map::PlayerList::const_iterator iter;
+
+            Unit* target;
+            for (iter = tList.begin(); iter!=tList.end(); ++iter)
+            {
+	      target = iter->getSource();
+	      if (target && target->getPowerType() == POWER_MANA && target->isAlive() && me->GetDistance2d(target->GetPositionX(), target->GetPositionY()) > 12.0f)
+		return target;
+	    }
+	    for (iter = tList.begin(); iter!=tList.end(); ++iter)
+            {
+	      target = iter->getSource();
+              if (target && target->getPowerType() == POWER_MANA && target->isAlive())
+                return target;
+            }
+	    return SelectTarget(SELECT_TARGET_RANDOM);
+	  }
+
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+	      if (!defreeze)
+	      {
+		if (mui_freeze <= diff)
+		{
+		  me->SetReactState(REACT_AGGRESSIVE);
+		  if (target = SelectEnemyCaster())
+		  {
+		    me->DeleteThreatList();
+		    me->SetInCombatWith(target);
+		    target->SetInCombatWith(me);
+		    DoStartMovement(target);
+		    me->AddThreat(target, 100000000.0f * 9.0f);
+		    mui_freeze2 = 3000;
+		  }
+		  defreeze = true;
+		}
+		else
+		  mui_freeze -= diff;
+	      }
+	      else
+	      {
+		if (mui_freeze2 > diff)
+		{
+		  mui_freeze2 -= diff;
+		  me->DeleteThreatList();
+		  me->SetInCombatWith(target);
+		  target->SetInCombatWith(me);
+		  DoStartMovement(target);
+		  me->AddThreat(target, 100000000.0f * 9.0f);
+		}
+	      }
 
-				DoMeleeAttackIfReady();
+	      DoMeleeAttackIfReady();
             }
 
+	private :
+
+	  Unit* target;
+	  uint32 mui_freeze;
+	  uint32 mui_freeze2;
+	  bool defreeze;
             };
 
             CreatureAI* GetAI(Creature* creature) const

@@ -55,6 +55,7 @@ enum Spells
 // Used for HasAura checks
 #define PUNGENT_BLIGHT_HELPER RAID_MODE<uint32>(69195, 71219, 73031, 73032)
 #define INOCULATED_HELPER     RAID_MODE<uint32>(69291, 72101, 72102, 72103)
+#define BILLI                 RAID_MODE<uint32>(69290, 71222, 73033, 73034)
 
 uint32 const gaseousBlight[3]        = {69157, 69162, 69164};
 uint32 const gaseousBlightVisual[3]  = {69126, 69152, 69154};
@@ -230,7 +231,9 @@ class boss_festergut : public CreatureScript
                         case EVENT_GAS_SPORE:
                             Talk(EMOTE_WARN_GAS_SPORE);
                             Talk(EMOTE_GAS_SPORE);
-                            me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, 1, me, -SPELL_GAS_SPORE);
+			    me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 3, 2, 3), me);
+			    /*                            me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, 1, me, -SPELL_GAS_SPORE);
+
 			    if (_gazSpore <  RAID_MODE<int32>(1, 2, 1, 2))
 			    {
 			      events.ScheduleEvent(EVENT_GAS_SPORE, 200);
@@ -240,7 +243,8 @@ class boss_festergut : public CreatureScript
 			    {
 			      _gazSpore = 0;
 			      events.ScheduleEvent(EVENT_GAS_SPORE, urand(40000, 45000));
-			    }
+			      }*/
+			    events.ScheduleEvent(EVENT_GAS_SPORE, urand(40000, 45000));
                             events.RescheduleEvent(EVENT_VILE_GAS, urand(28000, 35000));
                             break;
                         case EVENT_GASTRIC_BLOAT:
@@ -462,10 +466,30 @@ class spell_festergut_blighted_spores : public SpellScriptLoader
 
             void ExtraEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-	      //	std::cout << "thats good !" << std::endl;
 	      if (GetTarget()->ToPlayer())
 		if (GetTarget()->ToPlayer()->HasSpellCooldown(SPELL_INOCULATED))
+		{
+		  uint32 spellids = 0;
+		  uint32 maxAura = 3;
+		  if (GetTarget()->ToPlayer()->GetAura(69290))
+		  {
+		    maxAura = 2;
+		    spellids = 69290;
+		  }
+		  if (GetTarget()->ToPlayer()->GetAura(71222))
+		    spellids = 71222;
+		  if (GetTarget()->ToPlayer()->GetAura(73033))
+		  {
+		    maxAura = 2;
+		    spellids = 73033;
+		  }
+		  if (GetTarget()->ToPlayer()->GetAura(73034))
+		    spellids = 73034;
+		  uint32 nbStack = GetTarget()->ToPlayer()->GetAura(spellids)->GetStackAmount() + 1;
+		  if (GetTarget()->ToPlayer()->GetAura(spellids) && nbStack <= maxAura)
+		    GetTarget()->ToPlayer()->SetAuraStack(spellids, GetTarget()->ToPlayer(),  GetTarget()->ToPlayer()->GetAura(spellids)->GetStackAmount() + 1);
 		  return ;
+		}
 	      GetTarget()->CastSpell(GetTarget(), SPELL_INOCULATED, true);
 	      if (GetTarget()->ToPlayer())
 		GetTarget()->ToPlayer()->AddSpellCooldown(SPELL_INOCULATED, 0, uint32 (time(NULL) + 3));

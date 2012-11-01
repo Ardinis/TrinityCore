@@ -1518,6 +1518,8 @@ class npc_combustion_consumption : public CreatureScript
         }
 };
 
+#define SPELL_DAMAGE_BUFF 64036
+
 class npc_living_inferno : public CreatureScript
 {
     public:
@@ -1525,7 +1527,15 @@ class npc_living_inferno : public CreatureScript
 
         struct npc_living_infernoAI : public ScriptedAI
         {
-            npc_living_infernoAI(Creature* creature) : ScriptedAI(creature) { }
+	  npc_living_infernoAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+
+	  void Reset()
+	  {
+	    CheckInterval = 2000;
+	    instance = me->GetInstanceScript();
+
+	  }
 
             void JustSummoned(Creature* /*summoner*/)
             {
@@ -1533,8 +1543,29 @@ class npc_living_inferno : public CreatureScript
 		  me->DespawnOrUnsummon();
                 me->SetInCombatWithZone();
                 DoCast(me, SPELL_BLAZING_AURA);
-		//DoZoneInCombat
             }
+
+	  void UpdateAI(uint32 const diff)
+	  {
+	    if (instance && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
+	      me->DespawnOrUnsummon();
+
+	    if (CheckInterval <= diff)
+	    {
+	      if (Creature *c = me->FindNearestCreature(40683, 10, true))
+	      {
+		me->CastSpell(me, 75886, true);
+		if (me->GetAura(75886))
+		  me->SetAuraStack(SPELL_DAMAGE_BUFF, me,  me->GetAura(75886)->GetStackAmount());
+	      }
+	      CheckInterval = 2000;
+	    }
+	    else CheckInterval -= diff;
+	  }
+
+	private:
+	  uint32 CheckInterval;
+	  InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1555,7 +1586,7 @@ class npc_living_ember : public CreatureScript
 
             void Reset()
             {
-	      //		if (!Is25ManRaid())
+	      if (!Is25ManRaid() && !IsHeroic())
 		  me->DespawnOrUnsummon();
                 _hasEnraged = false;
 		CheckInterval = 2000;
@@ -1583,8 +1614,6 @@ class npc_living_ember : public CreatureScript
 
 		if (CheckInterval <= diff)
 		  {
-		    if (Creature *c = me->FindNearestCreature(40681, 15, true))
-		      c->CastSpell(c, 75886, true);
 		    me->RemoveAura(75888);
 		    CheckInterval = 2000;
 		  }

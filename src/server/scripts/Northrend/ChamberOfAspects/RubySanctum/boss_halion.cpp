@@ -366,6 +366,8 @@ class boss_halion : public CreatureScript
 		instance->SetData(DATA_HALION_REAL_DAMAGED_INIT, 0);
 		instance->SetData(DATA_HALION_TWILIGHT_DAMAGED_INIT, 0);
 		instance->SetData(DATA_CORPO, NOT_STARTED);
+		mui_switchPhase1 = 3600000;
+		switchPhase = false;
             }
 
             void EnterCombat(Unit* who)
@@ -406,23 +408,18 @@ class boss_halion : public CreatureScript
                 _JustReachedHome();
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
                     controller->AI()->Reset();
+		mui_switchPhase1 = 3600000;
+		switchPhase = false;
             }
 
             Position const* GetMeteorStrikePosition() const { return &_meteorStrikePos; }
 
 	  void DamageTaken(Unit* /*attacker*/, uint32& damage, SpellInfo const* spellInfo)
             {
-                if (me->HealthBelowPctDamaged(75, damage) && (events.GetPhaseMask() & PHASE_ONE_MASK))
+                if (!switchPhase && me->HealthBelowPctDamaged(75, damage) && (events.GetPhaseMask() & PHASE_ONE_MASK))
                 {
-                    events.SetPhase(PHASE_TWO);
-                    events.DelayEvents(2600); // 2.5 sec + 0.1 sec lag
-
-                    Talk(SAY_PHASE_TWO);
-                    DoCast(me, SPELL_TWILIGHT_PHASING);
-
-                    if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
-                        controller->AI()->SetData(DATA_FIGHT_PHASE, PHASE_TWO);
-
+		  switchPhase = true;
+		  mui_switchPhase1 = 500;
                     return;
                 }
 
@@ -451,8 +448,26 @@ class boss_halion : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+	      if (me->HasUnitState(UNIT_STATE_CASTING))
+		return ;
+
                 if (events.GetPhaseMask() & PHASE_TWO_MASK)
                     return;
+
+		if (mui_switchPhase1 <= diff)
+		{
+                    events.SetPhase(PHASE_TWO);
+                    events.DelayEvents(2600); // 2.5 sec + 0.1 sec lag
+
+                    Talk(SAY_PHASE_TWO);
+                    DoCast(me, SPELL_TWILIGHT_PHASING);
+
+                    if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
+                        controller->AI()->SetData(DATA_FIGHT_PHASE, PHASE_TWO);
+		    mui_switchPhase1 = 3600000;
+		    return ;
+		}
+		else  mui_switchPhase1 -= diff;
 
                 generic_halionAI::UpdateAI(diff);
             }
@@ -524,7 +539,10 @@ class boss_halion : public CreatureScript
             }
 
         private:
-            Position _meteorStrikePos;
+
+	  Position _meteorStrikePos;
+	  bool switchPhase;
+	  uint32 mui_switchPhase1;
 
         };
 
@@ -1125,19 +1143,28 @@ class npc_orb_carrier : public CreatureScript
 	    Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
 	    Position pos;
 	    Position posEnd;
+	    Position posMid;
 	    if (southOrb && northOrb)
 	      {
 		northOrb->GetPosition(&pos);
 		southOrb->GetPosition(&posEnd);
+		me->GetPosition(&posMid);
 		if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
 		  return;
 		if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
 		    southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
+		{
 		  if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
 		    {
 		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posEnd, 30);
+		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
 		    }
+		  if (Creature* orbDamage = me->SummonCreature(8852000, posEnd.GetPositionX(), posEnd.GetPositionY(), posEnd.GetPositionZ() + 5, posEnd.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
+		    {
+		      orbDamage->SetFlying(false);
+		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
+		    }
+		}
 	      }
 	  }
 

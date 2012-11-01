@@ -159,6 +159,13 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
             }
             float new_z = _map->GetHeight(owner.GetPhaseMask(), temp_x, temp_y, z, true);
 
+	    if (_map->GetId() == 617)
+	      if (z - new_z > 2)
+	      {
+		i_to_distance_from_caster = 0.0f;
+		i_nextCheckTime.Reset(urand(500,1000));
+		return false;
+	      }
             if (new_z <= INVALID_HEIGHT)
                 continue;
 

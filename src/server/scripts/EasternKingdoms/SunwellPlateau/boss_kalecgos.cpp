@@ -319,7 +319,8 @@ public:
                     if ((*i))
                     {
 		      //SPELL_SPECTRAL_BLAST
-		      me->CastSpell((*i), SPELL_SPECTRAL_BLAST_PORTAL);
+		      //		      me->CastSpell((*i), SPELL_SPECTRAL_BLAST_PORTAL);
+		      me->SummonGameObject(183410, me->GetPositionX() + 1, me->GetPositionY() + 1, me->GetPositionZ() + 1, 0, 0, 0, 0, 0, 15000);
 		      //                        (*i)->CastSpell((*i), SPELL_TELEPORT_SPECTRAL, true);
 		      //		(*i)->CastSpell((*i), AURA_SPECTRAL_EXHAUSTION, true);
                         SpectralBlastTimer = 20000+rand()%5000;

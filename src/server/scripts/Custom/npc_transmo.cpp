@@ -215,8 +215,8 @@ private:
     {
     case EQUIPMENT_SLOT_HEAD      : return "Tete";
     case EQUIPMENT_SLOT_SHOULDERS : return "Epaules";
-    case EQUIPMENT_SLOT_BODY      : return "Torse";
-    case EQUIPMENT_SLOT_CHEST     : return "Chemise";
+    case EQUIPMENT_SLOT_BODY      : return "Chemise";
+    case EQUIPMENT_SLOT_CHEST     : return "Torse";
     case EQUIPMENT_SLOT_WAIST     : return "Taille";
     case EQUIPMENT_SLOT_LEGS      : return "Jambes";
     case EQUIPMENT_SLOT_FEET      : return "Pieds";

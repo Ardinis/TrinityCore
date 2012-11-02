@@ -166,7 +166,7 @@ public:
 	 player->GetSession()->SendAreaTriggerMessage("l'objet %s n'est pas transmogrifiable %s", GetItemName(newitem->GetTemplate(), player->GetSession(), true).c_str());
 	 break;
        }
-       if (!player->HasEnoughMoney(golds))
+       if (!player->HasEnoughMoney(pProto->BuyPrice))
        {
 	 player->GetSession()->SendNotification("Vous n'avez pas assez d'argent.");
 	 break;

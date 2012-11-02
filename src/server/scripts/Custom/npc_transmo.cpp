@@ -89,7 +89,16 @@ public:
 	    if (player->CanTransmo(olditem, newitem))
 	    {
 	      uint32 newitemEntry = newitem->GetEntry()+10;
-	      std::string box =  "Vous etes sur le point de transmogrifier votre item en :\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nCet item va vous etre lie, vous ne pourrez plus echanger cet item.\r\nVoulez vous continuer ?"/*+std::string(token)*/;
+	      int price = 400000;
+	      if (ItemTemplate const* pProto = olditem->GetTemplate())
+		if (pProto->BuyPrice > 0)
+		  price += pProto->SellPrice;
+	      price /= 10000;
+	      std::string s;
+	      std::stringstream out;
+	      out << price;
+	      s = out.str();
+	      std::string box =  "Vous etes sur le point de transmogrifier votre item en :\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nCet item va vous etre lie, vous ne pourrez plus echanger cet item.\r\nVoulez vous continuer ?" + "|TInterface\ICONS\INV_Misc_Coin_02.blp:32|t" + " Prix : " + s.c_str() + " pieces d'or";
 	      player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, GetItemName(newitem->GetTemplate(), player->GetSession(), true), newitemEntry, guidlow, box, 0, false);
 	      ++itemcount;
 	    }
@@ -106,7 +115,16 @@ public:
 		if (player->CanTransmo(olditem, newitem))
 		{
 		  uint32 newitemEntry = newitem->GetEntry()+10;
-		  std::string box =  "Vous etes sur le point de transmogrifier votre item en :\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nCet item va vous etre lie, vous ne pourrez plus echanger cet item.\r\nVoulez vous continuer ?"/*+std::string(token)*/;
+		  int price = 400000;
+		  if (ItemTemplate const* pProto = olditem->GetTemplate())
+		    if (pProto->BuyPrice > 0)
+		      price += pProto->SellPrice;
+		  price /= 10000;
+		  std::string s;
+		  std::stringstream out;
+		  out << price;
+		  s = out.str();
+		  std::string box =  "Vous etes sur le point de transmogrifier votre item en :\r\n\r\n"+GetItemName(newitem->GetTemplate(), player->GetSession(), true)+"\r\n\r\nCet item va vous etre lie, vous ne pourrez plus echanger cet item.\r\nVoulez vous continuer ?" + "|TInterface\ICONS\INV_Misc_Coin_02.blp:32|t" + " Prix : " + s.c_str() + " pieces d'or";
 		  player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, GetItemName(newitem->GetTemplate(), player->GetSession(), true), newitemEntry, guidlow, box, 0, false);
 		  ++itemcount;
 		}
@@ -159,20 +177,20 @@ public:
 	break;
       }
 
-     if (ItemTemplate const* pProto = newitem->GetTemplate())
+     if (ItemTemplate const* pProto = olditem->GetTemplate())
      {
-       if (pProto->BuyPrice < 0)
+       if (pProto->SellPrice < 0)
        {
 	 player->GetSession()->SendAreaTriggerMessage("l'objet %s n'est pas transmogrifiable %s", GetItemName(newitem->GetTemplate(), player->GetSession(), true).c_str());
 	 break;
        }
-       if (!player->HasEnoughMoney(pProto->BuyPrice))
+       if (!player->HasEnoughMoney(pProto->SellPrice))
        {
 	 player->GetSession()->SendNotification("Vous n'avez pas assez d'argent.");
 	 break;
        }
        //decrement money
-       player->SetMoney(player->GetMoney() - pProto->BuyPrice);
+       player->SetMoney(player->GetMoney() - pProto->BuyPrice - 1000000);
      }
 
       player->AddTransmo(action, newitem->GetEntry());

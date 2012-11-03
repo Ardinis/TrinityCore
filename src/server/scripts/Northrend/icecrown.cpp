@@ -868,7 +868,7 @@ public:
 
 struct npc_valiantAI : public ScriptedAI
 {
-  Unit *pTarget;
+  Unit *pTargetit;
   uint32 SpellTimer;
   uint32 MoviTimer;
   uint32 act;
@@ -903,7 +903,7 @@ public:
     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     if (act != 1 && act != 2)
       act = 0;
-    pTarget = NULL;
+    pTargetit = NULL;
   }
 
   void EnterCombat(Unit* who)
@@ -916,10 +916,10 @@ public:
   {
     me->MonsterSay(SAY_END, LANG_UNIVERSAL, 0);
     me->setFaction(35);
-    if (act == 1 && pTarget)
-      pTarget->CastSpell(pTarget, MUNTED_MELEE_VICTORY, true);
-    else if (act == 2 && pTarget)
-      pTarget->CastSpell(pTarget, MUNTED_MELEE2_VICTORY, true);
+    if (act == 1 && pTargetit)
+      pTargetit->CastSpell(pTargetit, MUNTED_MELEE_VICTORY, true);
+    else if (act == 2 && pTargetit)
+      pTargetit->CastSpell(pTargetit, MUNTED_MELEE2_VICTORY, true);
     me->Respawn(true);
     EnterEvadeMode();
   }
@@ -999,9 +999,9 @@ public:
       return;
 	if (SpellTimer <= uiDiff)
 	  {
-	    if (pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
+	    if (pTargetit = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
 	      {
-		if (((pTarget->GetPositionX() - me->GetPositionX()) <= 2) && ((pTarget->GetPositionY() - me->GetPositionY()) <= 2))
+		if (((pTargetit->GetPositionX() - me->GetPositionX()) <= 2) && ((pTargetit->GetPositionY() - me->GetPositionY()) <= 2))
 		  {
 		    switch (urand(0,4))
 		      {
@@ -1022,21 +1022,21 @@ public:
 			break;
 		      }
 		  } 
-		if (((pTarget->GetPositionX() - me->GetPositionX()) > 2) && ((pTarget->GetPositionY() - me->GetPositionY()) > 2))
+		if (((pTargetit->GetPositionX() - me->GetPositionX()) > 2) && ((pTargetit->GetPositionY() - me->GetPositionY()) > 2))
 		  {
 		    switch (urand(0,7))
 		      {
 		      case 0: 
 			DoCastAOE(SHIELD_BREAKER, true);
-			pTarget->RemoveAura(DEFEND);
+			pTargetit->RemoveAura(DEFEND);
 			break;
 		      case 1: 
 			DoCastAOE(SHIELD_BREAKER, true);
-			pTarget->RemoveAura(DEFEND);
+			pTargetit->RemoveAura(DEFEND);
 		    break;
 		      case 2: 
 			DoCastAOE(SHIELD_BREAKER, true);
-			pTarget->RemoveAura(DEFEND);
+			pTargetit->RemoveAura(DEFEND);
 			break;
 		      case 3: 
 			DoCastAOE(CHARGE, true);
@@ -1062,35 +1062,35 @@ public:
 
 	if (MoviTimer <= uiDiff)
 	  {
-	    if (pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
+	    if (pTargetit = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
 	      switch (urand(0,8))
 		{
 		case 0: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() + 4), pTarget->GetPositionY(), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() + 4), pTargetit->GetPositionY(), pTargetit->GetPositionZ());
 		  break;
 		case 1: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY() - 5), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX()), (pTargetit->GetPositionY() - 5), pTargetit->GetPositionZ());
 		  break;
 		case 2: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() - 2), (pTarget->GetPositionY() + 1), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 2), (pTargetit->GetPositionY() + 1), pTargetit->GetPositionZ());
 		break;
 		case 3: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() - 3), (pTarget->GetPositionY() - 4), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 3), (pTargetit->GetPositionY() - 4), pTargetit->GetPositionZ());
 		  break;
 		case 4: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() - 1), (pTarget->GetPositionY() + 5), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 1), (pTargetit->GetPositionY() + 5), pTargetit->GetPositionZ());
 		  break;
 		case 5: 
-		me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() - 4), (pTarget->GetPositionY() + 5), pTarget->GetPositionZ());
+		me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 4), (pTargetit->GetPositionY() + 5), pTargetit->GetPositionZ());
 		break;
 		case 6: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX()), (pTargetit->GetPositionY()), pTargetit->GetPositionZ());
 		  break;
 		case 7: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() - 5), (pTarget->GetPositionY() + 2), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 5), (pTargetit->GetPositionY() + 2), pTargetit->GetPositionZ());
 		  break;
 		case 8: 
-		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX() - 5), (pTarget->GetPositionY() - 1), pTarget->GetPositionZ());
+		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 5), (pTargetit->GetPositionY() - 1), pTargetit->GetPositionZ());
 		  break;
 		}
 	    MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);

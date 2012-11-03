@@ -904,6 +904,8 @@ public:
     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     if (act != 1 && act != 2)
       act = 0;
+    pTarget = NULL;
+    target = NULL;
   }
 
   void EnterCombat(Unit* who)
@@ -916,9 +918,9 @@ public:
   {
     me->MonsterSay(SAY_END, LANG_UNIVERSAL, 0);
     me->setFaction(35);
-    if (act == 1)
+    if (act == 1 && pTarget)
       pTarget->CastSpell(pTarget, MUNTED_MELEE_VICTORY, true);
-    else if (act == 2)
+    else if (act == 2 && pTarget)
       pTarget->CastSpell(pTarget, MUNTED_MELEE2_VICTORY, true);
     me->Respawn(true);
     EnterEvadeMode();
@@ -972,7 +974,7 @@ public:
        
   void SpellHitTarget(Unit *pTarget, const SpellInfo *spell)
   {
-    if (spell->Id == SHIELD_BREAKER)
+    if (spell->Id == SHIELD_BREAKER && pTarget)
       pTarget->RemoveAura(DEFEND);
   }
 
@@ -996,106 +998,107 @@ public:
   {
     if (!UpdateVictim())
       return;
-    pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true);
-               
-    if (SpellTimer<=uiDiff)
-      {
-	if (((pTarget->GetPositionX()-me->GetPositionX()) <= 2) && ((pTarget->GetPositionY()-me->GetPositionY()) <= 2))
+	if (SpellTimer<=uiDiff)
 	  {
-	    switch (urand(0,4))
+	    if (pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
 	      {
-	      case 0: 
-		me->CastSpell(me, DEFEND, true);
-		break;
-	      case 1: 
-		DoCastAOE(THRUST, true);
-		break;
-	      case 2: 
-		DoCastAOE(THRUST, true);
-		break;
-	      case 3: 
-		DoCastAOE(THRUST, true);
-		break;
-	      case 4: 
-		DoCastAOE(THRUST, true);
-		break;
+		if (((pTarget->GetPositionX()-me->GetPositionX()) <= 2) && ((pTarget->GetPositionY()-me->GetPositionY()) <= 2))
+		  {
+		    switch (urand(0,4))
+		      {
+		      case 0: 
+			me->CastSpell(me, DEFEND, true);
+		      break;
+		      case 1: 
+			DoCastAOE(THRUST, true);
+			break;
+		      case 2: 
+			DoCastAOE(THRUST, true);
+			break;
+		      case 3: 
+			DoCastAOE(THRUST, true);
+		      break;
+		      case 4: 
+			DoCastAOE(THRUST, true);
+			break;
+		      }
+		  }
+		if (((pTarget->GetPositionX()-me->GetPositionX()) > 2) && ((pTarget->GetPositionY()-me->GetPositionY()) > 2))
+		  {
+		    switch (urand(0,7))
+		      {
+		      case 0: 
+			DoCastAOE(SHIELD_BREAKER, true);
+			pTarget->RemoveAura(DEFEND);
+			break;
+		      case 1: 
+			DoCastAOE(SHIELD_BREAKER, true);
+			pTarget->RemoveAura(DEFEND);
+		    break;
+		      case 2: 
+			DoCastAOE(SHIELD_BREAKER, true);
+			pTarget->RemoveAura(DEFEND);
+			break;
+		      case 3: 
+			DoCastAOE(CHARGE, true);
+			break;
+		      case 4: 
+		    DoCastAOE(CHARGE, true);
+		    break;
+		      case 5: 
+			DoCastAOE(CHARGE, true);
+			break;
+		      case 6: 
+			DoCastAOE(CHARGE, true);
+			break;
+		      case 7: 
+		    me->CastSpell(me, DEFEND, true);
+		    break;
+		      }
+		  }
 	      }
-	  }
-	if (((pTarget->GetPositionX()-me->GetPositionX()) > 2) && ((pTarget->GetPositionY()-me->GetPositionY()) > 2))
+	    SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
+	    
+	  } else SpellTimer -= uiDiff;
+	if (MoviTimer<=uiDiff)
 	  {
-	    switch (urand(0,7))
-	      {
-	      case 0: 
-		DoCastAOE(SHIELD_BREAKER, true);
-		pTarget->RemoveAura(DEFEND);
+	    if (pTarget)
+	      switch (urand(0,8))
+		{
+		case 0: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+4), pTarget->GetPositionY(), pTarget->GetPositionZ());
+		  break;
+		case 1: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()-5), pTarget->GetPositionZ());
+		  break;
+		case 2: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-2), (pTarget->GetPositionY()+1), pTarget->GetPositionZ());
 		break;
-	      case 1: 
-		DoCastAOE(SHIELD_BREAKER, true);
-		pTarget->RemoveAura(DEFEND);
+		case 3: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-3), (pTarget->GetPositionY()-4), pTarget->GetPositionZ());
+		  break;
+		case 4: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-1), (pTarget->GetPositionY()+5), pTarget->GetPositionZ());
+		  break;
+		case 5: 
+		me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-4), (pTarget->GetPositionY()+5), pTarget->GetPositionZ());
 		break;
-	      case 2: 
-		DoCastAOE(SHIELD_BREAKER, true);
-		pTarget->RemoveAura(DEFEND);
-		break;
-	      case 3: 
-		DoCastAOE(CHARGE, true);
-		break;
-	      case 4: 
-		DoCastAOE(CHARGE, true);
-		break;
-	      case 5: 
-		DoCastAOE(CHARGE, true);
-		break;
-	      case 6: 
-		DoCastAOE(CHARGE, true);
-		break;
-	      case 7: 
-		me->CastSpell(me, DEFEND, true);
-		break;
-	      }
-	  }
-	SpellTimer= urand(TIMER_SPELL_MIN,TIMER_SPELL_MAX );
-                       
-      } else SpellTimer -= uiDiff;
-    if (MoviTimer<=uiDiff)
-      {
-	switch (urand(0,8))
-	  {
-	  case 0: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()+4), pTarget->GetPositionY(), pTarget->GetPositionZ());
-	    break;
-	  case 1: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()-5), pTarget->GetPositionZ());
-	    break;
-	  case 2: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-2), (pTarget->GetPositionY()+1), pTarget->GetPositionZ());
-	    break;
-	  case 3: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-3), (pTarget->GetPositionY()-4), pTarget->GetPositionZ());
-	    break;
-	  case 4: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-1), (pTarget->GetPositionY()+5), pTarget->GetPositionZ());
-	    break;
-	  case 5: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-4), (pTarget->GetPositionY()+5), pTarget->GetPositionZ());
-	    break;
-	  case 6: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()), pTarget->GetPositionZ());
-	    break;
-	  case 7: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-5), (pTarget->GetPositionY()+2), pTarget->GetPositionZ());
-	    break;
-	  case 8: 
-	    me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-5), (pTarget->GetPositionY()-1), pTarget->GetPositionZ());
-	  }
-	MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
-      } else MoviTimer -= uiDiff;
-    
-    DoMeleeAttackIfReady();
+		case 6: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()), (pTarget->GetPositionY()), pTarget->GetPositionZ());
+		  break;
+		case 7: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-5), (pTarget->GetPositionY()+2), pTarget->GetPositionZ());
+		  break;
+		case 8: 
+		  me->GetMotionMaster()->MovePoint(0, (pTarget->GetPositionX()-5), (pTarget->GetPositionY()-1), pTarget->GetPositionZ());
+		}
+	    MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
+	  } else MoviTimer -= uiDiff;
+	DoMeleeAttackIfReady();
   }
 };
-
 };
+
 
 void AddSC_icecrown()
 {

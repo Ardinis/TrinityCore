@@ -184,13 +184,13 @@ public:
 	 player->GetSession()->SendAreaTriggerMessage("l'objet %s n'est pas transmogrifiable %s", GetItemName(newitem->GetTemplate(), player->GetSession(), true).c_str());
 	 break;
        }
-       if (!player->HasEnoughMoney(pProto->SellPrice))
+       if (!player->HasEnoughMoney(pProto->SellPrice + 400000))
        {
 	 player->GetSession()->SendNotification("Vous n'avez pas assez d'argent.");
 	 break;
        }
        //decrement money
-       player->SetMoney(player->GetMoney() - pProto->BuyPrice - 1000000);
+       player->SetMoney(player->GetMoney() - pProto->SellPrice - 400000);
      }
 
       player->AddTransmo(action, newitem->GetEntry());

@@ -985,11 +985,12 @@ public:
 
     if (me->isAttackReady())
       {
-	if (me->IsWithinMeleeRange(me->getVictim()))
-	  {
-	    DoCastVictim(SPELL_THRUST);
-	    me->resetAttackTimer();
-	  }
+	if (me->getVictim())
+	  if (me->IsWithinMeleeRange(me->getVictim()))
+	    {
+	      DoCastVictim(SPELL_THRUST);
+	      me->resetAttackTimer();
+	    }
       }
   }
 
@@ -1062,7 +1063,7 @@ public:
 	  } else SpellTimer -= uiDiff;
 	if (MoviTimer<=uiDiff)
 	  {
-	    if (pTarget)
+	    if (pTarget = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
 	      switch (urand(0,8))
 		{
 		case 0: 

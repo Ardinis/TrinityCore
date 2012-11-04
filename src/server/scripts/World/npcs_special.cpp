@@ -3803,6 +3803,7 @@ public:
 			}
 			else
 			{
+			  if (jaloot)
 				if(!jaloot->GetAura(52182))
 					jaloot->AddAura(52182, jaloot);
 			}

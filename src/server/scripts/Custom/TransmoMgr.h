@@ -44,7 +44,7 @@ public:
 
 		m_AllowPoor = ConfigMgr::GetBoolDefault("Transmo.AllowPoor", false);
 		m_AllowCommon = ConfigMgr::GetBoolDefault("Transmo.AllowCommon", false);
-		m_AllowUncommon = ConfigMgr::GetBoolDefault("Transmo.AllowUncommon", false);
+		m_AllowUncommon = ConfigMgr::GetBoolDefault("Transmo.AllowUncommon", true);
 		m_AllowRare = ConfigMgr::GetBoolDefault("Transmo.AllowRare", true);
 		m_AllowEpic = ConfigMgr::GetBoolDefault("Transmo.AllowEpic", true);
 		m_AllowLegendary = ConfigMgr::GetBoolDefault("Transmo.AllowLegendary", false);

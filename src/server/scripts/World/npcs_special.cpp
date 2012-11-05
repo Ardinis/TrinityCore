@@ -3803,6 +3803,7 @@ public:
 			}
 			else
 			{
+			  if (jaloot)
 				if(!jaloot->GetAura(52182))
 					jaloot->AddAura(52182, jaloot);
 			}
@@ -5841,7 +5842,7 @@ new npc_air_force_bots;
     new npc_firework();
     new npc_spring_rabbit();
     new npc_argent_squire();
-    new npc_artuis();
+    // new npc_artuis();
     //    new vehicle_knight_gryphon();
     //	new npc_risen_ally();
     new spell_toss_stinky_bomb();

@@ -49,7 +49,7 @@ public:
 		m_AllowEpic = ConfigMgr::GetBoolDefault("Transmo.AllowEpic", true);
 		m_AllowLegendary = ConfigMgr::GetBoolDefault("Transmo.AllowLegendary", false);
 		m_AllowArtefact = ConfigMgr::GetBoolDefault("Transmo.AllowArtefact", false);
-		m_AllowHeirloom = ConfigMgr::GetBoolDefault("Transmo.AllowHeirloom", false);
+		m_AllowHeirloom = ConfigMgr::GetBoolDefault("Transmo.AllowHeirloom", true);
 	}
 private:
 

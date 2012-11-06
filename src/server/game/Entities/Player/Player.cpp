@@ -25515,14 +25515,28 @@ bool Player::CanTransmo(Item *oldItem, Item *newItem)
       if (oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
         return false;
       if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
+      {
+	if ((oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+	     oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
+	     oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN) &&
+	    (newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+	     newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
+	     newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN))
+	  return true;
         return false;
+      }
     }
   else if (oldItem->GetTemplate()->Class == ITEM_CLASS_ARMOR)
     {
       if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
-        return false;
+	return false;
       if (oldItem->GetTemplate()->InventoryType != newItem->GetTemplate()->InventoryType)
+      {
+	if ((oldItem->GetTemplate()->InventoryType == INVTYPE_CHEST || oldItem->GetTemplate()->InventoryType == INVTYPE_ROBE) &&
+	    (newItem->GetTemplate()->InventoryType == INVTYPE_CHEST || newItem->GetTemplate()->InventoryType == INVTYPE_ROBE))
+	  return true;
         return false;
+      }
     }
 
 

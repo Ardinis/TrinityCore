@@ -4604,7 +4604,9 @@ void Spell::TakeRunePower(bool didHit)
 	  runeCost[rune]--;
 	  // keep Death Rune type if missed
 	  if (didHit)
+	  {
 	    player->RestoreBaseRune(i);
+	  }
 
 	  if (runeCost[RUNE_DEATH] == 0)
 	    break;

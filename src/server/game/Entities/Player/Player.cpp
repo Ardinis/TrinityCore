@@ -2649,12 +2649,12 @@ void Player::Regenerate(Powers power)
             }
         }   break;
         case POWER_RUNE:
-	  for(uint32 i = 0; i < MAX_RUNES; ++i)
+	  /*	  for(uint32 i = 0; i < MAX_RUNES; ++i)
 	    if(uint8 cd = GetRuneCooldown(i))
 	    {
 	      SetRuneCooldown(i, cd - 1);
 	    }
-	  break;
+	    break;*/
         case POWER_FOCUS:
         case POWER_HAPPINESS:
         case POWER_HEALTH:

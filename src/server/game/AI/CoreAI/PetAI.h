@@ -39,8 +39,6 @@ class PetAI : public CreatureAI
         void KilledUnit(Unit* /*victim*/);
         void AttackStart(Unit* target);
         void MovementInform(uint32 moveType, uint32 data);
-	void OwnerDamagedBy(Unit* attacker);
-	void OwnerAttacked(Unit* target);
 	void ReceiveEmote(Player* player, uint32 textEmote);
 
     private:

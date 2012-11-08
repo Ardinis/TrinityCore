@@ -568,8 +568,8 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
-      if (victim->ToPlayer()->GetCommandStatus(CHEAT_GOD))
-	return 0;
+      //      if (victim->ToPlayer()->GetCommandStatus(CHEAT_GOD))
+      //	return 0;
 
       // Signal to pets that their owner was attacked
       Pet* pet = victim->ToPlayer()->GetPet();
@@ -8197,6 +8197,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
             // Blood of the North
             // Reaping
             // Death Rune Mastery
+
             if (dummySpell->SpellIconID == 3041 || dummySpell->SpellIconID == 22 || dummySpell->SpellIconID == 2622)
             {
 	      //	      std::cout << "a" << std::endl;
@@ -8210,8 +8211,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
 
                     RuneType rune = ToPlayer()->GetLastUsedRune();
                     // can't proc from death rune use
-                    if (rune == RUNE_DEATH)
-                        return false;
+
+		    //                    if (rune == RUNE_DEATH)
+		    //   return false;
 		    //  std::cout << "c" << std::endl;
                     AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
                     if (!aurEff)
@@ -8230,24 +8232,20 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     {
                         if (dummySpell->SpellIconID == 2622)
                         {
-			  //	      std::cout << "e" << std::endl;
                             if (player->GetCurrentRune(i) == RUNE_DEATH ||
                                 player->GetBaseRune(i) == RUNE_BLOOD)
                                 continue;
                         }
                         else
                         {
-			  //			  std::cout << "f" << std::endl;
-                            if (player->GetCurrentRune(i) == RUNE_DEATH ||
-                                player->GetBaseRune(i) != RUNE_BLOOD)
-                                continue;
+			  if (player->GetCurrentRune(i) == RUNE_DEATH ||
+			      player->GetBaseRune(i) != RUNE_BLOOD)
+			    continue;
                         }
-			//			std::cout << "g : "  << player->GetRuneCooldown(i) << " i : " << player->GetRuneBaseCooldown(i) << std::endl;
-                        if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i) &&
-			    !((player->GetRuneCooldown(i) == 8000 || player->GetRuneCooldown(i) == 10000) &&
-			      (player->GetRuneBaseCooldown(i) == 8000 || player->GetRuneBaseCooldown(i) == 10000)))
-                            continue;
-			//	std::cout << "g - bis" << std::endl;
+			if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i) &&
+			    (player->GetRuneCooldown(i) - player->GetRuneBaseCooldown(i)) != 2000 &&
+			    (player->GetRuneCooldown(i) - player->GetRuneBaseCooldown(i)) != -2000)
+			  continue;
                         --runesLeft;
                         // Mark aura as used
                         player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);

@@ -471,8 +471,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 51963:
                     {
                         // about +4 base spell dmg per level
-                        damage = (m_caster->getLevel() - 60) * 4 + 60;
-                        break;
+		      damage = (m_caster->getLevel() - 60) * 4 + 60;
+		      if (Unit* owner = m_caster->GetOwner())
+		      {
+			damage = 120 + (0.333 * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+		      }
+		      break;
                     }
                 }
                 break;
@@ -4196,8 +4200,8 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             for (Unit::ControlList::const_iterator itr = m_caster->m_Controlled.begin(); itr != m_caster->m_Controlled.end(); ++itr) //Find Rune Weapon
                 if ((*itr)->GetEntry() == 27893)
                 {
-					pPet = (*itr);
-                    break;
+		  pPet = (*itr);
+		  break;
                 }
 
             // Plague Strike
@@ -4209,11 +4213,12 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 // double disease when dancing runic weapon active
                 if (pPet && m_caster->getVictim())
                 {
-                    pPet->CastSpell(m_caster->getVictim(),m_spellInfo->Effects[EFFECT_2].CalcValue(),true);
-                    if (Aura *aur=m_caster->getVictim()->GetAura(m_spellInfo->Effects[EFFECT_2].CalcValue(),pPet->GetGUID()))
+		  //		  std::cout << "double disease when dancing runic weapon active : " << m_spellInfo->Effects[EFFECT_2] << std::endl;
+                    pPet->CastSpell(m_caster->getVictim(), 55078, true);
+                    if (Aura *aur = m_caster->getVictim()->GetAura(55078, pPet->GetGUID()))
 		      if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
 		      {
-                        aur->SetMaxDuration(epidemic->GetAmount()+aur->GetMaxDuration());
+                        aur->SetMaxDuration(epidemic->GetAmount() + aur->GetMaxDuration());
                         aur->SetDuration(aur->GetMaxDuration());
 		      }
                 }
@@ -4223,10 +4228,10 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             // Blood Strike
             if (m_spellInfo->SpellFamilyFlags[0] & 0x400000)
             {
-                if(pPet)
-					AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * (unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())) / 2.0f);
+                if (pPet)
+		  AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * (unitTarget->GetDiseasesByCaster(m_caster->GetGUID())+unitTarget->GetDiseasesByCaster(pPet->GetGUID())) / 2.0f);
                 else
-					AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
+		  AddPctF(totalDamagePercentMod, m_spellInfo->Effects[EFFECT_2].CalcValue() * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
 
 
                 // Glyph of Blood Strike

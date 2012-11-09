@@ -2228,7 +2228,7 @@ public:
             // Not needed to be despawned now
             DespawnTimer = 0;
             // Find victim of Summon Gargoyle spell
-            std::list<Unit*> targets;
+	    /*            std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
             me->VisitNearbyObject(30, searcher);
@@ -2237,7 +2237,14 @@ public:
                 {
                     me->Attack((*iter), false);
                     break;
-                }
+		    }*/
+	    if (Unit* owner = me->GetOwner())
+	      if (owner->GetTypeId() == TYPEID_PLAYER && owner->getVictim())
+	      {
+		me->AttackStop();
+		me->ToCreature()->AI()->AttackStart(owner->getVictim());
+	      }
+
         }
 
         void JustDied(Unit* /*killer*/)

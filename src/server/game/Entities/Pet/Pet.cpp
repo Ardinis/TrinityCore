@@ -957,10 +957,10 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
 					SetModifierValue(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.139 * dmg_glyphe)  );
                     // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 1.5
-					
+
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 1.5 / 14)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 1.5 / 14)));
-					
+
                     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
                     SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.15f);  //  Bonus Stamina (30% of player stamina)(comme j'ai pris la force c'est 30/2)
                     if (!HasAura(58877))//prevent apply twice for the 2 wolves
@@ -985,7 +985,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         SetCreateMana(28 + 10*petlevel);
                         SetCreateHealth(28 + 30*petlevel);
                     }
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f));
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                     break;
@@ -1965,5 +1965,5 @@ void Pet::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
     }
   if(Player *owner = GetOwner())
     owner->GetSession()->SendPacket(&data);
-    
+
 }

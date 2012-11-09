@@ -4208,8 +4208,8 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             if (m_spellInfo->SpellFamilyFlags[0] & 0x1)
             {
                 // Glyph of Plague Strike
-                if (AuraEffect const* aurEff = m_caster->GetAuraEffect(58657, EFFECT_0))
-                    AddPctN(totalDamagePercentMod, aurEff->GetAmount());
+	      if (AuraEffect const* aurEff = m_caster->GetAuraEffect(58657, EFFECT_0))
+		AddPctN(totalDamagePercentMod, aurEff->GetAmount());
                 // double disease when dancing runic weapon active
                 if (pPet && m_caster->getVictim())
                 {

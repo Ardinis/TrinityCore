@@ -10796,8 +10796,8 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
 	  }
             // Sigil of the Vengeful Heart
             if (spellProto->SpellFamilyFlags[0] & 0x2000)
-                if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
-                    AddPctN(DoneTotal, aurEff->GetAmount());
+	      if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
+		DoneTotal += aurEff->GetAmount();
 
             // Glacier Rot
             if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)
@@ -11364,10 +11364,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 		}
 	    }
 	  }
-            // Sigil of the Vengeful Heart
-            if (spellProto->SpellFamilyFlags[0] & 0x2000)
-                if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
-                    AddPctN(DoneTotal, aurEff->GetAmount());
+		  // Sigil of the Vengeful Heart
+		  if (spellProto->SpellFamilyFlags[0] & 0x2000)
+		    if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
+		      DoneTotal += aurEff->GetAmount();
 
             // Glacier Rot
             if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)

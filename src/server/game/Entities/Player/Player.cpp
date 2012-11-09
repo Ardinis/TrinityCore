@@ -4382,7 +4382,7 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         // check if spellentry is present and if the cooldown is less or equal to 10 min
         if (entry &&
             entry->RecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
-            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS)
+            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS && entry->Id != 48289 && entry->Id != 52150 && entry->Id != 46585) //48289 == ghoul summon cooldown
         {
             // remove & notify
             RemoveSpellCooldown(itr->first, true);

@@ -3030,6 +3030,9 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+	case 49575:
+	  spellInfo->EffectMiscValue[0] = 70;
+	  break;
 	    case 63311:
 	      spellInfo->rangeIndex = 1;
 	      spellInfo->EffectImplicitTargetA[0] = 104;

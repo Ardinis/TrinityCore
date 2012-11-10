@@ -12385,10 +12385,15 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
   if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
 
+  // Cloac Of Shadow exceptions
+  if (HasAura(35729, EFFECT_0) || HasAura(31224, EFFECT_0))
+    if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766)
+	return true;
+
   // Anti-magic Shell; immune to magical aura effects
-    if (HasAura(48707, EFFECT_0))
-      if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->_IsPositiveSpell()) /*&& spellInfo->Effects[index].Effect == SPELL_EFFECT_APPLY_AURA*/)
-            return true;
+  if (HasAura(48707, EFFECT_0))
+    if (spellInfo->Id == 6358 || spellInfo->Id == 1978 || spellInfo->Id == 55095 || spellInfo->Id == 55078 || (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->_IsPositiveSpell()) && spellInfo->Effects[index].Effect == SPELL_EFFECT_APPLY_AURA)
+      return true;
 
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
     uint32 effect = spellInfo->Effects[index].Effect;

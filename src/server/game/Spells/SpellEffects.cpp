@@ -637,11 +637,36 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_ROGUE:
             {
+	      /*
+  // Envenom must be considered as a positive effect even though it deals damage
+                case 32645:     // Envenom (Rank 1)
+                case 32684:     // Envenom (Rank 2)
+                case 57992:     // Envenom (Rank 3)
+                case 57993:     // Envenom (Rank 4)
+	      */
                 // Envenom
                 if (m_spellInfo->SpellFamilyFlags[1] & 0x00000008)
                 {
                     if (Player* player = m_caster->ToPlayer())
                     {
+		      uint32 chance = 0;
+		      if (player->HasAura(14161))
+		      {
+			chance = 60;
+		      }
+		      else if (player->HasAura(14160))
+		      {
+			chance = 40;
+		      }
+		      else if (player->HasAura(14156))
+		      {
+			chance = 20;
+		      }
+
+			if (roll_chance_i(chance))
+			{
+			  m_caster->CastSpell(unitTarget, 14157, true);
+			}
                         // consume from stack dozes not more that have combo-points
                         if (uint32 combo = player->GetComboPoints())
                         {
@@ -1647,7 +1672,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                     // remove all harmful spells on you...
                     SpellInfo const* spell = iter->second->GetBase()->GetSpellInfo();
                     if ((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC // only affect magic spells
-                        || ((spell->GetDispelMask()) & dispelMask))
+                        || ((spell->GetDispelMask()) & dispelMask) || spell->Id == 55095 || spell->Id == 55078 || spell->Id == 1978 || spell->Id == 6358 || spell->Id == 68766)
                         // ignore positive and passive auras
                         && !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
                     {

@@ -718,25 +718,22 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
                         {
                             float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                            //damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
-			    int base = irand(0, 300);
-			    if (m_caster && m_caster->getLevel() == 80)
 			      switch (combo)
 			      {
 			      case 1:
-				damage = base + ((370 * combo) + ap * 0.07);
+				damage += combo * ap * 0.07;
 				break;
 			      case 2:
-				damage = base + ((370 * combo) + ap * 0.14);
+				damage += combo + ap * 0.14;
 				break;
 			      case 3:
-				damage = base + ((370 * combo) + ap * 0.21);
+				damage += combo + ap * 0.21;
 				break;
 			      case 4:
-				damage = base + ((370 * combo) + ap * 0.28);
+				damage += combo * ap * 0.28;
 				break;
 			      case 5:
-				damage = base + ((370 * combo) + ap * 0.35);
+				damage += combo * ap * 0.35;
 				break;
 			      default :
 				damage += 0;

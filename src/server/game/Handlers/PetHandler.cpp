@@ -232,8 +232,8 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
 				{
 				  pPet->ToCreature()->AI()->AttackStart(TargetUnit);
 				}
-				if (TargetUnit)
-				  owner->SetInCombatWith(TargetUnit);
+				//				if (TargetUnit)
+				//  owner->SetInCombatWith(TargetUnit);
 			      }
 
                             //10% chance to play special pet attack talk, else growl

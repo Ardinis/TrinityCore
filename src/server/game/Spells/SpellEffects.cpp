@@ -316,6 +316,14 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
     bool apply_direct_bonus = true;
 
+    //T9 2p
+    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209)
+      if (Player* player = m_caster->ToPlayer())
+	if (player->HasAura(67210))
+	{
+	  player->RemoveAura(67210);
+	}
+
     if (unitTarget && unitTarget->isAlive())
     {
         switch (m_spellInfo->SpellFamilyName)
@@ -665,6 +673,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 			  if (roll_chance_i(chance))
 			    m_caster->CastSpell(unitTarget, 70802, true);
 
+			//T9 2p
+			//			if (player->HasAura(67210))
+			//  player->RemoveAura(67210);
+
                         // consume from stack dozes not more that have combo-points
                         if (uint32 combo = player->GetComboPoints())
                         {
@@ -871,6 +883,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     SpellCastTargets targets;
 
     // selection by spell family
+    //T9 2p
+    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209)
+      if (Player* player = m_caster->ToPlayer())
+	if (player->HasAura(67210))
+	{
+	  player->RemoveAura(67210);
+	}
 
 
     switch (m_spellInfo->SpellFamilyName)
@@ -1583,6 +1602,14 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         return;
 
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
+
+    //T9 2p
+    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209)
+      if (Player* player = m_caster->ToPlayer())
+	if (player->HasAura(67210))
+	{
+	  player->RemoveAura(67210);
+	}
 
     // todo: move those to spell scripts
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL
@@ -4236,7 +4263,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 // double disease when dancing runic weapon active
                 if (pPet && m_caster->getVictim())
                 {
-		  //		  std::cout << "double disease when dancing runic weapon active : " << m_spellInfo->Effects[EFFECT_2] << std::endl;
                     pPet->CastSpell(m_caster->getVictim(), 55078, true);
                     if (Aura *aur = m_caster->getVictim()->GetAura(55078, pPet->GetGUID()))
 		      if (AuraEffect const* epidemic = m_caster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))

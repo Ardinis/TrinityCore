@@ -3795,6 +3795,26 @@ void Unit::RemoveAurasByType(AuraType auraType, uint64 casterGUID, Aura* except,
     }
 }
 
+void Unit::RemoveAurasByTypeWithVanish(AuraType auraType, uint64 casterGUID, Aura* except, bool negative, bool positive)
+{
+    for (AuraEffectList::iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+    {
+        Aura* aura = (*iter)->GetBase();
+        AuraApplication * aurApp = aura->GetApplicationOfTarget(GetGUID());
+
+        ++iter;
+        if (aura != except && (!casterGUID || aura->GetCasterGUID() == casterGUID)
+            && ((negative && !aurApp->IsPositive()) || (positive && aurApp->IsPositive())))
+        {
+	  std::cout << "AURA : " << aura->GetId() << std::endl;
+	  uint32 removedAuras = m_removedAurasCount;
+	  RemoveAura(aurApp);
+	  if (m_removedAurasCount > removedAuras + 1)
+	    iter = m_modAuras[auraType].begin();
+        }
+    }
+}
+
 void Unit::RemoveAurasWithAttribute(uint32 flags)
 {
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
@@ -3907,6 +3927,28 @@ void Unit::RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemo
         if (!except || aura->GetId() != except)
         {
             if (aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask)
+            {
+                RemoveAura(iter, removemode);
+                continue;
+            }
+        }
+        ++iter;
+    }
+}
+
+void Unit::RemoveMovementImpairingAurasWithVanish()
+{
+    RemoveAurasWithMechanicWithVanish((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT));
+}
+
+void Unit::RemoveAurasWithMechanicWithVanish(uint32 mechanic_mask, AuraRemoveMode removemode, uint32 except)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (!except || aura->GetId() != except)
+        {
+	  if (aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask && aura->GetSpellInfo()->Id != 51713)
             {
                 RemoveAura(iter, removemode);
                 continue;

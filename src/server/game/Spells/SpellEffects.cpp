@@ -746,6 +746,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                     }
                 }
+		else if (m_spellInfo->Id == 48637)
+		  damage *= 1.3f;
                 break;
             }
             case SPELLFAMILY_HUNTER:

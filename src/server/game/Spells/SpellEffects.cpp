@@ -718,7 +718,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
                         {
                             float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-			      switch (combo)
+			    damage +=  combo * ap * 0.071;
+			    /*			      switch (combo)
 			      {
 			      case 1:
 				damage += combo * ap * 0.07;
@@ -738,7 +739,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 			      default :
 				damage += 0;
 				break;
-			      }
+				}*/
 
                             // Eviscerate and Envenom Bonus Damage (item set effect)
 			    if (AuraEffect const * aurEffB = m_caster->GetAuraEffect(37169, EFFECT_0, m_caster->GetGUID()))

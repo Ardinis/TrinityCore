@@ -274,17 +274,17 @@ class boss_xt002 : public CreatureScript
             {
 	      if (hardMode &&  phase != PHASE_ONE)
 		return;
-	      if (HealthBelowPctDamaged(75, damage) && !first)
+	      if (me->HealthBelowPctDamaged(75, damage) && !first)
 	      {
 		first = true;
 		ExposeHeart();
 	      }
-	      if (HealthBelowPctDamaged(50, damage) && !second)
+	      if (me->HealthBelowPctDamaged(50, damage) && !second)
 	      {
 		second = true;
 		ExposeHeart();
 	      }
-	      if (HealthBelowPctDamaged(25, damage) && !third)
+	      if (me->HealthBelowPctDamaged(25, damage) && !third)
 	      {
 		third = true;
 		ExposeHeart();

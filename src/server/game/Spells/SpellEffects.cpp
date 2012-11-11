@@ -651,22 +651,20 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     {
 		      uint32 chance = 0;
 		      if (player->HasAura(14161))
-		      {
 			chance = 60;
-		      }
 		      else if (player->HasAura(14160))
-		      {
 			chance = 40;
-		      }
 		      else if (player->HasAura(14156))
-		      {
 			chance = 20;
-		      }
-
 			if (roll_chance_i(chance))
-			{
 			  m_caster->CastSpell(unitTarget, 14157, true);
-			}
+
+
+			chance = 13; // T10 proc
+			if (player->HasAura(70803))
+			  if (roll_chance_i(chance))
+			    m_caster->CastSpell(unitTarget, 70802, true);
+
                         // consume from stack dozes not more that have combo-points
                         if (uint32 combo = player->GetComboPoints())
                         {
@@ -748,7 +746,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     }
                 }
 		else if (m_spellInfo->Id == 48637)
-		  damage *= 1.3f;
+		  damage *= 1.35f;
                 break;
             }
             case SPELLFAMILY_HUNTER:

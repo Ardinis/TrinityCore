@@ -317,7 +317,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
     bool apply_direct_bonus = true;
 
     //T9 2p
-    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209)
+    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209 && m_spellInfo->Id != 57965)
       if (Player* player = m_caster->ToPlayer())
 	if (player->HasAura(67210))
 	{
@@ -884,7 +884,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
     // selection by spell family
     //T9 2p
-    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209)
+    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209  && m_spellInfo->Id != 57965)
       if (Player* player = m_caster->ToPlayer())
 	if (player->HasAura(67210))
 	{
@@ -1604,7 +1604,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
 
     //T9 2p
-    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209)
+    if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209 && m_spellInfo->Id != 57965)
       if (Player* player = m_caster->ToPlayer())
 	if (player->HasAura(67210))
 	{

@@ -6708,6 +6708,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     victim->CastSpell(victim, 57894, true, NULL, NULL, GetGUID());
                     return true;
                 }
+
+
             }
             break;
         }

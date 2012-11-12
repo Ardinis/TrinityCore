@@ -162,6 +162,8 @@ class ArenaTeam
         void BroadcastEvent(ArenaTeamEvents event, uint64 guid, uint8 strCount, std::string str1, std::string str2, std::string str3);
         void NotifyStatsChanged();
 
+	void MassInviteToEvent(WorldSession* session);
+
         void Roster(WorldSession* session);
         void Query(WorldSession* session);
         void SendStats(WorldSession* session);
@@ -201,4 +203,3 @@ class ArenaTeam
         ArenaTeamStats Stats;
 };
 #endif
-

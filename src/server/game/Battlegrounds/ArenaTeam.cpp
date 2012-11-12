@@ -522,6 +522,23 @@ void ArenaTeam::BroadcastEvent(ArenaTeamEvents event, uint64 guid, uint8 strCoun
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_ARENA_TEAM_EVENT");
 }
 
+void ArenaTeam::MassInviteToEvent(WorldSession* session)
+{
+  WorldPacket data(SMSG_CALENDAR_ARENA_TEAM, (Members.size() - 1) * (4 + 8 + 1));
+  data << uint32(Members.size() - 1);
+
+  for (MemberList::const_iterator itr = Members.begin(); itr != Members.end(); ++itr)
+  {
+    if (itr->Guid != session->GetPlayer()->GetGUID())
+    {
+      data.appendPackGUID(itr->Guid);
+      data << uint8(0); // unk
+    }
+  }
+
+  session->SendPacket(&data);
+}
+
 uint8 ArenaTeam::GetSlotByType(uint32 type)
 {
     switch(type)
@@ -646,7 +663,7 @@ int32 ArenaTeam::GetPursuitMod(uint32 ownRating, uint32 ownMMRRating)
 			pursuit_mod = 2000.0f / float(ownRating);
 		else
 			pursuit_mod = 2000.0f / 1000.0f;
-	
+
     return ceil(pursuit_mod);
 }
 
@@ -665,8 +682,8 @@ int32 ArenaTeam::GetRatingModWon(uint32 ownRating, uint32 ownMMRRating, uint32 o
 			mod = (24.0f + (24.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);
 	}
 	else
-		mod = 24.0f * (won_mod - chance);	
-	
+		mod = 24.0f * (won_mod - chance);
+
     return (int32)ceil(mod);
 }
 
@@ -677,7 +694,7 @@ int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won 
     float chance = GetChanceAgainst(ownRating, opponentRating);
     float won_mod = (won) ? 1.0f : 0.0f;
     float mod;
-	
+
 	if(won && ownRating < 1300)
 	{
 		if(ownRating < 1000)
@@ -687,7 +704,7 @@ int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won 
 	}
 	else
 		mod = 24.0f * (won_mod - chance);
-	
+
     return (int32)ceil(mod);
 }
 

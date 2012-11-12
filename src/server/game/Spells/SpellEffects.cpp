@@ -699,24 +699,24 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                     {
                                         uint32 chance = (*iter)->GetSpellInfo()->Effects[EFFECT_2].CalcValue(m_caster);
 
-										if ((chance >= 100) || roll_chance_i(chance))
-											needConsume = false;
+					if ((chance >= 100) || roll_chance_i(chance))
+					  needConsume = false;
                                         break;
                                     }
                                 }
 
                                 if (needConsume)
-                                    for (uint32 i = 0; i < doses; ++i)
-                                        unitTarget->RemoveAuraFromStack(spellId);
+				  for (uint32 i = 0; i < doses; ++i)
+				    unitTarget->RemoveAuraFromStack(spellId, m_caster->GetGUID());
 
                                 damage *= doses;
                                 damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
                             }
 
                             // Eviscerate and Envenom Bonus Damage (item set effect)
-					         if (AuraEffect const * aurEffB = m_caster->GetAuraEffect(37169, EFFECT_0, m_caster->GetGUID()))
-				             damage += combo * aurEffB->GetAmount();
-			                 break;
+			    if (AuraEffect const * aurEffB = m_caster->GetAuraEffect(37169, EFFECT_0, m_caster->GetGUID()))
+			      damage += combo * aurEffB->GetAmount();
+			    break;
                         }
                     }
                 }

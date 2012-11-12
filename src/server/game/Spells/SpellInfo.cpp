@@ -2340,6 +2340,8 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
 	    // Slice and Dice
 	    if (SpellFamilyFlags[0] & 0x40000)
 	      return true;
+	    if (SpellFamilyFlags[1] & 0x00000008)
+	      return true;
             break;
         default:
             break;

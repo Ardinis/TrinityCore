@@ -31,6 +31,7 @@ void AddSC_player_event();
 void AddSC_npc_transmo();
 
 // spells
+void AddSC_pet_spell_scripts();
 void AddSC_deathknight_spell_scripts();
 void AddSC_druid_spell_scripts();
 void AddSC_generic_spell_scripts();
@@ -323,6 +324,7 @@ void AddSC_bug_trio();
 void AddSC_boss_sartura();
 void AddSC_boss_skeram();
 void AddSC_boss_twinemperors();
+void AddSC_boss_ouro();
 void AddSC_mob_anubisath_sentinel();
 void AddSC_instance_temple_of_ahnqiraj();
 void AddSC_wailing_caverns();                //Wailing caverns
@@ -649,6 +651,7 @@ void AddExampleScripts()
 
 void AddSpellScripts()
 {
+  AddSC_pet_spell_scripts();
     AddSC_deathknight_spell_scripts();
     AddSC_druid_spell_scripts();
     AddSC_generic_spell_scripts();
@@ -952,6 +955,7 @@ void AddKalimdorScripts()
     AddSC_boss_sartura();
     AddSC_boss_skeram();
     AddSC_boss_twinemperors();
+    AddSC_boss_ouro();
     AddSC_mob_anubisath_sentinel();
     AddSC_instance_temple_of_ahnqiraj();
     AddSC_wailing_caverns();                //Wailing caverns

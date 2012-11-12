@@ -26,7 +26,8 @@
 enum DruidSpells
 {
     DRUID_INCREASED_MOONFIRE_DURATION   = 38414,
-    DRUID_NATURES_SPLENDOR              = 57865
+    DRUID_NATURES_SPLENDOR              = 57865,
+    SPELL_DRUID_ITEM_T8_BALANCE_RELIC   = 64950,
 };
 
 // 54846 Glyph of Starfire
@@ -41,7 +42,7 @@ class spell_dru_glyph_of_starfire : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DRUID_INCREASED_MOONFIRE_DURATION) || !sSpellMgr->GetSpellInfo(DRUID_NATURES_SPLENDOR))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DRUID_INCREASED_MOONFIRE_DURATION) || !sSpellMgr->GetSpellInfo(DRUID_NATURES_SPLENDOR))
                     return false;
                 return true;
             }
@@ -368,6 +369,34 @@ class spell_dru_starfall_dummy : public SpellScriptLoader
         }
 };
 
+class spell_dru_insect_swarm : public SpellScriptLoader
+{
+public:
+  spell_dru_insect_swarm() : SpellScriptLoader("spell_dru_insect_swarm") { }
+
+  class spell_dru_insect_swarm_AuraScript : public AuraScript
+  {
+    PrepareAuraScript(spell_dru_insect_swarm_AuraScript);
+
+    void CalculateAmount(AuraEffect const* aurEff, int32 & amount, bool & /*canBeRecalculated*/)
+    {
+      if (Unit* caster = GetCaster())
+	if (AuraEffect const* relicAurEff = caster->GetAuraEffect(SPELL_DRUID_ITEM_T8_BALANCE_RELIC, EFFECT_0))
+	  amount += relicAurEff->GetAmount() / aurEff->GetTotalTicks();
+    }
+
+    void Register()
+    {
+      DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_insect_swarm_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+    }
+  };
+
+  AuraScript* GetAuraScript() const
+  {
+    return new spell_dru_insect_swarm_AuraScript();
+  }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_glyph_of_starfire();
@@ -378,4 +407,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_starfall_aoe();
     new spell_dru_swift_flight_passive();
     //    new spell_dru_starfall_dummy();
+    new spell_dru_insect_swarm();
 }

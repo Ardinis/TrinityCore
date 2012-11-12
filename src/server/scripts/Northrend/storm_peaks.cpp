@@ -773,7 +773,7 @@ public:
             }
         }
 
-        void SpellHit(Unit* hitter, const SpellEntry* spell)
+        void SpellHit(Unit* hitter, const SpellInfo* spell)
         {
             if (!hitter || !spell)
                 return;
@@ -984,8 +984,8 @@ void AddSC_storm_peaks()
     new npc_loklira_crone;
     new npc_injured_goblin;
     new npc_roxi_ramrocket;
-    new npc_brunnhildar_prisoner;
-	new npc_freed_protodrake;
+    // new npc_brunnhildar_prisoner;
+    //	new npc_freed_protodrake;
 	new npc_captive_protodrake;
     new npc_icefang;
     new npc_hyldsmeet_protodrake;

@@ -46,6 +46,7 @@ public:
         uint64 uiKrikthirDoor;
 
         uint32 auiEncounter[MAX_ENCOUNTER];
+      uint32 dataHadronoxEvent;
 
        void Initialize()
        {
@@ -59,6 +60,7 @@ public:
             uiWatcherSilthik = 0;
             uiWatcherNarjil = 0;
             uiKrikthirDoor = 0;
+	    dataHadronoxEvent = 0;
         }
 
         bool IsEncounterInProgress() const
@@ -139,6 +141,9 @@ public:
                     for (uint8 i = 0; i < 3; ++i)
                         HandleGameObject(uiAnubarakDoor[i], true);
                 break;
+	    case DATA_HADRONOX_PRE_EVENT:
+	      dataHadronoxEvent = data;
+	      break;
             }
 
             if (data == DONE)
@@ -154,6 +159,7 @@ public:
                 case DATA_KRIKTHIR_THE_GATEWATCHER_EVENT:   return auiEncounter[0];
                 case DATA_HADRONOX_EVENT:                   return auiEncounter[1];
                 case DATA_ANUBARAK_EVENT:                   return auiEncounter[2];
+	        case DATA_HADRONOX_PRE_EVENT:               return dataHadronoxEvent;
             }
 
             return 0;

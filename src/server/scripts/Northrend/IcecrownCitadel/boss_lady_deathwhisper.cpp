@@ -163,6 +163,7 @@ enum Phases
 
     PHASE_INTRO_MASK    = 1 << PHASE_INTRO,
     PHASE_ONE_MASK      = 1 << PHASE_ONE,
+    PHASE_TWO_MASK      = 1 << PHASE_TWO,
 };
 
 enum DeprogrammingData
@@ -183,6 +184,7 @@ enum DeprogrammingData
 uint32 const SummonEntries[2] = {NPC_CULT_FANATIC, NPC_CULT_ADHERENT};
 
 #define GUID_CULTIST    1
+#define ACTION_PHASE_2 42
 
 Position const SummonPositions[7] =
 {
@@ -229,6 +231,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
                 events.SetPhase(PHASE_ONE);
                 _waveCounter = 0;
+		_shaderCount = 0;
                 _nextVengefulShadeTargetGUID = 0;
                 _darnavanGUID = 0;
                 DoCast(me, SPELL_SHADOW_CHANNELING);
@@ -265,7 +268,6 @@ class boss_lady_deathwhisper : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : DamE MURMEMORT <!>");
                 if (!instance->CheckRequiredBosses(DATA_LADY_DEATHWHISPER, who->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -343,6 +345,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, FAIL);
 
                 summons.DespawnAll();
+		_shaderCount = 0;
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))
                 {
                     darnavan->DespawnOrUnsummon();
@@ -368,6 +371,10 @@ class boss_lady_deathwhisper : public CreatureScript
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
                     events.SetPhase(PHASE_TWO);
+		    for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+		      if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
+			if (temp->AI())
+			  temp->AI()->DoAction(ACTION_PHASE_2);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(6000, 9000), 0, PHASE_TWO);
@@ -399,10 +406,17 @@ class boss_lady_deathwhisper : public CreatureScript
                     target = SelectTarget(SELECT_TARGET_RANDOM);                        // Wave adds
 
                 summon->AI()->AttackStart(target);                                      // CAN be NULL
-				if (summon->GetEntry() == NPC_REANIMATED_FANATIC)
+		if (summon->GetEntry() == NPC_VENGEFUL_SHADE)
+		{
+		  summon->SetReactState(REACT_PASSIVE);
+		  summon->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+		}
+		if (summon->GetEntry() == NPC_REANIMATED_FANATIC)
                     summon->AI()->DoCast(summon, SPELL_FANATIC_S_DETERMINATION);
                 else if (summon->GetEntry() == NPC_REANIMATED_ADHERENT)
                     summon->AI()->DoCast(summon, SPELL_ADHERENT_S_DETERMINATION);
+		if (events.GetPhaseMask() & PHASE_TWO_MASK)
+		  summon->AI()->DoAction(ACTION_PHASE_2);
             }
 
             void UpdateAI(uint32 const diff)
@@ -463,7 +477,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             break;
                         case EVENT_P1_EMPOWER_CULTIST:
                             EmpowerCultist();
-                            events.ScheduleEvent(EVENT_P1_EMPOWER_CULTIST, urand(18000, 25000));
+                            events.ScheduleEvent(EVENT_P1_EMPOWER_CULTIST, urand(18000, 25000), 0, PHASE_ONE);
                             break;
                         case EVENT_P2_FROSTBOLT:
                             DoCastVictim(SPELL_FROSTBOLT);
@@ -479,13 +493,25 @@ class boss_lady_deathwhisper : public CreatureScript
                             events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(9000, 13000), 0, PHASE_TWO);
                             break;
                         case EVENT_P2_SUMMON_SHADE:
+			{
                             if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
                             {
                                 _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
                                 DoCast(shadeTarget, SPELL_SUMMON_SHADE);
                             }
-                            events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(18000, 23000), 0, PHASE_TWO);
+			    int shaderCount = RAID_MODE(1, 2, 1, 3);
+			    if (_shaderCount + 1 < shaderCount)
+			    {
+			      _shaderCount++;
+			      events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, 100, 0, PHASE_TWO);
+			    }
+			    else
+			    {
+			      _shaderCount = 0;
+			      events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(10000, 13000), 0, PHASE_TWO);
+			    }
                             break;
+			}
                         case EVENT_P2_SUMMON_WAVE:
                             SummonWaveP2();
                             events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, 45000, 0, PHASE_TWO);
@@ -620,6 +646,7 @@ class boss_lady_deathwhisper : public CreatureScript
             uint32 _waveCounter;
             uint8 const _dominateMindCount;
             bool _introDone;
+	  int _shaderCount;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -645,8 +672,8 @@ class npc_cult_fanatic : public CreatureScript
                 Events.ScheduleEvent(EVENT_FANATIC_NECROTIC_STRIKE, urand(10000, 12000));
                 Events.ScheduleEvent(EVENT_FANATIC_SHADOW_CLEAVE, urand(14000, 16000));
                 Events.ScheduleEvent(EVENT_FANATIC_VAMPIRIC_MIGHT, urand(20000, 27000));
-                if (me->GetEntry() == NPC_CULT_FANATIC)
-                    Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(18000, 32000));
+		if (me->GetEntry() == NPC_CULT_FANATIC)
+		  Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(18000, 32000));
             }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
@@ -660,6 +687,15 @@ class npc_cult_fanatic : public CreatureScript
                     DoCast(me, SPELL_DARK_TRANSFORMATION);
                 }
             }
+
+	  void DoAction(int32 const action)
+	  {
+	    if (action == ACTION_PHASE_2)
+	    {
+	      me->MonsterYell("Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM)", LANG_UNIVERSAL, 0);
+	      Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
+	    }
+	  }
 
             void UpdateAI(uint32 const diff)
             {
@@ -723,9 +759,18 @@ class npc_cult_adherent : public CreatureScript
                 Events.ScheduleEvent(EVENT_ADHERENT_DEATHCHILL, urand(14000, 16000));
                 Events.ScheduleEvent(EVENT_ADHERENT_CURSE_OF_TORPOR, urand(14000, 16000));
                 Events.ScheduleEvent(EVENT_ADHERENT_SHORUD_OF_THE_OCCULT, urand(32000, 39000));
-                if (me->GetEntry() == NPC_CULT_ADHERENT)
-                    Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(18000, 32000));
+		if (me->GetEntry() == NPC_CULT_ADHERENT)
+		  Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(18000, 32000));
             }
+
+	  void DoAction(int32 const action)
+	  {
+	    if (action == ACTION_PHASE_2)
+	    {
+	      me->MonsterYell("Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM)", LANG_UNIVERSAL, 0);
+	      Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
+	    }
+	  }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {

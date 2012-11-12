@@ -75,9 +75,10 @@ enum BossSpells
     SPELL_LEGION_FLAME_EFFECT   = 66201,
     SPELL_SHIVAN_SLASH          = 67098,
     SPELL_SPINNING_STRIKE       = 66283,
-    SPELL_MISTRESS_KISS         = 67077,
+    SPELL_MISTRESS_KISS         = 66336,
     SPELL_FEL_INFERNO           = 67047,
     SPELL_FEL_STREAK            = 66494,
+    SPELL_LORD_HITTIN                 = 66326,
     SPELL_BERSERK               = 64238,
 };
 
@@ -179,9 +180,6 @@ public:
             if (!UpdateVictim())
                 return;
 
-	    if (me->HasUnitState(UNIT_STATE_CASTING))
-	      return;
-
             if (m_uiSummonInfernalEruptionTimer <= uiDiff)
             {
                 DoScriptText(EMOTE_INFERNAL_ERUPTION, me);
@@ -208,18 +206,18 @@ public:
 
             if (m_uiFelLightningTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
+	      if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.f, true, -SPELL_LORD_HITTIN))
                     DoCast(pTarget, SPELL_FEL_LIGHTING);
-                m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
+	      m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             } else m_uiFelLightningTimer -= uiDiff;
 
             if (m_uiIncinerateFleshTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.f, true, -SPELL_LORD_HITTIN))
                 {
-                    DoScriptText(EMOTE_INCINERATE, me, pTarget);
+                    DoScriptText(EMOTE_INCINERATE, me, target);
                     DoScriptText(SAY_INCINERATE, me);
-                    DoCast(pTarget, SPELL_INCINERATE_FLESH);
+                    DoCast(target, SPELL_INCINERATE_FLESH);
                 }
                 m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiIncinerateFleshTimer -= uiDiff;
@@ -232,10 +230,10 @@ public:
 
             if (m_uiLegionFlameTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true))
+	      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.f, true, -SPELL_LORD_HITTIN))
                 {
-                    DoScriptText(EMOTE_LEGION_FLAME, me, pTarget);
-                    DoCast(pTarget, SPELL_LEGION_FLAME);
+                    DoScriptText(EMOTE_LEGION_FLAME, me, target);
+                    DoCast(target, SPELL_LEGION_FLAME);
                 }
                 m_uiLegionFlameTimer = 30*IN_MILLISECONDS;
             } else m_uiLegionFlameTimer -= uiDiff;
@@ -577,15 +575,119 @@ public:
 
             if (IsHeroic() && m_uiMistressKissTimer <= uiDiff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM))
-                    DoCast(pTarget, SPELL_MISTRESS_KISS);
+	      if (Unit* target = SelectEnemyCaster(false))
+		me->CastCustomSpell(SPELL_MISTRESS_KISS, SPELLVALUE_MAX_TARGETS, 1, target, true);
+	      //                    DoCast(target, SPELL_MISTRESS_KISS);
                 m_uiMistressKissTimer = 30*IN_MILLISECONDS;
             } else m_uiMistressKissTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
+
+      Unit* SelectEnemyCaster(bool /*casting*/)
+        {
+            std::list<HostileReference*> const& tList = me->getThreatManager().getThreatList();
+            std::list<HostileReference*>::const_iterator iter;
+            Unit* target;
+            for (iter = tList.begin(); iter!=tList.end(); ++iter)
+            {
+               target = Unit::GetUnit(*me, (*iter)->getUnitGuid());
+               if (target && target->getPowerType() == POWER_MANA)
+                    return target;
+           }
+           return NULL;
+	}
+
     };
 
+};
+
+enum MistressKiss
+  {
+    SPELL_MISTRESS_KISS_DAMAGE_SILENCE = 66359
+  };
+
+class spell_mistress_kiss : public SpellScriptLoader
+{
+public:
+  spell_mistress_kiss() : SpellScriptLoader("spell_mistress_kiss") { }
+
+  class spell_mistress_kiss_AuraScript : public AuraScript
+  {
+    PrepareAuraScript(spell_mistress_kiss_AuraScript);
+
+    bool Load()
+    {
+      if (GetCaster())
+	if (sSpellMgr->GetSpellIdForDifficulty(SPELL_MISTRESS_KISS_DAMAGE_SILENCE, GetCaster()))
+	  return true;
+      return false;
+    }
+
+    void HandleDummyTick(AuraEffect const* /*aurEff*/)
+    {
+      if (Unit* target = GetTarget())
+	{
+	  if (target->HasUnitState(UNIT_STATE_CASTING))
+	    {
+	      target->CastSpell(target, SPELL_MISTRESS_KISS_DAMAGE_SILENCE, true);
+	      target->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+	    }
+	}
+    }
+
+    void Register()
+    {
+      OnEffectPeriodic += AuraEffectPeriodicFn(spell_mistress_kiss_AuraScript::HandleDummyTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+    }
+  };
+
+  AuraScript* GetAuraScript() const
+  {
+    return new spell_mistress_kiss_AuraScript();
+  }
+};
+
+enum MistressKissDebuff
+  {
+    SPELL_MISTRESS_KISS_DEBUFF = 66334
+  };
+
+class spell_mistress_kiss_area : public SpellScriptLoader
+{
+public:
+  spell_mistress_kiss_area() : SpellScriptLoader("spell_mistress_kiss_area") {}
+
+  class spell_mistress_kiss_area_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_mistress_kiss_area_SpellScript)
+
+    bool Load()
+    {
+      if (GetCaster())
+	if (sSpellMgr->GetSpellIdForDifficulty(SPELL_MISTRESS_KISS_DEBUFF, GetCaster()))
+	  return true;
+      return false;
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+      Unit* caster = GetCaster();
+      Unit* target = GetHitUnit();
+      if (caster && target)
+	caster->CastSpell(target, SPELL_MISTRESS_KISS_DEBUFF, true);
+    }
+
+    void Register()
+    {
+      OnEffectHitTarget += SpellEffectFn(spell_mistress_kiss_area_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_mistress_kiss_area_SpellScript();
+  }
 };
 
 void AddSC_boss_jaraxxus()
@@ -596,4 +698,6 @@ void AddSC_boss_jaraxxus()
     new mob_fel_infernal();
     new mob_nether_portal();
     new mob_mistress_of_pain();
+    new spell_mistress_kiss();
+    new spell_mistress_kiss_area();
 }

@@ -161,6 +161,9 @@ enum Spells
     SPELL_FEL_IRON_BOMB_UNDEAD      = 71787,
     SPELL_MACHINE_GUN_UNDEAD        = 71788,
     SPELL_ROCKET_LAUNCH_UNDEAD      = 71786,
+
+    // Invisible Stalker (Float, Uninteractible, LargeAOI)
+    SPELL_SOUL_MISSILE              = 72585,
 };
 
 // Helper defines
@@ -251,11 +254,15 @@ enum EventTypes
     EVENT_RUPERT_FEL_IRON_BOMB          = 52,
     EVENT_RUPERT_MACHINE_GUN            = 53,
     EVENT_RUPERT_ROCKET_LAUNCH          = 54,
-	
+
 	// Sindragosas Ward
 	EVENT_SUB_WAVE_1                    = 55,
 	EVENT_SUB_WAVE_2                    = 56,
 	EVENT_UPDATE_CHECK                  = 57,
+
+    // Invisible Stalker (Float, Uninteractible, LargeAOI)
+    EVENT_SOUL_MISSILE                  = 58,
+
 };
 
 enum DataTypesICC
@@ -969,14 +976,8 @@ public:
     {
       me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
       me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-    }
-
-    void InitializeAI()
-    {
-      if (!me->isDead())
-	Reset();
-      
-      me->SetReactState(REACT_PASSIVE);
+      me->SetReactState(REACT_DEFENSIVE);
+      Reset();
     }
 
     void Reset()
@@ -1005,7 +1006,7 @@ public:
     {
       if (_impaledguid)
 	RemoveSpike();
-      
+
       _JustDied();
       Talk(SAY_SVALNA_DEATH);
 
@@ -1029,7 +1030,7 @@ public:
       _EnterCombat();
       if (Creature* crok = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_CROK_SCOURGEBANE)))
 	crok->AI()->Talk(SAY_CROK_COMBAT_SVALNA);
-      events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);	
+      events.ScheduleEvent(EVENT_SVALNA_COMBAT, 9000);
       events.ScheduleEvent(EVENT_IMPALING_SPEAR, urand(20000, 30000));
     }
 
@@ -1059,12 +1060,12 @@ public:
 	  break;
 	}
     }
-    
+
     void JustReachedHome()
     {
       _JustReachedHome();
       me->RemoveAurasDueToSpell(SPELL_DIVINE_SURGE);
-      me->SetReactState(REACT_PASSIVE);
+      me->SetReactState(REACT_DEFENSIVE);
       me->SetFlying(false);
     }
 
@@ -1107,31 +1108,31 @@ public:
 	  DoCastAOE(SPELL_ETHER_EXPLOSION);
 	}
     }
-    
+
     void MovementInform(uint32 type, uint32 id)
     {
       if (type != EFFECT_MOTION_TYPE || id != POINT_LAND)
 	return;
-      
+
       _isEventInProgress = false;
       me->setActive(false);
       me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
       me->SetFlying(false);
     }
-    
+
     void RemoveSpike()
     {
       if (!_impaledguid)
 	return;
-      
+
       if (Player* _impaled = ObjectAccessor::GetPlayer(*me , _impaledguid))
 	{
 	  _impaled->RemoveAurasDueToSpell(VEHICLE_SPELL_RIDE_HARDCODED);
 	  _impaled->RemoveAurasDueToSpell(SPELL_IMPALING_SPEAR);
 	  _impaledguid = 0;
 	}
-    }			
-			
+    }
+
     void SpellHitTarget(Unit* target, SpellInfo const* spell)
     {
       switch (spell->Id)
@@ -1157,15 +1158,15 @@ public:
     {
       if (!UpdateVictim() && !_isEventInProgress)
 	return;
-      
+
       events.Update(diff);
-      
+
       if (me->HasUnitState(UNIT_STATE_CASTING))
 	return;
 
-      if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))	
+      if (!GetClosestCreatureWithEntry(me, NPC_IMPALING_SPEAR, 50000.0f))
 	RemoveSpike();
-      
+
       while (uint32 eventId = events.ExecuteEvent())
 	{
 	  switch (eventId)
@@ -1184,7 +1185,7 @@ public:
 	    case EVENT_SVALNA_COMBAT:
 	      me->SetFlying(false);
 	      me->SetReactState(REACT_DEFENSIVE);
-	      DoCast(me, SPELL_DIVINE_SURGE, true);							
+	      DoCast(me, SPELL_DIVINE_SURGE, true);
 	      Talk(SAY_SVALNA_AGGRO);
 	      break;
 	    case EVENT_IMPALING_SPEAR:
@@ -1209,10 +1210,10 @@ public:
 	      break;
 	    }
 	}
-      
+
       DoMeleeAttackIfReady();
     }
-    
+
   private:
     uint64 _impaledguid;
     bool _isEventInProgress, _introDone;
@@ -1265,21 +1266,52 @@ class npc_crok_scourgebane : public CreatureScript
             {
                 SetDespawnAtEnd(false);
                 SetDespawnAtFar(false);
-                _isEventActive = false;
                 _isEventDone = _instance->GetBossState(DATA_SISTER_SVALNA) == DONE;
                 _didUnderTenPercentText = false;
 		me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+		Reset();
             }
 
             void Reset()
             {
-                _events.Reset();
-                _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, urand(7500, 12500));
-                _events.ScheduleEvent(EVENT_DEATH_STRIKE, urand(25000, 30000));
-                me->SetReactState(REACT_DEFENSIVE);
-                _didUnderTenPercentText = false;
-                _wipeCheckTimer = 1000;
+	      me->GetMotionMaster()->MoveTargetedHome();
+	      _events.Reset();
+	      _events.ScheduleEvent(EVENT_SCOURGE_STRIKE, urand(7500, 12500));
+	      _events.ScheduleEvent(EVENT_DEATH_STRIKE, urand(25000, 30000));
+	      me->SetReactState(REACT_DEFENSIVE);
+	      _didUnderTenPercentText = false;
+	      _wipeCheckTimer = 1000;
+	      me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	      _aliveTrash.clear();
+	      me->GetMap()->LoadGrid(4356.71f, 2484.33f);
+	      std::list<Creature*> temp;
+	      FrostwingVrykulSearcher check(me, 900.0f);
+	      Trinity::CreatureListSearcher<FrostwingVrykulSearcher> searcher(me, temp, check);
+	      me->VisitNearbyGridObject(900.0f, searcher);
+	      float minY = 2484.0f;
+	      float maxY = 2673.0f;
+	      for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+	      {
+		if ((*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
+		{
+		  (*itr)->Respawn();
+		  (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+		  (*itr)->SetReactState(REACT_PASSIVE);
+		}
+	      }
+	      _isEventActive = false;
+                    _isEventDone = _instance->GetBossState(DATA_SISTER_SVALNA) == DONE;
+                    me->setActive(false);
+                    _aliveTrash.clear();
+                    _currentWPid = 0;
+	      me->SetReactState(REACT_PASSIVE);
             }
+
+	  void JustDied(Unit* /*killer*/)
+	  {
+	    me->Respawn();
+	    Reset();
+	  }
 
             void DoAction(int32 const action)
             {
@@ -1300,8 +1332,11 @@ class npc_crok_scourgebane : public CreatureScript
                     _events.ScheduleEvent(EVENT_START_PATHING, 37000);
                     me->setActive(true);
                     for (uint32 i = 0; i < 4; ++i)
-                        if (Creature* crusader = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_CAPTAIN_ARNATH + i)))
-                            crusader->AI()->DoAction(ACTION_START_GAUNTLET);
+		      if (Creature* crusader = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_CAPTAIN_ARNATH + i)))
+		      {
+			crusader->AI()->DoAction(ACTION_START_GAUNTLET);
+			crusader->Respawn();
+		      }
                 }
                 else if (action == ACTION_RESET_EVENT)
                 {
@@ -1339,6 +1374,7 @@ class npc_crok_scourgebane : public CreatureScript
                 {
                     // pause pathing until trash pack is cleared
                     case 0:
+		      me->SetReactState(REACT_AGGRESSIVE);
                         Talk(SAY_CROK_COMBAT_WP_0);
                         if (!_aliveTrash.empty())
                             SetEscortPaused(true);
@@ -1397,8 +1433,12 @@ class npc_crok_scourgebane : public CreatureScript
 
                         _aliveTrash.clear();
                         for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
-                            if ((*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
-                                _aliveTrash.insert((*itr)->GetGUID());
+			  if ((*itr)->isAlive() && (*itr)->GetHomePosition().GetPositionY() < maxY && (*itr)->GetHomePosition().GetPositionY() > minY)
+			  {
+			    (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+			    (*itr)->SetReactState(REACT_AGGRESSIVE);
+			    _aliveTrash.insert((*itr)->GetGUID());
+			  }
                         break;
                     }
                     // at waypoints 1 and 2 she kills one captain
@@ -1418,21 +1458,17 @@ class npc_crok_scourgebane : public CreatureScript
                 {
                     _wipeCheckTimer = 1000;
                     Player* player = NULL;
-                    Trinity::AnyPlayerInObjectRangeCheck check(me, 60.0f);
+                    Trinity::AnyPlayerInObjectRangeCheck check(me, 300.0f);
                     Trinity::PlayerSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, player, check);
-                    me->VisitNearbyWorldObject(60.0f, searcher);
+                    me->VisitNearbyWorldObject(300.0f, searcher);
                     // wipe
                     if (!player)
                     {
-                        damage *= 100;
-                        if (damage >= me->GetHealth())
-                        {
-                            FrostwingGauntletRespawner respawner;
-                            Trinity::CreatureWorker<FrostwingGauntletRespawner> worker(me, respawner);
-                            me->VisitNearbyGridObject(333.0f, worker);
-                            Talk(SAY_CROK_DEATH);
-                        }
-                        return;
+		      FrostwingGauntletRespawner respawner;
+		      Trinity::CreatureWorker<FrostwingGauntletRespawner> worker(me, respawner);
+		      me->VisitNearbyGridObject(333.0f, worker);
+		      Talk(SAY_CROK_DEATH);
+		      return;
                     }
                 }
 
@@ -1749,9 +1785,9 @@ class npc_captain_brandon : public CreatureScript
 
         struct npc_captain_brandonAI : public npc_argent_captainAI
         {
-            npc_captain_brandonAI(Creature* creature) : npc_argent_captainAI(creature)
-			{
-			}
+	  npc_captain_brandonAI(Creature* creature) : npc_argent_captainAI(creature)
+	  {
+	  }
 
             void Reset()
             {
@@ -1972,9 +2008,11 @@ class npc_impaling_spear : public CreatureScript
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-      if (Player *pl2 = creature->FindNearestPlayer(2))
-	if (pl2->GetGUID() == player->GetGUID())
-	  return false;
+      if (creature->ToTempSummon())
+	if (Unit *p = creature->ToTempSummon()->GetSummoner())
+	  if (Player *pl2 = p->ToPlayer())
+	    if (pl2->GetGUID() == player->GetGUID())
+	      return false;
       player->AddItem(50307, 1);
       creature->DespawnOrUnsummon(100);
       return true;
@@ -2581,8 +2619,8 @@ class npc_ess_disjointe : public CreatureScript
             {
 	      CastTimer = 10000;
 	      classPlayer = 0;
-	      me->SetHealth(RAID_MODE(126000, 315000, 126000, 315000)); 
-	      me->SetMaxHealth(RAID_MODE(126000, 315000, 126000, 315000)); 
+	      me->SetHealth(RAID_MODE(126000, 315000, 126000, 315000));
+	      me->SetMaxHealth(RAID_MODE(126000, 315000, 126000, 315000));
             }
 
             void DoAction(int32 const action)
@@ -2597,7 +2635,7 @@ class npc_ess_disjointe : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-		
+
 		if (CastTimer <= diff)
 		  {
 		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -2675,6 +2713,82 @@ class npc_ess_disjointe : public CreatureScript
         }
 };
 
+class npc_arthas_teleport_visual : public CreatureScript
+{
+public:
+  npc_arthas_teleport_visual() : CreatureScript("npc_arthas_teleport_visual") { }
+
+  struct npc_arthas_teleport_visualAI : public NullCreatureAI
+  {
+    npc_arthas_teleport_visualAI(Creature* creature) : NullCreatureAI(creature), _instance(creature->GetInstanceScript())
+    {
+    }
+
+    void Reset()
+    {
+      _events.Reset();
+      if (_instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE &&
+	  _instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE &&
+	  _instance->GetBossState(DATA_SINDRAGOSA) == DONE)
+	_events.ScheduleEvent(EVENT_SOUL_MISSILE, urand(1000, 6000));
+    }
+
+    void UpdateAI(uint32 const diff)
+    {
+      if (_events.Empty())
+      	return;
+
+      _events.Update(diff);
+
+      if (_events.ExecuteEvent() == EVENT_SOUL_MISSILE)
+      {
+	DoCastAOE(SPELL_SOUL_MISSILE);
+	_events.ScheduleEvent(EVENT_SOUL_MISSILE, urand(5000, 7000));
+      }
+    }
+
+  private:
+    InstanceScript* _instance;
+    EventMap _events;
+  };
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    // Distance from the center of the spire
+    if (creature->GetExactDist2d(4357.052f, 2769.421f) < 100.0f && creature->GetHomePosition().GetPositionZ() < 315.0f)
+      return GetIcecrownCitadelAI<npc_arthas_teleport_visualAI>(creature);
+
+    // Default to no script
+    return NULL;
+  }
+};
+
+class spell_icc_soul_missile : public SpellScriptLoader
+{
+public:
+  spell_icc_soul_missile() : SpellScriptLoader("spell_icc_soul_missile") { }
+
+  class spell_icc_soul_missile_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_icc_soul_missile_SpellScript);
+
+    void RelocateDest()
+    {
+      static Position const offset = {0.0f, 0.0f, 200.0f, 0.0f};
+      const_cast<WorldLocation*>(GetTargetDest())->RelocateOffset(offset);
+    }
+
+    void Register()
+    {
+      OnCast += SpellCastFn(spell_icc_soul_missile_SpellScript::RelocateDest);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_icc_soul_missile_SpellScript();
+  }
+};
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -2688,7 +2802,7 @@ void AddSC_icecrown_citadel()
     new npc_captain_brandon();
     new npc_captain_grondel();
     new npc_captain_rupert();
-    new npc_frostwing_vrykul();
+    //    new npc_frostwing_vrykul();
     new npc_impaling_spear();
     new spell_icc_stoneform();
     new spell_icc_sprit_alarm();
@@ -2705,4 +2819,6 @@ void AddSC_icecrown_citadel()
     new npc_buff_icc();
     new npc_val_icc();
     new npc_ess_disjointe();
+    new npc_arthas_teleport_visual();
+    new spell_icc_soul_missile();
 }

@@ -83,7 +83,8 @@ class boss_baltharus_the_warborn : public CreatureScript
                 _Reset();
                 events.SetPhase(PHASE_INTRO);
                 events.ScheduleEvent(EVENT_OOC_CHANNEL, 0, 0, PHASE_INTRO);
-                _cloneCount = RAID_MODE<uint8>(1, 2, 2, 2);
+		//     _cloneCount = RAID_MODE<uint8>(1, 2, 2, 2);
+		_cloneCount = 3;
                 instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetMaxHealth());
             }
 
@@ -147,28 +148,22 @@ class boss_baltharus_the_warborn : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage, SpellInfo const* /*spellInfo*/)
             {
-                if (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
-                {
-                    if (me->HealthBelowPctDamaged(50, damage) && _cloneCount == 1)
-                        DoAction(ACTION_CLONE);
-                }
-                else
-                {
-                    if ((me->HealthBelowPctDamaged(66, damage) && _cloneCount == 2) || (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 1))
-                        DoAction(ACTION_CLONE);
-                }
+	      if (me->GetHealth() > damage)
+		instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
 
-                if (me->GetHealth() > damage)
-                    instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
+	      if (me->HasUnitState(UNIT_STATE_CASTING))
+		return;
+	      if ((me->HealthBelowPctDamaged(66, damage) && _cloneCount == 3)
+		  || (me->HealthBelowPctDamaged(50, damage) && _cloneCount == 2)
+		  || (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 1))
+		DoAction(ACTION_CLONE);
+
             }
 
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim() && !(events.GetPhaseMask() & PHASE_INTRO_MASK))
                     return;
-
-                if (!(events.GetPhaseMask() & PHASE_INTRO_MASK))
-                    me->SetHealth(instance->GetData(DATA_BALTHARUS_SHARED_HEALTH));
 
                 events.Update(diff);
 
@@ -230,6 +225,8 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
             npc_baltharus_the_warborn_cloneAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+                if (_instance)
+                    me->SetHealth(_instance->GetData(DATA_BALTHARUS_SHARED_HEALTH));
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -244,16 +241,13 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
             void DamageTaken(Unit* /*attacker*/, uint32& damage, SpellInfo const* /*spellInfo*/)
             {
                 // Setting DATA_BALTHARUS_SHARED_HEALTH to 0 when killed would bug the boss.
-                if (_instance && me->GetHealth() > damage)
-                    _instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
+	      //                if (_instance && me->GetHealth() > damage)
+	      //        _instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
             }
 
             void JustDied(Unit* killer)
             {
                 // This is here because DamageTaken wont trigger if the damage is deadly.
-                if (_instance)
-                    if (Creature* baltharus = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_BALTHARUS_THE_WARBORN)))
-                        killer->Kill(baltharus);
             }
 
             void UpdateAI(uint32 const diff)
@@ -261,8 +255,6 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (_instance)
-                    me->SetHealth(_instance->GetData(DATA_BALTHARUS_SHARED_HEALTH));
 
                 _events.Update(diff);
 

@@ -376,7 +376,7 @@ AuraEffect::AuraEffect(Aura* base, uint8 effIndex, int32 *baseAmount, Unit* cast
 m_base(base), m_spellInfo(base->GetSpellInfo()),
 m_baseAmount(baseAmount ? *baseAmount : m_spellInfo->Effects[effIndex].BasePoints),
 m_spellmod(NULL), m_periodicTimer(0), m_tickNumber(0), m_effIndex(effIndex),
-m_canBeRecalculated(true), m_isPeriodic(false)
+m_canBeRecalculated(true), m_isPeriodic(false), damageBonus(0), healingBonus(0)
 {
     CalculatePeriodic(caster, true, false);
 
@@ -631,7 +631,10 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 uint8 cp = caster->ToPlayer()->GetComboPoints();
 
                 // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-                if (AuraEffect const* aurEff = caster->GetAuraEffect(34241, 0))
+		if (AuraEffect const* aurEff = caster->GetAuraEffect(34241, EFFECT_0))
+                    amount += cp * aurEff->GetAmount();
+                // Idol of Worship. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
+               else if (AuraEffect const* aurEff = caster->GetAuraEffect(60774, EFFECT_0))
                     amount += cp * aurEff->GetAmount();
 
                 amount += uint32(CalculatePctU(caster->GetTotalAttackPowerValue(BASE_ATTACK), cp));
@@ -664,20 +667,26 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             }
             break;
         case SPELL_AURA_PERIODIC_ENERGIZE:
-            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
-            {
-                // Replenishment (0.25% from max)
-                // Infinite Replenishment
-                if (m_spellInfo->SpellIconID == 3184 && m_spellInfo->SpellVisual[0] == 12495)
-                    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 25 / 10000;
-            }
-            // Innervate
-            else if (m_spellInfo->Id == 29166)
-                ApplyPctF(amount, float(GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA)) / GetTotalTicks());
-            // Owlkin Frenzy
-            else if (m_spellInfo->Id == 48391)
-                ApplyPctU(amount, GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA));
-            break;
+	{
+	  switch (m_spellInfo->Id)
+	  {
+	  case 57669: // Replenishment (0.2% from max)
+	    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.002f;
+	    break;
+	  case 61782: // Infinite Replenishment
+	    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 0.0025f;
+	    break;
+	  case 29166: // Innervate
+	    ApplyPctF(amount, float(GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA)) / GetTotalTicks());
+	    break;
+	  case 48391: // Owlkin Frenzy
+	    ApplyPctU(amount, GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA));
+	    break;
+	  default :
+	    break;
+	  }
+	  break;
+	}
         case SPELL_AURA_PERIODIC_HEAL:
             if (!caster)
                 break;
@@ -698,7 +707,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             {
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    int32 value = (-1 * amount) - 10;
+                    int32 value = (-1 * amount);
                     uint32 defva = uint32(caster->ToPlayer()->GetSkillValue(SKILL_DEFENSE) + caster->ToPlayer()->GetRatingBonusValue(CR_DEFENSE_SKILL));
 
                     if (defva > 400)
@@ -1603,7 +1612,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
 	  // Use the new aura to see on what stance the target will be
 
             uint32 newStance = (1<<((newAura ? newAura->GetMiscValue() : 0)-1));
-           
+
 
             // If the stances are not compatible with the spell, remove it
 
@@ -2297,6 +2306,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     case 75532:
                         target->SetDisplayId(target->getGender() == GENDER_MALE ? 31737 : 31738);
                         break;
+			// Gnomeregan Pride
+		case 75531:
+		  target->SetDisplayId(target->getGender() == GENDER_MALE ? 31654 : 31655);
+		  break;
                     default:
                         break;
                 }
@@ -3131,7 +3144,7 @@ void AuraEffect::HandleModPossess(AuraApplication const* aurApp, uint8 mode, boo
         target->RemoveCharmedBy(caster);
 		caster->ToPlayer()->SetMover(caster);
     }
-		
+
 }
 
 // only one spell has this aura
@@ -4792,15 +4805,16 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         target->ToPlayer()->RemoveAmmo();      // not use ammo and not allow use
                     break;
-                case 49028:
-                    if (caster)
-                        if (AuraEffect* aurEff = caster->GetAuraEffect(63330, 0)) // glyph of Dancing Rune Weapon
-                            GetBase()->SetDuration(GetBase()->GetDuration() + aurEff->GetAmount());
-                    break;
                 case 52916: // Honor Among Thieves
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
-                            target->CastSpell(spellTarget, 51699, true);
+			  if (spellTarget && spellTarget->ToPlayer() && spellTarget->isInCombat())
+			    if (spellTarget->ToPlayer()->HasSpellCooldown(51699) == 0)
+			    {
+			      if (caster)
+				caster->CastSpell(spellTarget, 51699, true);
+			      spellTarget->ToPlayer()->AddSpellCooldown(51699, 0, uint32(time(NULL) + 1));
+			    }
                    break;
                 case 28832: // Mark of Korth'azz
                 case 28833: // Mark of Blaumeux
@@ -5855,7 +5869,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     return;
                 if (target->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
                     return;
-
                  // timer expired - remove death runes
                 target->ToPlayer()->RemoveRunesByAuraEffect(this);
             }
@@ -6243,8 +6256,10 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
     if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        damage = caster->SpellDamageBonus(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
-
+      //        damage = caster->SpellDamageBonus(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+	damage += damageBonus;
+	if (target && caster)
+	  damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
         // Calculate armor mitigation
         if (Unit::IsDamageReducedByArmor(GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), GetEffIndex()))
         {
@@ -6510,7 +6525,8 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
             damage += addition;
         }
 
-        damage = caster->SpellHealingBonus(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+	damage = caster->SpellHealingBonus(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
+	//damage += healingBonus;
     }
 
     bool crit = IsPeriodicTickCrit(target, caster);

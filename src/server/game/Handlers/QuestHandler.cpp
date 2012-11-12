@@ -123,7 +123,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket & recv_data)
 
     // no or incorrect quest giver
     if (!pObject || (pObject->GetTypeId() != TYPEID_PLAYER && !pObject->hasQuest(quest)) ||
-        (pObject->GetTypeId() == TYPEID_PLAYER && !pObject->ToPlayer()->CanShareQuest(quest)))
+        (pObject->GetTypeId() == TYPEID_PLAYER && pObject != _player && !pObject->ToPlayer()->CanShareQuest(quest)))
     {
         _player->PlayerTalkClass->SendCloseGossip();
         _player->SetDivider(0);
@@ -331,7 +331,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket & recv_data)
                         // Send next quest
                         if (Quest const* nextQuest = _player->GetNextQuest(guid, quest))
                         {
-                            if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(quest, true))
+                            if (nextQuest->IsAutoAccept() && _player->CanAddQuest(nextQuest, true) && _player->CanTakeQuest(nextQuest, true))
                             {
                                 _player->AddQuest(nextQuest, object);
                                 if (_player->CanCompleteQuest(nextQuest->GetQuestId()))
@@ -589,7 +589,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                     continue;
                 }
 
-                player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, _player->GetGUID(), true);
+                player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, player->GetGUID(), true);
                 player->SetDivider(_player->GetGUID());
             }
         }

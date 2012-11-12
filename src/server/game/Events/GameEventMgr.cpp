@@ -29,6 +29,7 @@
 #include "BattlegroundMgr.h"
 #include "UnitAI.h"
 #include "GameObjectAI.h"
+#include "ScriptMgr.h"
 
 bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
 {
@@ -128,6 +129,7 @@ bool GameEventMgr::StartEvent(uint16 event_id, bool overwrite)
     {
         AddActiveEvent(event_id);
         ApplyNewEvent(event_id);
+		sScriptMgr->OnGameEventStart(event_id);
         if (overwrite)
         {
             mGameEvent[event_id].start = time(NULL);
@@ -146,6 +148,8 @@ bool GameEventMgr::StartEvent(uint16 event_id, bool overwrite)
         AddActiveEvent(event_id);
         // add spawns
         ApplyNewEvent(event_id);
+
+		sScriptMgr->OnGameEventStart(event_id);
 
         // check if can go to next state
         bool conditions_met = CheckOneGameEventConditions(event_id);
@@ -168,6 +172,7 @@ void GameEventMgr::StopEvent(uint16 event_id, bool overwrite)
 
     RemoveActiveEvent(event_id);
     UnApplyEvent(event_id);
+    sScriptMgr->OnGameEventStop(event_id);
 
     if (overwrite && !serverwide_evt)
     {

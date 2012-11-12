@@ -81,7 +81,7 @@ public:
         {
             switch (go->GetEntry())
             {
-            case ENTRY_PUMPKIN_SHRINE: PumpkinShrineGUID = go->GetGUID();break;
+			case ENTRY_PUMPKIN_SHRINE: if (IsLfg()) PumpkinShrineGUID = go->GetGUID(); else go->Delete(); break;
             case 104600: DoorHighInquisitorGUID = go->GetGUID(); break;
             }
         }
@@ -90,9 +90,9 @@ public:
         {
             switch (creature->GetEntry())
             {
-                case ENTRY_HORSEMAN:    HorsemanGUID = creature->GetGUID(); break;
-                case ENTRY_HEAD:        HeadGUID = creature->GetGUID(); break;
-                case ENTRY_PUMPKIN:     HorsemanAdds.insert(creature->GetGUID());break;
+				case ENTRY_HORSEMAN:    if (IsLfg()) HorsemanGUID = creature->GetGUID(); else creature->DisappearAndDie(); break;
+                case ENTRY_HEAD:        if (IsLfg()) HeadGUID = creature->GetGUID(); else creature->DisappearAndDie(); break;
+                case ENTRY_PUMPKIN:     if (IsLfg()) HorsemanAdds.insert(creature->GetGUID()); else creature->DisappearAndDie(); break;
                 case 3976: MograineGUID = creature->GetGUID(); break;
                 case 3977: WhitemaneGUID = creature->GetGUID(); break;
                 case 3981: VorrelGUID = creature->GetGUID(); break;

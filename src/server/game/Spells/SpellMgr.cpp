@@ -2120,13 +2120,13 @@ bool SpellMgr::IsCCSpell(SpellInfo const *spellProto, uint8 EffMask)
 {
        if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER ||
                spellProto->SpellFamilyName == SPELLFAMILY_GENERIC)
-               return false; 
-       
+               return false;
+
        for (uint8 effIndex = 0; effIndex<MAX_SPELL_EFFECTS; ++effIndex)
        {
                if (EffMask && !(EffMask & (1<<effIndex)))
-				   continue;    
-        
+				   continue;
+
                switch(spellProto->Effects[effIndex].ApplyAuraName)
                {
 				case SPELL_AURA_MOD_CONFUSE:
@@ -3030,6 +3030,9 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+	case 49575:
+	  spellInfo->EffectMiscValue[0] = 70;
+	  break;
 	    case 63311:
 	      spellInfo->rangeIndex = 1;
 	      spellInfo->EffectImplicitTargetA[0] = 104;
@@ -3063,6 +3066,11 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 spellInfo->EffectImplicitTargetB[0] = 0;
                 break;
+	case 74509: // Repelling wave
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
+	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
+	  spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
+	  break;
             case 31344: // Howl of Azgalor
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS; // 100yards instead of 50000?!
                 break;
@@ -3143,6 +3151,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 52479: // Gift of the Harvester
             case 48246: // Ball of Flame
                 spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 36384: // Skartax Purple Beam
+                spellInfo->MaxAffectedTargets = 2;
                 break;
             case 41376: // Spite
             case 39992: // Needle Spine
@@ -3266,7 +3277,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
 			case 55689: // Glyph of Shadow (to prevent glyph aura loss)
 				spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_NEED_SHAPESHIFT;
-				break;				
+				break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;
                 break;
@@ -3274,11 +3285,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 16835:
                 spellInfo->DurationIndex = 21;
                 break;
-/*				
+/*
 			case 62324: // Throw Passenger
 				spellInfo->Targets |= TARGET_UNIT_CASTER;
-				break;		
-*/				
+				break;
+*/
             case 51735: // Ebon Plague
             case 51734:
             case 51726:
@@ -3354,6 +3365,29 @@ void SpellMgr::LoadDbcDataCorrections()
                         // this needs research on modifier applying rules, does not seem to be in Attributes fields
                 spellInfo->EffectSpellClassMask[0] = flag96(0x00000040, 0x00000000, 0x00000000);
                 break;
+	case 64949: // Idol of the Flourishing Life
+	  spellInfo->EffectSpellClassMask[EFFECT_0] = flag96(0x00000000, 0x02000000, 0x00000000);
+	  spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  break;
+	case 34231: // Libram of the Lightbringer
+	case 60792: // Libram of Tolerance
+	case 64956: // Libram of the Resolute
+	  spellInfo->EffectSpellClassMask[EFFECT_0] = flag96(0x80000000, 0x00000000, 0x00000000);
+	  spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  break;
+	case 28851: // Libram of Light
+	case 28853: // Libram of Divinity
+	case 32403: // Blessed Book of Nagrand
+	  spellInfo->EffectSpellClassMask[EFFECT_0] = flag96(0x40000000, 0x00000000, 0x00000000);
+	  spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  break;
+	case 45602: // Ride Carpet
+	    spellInfo->EffectBasePoints[EFFECT_0] = 0; // force seat 0, vehicle doesn't have the required seat flags for "no seat specified (-1)"
+	    break;
+	case 64745: // Item - Death Knight T8 Tank 4P Bonus
+	case 64936: // Item - Warrior T8 Protection 4P Bonus
+	  spellInfo->EffectBasePoints[0] = 100; // 100% chance of procc'ing, not -10% (chance calculated in PrepareTriggersExecutedOnHit)
+	  break;
             case 63163: // Apply Enchanted Bridle (Argent Tournament)
                 spellInfo->EffectDieSides[0] = 0; // was 1, that should probably mean seat 0, but instead it's treated as spell 1
                 spellInfo->EffectBasePoints[0] = 52391; // Ride Vehicle (forces seat 0)
@@ -3371,6 +3405,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;
+	case 70650: // Death Knight T10 Tank 2P Bonus
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
+	  break;
             // ULDUAR SPELLS
             //
             case 62374: // Pursued (Flame Leviathan)
@@ -3554,6 +3591,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71085: // Mana Void (periodic aura)
                 spellInfo->DurationIndex = 9; // 30 seconds (missing)
                 break;
+	case 72015: // Frostbolt Volley (only heroic)
+	case 72016: // Frostbolt Volley (only heroic)
+	    spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_40_YARDS; // 40 yards
+	  break;
             case 70936: // Summon Suppressor (needs target selection script)
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
                 spellInfo->EffectImplicitTargetB[0] = 0;
@@ -3615,12 +3656,15 @@ void SpellMgr::LoadDbcDataCorrections()
 	case 64676 :
 	case 64459 :
 	case 64675 :
-	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; 
-	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; 
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
+	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS;
 	  break;
             case 73529: // Shadow Trap
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_10_YARDS;   // 10yd
                 break;
+	case 74629:
+	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;   // 10yd
+	  break;
 	case 62383:
 	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
 	  break;
@@ -3670,7 +3714,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 72405: // Broken Frostmourne
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
-            case 51678: // WintergraspSiegeEngine Ram set radius of damage for units to 5 yards 
+            case 51678: // WintergraspSiegeEngine Ram set radius of damage for units to 5 yards
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_KNOCK_BACK
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; // SPELL_EFFECT_SCHOOL_DAMAGE
                 spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // SPELL_EFFECT_WMO_DAMAGE, Huck but it must be -> Fortress towers are much bigger than original WMO damage radius of spell
@@ -3692,19 +3736,51 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
 			case 53651:
 			    spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
-				break;		
+				break;
 			case 53379: // Swift Retribution
 			case 53484:
 			case 53648:
 			  spellInfo->EffectSpellClassMask[0] = flag96(0x00000000, 0x00000000, 0x00000020);
-			  break;				
+			  break;
+	case 2378: // Minor Fortitude
+	  spellInfo->manaCost = 0;
+	  spellInfo->manaPerSecond = 0;
+	  break;
+	case 18754: // Improved succubus - problems with apply if target is pet
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER; // it's affects duration of seduction, let's minimize affection
+	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.22; // reduce cast time of seduction by 22%
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  break;
+	case 18755:
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.44; // reduce cast time of seduction by 44%
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  break;
+	case 18756:
+	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.66; // reduce cast time of seduction by 66%
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  break;
+	case 45524: // Chains of Ice
+	  spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+	  break;
+	case 66359: // Mistress' Kiss
+	case 67073:
+	case 67074:
+	case 67075:
+	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+	  spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+	  break;
+	case 24259: // Spell Lock silence
+	  spellInfo->speed = 80;
+	  break;
             default:
                 break;
         }
 
         switch (spellInfo->SpellFamilyName)
         {
-            case SPELLFAMILY_HUNTER: // Monstrous Bite Error target spell 
+            case SPELLFAMILY_HUNTER: // Monstrous Bite Error target spell
                 if (spellInfo->SpellIconID == 599)
                     spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
                 else

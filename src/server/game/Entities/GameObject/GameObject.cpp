@@ -175,7 +175,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 		if(guidlow > 3492269)
 			sLog->outError(" POP GAMEOBJECT (GUID: %u Entry: %u) Coordonne Map: %u (X: %f Y: %f , Z = %f)", guidlow, name_id, map->GetId(),x, y, z);
 			}*/
-	
+
     SetPhaseMask(phaseMask, false);
 
     SetZoneScript();
@@ -300,7 +300,7 @@ void GameObject::Update(uint32 diff)
                     else if (Unit* owner = GetOwner())
                     {
                         if (owner->isInCombat())
-                            m_cooldownTime = time(NULL) + goInfo->trap.cooldown;
+			  m_cooldownTime = time(NULL) + goInfo->trap.startDelay;
                     }
                     m_lootState = GO_READY;
                     break;
@@ -424,7 +424,7 @@ void GameObject::Update(uint32 diff)
                     bool IsBattlegroundTrap = false;
                     //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                     //TODO: move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
-                    float radius = (float)(goInfo->trap.radius)/2; // TODO rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
+                    float radius = (float)(goInfo->trap.radius)/3*2; // TODO rename radius to diameter (goInfo->trap.radius) should be (goInfo->trap.diameter)
                     if (!radius)
                     {
                         if (goInfo->trap.cooldown != 3)            // cast in other case (at some triggering/linked go/etc explicit call)
@@ -1075,8 +1075,8 @@ void GameObject::Use(Unit* user)
     {
         if (sScriptMgr->OnGossipHello(playerUser, this))
             return;
-
-        AI()->GossipHello(playerUser);
+	if (AI()->GossipHello(playerUser))
+	  return;
     }
 
     // If cooldown data present in template
@@ -1516,7 +1516,7 @@ void GameObject::Use(Unit* user)
 
             Player* player = user->ToPlayer();
 
-            if (player->CanUseBattlegroundObject())
+            if (player->CanUseBattlegroundObject(this))
             {
                 // in battleground check
                 Battleground* bg = player->GetBattleground();
@@ -1524,6 +1524,8 @@ void GameObject::Use(Unit* user)
                     return;
                 if (player->GetVehicle())
                     return;
+		player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+		player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
                 // BG flag click
                 // AB:
                 // 15001
@@ -1556,14 +1558,19 @@ void GameObject::Use(Unit* user)
 
             Player* player = user->ToPlayer();
 
-            if (player->CanUseBattlegroundObject())
+            if (player->CanUseBattlegroundObject(this))
             {
                 // in battleground check
                 Battleground* bg = player->GetBattleground();
                 if (!bg)
                     return;
+
                 if (player->GetVehicle())
                     return;
+
+		player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+		player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+
                 // BG flag dropped
                 // WS:
                 // 179785 - Silverwing Flag
@@ -1702,6 +1709,11 @@ bool GameObject::IsInRange(float x, float y, float z, float radius) const
     float dy = y - GetPositionY();
     float dz = z - GetPositionZ();
     float dist = sqrt(dx*dx + dy*dy);
+    //! Check if the distance between the 2 objects is 0, can happen if both objects are on the same position.
+    //! The code below this check wont crash if dist is 0 because 0/0 in float operations is valid, and returns infinite
+    if (G3D::fuzzyEq(dist, 0.0f))
+      return true;
+
     float sinB = dx / dist;
     float cosB = dy / dist;
     dx = dist * (cosA * cosB + sinA * sinB);
@@ -1912,7 +1924,8 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
 void GameObject::SetLootState(LootState state, Unit* unit)
 {
     m_lootState = state;
-    AI()->OnStateChanged(state, unit);
+    if (AI())
+      AI()->OnStateChanged(state, unit);
     if (m_model)
     {
         // startOpen determines whether we are going to add or remove the LoS on activation

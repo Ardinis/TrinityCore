@@ -43,7 +43,7 @@ _flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
     ASSERT(GetTarget() && GetBase());
 
     if (GetBase()->CanBeSentToClient())
-    {	
+    {
 		uint32 MaximumAura = MAX_AURAS;
 
 		if(GetBase()->GetId() == 32223)
@@ -378,7 +378,7 @@ void Aura::_InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount)
                 }
             }
         }
-    }	
+    }
 }
 
 Aura::~Aura()
@@ -1492,9 +1492,12 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // check cooldown
                         if (caster->GetTypeId() == TYPEID_PLAYER)
                         {
-                            if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
-                                break;
-                            // and add if needed
+			  if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
+			  {
+			    if (caster->ToPlayer()->GetSpellCooldownDelay(aura->GetId()) <= 10)
+			      break;
+			  }
+			  else
                             caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, uint32(time(NULL) + 12));
                         }
                         // effect on caster
@@ -1566,7 +1569,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_ROGUE:
                 // Remove Vanish on stealth remove
                 if (GetId() == 1784)
-                    target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
+		{
+		  target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
+		}
                 break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
@@ -1585,7 +1590,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                     if (target->ToPlayer()->getClass() != CLASS_DEATH_KNIGHT)
                         break;
-
                      // aura removed - remove death runes
                     target->ToPlayer()->RemoveRunesByAuraEffect(GetEffect(0));
                 }
@@ -1672,13 +1676,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             switch (GetId())
             {
                 case 19746:
-/*
 		  // Improved concentration aura - linked aura
-		  if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
-		    if (apply)
-		      target->CastSpell(target, 63510, true);
-		    else target->RemoveAura(63510);
-*/
+		  if (caster)
+		    if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
+		    {
+		      if (apply)
+		      {
+			if (target)
+			  target->CastSpell(target, 63510, true);
+		      }
+		      else target->RemoveAura(63510);
+		    }
+		  break;
                 case 31821:
                     // Aura Mastery Triggered Spell Handler
                     // If apply Concentration Aura -> trigger -> apply Aura Mastery Immunity
@@ -1706,22 +1715,29 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
             }
-/*
-			if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
-			{
-				// Improved devotion aura
-				if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
-					if (apply)
-						caster->CastSpell(target, 63514, true);
-					else target->RemoveAura(63514);
-				// 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
-				// Not allow for Retribution Aura (prevent stacking)
-				if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
-					if (apply)
-						caster->CastSpell(target, 63531, true);
-					else target->RemoveAura(63531);
+	    if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
+	      {
+                if (!caster)
+		  break;
+
+                // Improved devotion aura
+                if (caster->HasAura(20140) || caster->HasAura(20138) || caster->HasAura(20139))
+		  {
+                    if (apply)
+		      caster->CastSpell(target, 63514, true);
+                    else
+		      target->RemoveAura(63514);
+		  }
+                // 63531 - linked aura for both Sanctified Retribution and Swift Retribution talents
+                // Not allow for Retribution Aura (prevent stacking)
+                if ((GetSpellInfo()->SpellIconID != 555) && (caster->HasAura(53648) || caster->HasAura(53484) || caster->HasAura(53379) || caster->HasAura(31869)))
+		  {
+                    if (apply)
+		      caster->CastSpell(target, 63531, true);
+                    else
+		      target->RemoveAura(63531);
+		  }
 	      }
-*/
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
@@ -1842,18 +1858,18 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 
                 switch(m_effects[i]->GetMiscValue())
                 {
-                    case 5:  
-                        spell_immune = 55357; 
-                        break;                    
-                    case 7: 
-                    case 11: 
-                        spell_immune = 55378; 
+                    case 5:
+                        spell_immune = 55357;
                         break;
-                    case 9:  
+                    case 7:
+                    case 11:
+                        spell_immune = 55378;
+                        break;
+                    case 9:
                         spell_immune = 55366;
                         break;
-                    case 12: 
-                        spell_immune = 55358; 
+                    case 12:
+                        spell_immune = 55358;
                         break;
                     default:
                         break;
@@ -1865,9 +1881,24 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
             }
         }
-}               
+    if (apply)
+    {
+      for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+      {
+	if (!GetSpellInfo() || !GetSpellInfo()->Effects[i].Effect || !GetSpellInfo()->Effects[i].ApplyAuraName)
+	  continue;
+	if (GetEffect(i))
+	{
+	  if (caster && target)
+	    GetEffect(i)->SetDamageBonus(caster->SpellDamageBonusDone(target, m_spellInfo, GetEffect(i)->GetAmount(), DOT, GetStackAmount()) - GetEffect(i)->GetAmount());
+	  //	  GetEffect(i)->SetHealingBonus(caster->SpellHealingBonus(target, GetSpellInfo(), GetEffect(i)->GetAmount(), DOT, GetStackAmount()) - GetEffect(i)->GetAmount());
+	}
+      }
+    }
 
-	
+}
+
+
 bool Aura::CanBeAppliedOn(Unit* target)
 {
     // unit not in world or during remove from world
@@ -2575,4 +2606,3 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* /*caster*
         }
     }
 }
-

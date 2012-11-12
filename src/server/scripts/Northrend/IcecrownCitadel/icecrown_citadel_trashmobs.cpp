@@ -21,7 +21,7 @@
 // Script final por Eilo
 
 #include "ScriptPCH.h"
- 
+
 enum Spells
 {
 /*-----Trash de Martillo de la Luz-----*/
@@ -47,14 +47,14 @@ enum Spells
 */
 /*--Trash de Oratorio de los Malditos--*/
     // ## Deathspeaker Servant ##
-    SPELL_CHAOS_BOLT_10M          = 69576,    
+    SPELL_CHAOS_BOLT_10M          = 69576,
     SPELL_CHAOS_BOLT_25M          = 71108,
     SPELL_CONSUMING_SHADOWS       = 69405,
     SPELL_CURSE_OF_AGONY_10M      = 69404,
     SPELL_CURSE_OF_AGONY_25M      = 71112,
 
     // ## Deathspeaker Disciple ##
-    SPELL_SHADOW_BOLT_DEATHSPEAKER= 69387, //tambien la usa deathspeaker attendant   
+    SPELL_SHADOW_BOLT_DEATHSPEAKER= 69387, //tambien la usa deathspeaker attendant
     SPELL_DARK_BLESSING           = 69391,
     SPELL_SHADOW_MEND_10M         = 69389,
     SPELL_SHADOW_MEND_25M         = 71107,
@@ -230,7 +230,7 @@ class npc_ancient_skeletal_soldier_icc : public CreatureScript
 {
     public:
         npc_ancient_skeletal_soldier_icc() : CreatureScript("npc_ancient_skeletal_soldier_icc") { }
- 
+
         struct npc_ancient_skeletal_soldier_iccAI : public ScriptedAI
         {
             npc_ancient_skeletal_soldier_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -241,7 +241,7 @@ class npc_ancient_skeletal_soldier_icc : public CreatureScript
             {
                 m_uiBASH_Timer = 5000; //inicia en 5 segundos
             }
- 
+
             void JustDied(Unit* killer)
             {
                 DoCast(me,SPELL_SOUL_FEAST_ALL);
@@ -251,7 +251,7 @@ class npc_ancient_skeletal_soldier_icc : public CreatureScript
             {
             if (!UpdateVictim())
                 return;
- 
+
             if (m_uiBASH_Timer <= uiDiff)
             {
                 DoCast(me->getVictim(), SPELL_SHIELD_BASH);
@@ -260,11 +260,11 @@ class npc_ancient_skeletal_soldier_icc : public CreatureScript
             }
             else
                m_uiBASH_Timer -= uiDiff;
- 
+
             DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_ancient_skeletal_soldier_iccAI(creature);
@@ -276,7 +276,7 @@ class npc_deathbound_ward_icc : public CreatureScript
 {
     public:
         npc_deathbound_ward_icc() : CreatureScript("npc_deathbound_ward_icc") { }
- 
+
         struct npc_deathbound_ward_iccAI : public ScriptedAI
         {
             npc_deathbound_ward_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -289,7 +289,7 @@ class npc_deathbound_ward_icc : public CreatureScript
                 m_uiDisrupting_Shout_Timer = 10000; //resetea en 10
                 m_uiSaber_Lash_Timer = 7000;
             }
- 
+
             void UpdateAI(const uint32 uiDiff)
             {
                 if (!UpdateVictim())
@@ -312,11 +312,11 @@ class npc_deathbound_ward_icc : public CreatureScript
                 }
                 else
                     m_uiSaber_Lash_Timer -= uiDiff;
-        
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_deathbound_ward_iccAI(creature);
@@ -328,7 +328,7 @@ class npc_nerubar_broodkeeper_icc : public CreatureScript
 {
     public:
         npc_nerubar_broodkeeper_icc() : CreatureScript("npc_nerubar_broodkeeper_icc") { }
- 
+
         struct npc_nerubar_broodkeeper_iccAI : public ScriptedAI
         {
             npc_nerubar_broodkeeper_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -343,7 +343,7 @@ class npc_nerubar_broodkeeper_icc : public CreatureScript
                 m_uiMENDING_Timer = urand(5000, 8000); //entre 5 a 8 segs
                 m_uiWRAPS_Timer = urand(5000, 8000); //entre 5 a 8 segs
             }
- 
+
             void JustDied(Unit* killer)
             {
                 DoCast(me,SPELL_SOUL_FEAST_ALL);
@@ -353,7 +353,7 @@ class npc_nerubar_broodkeeper_icc : public CreatureScript
             {
             if (!UpdateVictim())
                 return;
- 
+
             if (m_uiWRAPS_Timer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -363,7 +363,7 @@ class npc_nerubar_broodkeeper_icc : public CreatureScript
             }
             else
                m_uiWRAPS_Timer -= uiDiff;
-  
+
             if (m_uiMENDING_Timer <= uiDiff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -382,11 +382,11 @@ class npc_nerubar_broodkeeper_icc : public CreatureScript
             }
             else
                m_uiSCARABS_Timer -= uiDiff;
- 
+
             DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_nerubar_broodkeeper_iccAI(creature);
@@ -407,7 +407,7 @@ class npc_servant_of_the_throne_icc : public CreatureScript
 
             void Reset()
             {
-                m_uiGlacial_Blast_Timer = 1000; //inicia pegando practicamente       
+                m_uiGlacial_Blast_Timer = 1000; //inicia pegando practicamente
             }
 
             void JustDied(Unit* killer)
@@ -430,7 +430,7 @@ class npc_servant_of_the_throne_icc : public CreatureScript
                 else
                    m_uiGlacial_Blast_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -449,12 +449,12 @@ class npc_the_damned_icc : public CreatureScript
         struct npc_the_damned_iccAI : public ScriptedAI
         {
             npc_the_damned_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
-        
+
             uint32 m_uiBone_Flurry_Timer;
 
             void Reset()
             {
-                m_uiBone_Flurry_Timer = 20000;    
+                m_uiBone_Flurry_Timer = 20000;
             }
 
             void JustDied(Unit * killer)
@@ -480,11 +480,11 @@ class npc_the_damned_icc : public CreatureScript
                 }
                 else
                     m_uiBone_Flurry_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_the_damned_iccAI(creature);
@@ -545,16 +545,16 @@ class npc_deathspeaker_servant_10man_icc : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_CURSE_OF_AGONY_10M);
-         
+
                     m_uiCURSE_Timer = urand(15000, 20000);
                 }
                 else
                     m_uiCURSE_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_deathspeaker_servant_10man_iccAI(creature);
@@ -620,11 +620,11 @@ class npc_deathspeaker_servant_25man_icc : public CreatureScript
                 }
                 else
                     m_uiCURSE_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_deathspeaker_servant_25man_iccAI(creature);
@@ -640,7 +640,7 @@ class npc_deathspeaker_disciple_10man_icc : public CreatureScript
         struct npc_deathspeaker_disciple_10man_iccAI : public ScriptedAI
         {
             npc_deathspeaker_disciple_10man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
- 
+
             uint32 m_uiBOLT_Timer;
             uint32 m_uiBLESSING_Timer;
             uint32 m_uiMEND_Timer;
@@ -679,7 +679,7 @@ class npc_deathspeaker_disciple_10man_icc : public CreatureScript
                 }
                 else
                     m_uiBLESSING_Timer -= uiDiff;
- 
+
                 if (m_uiMEND_Timer <= uiDiff)
                 {
                     DoCast(me, SPELL_SHADOW_MEND_10M);
@@ -688,11 +688,11 @@ class npc_deathspeaker_disciple_10man_icc : public CreatureScript
                 }
                 else
                     m_uiMEND_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_deathspeaker_disciple_10man_iccAI(creature);
@@ -757,7 +757,7 @@ class npc_deathspeaker_disciple_25man_icc : public CreatureScript
                 else
                     m_uiMEND_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -813,8 +813,8 @@ class npc_deathspeaker_attendant_10man_icc : public CreatureScript
                 }
                 else
                     m_uiNOVA_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -870,8 +870,8 @@ class npc_deathspeaker_attendant_25man_icc : public CreatureScript
                 }
                 else
                     m_uiNOVA_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -917,7 +917,7 @@ class npc_deathspeaker_zealot_icc : public CreatureScript
                 else
                     m_uiCLEAVE_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -932,7 +932,7 @@ class npc_deathspeaker_high_priest_icc : public CreatureScript
 {
     public:
         npc_deathspeaker_high_priest_icc() : CreatureScript("npc_deathspeaker_high_priest_icc") { }
- 
+
         struct npc_deathspeaker_high_priest_iccAI : public ScriptedAI
         {
             npc_deathspeaker_high_priest_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -975,7 +975,7 @@ class npc_deathspeaker_high_priest_icc : public CreatureScript
                 else
                     m_uiRECKONING_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -990,7 +990,7 @@ class npc_valkyr_herald_10man_icc : public CreatureScript
 {
     public:
         npc_valkyr_herald_10man_icc() : CreatureScript("npc_valkyr_herald_10man_icc") { }
- 
+
         struct npc_valkyr_herald_10man_iccAI : public ScriptedAI
         {
             npc_valkyr_herald_10man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -1021,7 +1021,7 @@ class npc_valkyr_herald_10man_icc : public CreatureScript
                 else
                     m_uiESSENCE_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1036,7 +1036,7 @@ class npc_valkyr_herald_25man_icc : public CreatureScript
 {
     public:
         npc_valkyr_herald_25man_icc() : CreatureScript("npc_valkyr_herald_25man_icc") { }
- 
+
         struct npc_valkyr_herald_25man_iccAI : public ScriptedAI
         {
             npc_valkyr_herald_25man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -1067,7 +1067,7 @@ class npc_valkyr_herald_25man_icc : public CreatureScript
                 else
                     m_uiESSENCE_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1126,7 +1126,7 @@ class npc_blighted_abomination_icc : public CreatureScript
                 }
                 else
                     m_uiHOOK_Timer -= uiDiff;
- 
+
                 if (m_uiCLEAVE_Timer <= uiDiff)
                 {
                     DoCast(me->getVictim(), SPELL_CLEAVE);
@@ -1135,8 +1135,8 @@ class npc_blighted_abomination_icc : public CreatureScript
                 }
                 else
                     m_uiCLEAVE_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1195,7 +1195,7 @@ class npc_vengeful_fleshreapert_icc : public CreatureScript
                 else
                     m_uiDEVOUR_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1210,7 +1210,7 @@ class npc_plague_scientist_icc : public CreatureScript
 {
     public:
         npc_plague_scientist_icc() : CreatureScript("npc_plague_scientist_icc") { }
- 
+
         struct npc_plague_scientist_iccAI : public ScriptedAI
         {
             npc_plague_scientist_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -1218,7 +1218,7 @@ class npc_plague_scientist_icc : public CreatureScript
             uint32 m_uiBLAST_Timer;
             uint32 m_uiSTREAM_Timer;
             uint32 m_uiSTREAM_OUT_Timer;
-            uint32 m_uiSPRAY_Timer;    
+            uint32 m_uiSPRAY_Timer;
 
             void Reset()
             {
@@ -1266,7 +1266,7 @@ class npc_plague_scientist_icc : public CreatureScript
                 }
                 else
                     m_uiSPRAY_Timer -= uiDiff;
- 
+
                 if (m_uiBLAST_Timer <= uiDiff)
                 {
                     DoCast(me->getVictim(), SPELL_PLAGUE_BLAST);
@@ -1276,7 +1276,7 @@ class npc_plague_scientist_icc : public CreatureScript
                 else
                     m_uiBLAST_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1331,10 +1331,10 @@ class npc_pustulating_horror_10man_icc : public CreatureScript
                 else
                     m_uiPUS_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_pustulating_horror_10man_iccAI(creature);
@@ -1386,7 +1386,7 @@ class npc_pustulating_horror_25man_icc : public CreatureScript
                 else
                     m_uiPUS_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1432,10 +1432,10 @@ class npc_decaying_colossus_10man_icc : public CreatureScript
                 else
                     m_uiSTOMP_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_decaying_colossus_10man_iccAI(creature);
@@ -1478,10 +1478,10 @@ class npc_decaying_colossus_25man_icc : public CreatureScript
                 else
                     m_uiSTOMP_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
- 
+
         CreatureAI *GetAI(Creature *creature) const
         {
             return new npc_decaying_colossus_25man_iccAI(creature);
@@ -1548,7 +1548,7 @@ class npc_darkfallen_archmage_10man_icc : public CreatureScript
                 }
                 else
                     m_uiFIREBALL_Timer -= uiDiff;
- 
+
                 if (m_uiBLAST_Timer <= uiDiff)
                 {
                     DoCastAOE(SPELL_BLAST_WAVE_10M);
@@ -1558,7 +1558,7 @@ class npc_darkfallen_archmage_10man_icc : public CreatureScript
                 else
                     m_uiBLAST_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1628,7 +1628,7 @@ class npc_darkfallen_archmage_25man_icc : public CreatureScript
                 }
                 else
                     m_uiFIREBALL_Timer -= uiDiff;
- 
+
                 if (m_uiBLAST_Timer <= uiDiff)
                 {
                     DoCastAOE(SPELL_BLAST_WAVE_25M);
@@ -1638,7 +1638,7 @@ class npc_darkfallen_archmage_25man_icc : public CreatureScript
                 else
                     m_uiBLAST_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1711,7 +1711,7 @@ class npc_darkfallen_blood_knight_icc : public CreatureScript
                 else
                     m_uiMIRROR_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1726,7 +1726,7 @@ class npc_darkfallen_noble_10man_icc : public CreatureScript
 {
     public:
         npc_darkfallen_noble_10man_icc() : CreatureScript("npc_darkfallen_noble_10man_icc") { }
- 
+
         struct npc_darkfallen_noble_10man_iccAI : public ScriptedAI
         {
             npc_darkfallen_noble_10man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -1781,7 +1781,7 @@ class npc_darkfallen_noble_10man_icc : public CreatureScript
                 else
                     m_uiFIEND_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1851,7 +1851,7 @@ class npc_darkfallen_noble_25man_icc : public CreatureScript
                 else
                     m_uiFIEND_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1860,7 +1860,7 @@ class npc_darkfallen_noble_25man_icc : public CreatureScript
             return new npc_darkfallen_noble_25man_iccAI(creature);
         }
 };
- 
+
  //#########  Npc Vampiric Fiend ##############
 class npc_vampiric_fiend_icc : public CreatureScript
 {
@@ -1897,14 +1897,14 @@ class npc_vampiric_fiend_icc : public CreatureScript
                 {
                     DoCastAOE(SPELL_LEECHING_ROT);
                     // despawn en 3 segs despues de chupar
-                    me->DespawnOrUnsummon(3000); 
+                    me->DespawnOrUnsummon(3000);
                     // castea cada 10 segs
                     m_uiLEECHING_Timer = 10000;
                 }
                 else
                     m_uiLEECHING_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1919,7 +1919,7 @@ class npc_darkfallen_advisor_10man_icc : public CreatureScript
 {
     public:
         npc_darkfallen_advisor_10man_icc() : CreatureScript("npc_darkfallen_advisor_10man_icc") { }
- 
+
         struct npc_darkfallen_advisor_10man_iccAI : public ScriptedAI
         {
             npc_darkfallen_advisor_10man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -1965,7 +1965,7 @@ class npc_darkfallen_advisor_10man_icc : public CreatureScript
                 else
                     m_uiPROTECTION_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -1980,7 +1980,7 @@ class npc_darkfallen_advisor_25man_icc : public CreatureScript
 {
     public:
         npc_darkfallen_advisor_25man_icc() : CreatureScript("npc_darkfallen_advisor_25man_icc") { }
- 
+
         struct npc_darkfallen_advisor_25man_iccAI : public ScriptedAI
         {
             npc_darkfallen_advisor_25man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -2026,7 +2026,7 @@ class npc_darkfallen_advisor_25man_icc : public CreatureScript
                 else
                     m_uiPROTECTION_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2041,7 +2041,7 @@ class npc_darkfallen_commander_10man_icc : public CreatureScript
 {
     public:
         npc_darkfallen_commander_10man_icc() : CreatureScript("npc_darkfallen_commander_10man_icc") { }
- 
+
         struct npc_darkfallen_commander_10man_iccAI : public ScriptedAI
         {
             npc_darkfallen_commander_10man_iccAI(Creature* pCreature) : ScriptedAI(pCreature) {}
@@ -2084,7 +2084,7 @@ class npc_darkfallen_commander_10man_icc : public CreatureScript
                 else
                     m_uiRUSH_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2142,7 +2142,7 @@ class npc_darkfallen_commander_25man_icc : public CreatureScript
                 else
                     m_uiRUSH_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2200,7 +2200,7 @@ class npc_darkfallen_lieutenant_10man_icc : public CreatureScript
                 else
                     m_uiCURSE_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2258,7 +2258,7 @@ class npc_darkfallen_lieutenant_25man_icc : public CreatureScript
                 else
                     m_uiCURSE_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2328,7 +2328,7 @@ class npc_darkfallen_tactician_icc : public CreatureScript
                 else
                     m_uiSHADOWSTEP_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2396,8 +2396,8 @@ class npc_ymirjar_deathbringer_10man_icc : public CreatureScript
                 }
                 else
                     m_uiBOLT_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2465,8 +2465,8 @@ class npc_ymirjar_deathbringer_25man_icc : public CreatureScript
                 }
                 else
                     m_uiBOLT_Timer -= uiDiff;
- 
-                DoMeleeAttackIfReady();   
+
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2512,7 +2512,7 @@ class npc_ymirjar_frostbinder_icc : public CreatureScript
                 else
                     m_uiORB_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2569,7 +2569,7 @@ class npc_ymirjar_battlemaiden_icc : public CreatureScript
                 else
                     m_uiRUSH_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2637,7 +2637,7 @@ class npc_ymirjar_huntress_icc : public CreatureScript
                 }
                 else
                     m_uiVOLLEY_Timer -= uiDiff;
- 
+
                 if (m_uiTRAP_Timer <= uiDiff)
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -2705,7 +2705,7 @@ class npc_ymirjar_warlord_icc : public CreatureScript
                 else
                     m_uiWHIRLWIND_Timer -= uiDiff;
 
-                DoMeleeAttackIfReady();   
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -2751,7 +2751,7 @@ void AddSC_icecrown_citadel_trashmobs()
         new npc_darkfallen_lieutenant_10man_icc();
         new npc_darkfallen_lieutenant_25man_icc();
         new npc_darkfallen_tactician_icc();
-        new npc_ymirjar_deathbringer_10man_icc();
+	//        new npc_ymirjar_deathbringer_10man_icc();
         new npc_ymirjar_deathbringer_25man_icc();
         // new npc_ymirjar_frostbinder_icc();
         new npc_ymirjar_battlemaiden_icc();

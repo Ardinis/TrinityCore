@@ -85,7 +85,7 @@ class boss_saviana_ragefire : public CreatureScript
                 events.Reset();
                 events.ScheduleEvent(EVENT_ENRAGE, 20000, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_FLAME_BREATH, 14000, EVENT_GROUP_LAND_PHASE);
-                events.ScheduleEvent(EVENT_FLIGHT, 60000);
+                events.ScheduleEvent(EVENT_FLIGHT, 40000);
             }
 
             void JustDied(Unit* /*killer*/)

@@ -37,7 +37,9 @@ enum DeathKnightSpells
     DK_SPELL_BLOOD_PRESENCE                     = 48266,
     DK_SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED  = 63611,
     DK_SPELL_UNHOLY_PRESENCE                    = 48265,
-    DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63622,
+    DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED = 63611,
+    SPELL_DK_ITEM_T8_MELEE_4P_BONUS             = 64736,
+    DK_SPELL_BLACK_ICE_R1                       = 49140,
 };
 
 // 50462 - Anti-Magic Shell (on raid member)
@@ -102,15 +104,14 @@ class spell_dk_anti_magic_shell_self : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_RUNIC_POWER_ENERGIZE))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_RUNIC_POWER_ENERGIZE))
                     return false;
                 return true;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
-                // Set absorbtion amount to unlimited
-                amount = -1;
+	      amount = GetCaster()->CountPctFromMaxHealth(hpPct);
             }
 
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
@@ -161,13 +162,15 @@ class spell_dk_anti_magic_zone : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_ANTI_MAGIC_SHELL_TALENT))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_ANTI_MAGIC_SHELL_TALENT))
                     return false;
                 return true;
             }
 
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
+	      if (!sSpellMgr)
+		return;
                 SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(DK_SPELL_ANTI_MAGIC_SHELL_TALENT);
                 amount = talentSpell->Effects[EFFECT_0].CalcValue(GetCaster());
                 if (Player* player = GetCaster()->ToPlayer())
@@ -204,6 +207,8 @@ class spell_dk_corpse_explosion : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
+	      if (!sSpellMgr)
+		return false;
                 if (!sSpellMgr->GetSpellInfo(DK_SPELL_CORPSE_EXPLOSION_TRIGGERED) || !sSpellMgr->GetSpellInfo(DK_SPELL_GHOUL_EXPLODE))
                     return false;
                 if (!sSpellMgr->GetSpellInfo(DK_SPELL_CORPSE_EXPLOSION_VISUAL))
@@ -257,7 +262,7 @@ class spell_dk_ghoul_explode : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_CORPSE_EXPLOSION_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_CORPSE_EXPLOSION_TRIGGERED))
                     return false;
                 return true;
             }
@@ -379,27 +384,52 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
+	  float multiplier;
+
+	  bool Load()
+	  {
+	    multiplier = 1.0f;
+	    return true;
+	  }
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
                     return false;
                 return true;
             }
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    int32 bp = CalculatePctN(GetHitDamage(), GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()));
-                    caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-                }
-            }
+	      Unit* caster = GetCaster();
+	      if (Unit* unitTarget = GetHitUnit())
+	      {
+		multiplier = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()) / 100.f);
+		// Death Knight T8 Melee 4P Bonus
+		if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_ITEM_T8_MELEE_4P_BONUS, EFFECT_0))
+		  AddPct(multiplier, aurEff->GetAmount());
+	      }
+
+	    }
+
+	  void HandleAfterHit()
+	  {
+	    Unit* caster = GetCaster();
+	    if (Unit* unitTarget = GetHitUnit())
+	    {
+	      int32 bp = GetHitDamage() * multiplier;
+
+	      if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
+		AddPct(bp, aurEff->GetAmount());
+
+	      caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
+	    }
+	  }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+		AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
             }
         };
 
@@ -465,7 +495,7 @@ class spell_dk_blood_boil : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(DK_SPELL_BLOOD_BOIL_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_BLOOD_BOIL_TRIGGERED))
                     return false;
                 return true;
             }
@@ -511,6 +541,8 @@ class spell_dk_will_of_the_necropolis : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellEntry)
             {
+	      if (!sSpellMgr)
+		return false;
                 // can't use other spell than will of the necropolis due to spell_ranks dependency
                 if (sSpellMgr->GetFirstSpellInChain(DK_SPELL_WILL_OF_THE_NECROPOLIS_AURA_R1) != sSpellMgr->GetFirstSpellInChain(spellEntry->Id))
                     return false;
@@ -538,6 +570,8 @@ class spell_dk_will_of_the_necropolis : public SpellScriptLoader
 
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
+	      if (!sSpellMgr)
+		return ;
                 // min pct of hp is stored in effect 0 of talent spell
                 uint32 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
                 SpellInfo const* talentProto = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellWithRank(DK_SPELL_WILL_OF_THE_NECROPOLIS_TALENT_R1, rank));
@@ -575,7 +609,7 @@ public:
 
         bool Validate(SpellInfo const* /*entry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(DK_SPELL_BLOOD_PRESENCE) || !sSpellMgr->GetSpellInfo(DK_SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED))
+            if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_BLOOD_PRESENCE) || !sSpellMgr->GetSpellInfo(DK_SPELL_IMPROVED_BLOOD_PRESENCE_TRIGGERED))
                 return false;
             return true;
         }
@@ -622,7 +656,7 @@ public:
 
         bool Validate(SpellInfo const* /*entry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(DK_SPELL_UNHOLY_PRESENCE) || !sSpellMgr->GetSpellInfo(DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED))
+            if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_UNHOLY_PRESENCE) || !sSpellMgr->GetSpellInfo(DK_SPELL_IMPROVED_UNHOLY_PRESENCE_TRIGGERED))
                 return false;
             return true;
         }
@@ -675,7 +709,7 @@ class spell_dk_death_strike : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DEATH_STRIKE_HEAL))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DEATH_STRIKE_HEAL))
                     return false;
                 return true;
             }
@@ -724,7 +758,7 @@ class spell_dk_death_coil : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DEATH_COIL_DAMAGE) || !sSpellMgr->GetSpellInfo(SPELL_DEATH_COIL_HEAL))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DEATH_COIL_DAMAGE) || !sSpellMgr->GetSpellInfo(SPELL_DEATH_COIL_HEAL))
                     return false;
                 return true;
             }

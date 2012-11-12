@@ -38,7 +38,7 @@ class spell_warr_last_stand : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(WARRIOR_SPELL_LAST_STAND_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(WARRIOR_SPELL_LAST_STAND_TRIGGERED))
                     return false;
                 return true;
             }
@@ -111,7 +111,7 @@ public:
 
         bool Validate(SpellInfo const* /*SpellEntry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DAMAGE_REDUCTION_AURA))
+            if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DAMAGE_REDUCTION_AURA))
                 return false;
             return true;
         }
@@ -166,7 +166,7 @@ class spell_warr_deep_wounds : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DEEP_WOUNDS_RANK_1) || !sSpellMgr->GetSpellInfo(SPELL_DEEP_WOUNDS_RANK_2) || !sSpellMgr->GetSpellInfo(SPELL_DEEP_WOUNDS_RANK_3))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DEEP_WOUNDS_RANK_1) || !sSpellMgr->GetSpellInfo(SPELL_DEEP_WOUNDS_RANK_2) || !sSpellMgr->GetSpellInfo(SPELL_DEEP_WOUNDS_RANK_3))
                     return false;
                 return true;
             }
@@ -174,6 +174,8 @@ class spell_warr_deep_wounds : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 int32 damage = GetEffectValue();
+		if (!sSpellMgr)
+		  return;
                 if (Unit* target = GetHitUnit())
                     if (Unit* caster = GetCaster())
                     {
@@ -224,7 +226,7 @@ class spell_warr_charge : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_JUGGERNAUT_CRIT_BONUS_TALENT) || !sSpellMgr->GetSpellInfo(SPELL_JUGGERNAUT_CRIT_BONUS_BUFF) || !sSpellMgr->GetSpellInfo(SPELL_CHARGE))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_JUGGERNAUT_CRIT_BONUS_TALENT) || !sSpellMgr->GetSpellInfo(SPELL_JUGGERNAUT_CRIT_BONUS_BUFF) || !sSpellMgr->GetSpellInfo(SPELL_CHARGE))
                     return false;
                 return true;
             }
@@ -267,7 +269,7 @@ class spell_warr_slam : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SLAM))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_SLAM))
                     return false;
                 return true;
             }
@@ -308,7 +310,7 @@ class spell_warr_execute : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_EXECUTE) || !sSpellMgr->GetSpellInfo(SPELL_GLYPH_OF_EXECUTION))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_EXECUTE) || !sSpellMgr->GetSpellInfo(SPELL_GLYPH_OF_EXECUTION))
                     return false;
                 return true;
             }

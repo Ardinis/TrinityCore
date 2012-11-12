@@ -858,6 +858,11 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_isActive = true;
 
     m_runes = NULL;
+    for (uint8 i = 0; i < MAX_RUNES; ++i)
+    {
+      reduceRuneCoolDown[i] = false;
+      m_reduceCoolDown[i] = time(0);
+    }
 
     m_lastFallTime = 0;
     m_lastFallZ = 0;
@@ -1562,16 +1567,16 @@ void Player::Update(uint32 p_time)
     {
         time_t localtime;
         localtime = time(NULL);
-		
+
         if (m_jail_release <= localtime)
         {
             m_jail_isjailed = false;
             m_jail_release = 0;
 
             _SaveJail();
-            
+
             sWorld->SendWorldText(LANG_JAIL_CHAR_FREE, GetName());
-            
+
 			CastSpell(this,8690,false);
 
             return;
@@ -1594,14 +1599,14 @@ void Player::Update(uint32 p_time)
                     sObjectMgr->m_jailconf_horde_y, sObjectMgr->m_jailconf_horde_z, sObjectMgr->m_jailconf_horde_o);
                 return;
             }
-			
+
         }
     }
-	
+
 	if (m_jail_warning == true)
 	{
 		m_jail_warning  = false;
-		
+
 		if (sObjectMgr->m_jailconf_warn_player == m_jail_times || sObjectMgr->m_jailconf_warn_player <= m_jail_times)
 		{
 			if ((sObjectMgr->m_jailconf_max_jails-1 == m_jail_times-1) && sObjectMgr->m_jailconf_ban-1)
@@ -1612,7 +1617,7 @@ void Player::Update(uint32 p_time)
 			{
 				ChatHandler(this).PSendSysMessage(LANG_JAIL_WARNING, m_jail_times , sObjectMgr->m_jailconf_max_jails);
 			}
-		        
+
 		}
 				return;
 	}
@@ -1621,9 +1626,9 @@ if (m_jail_amnestie == true && sObjectMgr->m_jailconf_amnestie > 0)
 	m_jail_amnestie =false;
 	time_t localtime;
     localtime    = time(NULL);
-	
+
 	if (localtime >  m_jail_amnestietime)
-	{   
+	{
 		CharacterDatabase.PExecute("DELETE FROM `jail` WHERE `guid` = '%u'",GetGUIDLow());
 		ChatHandler(this).PSendSysMessage(LANG_JAIL_AMNESTII);
 	}
@@ -2208,6 +2213,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     else
         sLog->outDebug(LOG_FILTER_MAPS, "Player %s is being teleported to map %u", GetName(), mapid);
 
+    if (m_vehicle)
+      ExitVehicle();
+
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     SetUnitMovementFlags(0);
     DisableSpline();
@@ -2552,17 +2560,26 @@ void Player::RegenerateAll()
     //    return;
 
     m_regenTimerCount += m_regenTimer;
-
     Regenerate(POWER_ENERGY);
 
     Regenerate(POWER_MANA);
 
     // Runes act as cooldowns, and they don't need to send any data
     if (getClass() == CLASS_DEATH_KNIGHT)
-        for (uint8 i = 0; i < MAX_RUNES; ++i)
-            if (uint32 cd = GetRuneCooldown(i))
-                SetRuneCooldown(i, (cd > m_regenTimer) ? cd - m_regenTimer : 0);
-
+      for (uint8 i = 0; i < MAX_RUNES; ++i)
+	if (uint32 cd = GetRuneCooldown(i))
+	{
+	  //	  if (reduceRuneCoolDown[i])
+	  //  m_reduceCoolDown[i] -= m_regenTimer;
+	  // if (m_reduceCoolDown[i] > 0)
+	  //  m_reduceCoolDown[i] = 0;
+	  if (cd < m_regenTimer && cd > 0)
+	  {
+	    reduceRuneCoolDown[i] = true;
+	    m_reduceCoolDown[i] = time(0);
+	  }
+	  SetRuneCooldown(i, (cd > m_regenTimer) ? cd - m_regenTimer : 0);
+	}
     if (m_regenTimerCount >= 2000)
     {
         // Not in combat or they have regeneration
@@ -2632,6 +2649,12 @@ void Player::Regenerate(Powers power)
             }
         }   break;
         case POWER_RUNE:
+	  /*	  for(uint32 i = 0; i < MAX_RUNES; ++i)
+	    if(uint8 cd = GetRuneCooldown(i))
+	    {
+	      SetRuneCooldown(i, cd - 1);
+	    }
+	    break;*/
         case POWER_FOCUS:
         case POWER_HAPPINESS:
         case POWER_HEALTH:
@@ -3066,9 +3089,9 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     uint8 level = getLevel();
 
     sScriptMgr->OnGivePlayerXP(this, xp, victim);
-	
+
     if(level < 66 && GetMapId() == 571)
-        return;	
+        return;
 
     // Favored experience increase START
     uint32 zone = GetZoneId();
@@ -4359,7 +4382,7 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         // check if spellentry is present and if the cooldown is less or equal to 10 min
         if (entry &&
             entry->RecoveryTime <= 10 * MINUTE * IN_MILLISECONDS &&
-            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS)
+            entry->CategoryRecoveryTime <= 10 * MINUTE * IN_MILLISECONDS && entry->Id != 48289 && entry->Id != 52150 && entry->Id != 46585) //48289 == ghoul summon cooldown
         {
             // remove & notify
             RemoveSpellCooldown(itr->first, true);
@@ -5846,9 +5869,14 @@ float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
     return m_auraBaseMod[modGroup][FLAT_MOD] * m_auraBaseMod[modGroup][PCT_MOD];
 }
 
+float Player::GetShieldBlockValuePctMod() const
+{
+  return m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
+}
+
 uint32 Player::GetShieldBlockValue() const
 {
-    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) * 0.5f - 10)*m_auraBaseMod[SHIELD_BLOCK_VALUE][PCT_MOD];
+    float value = (m_auraBaseMod[SHIELD_BLOCK_VALUE][FLAT_MOD] + GetStat(STAT_STRENGTH) * 0.5f - 10) * GetShieldBlockValuePctMod();
 
     value = (value < 0) ? 0 : value;
 
@@ -8229,7 +8257,7 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
 	// don't apply mod if item is broken or cannot be used
 	if (item->IsBroken() || !CanUseAttackType(attackType))
 		return;
-	
+
     // generic not weapon specific case processes in aura code
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
         return;
@@ -8526,6 +8554,20 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
             // Shiv has 100% chance to apply the poison
             if (FindCurrentSpellBySpellId(5938) && e_slot == TEMP_ENCHANTMENT_SLOT)
                 chance = 100.0f;
+
+	    if (spellInfo->Id == 57965 && e_slot == TEMP_ENCHANTMENT_SLOT)
+	    {
+	      if (this->HasAura(14117)) //rank 5
+		chance += 50;
+	      else if (this->HasAura(14116)) // rank 4
+		chance += 40;
+	      else if (this->HasAura(14115)) // rank 3
+		chance += 30;
+	      else if (this->HasAura(14114)) // rank 2
+		chance += 20;
+	      else if (this->HasAura(14113)) // rank 1
+		chance += 10;
+	    }
 
             if (roll_chance_f(chance))
             {
@@ -9253,7 +9295,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             break;
          default:
             NumberOfFields = 12;
-            break;			
+            break;
     }
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+(NumberOfFields*8)));
@@ -9291,6 +9333,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 1519:                                          // Stormwind City
         case 1537:                                          // Ironforge
         case 2257:                                          // Deeprun Tram
+        case 3703:                                          // Shattrath City
             break;
         case 139:                                           // Eastern Plaguelands
             if (pvp && pvp->GetTypeId() == OUTDOOR_PVP_EP)
@@ -9697,7 +9740,6 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(3610) << uint32(0x0);           // 9 show
             }
             break;
-        case 3703:                                          // Shattrath City
         case 4384:                                          // Strand of the Ancients
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_SA)
                 bg->FillInitialWorldStates(data);
@@ -9804,7 +9846,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 data << uint32(4132) << uint32(0);              // 9  WORLDSTATE_SHOW_CRATES
                 data << uint32(4131) << uint32(0);              // 10 WORLDSTATE_CRATES_REVEALED
             }
-            break;			
+            break;
 	    // The Ruby Sanctum
        case 4987:
            if (instance && mapid == 724)
@@ -10020,7 +10062,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
             {
                 if (ItemTemplate const* mhWeaponProto = mhWeapon->GetTemplate())
                 {
-                    if (mhWeaponProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || mhWeaponProto->SubClass == ITEM_SUBCLASS_WEAPON_STAFF)
+		  if ((mhWeaponProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || mhWeaponProto->SubClass == ITEM_SUBCLASS_WEAPON_STAFF)  && mhWeaponProto->InventoryType == INVTYPE_2HWEAPON)
                     {
                         const_cast<Player*>(this)->AutoUnequipOffhandIfNeed(true);
                         break;
@@ -11609,7 +11651,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
 				//don't allow warrior and rogue class 100% ARP 100% crit chance exploit
 				if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) && (pProto->Class == ITEM_CLASS_WEAPON || pProto->Class == ITEM_CLASS_ARMOR))
 					return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-				
+
                 // May be here should be more stronger checks; STUNNED checked
                 // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
                 if (HasUnitState(UNIT_STATE_STUNNED))
@@ -17500,7 +17542,7 @@ void Player::_LoadJail(void)
             TeleportTo(sObjectMgr->m_jailconf_horde_m, sObjectMgr->m_jailconf_horde_x,
                 sObjectMgr->m_jailconf_horde_y, sObjectMgr->m_jailconf_horde_z, sObjectMgr->m_jailconf_horde_o);
         }
-         
+
         sWorld->SendWorldText(LANG_JAIL_CHAR_TELE, GetName());
     }
 }
@@ -23482,10 +23524,14 @@ WorldObject* Player::GetViewpoint() const
     return NULL;
 }
 
-bool Player::CanUseBattlegroundObject()
+bool Player::CanUseBattlegroundObject(GameObject* gameobject)
 {
-    // TODO : some spells gives player ForceReaction to one faction (ReputationMgr::ApplyForceReaction)
-    // maybe gameobject code should handle that ForceReaction usage
+
+  FactionTemplateEntry const* playerFaction = getFactionTemplateEntry();
+  FactionTemplateEntry const* faction = sFactionTemplateStore.LookupEntry(gameobject->GetUInt32Value(GAMEOBJECT_FACTION));
+
+  if (playerFaction && faction && !playerFaction->IsFriendlyTo(*faction))
+    return false;
     // BUG: sometimes when player clicks on flag in AB - client won't send gameobject_use, only gameobject_report_use packet
     return (//InBattleground() &&                          // in battleground - not need, check in other cases
              //!IsMounted() && - not correct, player is dismounted when he clicks on flag
@@ -23772,6 +23818,8 @@ void Player::InitRunes()
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
+      reduceRuneCoolDown[i] = false;
+      m_reduceCoolDown[i] = 2000;
         SetBaseRune(i, runeSlotTypes[i]);                              // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                           // init current types
         SetRuneCooldown(i, 0);                                         // reset cooldowns
@@ -25486,14 +25534,28 @@ bool Player::CanTransmo(Item *oldItem, Item *newItem)
       if (oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE)
         return false;
       if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
+      {
+	if ((oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+	     oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
+	     oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN) &&
+	    (newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+	     newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
+	     newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN))
+	  return true;
         return false;
+      }
     }
   else if (oldItem->GetTemplate()->Class == ITEM_CLASS_ARMOR)
     {
       if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
-        return false;
+	return false;
       if (oldItem->GetTemplate()->InventoryType != newItem->GetTemplate()->InventoryType)
+      {
+	if ((oldItem->GetTemplate()->InventoryType == INVTYPE_CHEST || oldItem->GetTemplate()->InventoryType == INVTYPE_ROBE) &&
+	    (newItem->GetTemplate()->InventoryType == INVTYPE_CHEST || newItem->GetTemplate()->InventoryType == INVTYPE_ROBE))
+	  return true;
         return false;
+      }
     }
 
 

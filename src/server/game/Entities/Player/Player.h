@@ -1002,7 +1002,7 @@ class TradeData
     public:                                                 // constructors
         TradeData(Player* player, Player* trader) :
             m_player(player),  m_trader(trader), m_accepted(false), m_acceptProccess(false),
-            m_money(0), m_spell(0) {}
+	      m_money(0), m_spell(0), m_spellCastItem(0) { memset(m_items, 0, TRADE_SLOT_COUNT * sizeof(uint64)); }
 
         Player* GetTrader() const { return m_trader; }
         TradeData* GetTraderData() const;
@@ -2086,6 +2086,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateCorpseReclaimDelay();
         void SendCorpseReclaimDelay(bool load = false);
 
+	float GetShieldBlockValuePctMod() const;           // overwrite Unit version (virtual)
         uint32 GetShieldBlockValue() const;                 // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value);
@@ -2250,7 +2251,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool GetBGAccessByLevel(BattlegroundTypeId bgTypeId) const;
         bool isTotalImmunity();
-        bool CanUseBattlegroundObject();
+        bool CanUseBattlegroundObject(GameObject *go);
         bool isTotalImmune();
         bool CanCaptureTowerPoint();
 
@@ -2831,6 +2832,7 @@ class Player : public Unit, public GridObject<Player>
 
         DeclinedName *m_declinedname;
         Runes *m_runes;
+
         EquipmentSets m_EquipmentSets;
 
         bool CanAlwaysSee(WorldObject const* obj) const;
@@ -2838,6 +2840,10 @@ class Player : public Unit, public GridObject<Player>
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;
 
         uint8 m_grantableLevels;
+
+ public :
+	bool reduceRuneCoolDown[MAX_RUNES];
+	uint32 m_reduceCoolDown[MAX_RUNES];
 
     private:
         // internal common parts for CanStore/StoreItem functions

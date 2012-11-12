@@ -837,10 +837,10 @@ InventoryResult Item::CanBeMergedPartlyWith(ItemTemplate const* proto) const
 bool Item::IsFitToSpellRequirements(SpellInfo const* spellInfo) const
 {
     ItemTemplate const* proto = GetTemplate();
-	
-	//Lava Lash   
-	if (spellInfo->Id==60103 && spellInfo->EquippedItemClass==ITEM_CLASS_WEAPON)   
-		return true;   	
+
+	//Lava Lash
+	if (spellInfo->Id==60103 && spellInfo->EquippedItemClass==ITEM_CLASS_WEAPON)
+		return true;
 
     if (spellInfo->EquippedItemClass != -1)                 // -1 == any item class
     {

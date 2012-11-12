@@ -1067,6 +1067,7 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 #define ENTRY_FIRE_ELEMENTAL    15438
 #define ENTRY_GHOUL             26125
 #define ENTRY_BLOODWORM         28017
+#define ENTRY_RUNIC_WEAPON      27893
 
 bool Guardian::UpdateStats(Stats stat)
 {
@@ -1121,7 +1122,7 @@ bool Guardian::UpdateStats(Stats stat)
                 PetSpellMap::const_iterator itr = (ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            // Wild Hunt rank 2
-						
+
                 if (itr != ToPet()->m_spells.end())                                 // If pet has Wild Hunt
                 {
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
@@ -1137,7 +1138,7 @@ bool Guardian::UpdateStats(Stats stat)
 				if(ToPet()->HasSpell(62762))	// chasse sauvage Range 2
 					Vie += owner->GetStat(stat) * 0.40f; // (UNIT_MOD_STAT_STAMINA, TOTAL_PCT)
 				else
-					if(ToPet()->HasSpell(62758)) // chasse sauvage 
+					if(ToPet()->HasSpell(62758)) // chasse sauvage
 						Vie += owner->GetStat(stat) * 0.20f;
             }
 			float EnduSup =0.0f;
@@ -1145,16 +1146,16 @@ bool Guardian::UpdateStats(Stats stat)
             {
 				EnduSup = 0.0f;
 				if(ToPet()->HasSpell(61688))	// Endu Sup Rang 3
-					EnduSup += owner->GetStat(stat) * 0.101f; 
+					EnduSup += owner->GetStat(stat) * 0.101f;
 				else
 					if(ToPet()->HasSpell(61687)) // Endu Sup Rang 2
 						EnduSup += owner->GetStat(stat) * 0.067f;
 					else
 						if(ToPet()->HasSpell(61686)) //  Endu Sup Rang 1
 							EnduSup += owner->GetStat(stat) * 0.033f;
-            }			
-			
-			ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);	
+            }
+
+			ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);
             // ownersBonus is multiplied by TOTAL_PCT too
             ownersBonus = float(owner->GetStat(stat))* mod + Vie + EnduSup;
             value += ownersBonus;
@@ -1317,7 +1318,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             float mod = 1.0f;                                                 //Hunter contribution modifier
             if (isPet())
             {
-/*		
+/*
                 PetSpellMap::const_iterator itr = ToPet()->m_spells.find(62758);    //Wild Hunt rank 1
                 if (itr == ToPet()->m_spells.end())
                     itr = ToPet()->m_spells.find(62762);                            //Wild Hunt rank 2
@@ -1327,21 +1328,21 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                     SpellInfo const* sProto = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
                     mod += CalculatePctN(1.0f, sProto->Effects[1].CalcValue());
                 }
-				502 + 79.5 
+				502 + 79.5
 */
 /*
 				if(ToPet()->HasSpell(62762))	// chasse sauvage Range 2
 					mod += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.30f;
 				else
-					if(ToPet()->HasSpell(62758)) // chasse sauvage 
+					if(ToPet()->HasSpell(62758)) // chasse sauvage
 						mod += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.15f;
-*/					
+*/
 				if(owner->HasSpell(34454)) // Dresseur rang 2
 					Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK)* 0.10f;
 				else
 				{
-					if(owner->HasSpell(34453)) // Dresseur 
-						Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.05f;  
+					if(owner->HasSpell(34453)) // Dresseur
+						Dresseur += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.05f;
 				}
 
 				if (((Creature*)this)->isPet())
@@ -1357,7 +1358,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
 						mod += (sProto->EffectBasePoints[1] / 100.0f);
 				  }
 				}
-            }			
+            }
             bonusAP = (owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod) + Dresseur;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f * mod + Dresseur));
         }
@@ -1366,6 +1367,13 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.22f;
             SetBonusDamage(int32(owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.1287f));
         }
+        else if(GetEntry() == ENTRY_RUNIC_WEAPON)
+        {
+
+            bonusAP = owner->GetTotalAttackPowerValue(BASE_ATTACK);
+
+        }
+
         //demons benefit from warlocks shadow or fire damage
         else if (isPet())
         {
@@ -1438,8 +1446,19 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);
 
-    float weapon_mindamage = GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
-    float weapon_maxdamage = GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+    float weapon_mindamage=0.0;
+    float weapon_maxdamage=0.0;
+
+    if(GetEntry() == ENTRY_RUNIC_WEAPON)
+    {
+        weapon_mindamage = m_owner->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE)/2.0;
+        weapon_maxdamage = m_owner->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE)/2.0;
+    }
+    else
+    {
+        weapon_mindamage = GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
+        weapon_maxdamage = GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+    }
 
     float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;

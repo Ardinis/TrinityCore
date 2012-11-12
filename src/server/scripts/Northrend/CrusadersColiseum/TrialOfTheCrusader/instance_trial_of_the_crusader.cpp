@@ -326,10 +326,12 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                         if (TrialCounter >= 45)
                                             tributeChest = GO_TRIBUTE_CHEST_10H_50;
                                         else
+					  {
                                             if (TrialCounter >= 25)
                                                 tributeChest = GO_TRIBUTE_CHEST_10H_45;
                                             else
                                                 tributeChest = GO_TRIBUTE_CHEST_10H_25;
+					  }
                                 }
                                 else if (instance->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
                                 {
@@ -339,14 +341,17 @@ class instance_trial_of_the_crusader : public InstanceMapScript
                                         if (TrialCounter >= 45)
                                             tributeChest = GO_TRIBUTE_CHEST_25H_50;
                                         else
+					  {
                                             if (TrialCounter >= 25)
                                                 tributeChest = GO_TRIBUTE_CHEST_25H_45;
                                             else
                                                 tributeChest = GO_TRIBUTE_CHEST_25H_25;
+					  }
                                 }
                                 if (tributeChest)
                                     if (Creature* tirion =  instance->GetCreature(TirionGUID))
-                                        if (GameObject* chest = tirion->SummonGameObject(tributeChest, 805.62f, 134.87f, 142.16f, 3.27f, 0, 0, 0, 0, 90000000))
+				      // need proper location.this one is guessed based on videos
+                                       if (GameObject* chest = tirion->SummonGameObject(tributeChest, 643.814f, 136.027f, 141.295f, 0, 0, 0, 0, 0, 90000000))
                                             chest->SetRespawnTime(chest->GetRespawnDelay());
                                 break;
                         }

@@ -109,7 +109,7 @@ enum Spells
 	SPELL_EFFECT_MARK_DMG				= 69189,
     SPELL_BOILING_BLOOD                 = 72385,
     SPELL_RUNE_OF_BLOOD                 = 72410,
-	SPELL_DAMAGE_BUFF					= 64036, // Augmente de 5% le dps 
+	SPELL_DAMAGE_BUFF					= 64036, // Augmente de 5% le dps
 
     // Blood Beast
     SPELL_BLOOD_LINK_BEAST              = 72176,
@@ -178,8 +178,8 @@ enum EventTypes
     EVENT_OUTRO_ALLIANCE_20     = 42,
     EVENT_OUTRO_ALLIANCE_21     = 43,
 
-    EVENT_OUTRO_ALLIANCE_21_1       = 431, 
-    EVENT_OUTRO_ALLIANCE_21_2       = 432,  
+    EVENT_OUTRO_ALLIANCE_21_1       = 431,
+    EVENT_OUTRO_ALLIANCE_21_2       = 432,
     EVENT_OUTRO_ALLIANCE_21_3       = 433,
     EVENT_OUTRO_ALLIANCE_21_4       = 434,
     EVENT_OUTRO_ALLIANCE_21_5       = 435,
@@ -187,7 +187,7 @@ enum EventTypes
     EVENT_OUTRO_ALLIANCE_21_7       = 437,
     EVENT_OUTRO_ALLIANCE_21_8       = 438,
     EVENT_OUTRO_ALLIANCE_21_9       = 439,
-	
+
     EVENT_OUTRO_HORDE_1         = 44,
     EVENT_OUTRO_HORDE_2         = 45,
     EVENT_OUTRO_HORDE_3         = 46,
@@ -195,11 +195,11 @@ enum EventTypes
     EVENT_OUTRO_HORDE_5         = 48,
     EVENT_OUTRO_HORDE_6         = 49,
     EVENT_OUTRO_HORDE_6_1       = 491,
-    EVENT_OUTRO_HORDE_6_2       = 492,      
+    EVENT_OUTRO_HORDE_6_2       = 492,
 	EVENT_OUTRO_HORDE_6_3       = 493,
     EVENT_OUTRO_HORDE_6_4       = 494,
-    EVENT_OUTRO_HORDE_6_5       = 495,	
-	
+    EVENT_OUTRO_HORDE_6_5       = 495,
+
     EVENT_OUTRO_HORDE_7         = 50,
     EVENT_OUTRO_HORDE_8         = 51,
 };
@@ -226,7 +226,7 @@ enum Actions
     ACTION_KNEEL                        = -3781308,
     ACTION_KING                         = -3781309,
     ACTION_EXIT_1                       = -3791310,
-    ACTION_EXIT_2                       = -3791311,	
+    ACTION_EXIT_2                       = -3791311,
     ACTION_MARK_OF_THE_FALLEN_CHAMPION  = -72293,
 };
 
@@ -241,10 +241,10 @@ enum MovePoints
     POINT_CORPSE            = 3781304,
     POINT_FINAL             = 3781305,
     POINT_STAND             = 3781306,
-    POINT_CORPSE_1          = 3781307, 
-    POINT_KING              = 3781308,      
-    POINT_EXIT_1            = 3781309,     
-    POINT_EXIT_2            = 3781310,	
+    POINT_CORPSE_1          = 3781307,
+    POINT_KING              = 3781308,
+    POINT_EXIT_1            = 3781309,
+    POINT_EXIT_2            = 3781310,
     POINT_EXIT              = 5,        // waypoint id
 };
 
@@ -319,6 +319,7 @@ class boss_deathbringer_saurfang : public CreatureScript
             void Reset()
             {
                 _Reset();
+                events.Reset();
                 events.SetPhase(PHASE_COMBAT);
                 _frenzied = false;
                 me->SetPower(POWER_ENERGY, 0);
@@ -329,11 +330,16 @@ class boss_deathbringer_saurfang : public CreatureScript
                 DoCast(me, SPELL_RUNE_OF_BLOOD_S, true);
                 me->RemoveAurasDueToSpell(SPELL_BERSERK);
                 me->RemoveAurasDueToSpell(SPELL_FRENZY);
+		me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
+                events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 40000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_BOILING_BLOOD, 15500, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_BLOOD_NOVA, 17000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, 3000, 0, PHASE_COMBAT);
             }
 
             void EnterCombat(Unit* who)
             {
-				sLog->outError(" <!> LANCEMENT SCRIPT : SAURCROC <!>");
                 if (!instance->CheckRequiredBosses(DATA_DEATHBRINGER_SAURFANG, who->ToPlayer()))
                 {
                     EnterEvadeMode();
@@ -358,7 +364,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 _introDone = true;
 
                 Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 30000, 0, PHASE_COMBAT);
+                events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 40000, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BOILING_BLOOD, 15500, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BLOOD_NOVA, 17000, 0, PHASE_COMBAT);
@@ -400,6 +406,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 _JustReachedHome();
                 instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, FAIL);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+		me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
             }
 
             void KilledUnit(Unit* victim)
@@ -416,11 +423,8 @@ class boss_deathbringer_saurfang : public CreatureScript
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
-				
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
-                    summon->AI()->AttackStart(target);
 
-                if (IsHeroic())
+	       if (IsHeroic())
                 {
                     summon->AddAura(SPELL_SCENT_OF_BLOOD_TRIGGERED,summon);
 					std::list<Unit*> playerList;
@@ -431,7 +435,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                         pTemp->AddAura(SPELL_SCENT_OF_BLOOD,pTemp);
                     }
                 }
-	
+
                 summon->AI()->DoCast(summon, SPELL_BLOOD_LINK_BEAST, true);
                 summon->AI()->DoCast(summon, SPELL_RESISTANT_SKIN, true);
                 summons.Summon(summon);
@@ -479,8 +483,8 @@ class boss_deathbringer_saurfang : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-					
-                if (!_frenzied && HealthBelowPct(31)) 
+
+                if (!_frenzied && HealthBelowPct(31))
                 {
                     DoCast(me, SPELL_FRENZY);
                     Talk(SAY_FRENZY);
@@ -489,7 +493,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 
                 uint32 power = me->GetPower(POWER_ENERGY);
                 if (power >= 100)
-                    me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 20);																											
+                    me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 20);
                 else if (power >= 95 && power < 100)
                     me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 19);
                 else if (power >= 90 && power < 95)
@@ -611,6 +615,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
                             Talk(SAY_BERSERK);
+			    events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
                             break;
                         default:
                             break;
@@ -715,25 +720,92 @@ class npc_blood_beast : public CreatureScript
 				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
             }
 
+	  void Reset()
+	  {
+	      mui_freeze = 3000;
+	      defreeze = false;
+	      me->SetReactState(REACT_PASSIVE);
+	      mui_freeze2 = 2000;
+	  }
+
 	  void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
 	  {
 	    //place for fix blood beast damage
+
 	  }
 
             void IsSummonedBy(Unit* summoner)
             {
             }
-                        
+
+	  Unit* SelectEnemyCaster()
+	  {
+	    Map::PlayerList const &tList = me->GetMap()->GetPlayers();
+	    Map::PlayerList::const_iterator iter;
+
+            Unit* target;
+            for (iter = tList.begin(); iter!=tList.end(); ++iter)
+            {
+	      target = iter->getSource();
+	      if (target && target->getPowerType() == POWER_MANA && target->isAlive() && me->GetDistance2d(target->GetPositionX(), target->GetPositionY()) > 12.0f)
+		return target;
+	    }
+	    for (iter = tList.begin(); iter!=tList.end(); ++iter)
+            {
+	      target = iter->getSource();
+              if (target && target->getPowerType() == POWER_MANA && target->isAlive())
+                return target;
+            }
+	    return SelectTarget(SELECT_TARGET_RANDOM);
+	  }
+
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
-                    return;
+	      if (!defreeze)
+	      {
+		if (mui_freeze <= diff)
+		{
+		  me->SetReactState(REACT_AGGRESSIVE);
+		  if (target = SelectEnemyCaster())
+		  {
+		    me->DeleteThreatList();
+		    me->SetInCombatWith(target);
+		    target->SetInCombatWith(me);
+		    //		    DoStartMovement(target);
+		  me->AI()->AttackStart(target);
+		    me->AddThreat(target, 100000000.0f * 9.0f);
+		    mui_freeze2 = 2000;
+		  }
+		  defreeze = true;
+		}
+		else
+		  mui_freeze -= diff;
+	      }
+	      else
+	      {
+		if (mui_freeze2 > diff)
+		{
+		  mui_freeze2 -= diff;
+		  me->DeleteThreatList();
+		  me->SetInCombatWith(target);
+		  target->SetInCombatWith(me);
+		  me->AI()->AttackStart(target);
+		  //  DoStartMovement(target);
+		  me->AddThreat(target, 100000000.0f * 9.0f);
+		}
+	      }
 
-				DoMeleeAttackIfReady();
+	      DoMeleeAttackIfReady();
             }
 
+	private :
+
+	  Unit* target;
+	  uint32 mui_freeze;
+	  uint32 mui_freeze2;
+	  bool defreeze;
             };
-                        
+
             CreatureAI* GetAI(Creature* creature) const
             {
                 return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
@@ -853,7 +925,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                                 deathbringer->DespawnOrUnsummon();
                             //me->DespawnOrUnsummon();
                             me->SetVisible(false);
-                            _events.ScheduleEvent(EVENT_OUTRO_HORDE_6_1, 1000);							
+                            _events.ScheduleEvent(EVENT_OUTRO_HORDE_6_1, 1000);
                             break;
                         default:
                             break;
@@ -966,14 +1038,14 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
 									if (Player* pPlayer = itr->getSource())
 										pPlayer->CombatStop();
 								}
-                                break;							
+                                break;
                     }
                 }
             }
 
         private:
             TempSummon* _peon1, * _peon2;
-            GameObject* _hordeportal1, * _hordeportal2;		
+            GameObject* _hordeportal1, * _hordeportal2;
             EventMap _events;
             InstanceScript* _instance;
             std::list<Creature*> _guardList;
@@ -982,14 +1054,14 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
-		
+
 			if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
 			{
 				player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sorry, I'm not the raid leader", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
 				player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
 				return true;
 			}
-		
+
             InstanceScript* instance = creature->GetInstanceScript();
             if (instance && instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) != DONE)
             {
@@ -1002,13 +1074,13 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
 
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
         {
-		
+
 			if (action == GOSSIP_ACTION_INFO_DEF+2)
 			{
 				player->CLOSE_GOSSIP_MENU();
 				return true;
-			}	
-	
+			}
+
             player->PlayerTalkClass->ClearMenus();
             player->CLOSE_GOSSIP_MENU();
             if (action == -ACTION_START_EVENT)
@@ -1037,7 +1109,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
             Transport* CreateZeppelin()
             {
                     const GameObjectTemplate* goInfo = sObjectMgr->GetGameObjectTemplate(201834);
-                              
+
                     if (!goInfo) return NULL;
 
                     Transport *t = new Transport(154573, goInfo->ScriptId);
@@ -1061,9 +1133,9 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     Map* tMap = me->GetMap();
                     t->SetMap(tMap);
                     t->AddToWorld();
-                              
+
                     for (Map::PlayerList::const_iterator itr = tMap->GetPlayers().begin(); itr != tMap->GetPlayers().end(); ++itr)
-                              
+
                             if (Player* pPlayer = itr->getSource())
                             {
                                     UpdateData transData;
@@ -1072,7 +1144,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                                     transData.BuildPacket(&packet);
                                     pPlayer->SendDirectMessage(&packet);
                             }
-                
+
                     sMapMgr->m_Transports.insert(t);
                     t->Update(1);
                     return t;
@@ -1113,7 +1185,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         me->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
                         Talk(SAY_OUTRO_ALLIANCE_1);
                         zepp = CreateZeppelin();
-                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_2, 4000);						
+                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_2, 4000);
                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                         me->SendMovementFlagUpdate();
                         me->Relocate(me->GetPositionX(), me->GetPositionY(), 539.2917f);
@@ -1140,7 +1212,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                             break;
                     case ACTION_EXIT_1:
                             _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_17, 1000);
-                            break;						
+                            break;
                 }
             }
 
@@ -1195,7 +1267,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                 {
                         me->SetFacingTo(0.0f);
                         _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_21_2, 1000);
-                }				
+                }
             }
 
             void UpdateAI(uint32 const diff)
@@ -1437,14 +1509,14 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
         bool OnGossipHello(Player* player, Creature* creature)
         {
             InstanceScript* instance = creature->GetInstanceScript();
-			
+
             if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sorry, I'm not the raid leader", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
                 return true;
-            }			
-			
+            }
+
             if (instance && instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) != DONE)
             {
                 player->ADD_GOSSIP_ITEM(0, "Let it begin...", 631, -ACTION_START_EVENT + 1);

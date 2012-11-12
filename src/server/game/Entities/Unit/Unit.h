@@ -1463,14 +1463,14 @@ class Unit : public WorldObject
         float GetSpellCritChanceReduction() const { return GetCombatRatingReduction(CR_CRIT_TAKEN_SPELL); }
 
         // player or player's pet resilience (-1%)
-        uint32 GetMeleeCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_MELEE, 2.2f, 33.0f, damage); }
-        uint32 GetRangedCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_RANGED, 2.2f, 33.0f, damage); }
-        uint32 GetSpellCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_SPELL, 2.2f, 33.0f, damage); }
+        uint32 GetMeleeCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_MELEE, 2.4f, 33.0f, damage); }
+        uint32 GetRangedCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_RANGED, 2.4f, 33.0f, damage); }
+        uint32 GetSpellCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_SPELL, 2.4f, 33.0f, damage); }
 
         // player or player's pet resilience (-1%), cap 100%
-        uint32 GetMeleeDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_MELEE, 2.0f, 100.0f, damage); }
-        uint32 GetRangedDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_RANGED, 2.0f, 100.0f, damage); }
-        uint32 GetSpellDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_SPELL, 2.0f, 100.0f, damage); }
+        uint32 GetMeleeDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_MELEE, 2.2f, 100.0f, damage); }
+        uint32 GetRangedDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_RANGED, 2.2f, 100.0f, damage); }
+        uint32 GetSpellDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_CRIT_TAKEN_SPELL, 2.2f, 100.0f, damage); }
 
         void ApplyResilience(const Unit* pVictim, float * crit, int32 * damage, bool isCrit, CombatRating type) const;
 
@@ -1496,10 +1496,15 @@ class Unit : public WorldObject
             return true;
         }
 
+	virtual float GetShieldBlockValuePctMod() const =0;
         virtual uint32 GetShieldBlockValue() const =0;
         uint32 GetShieldBlockValue(uint32 soft_cap, uint32 hard_cap) const
         {
             uint32 value = GetShieldBlockValue();
+	    float pctMod = GetShieldBlockValuePctMod();
+
+	    soft_cap *= pctMod;
+	    hard_cap *= pctMod;
             if (value >= hard_cap)
             {
                 value = (soft_cap + hard_cap) / 2;
@@ -1769,12 +1774,15 @@ class Unit : public WorldObject
         void RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit* stealer);
         void RemoveAurasDueToItemSpell(Item* castItem, uint32 spellId);
         void RemoveAurasByType(AuraType auraType, uint64 casterGUID = 0, Aura* except = NULL, bool negative = true, bool positive = true);
+        void RemoveAurasByTypeWithVanish(AuraType auraType, uint64 casterGUID = 0, Aura* except = NULL, bool negative = true, bool positive = true);
         void RemoveNotOwnSingleTargetAuras(uint32 newPhase = 0x0);
         void RemoveAurasWithInterruptFlags(uint32 flag, uint32 except = 0);
         void RemoveAurasWithAttribute(uint32 flags);
         void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID);
         void RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemode = AURA_REMOVE_BY_DEFAULT, uint32 except=0);
         void RemoveMovementImpairingAuras();
+        void RemoveAurasWithMechanicWithVanish(uint32 mechanic_mask, AuraRemoveMode removemode = AURA_REMOVE_BY_DEFAULT, uint32 except=0);
+        void RemoveMovementImpairingAurasWithVanish();
 
         void RemoveAreaAurasDueToLeaveWorld();
         void RemoveAllAuras();
@@ -2016,6 +2024,11 @@ class Unit : public WorldObject
         int32 SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit* pVictim);
         int32 SpellBaseHealingBonusForVictim(SpellSchoolMask schoolMask, Unit* pVictim);
         uint32 SpellDamageBonus(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellDamageBonusDone(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
+	uint32 SpellDamageBonusTaken(Unit *caster, SpellInfo const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);
+	int32 SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask);
+	float CalculateDefaultCoefficient(SpellInfo const *spellInfo, DamageEffectType damagetype);
+
         uint32 SpellHealingBonus(Unit* pVictim, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1);
         bool   isSpellBlocked(Unit* pVictim, SpellInfo const* spellProto, WeaponAttackType attackType = BASE_ATTACK);
         bool   isBlockCritical();

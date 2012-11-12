@@ -51,8 +51,6 @@ class spell_ex_5581 : public SpellScriptLoader
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
                 // check if spellid 70522 exists in dbc, we will trigger it later
-                if (!sSpellMgr->GetSpellInfo(SPELL_TRIGGERED))
-                    return false;
                 return true;
             }
 

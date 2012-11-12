@@ -96,6 +96,8 @@ class spell_sha_fire_nova : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellEntry)
             {
+	      if (!sSpellMgr)
+		return false;
                 if (!sSpellMgr->GetSpellInfo(SHAMAN_SPELL_FIRE_NOVA_R1) || sSpellMgr->GetFirstSpellInChain(SHAMAN_SPELL_FIRE_NOVA_R1) != sSpellMgr->GetFirstSpellInChain(spellEntry->Id))
                     return false;
 
@@ -119,6 +121,8 @@ class spell_sha_fire_nova : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 if (Unit* caster = GetCaster())
                 {
                     uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
@@ -156,7 +160,7 @@ class spell_sha_mana_tide_totem : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SHAMAN_SPELL_GLYPH_OF_MANA_TIDE) || !sSpellMgr->GetSpellInfo(SHAMAN_SPELL_MANA_TIDE_TOTEM))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SHAMAN_SPELL_GLYPH_OF_MANA_TIDE) || !sSpellMgr->GetSpellInfo(SHAMAN_SPELL_MANA_TIDE_TOTEM))
                     return false;
                 return true;
             }
@@ -204,7 +208,7 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SHAMAN_TOTEM_SPELL_EARTHBIND_TOTEM) || !sSpellMgr->GetSpellInfo(SHAMAN_TOTEM_SPELL_EARTHEN_POWER))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SHAMAN_TOTEM_SPELL_EARTHBIND_TOTEM) || !sSpellMgr->GetSpellInfo(SHAMAN_TOTEM_SPELL_EARTHEN_POWER))
                     return false;
                 return true;
             }
@@ -298,7 +302,7 @@ class spell_sha_bloodlust : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SHAMAN_SPELL_SATED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SHAMAN_SPELL_SATED))
                     return false;
                 return true;
             }
@@ -340,7 +344,7 @@ class spell_sha_heroism : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SHAMAN_SPELL_EXHAUSTION))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SHAMAN_SPELL_EXHAUSTION))
                     return false;
                 return true;
             }
@@ -387,7 +391,7 @@ class spell_sha_ancestral_awakening_proc : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_ANCESTRAL_AWAKENING_PROC))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_ANCESTRAL_AWAKENING_PROC))
                     return false;
                 return true;
             }
@@ -427,7 +431,7 @@ class spell_sha_cleansing_totem_pulse : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_CLEANSING_TOTEM_EFFECT))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_CLEANSING_TOTEM_EFFECT))
                     return false;
                 return true;
             }
@@ -469,7 +473,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_GLYPH_OF_HEALING_STREAM_TOTEM) || !sSpellMgr->GetSpellInfo(SPELL_HEALING_STREAM_TOTEM_HEAL))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_GLYPH_OF_HEALING_STREAM_TOTEM) || !sSpellMgr->GetSpellInfo(SPELL_HEALING_STREAM_TOTEM_HEAL))
                     return false;
                 return true;
             }
@@ -526,7 +530,7 @@ class spell_sha_mana_spring_totem : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MANA_SPRING_TOTEM_ENERGIZE))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_MANA_SPRING_TOTEM_ENERGIZE))
                     return false;
                 return true;
             }

@@ -126,7 +126,7 @@ class InstanceScript : public ZoneScript
 {
     public:
 
-        explicit InstanceScript(Map* map) : instance(map), completedEncounters(0) {}
+        explicit InstanceScript(Map* map) : instance(map), completedEncounters(0), IsLFG(false) {}
 
         virtual ~InstanceScript() {}
 
@@ -212,6 +212,9 @@ class InstanceScript : public ZoneScript
 
         virtual void FillInitialWorldStates(WorldPacket& /*data*/) {}
 
+		void SetIsLfg(bool isLFG) { IsLFG = isLFG; }
+		bool IsLfg() const { return IsLFG; }
+
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(DoorData const* data);
@@ -230,5 +233,6 @@ class InstanceScript : public ZoneScript
         DoorInfoMap doors;
         MinionInfoMap minions;
         uint32 completedEncounters; // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
+		bool IsLFG;
 };
 #endif

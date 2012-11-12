@@ -1669,7 +1669,7 @@ public:
             Player *pPlayer = who->ToPlayer();
             if (!pPlayer)
                 return;
-            if (pPlayer->HasAura(SPELL_BREWFEST_RAM) 
+            if (pPlayer->HasAura(SPELL_BREWFEST_RAM)
                 && me->GetDistance(pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ()) <= 25.0f
                 && !pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1))
             {
@@ -1694,7 +1694,7 @@ enum eBrewfestKegReceiver
     SPELL_CREATE_TICKETS            = 44501,
     QUEST_THERE_AND_BACK_AGAIN_A    = 11122,
     QUEST_THERE_AND_BACK_AGAIN_H    = 11412,
-    NPC_BREWFEST_DELIVERY_BUNNY     = 24337   
+    NPC_BREWFEST_DELIVERY_BUNNY     = 24337
 };
 
 class npc_brewfest_keg_receiver : public CreatureScript
@@ -1710,14 +1710,14 @@ public:
             Player *pPlayer = who->ToPlayer();
             if (!pPlayer)
                 return;
-            if (pPlayer->HasAura(SPELL_BREWFEST_RAM) 
+            if (pPlayer->HasAura(SPELL_BREWFEST_RAM)
                 && me->GetDistance(pPlayer->GetPositionX(),pPlayer->GetPositionY(),pPlayer->GetPositionZ()) <= 5.0f
-                && pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1)) 
+                && pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1))
             {
                 pPlayer->CastSpell(me,SPELL_THROW_KEG,true);
                 pPlayer->DestroyItemCount(ITEM_BREWFEST_KEG,1,true);
                 pPlayer->GetAura(SPELL_BREWFEST_RAM)->SetDuration(pPlayer->GetAura(SPELL_BREWFEST_RAM)->GetDuration() + 30000);
-                if (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+                if (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                     || pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H))
                 {
                     pPlayer->CastSpell(pPlayer,SPELL_CREATE_TICKETS,true);
@@ -1725,9 +1725,9 @@ public:
                 else
                 {
                     pPlayer->KilledMonsterCredit(NPC_BREWFEST_DELIVERY_BUNNY,0);
-                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE) 
+                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE)
                         pPlayer->AreaExploredOrEventHappens(QUEST_THERE_AND_BACK_AGAIN_A);
-                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE) 
+                    if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE)
                         pPlayer->AreaExploredOrEventHappens(QUEST_THERE_AND_BACK_AGAIN_H);
                     if (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_COMPLETE
                         || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_COMPLETE)
@@ -1760,20 +1760,20 @@ public:
         if (pCreature->isQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-            if (pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM) 
-                && !pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+            if (pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM)
+                && !pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                 && !pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H)
                 && (pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE
                 || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE))
                 pPlayer->RemoveSpellCooldown(SPELL_BREWFEST_SUMMON_RAM);
-            if (!pPlayer->HasAura(SPELL_BREWFEST_RAM) && ((pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE 
-            || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE 
-            || (!pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM) && 
-                (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+            if (!pPlayer->HasAura(SPELL_BREWFEST_RAM) && ((pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_A) == QUEST_STATUS_INCOMPLETE
+            || pPlayer->GetQuestStatus(QUEST_THERE_AND_BACK_AGAIN_H) == QUEST_STATUS_INCOMPLETE
+            || (!pPlayer->HasSpellCooldown(SPELL_BREWFEST_SUMMON_RAM) &&
+                (pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                 || pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H))))))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RAM, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-            if ((pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A) 
+            if ((pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_A)
                 || pPlayer->GetQuestRewardStatus(QUEST_THERE_AND_BACK_AGAIN_H))
                 && !pPlayer->HasItemCount(33306,1,true))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RAM_REINS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
@@ -1789,7 +1789,7 @@ public:
         pPlayer->PlayerTalkClass->SendCloseGossip();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
-            if (pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1)) 
+            if (pPlayer->HasItemCount(ITEM_BREWFEST_KEG,1))
                 pPlayer->DestroyItemCount(ITEM_BREWFEST_KEG,1,true);
             pPlayer->CastSpell(pPlayer,SPELL_BREWFEST_SUMMON_RAM,true);
             pPlayer->AddSpellCooldown(SPELL_BREWFEST_SUMMON_RAM,0,time(NULL) + 18*60*60);
@@ -2164,7 +2164,7 @@ public:
             {
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     me->CastStop();
-                me->AI()->EnterEvadeMode();  
+                me->AI()->EnterEvadeMode();
                 return;
             }
 
@@ -2228,7 +2228,7 @@ public:
             // Not needed to be despawned now
             DespawnTimer = 0;
             // Find victim of Summon Gargoyle spell
-            std::list<Unit*> targets;
+	    /*            std::list<Unit*> targets;
             Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(me, me, 30);
             Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(me, targets, u_check);
             me->VisitNearbyObject(30, searcher);
@@ -2237,7 +2237,14 @@ public:
                 {
                     me->Attack((*iter), false);
                     break;
-                }
+		    }*/
+	    if (Unit* owner = me->GetOwner())
+	      if (owner->GetTypeId() == TYPEID_PLAYER && owner->getVictim())
+	      {
+		me->AttackStop();
+		me->ToCreature()->AI()->AttackStart(owner->getVictim());
+	      }
+
         }
 
         void JustDied(Unit* /*killer*/)
@@ -2431,21 +2438,15 @@ public:
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
 
-        void DamageTaken(Unit* /*killer*/, uint32& damage)
-        {
-            if (me->isSummon())
-                if (Unit* owner = me->ToTempSummon()->GetSummoner())
-                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND) && damage >= me->GetHealth())
-                        owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
-        }
+      void JustDied(Unit* killer)
+      {
+	if (me->isSummon())
+	  if (Unit* owner = me->ToTempSummon()->GetSummoner())
+	    if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
+	      owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
 
-        void UpdateAI(uint32 const /*diff*/)
-        {
-            if (!UpdateVictim())
-                return;
+      }
 
-            DoMeleeAttackIfReady();
-        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -2609,7 +2610,7 @@ public:
 
 				if (urand(0,90) == 90)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ENGINEERING6, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-				
+
                 player->PlayerTalkClass->SendGossipMenu(TEXT_WORMHOLE, creature->GetGUID());
             }
         }
@@ -3515,7 +3516,7 @@ public:
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pennon de champion de Lune-d'Argent", GOSSIP_SENDER_MAIN, SPELL_SILVERMOON_PENNANT);
         if (pPlayer->GetQuestRewardStatus(QUEST_CHAMP_THUNDERBLUFF))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pennon de champion des Pitons-de-Tonnerre", GOSSIP_SENDER_MAIN, SPELL_THUNDERBLUFF_PENNANT);
- 
+
         //Alliance
         if (pPlayer->GetQuestRewardStatus(QUEST_CHAMP_DARNASSUS))
             pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pennon de champion de Darnassus", GOSSIP_SENDER_MAIN, SPELL_DARNASSUS_PENNANT);
@@ -3640,7 +3641,7 @@ public:
     }
 };
 
-const Position movePosition[] = 
+const Position movePosition[] =
 {
     { 8539.276367f, 624.307678f, 563.883545f, 0.0f },
     { 8607.274414f, 796.302795f, 597.421082f, 0.0f },
@@ -3660,7 +3661,7 @@ public:
 
     struct vehicle_knight_gryphonAI : VehicleAI
     {
-        vehicle_knight_gryphonAI(Creature *c) : VehicleAI(c) 
+        vehicle_knight_gryphonAI(Creature *c) : VehicleAI(c)
         {
             MovingStarted = false;
             curPoint = 8;
@@ -3682,7 +3683,7 @@ public:
                         me->GetMotionMaster()->MovePoint(curPoint,movePosition[curPoint]);
                     else  {
                         if (me->GetCharmer())
-                            if (me->GetCharmer()->ToPlayer()) 
+                            if (me->GetCharmer()->ToPlayer())
                             {
                                 me->GetCharmer()->ToPlayer()->KilledMonsterCredit(me->GetEntry(),0);
                                 me->GetCharmer()->ToPlayer()->ExitVehicle();
@@ -3778,7 +3779,7 @@ public:
         if (ArtuisGob.empty())
 			me->SummonGameObject(190777, 5619.55f, 3776.31f, -94.513f, 2.39f, 0.0f, 0.0f, 0.0f, 0.0f, 180000))//despawn apres 3 minutes apres pop.
 */
-		
+
 		Summons.DespawnAll();
     }
 
@@ -3809,6 +3810,7 @@ public:
 			}
 			else
 			{
+			  if (jaloot)
 				if(!jaloot->GetAura(52182))
 					jaloot->AddAura(52182, jaloot);
 			}
@@ -3836,7 +3838,7 @@ public:
 				m_uibolt = 2000;
 			}
 			else m_uibolt -= diff;
-	  
+
 			if (m_uijav <= diff)
 			{
 				DoCast(me->getVictim(), GIVRE_JAVELOT, true);
@@ -3925,7 +3927,7 @@ class npc_risen_ally : public CreatureScript
 
 	            me->SetUInt32Value(UNIT_FIELD_LEVEL, pCreature->getLevel());
 	            me->SetUInt32Value(UNIT_FIELD_RESISTANCES, pCreature->GetUInt32Value(UNIT_FIELD_RESISTANCES));
-	           
+
 				//me->SetSheath(SHEATH_STATE_MELEE);
 				me->SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_ABANDONED);
 				me->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
@@ -3934,7 +3936,7 @@ class npc_risen_ally : public CreatureScript
 				me->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
 
 				uint32 petlevel = pCreature->getLevel();
-			
+
 				pCreature->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
 			    pCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
 
@@ -3992,7 +3994,7 @@ class npc_risen_ally : public CreatureScript
 				{
 				   me->SetLevel(creator->getLevel());
 				   me->setFaction(creator->getFaction());
-				}			
+				}
             }
 
             void UpdateAI(const uint32 diff)
@@ -4006,10 +4008,1805 @@ class npc_risen_ally : public CreatureScript
         };
 };
 
+class npc_brew : public CreatureScript
+{
+public:
+  npc_brew() : CreatureScript("npc_brew") { }
+
+  struct npc_brewAI : public ScriptedAI
+  {
+    npc_brewAI(Creature* creature) : ScriptedAI(creature)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetVisible(false);
+    }
+
+    uint32 waves;
+
+    void Reset()
+    {
+      waves = 0;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (waves <= uiDiff)
+        {
+	  if (me->GetEntry() == 8000002)
+            me->SummonCreature(8000001,  me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 3000000);
+          else
+            me->SummonCreature(9000001,  me->GetPositionX(),  me->GetPositionY(),  me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 3000000);
+
+          waves = 1800000;
+          //      waves = 400000;
+        }
+      else waves -= uiDiff;
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_brewAI(creature);
+  }
+};
+
+class npc_sum_brew : public CreatureScript
+{
+public:
+  npc_sum_brew() : CreatureScript("npc_sum_brew") { }
+
+  struct npc_sum_brewAI : public ScriptedAI
+  {
+    npc_sum_brewAI(Creature* creature) : ScriptedAI(creature)
+    {
+    }
+
+    uint32 move, move2;
+    float x[3],y[3],z[3];
+
+    void Reset()
+    {
+      if (me->GetEntry() == 8000003)
+        {
+          x[0] = -5159.65;
+          y[0] = -630.11;
+          z[0] = 397.50;
+          x[1] = -5147.03;
+          y[1] = -577.77;
+          z[1] = 397.27;
+          x[2] = -5185.09;
+          y[2] = -599.90;
+          z[2] = 397.27;
+        }
+      else
+        {
+          x[0] = 1184.29;
+          y[0] = -4275.24;
+          z[0] = 21.19;
+          x[1] = 1221.62;
+          y[1] = -4297.02;
+          z[1] = 21.19;
+          x[2] = 1185.37;
+          y[2] = -4313.25;
+	  z[2] = 21.29;
+        }
+      int a = rand() % 3;
+      me->GetMotionMaster()->MovePoint(42, x[a], y[a], z[a]);
+      move = 10000000;
+      move2 = 10000000;
+    }
+
+    void MovementInform(uint32 type, uint32 id)
+    {
+      switch(id)
+        {
+        case 42:
+          {
+            move = 3000 + rand() % 10000;
+            break;
+          }
+        case 43:
+          {
+            move2 = 3000 + rand() % 10000;
+            break;
+          }
+        }
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell)
+    {
+      if (caster)
+	caster->Kill(me);
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (move <= uiDiff)
+        {
+	  float _x, _y, _z;
+	  if (me->GetEntry() == 8000003)
+	    {
+	      _x = -5159.35;
+	      _y = -596.81;
+	      _z = 398.17;
+	    }
+	  else
+	    {
+	      _x = 1199.87;
+	      _y = -4298.49;
+	      _z =  21.36;
+	    }
+	  me->GetMotionMaster()->MovePoint(43, _x, _y, _z);
+          move = 10000000;
+        }
+      else move -= uiDiff;
+      if (move2 <= uiDiff)
+        {
+          int a = rand() % 3;
+          me->GetMotionMaster()->MovePoint(42, x[a], y[a], z[a]);
+          move2 = 10000000;
+        }
+      else move2 -= uiDiff;
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_sum_brewAI(creature);
+  }
+};
+
+enum Mobs
+  {
+    NPC_D          = 8000003,
+    NPC_H          = 9000003,
+    GOB_MOLE_MACHINE                = 194316,
+    GOB_MOLE_MACHINE_SUCCESS                = 8000000
+  };
+
+
+class npc_brew_attak_trigger : public CreatureScript
+{
+public:
+  npc_brew_attak_trigger() : CreatureScript("npc_brew_attak_trigger") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_brew_attak_triggerAI (pCreature);
+  }
+
+  struct npc_brew_attak_triggerAI : public Scripted_NoMovementAI
+  {
+    npc_brew_attak_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), summons(pCreature)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetVisible(false);
+    }
+
+    GameObject* MoleMachine;
+    uint32 SummonTimer, sumCount;
+    uint32 SummonEndTimer;
+    uint32 SEndTimer, sum;
+    std::list<Creature *> summoned;
+    uint32 checkSuccess;
+    bool succ, end;
+    SummonList summons;
+
+    void Reset()
+    {
+      sumCount = 4;
+      succ = false;
+      end = false;
+      checkSuccess = 10000;
+      SEndTimer = 240000;
+      MoleMachine = me->SummonGameObject(GOB_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+                                         float(urand(0, 6)), 0, 0, 0, 0, 300000);
+      if (MoleMachine)
+        MoleMachine->SetGoState(GO_STATE_ACTIVE);
+      SummonTimer = 0;
+      SummonEndTimer = 900000;
+    }
+
+    void JustSummoned(Creature* summon)
+    {
+      summons.Summon(summon);
+      if (sumCount == 1 && (summon->GetEntry() == NPC_D || summon->GetEntry() == NPC_H))
+        summoned.push_back(summon);
+    }
+
+    bool checkEndEvent()
+    {
+      if (!summoned.empty())
+        {
+          for (std::list<Creature *>::iterator it = summoned.begin(); it != summoned.end(); it++)
+            {
+              if ((*it)->isAlive())
+                {
+                  return false;
+                }
+            }
+        }
+      return true;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      //      if (!UpdateVictim())
+      //        return;
+
+      if (SummonEndTimer <= uiDiff)
+        {
+          SummonEndTimer = 0;
+          me->DespawnOrUnsummon();
+        }
+      else
+        SummonEndTimer -= uiDiff;
+
+      if (!end && !succ)
+	if (SEndTimer <= uiDiff)
+	  {
+	    if (checkEndEvent())
+	      {
+		succ = true;
+		printf("omg ces cons de joueurs ont reussis ><\n");
+		me->SummonGameObject(GOB_MOLE_MACHINE_SUCCESS, me->GetPositionX() + 10, me->GetPositionY() + 10, me->GetPositionZ(),
+				     float(urand(0, 6)), 0, 0, 0, 0, 600000);
+	      }
+	    else
+              printf("fail de l'event!!!!!!!! ><\n");
+	    summons.DespawnAll();
+	    SEndTimer = 100000;
+	    end = true;
+	  }
+	else
+	  SEndTimer -= uiDiff;
+
+      if (!succ && !end)
+	if (SummonTimer <= uiDiff)
+	  {
+	    float x = me->GetPositionX();
+	    float y = me->GetPositionY();
+	    float z = me->GetPositionZ() + 1;
+	    if (sumCount > 0)
+	      {
+		printf("summon !\n");
+		if (me->GetEntry() == 8000001)
+		  {
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+		else
+		  {
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+	      }
+	    sumCount--;
+	    SummonTimer = 60000;
+	  }
+	else SummonTimer -= uiDiff;
+    }
+  };
+
+};
+class npc_brew_attak_trigger2 : public CreatureScript
+{
+public:
+  npc_brew_attak_trigger2() : CreatureScript("npc_brew_attak_trigger2") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_brew_attak_trigger2AI (pCreature);
+  }
+
+  struct npc_brew_attak_trigger2AI : public Scripted_NoMovementAI
+  {
+    npc_brew_attak_trigger2AI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), summons(pCreature)
+    {
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetVisible(false);
+    }
+
+    GameObject* MoleMachine;
+    uint32 SummonTimer, sumCount;
+    uint32 SummonEndTimer;
+    uint32 SEndTimer, sum;
+    std::list<Creature *> summoned;
+    uint32 checkSuccess;
+    bool succ, end;
+    SummonList summons;
+
+    void Reset()
+    {
+      sumCount = 4;
+      succ = false;
+      end = false;
+      checkSuccess = 10000;
+      SEndTimer = 240000;
+      MoleMachine = me->SummonGameObject(GOB_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+                                         float(urand(0, 6)), 0, 0, 0, 0, 300000);
+      if (MoleMachine)
+        MoleMachine->SetGoState(GO_STATE_ACTIVE);
+      SummonTimer = 0;
+      SummonEndTimer = 900000;
+    }
+    void JustSummoned(Creature* summon)
+    {
+      summons.Summon(summon);
+      if (sumCount == 1 && (summon->GetEntry() == NPC_D || summon->GetEntry() == NPC_H))
+        summoned.push_back(summon);
+    }
+
+    bool checkEndEvent()
+    {
+      if (!summoned.empty())
+        {
+          for (std::list<Creature *>::iterator it = summoned.begin(); it != summoned.end(); it++)
+            {
+              if ((*it)->isAlive())
+                {
+                  return false;
+                }
+              else
+		printf("its dead");
+            }
+        }
+      return true;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      //      if (!UpdateVictim())
+      //        return;
+
+      if (SummonEndTimer <= uiDiff)
+        {
+          SummonEndTimer = 0;
+          me->DespawnOrUnsummon();
+        }
+      else
+        SummonEndTimer -= uiDiff;
+
+      if (!end && !succ)
+	if (SEndTimer <= uiDiff)
+	  {
+	    if (checkEndEvent())
+	      {
+		succ = true;
+		printf("omg ces cons de joueurs ont reussis ><\n");
+		me->SummonGameObject(GOB_MOLE_MACHINE_SUCCESS, me->GetPositionX() + 10, me->GetPositionY() + 10, me->GetPositionZ(),
+				     float(urand(0, 6)), 0, 0, 0, 0, 600000);
+	      }
+	    else
+              printf("fail de l'event!!!!!!!! ><\n");
+	    summons.DespawnAll();
+	    SEndTimer = 100000;
+	    end = true;
+	  }
+	else
+	  SEndTimer -= uiDiff;
+
+      if (!succ && !end)
+	if (SummonTimer <= uiDiff)
+	  {
+	    float x = me->GetPositionX();
+	    float y = me->GetPositionY();
+	    float z = me->GetPositionZ() + 1;
+	    if (sumCount > 0)
+	      {
+		printf("summon !\n");
+		if (me->GetEntry() == 8000001)
+		  {
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_D, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+		else
+		  {
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		    me->SummonCreature(NPC_H, x, y, z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000000);
+		  }
+	      }
+	    sumCount--;
+	    SummonTimer = 60000;
+	  }
+	else SummonTimer -= uiDiff;
+    }
+  };
+
+};
+
+class npc_cervoise : public CreatureScript
+{
+public:
+  npc_cervoise(): CreatureScript("npc_cervoise"){}
+
+  struct npc_cervoiseAI : public ScriptedAI
+  {
+    npc_cervoiseAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      pCreature->setFaction(35); //wrong faction in db?
+    }
+
+    void Reset()
+    {
+    }
+
+    void JustDied(Unit* /*killer*/)
+    {
+      me->Respawn();
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell)
+    {
+      if (caster)
+        {
+          caster->Kill(me);
+          caster->ToPlayer()->KilledMonsterCredit(24108, 1);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+    }
+
+  };
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_cervoiseAI (pCreature);
+  }
+};
+
+enum HalloweenData
+{
+  NPC_STINKY_BOMB_CREDIT = 15415,
+
+  GO_STINKY_BOMB_FLASK   = 180449,
+  GO_STINKY_BOMB_CLOUD   = 180450,
+
+  QUEST_CRASHING_WICKERMAN_FESTIVAL = 1658,
+
+  SPELL_PIRATE_COSTUME_MALE           = 24708,
+  SPELL_PIRATE_COSTUME_FEMALE         = 24709,
+  SPELL_NINJA_COSTUME_MALE            = 24711,
+  SPELL_NINJA_COSTUME_FEMALE          = 24710,
+  SPELL_LEPER_GNOME_COSTUME_MALE      = 24712,
+  SPELL_LEPER_GNOME_COSTUME_FEMALE    = 24713,
+  SPELL_GHOST_COSTUME_MALE            = 24735,
+  SPELL_GHOST_COSTUME_FEMALE          = 24736,
+
+
+  SPELL_HALLOWEEN_WAND_PIRATE         = 24717,
+  SPELL_HALLOWEEN_WAND_NINJA          = 24718,
+  SPELL_HALLOWEEN_WAND_LEPER_GNOME    = 24719,
+  SPELL_HALLOWEEN_WAND_RANDOM         = 24720,
+  SPELL_HALLOWEEN_WAND_SKELETON       = 24724,
+  SPELL_HALLOWEEN_WAND_WISP           = 24733,
+  SPELL_HALLOWEEN_WAND_GHOST          = 24737,
+  SPELL_HALLOWEEN_WAND_BAT            = 24741,
+
+  SPELL_GRIM_VISAGE                   = 24705,
+
+  // Headless Horseman fire event
+  NPC_HEADLESS_FIRE                   = 23537,
+  NPC_FIRE_DUMMY                      = 23686,
+  NPC_SHADE_HORSEMAN                  = 23543,
+  GO_FIRE_EFFIGY                      = 186720,
+  GO_LARGE_JACK_O_LANTERN             = 186887,
+
+
+  SPELL_FIRE_CREATE_NODE              = 42118,
+  SPELL_WATER_SPOUT_VISUAL            = 42348,
+  SPELL_FIRE_VISUAL_BUFF              = 42074,
+  SPELL_FIRE_SIZE_STACK               = 42091,
+  SPELL_FIRE_STARTING_SIZE            = 42096,
+  SPELL_QUESTS_CREDITS                = 42242,
+  SPELL_CREATE_WATER_BUCKET           = 42349,
+
+  SPELL_HORSEMAN_CONFLAGRATION_1      = 42380,
+  SPELL_HORSEMAN_CONFLAGRATION_2      = 42869,
+  SPELL_HORSEMAN_JACK_O_LANTERN       = 44185,
+  SPELL_HORSEMAN_CLEAVE               = 15496,
+
+  SAY_HORSEMAN_SPAWN                  = 1,
+  SAY_HORSEMAN_FIRES_OUT              = 2,
+  SAY_HORSEMAN_FIRES_FAIL             = 3,
+  SAY_HORSEMAN_LAUGHS                 = 4,
+
+  QUEST_LET_THE_FIRES_COME_A          = 12135,
+  QUEST_LET_THE_FIRES_COME_H          = 12139,
+  QUEST_STOP_FIRES_A                  = 11131,
+  QUEST_STOP_FIRES_H                  = 11219,
+};
+
+#define FIRE_NODES_PER_AREA  13
+
+const Position FireNodesGoldShire[FIRE_NODES_PER_AREA + 1] =
+{
+  {-9459.41f, 43.90f, 64.23f, 0.00f},
+  {-9472.57f, 41.11f, 64.17f, 0.00f},
+  {-9467.22f, 85.86f, 66.20f, 0.00f},
+  {-9472.94f, 93.84f, 69.20f, 0.00f},
+  {-9462.50f, 103.90f, 68.51f, 0.00f},
+  {-9467.84f, 100.69f, 66.12f, 0.00f},
+  {-9456.91f, 112.81f, 66.12f, 0.00f},
+  {-9478.22f, 41.65f, 69.85f, 0.00f},
+  {-9481.30f, 24.87f, 69.08f, 0.00f},
+  {-9482.69f, 14.39f, 62.94f, 0.00f},
+  {-9471.16f, -6.65f, 70.76f, 0.00f},
+  {-9451.26f, 38.83f, 68.02f, 0.00f},
+  {-9450.13f, 89.46f, 66.22f, 0.00f},
+  {-9464.28f,68.1982f,56.2331f,0.0f}, // Center of Town
+};
+
+const Position FireNodesRazorHill[FIRE_NODES_PER_AREA+1] =
+{
+  {372.70f, -4714.64f, 23.11f, 0.00f},
+  {343.11f, -4708.87f, 29.19f, 0.00f},
+  {332.06f, -4703.21f, 24.52f, 0.00f},
+  {317.20f, -4694.22f, 16.78f, 0.00f},
+  {326.30f, -4693.24f, 34.59f, 0.00f},
+  {281.18f, -4705.37f, 22.38f, 0.00f},
+  {293.32f, -4773.45f, 25.03f, 0.00f},
+  {280.17f, -4831.90f, 22.25f, 0.00f},
+  {319.04f, -4770.23f, 31.47f, 0.00f},
+  {362.50f, -4676.11f, 28.63f, 0.00f},
+  {348.71f, -4805.08f, 32.23f, 0.00f},
+  {342.88f, -4837.07f, 26.29f, 0.00f},
+  {361.80f, -4769.27f, 18.49f, 0.00f},
+  {317.837f,-4734.06f,9.76272f,0.0f}, // Center of Town
+};
+
+enum HalloweenFireEvents
+{
+  EVENT_FIRE_NONE,
+  EVENT_FIRE_HIT_BY_BUCKET,
+  EVENT_FIRE_VISUAL_WATER,
+  EVENT_FIRE_GROW_FIRE,
+  EVENT_HORSEMAN_CONFLAGRATION,
+  EVENT_HORSEMAN_CLEAVE,
+  EVENT_HORSEMAN_LAUGHS,
+  EVENT_FIRE_FINISH,
+  EVENT_FIRE_FAIL,
+};
+
+class spell_halloween_wand : public SpellScriptLoader
+{
+public:
+  spell_halloween_wand() : SpellScriptLoader("spell_halloween_wand") {}
+
+  class spell_halloween_wand_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_halloween_wand_SpellScript)
+
+    bool Validate(SpellInfo const* /*spellEntry*/)
+    {
+      if (!sSpellMgr->GetSpellInfo(SPELL_PIRATE_COSTUME_MALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_PIRATE_COSTUME_FEMALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_NINJA_COSTUME_MALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_NINJA_COSTUME_FEMALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_LEPER_GNOME_COSTUME_MALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_LEPER_GNOME_COSTUME_FEMALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_GHOST_COSTUME_MALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_GHOST_COSTUME_FEMALE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_PIRATE))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_NINJA))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_LEPER_GNOME))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_RANDOM))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_SKELETON))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_WISP))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_GHOST))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_BAT))
+	return false;
+      return true;
+    }
+
+    void HandleScriptEffect()
+    {
+      Unit* caster = GetCaster();
+      Unit* target = GetHitPlayer();
+
+      if (!caster || !target)
+	return;
+
+      uint32 spellId = 0;
+      uint8 gender = target->getGender();
+
+      switch (GetSpellInfo()->Id)
+      {
+      case SPELL_HALLOWEEN_WAND_LEPER_GNOME:
+	spellId = gender ? SPELL_LEPER_GNOME_COSTUME_FEMALE : SPELL_LEPER_GNOME_COSTUME_MALE;
+	break;
+      case SPELL_HALLOWEEN_WAND_PIRATE:
+	spellId = gender ? SPELL_PIRATE_COSTUME_FEMALE : SPELL_PIRATE_COSTUME_MALE;
+	break;
+      case SPELL_HALLOWEEN_WAND_GHOST:
+	spellId = gender ? SPELL_GHOST_COSTUME_FEMALE : SPELL_GHOST_COSTUME_MALE;
+	break;
+      case SPELL_HALLOWEEN_WAND_NINJA:
+	spellId = gender ? SPELL_NINJA_COSTUME_FEMALE : SPELL_NINJA_COSTUME_MALE;
+	break;
+      case SPELL_HALLOWEEN_WAND_RANDOM:
+	spellId = RAND(SPELL_HALLOWEEN_WAND_PIRATE, SPELL_HALLOWEEN_WAND_NINJA, SPELL_HALLOWEEN_WAND_LEPER_GNOME, SPELL_HALLOWEEN_WAND_SKELETON, SPELL_HALLOWEEN_WAND_WISP, SPELL_HALLOWEEN_WAND_GHOST, SPELL_HALLOWEEN_WAND_BAT);
+	break;
+      }
+      caster->CastSpell(target, spellId, true);
+    }
+
+    void Register()
+    {
+      AfterHit += SpellHitFn(spell_halloween_wand_SpellScript::HandleScriptEffect);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_halloween_wand_SpellScript();
+  }
+};
+
+class spell_toss_stinky_bomb : public SpellScriptLoader
+{
+public:
+  spell_toss_stinky_bomb() : SpellScriptLoader("spell_toss_stinky_bomb") {}
+
+  class spell_toss_stinky_bomb_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_toss_stinky_bomb_SpellScript)
+
+    void HandleScriptEffect(SpellEffIndex effIndex)
+    {
+      Unit* caster = GetCaster();
+
+      if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+	caster->ToPlayer()->KilledMonsterCredit(NPC_STINKY_BOMB_CREDIT, 0);
+    }
+
+    void Register()
+    {
+      OnEffectHit += SpellEffectFn(spell_toss_stinky_bomb_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SEND_EVENT);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_toss_stinky_bomb_SpellScript();
+  }
+};
+
+class spell_clean_stinky_bomb : public SpellScriptLoader
+{
+public:
+  spell_clean_stinky_bomb() : SpellScriptLoader("spell_clean_stinky_bomb") {}
+
+  class spell_clean_stinky_bomb_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_clean_stinky_bomb_SpellScript)
+
+    SpellCastResult CheckIfNearBomb()
+    {
+      Unit* caster = GetCaster();
+
+      if(GameObject* stinky = GetClosestGameObjectWithEntry(caster, GO_STINKY_BOMB_CLOUD, 15.0f))
+	return SPELL_CAST_OK;
+      else
+	return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+    }
+
+    void HandleCleanBombEffect(SpellEffIndex effIndex)
+    {
+      Unit* caster = GetCaster();
+
+      if (GameObject* stinky = GetClosestGameObjectWithEntry(caster, GO_STINKY_BOMB_CLOUD, 15.0f))
+	stinky->RemoveFromWorld();
+    }
+
+    void Register()
+    {
+      OnCheckCast += SpellCheckCastFn(spell_clean_stinky_bomb_SpellScript::CheckIfNearBomb);
+      OnEffectHit += SpellEffectFn(spell_clean_stinky_bomb_SpellScript::HandleCleanBombEffect, EFFECT_1, SPELL_EFFECT_ACTIVATE_OBJECT);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_clean_stinky_bomb_SpellScript();
+  }
+};
+
+class at_wickerman_festival : public AreaTriggerScript
+{
+public:
+  at_wickerman_festival() : AreaTriggerScript("at_wickerman_festival") {}
+
+  bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/)
+  {
+    player->GroupEventHappens(QUEST_CRASHING_WICKERMAN_FESTIVAL, player);
+    return true;
+  }
+};
+
+#define GOSSIP_WICKERMAN_EMBER "Usar las cenizas como pintura de guerra para la cara" //"Smear the ash on my face like war paint!"
+
+class go_wickerman_ember : public GameObjectScript
+{
+public:
+  go_wickerman_ember() : GameObjectScript("go_wickerman_ember") { }
+
+  bool OnGossipHello(Player* player, GameObject* go)
+  {
+    if (!player->HasAura(SPELL_GRIM_VISAGE))
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WICKERMAN_EMBER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+    player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
+    return true;
+  }
+
+  bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 action)
+  {
+    if (action == GOSSIP_ACTION_INFO_DEF)
+      go->CastSpell(player, SPELL_GRIM_VISAGE);
+
+    player->PlayerTalkClass->ClearMenus();
+    player->CLOSE_GOSSIP_MENU();
+    return true;
+  }
+};
+
+class item_water_bucket : public ItemScript
+{
+public:
+
+  item_water_bucket() : ItemScript("item_water_bucket") { }
+
+  bool OnUse(Player* player, Item* item, SpellCastTargets const& targets)
+  {
+    if (Creature* dummy = player->SummonCreature(NPC_FIRE_DUMMY, targets.GetDst()->GetPositionX(), targets.GetDst()->GetPositionY(), targets.GetDst()->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 500))
+    {
+      std::list<Creature*> firesList;
+      Trinity::AllCreaturesOfEntryInRange checker(dummy, NPC_HEADLESS_FIRE, 3.0f);
+      Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(dummy, firesList, checker);
+      player->VisitNearbyObject(3.0f, searcher);
+
+      if (firesList.empty())
+      {
+	// Just some extra checks...
+	Creature* fire = dummy->FindNearestCreature(NPC_HEADLESS_FIRE, 3.0f, true);
+	if (fire && fire->isAlive())
+	  fire->AI()->SetGUID(player->GetGUID(), EVENT_FIRE_HIT_BY_BUCKET);
+	else if (Player* friendPlr = dummy->SelectNearestPlayer(3.0f))
+	{
+	  if (friendPlr->IsFriendlyTo(player) && friendPlr->isAlive())
+	    player->CastSpell(friendPlr, SPELL_CREATE_WATER_BUCKET, true);
+	}
+	else
+	  return false;
+      }
+
+      for (std::list<Creature*>::const_iterator i = firesList.begin(); i != firesList.end(); ++i)
+	if ((*i) && (*i)->isAlive())
+	  (*i)->AI()->SetGUID(player->GetGUID(), EVENT_FIRE_HIT_BY_BUCKET);
+    }
+    return false;
+  }
+};
+
+class npc_halloween_fire : public CreatureScript
+{
+public:
+  npc_halloween_fire() : CreatureScript("npc_halloween_fire") { }
+
+
+  struct npc_halloween_fireAI : public ScriptedAI
+  {
+    npc_halloween_fireAI(Creature* c) : ScriptedAI(c) {}
+
+    bool fireEffigy;
+    bool off;
+    EventMap events;
+    uint64 _playerGUID;
+
+    void Reset()
+    {
+      off = false;
+      fireEffigy = false;
+      _playerGUID = 0;
+      events.Reset();
+      // Mark the npc if is for handling effigy instead of horseman fires
+      if(GameObject* effigy = me->FindNearestGameObject(GO_FIRE_EFFIGY, 0.5f))
+	fireEffigy = true;
+      me->CastSpell(me, SPELL_FIRE_STARTING_SIZE, true);
+      events.ScheduleEvent(EVENT_FIRE_GROW_FIRE, 1000);
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      events.Update(diff);
+
+      switch(events.ExecuteEvent())
+      {
+      case EVENT_FIRE_VISUAL_WATER:
+	me->CastSpell(me, SPELL_WATER_SPOUT_VISUAL, true);
+	if (fireEffigy)
+	{
+	  if (GameObject* effigy = me->FindNearestGameObject(GO_FIRE_EFFIGY, 0.5f))
+	  {
+	    effigy->SetGoState(GO_STATE_READY);
+	    if (Player* player = me->GetPlayer(*me, _playerGUID))
+	      player->KilledMonsterCredit(me->GetEntry(),0);
+	    events.ScheduleEvent(EVENT_FIRE_GROW_FIRE, 22000);
+	  }
+	} else {
+	  if (Aura* fireSize = me->GetAura(SPELL_FIRE_SIZE_STACK))
+	  {
+	    if (fireSize->GetStackAmount() < 10)
+	    {
+	      me->RemoveAura(fireSize);
+	      me->RemoveAurasDueToSpell(SPELL_FIRE_VISUAL_BUFF);
+	      me->DespawnOrUnsummon(1000);
+	    } else
+	      fireSize->ModStackAmount(-10);
+	  }
+	}
+	break;
+      case EVENT_FIRE_GROW_FIRE:
+	if (fireEffigy)
+	{
+	  if (GameObject* effigy = me->FindNearestGameObject(GO_FIRE_EFFIGY, 0.5f))
+	    effigy->SetGoState(GO_STATE_ACTIVE);
+	} else {
+	  if (off) break; // This fire have been extinguished
+
+	  if (Aura* fireSize = me->GetAura(SPELL_FIRE_SIZE_STACK)) // This fire have maxium size
+	    if(fireSize->GetStackAmount() == 255) break;
+
+	  if (!me->HasAura(SPELL_FIRE_STARTING_SIZE))
+	    me->CastSpell(me, SPELL_FIRE_STARTING_SIZE, true);
+	  if (!me->HasAura(SPELL_FIRE_VISUAL_BUFF))
+	    me->CastSpell(me, SPELL_FIRE_VISUAL_BUFF, true);
+	  me->CastSpell(me, SPELL_FIRE_SIZE_STACK, true);
+	  events.ScheduleEvent(EVENT_FIRE_GROW_FIRE, urand(1000,2500));
+	}
+	break;
+      }
+    }
+
+    void SetGUID(uint64 guid, int32 id)
+    {
+      if (off) return;
+
+      if (id == EVENT_FIRE_HIT_BY_BUCKET)
+      {
+	_playerGUID = guid;
+	if (fireEffigy)
+	{
+	  if (GameObject* effigy = me->FindNearestGameObject(GO_FIRE_EFFIGY, 0.5f))
+	    if (effigy->GetGoState() == GO_STATE_ACTIVE)
+	      events.ScheduleEvent(EVENT_FIRE_VISUAL_WATER, 1000);
+	} else
+	{
+	  if (Creature* horseman = me->GetCreature(*me, me->GetCreatorGUID()))
+	    horseman->AI()->SetGUID(_playerGUID, EVENT_FIRE_HIT_BY_BUCKET);
+	  events.ScheduleEvent(EVENT_FIRE_VISUAL_WATER, 1000);
+	}
+      }
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_halloween_fireAI(creature);
+  }
+};
+
+/* This should be fixed ASAP, as far as I know, HHman should appear flying on villages and
+start casting SPELL_FIRE_CREATE_NODE on their buildings, maybe also son zone warning, also need
+to fix the quests, there are 2 aviable now, when only one should be depending if the village is
+alreade setted on fire or nor.
+*/
+class npc_shade_horseman : public CreatureScript
+{
+public:
+  npc_shade_horseman() : CreatureScript("npc_shade_horseman") { }
+
+
+  struct npc_shade_horsemanAI : public ScriptedAI
+  {
+    npc_shade_horsemanAI(Creature* c) : ScriptedAI(c), fires(c) {}
+
+    SummonList fires;
+    EventMap events;
+    bool moving;
+    bool pointReached;
+    bool allFiresSet;
+    bool firesOut;
+    uint32 wpCount;
+    std::list<uint64> _playerList;
+
+    void Reset()
+    {
+      moving = true;
+      pointReached = true;
+      allFiresSet = false;
+      firesOut = false;
+      wpCount = 0;
+      _playerList.clear();
+      events.Reset();
+
+      me->Mount(25159);
+      me->SetReactState(REACT_PASSIVE);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+      me->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
+
+      events.ScheduleEvent(EVENT_HORSEMAN_LAUGHS, urand(5000, 10000));
+      events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(7000, 14000));
+      events.ScheduleEvent(EVENT_FIRE_FAIL, 600000);
+    }
+
+    void JustSummoned(Creature* summon)
+    {
+      if (!summon)
+	return;
+
+      summon->SetCreatorGUID(me->GetGUID());
+      fires.Summon(summon);
+    }
+
+    void SummonedCreatureDespawn(Creature* summon)
+    {
+      if (!summon)
+	return;
+
+      fires.Despawn(summon);
+    }
+
+    void JustDied(Unit* killer)
+    {
+      if (killer && killer->GetAreaId() == me->GetAreaId())
+	killer->SummonGameObject(GO_LARGE_JACK_O_LANTERN, me->GetPositionX(), me->GetPositionY(), killer->GetPositionZ()+1.0f, me->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 180000);
+    }
+    void MovementInform(uint32 type, uint32 id)
+    {
+      if (type != POINT_MOTION_TYPE)
+	return;
+
+      if (moving && id < FIRE_NODES_PER_AREA)
+      {
+	if (id == 0 && !allFiresSet)
+	{
+	  sLog->outBasic("HEADLESS HORSEMAN BUG TRACKING Area %u.", me->GetAreaId());
+	  Talk(SAY_HORSEMAN_SPAWN);
+	}
+
+	if (!allFiresSet)
+	{
+	  const Position pos = GetPositionsForArea()[wpCount];
+	  if (pos.IsPositionValid())
+	    me->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_FIRE_CREATE_NODE, true);
+	}
+
+	if (id+1 == FIRE_NODES_PER_AREA)
+	{
+	  allFiresSet = true;
+	  wpCount = 0;
+	}
+	else
+	  ++wpCount;
+
+	pointReached = true;
+      }
+      else if (id == FIRE_NODES_PER_AREA && firesOut)
+      {
+	me->ExitVehicle();
+	me->SetReactState(REACT_AGGRESSIVE);
+	me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+	me->RemoveUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
+	events.ScheduleEvent(EVENT_HORSEMAN_CLEAVE, urand(5000, 10000));
+      }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      events.Update(diff);
+
+
+      if (!firesOut)
+      {
+	const Position pos = GetPositionsForArea()[wpCount];
+
+	if (!pos.IsPositionValid())
+	  return;
+
+	if (pointReached)
+	{
+	  pointReached = false;
+	  me->GetMotionMaster()->MovePoint(wpCount, pos.GetPositionX(), pos.GetPositionY(), GetZForArea());
+	}
+
+	if (allFiresSet && fires.size() <= (uint32)(FIRE_NODES_PER_AREA*0.3f) && wpCount != FIRE_NODES_PER_AREA+1)
+	{
+	  Talk(SAY_HORSEMAN_FIRES_OUT);
+	  wpCount = FIRE_NODES_PER_AREA;
+	  me->GetMotionMaster()->MoveIdle();
+	  me->GetMotionMaster()->MovePoint(FIRE_NODES_PER_AREA, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+	  fires.DespawnAll();
+	  firesOut = true;
+	  // Credit quest to players
+	  if (!_playerList.empty())
+	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+	      if (Player* player = me->GetPlayer(*me, *i))
+		player->CastSpell(player, SPELL_QUESTS_CREDITS, true);
+	  me->DespawnOrUnsummon(10000);
+	  return;
+	}
+
+	switch(events.ExecuteEvent())
+	{
+	case EVENT_FIRE_FAIL:
+	  fires.DespawnAll();
+	  Talk(SAY_HORSEMAN_FIRES_FAIL);
+	  wpCount = FIRE_NODES_PER_AREA+1;
+	  me->GetMotionMaster()->MovePoint(wpCount, pos.GetPositionX(), pos.GetPositionY(), GetZForArea());
+	  if (!_playerList.empty())
+	  {
+	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+	    {
+	      Player* player = me->GetPlayer(*me, *i);
+	      if (player)
+	      {
+		uint32 questId = player->GetTeam() == ALLIANCE ? QUEST_LET_THE_FIRES_COME_A : QUEST_LET_THE_FIRES_COME_H;
+		if (player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+		  player->FailQuest(questId);
+	      }
+	    }
+	  }
+	  me->DespawnOrUnsummon(10000);
+	  break;
+	case EVENT_HORSEMAN_CONFLAGRATION:
+	  if (!_playerList.empty())
+	  {
+	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+	    {
+	      Player* player = me->GetPlayer(*me, *i);
+	      if (player && player->GetDistance(me) <= 30.0f)
+	      {
+		me->CastSpell(player, RAND(SPELL_HORSEMAN_CONFLAGRATION_1, SPELL_HORSEMAN_CONFLAGRATION_2, SPELL_HORSEMAN_JACK_O_LANTERN), true);
+		break;
+	      }
+	    }
+	  }
+	  events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(5000, 10000));
+	  break;
+	case EVENT_HORSEMAN_LAUGHS:
+	  Talk(SAY_HORSEMAN_LAUGHS);
+	  events.ScheduleEvent(EVENT_HORSEMAN_LAUGHS, urand(10000, 25000));
+	  break;
+	}
+      } else {
+	switch(events.ExecuteEvent())
+	{
+	case EVENT_HORSEMAN_CLEAVE:
+	  if (Unit* victim = me->getVictim())
+	    me->CastSpell(victim, SPELL_HORSEMAN_CLEAVE, true);
+	  events.ScheduleEvent(EVENT_HORSEMAN_CLEAVE, urand(5000, 10000));
+	  return;
+	case EVENT_HORSEMAN_CONFLAGRATION:
+	  if (!_playerList.empty())
+	  {
+	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+	    {
+	      Player* player = me->GetPlayer(*me, *i);
+	      if (player && player->GetAreaId() == me->GetAreaId() && player->GetDistance(me) <= 30.0f)
+	      {
+		me->CastSpell(player, RAND(SPELL_HORSEMAN_CONFLAGRATION_1, SPELL_HORSEMAN_CONFLAGRATION_2, SPELL_HORSEMAN_JACK_O_LANTERN), true);
+		break;
+	      }
+	    }
+	  }
+	  events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(5000, 10000));
+	  break;
+	}
+	DoMeleeAttackIfReady();
+      }
+    }
+
+    const Position* GetPositionsForArea()
+    {
+      switch (me->GetAreaId())
+      {
+      case 87: //GoldShire
+	return FireNodesGoldShire;
+      case 362: // Razor Hill
+      case 2337:
+      case 14:
+	return FireNodesRazorHill;
+      }
+      return NULL;
+    }
+
+    float GetZForArea()
+    {
+      switch (me->GetAreaId())
+      {
+      case 87: //GoldShire
+	return 77.6f;
+      case 362: // Razor Hill
+      case 2337:
+      case 14:
+	return 40.0f;
+      }
+      return 0.0f;
+    }
+
+    void SetGUID(uint64 guid, int32 id)
+    {
+      if (id == EVENT_FIRE_HIT_BY_BUCKET)
+      {
+	_playerList.push_back(guid);
+	_playerList.unique();
+      }
+
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_shade_horsemanAI(creature);
+  }
+};
+
+class npc_halloween_orphan_matron : public CreatureScript
+{
+public:
+  npc_halloween_orphan_matron() : CreatureScript("npc_halloween_orphan_matron") { }
+
+  uint64 _headlessHoresemanGUID;
+
+  bool OnGossipHello(Player* player, Creature* me)
+  {
+    player->PrepareQuestMenu(me->GetGUID());
+    if (Creature* horseman = me->GetCreature(*me, _headlessHoresemanGUID))
+    {
+      QuestMenu &qm = player->PlayerTalkClass->GetQuestMenu();
+      QuestMenu qm2;
+
+      uint32 quest1 = player->GetTeam() == ALLIANCE ? QUEST_LET_THE_FIRES_COME_A : QUEST_LET_THE_FIRES_COME_H;
+      uint32 quest2 = player->GetTeam() == ALLIANCE ? QUEST_STOP_FIRES_A : QUEST_STOP_FIRES_H;
+
+      // Copy current quest menu ignoring some quests
+      for (uint32 i = 0; i<qm.GetMenuItemCount(); ++i)
+      {
+	if (qm.GetItem(i).QuestId == quest1 || qm.GetItem(i).QuestId == quest2)
+	  continue;
+
+	qm2.AddMenuItem(qm.GetItem(i).QuestId, qm.GetItem(i).QuestIcon);
+      }
+
+      if (player->GetQuestStatus(quest1) == QUEST_STATUS_NONE)
+      {
+	if (player->GetQuestStatus(quest2) == QUEST_STATUS_NONE)
+	  qm2.AddMenuItem(quest2, 2);
+	else if (player->GetQuestStatus(quest2) != QUEST_STATUS_REWARDED)
+	  qm2.AddMenuItem(quest2, 4);
+      }
+      else
+	if (player->GetQuestStatus(quest1) != QUEST_STATUS_REWARDED)
+	  qm2.AddMenuItem(quest1, 4);
+
+      qm.ClearMenu();
+
+      for (uint32 i = 0; i<qm2.GetMenuItemCount(); ++i)
+	qm.AddMenuItem(qm2.GetItem(i).QuestId, qm2.GetItem(i).QuestIcon);
+    }
+
+    player->SEND_GOSSIP_MENU(player->GetGossipTextId(me), me->GetGUID());
+    return true;
+  }
+
+  bool OnQuestAccept(Player* player, Creature* me, Quest const* quest)
+  {
+    if (!(me->GetAreaId() == 87 || me->GetAreaId() == 362))
+    {
+      return true;
+    }
+
+    if (quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_A || quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_H)
+    {
+      Creature* horseman = me->FindNearestCreature(NPC_SHADE_HORSEMAN, 100);
+      //me->GetCreature(*me, _headlessHoresemanGUID);
+
+      if (!horseman)
+      {
+	sLog->outBasic("HEADLESS HORSEMAN BUG TRACKING. SUMMON: GUID Player: %u. Area %u.", player->GetGUID(), player->GetAreaId());
+	if (Creature* newHorseman = player->SummonCreature(NPC_SHADE_HORSEMAN, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 20.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 180000))
+	  _headlessHoresemanGUID = newHorseman->GetGUID();
+      }
+    }
+    return true;
+  }
+};
+
+
+class npc_raise_ally : public CreatureScript
+{
+public:
+    npc_raise_ally() : CreatureScript("npc_raise_ally") { }
+
+    struct npc_raise_ally_AI : public ScriptedAI
+    {
+      npc_raise_ally_AI(Creature* c) : ScriptedAI(c) { Reset(); }
+
+        void Reset()
+        {
+	  if (me->ToTempSummon())
+	    if (me->ToTempSummon()->GetSummoner())
+	    {
+	      int health = me->ToTempSummon()->GetSummoner()->GetMaxHealth() * 60 / 100;
+	      int mana = me->ToTempSummon()->GetSummoner()->GetMaxPower(POWER_MANA) * 20 / 100;
+	      if (mana <= 0)
+		mana = 10000;
+	      me->SetMaxHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
+	      me->SetHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
+	      me->SetMaxPower(POWER_ENERGY, mana);
+	      me->SetPower(POWER_ENERGY, mana);
+	      //	      me->SetEnergy(100);
+	    }
+        }
+
+      void JustDied(Unit* /*who*/)
+      {
+	if (me->ToTempSummon())
+	  if (me->ToTempSummon()->GetSummoner())
+	    me->ToTempSummon()->GetSummoner()->Kill(me->ToTempSummon()->GetSummoner());
+      }
+
+        void EnterCombat(Unit* /*who*/) {}
+
+        void UpdateAI(uint32 const diff)
+        {
+        }
+
+      void ReceiveEmote(Player* player, uint32 emote)
+      {
+         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_raise_ally_AI(creature);
+    }
+};
+
+/*###########################################
+     ### QUEST The Exorcism of Colonel Jules ###
+     ###########################################*/
+#define GOSSIP_ITEM_1 "Je suis pret, Anchorite. Commencons l'exorcism"
+
+#define SAY_BARADA1            -1900100
+#define SAY_BARADA2            -1900101
+#define SAY_BARADA3            -1900104
+#define SAY_BARADA4            -1900105
+#define SAY_BARADA5            -1900106
+#define SAY_BARADA6            -1900107
+#define SAY_BARADA7            -1900108
+#define SAY_BARADA8            -1900109
+#define SAY_COLONEL1           -1900110
+#define SAY_COLONEL2           -1900111
+#define SAY_COLONEL3           -1900112
+#define SAY_COLONEL4           -1900113
+#define SAY_COLONEL5           -1900114
+#define SAY_COLONEL6           -1900115
+#define SAY_COLONEL7           -1900116
+#define SAY_COLONEL8           -1900117
+
+enum
+{
+  QUEST_THE_EXORCIM          = 10935,
+  NPC_COLONEL_JULES          = 22432,
+  NPC_DARKNESS_RELEASED      = 22507,
+
+  SPELL_EXORCIM              = 39277,
+  SPELL_EXORCIM2             = 39278,
+  SPELL_COLONEL1             = 39283,
+  SPELL_COLONEL2             = 39294,
+  SPELL_COLONEL3             = 39284,
+  SPELL_COLONEL4             = 39294,
+  SPELL_COLONEL5             = 39295,
+  SPELL_COLONEL7             = 39381,
+    SPELL_COLONEL8             = 39380
+};
+
+
+class npc_anchorite_barada : public CreatureScript
+{
+public:
+  npc_anchorite_barada() : CreatureScript("npc_anchorite_barada") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_anchorite_baradaAI (pCreature);
+  }
+
+  struct npc_anchorite_baradaAI : public ScriptedAI
+  {
+    npc_anchorite_baradaAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+    bool Exorcim;
+
+    uint64 uiPlayerGUID;
+    uint32 uiStepsTimer;
+    uint32 uiSteps;
+
+    float colonel;
+
+    void Reset()
+    {
+      Exorcim = false;
+      uiStepsTimer = 0;
+      uiSteps = 0;
+      uiPlayerGUID = 0;
+    }
+
+    void AttackedBy(Unit* pWho) {}
+    void AttackStart(Unit* pWho) {}
+
+    void DoSpawnDarkness()
+    {
+      me->SummonCreature(NPC_DARKNESS_RELEASED, -710.924, 2754.683, 105.0, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+    }
+
+    void MoveInLineOfSight(Unit *pWho)
+    {
+      if (pWho->GetTypeId() == TYPEID_PLAYER)
+      {
+	if (CAST_PLR(pWho)->GetQuestStatus(QUEST_THE_EXORCIM) == QUEST_STATUS_INCOMPLETE)
+	{
+	  if (me->IsWithinDistInMap(((Player *)pWho), 5))
+	  {
+	    uiPlayerGUID = pWho->GetGUID();
+	  }
+	}
+      }
+    }
+
+    uint32 NextStep(uint32 uiSteps)
+    {
+      Creature* pColonel = me->FindNearestCreature(NPC_COLONEL_JULES, 15);
+      colonel = me->GetAngle(pColonel->GetPositionX(), pColonel->GetPositionY());
+
+      switch(uiSteps)
+      {
+      case 1:me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	pColonel->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+	me->SetStandState(UNIT_STAND_STATE_STAND);return 2000;
+      case 2:DoScriptText(SAY_BARADA1, me,0);return 5000;
+      case 3:DoScriptText(SAY_BARADA2, me,0);return 3000;
+      case 4:DoScriptText(SAY_COLONEL1, pColonel, 0);return 3000;
+      case 5:me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);return 3000;
+      case 6:me->GetMotionMaster()->MovePoint(0, -707.702f, 2749.038f, 101.590f);return 2000;
+      case 7:me->GetMotionMaster()->MovePoint(0, -710.810f, 2748.376f, 101.590f);return 2100;
+      case 8:me->SetOrientation(colonel);
+	me->SendMovementFlagUpdate();return 2000;
+      case 9:me->CastSpell(me, SPELL_EXORCIM , false);return 10000;
+      case 10:DoScriptText(SAY_BARADA3, me,0); return 10000;
+      case 11:DoScriptText(SAY_COLONEL2, pColonel, 0);return 8000;
+      case 12:me->RemoveAllAuras();
+      case 13:me->CastSpell(me, SPELL_EXORCIM2 , false);
+      case 14:pColonel->CastSpell(pColonel, SPELL_COLONEL1, false);
+      case 15:pColonel->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
+	pColonel->SetSpeed(MOVE_RUN, 0.17f);
+	pColonel->GetMotionMaster()->MovePoint(0, -710.611f, 2753.435f, 103.774f);
+	pColonel->CastSpell(pColonel, SPELL_COLONEL3, false);return 14000;
+      case 16:DoScriptText(SAY_COLONEL3, pColonel, 0);
+	DoSpawnDarkness();
+	DoSpawnDarkness();return 14000;
+      case 17:DoScriptText(SAY_BARADA4, me, 0);
+	DoSpawnDarkness();
+	DoSpawnDarkness();return 14000;
+      case 18:DoScriptText(SAY_COLONEL4, pColonel, 0);
+	DoSpawnDarkness();return 14000;
+      case 19:DoScriptText(SAY_BARADA5, me, 0); return 14000;
+      case 20:pColonel->CastSpell(pColonel, SPELL_COLONEL4, false);
+	pColonel->CastSpell(pColonel, SPELL_COLONEL2, false);
+	DoSpawnDarkness();return 1500;
+      case 21:pColonel->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 103.774f);return 5000;
+      case 22:DoScriptText(SAY_COLONEL5, pColonel, 0);return 1000;
+      case 23:pColonel->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 103.774f);
+	DoSpawnDarkness();return 4000;
+      case 24:pColonel->GetMotionMaster()->MovePoint(0, -708.558f, 2744.923f, 103.774f);
+	pColonel->CastSpell(me,SPELL_COLONEL5, false);return 2500;
+      case 25:DoScriptText(SAY_BARADA6, me, 0);
+      case 26:pColonel->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 103.774f);
+	DoSpawnDarkness();return 3500;
+      case 27:pColonel->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 103.774f);return 4000;
+      case 28:pColonel->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 103.774f);
+	DoScriptText(SAY_COLONEL6, pColonel, 0);
+	DoSpawnDarkness();return 4000;
+      case 29:pColonel->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 103.774f);return 4000;
+      case 30:pColonel->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 103.774f);return 4000;
+      case 31: DoScriptText(SAY_BARADA7, me, 0); return 0;
+      case 32:pColonel->GetMotionMaster()->MovePoint(0, -708.558f, 2744.923f, 103.774f);
+	DoSpawnDarkness();return 4000;
+      case 33:pColonel->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 103.774f);return 4000;
+      case 34:pColonel->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 103.774f);
+	DoScriptText(SAY_COLONEL7, pColonel, 0);
+	DoSpawnDarkness();return 4000;
+      case 35:pColonel->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 103.774f);return 4000;
+      case 36:pColonel->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 103.774f);
+	DoSpawnDarkness();return 4000;
+      case 37:DoScriptText(SAY_BARADA6, me, 0);
+      case 38:pColonel->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 103.774f);return 4000;
+      case 39:pColonel->GetMotionMaster()->MovePoint(0, -708.558f, 2744.923f, 103.774f);return 4000;
+      case 40:pColonel->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 103.774f);
+	DoScriptText(SAY_COLONEL8, pColonel, 0);return 4000;
+      case 41:pColonel->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 103.774f);return 4000;
+      case 42:pColonel->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 103.774f);return 4000;
+      case 43:DoScriptText(SAY_BARADA6, me, 0); return 1000;
+      case 44:pColonel->GetMotionMaster()->MovePoint(0, -708.558f, 2744.923f, 103.774f);return 4000;
+      case 45:pColonel->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 103.774f);
+	pColonel->CastSpell(pColonel, SPELL_COLONEL8, false);return 4000;
+      case 46:pColonel->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 103.774f);
+	pColonel->CastSpell(pColonel, SPELL_COLONEL7, false);return 4000;
+      case 47:pColonel->GetMotionMaster()->MovePoint(0, -710.792f, 2750.693f, 103.774f);return 5000;
+      case 48:DoScriptText(SAY_BARADA8, me, 0); return 1000;
+      case 49:pColonel->GetMotionMaster()->MovePoint(0, -710.111f, 2754.346f, 102.367f);return 3000;
+      case 50:pColonel->RemoveAllAuras();
+      case 51:me->RemoveAllAuras();return 2000;
+      case 52:me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);return 2000;
+      case 53:me->GetMotionMaster()->MovePoint(0, -706.726f, 2751.632f, 101.591f);return 2200;
+      case 54:me->GetMotionMaster()->MovePoint(0, -707.382f, 2753.994f, 101.591f);return 7000;
+      case 55:me->SetStandState(UNIT_STAND_STATE_KNEEL);
+	me->CombatStop();return 3000;
+      case 56:pColonel->SetFlag(UNIT_NPC_FLAGS, 1);return 6000;
+      case 57:me->SetFlag(UNIT_NPC_FLAGS, 1);
+	if (Player* pPlayer = Unit::GetPlayer(*me, uiPlayerGUID))
+	  pPlayer->AreaExploredOrEventHappens(QUEST_THE_EXORCIM);return 1000;
+      case 58:Reset();
+      default: return 0;
+      }
+    }
+
+    void JustDied(Unit* pWho)
+    {
+      if (Creature* pColonel = me->FindNearestCreature(NPC_COLONEL_JULES, 15.0f, true))
+      {
+	pColonel->GetMotionMaster()->MovePoint(0, -710.111f, 2754.346f, 102.367f);
+	pColonel->RemoveAllAuras();
+      }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (uiStepsTimer <= uiDiff)
+      {
+	if (Exorcim)
+	  uiStepsTimer = NextStep(++uiSteps);
+      }
+      else uiStepsTimer -= uiDiff;
+    }
+  };
+
+  bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+  {
+    if (pPlayer->GetQuestStatus(QUEST_THE_EXORCIM) == QUEST_STATUS_INCOMPLETE)
+      pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
+    return true;
+  }
+
+  bool OnGossipSelect(Player* pPlayer, Creature* pCreature,  uint32 /*uiSender*/, uint32 uiAction)
+  {
+    if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+    {
+      ((npc_anchorite_baradaAI*)pCreature->AI())->Exorcim = true;
+      pPlayer->CLOSE_GOSSIP_MENU();
+    }
+    return true;
+  }
+};
+
+
+/*######
+## npc_darkness_released
+######*/
+
+enum
+{
+  SPELL_AURA_ME     = 39303,
+  SPELL_DARKNESS    = 39307,
+    NPC_BARADA        = 22431
+};
+
+class npc_darkness_released : public CreatureScript
+{
+public:
+  npc_darkness_released() : CreatureScript("npc_darkness_released") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_darkness_releasedAI (pCreature);
+  }
+
+  struct npc_darkness_releasedAI : public ScriptedAI
+  {
+    npc_darkness_releasedAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+    uint32 uiAtTimer;
+    uint32 uiChTimer;
+
+    void Reset()
+    {
+      uiChTimer = 5000;
+      uiAtTimer = 10000;
+      DoCast(SPELL_AURA_ME);
+      me->SetUnitMovementFlags(MOVEMENTFLAG_LEVITATING);
+      me->SetSpeed(MOVE_RUN, 0.10f);
+      switch(urand(0,3))
+      {
+      case 0: me->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 105.0f); break;
+      case 1: me->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 105.0f); break;
+      case 2: me->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 105.0f); break;
+      case 3: me->GetMotionMaster()->MovePoint(0, -708.558f, 2744.923f, 105.0f); break;
+      }
+    }
+
+    void AttackedBy(Unit* pWho) {}
+    void AttackStart(Unit* pWho) {}
+
+    void JustDied(Unit* pWho)
+    {
+      me->RemoveCorpse();
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (uiAtTimer <= uiDiff)
+      {
+	DoCast(SPELL_DARKNESS);
+	switch (urand(0,3))
+	{
+	case 0: me->GetMotionMaster()->MovePoint(0, -714.212f, 2750.606f, 105.0f); break;
+	case 1: me->GetMotionMaster()->MovePoint(0, -713.406f, 2744.240f, 105.0f); break;
+	case 2: me->GetMotionMaster()->MovePoint(0, -707.784f, 2749.562f, 105.0f); break;
+	case 3: me->GetMotionMaster()->MovePoint(0, -708.558f, 2744.923f, 105.0f); break;
+	}
+
+	uiAtTimer = 10000;
+      }
+      else uiAtTimer -= uiDiff;
+
+      if (uiChTimer <= uiDiff)
+      {
+	if (Creature* pBar = me->FindNearestCreature(NPC_BARADA, 15.0f, false))
+	  me->setDeathState(CORPSE);
+
+	if (Creature* pBara = me->FindNearestCreature(NPC_BARADA, 15.0f, true))
+	{
+	  if (!pBara->HasAura(SPELL_EXORCIM2, 0))
+	    me->setDeathState(CORPSE);
+	}
+
+	uiChTimer = 5000;
+      }
+      else uiChTimer -= uiDiff;
+    }
+  };
+};
+
+
+class npc_foul_purge : public CreatureScript
+{
+public:
+  npc_foul_purge() : CreatureScript("npc_foul_purge") { }
+
+  CreatureAI* GetAI_npc_foul_purge(Creature* pCreature)
+  {
+    return new npc_foul_purgeAI(pCreature);
+  }
+
+  struct npc_foul_purgeAI : public ScriptedAI
+  {
+    npc_foul_purgeAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+    uint32 uiChTimer;
+
+    void Reset()
+    {
+      if (Creature* pBara = me->FindNearestCreature(NPC_BARADA, 15.0f, true))
+      {
+	AttackStart(pBara);
+      }
+      uiChTimer = 4000;
+    }
+
+    void JustDied(Unit* pWho)
+    {
+      me->RemoveCorpse();
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (uiChTimer <= uiDiff)
+      {
+	if (Creature* pBar = me->FindNearestCreature(NPC_BARADA, 15.0f, false))
+	  me->setDeathState(CORPSE);
+
+	if (Creature* pBara = me->FindNearestCreature(NPC_BARADA, 15.0f, true))
+	{
+	  if (!pBara->HasAura(SPELL_EXORCIM2, 0))
+	    me->setDeathState(CORPSE);
+	}
+
+	uiChTimer = 4000;
+      }
+      else uiChTimer -= uiDiff;
+
+      DoMeleeAttackIfReady();
+    }
+  };
+};
+
+
+/*######
+## npc_mana_bomb
+## http://www.wowhead.com/quest=10446 The Final Code (Alliance)
+## http://www.wowhead.com/quest=10447 The Final Code (Horde)
+######*/
+
+enum eManaBomb
+{
+  SAY_COUNT_1                 = -1000472,
+  SAY_COUNT_2                 = -1000473,
+  SAY_COUNT_3                 = -1000474,
+  SAY_COUNT_4                 = -1000475,
+  SAY_COUNT_5                 = -1000476,
+  SPELL_MANA_BOMB_LIGHTNING   = 37843,
+  SPELL_MANA_BOMB_EXPL        = 35513,
+  NPC_MANA_BOMB_EXPL_TRIGGER  = 20767,
+    NPC_MANA_BOMB_KILL_TRIGGER  = 21039
+};
+
+class npc_mana_bomb : public CreatureScript
+{
+public:
+  npc_mana_bomb() : CreatureScript("npc_mana_bomb") { }
+
+  bool OnGossipHello(Player* pPlayer, GameObject* pGo)
+  {
+    if (Creature* pCreature = GetClosestCreatureWithEntry(pGo, NPC_MANA_BOMB_EXPL_TRIGGER, INTERACTION_DISTANCE))
+    {
+      if (npc_mana_bombAI* pBombAI = dynamic_cast<npc_mana_bombAI*>(pCreature->AI()))
+	pBombAI->DoTrigger(pPlayer, pGo);
+    }
+
+    return true;
+  }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_mana_bombAI (pCreature);
+  }
+
+  struct npc_mana_bombAI : public ScriptedAI
+  {
+    npc_mana_bombAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      Reset();
+    }
+
+    GameObject* pManaBomb;
+
+    bool m_bIsActivated;
+    uint32 m_uiEventTimer;
+    uint32 m_uiEventCounter;
+
+    void Reset()
+    {
+      pManaBomb = NULL;
+      m_bIsActivated = false;
+      m_uiEventTimer = 1000;
+      m_uiEventCounter = 0;
+    }
+
+    void DoTrigger(Player* pPlayer, GameObject* pGo)
+    {
+      if (m_bIsActivated)
+	return;
+      m_bIsActivated = true;
+      pPlayer->KilledMonsterCredit(NPC_MANA_BOMB_KILL_TRIGGER,me->GetGUID());
+      pManaBomb = pGo;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!m_bIsActivated)
+	return;
+
+      if (m_uiEventTimer < uiDiff)
+      {
+	m_uiEventTimer = 1000;
+
+	if (m_uiEventCounter < 10)
+	  me->CastSpell(me, SPELL_MANA_BOMB_LIGHTNING, false);
+
+	switch(m_uiEventCounter)
+	{
+	case 5:
+	  if (pManaBomb)
+	    pManaBomb->SetGoState(GO_STATE_ACTIVE);
+	  DoScriptText(SAY_COUNT_1, me);
+	  break;
+	case 6:
+	  DoScriptText(SAY_COUNT_2, me);
+	  break;
+	case 7:
+	  DoScriptText(SAY_COUNT_3, me);
+	  break;
+	case 8:
+	  DoScriptText(SAY_COUNT_4, me);
+	  break;
+	case 9:
+	  DoScriptText(SAY_COUNT_5, me);
+	  break;
+	case 10:
+	  me->CastSpell(me, SPELL_MANA_BOMB_EXPL, false);
+	  break;
+	case 30:
+	  if (pManaBomb)
+	    pManaBomb->SetGoState(GO_STATE_READY);
+	  Reset();
+	  break;
+	}
+
+	++m_uiEventCounter;
+      }
+      else
+	m_uiEventTimer -= uiDiff;
+    }
+  };
+};
 
 void AddSC_npcs_special()
 {
-    new npc_air_force_bots;
+new npc_air_force_bots;
     new npc_lunaclaw_spirit;
     new npc_chicken_cluck;
     new npc_dancing_flames;
@@ -4030,6 +5827,11 @@ void AddSC_npcs_special()
 	new npc_brewfest_keg_receiver();
 	new npc_brewfest_ram_master();
 	new npc_demeza();
+	new npc_brew();
+	new npc_sum_brew();
+	new npc_brew_attak_trigger();
+	new npc_brew_attak_trigger2();
+	new npc_cervoise();
     new npc_snake_trap;
     new npc_mirror_image;
     new npc_ebon_gargoyle;
@@ -4046,8 +5848,24 @@ void AddSC_npcs_special()
     new npc_earth_elemental();
     new npc_firework();
     new npc_spring_rabbit();
-    new npc_argent_squire();	
-    new npc_artuis();
-    new vehicle_knight_gryphon();
+    new npc_argent_squire();
+    // new npc_artuis();
+    //    new vehicle_knight_gryphon();
     //	new npc_risen_ally();
+    new spell_toss_stinky_bomb();
+    new spell_clean_stinky_bomb();
+    new at_wickerman_festival();
+    new spell_halloween_wand();
+    new go_wickerman_ember();
+    new item_water_bucket();
+    new npc_halloween_fire();
+    new npc_shade_horseman();
+    new npc_halloween_orphan_matron();
+
+    new npc_anchorite_barada();
+    new npc_darkness_released();
+    new npc_foul_purge();
+new npc_mana_bomb();
+
+    new npc_raise_ally();
 }

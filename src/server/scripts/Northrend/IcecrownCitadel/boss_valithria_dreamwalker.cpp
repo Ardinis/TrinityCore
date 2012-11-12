@@ -326,7 +326,7 @@ class boss_valithria_dreamwalker : public CreatureScript
             {
                 if (action != ACTION_ENTER_COMBAT)
                     return;
-			sLog->outError(" <!> LANCEMENT SCRIPT : ValITHRIA <!>");
+
 		DoCast(me, SPELL_COPY_DAMAGE);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);

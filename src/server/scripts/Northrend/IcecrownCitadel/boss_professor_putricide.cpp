@@ -230,7 +230,6 @@ class boss_professor_putricide : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : PUTRICIDE <!>");
                 if (events.GetPhaseMask() & PHASE_MASK_NOT_SELF)
                     return;
 
@@ -610,6 +609,7 @@ class boss_professor_putricide : public CreatureScript
                     {
                         case EVENT_FESTERGUT_DIES:
                             Talk(SAY_FESTERGUT_DEATH);
+			    SetPhase(PHASE_FESTERGUT);
                             EnterEvadeMode();
                             break;
                         case EVENT_FESTERGUT_GOO:
@@ -619,6 +619,7 @@ class boss_professor_putricide : public CreatureScript
                             break;
                         case EVENT_ROTFACE_DIES:
                             Talk(SAY_ROTFACE_DEATH);
+			    SetPhase(PHASE_ROTFACE);
                             EnterEvadeMode();
                             break;
                         case EVENT_ROTFACE_VILE_GAS:

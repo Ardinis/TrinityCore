@@ -103,7 +103,7 @@ float SpellImplicitTargetInfo::CalcDirectionAngle() const
         case TARGET_DIR_LEFT:
             return static_cast<float>(M_PI/2);
         case TARGET_DIR_FRONT_RIGHT:
-            return static_cast<float>(M_PI/4);
+            return static_cast<float>(-M_PI/4);
         case TARGET_DIR_BACK_RIGHT:
             return static_cast<float>(-3*M_PI/4);
         case TARGET_DIR_BACK_LEFT:
@@ -589,6 +589,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
         if (!basePointsPerLevel && (_spellInfo->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION && _spellInfo->SpellLevel) &&
                 Effect != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
                 Effect != SPELL_EFFECT_KNOCK_BACK &&
+	        Effect != SPELL_EFFECT_ADD_EXTRA_ATTACKS &&
                 ApplyAuraName != SPELL_AURA_MOD_SPEED_ALWAYS &&
                 ApplyAuraName != SPELL_AURA_MOD_SPEED_NOT_STACK &&
                 ApplyAuraName != SPELL_AURA_MOD_INCREASE_SPEED &&
@@ -1260,9 +1261,6 @@ bool SpellInfo::CanPierceImmuneAura(SpellInfo const* aura) const
 
 bool SpellInfo::CanDispelAura(SpellInfo const* aura) const
 {
-    // These auras (like ressurection sickness) can't be dispelled
-    if (aura->Attributes & SPELL_ATTR0_NEGATIVE_1)
-        return false;
 
     // These spells (like Mass Dispel) can dispell all auras
     if (Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
@@ -2280,14 +2278,15 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
         case SPELLFAMILY_GENERIC:
             switch (Id)
             {
+	    case 29214: // Wrath of the Plaguebringer
                 case 34700: // Allergic Reaction
+	    case 54836: // Wrath of the Plaguebringer
                 case 61716: // Rabbit Costume
                 case 61734: // Noblegarden Bunny
                 case 61987: // Avenging Wrath Marker
                 case 61988: // Divine Shield exclude aura
-                case 62532: // Conservator's Grip
                     return false;
-                case 30877: // Tag Murloc
+	       case 30877: // Tag Murloc
                 case 62344: // Fists of Stone
                     return true;
                 default:
@@ -2309,6 +2308,8 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 64904: // Hymn of Hope
                 case 47585: // Dispersion
                     return true;
+	    case 527:
+	      return false;
                 default:
                     break;
             }
@@ -2378,6 +2379,8 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_ENERGIZE_PCT:
             return true;
+    case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
+      return false;
 
             // non-positive aura use
         case SPELL_EFFECT_APPLY_AURA:
@@ -2557,4 +2560,33 @@ bool SpellInfo::_IsPositiveTarget(uint32 targetA, uint32 targetB)
     if (targetB)
         return _IsPositiveTarget(targetB, 0);
     return true;
+}
+
+uint32 SpellInfo::GetMaxTicks() const
+{
+  int32 DotDuration = GetDuration();
+  if (DotDuration == 0)
+    return 1;
+
+  // 200% limit
+  if (DotDuration > 30000)
+    DotDuration = 30000;
+
+  uint8 x = 0;
+  for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+  {
+    if (Effects[j].Effect == SPELL_EFFECT_APPLY_AURA && (
+            Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
+            Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_HEAL ||
+            Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_LEECH))
+    {
+      x = j;
+      break;
+    }
+  }
+
+  if (Effects[x].Amplitude != 0)
+    return DotDuration / Effects[x].Amplitude;
+
+  return 6;
 }

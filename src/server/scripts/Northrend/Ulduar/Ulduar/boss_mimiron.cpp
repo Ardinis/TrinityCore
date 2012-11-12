@@ -1199,6 +1199,7 @@ class boss_leviathan_mk_turret : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+		instance = me->GetInstanceScript();
             }
 
             void Reset()
@@ -1241,6 +1242,8 @@ class boss_leviathan_mk_turret : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
+		if (instance && instance->GetBossState(BOSS_MIMIRON) != IN_PROGRESS)
+		  return;
 
                 if (napalmShellTimer <= diff)
                 {
@@ -1252,8 +1255,10 @@ class boss_leviathan_mk_turret : public CreatureScript
                     napalmShellTimer -= diff;
             }
 
-            private:
-                uint32 napalmShellTimer;
+	private:
+	  uint32 napalmShellTimer;
+	  InstanceScript* instance;
+
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -2494,6 +2499,7 @@ class npc_frost_bomb : public CreatureScript
                 if (frostTimer <= diff)
                 {
                     DoCast(me, RAID_MODE(SPELL_FROST_BOMB_EXPLOSION_10, SPELL_FROST_BOMB_EXPLOSION_25), true);
+		    me->DespawnOrUnsummon();
                     frostTimer = 10000;
                 }
                 else frostTimer -= diff;
@@ -2602,12 +2608,12 @@ void AddSC_boss_mimiron()
     new achievement_firefighter("achievement_firefighter_25");  // Achiev 3189 / Criteria 10463
 
     // TODO: Find correct criterias for the following achievements:
-    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
-    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
-    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
-    new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
-    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
-    new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
+    //    new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot");
+    //  new achievement_set_up_us_the_bomb__boombot_explosion("achievement_set_up_us_the_bomb__boombot_25");
+    //  new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity");
+    //  new achievement_set_up_us_the_bomb__proximity_mines("achievement_set_up_us_the_bomb__proximity_25");
+    //  new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets");
+    // new achievement_set_up_us_the_bomb__rocket_strikes("achievement_set_up_us_the_bomb__rockets_25");
 }
 
 #undef SPELL_NAPALM_SHELL

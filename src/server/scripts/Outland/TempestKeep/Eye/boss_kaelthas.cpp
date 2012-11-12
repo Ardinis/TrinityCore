@@ -300,6 +300,7 @@ class boss_kaelthas : public CreatureScript
             uint32 PhaseSubphase;                                   //generic
             uint32 Phase_Timer;                                     //generic timer
             uint32 PyrosCasted;
+	  uint32 mui_check_dist_z;
 
             bool InGravityLapse;
             bool IsCastingFireball;
@@ -326,6 +327,7 @@ class boss_kaelthas : public CreatureScript
                 InGravityLapse = false;
                 IsCastingFireball = false;
                 ChainPyros = false;
+		mui_check_dist_z = 500;
 
                 if (me->isInCombat())
                     PrepareAdvisors();
@@ -469,6 +471,15 @@ class boss_kaelthas : public CreatureScript
             void UpdateAI(const uint32 diff)
             {
                 //Phase 1
+
+	      if (mui_check_dist_z <= diff)
+	      {
+		if (me->GetPositionZ() >= 49)
+		  me->GetMotionMaster()->MoveFall();
+		mui_check_dist_z = 500;
+	      }
+	      else mui_check_dist_z -= diff;
+
                 switch (Phase)
                 {
                     case 1:

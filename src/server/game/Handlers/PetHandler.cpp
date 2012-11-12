@@ -218,6 +218,23 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                             charmInfo->SetIsReturning(false);
 
                             pet->ToCreature()->AI()->AttackStart(TargetUnit);
+			    if (Unit* owner = pet->GetOwner())
+			      if (owner->GetTypeId() == TYPEID_PLAYER)
+			      {
+				Unit* pPet = NULL;
+				for (Unit::ControlList::const_iterator itr = owner->m_Controlled.begin(); itr != owner->m_Controlled.end(); ++itr) // find gargoyle
+				  if ((*itr)->GetEntry() == 27829)
+				  {
+				    pPet = (*itr);
+				    break;
+				  }
+				if (pPet)
+				{
+				  pPet->ToCreature()->AI()->AttackStart(TargetUnit);
+				}
+				//				if (TargetUnit)
+				//  owner->SetInCombatWith(TargetUnit);
+			      }
 
                             //10% chance to play special pet attack talk, else growl
                             if (pet->ToCreature()->isPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)
@@ -232,6 +249,25 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                         {
                             if (pet->getVictim() && pet->getVictim() != TargetUnit)
                                 pet->AttackStop();
+
+			    if (Unit* owner = pet->GetOwner())
+			      if (owner->GetTypeId() == TYPEID_PLAYER)
+			      {
+				Unit* pPet = NULL;
+				for (Unit::ControlList::const_iterator itr = owner->m_Controlled.begin(); itr != owner->m_Controlled.end(); ++itr) // find gargoyle
+				  if ((*itr)->GetEntry() == 27829)
+				  {
+				    pPet = (*itr);
+				    break;
+				  }
+				if (pPet)
+				{
+				  if (pPet->getVictim() && pPet->getVictim() != TargetUnit)
+				    pPet->AttackStop();
+				  pPet->Attack(TargetUnit, true);
+				  pPet->SendPetAIReaction(guid1);
+				}
+			      }
 
                             charmInfo->SetIsCommandAttack(true);
                             charmInfo->SetIsAtStay(false);

@@ -84,6 +84,8 @@ class spell_pal_ardent_defender : public SpellScriptLoader
             void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
                 Unit* victim = GetTarget();
+		if (!victim || !aurEff || !victim->ToPlayer())
+		  return ;
                 int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
                 uint32 allowedHealth = victim->CountPctFromMaxHealth(35);
                 // If damage kills us
@@ -138,7 +140,7 @@ class spell_pal_blessing_of_faith : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_DRUID) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PALADIN) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PRIEST) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_SHAMAN))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_DRUID) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PALADIN) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_PRIEST) || !sSpellMgr->GetSpellInfo(SPELL_BLESSING_OF_LOWER_CITY_SHAMAN))
                     return false;
                 return true;
             }
@@ -187,7 +189,7 @@ class spell_pal_blessing_of_sanctuary : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF))
                     return false;
                 return true;
             }
@@ -232,7 +234,7 @@ class spell_pal_guarded_by_the_light : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_DIVINE_PLEA))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_DIVINE_PLEA))
                     return false;
                 return true;
             }
@@ -266,6 +268,8 @@ class spell_pal_holy_shock : public SpellScriptLoader
             PrepareSpellScript(spell_pal_holy_shock_SpellScript)
             bool Validate(SpellInfo const* spellEntry)
             {
+	      if (!sSpellMgr)
+		return false;
                 if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_HOLY_SHOCK_R1))
                     return false;
 
@@ -282,6 +286,8 @@ class spell_pal_holy_shock : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 Unit* caster = GetCaster();
                 if (Unit* unitTarget = GetHitUnit())
                 {
@@ -297,12 +303,12 @@ class spell_pal_holy_shock : public SpellScriptLoader
             {
                 Player* caster = GetCaster()->ToPlayer();
                 if (GetTargetUnit())
-                    if (Player* target = GetTargetUnit()->ToPlayer())
-                        if (caster->GetTeam() != target->GetTeam() && !caster->IsValidAttackTarget(target))
-                            return SPELL_FAILED_BAD_TARGETS;
+		  if (Unit* target = GetTargetUnit())
+		    if (!caster->IsFriendlyTo(target) && !caster->IsValidAttackTarget(target))
+		      return SPELL_FAILED_BAD_TARGETS;
                 return SPELL_CAST_OK;
-            }		
-			
+            }
+
             void Register()
             {
                 // add dummy effect spell handler to Holy Shock
@@ -327,6 +333,8 @@ class spell_pal_judgement_of_command : public SpellScriptLoader
             PrepareSpellScript(spell_pal_judgement_of_command_SpellScript)
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 if (Unit* unitTarget = GetHitUnit())
                     if (SpellInfo const* spell_proto = sSpellMgr->GetSpellInfo(GetEffectValue()))
                         GetCaster()->CastSpell(unitTarget, spell_proto, true, NULL);
@@ -356,7 +364,7 @@ public:
        PrepareAuraScript(spell_pal_sacred_shield_AuraScript)
        bool Validate(SpellInfo const* /*entry*/)
        {
-           if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_SACRED_SHIELD_EFFECT))
+           if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_SACRED_SHIELD_EFFECT))
                return false;
            return true;
        }
@@ -391,7 +399,7 @@ class spell_pal_righteous_defense : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_RIGHTEOUS_DEFENCE))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_RIGHTEOUS_DEFENCE))
                     return false;
                 return true;
             }
@@ -428,7 +436,7 @@ class spell_pal_divine_storm : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /* spell */)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_DUMMY))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_DUMMY))
                     return false;
                 return true;
             }
@@ -468,7 +476,7 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /* spell */)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_HEAL))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DIVINE_STORM_HEAL))
                     return false;
                 return true;
             }
@@ -502,6 +510,40 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
         }
 };
 
+class spell_pal_exorcism_and_holy_wrath_damage : public SpellScriptLoader
+{
+public:
+  spell_pal_exorcism_and_holy_wrath_damage() : SpellScriptLoader("spell_pal_exorcism_and_holy_wrath_damage") { }
+
+  class spell_pal_exorcism_and_holy_wrath_damage_AuraScript : public AuraScript
+  {
+    PrepareAuraScript(spell_pal_exorcism_and_holy_wrath_damage_AuraScript);
+
+    void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
+    {
+      if (!spellMod)
+	{
+	  spellMod = new SpellModifier(aurEff->GetBase());
+	  spellMod->op = SPELLMOD_DAMAGE;
+	  spellMod->type = SPELLMOD_FLAT;
+	  spellMod->spellId = GetId();
+	  spellMod->mask[1] = 0x200002;
+	}
+
+      spellMod->value = aurEff->GetAmount();
+    }
+
+    void Register()
+    {
+      DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_pal_exorcism_and_holy_wrath_damage_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+  };
+
+  AuraScript* GetAuraScript() const
+  {
+    return new spell_pal_exorcism_and_holy_wrath_damage_AuraScript();
+  }
+};
 
 void AddSC_paladin_spell_scripts()
 {
@@ -515,4 +557,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_righteous_defense();
     new spell_pal_divine_storm();
     //    new spell_pal_divine_storm_dummy();
+    new spell_pal_exorcism_and_holy_wrath_damage();
 }

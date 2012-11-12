@@ -48,7 +48,7 @@ class spell_mage_blast_wave : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_BLAST_WAVE))
                     return false;
                 return true;
             }
@@ -93,6 +93,8 @@ class spell_mage_cold_snap : public SpellScriptLoader
                 const SpellCooldowns& cm = caster->GetSpellCooldownMap();
                 for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
                 {
+		  if (sSpellMgr)
+		  {
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
                     if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
@@ -103,6 +105,9 @@ class spell_mage_cold_snap : public SpellScriptLoader
                     }
                     else
                         ++itr;
+		  }
+		  else
+		    ++itr;
                 }
             }
 
@@ -134,7 +139,7 @@ class spell_mage_polymorph_cast_visual : public SpellScriptLoader
             {
                 // check if spell ids exist in dbc
                 for (int i = 0; i < 6; i++)
-                    if (!sSpellMgr->GetSpellInfo(spell_list[i]))
+                    if (!sSpellMgr || !sSpellMgr->GetSpellInfo(spell_list[i]))
                         return false;
                 return true;
             }
@@ -180,7 +185,7 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT))
                     return false;
                 return true;
             }
@@ -226,7 +231,7 @@ class spell_mage_frost_warding_trigger : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FROST_WARDING_TRIGGERED) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_FROST_WARDING_R1))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_MAGE_FROST_WARDING_TRIGGERED) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_FROST_WARDING_R1))
                     return false;
                 return true;
             }
@@ -270,6 +275,8 @@ class spell_mage_incanters_absorbtion_base_AuraScript : public AuraScript
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
+	  if (!sSpellMgr)
+	    return false;
             return sSpellMgr->GetSpellInfo(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED)
                 && sSpellMgr->GetSpellInfo(SPELL_MAGE_INCANTERS_ABSORBTION_R1);
         }

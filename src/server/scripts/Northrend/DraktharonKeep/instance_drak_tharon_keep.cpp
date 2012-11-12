@@ -78,6 +78,7 @@ public:
             uiNovosCrystal3 = 0;
             uiNovosCrystal4 = 0;
             uiDredAchievCounter = 0;
+	    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
         }
 
         bool IsEncounterInProgress() const

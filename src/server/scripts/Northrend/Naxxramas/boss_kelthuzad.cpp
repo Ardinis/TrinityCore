@@ -75,6 +75,7 @@ enum Event
 
     EVENT_PHASE,
     EVENT_MORTAL_WOUND,
+    EVENT_FRENZY,
 };
 
 enum Spells
@@ -688,7 +689,7 @@ public:
                 if (Creature* sum = trigger->SummonCreature(NPC_ABOMINATION, PosAbominations[i]))
                 {
                     pKelthuzadAI->spawns.Summon(sum);
-                    sum->GetMotionMaster()->MoveRandom(9.0f);
+                    sum->GetMotionMaster()->MoveRandom(5.0f);
                     sum->SetReactState(REACT_DEFENSIVE);
                 }
             }
@@ -736,7 +737,7 @@ class npc_kelthuzad_abomination : public CreatureScript
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(2000, 5000));
-                DoCast(me, SPELL_FRENZY, true);
+		events.ScheduleEvent(EVENT_FRENZY, urand(25000, 30000));
             }
 
             void UpdateAI(uint32 const diff)
@@ -754,6 +755,10 @@ class npc_kelthuzad_abomination : public CreatureScript
                             DoCastVictim(SPELL_MORTAL_WOUND, true);
                             events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(10000, 15000));
                             break;
+		    case EVENT_FRENZY:
+                           DoCast(me, SPELL_FRENZY,true);
+			   events.RepeatEvent(urand(25000, 30000));
+                           break;
                         default:
                             break;
                     }

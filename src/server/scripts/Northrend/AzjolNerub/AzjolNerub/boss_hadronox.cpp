@@ -44,6 +44,46 @@ enum Spells
     H_SPELL_WEB_GRAB                              = 59421
 };
 
+#define PAUSE 42
+
+#define ACTION_RESTART 0
+#define ACTION_START 2
+#define ACTION_TOILE 1
+
+#define NPC_HADRANOX_TRIGGER1 234721
+#define NPC_HADRANOX_TRIGGER2 234720
+
+class HadranoxTriggerSearcher
+{
+public:
+  HadranoxTriggerSearcher(Creature const* source, float range) : _source(source), _range(range) {}
+
+  bool operator()(Unit* unit)
+  {
+    if (!unit->isAlive())
+      return false;
+
+    switch (unit->GetEntry())
+    {
+    case NPC_HADRANOX_TRIGGER1:
+    case NPC_HADRANOX_TRIGGER2:
+      break;
+    default:
+      return false;
+    }
+
+
+    if (!unit->IsWithinDist(_source, _range, false))
+      return false;
+
+    return true;
+  }
+
+private:
+  Creature const* _source;
+  float _range;
+};
+
 class boss_hadronox : public CreatureScript
 {
 public:
@@ -67,9 +107,13 @@ public:
         uint32 uiDoorsTimer;
         uint32 uiCheckDistanceTimer;
 
+      uint32 entoilageEvent;
+
         bool bFirstTime;
 
         float fMaxDistance;
+
+      bool eventHF;
 
         void Reset()
         {
@@ -82,11 +126,22 @@ public:
             uiGrabTimer = urand(15*IN_MILLISECONDS, 19*IN_MILLISECONDS);
             uiDoorsTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
             uiCheckDistanceTimer = 2*IN_MILLISECONDS;
+	    entoilageEvent = 30000;
 
             if (instance && (instance->GetData(DATA_HADRONOX_EVENT) != DONE && !bFirstTime))
                 instance->SetData(DATA_HADRONOX_EVENT, FAIL);
 
             bFirstTime = false;
+	    eventHF = true;
+
+	    instance->SetData(DATA_HADRONOX_PRE_EVENT, NOT_STARTED);
+	    std::list<Creature*> temp;
+	    HadranoxTriggerSearcher check(me, 900.0f);
+	    Trinity::CreatureListSearcher<HadranoxTriggerSearcher> searcher(me, temp, check);
+	    me->VisitNearbyGridObject(900.0f, searcher);
+	    for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+	      (*itr)->AI()->DoAction(ACTION_START);
+
         }
 
         //when Hadronox kills any enemy (that includes a party member) she will regain 10% of her HP if the target had Leech Poison on
@@ -102,7 +157,15 @@ public:
         void JustDied(Unit* /*Killer*/)
         {
             if (instance)
+	    {
                 instance->SetData(DATA_HADRONOX_EVENT, DONE);
+		if (eventHF)
+		{
+		  if (IsHeroic())
+		    instance->DoCompleteAchievement(1297);
+		  //valide HF
+		}
+	    }
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -140,6 +203,19 @@ public:
 
             // Without he comes up through the air to players on the bridge after krikthir if players crossing this bridge!
             CheckDistance(fMaxDistance, diff);
+
+	    if (entoilageEvent <= diff)
+	    {
+	      std::list<Creature*> temp;
+	      HadranoxTriggerSearcher check(me, 900.0f);
+	      Trinity::CreatureListSearcher<HadranoxTriggerSearcher> searcher(me, temp, check);
+	      me->VisitNearbyGridObject(900.0f, searcher);
+	      for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+		(*itr)->AI()->DoAction(ACTION_TOILE);
+	      eventHF = false;
+	      entoilageEvent = 3600000;
+	    }
+	    else entoilageEvent -= diff;
 
             if (me->HasAura(SPELL_WEB_FRONT_DOORS) || me->HasAura(SPELL_WEB_SIDE_DOORS))
             {
@@ -194,7 +270,267 @@ public:
     }
 };
 
+#define ANUBAR_CHAMPION 29062
+#define ANUBAR_NECRO 29064
+#define ANUBAR_DEMON 29063
+
+class npc_trigger_hadranox_event : public CreatureScript
+{
+public:
+  npc_trigger_hadranox_event() : CreatureScript("npc_trigger_hadranox_event") { }
+
+struct npc_trigger_hadranox_eventAI : public Scripted_NoMovementAI
+  {
+    npc_trigger_hadranox_eventAI(Creature* creature) : Scripted_NoMovementAI(creature)
+    {
+      instance = creature->GetInstanceScript();
+      me->GetPosition(&pos);
+      instance->SetData(DATA_HADRONOX_PRE_EVENT, NOT_STARTED);
+      Reset();
+    }
+
+    void Reset()
+    {
+      summonTimer = 5000;
+      stopSummon = false;
+      restart = false;
+    }
+
+    void EnterCombat(Unit* /*who*/){}
+
+    void AttackStart(Unit* /*who*/){}
+
+
+    void DoAction(int32 const action)
+    {
+      switch (action)
+      {
+      case ACTION_START:
+	summonTimer = 5000;
+	stopSummon = false;
+	restart = false;
+	break;
+      case ACTION_RESTART:
+	summonTimer = 45000;
+	stopSummon = false;
+	restart = true;
+	break;
+      case ACTION_TOILE:
+	stopSummon = true;
+	break;
+      }
+    }
+
+    void DoSummonNerrubar(bool st)
+    {
+      if (st)
+      {
+	me->SummonCreature(ANUBAR_CHAMPION, pos);
+	me->SummonCreature(ANUBAR_DEMON, pos);
+      }
+      else
+      {
+	me->SummonCreature(ANUBAR_NECRO, pos);
+	me->SummonCreature(ANUBAR_DEMON, pos);
+      }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (summonTimer < diff)
+      {
+	if (restart)
+	  instance->SetData(DATA_HADRONOX_PRE_EVENT, IN_PROGRESS);
+	if (instance->GetData(DATA_HADRONOX_PRE_EVENT) == PAUSE || stopSummon)
+	{
+	  summonTimer = 5000;
+	  return ;
+	}
+	DoSummonNerrubar(sumType);
+	sumType != sumType;
+	summonTimer = 5000;
+      }
+      else summonTimer -= diff;
+    }
+
+private :
+
+  InstanceScript* instance;
+  Position pos;
+    bool sumType, stopSummon, restart;
+    uint32 summonTimer;
+
+  };
+
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_trigger_hadranox_eventAI(creature);
+  }
+};
+
+#define MAX_POS_EVENT 10
+
+Position const EventPos[11]   =
+{
+  {514.44f, 586.84f, 736.50f, 0.0f},
+  {543.44f, 584.84f, 732.50f, 0.0f},
+  {543.80f, 565.36f, 732.0f, 0.0f},
+  {570.95f, 570.35f, 726.76f, 0.0f},
+  {598.93f, 578.77f, 724.37f, 0.0f},
+  {608.01f, 562.32f, 718.92f, 0.0f},
+  {618.36f, 521.89f, 696.0f, 0.0f}, // ?? not sure of this point
+  {602.74f, 510.37f, 694.79f, 0.0f},
+  {566.58f, 512.39f, 700.0f, 0.0f},
+  {554.29f, 518.39f, 692.0f, 0.0f},
+  {540.92f, 524.60f, 689.39f, 0.0f},
+};
+
+class npc_hadranox_anubar : public CreatureScript
+{
+public:
+  npc_hadranox_anubar() : CreatureScript("npc_hadranox_anubar") { }
+
+struct npc_hadranox_anubarAI : public ScriptedAI
+  {
+    npc_hadranox_anubarAI(Creature* creature) : ScriptedAI(creature)
+    {
+      instance = creature->GetInstanceScript();
+      Reset();
+    }
+
+    void Reset()
+    {
+      if (me->GetPositionX() < 500)
+	curPos = 0;
+      else
+	curPos = 1;
+      doIt = false;
+      nextStep = true;
+      me->SetReactState(REACT_PASSIVE);
+      c = me->FindNearestCreature(28921, 1000);
+      if (c == NULL || !c->isAlive())
+	me->DespawnOrUnsummon();
+    }
+
+    void MovementInform(uint32 type, uint32 point)
+    {
+      if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+	return;
+      curPos++;
+      nextStep = true;
+    }
+
+    void DamageTaken(Unit* attacker, uint32& /*damage*/)
+    {
+      me->SetReactState(REACT_AGGRESSIVE);
+      curPos = MAX_POS_EVENT;
+    }
+
+    void EnterCombat(Unit* /*who*/){}
+
+    void UpdateAI(const uint32 diff)
+    {
+      if (instance->GetData(DATA_HADRONOX_PRE_EVENT) == PAUSE)
+	me->DespawnOrUnsummon();
+
+      if (nextStep && curPos <= MAX_POS_EVENT)
+      {
+	me->GetMotionMaster()->MovePoint(42, EventPos[curPos]);
+	nextStep = false;
+      }
+      if (curPos > MAX_POS_EVENT && !doIt)
+      {
+	if (instance->GetData(DATA_HADRONOX_PRE_EVENT) != IN_PROGRESS)
+	  me->DespawnOrUnsummon();
+	else
+	{
+	  me->SetReactState(REACT_AGGRESSIVE);
+	  me->AI()->AttackStart(c);
+	  doIt = true;
+	}
+      }
+    }
+
+private :
+
+  InstanceScript* instance;
+    int curPos;
+    bool nextStep;
+    bool doIt;
+    Creature *c;
+
+  };
+
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_hadranox_anubarAI(creature);
+  }
+};
+
+class npc_hadranox_scarab : public CreatureScript
+{
+public:
+  npc_hadranox_scarab() : CreatureScript("npc_hadranox_scarab") { }
+
+struct npc_hadranox_scarabAI : public ScriptedAI
+  {
+    npc_hadranox_scarabAI(Creature* creature) : ScriptedAI(creature)
+    {
+      instance = creature->GetInstanceScript();
+      Reset();
+    }
+
+    void Reset()
+    {
+      me->SetReactState(REACT_AGGRESSIVE);
+      start = false;
+    }
+
+    void JustDied(Unit* /*Killer*/)
+    {
+
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
+    {
+      if (!start)
+      {
+	instance->SetData(DATA_HADRONOX_PRE_EVENT, PAUSE);
+	std::list<Creature*> temp;
+	HadranoxTriggerSearcher check(me, 900.0f);
+	Trinity::CreatureListSearcher<HadranoxTriggerSearcher> searcher(me, temp, check);
+	me->VisitNearbyGridObject(900.0f, searcher);
+	for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+	  (*itr)->AI()->DoAction(ACTION_RESTART);
+	//_enterCombat(who);
+	start = true;
+      }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+      DoMeleeAttackIfReady();
+    }
+
+private :
+
+  InstanceScript* instance;
+    bool start;
+  };
+
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_hadranox_scarabAI(creature);
+  }
+};
+
 void AddSC_boss_hadronox()
 {
-    new boss_hadronox;
+    new boss_hadronox();
+    new npc_trigger_hadranox_event();
+    new npc_hadranox_anubar();
+    new npc_hadranox_scarab();
 }

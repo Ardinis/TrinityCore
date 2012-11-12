@@ -156,14 +156,13 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recv_data
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_LFD_PLAYER_LOCK_INFO_REQUEST [" UI64FMTD "]", guid);
 
     // Get Random dungeons that can be done at a certain level and expansion
-    // FIXME - Should return seasonals (when not disabled)
     LfgDungeonSet randomDungeons;
     uint8 level = GetPlayer()->getLevel();
     uint8 expansion = GetPlayer()->GetSession()->Expansion();
     for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
     {
         LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(i);
-        if (dungeon && dungeon->type == LFG_TYPE_RANDOM && dungeon->expansion <= expansion &&
+		if (dungeon && (dungeon->type == LFG_TYPE_RANDOM || sLFGMgr->IsActifSeasonalDungeon(dungeon->ID)) && dungeon->expansion <= expansion &&
             dungeon->minlevel <= level && level <= dungeon->maxlevel)
             randomDungeons.insert(dungeon->Entry());
     }

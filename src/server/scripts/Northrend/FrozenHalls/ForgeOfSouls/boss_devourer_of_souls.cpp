@@ -88,28 +88,28 @@ struct outroPosition
     Position movePosition;
 } outroPositions[] =
 {
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5590.47f, 2427.79f, 705.935f, 0.802851f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5593.59f, 2428.34f, 705.935f, 0.977384f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5600.81f, 2429.31f, 705.935f, 0.890118f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5600.81f, 2421.12f, 705.935f, 0.890118f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5601.43f, 2426.53f, 705.935f, 0.890118f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5601.55f, 2418.36f, 705.935f, 1.15192f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5598, 2429.14f, 705.935f, 1.0472f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5594.04f, 2424.87f, 705.935f, 1.15192f } },
-    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5597.89f, 2421.54f, 705.935f, 0.610865f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5598.57f, 2434.62f, 705.935f, 1.13446f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5585.46f, 2417.99f, 705.935f, 1.06465f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5605.81f, 2428.42f, 705.935f, 0.820305f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5591.61f, 2412.66f, 705.935f, 0.925025f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5593.9f, 2410.64f, 705.935f, 0.872665f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5586.76f, 2416.73f, 705.935f, 0.942478f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_3_HORDE }, { 5592.23f, 2419.14f, 705.935f, 0.855211f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_3_HORDE }, { 5594.61f, 2416.87f, 705.935f, 0.907571f } },
-    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_3_HORDE }, { 5589.77f, 2421.03f, 705.935f, 0.855211f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5550.47f, 2490.79f, 709.935f, 0.802851f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5643.59f, 2482.34f, 709.935f, 0.977384f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5650.81f, 2484.31f, 709.935f, 0.890118f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5650.81f, 2486.12f, 709.935f, 0.890118f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5651.43f, 2488.53f, 709.935f, 0.890118f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5651.55f, 2492.36f, 709.935f, 1.15192f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5648, 2484.14f, 709.935f, 1.0472f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5644.04f, 2486.87f, 709.935f, 1.15192f } },
+    { { NPC_CHAMPION_1_ALLIANCE, NPC_CHAMPION_1_HORDE }, { 5647.89f, 2488.54f, 709.935f, 0.610865f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5648.57f, 2492.62f, 709.935f, 1.13446f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5635.46f, 2484.99f, 709.935f, 1.06465f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5655.81f, 2486.42f, 709.935f, 0.820305f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5641.61f, 2488.66f, 709.935f, 0.925025f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5643.9f, 2492.64f, 709.935f, 0.872665f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_2_HORDE }, { 5636.76f, 2484.73f, 709.935f, 0.942478f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_3_HORDE }, { 5642.23f, 2486.14f, 709.935f, 0.855211f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_3_HORDE }, { 5644.61f, 2488.87f, 709.935f, 0.907571f } },
+    { { NPC_CHAMPION_2_ALLIANCE, NPC_CHAMPION_3_HORDE }, { 5639.77f, 2490.03f, 709.935f, 0.855211f } },
 
-    { { NPC_KORELN, NPC_LORALEN }, { 5602.58f, 2435.95f, 705.935f, 0.959931f } },
-    { { NPC_ELANDRA, NPC_KALIRA }, { 5606.13f, 2433.16f, 705.935f, 0.785398f } },
-    { { NPC_JAINA_PART2, NPC_SYLVANAS_PART2 }, { 5606.12f, 2436.6f, 705.935f, 0.890118f } },
+    { { NPC_KORELN, NPC_LORALEN }, { 5652.58f, 2490.95f, 709.935f, 0.959931f } },
+    { { NPC_ELANDRA, NPC_KALIRA }, { 5656.13f, 2490.16f, 709.935f, 0.785398f } },
+    { { NPC_JAINA_PART2, NPC_SYLVANAS_PART2 }, { 5656.12f, 2490.6f, 709.935f, 0.890118f } },
 
     { { 0, 0 }, { 0.0f, 0.0f, 0.0f, 0.0f } }
 };
@@ -117,6 +117,7 @@ struct outroPosition
 Position const CrucibleSummonPos = {5672.294f,2520.686f, 713.4386f, 0.9599311f};
 
 #define DATA_THREE_FACED        1
+#define NPC_BURST_TARGET        34211
 
 class boss_devourer_of_souls : public CreatureScript
 {
@@ -150,6 +151,7 @@ class boss_devourer_of_souls : public CreatureScript
                 mirroredSoulTarget = 0;
 
                 instance->SetData(DATA_DEVOURER_EVENT, NOT_STARTED);
+		canDoIt = false;
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -160,7 +162,7 @@ class boss_devourer_of_souls : public CreatureScript
                     instance->instance->SummonCreature(NPC_CRUCIBLE_OF_SOULS, CrucibleSummonPos);
                 events.ScheduleEvent(EVENT_PHANTOM_BLAST, 5000);
                 events.ScheduleEvent(EVENT_MIRRORED_SOUL, 8000);
-                events.ScheduleEvent(EVENT_WELL_OF_SOULS, 30000);
+                events.ScheduleEvent(EVENT_WELL_OF_SOULS, 2000);
                 events.ScheduleEvent(EVENT_UNLEASHED_SOULS, 20000);
                 events.ScheduleEvent(EVENT_WAILING_SOULS, urand(60000, 70000));
 
@@ -231,17 +233,27 @@ class boss_devourer_of_souls : public CreatureScript
                     {
                         summon->GetMotionMaster()->MovePoint(0, outroPositions[i].movePosition);
                         if (summon->GetEntry() == NPC_JAINA_PART2)
-                            DoScriptText(SAY_JAINA_OUTRO, summon);
+			{
+			  DoPlaySoundToSet(summon, 16625);
+			  summon->MonsterYell("excellent travail champions, nous allons installer notre camp de base dans ce hall, mes mages vont bientot reactiver le systeme de transfert du fleaut, empruntez le quand vous serez pret pour la derniere mission, je vous retrouverais de l'autre cote", LANG_UNIVERSAL, 0);
+			  //                            DoScriptText(SAY_JAINA_OUTRO, summon);
+			}
                         else if (summon->GetEntry() == NPC_SYLVANAS_PART2)
-                            DoScriptText(SAY_SYLVANAS_OUTRO, summon);
+			{
+			  DoPlaySoundToSet(summon, 17044);
+			  summon->MonsterYell("excellent travail champions, nous allons installer notre camp de base dans ce hall, mes mages vont bientot reactiver le systeme de transfert du fleaut, empruntez le quand vous serez pret pour la derniere mission, je vous retrouverais de l'autre cote", LANG_UNIVERSAL, 0);
+			  //                            DoScriptText(SAY_SYLVANAS_OUTRO, summon);
+			}
                     }
                 }
             }
 
-            void SpellHitTarget(Unit* /*target*/, const SpellInfo* spell)
+            void SpellHitTarget(Unit* target, const SpellInfo* spell)
             {
                 if (spell->Id == H_SPELL_PHANTOM_BLAST)
                     threeFaced = false;
+		if (spell->Id == 70324 || spell->Id == 68873)
+		  target->CastSpell(target,  68848, true);
             }
 
             uint32 GetData(uint32 type)
@@ -251,6 +263,15 @@ class boss_devourer_of_souls : public CreatureScript
 
                 return 0;
             }
+
+	  void MovementInform(uint32 uiType, uint32 uiId)
+	  {
+	    if (canDoIt)
+	    {
+	      DoCast(targets, SPELL_WELL_OF_SOULS);
+	      canDoIt = false;
+	    }
+	  }
 
             void UpdateAI(const uint32 diff)
             {
@@ -281,9 +302,13 @@ class boss_devourer_of_souls : public CreatureScript
                             events.ScheduleEvent(EVENT_MIRRORED_SOUL, urand(15000, 30000));
                             break;
                         case EVENT_WELL_OF_SOULS:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                DoCast(target, SPELL_WELL_OF_SOULS);
-                            events.ScheduleEvent(EVENT_WELL_OF_SOULS, 20000);
+                            if (targets = SelectTarget(SELECT_TARGET_RANDOM, 0))
+			    {
+			      me->GetMotionMaster()->MoveJump(targets->GetPositionX(), targets->GetPositionY(), targets->GetPositionZ(), 20.0f, 20.0f);
+			      canDoIt = true;
+			      //			      DoCast(target, SPELL_WELL_OF_SOULS);
+			    }
+                            events.ScheduleEvent(EVENT_WELL_OF_SOULS, 10000);
                             break;
                         case EVENT_UNLEASHED_SOULS:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -303,9 +328,9 @@ class boss_devourer_of_souls : public CreatureScript
                             DoScriptText(RAND(SAY_FACE_ANGER_WAILING_SOUL, SAY_FACE_DESIRE_WAILING_SOUL), me);
                             DoScriptText(EMOTE_WAILING_SOUL, me);
                             DoCast(me, SPELL_WAILING_SOULS_STARTING);
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
                             {
-                                me->SetOrientation(me->GetAngle(target));
+                                me->SetOrientation(me->GetAngle(target) + 3.2f);
                                 me->SendMovementFlagUpdate();
                                 DoCast(me, SPELL_WAILING_SOULS_BEAM);
                             }
@@ -335,7 +360,10 @@ class boss_devourer_of_souls : public CreatureScript
                             me->SetOrientation(beamAngle);
                             me->SendMovementFlagUpdate();
                             me->StopMoving();
-
+			    float x, y;
+			    me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
+			    if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 500))
+			      me->SetTarget(temp->GetGUID());
                             DoCast(me, SPELL_WAILING_SOULS);
 
                             if (--wailingSoulTick)
@@ -364,6 +392,9 @@ class boss_devourer_of_souls : public CreatureScript
             int8 wailingSoulTick;
 
             uint64 mirroredSoulTarget;
+
+	  Unit *targets;
+	  bool canDoIt;
         };
 
         CreatureAI* GetAI(Creature* creature) const

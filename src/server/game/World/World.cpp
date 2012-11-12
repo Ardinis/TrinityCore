@@ -1503,6 +1503,12 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading LFG rewards...");
     sLFGMgr->LoadRewards();
 
+	sLog->outString("Loading LFG seasonals dungeons...");
+    sLFGMgr->LoadSeasonals();
+
+	sLog->outString("Loading LFG entrance positions...");
+    sLFGMgr->LoadEntrancePositions();
+
     sLog->outString("Loading SpellArea Data...");                // must be after quest load
     sSpellMgr->LoadSpellAreas();
 

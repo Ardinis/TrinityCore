@@ -129,7 +129,6 @@ class boss_rotface : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : ROTFACE <!>");
                 if (!instance->CheckRequiredBosses(DATA_ROTFACE, who->ToPlayer()))
                 {
                     EnterEvadeMode();

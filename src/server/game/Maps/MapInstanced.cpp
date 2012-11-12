@@ -24,6 +24,8 @@
 #include "InstanceSaveMgr.h"
 #include "World.h"
 #include "Group.h"
+#include "LFGMgr.h"
+#include "InstanceScript.h"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, DUNGEON_DIFFICULTY_NORMAL)
 {
@@ -162,7 +164,16 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             map = FindInstanceMap(NewInstanceId);
             // it is possible that the save exists but the map doesn't
             if (!map)
+			{
                 map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
+				if (player->GetGroup() && player->GetGroup()->isLFGGroup() && map && ((InstanceMap*)map)->GetInstanceScript())
+				{
+					if (uint32 dungeonId = sLFGMgr->GetDungeon(player->GetGroup()->GetGUID(), true))
+						if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+							if (dungeon->map == map->GetId() && dungeon->difficulty == map->GetDifficulty())
+								((InstanceMap*)map)->GetInstanceScript()->SetIsLfg(true);
+				}
+			}
         }
         else
         {
@@ -175,7 +186,16 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
             //ASSERT(!FindInstanceMap(NewInstanceId));
             map = FindInstanceMap(NewInstanceId);
             if (!map)
+			{
                 map = CreateInstance(NewInstanceId, NULL, diff);
+				if (player->GetGroup() && player->GetGroup()->isLFGGroup() && map && ((InstanceMap*)map)->GetInstanceScript())
+				{
+					if (uint32 dungeonId = sLFGMgr->GetDungeon(player->GetGroup()->GetGUID(), true))
+						if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+							if (dungeon->map == map->GetId() && dungeon->difficulty == map->GetDifficulty())
+								((InstanceMap*)map)->GetInstanceScript()->SetIsLfg(true);
+				}
+			}
         }
     }
 

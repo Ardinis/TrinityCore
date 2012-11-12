@@ -29,7 +29,7 @@ class Player;
 
 enum LFGenum
 {
-    LFG_TIME_ROLECHECK                           = 2*MINUTE,
+    LFG_TIME_ROLECHECK                           = 40*IN_MILLISECONDS,
     LFG_TIME_BOOT                                = 2*MINUTE,
     LFG_TIME_PROPOSAL                            = 2*MINUTE,
     LFG_TANKS_NEEDED                             = 1,
@@ -142,6 +142,7 @@ typedef std::map<uint64, LfgProposalPlayer*> LfgProposalPlayerMap;
 typedef std::map<uint32, LfgPlayerBoot*> LfgPlayerBootMap;
 typedef std::map<uint64, LfgGroupData> LfgGroupDataMap;
 typedef std::map<uint64, LfgPlayerData> LfgPlayerDataMap;
+typedef std::map<uint32, Position> LfgEntrancePositionMap;
 
 // Data needed by SMSG_LFG_JOIN_RESULT
 struct LfgJoinResultData
@@ -267,6 +268,12 @@ class LFGMgr
         void RewardDungeonDoneFor(const uint32 dungeonId, Player* player);
         LfgReward const* GetRandomDungeonReward(uint32 dungeon, uint8 level);
 
+		// Seasonals
+		void LoadSeasonals();
+		bool IsActifSeasonalDungeon(uint32 dungeonId);
+		bool IsSeasonalDungeon(uint32 dungeonId);
+		bool isHolidayHaveSeasonalDungeon(HolidayIds id);
+
         // Queue
         void Join(Player* player, uint8 roles, const LfgDungeonSet& dungeons, const std::string& comment);
         void Leave(Player* player, Group* grp = NULL);
@@ -278,6 +285,7 @@ class LFGMgr
         void UpdateProposal(uint32 proposalId, uint64 guid, bool accept);
 
         // Teleportation
+		void LoadEntrancePositions();
         void TeleportPlayer(Player* player, bool out, bool fromOpcode = false);
 
         // Vote kick
@@ -286,6 +294,7 @@ class LFGMgr
         void OfferContinue(Group* grp);
 
         void InitializeLockedDungeons(Player* player);
+		void InitializeLockedDungeonsForAllPlayers();
 
         void _LoadFromDB(Field* fields, uint64 guid);
         void _SaveToDB(uint64 guid, uint32 db_guid);
@@ -348,8 +357,11 @@ class LFGMgr
         uint32 m_NumWaitTimeHealer;                        ///< Num of players used to calc healers wait time
         uint32 m_NumWaitTimeDps;                           ///< Num of players used to calc dps wait time
         LfgDungeonMap m_CachedDungeonMap;                  ///< Stores all dungeons by groupType
+		LfgEntrancePositionMap m_entrancePositions;        ///< Stores special entrance positions
         // Reward System
         LfgRewardMap m_RewardMap;                          ///< Stores rewards for random dungeons
+		// Seasonals system
+		std::map<uint32, uint32> m_SeasonalsDungeonHoliday;
         // Queue
         LfgQueueInfoMap m_QueueInfoMap;                    ///< Queued groups
         LfgGuidListMap m_currentQueue;                     ///< Ordered list. Used to find groups

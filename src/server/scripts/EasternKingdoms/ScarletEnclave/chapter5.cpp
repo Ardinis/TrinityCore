@@ -295,7 +295,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF+1:
                 player->CLOSE_GOSSIP_MENU();
                 CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, creature->AI())->uiStep = 1;
-                CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, creature->AI())->Start(true, false, player->GetGUID());
+                CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, creature->AI())->Start(true, false, player->GetGUID(), NULL, true);
                 break;
         }
         return true;
@@ -369,6 +369,7 @@ public:
         {
             if (!HasEscortState(STATE_ESCORT_ESCORTING))
             {
+	      me->GetMotionMaster()->MoveTargetedHome();
                 bIsBattle = false;
                 uiStep = 0;
                 uiPhase_timer = 3000;
@@ -614,8 +615,8 @@ public:
 
         void EnterEvadeMode()
         {
-            if (!bIsBattle)//do not reset self if we are in battle
-                npc_escortAI::EnterEvadeMode();
+	  //	  if (!bIsBattle)//do not reset self if we are in battle
+	  //	    npc_escortAI::EnterEvadeMode();
         }
 
         void UpdateAI(const uint32 diff)

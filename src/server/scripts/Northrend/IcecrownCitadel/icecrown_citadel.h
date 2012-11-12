@@ -51,6 +51,7 @@ enum SharedSpells
     SPELL_GREEN_BLIGHT_RESIDUE          = 72145,
 
     // The Lich King
+    SPELL_ARTHAS_TELEPORTER_CEREMONY    = 72915,
     SPELL_FROSTMOURNE_TELEPORT_VISUAL   = 73078,
 };
 
@@ -115,11 +116,11 @@ enum DataTypes
     // Gunship: Datos para logros
     DATA_BEEN_WAITING_ACHIEVEMENT   = 49,
     DATA_NECK_DEEP_ACHIEVEMENT      = 50,
-	
+
     DATA_SAURFANG_HORDE_SELLER      = 51,
     DATA_SAURFANG_HORDE_SMITH       = 52,
     DATA_SAURFANG_ALLIANCE_SELLER   = 53,
-    DATA_SAURFANG_ALLIANCE_SMITH    = 54,	
+    DATA_SAURFANG_ALLIANCE_SMITH    = 54,
 
     DATA_TEMPETE = 55,
 
@@ -307,6 +308,8 @@ enum CreaturesIds
     NPC_SPIRIT_BOMB                             = 39189,
     NPC_FROSTMOURNE_TRIGGER                     = 38584,
 
+
+    NPC_INVISIBLE_STALKER                       = 30298,
     // Gunship: Ids de los npcs
     NPC_GB_SKYBREAKER                           = 37540,
     NPC_GB_ORGRIMS_HAMMER                       = 37215,
@@ -338,14 +341,14 @@ enum CreaturesIds
     NPC_KORKRON_INVOKER                         = 37033,
     NPC_SPIRE_FROSTWYRM                         = 37230,
     NPC_SKYBREAKER_SORCERER                     = 37026,
-	
+
     // Sindragosas Ward
     NPC_SINDRAGOSAS_WARD 						= 37503,
     NPC_NERUBAR_WEBWEAVER 						= 37502,
     NPC_NERUBAR_CHAMPION 						= 37501,
     NPC_NERUBAR_BROODLING						= 37232,
     NPC_FROSTWARDEN_WARRIOR 					= 37228,
-    NPC_FROSTWARDEN_SORCERESS 					= 37229,	
+    NPC_FROSTWARDEN_SORCERESS 					= 37229,
 };
 
 enum GameObjectsIds
@@ -372,14 +375,14 @@ enum GameObjectsIds
     GO_DEATHBRINGER_S_CACHE_10H             = 202238,
     GO_DEATHBRINGER_S_CACHE_25H             = 202241,
     GO_SCOURGE_TRANSPORTER_SAURFANG         = 202244,
-	
+
     GO_SAURFANG_FORGE                       = 191508,
     GO_SAURFANG_ANVIL                       = 191345,
     GO_SAURFANG_BONFIRE                     = 196417,
     GO_SAURFANG_HORDE_TENT1                 = 201887,
     GO_SAURFANG_HORDE_TENT2                 = 201886,
     GO_SAURFANG_ALLIANCE_TENT1              = 201868,
-    GO_SAURFANG_ALLIANCE_TENT2              = 201868,	
+    GO_SAURFANG_ALLIANCE_TENT2              = 201868,
 
     // Professor Putricide
     GO_ORANGE_PLAGUE_MONSTER_ENTRANCE       = 201371,
@@ -427,6 +430,7 @@ enum GameObjectsIds
 
     // The Lich King
     GO_ARTHAS_PLATFORM                      = 202161,
+    GO_SCOURGE_TRANSPORTER_LK               = 202223,
     GO_ARTHAS_PRECIPICE                     = 202078,
     GO_DOODAD_ICECROWN_THRONEFROSTYWIND01   = 202188,
     GO_DOODAD_ICECROWN_THRONEFROSTYEDGE01   = 202189,

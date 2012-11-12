@@ -1394,7 +1394,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
-            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, m_attackType, m_spellInfo, m_triggeredByAuraSpell);		
+            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
 	}
     // Do damage and triggers
     else if (m_damage > 0)
@@ -1421,8 +1421,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 caster->ToPlayer()->CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
         }
 
-        caster->DealSpellDamage(&damageInfo, true);
-
         // Haunt
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
         {
@@ -1430,6 +1428,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             aurEff->SetAmount(CalculatePctU(aurEff->GetAmount(), damageInfo.damage));
         }
         m_damage = damageInfo.damage;
+        caster->DealSpellDamage(&damageInfo, true);
+
        // Cobra Strikes (can't find any other way that may work)
        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags[1] & 0x10000000)
            if (Unit * owner = caster->GetOwner())
@@ -1493,22 +1493,41 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 }
 
-SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool scaleAura)
+SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleAura)
 {
     if (!unit || !effectMask)
         return SPELL_MISS_EVADE;
 
-   // Recheck immune (only for delayed spells)
+    // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
     if (m_spellInfo->Speed && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)))
-		return SPELL_MISS_IMMUNE;
+      return SPELL_MISS_IMMUNE;
 
-    //// For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-    //// disable effects to which unit is immune
-    //for (uint32 effectNumber = 0; effectNumber < MAX_SPELL_EFFECTS; ++effectNumber)
-    //    if (effectMask & (1 << effectNumber) && unit->IsImmunedToSpellEffect(m_spellInfo, effectNumber))
-    //        effectMask &= ~(1 << effectNumber);
-    //if (!effectMask || (m_spellInfo->Speed && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo))))
-    //    return SPELL_MISS_IMMUNE;
+    // disable effects to which unit is immune
+    SpellMissInfo returnVal = SPELL_MISS_IMMUNE;
+    for (uint32 effectNumber = 0; effectNumber < MAX_SPELL_EFFECTS; ++effectNumber)
+    {
+      if (effectMask & (1 << effectNumber))
+      {
+	if (unit->IsImmunedToSpellEffect(m_spellInfo, effectNumber))
+	  effectMask &= ~(1 << effectNumber);
+	else if (m_spellInfo->Effects[effectNumber].IsAura() && !m_spellInfo->IsPositiveEffect(effectNumber))
+	{
+	  int32 debuff_resist_chance = unit->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(m_spellInfo->Dispel));
+	  debuff_resist_chance += unit->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(m_spellInfo->Dispel));
+
+	  if (debuff_resist_chance > 0)
+	    if (irand(0,10000) <= (debuff_resist_chance * 100))
+	    {
+	      effectMask &= ~(1 << effectNumber);
+	      returnVal = SPELL_MISS_RESIST;
+	    }
+	}
+      }
+    }
+
+    if (!effectMask)
+      return returnVal;
+
 
     PrepareScriptHitHandlers();
     CallScriptBeforeHitHandlers();
@@ -1809,8 +1828,8 @@ bool Spell::UpdateChanneledTargetList()
 
     //If target has Grounding totem aura and totem is not in range of channeling spell
     if (Unit *Ttarget = m_targets.GetUnitTarget())
-      if (!m_spellInfo->Effects[0].IsAreaAuraEffect() && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && m_spellInfo->IsChanneled())       
-	if (Ttarget->GetEntry() == 5925)          
+      if (!m_spellInfo->Effects[0].IsAreaAuraEffect() && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE && m_spellInfo->IsChanneled())
+	if (Ttarget->GetEntry() == 5925)
 	  range += 31;
 
     for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -4283,6 +4302,9 @@ void Spell::SendChannelUpdate(uint32 time)
 void Spell::SendChannelStart(uint32 duration)
 {
     uint64 channelTarget = m_targets.GetObjectTargetGUID();
+    if (!channelTarget && !m_spellInfo->NeedsExplicitUnitTarget())
+      if (m_UniqueTargetInfo.size() + m_UniqueGOTargetInfo.size() == 1)   // this is for TARGET_SELECT_CATEGORY_NEARBY
+	channelTarget = !m_UniqueTargetInfo.empty() ? m_UniqueTargetInfo.front().targetGUID : m_UniqueGOTargetInfo.front().targetGUID;
 
     WorldPacket data(MSG_CHANNEL_START, (8+4+4));
     data.append(m_caster->GetPackGUID());
@@ -4544,7 +4566,16 @@ void Spell::TakeRunePower(bool didHit)
         RuneType rune = player->GetCurrentRune(i);
         if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
         {
-            player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+	  uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
+	  if (didHit)
+	  {
+	    cooldownRunes = player->GetRuneBaseCooldown(i);
+	    if (player->reduceRuneCoolDown[i])
+	      if (time(0) - player->m_reduceCoolDown[i] < 3)
+		cooldownRunes -= 2000;
+	    player->reduceRuneCoolDown[i] = false;
+	  }
+            player->SetRuneCooldown(i, cooldownRunes);
             player->SetLastUsedRune(rune);
             runeCost[rune]--;
         }
@@ -4554,23 +4585,33 @@ void Spell::TakeRunePower(bool didHit)
 
     if (runeCost[RUNE_DEATH] > 0)
     {
-        for (uint32 i = 0; i < MAX_RUNES; ++i)
-        {
-            RuneType rune = player->GetCurrentRune(i);
-            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
-            {
-                player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
-                player->SetLastUsedRune(rune);
-                runeCost[rune]--;
+      for (uint32 i = 0; i < MAX_RUNES; ++i)
+      {
+	RuneType rune = player->GetCurrentRune(i);
+	if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
+	{
+	  uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
+	  if (didHit)
+	  {
+	    cooldownRunes = player->GetRuneBaseCooldown(i);
+	    if (player->reduceRuneCoolDown[i])
+	      if (time(0) - player->m_reduceCoolDown[i] < 3)
+		cooldownRunes -= 2000;
+	    player->reduceRuneCoolDown[i] = false;
+	  }
+	  player->SetRuneCooldown(i, cooldownRunes);
+	  player->SetLastUsedRune(rune);
+	  runeCost[rune]--;
+	  // keep Death Rune type if missed
+	  if (didHit)
+	  {
+	    player->RestoreBaseRune(i);
+	  }
 
-                // keep Death Rune type if missed
-                if (didHit)
-                    player->RestoreBaseRune(i);
-
-                if (runeCost[RUNE_DEATH] == 0)
-                    break;
-            }
-        }
+	  if (runeCost[RUNE_DEATH] == 0)
+	    break;
+	}
+      }
     }
 
     // you can gain some runic power when use runes
@@ -4820,6 +4861,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
 	  return SPELL_FAILED_NOTHING_TO_DISPEL;
 
+	if (m_spellInfo->Id == 527
+	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
+	  return SPELL_FAILED_NOTHING_TO_DISPEL;
+
     }
 
     // cancel autorepeat spells if cast start when moving
@@ -5025,6 +5070,13 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (castResult != SPELL_CAST_OK)
         return castResult;
 
+    if (m_spellInfo && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags[0] & 0x8000000) // Mocking Blow
+    {
+      if (Unit* target = m_targets.GetUnitTarget())
+	if (target->IsImmunedToSpellEffect(m_spellInfo, EFFECT_1) || target->GetTypeId() == TYPEID_PLAYER)
+	  return SPELL_FAILED_BAD_TARGETS;
+    }
+
     for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
         // for effects of spells that have only one target
@@ -5171,6 +5223,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 if (m_caster->HasUnitState(UNIT_STATE_ROOT))
                     return SPELL_FAILED_ROOTED;
+		if (m_caster->GetTypeId() == TYPEID_PLAYER)
+		  if (Unit* target = m_targets.GetUnitTarget())
+		    if (!target->isAlive())
+		      return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
             case SPELL_EFFECT_SKINNING:
@@ -5230,7 +5286,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_spellInfo->Id != 1842 || (m_targets.GetGOTarget() &&
                     m_targets.GetGOTarget()->GetGOInfo()->type != GAMEOBJECT_TYPE_TRAP))
                     if (m_caster->ToPlayer()->InBattleground() && // In Battleground players can use only flags and banners
-                        !m_caster->ToPlayer()->CanUseBattlegroundObject())
+                        !m_caster->ToPlayer()->CanUseBattlegroundObject(m_targets.GetGOTarget()))
                         return SPELL_FAILED_TRY_AGAIN;
 
                 // get the lock entry
@@ -5390,6 +5446,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
+	case SPELL_EFFECT_TRIGGER_SPELL:
+	  {
+	    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->HasUnitState(UNIT_STATE_ROOT))
+	      if (m_spellInfo->SpellFamilyFlags.IsEqual(0x0, 0x200, 0x0) && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
+		return SPELL_FAILED_ROOTED;
+	    break;
+	  }
             case SPELL_EFFECT_LEAP_BACK:
             {
                 // Spell 781 (Disengage) requires player to be in combat
@@ -5677,7 +5740,7 @@ SpellCastResult Spell::CheckCasterAuras() const
     // We use bitmasks so the loop is done only once and not on every aura check below.
     if (m_spellInfo->AttributesEx & SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY)
     {
-        for (int i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if (m_spellInfo->Effects[i].ApplyAuraName == SPELL_AURA_SCHOOL_IMMUNITY)
                 school_immune |= uint32(m_spellInfo->Effects[i].MiscValue);
@@ -5751,7 +5814,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                 SpellInfo const* auraInfo = aura->GetSpellInfo();
                 if (auraInfo->GetAllEffectsMechanicMask() & mechanic_immune)
                     continue;
-                if (auraInfo->GetSchoolMask() & school_immune)
+		if (auraInfo->GetSchoolMask() & school_immune && !(auraInfo->AttributesEx & SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE))
                     continue;
                 if (auraInfo->GetDispelMask() & dispel_immune)
                     continue;
@@ -6956,9 +7019,9 @@ SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& sk
                         0 : m_caster->ToPlayer()->GetSkillValue(skillId);
 
                     // skill bonus provided by casting spell (mostly item spells)
-                    // add the damage modifier from the spell casted (cheat lock / skeleton key etc.)
+		    // add the effect base points modifier from the spell casted (cheat lock / skeleton key etc.)
                     if (m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_GAMEOBJECT_ITEM_TARGET || m_spellInfo->Effects[effIndex].TargetB.GetTarget() == TARGET_GAMEOBJECT_ITEM_TARGET)
-                        skillValue += uint32(CalculateDamage(effIndex, NULL));
+		      skillValue += m_spellInfo->Effects[effIndex].CalcValue();
 
                     if (skillValue < reqSkillValue)
                         return SPELL_FAILED_LOW_CASTLEVEL;
@@ -7302,7 +7365,7 @@ bool Spell::CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMo
         (*scritr)->_PrepareScriptCall(hookType);
         for (; effItr != effEndItr ; ++effItr)
             // effect execution can be prevented
-            if (!(*scritr)->_IsEffectPrevented(effIndex) && (*effItr).IsEffectAffected(m_spellInfo, effIndex))
+	  if (!(*scritr)->_IsEffectPrevented(effIndex) && (*effItr).IsEffectAffected(m_spellInfo, effIndex))
                 (*effItr).Call(*scritr, effIndex);
 
         if (!preventDefault)

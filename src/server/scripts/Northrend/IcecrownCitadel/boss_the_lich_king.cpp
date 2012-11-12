@@ -1,5 +1,6 @@
 /*
 
+
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -517,13 +518,12 @@ class boss_the_lich_king : public CreatureScript
 
             void EnterCombat(Unit* target)
             {
-			sLog->outError(" <!> LANCEMENT SCRIPT : LICH KING <!>");
-			if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
+	      if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
                 {
                     EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
                     return;
-		    }
+		}
 
                 me->setActive(true);
                 DoZoneInCombat();
@@ -1440,6 +1440,8 @@ class npc_shambling_horror_icc : public CreatureScript
             npc_shambling_horror_iccAI(Creature* creature) : ScriptedAI(creature)
             {
                 _frenzied = false;
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -1509,6 +1511,8 @@ class npc_raging_spirit : public CreatureScript
             npc_raging_spiritAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -1585,6 +1589,8 @@ class npc_valkyr_shadowguard : public CreatureScript
             npc_valkyr_shadowguardAI(Creature* creature) : ScriptedAI(creature),
                 _grabbedPlayer(0), _instance(creature->GetInstanceScript())
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -1606,7 +1612,7 @@ class npc_valkyr_shadowguard : public CreatureScript
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
 		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, true);
+		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
 		mui_check = 3000;
 		mui_check2 = 3000;
             }
@@ -2087,6 +2093,8 @@ class npc_spirit_warden : public CreatureScript
             npc_spirit_wardenAI(Creature* creature) : ScriptedAI(creature),
                 _instance(creature->GetInstanceScript())
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -2145,6 +2153,9 @@ class npc_spirit_bomb : public CreatureScript
         {
             npc_spirit_bombAI(Creature* creature) : CreatureAI(creature)
             {
+	      me->SetReactState(REACT_DEFENSIVE);
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void IsSummonedBy(Unit* /*summoner*/)
@@ -2785,7 +2796,7 @@ class spell_the_lich_king_valkyr_target_search : public SpellScriptLoader
                 unitList.clear();
                 unitList.push_back(_target);
 		//		GetCaster()->UpdatePosition(_target->GetPositionX(),
-		//				_target->GetPositionY(), 
+		//				_target->GetPositionY(),
 		//			    _target->GetPositionZ() + 10, 0, true);
                 GetCaster()->GetAI()->SetGUID(_target->GetGUID());
             }

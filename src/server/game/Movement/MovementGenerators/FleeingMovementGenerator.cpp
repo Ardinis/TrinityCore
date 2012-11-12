@@ -159,6 +159,13 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
             }
             float new_z = _map->GetHeight(owner.GetPhaseMask(), temp_x, temp_y, z, true);
 
+	    if (_map->GetId() == 617)
+	      if (z - new_z > 2)
+	      {
+		i_to_distance_from_caster = 0.0f;
+		i_nextCheckTime.Reset(urand(500,1000));
+		return false;
+	      }
             if (new_z <= INVALID_HEIGHT)
                 continue;
 
@@ -336,6 +343,7 @@ void FleeingMovementGenerator<Player>::Finalize(Player &owner)
 {
     owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner.ClearUnitState(UNIT_STATE_FLEEING|UNIT_STATE_FLEEING_MOVE);
+    owner.StopMoving();
 }
 
 template<>
@@ -422,4 +430,3 @@ bool TimedFleeingMovementGenerator::Update(Unit & owner, const uint32 time_diff)
     // This is done instead of casting Unit& to Creature& and call parent method, then we can use Unit directly
     return MovementGeneratorMedium< Creature, FleeingMovementGenerator<Creature> >::Update(owner, time_diff);
 }
-

@@ -105,19 +105,30 @@ class boss_lord_marrowgar : public CreatureScript
                 me->RemoveAurasDueToSpell(SPELL_BONE_STORM);
                 me->RemoveAurasDueToSpell(SPELL_BERSERK);
                 events.ScheduleEvent(EVENT_ENABLE_BONE_SLICE, 10000);
-                events.ScheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(10000, 15000), EVENT_GROUP_SPECIAL);
+                events.ScheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(12000, 15000), EVENT_GROUP_SPECIAL);
                 events.ScheduleEvent(EVENT_COLDFLAME, 5000, EVENT_GROUP_SPECIAL);
                 events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(45000, 50000));
                 events.ScheduleEvent(EVENT_ENRAGE, 600000);
+		instance->SetData(DATA_TEMPETE, NOT_STARTED);
+		_saberSlashPlayers.clear();
                 _boneSlice = false;
 		_bstorm = false;
 		_endstorm = false;
             }
 
+	  void SpellHitTarget(Unit* who, SpellInfo const* spell)
+	  {
+	    if (spell->Id == 69055 || spell->Id == 70814)
+	    {
+	      for (std::list<Unit *>::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+		if ((*it) && (*it)->GetGUID() == who->GetGUID())
+		  return ;
+	      _saberSlashPlayers.push_back(who);
+	    }
+	  }
 
             void EnterCombat(Unit* /*who*/)
             {
-				sLog->outError(" <!> LANCEMENT SCRIPT : GARGAMOELLE <!>");
                 Talk(SAY_AGGRO);
 
                 me->setActive(true);
@@ -137,6 +148,8 @@ class boss_lord_marrowgar : public CreatureScript
                 _JustReachedHome();
                 instance->SetBossState(DATA_LORD_MARROWGAR, FAIL);
                 instance->SetData(DATA_BONED_ACHIEVEMENT, uint32(true));    // reset
+		instance->SetData(DATA_TEMPETE, NOT_STARTED);
+		_saberSlashPlayers.clear();
             }
 
             void KilledUnit(Unit* victim)
@@ -300,6 +313,9 @@ class boss_lord_marrowgar : public CreatureScript
             bool _boneSlice;
 	  bool _endstorm;
 	  bool _bstorm;
+
+	public:
+	  std::list<Unit *> _saberSlashPlayers;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -565,6 +581,32 @@ class spell_marrowgar_coldflame_damage : public SpellScriptLoader
         }
 };
 
+class bone_spike_graveyard_TargetCheck : public std::unary_function<Unit*, bool>
+{
+
+public:
+  bone_spike_graveyard_TargetCheck(std::list<Unit *> saberSlashPlayers)
+    : _saberSlashPlayers(saberSlashPlayers)
+  {}
+
+  bool operator()(Unit* unit) const
+  {
+    if (!unit)
+      return false;
+    if (unit && (!unit->isAlive() || unit->GetTypeId() != TYPEID_PLAYER || unit->HasAura(SPELL_IMPALED)))
+	return false;
+    for (std::list<Unit *>::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+    {
+      if ((*it) && (*it)->GetGUID() == unit->GetGUID())
+	return false;
+    }
+    return true;
+  }
+
+private:
+      std::list<Unit *> _saberSlashPlayers;
+};
+
 class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
 {
     public:
@@ -590,7 +632,8 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                     for (uint8 i = 0; i < boneSpikeCount; ++i)
                     {
                         // select any unit but not the tank
-                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 1, 75.0f, true, -SPELL_IMPALED);
+		      //                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 1, 75.0f, true, -SPELL_IMPALED);
+		      Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 0, bone_spike_graveyard_TargetCheck(CAST_AI(boss_lord_marrowgar::boss_lord_marrowgarAI, marrowgarAI)->_saberSlashPlayers));
                         if (!target)
                             break;
 

@@ -454,7 +454,7 @@ public:
                 SetPhaseEvents();
         }
 
-        void SpellHitTarget(Unit* target, const SpellEntry* pSpell)
+        void SpellHitTarget(Unit* target, const SpellInfo* pSpell)
         {
             if (pSpell->Id == SPELL_RANDOM_PORTAL)
             {
@@ -1153,7 +1153,7 @@ public:
 	    DoCast(me, SPELL_PORTAL_VISUAL_CLOSED, true);
         }
 
-      void SpellHit(Unit* /*caster*/, const SpellEntry* spell)
+      void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
        {
            if (spell->Id == SPELL_PORTAL_OPENED)
                 me->RemoveAura(SPELL_PORTAL_VISUAL_CLOSED);
@@ -1426,7 +1426,7 @@ public:
             }    
         }
 
-        void SpellHit(Unit* caster, const SpellEntry* spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
             if (spell->Id == SPELL_ARCANE_BOMB_DUMMY)
             {

@@ -31,6 +31,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "trial_of_the_crusader.h"
+#include "Vehicle.h"
 
 enum Yells
 {
@@ -44,6 +45,12 @@ enum Yells
     SAY_TRAMPLE_STARE    = -1649020,
     SAY_TRAMPLE_FAIL     = -1649021,
     SAY_TRAMPLE_START    = -1649022,
+};
+
+enum MyActions
+{
+    ACTION_ENABLE_FIRE_BOMB = 1,
+    ACTION_DISABLE_FIRE_BOMB,
 };
 
 enum Equipment
@@ -76,7 +83,7 @@ enum BossSpells
     SPELL_RISING_ANGER      = 66636,
     //Snobold
     SPELL_SNOBOLLED         = 66406,
-    SPELL_BATTER            = 66408,
+    SPELL_BATTER            = 66407, //66408
     SPELL_FIRE_BOMB         = 66313,
     SPELL_FIRE_BOMB_1       = 66317,
     SPELL_FIRE_BOMB_DOT     = 66318,
@@ -131,34 +138,41 @@ public:
         uint32 m_uiImpaleTimer;
         uint32 m_uiStaggeringStompTimer;
         SummonList Summons;
-        uint32 m_uiSummonTimer;
+      uint32 m_uiThrowTimer;
         uint32 m_uiSummonCount;
 
         void Reset()
         {
             m_uiImpaleTimer = urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS);
             m_uiStaggeringStompTimer = 15*IN_MILLISECONDS;
-            m_uiSummonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);;
+	    m_uiThrowTimer = urand(1*IN_MILLISECONDS, 5*IN_MILLISECONDS);
 
             if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
                 GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 m_uiSummonCount = 5;
             else
                 m_uiSummonCount = 4;
-
+            if (m_pInstance)
+	      m_pInstance->DoRemoveAurasDueToSpellOnPlayers(66406);
             Summons.DespawnAll();
         }
 
         void JustDied(Unit* /*pKiller*/)
         {
             if (m_pInstance)
+	    {
                 m_pInstance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_DONE);
+		m_pInstance->DoRemoveAurasDueToSpellOnPlayers(66406);
+	    }
         }
 
         void JustReachedHome()
         {
             if (m_pInstance)
-                m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+	    {
+	      m_pInstance->DoRemoveAurasDueToSpellOnPlayers(66406);
+	      m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
+	    }
 	    m_pInstance->SetData(DATA_PAUSE, NOT_STARTED);
             me->DespawnOrUnsummon();
         }
@@ -167,7 +181,25 @@ public:
         {
             me->SetInCombatWithZone();
             m_pInstance->SetData(TYPE_NORTHREND_BEASTS, GORMOK_IN_PROGRESS);
+	    for (uint8 i = 0; i < 4; i++)
+           {
+                if (Creature* pSnobold = DoSpawnCreature(NPC_SNOBOLD_VASSAL, 0, 0, 0, 0, TEMPSUMMON_CORPSE_DESPAWN, 0))
+                {
+                  pSnobold->EnterVehicle(me, i);
+                   pSnobold->SetInCombatWithZone();
+                   pSnobold->AI()->DoAction(ACTION_ENABLE_FIRE_BOMB);
+               }
+            }
         }
+
+      void DamageTaken(Unit* /*who*/, uint32& damage)
+      {
+	// despawn the remaining passengers on death
+	if (damage >= me->GetHealth())
+	  for (uint8 i = 0; i < 4; ++i)
+	    if (Unit* pSnobold = me->GetVehicleKit()->GetPassenger(i))
+	      pSnobold->ToCreature()->DespawnOrUnsummon();
+      }
 
         void JustSummoned(Creature* summon)
         {
@@ -209,15 +241,22 @@ public:
                 m_uiStaggeringStompTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);
             } else m_uiStaggeringStompTimer -= uiDiff;
 
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                if (m_uiSummonCount > 0)
-                {
-                    me->SummonCreature(NPC_SNOBOLD_VASSAL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN);
-                    DoScriptText(SAY_SNOBOLLED, me);
-                }
-                m_uiSummonTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
-            } else m_uiSummonTimer -= uiDiff;
+	    if (m_uiThrowTimer <= uiDiff)
+	      {
+                for (uint8 i = 0; i < 4; ++i)
+		  {
+                    if (Unit* pSnobold = me->GetVehicleKit()->GetPassenger(i))
+		      {
+                        pSnobold->ExitVehicle();
+                        pSnobold->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                        pSnobold->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+                        pSnobold->ToCreature()->AI()->DoAction(ACTION_DISABLE_FIRE_BOMB);
+			//                        Talk(EMOTE_SNOBOLLED);
+                        break;
+		      }
+		  }
+                m_uiThrowTimer = urand(15*IN_MILLISECONDS, 20*IN_MILLISECONDS);
+	      } else m_uiThrowTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
@@ -238,6 +277,14 @@ public:
 
     struct mob_snobold_vassalAI : public ScriptedAI
     {
+
+      enum MyEvents
+	{
+	  EVENT_FIRE_BOMB = 1,
+	  EVENT_BATTER,
+	  EVENT_HEAD_CRACK,
+	};
+
         mob_snobold_vassalAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             m_pInstance = (InstanceScript*)pCreature->GetInstanceScript();
@@ -264,19 +311,18 @@ public:
             if (m_pInstance)
                 m_uiBossGUID = m_pInstance->GetData64(NPC_GORMOK);
             //Workaround for Snobold
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
+	    //            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
+	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+	    mui_checkEnd = 1000;
         }
 
         void EnterCombat(Unit *pWho)
         {
-            m_uiTargetGUID = pWho->GetGUID();
-            me->TauntApply(pWho);
-            DoCast(pWho, SPELL_SNOBOLLED);
         }
 
         void DamageTaken(Unit* pDoneBy, uint32 &uiDamage)
         {
-            if (pDoneBy->GetGUID()==m_uiTargetGUID)
+            if (pDoneBy->GetGUID() == m_uiTargetGUID)
                 uiDamage = 0;
         }
 
@@ -286,7 +332,7 @@ public:
 
             switch (uiId)
             {
-                case 0: // JUMP!? Fuck! THAT'S BEEZARR! Would someone PLEASE make MotionMaster->Move* work better?
+                case 0 :
                     if (m_bTargetDied)
                         me->DespawnOrUnsummon();
                     break;
@@ -304,64 +350,154 @@ public:
                 m_pInstance->SetData(DATA_SNOBOLD_COUNT, DECREASE);
         }
 
-        void UpdateAI(const uint32 uiDiff)
-        {
-            if (m_bTargetDied || !UpdateVictim())
-                return;
+      void DoAction(int32 const action)
+      {
+	switch (action)
+	  {
+	  case ACTION_ENABLE_FIRE_BOMB:
+	    events.CancelEvent(EVENT_FIRE_BOMB);
+	    events.CancelEvent(EVENT_BATTER);
+            events.CancelEvent(EVENT_HEAD_CRACK);
+	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+	    break;
+	  case ACTION_DISABLE_FIRE_BOMB:
+	    events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+	    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_HEAD_CRACK, 1*IN_MILLISECONDS);
+	    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+	    break;
+	  }
+      }
 
-            if (Unit* pTarget = Unit::GetPlayer(*me, m_uiTargetGUID))
-            {
-                if (!pTarget->isAlive())
-                {
-                    if (m_pInstance)
-                    {
-                        Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
-                        if (gormok && gormok->isAlive())
-                        {
-                            SetCombatMovement(false);
-                            m_bTargetDied = true;
-                            me->GetMotionMaster()->MoveJump(gormok->GetPositionX(), gormok->GetPositionY(), gormok->GetPositionZ(), 15.0f, 15.0f);
-                        }
-                        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        {
-                            m_uiTargetGUID = target->GetGUID();
-                            me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 15.0f, 15.0f);
-                        }
-                    }
-                }
-            }
+      void BackToGornock()
+      {
+	if (m_pInstance)
+	  {
+	    Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
+	    if (gormok && gormok->isAlive())
+	      {
+		SetCombatMovement(false);
+		m_bTargetDied = true;
 
-            if (m_uiFireBombTimer < uiDiff)
-            {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0))
+		for (uint8 i = 0; i < 4; i++)
 		  {
-                    DoCast(pTarget, SPELL_FIRE_BOMB);
-		    me->SummonCreature(8888888, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 99999999);
+		    if (!gormok->GetVehicleKit()->GetPassenger(i))
+		      {
+			me->EnterVehicle(gormok, i);
+			m_uiTargetGUID = 0;
+			DoAction(ACTION_ENABLE_FIRE_BOMB);
+			break;
+		      }
 		  }
-                m_uiFireBombTimer = 20000;
-            }
-            else m_uiFireBombTimer -= uiDiff;
+	      }
+	  }
+      }
 
-            if (m_uiBatterTimer < uiDiff)
-            {
-                if (Unit *pTarget = Unit::GetPlayer(*me, m_uiTargetGUID))
-                    DoCast(pTarget, SPELL_BATTER);
-                m_uiBatterTimer = 10000;
-            }
-            else m_uiBatterTimer -= uiDiff;
+      bool CheckEnd()
+      {
+	Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
+	if (gormok && !gormok->isAlive())
+	  return true;
+	return false;
+      }
 
-            if (m_uiHeadCrackTimer < uiDiff)
-            {
-                if (Unit *pTarget = Unit::GetPlayer(*me, m_uiTargetGUID))
-                    DoCast(pTarget, SPELL_HEAD_CRACK);
-                m_uiHeadCrackTimer = 35000;
-            }
-            else m_uiHeadCrackTimer -= uiDiff;
+      void UpdateAI(uint32 const diff)
+      {
+	if (!UpdateVictim() || m_bTargetDied)
+	  return;
 
-            DoMeleeAttackIfReady();
-        }
+	if (mui_checkEnd <= diff)
+	  {
+	    if (CheckEnd() || me->GetPositionZ() < 393.9f)
+	      {
+		me->DespawnOrUnsummon();
+		return ;
+	      }
+	    mui_checkEnd = 1000;
+	  }
+	else
+	  mui_checkEnd -= diff;
+
+	events.Update(diff);
+
+	//what the hell dont work !!!
+
+	if (me->HasUnitState(UNIT_STATE_CASTING))
+	  return;
+
+	while (uint32 event = events.ExecuteEvent())
+	  {
+	    switch (event)
+	      {
+	      case EVENT_FIRE_BOMB:
+		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+		  {
+		    DoCast(target, SPELL_FIRE_BOMB, true);
+		    me->SummonCreature(8888888, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 99999999);
+		  }
+		events.ScheduleEvent(EVENT_FIRE_BOMB, 20*IN_MILLISECONDS);
+		return;
+	      case EVENT_HEAD_CRACK:
+		events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
+		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+		  {
+		    if (Player *player = target->ToPlayer())
+		      {
+			if (target->GetVehicleKit())
+			  if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
+			    {
+
+			      events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
+			      return;
+			    }
+			DoScriptText(SAY_SNOBOLLED, me, player);
+			m_uiTargetGUID = player->GetGUID();
+			player->CreateVehicleKit(444, 0);
+			me->EnterVehicle(player, 0);
+			//			if (me->GetExactDist2d(player) <= 1)
+			me->AddAura(66406, player);
+			//			me->MonsterYell("i am billi bob and i try to reach youre head !", LANG_UNIVERSAL, 0);
+			me->ClearUnitState(UNIT_STATE_ONVEHICLE);
+			if (player->GetVehicleKit())
+			  {
+			    player->GetVehicleKit()->RelocatePassengers(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+			    me->SendMovementFlagUpdate();
+			  }
+			//35
+			//			me->HandleEmoteCommand(35);
+			events.CancelEvent(EVENT_HEAD_CRACK);
+		      }
+		  }
+		return;
+	      case EVENT_BATTER:
+		//		if (Player* target = me->FindNearestPlayer(3))
+		if (Unit *target = Unit::GetPlayer(*me, m_uiTargetGUID))
+		{
+		  //		  if (me->GetExactDist2d(target) <= 2)
+		  {
+		    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
+		    target->AddAura(SPELL_BATTER, target);
+		    events.ScheduleEvent(EVENT_BATTER, 3*IN_MILLISECONDS);
+		    if (!target->isAlive())
+		      BackToGornock();
+		  }
+		}
+		else
+		  events.ScheduleEvent(EVENT_BATTER, 2*IN_MILLISECONDS);
+		return;
+	      }
+	  }
+
+	if (m_pInstance->GetData(TYPE_NORTHREND_BEASTS) == FAIL)
+	  me->DespawnOrUnsummon();
+
+	if (!me->GetVehicleBase() && !m_uiTargetGUID)
+	  DoMeleeAttackIfReady();
+      }
+    private:
+      EventMap events;
+      uint32 mui_checkEnd;
     };
-
 };
 
 
@@ -851,7 +987,7 @@ public:
 
                     if (m_uiMassiveCrashTimer <= uiDiff)
                     {
-                        me->GetMotionMaster()->MoveJump(ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 20.0f, 20.0f); // 1: Middle of the room
+                        me->GetMotionMaster()->MoveJump(ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 15.0f, 20.0f); // 1: Middle of the room
                         m_uiStage = 7; //Invalid (Do nothing more than move)
                         m_uiMassiveCrashTimer = 30*IN_MILLISECONDS;
                     } else m_uiMassiveCrashTimer -= uiDiff;
@@ -891,7 +1027,7 @@ public:
                             me->GetMotionMaster()->MoveJump(2*me->GetPositionX()-m_fTrampleTargetX,
                                 2*me->GetPositionY()-m_fTrampleTargetY,
                                 me->GetPositionZ(),
-                                20.0f, 20.0f); // 2: Hop Backwards
+                                15.0f, 20.0f); // 2: Hop Backwards
                             m_uiStage = 7; //Invalid (Do nothing more than move)
                         } else m_uiStage = 6;
                     } else m_uiTrampleTimer -= uiDiff;
@@ -992,7 +1128,7 @@ public:
 	    }
 	}
     }
-    
+
     void UpdateAI(const uint32 uiDiff)
     {
       if (m_uiBomb < uiDiff)
@@ -1001,7 +1137,7 @@ public:
 	  m_uiBomb = 2000;
 	}
       else m_uiBomb -= uiDiff;
-      
+
       if (!me->HasAura(SPELL_FIRE_BOMB_DOT))
 	me->DespawnOrUnsummon();
     }

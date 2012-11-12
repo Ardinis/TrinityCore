@@ -27,6 +27,7 @@
 enum HunterSpells
 {
     HUNTER_SPELL_READINESS                       = 23989,
+    DRAENEI_SPELL_GIFT_OF_THE_NAARU              = 59543,
     HUNTER_SPELL_BESTIAL_WRATH                   = 19574,
     HUNTER_PET_SPELL_LAST_STAND_TRIGGERED        = 53479,
     HUNTER_PET_HEART_OF_THE_PHOENIX              = 55709,
@@ -58,7 +59,7 @@ class spell_hun_aspect_of_the_beast : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET))
                     return false;
                 return true;
             }
@@ -231,7 +232,7 @@ class spell_hun_invigoration : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_INVIGORATION_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_SPELL_INVIGORATION_TRIGGERED))
                     return false;
                 return true;
             }
@@ -267,7 +268,7 @@ class spell_hun_last_stand_pet : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_LAST_STAND_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_LAST_STAND_TRIGGERED))
                     return false;
                 return true;
             }
@@ -303,10 +304,22 @@ class spell_hun_masters_call : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellEntry)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_MASTERS_CALL_TRIGGERED) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_0].CalcValue()) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_1].CalcValue()))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_SPELL_MASTERS_CALL_TRIGGERED) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_0].CalcValue()) || !sSpellMgr->GetSpellInfo(spellEntry->Effects[EFFECT_1].CalcValue()))
                     return false;
                 return true;
             }
+
+	  void HandleDummy(SpellEffIndex /*effIndex*/)
+	  {
+	    if (Unit* ally = GetHitUnit())
+	      if (Player* caster = GetCaster()->ToPlayer())
+		if (Pet* target = caster->GetPet())
+		{
+		  TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
+		  target->CastSpell(ally, GetEffectValue(), castMask);
+		  target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
+		}
+	  }
 
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
@@ -314,21 +327,22 @@ class spell_hun_masters_call : public SpellScriptLoader
                 {
                     // Cannot be processed while pet is dead
                     TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
-                    target->CastSpell(target, GetEffectValue(), castMask);
+		    //                    target->CastSpell(target, GetEffectValue(), castMask);
                     target->CastSpell(target, HUNTER_SPELL_MASTERS_CALL_TRIGGERED, castMask);
                     // there is a possibility that this effect should access effect 0 (dummy) target, but i dubt that
                     // it's more likely that on on retail it's possible to call target selector based on dbc values
                     // anyways, we're using GetTargetUnit() here and it's ok
-                    if (Unit* ally = GetTargetUnit())
-                    {
-                        target->CastSpell(ally, GetEffectValue(), castMask);
-                        target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
-                    }
+		    //  if (Unit* ally = GetTargetUnit())
+		    //                    {
+		    //  target->CastSpell(ally, GetEffectValue(), castMask);
+		    //   target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
+		    // }
                 }
             }
 
             void Register()
             {
+	      OnEffectHitTarget += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
                 OnEffectHitTarget += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
@@ -355,6 +369,8 @@ class spell_hun_readiness : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
+	      if (!sSpellMgr)
+		return;
                 Player* caster = GetCaster()->ToPlayer();
                 // immediately finishes the cooldown on your other Hunter abilities except Bestial Wrath
                 const SpellCooldowns& cm = caster->ToPlayer()->GetSpellCooldownMap();
@@ -367,6 +383,7 @@ class spell_hun_readiness : public SpellScriptLoader
                         spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
                         spellInfo->Id != HUNTER_SPELL_READINESS &&
                         spellInfo->Id != HUNTER_SPELL_BESTIAL_WRATH &&
+			spellInfo->Id != DRAENEI_SPELL_GIFT_OF_THE_NAARU &&
                         spellInfo->GetRecoveryTime() > 0)
                         caster->RemoveSpellCooldown((itr++)->first, true);
                     else
@@ -441,7 +458,7 @@ class spell_hun_sniper_training : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_R1) || !sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_BUFF_R1))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_R1) || !sSpellMgr->GetSpellInfo(SPELL_SNIPER_TRAINING_BUFF_R1))
                     return false;
                 return true;
             }
@@ -449,6 +466,8 @@ class spell_hun_sniper_training : public SpellScriptLoader
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
+		if (!sSpellMgr)
+		  return;
                 if (aurEff->GetAmount() <= 0)
                 {
                     Unit* caster = GetCaster();
@@ -506,7 +525,7 @@ class spell_hun_pet_heart_of_the_phoenix : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED) || !sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_TRIGGERED) || !sSpellMgr->GetSpellInfo(HUNTER_PET_HEART_OF_THE_PHOENIX_DEBUFF))
                     return false;
                 return true;
             }
@@ -553,7 +572,7 @@ class spell_hun_pet_carrion_feeder : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED))
+                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(HUNTER_PET_SPELL_CARRION_FEEDER_TRIGGERED))
                     return false;
                 return true;
             }
@@ -606,7 +625,7 @@ class spell_hun_misdirection : public SpellScriptLoader
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (Unit* caster = GetCaster())
-                    if (GetDuration())
+		  if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
                         caster->SetReducedThreatPercent(0, 0);
             }
 

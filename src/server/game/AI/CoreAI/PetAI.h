@@ -32,7 +32,6 @@ class PetAI : public CreatureAI
         explicit PetAI(Creature* c);
 
         void EnterEvadeMode();
-        void JustDied(Unit* /*who*/) { _stopAttack(); }
 
         void UpdateAI(const uint32);
         static int Permissible(const Creature*);
@@ -40,6 +39,7 @@ class PetAI : public CreatureAI
         void KilledUnit(Unit* /*victim*/);
         void AttackStart(Unit* target);
         void MovementInform(uint32 moveType, uint32 data);
+	void ReceiveEmote(Player* player, uint32 textEmote);
 
     private:
         bool _isVisible(Unit*) const;
@@ -58,5 +58,5 @@ class PetAI : public CreatureAI
         void DoAttack(Unit* target, bool chase);
         bool CanAttack(Unit* target);
 };
-#endif
 
+#endif

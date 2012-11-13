@@ -9051,6 +9051,22 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 52914:
         case 52915:
         case 52910:
+	{
+	  target = triggeredByAura->GetBase()->GetCaster();
+	  if (!target)
+	    return false;
+
+	  if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
+	    return false;
+
+	  //	  if (target->Get
+
+          CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
+
+	  if (cooldown && GetTypeId() == TYPEID_PLAYER)
+	    ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
+	  return true;
+	}
         // Honor Among Thieves
         case 52916:
         {

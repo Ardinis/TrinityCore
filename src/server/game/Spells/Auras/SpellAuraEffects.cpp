@@ -4808,11 +4808,13 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                 case 52916: // Honor Among Thieves
                     if (target->GetTypeId() == TYPEID_PLAYER)
                         if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
-			  if (spellTarget && spellTarget->ToPlayer() && spellTarget->isInCombat())
+			  if (spellTarget && spellTarget->ToPlayer() /*&& spellTarget->isInCombat()*/)
 			    if (spellTarget->ToPlayer()->HasSpellCooldown(51699) == 0)
 			    {
 			      if (caster)
+			      {
 				caster->CastSpell(spellTarget, 51699, true);
+			      }
 			      spellTarget->ToPlayer()->AddSpellCooldown(51699, 0, uint32(time(NULL) + 1));
 			    }
                    break;

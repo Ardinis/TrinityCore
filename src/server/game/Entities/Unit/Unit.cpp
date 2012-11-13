@@ -9060,7 +9060,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
 	    if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
                 return false;
-	    std::cout << "cast spell" << std::endl;
+
 	  CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
             if (cooldown && GetTypeId() == TYPEID_PLAYER)

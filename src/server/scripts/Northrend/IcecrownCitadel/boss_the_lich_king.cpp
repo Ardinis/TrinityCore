@@ -314,6 +314,7 @@ Position const OutroPosition1     = {493.6286f, -2124.569f, 840.8569f, 0.0f};
 Position const OutroFlying        = {508.9897f, -2124.561f, 845.3565f, 0.0f};
 Position const TerenasSpawn       = {495.5542f, -2517.012f, 1050.000f, 4.6993f};
 Position const TerenasSpawnHeroic = {495.7080f, -2523.760f, 1050.000f, 0.0f};
+Position const TerenasSpawnHeroicZ = {495.7080f, -2523.760f, 1075.000f, 0.0f};
 Position const SpiritWardenSpawn  = {495.3406f, -2529.983f, 1050.000f, 1.5592f};
 
 enum MovePoints
@@ -505,6 +506,7 @@ class boss_the_lich_king : public CreatureScript
                 _vileSpiritExplosions = 0;
                 SetEquipmentSlots(true);
 		mui_dead = 30000;
+		mui_sumVile = 1000;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -736,7 +738,8 @@ class boss_the_lich_king : public CreatureScript
                         summons.Summon(summon);
                         if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
                         {
-                            TeleportSpirit(summon);
+			  summon->DespawnOrUnsummon();
+			  //                            TeleportSpirit(summon);
                             return;
                         }
 
@@ -869,6 +872,16 @@ class boss_the_lich_king : public CreatureScript
                         return;
 
                 events.Update(diff);
+
+		if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
+		{
+		  if (mui_sumVile <= diff)
+		  {
+		    SummonAnotherSpirit();
+		    mui_sumVile = 3000;
+		  }
+		  else mui_sumVile -= diff;
+		}
 
                 // during Remorseless Winter phases The Lich King is channeling a spell, but we must continue casting other spells
                 if (me->HasUnitState(UNIT_STATE_CASTING) && !(events.GetPhaseMask() & PHASE_MASK_NO_CAST_CHECK))
@@ -1162,6 +1175,19 @@ class boss_the_lich_king : public CreatureScript
                 summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(1000));
             }
 
+
+	  void SummonAnotherSpirit()
+	  {
+	    //37799
+	    if (TempSummon* summon = me->GetMap()->SummonCreature(NPC_WICKED_SPIRIT, TerenasSpawnHeroicZ, NULL, 50000))
+	    {
+	      summon->SetReactState(REACT_PASSIVE);
+	      summon->SetSpeed(MOVE_FLIGHT, 0.5f);
+	      summon->m_Events.KillAllEvents(true);
+	      summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(1000));
+	    }
+	  }
+
             void SendMusicToPlayers(uint32 musicId) const
             {
                 WorldPacket data(SMSG_PLAY_MUSIC, 4);
@@ -1201,6 +1227,7 @@ class boss_the_lich_king : public CreatureScript
             uint32 _necroticPlagueStack;
             uint32 _vileSpiritExplosions;
 	  uint32 mui_dead;
+	  uint32 mui_sumVile;
         };
 
         CreatureAI* GetAI(Creature* creature) const

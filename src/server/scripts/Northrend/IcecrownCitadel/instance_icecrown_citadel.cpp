@@ -1154,6 +1154,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (player && AccountMgr::IsGMAccount(player->GetSession()->GetSecurity()))
                     return true;
 
+		return true;
+
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1192,6 +1194,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckPlagueworks(uint32 bossId) const
             {
+	      return true;
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1211,6 +1214,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckCrimsonHalls(uint32 bossId) const
             {
+	      return true;
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1230,6 +1234,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckFrostwingHalls(uint32 bossId) const
             {
+	      return true;
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1249,6 +1254,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckLowerSpire(uint32 bossId) const
             {
+	      return true;
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1284,6 +1290,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckHeroicAchievement(uint32 mode)
             {
+	      return true;
                 Map::PlayerList const &players = instance->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
@@ -1299,7 +1306,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
 	  void CheckLichKingAvailability()
 	  {
-	    if (GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && GetBossState(DATA_SINDRAGOSA) == DONE)
+	    //	    if (GetBossState(DATA_PROFESSOR_PUTRICIDE) == DONE && GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == DONE && GetBossState(DATA_SINDRAGOSA) == DONE)
 	    {
 	      if (GameObject* teleporter = instance->GetGameObject(TheLichKingTeleportGUID))
 	      {

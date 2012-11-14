@@ -9060,8 +9060,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 	    return false;
 
 	  //	  if (target->Get
-
-          CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
+	  if (target->isAlive())
+	    target->AddAura(trigger_spell_id, target);
+	  // CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
 	  if (cooldown && GetTypeId() == TYPEID_PLAYER)
 	    ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
@@ -13090,7 +13091,7 @@ bool Unit::IsValidAttackTarget(Unit const* target) const
 }
 
 // function based on function Unit::CanAttack from 13850 client
-bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell) const
+bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, WorldObject const* obj) const
 {
     ASSERT(target);
 

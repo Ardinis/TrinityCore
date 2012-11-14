@@ -1580,12 +1580,16 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, Unit const* target, b
 
     // check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
     if (implicit && AttributesEx6 & SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED && !target->CanFreeMove())
+    {
+      std::cout << "here wtf" << std::endl;
        return SPELL_FAILED_BAD_TARGETS;
-
+    }
     // check visibility - ignore stealth for implicit (area) targets
     if (!(AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE) && !caster->canSeeOrDetect(target, implicit))
+    {
+      std::cout << "here : " << this->Id  << std::endl;
         return SPELL_FAILED_BAD_TARGETS;
-
+    }
     // checked in Unit::IsValidAttack/AssistTarget, shouldn't be checked for ENTRY targets
     //if (!(AttributesEx6 & SPELL_ATTR6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
     //    return SPELL_FAILED_BAD_TARGETS;

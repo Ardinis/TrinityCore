@@ -23641,8 +23641,8 @@ void Player::SetViewpoint(WorldObject* target, bool apply)
  //remove Viewpoint if already have
  if (isSpectator() && spectateFrom)
  {
- SetViewpoint(spectateFrom, false);
- spectateFrom = NULL;
+   SetViewpoint(spectateFrom, false);
+   spectateFrom = NULL;
  }
 
         sLog->outDebug(LOG_FILTER_MAPS, "Player::CreateViewpoint: Player %s create seer %u (TypeId: %u).", GetName(), target->GetEntry(), target->GetTypeId());

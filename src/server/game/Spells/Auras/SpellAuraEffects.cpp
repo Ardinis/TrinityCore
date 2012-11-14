@@ -6349,6 +6349,8 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 		  }
 		resist -= damage;
 	      }
+	    if (target->HasAura(48659))
+	      damage = int32(float(damage) / 2);
 	  }
       }
 

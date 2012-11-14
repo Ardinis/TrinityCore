@@ -29,6 +29,8 @@ void AddSC_example_commandscript();
 void AddSC_telenpc();
 void AddSC_player_event();
 void AddSC_npc_transmo();
+// Arena Spectator
+void AddSC_arena_spectator_script();
 
 // spells
 void AddSC_pet_spell_scripts();
@@ -1276,6 +1278,7 @@ void AddCustomScripts()
   AddSC_telenpc();
   AddSC_player_event();
   AddSC_npc_transmo();
+  AddSC_arena_spectator_script();
     /* This is where custom scripts should be added. */
 
 #endif

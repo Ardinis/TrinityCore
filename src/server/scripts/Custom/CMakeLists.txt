@@ -13,6 +13,7 @@ set(scripts_STAT_SRCS
   Custom/telenpc.cpp
   Custom/player_event.cpp
   Custom/npc_transmo.cpp
+  Custom/arena_spectator.cpp
 )
 
 message("  -> Prepared: Custom")

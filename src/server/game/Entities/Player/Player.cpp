@@ -2957,93 +2957,92 @@ void Player::SetInWater(bool apply)
 
 void Player::SetSpectate(bool on)
 {
- if (on)
- {
- SetSpeed(MOVE_RUN, 2.5);
- spectatorFlag = true;
+  if (on)
+  {
+    SetSpeed(MOVE_RUN, 2.5);
+    spectatorFlag = true;
 
- m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
- setFaction(35);
+    m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
+    setFaction(35);
 
- if (Pet* pet = GetPet())
- {
- RemovePet(pet, PET_SAVE_AS_CURRENT);
- }
- UnsummonPetTemporaryIfAny();
+    if (Pet* pet = GetPet())
+    {
+      RemovePet(pet, PET_SAVE_AS_CURRENT);
+    }
+    UnsummonPetTemporaryIfAny();
 
- RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
- ResetContestedPvP();
+    RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    ResetContestedPvP();
 
- getHostileRefManager().setOnlineOfflineState(false);
- CombatStopWithPets();
+    getHostileRefManager().setOnlineOfflineState(false);
+    CombatStopWithPets();
 
- // random dispay id`s
- uint32 morphs[8] = {25900, 18718, 29348, 22235, 30414, 736, 20582, 28213};
- SetDisplayId(morphs[urand(0, 7)]);
+    // morph dispay id`s NOT RANDOM
+    SetDisplayId(2421);
 
- m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_ADMINISTRATOR);
- }
- else
- {
- uint32 newPhase = 0;
- AuraEffectList const& phases = GetAuraEffectsByType(SPELL_AURA_PHASE);
- if (!phases.empty())
- for (AuraEffectList::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
- newPhase |= (*itr)->GetMiscValue();
+    m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_ADMINISTRATOR);
+  }
+  else
+  {
+    uint32 newPhase = 0;
+    AuraEffectList const& phases = GetAuraEffectsByType(SPELL_AURA_PHASE);
+    if (!phases.empty())
+      for (AuraEffectList::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
+	newPhase |= (*itr)->GetMiscValue();
 
- if (!newPhase)
- newPhase = PHASEMASK_NORMAL;
+    if (!newPhase)
+      newPhase = PHASEMASK_NORMAL;
 
- SetPhaseMask(newPhase, false);
+    SetPhaseMask(newPhase, false);
 
- m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
- setFactionForRace(getRace());
- RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
- RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
+    m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
+    setFactionForRace(getRace());
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+    RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
 
- if (spectateFrom)
- SetViewpoint(spectateFrom, false);
+    if (spectateFrom)
+      SetViewpoint(spectateFrom, false);
 
- // restore FFA PvP Server state
- if (sWorld->IsFFAPvPRealm())
- SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    // restore FFA PvP Server state
+    if (sWorld->IsFFAPvPRealm())
+      SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 
- // restore FFA PvP area state, remove not allowed for GM mounts
- UpdateArea(m_areaUpdateId);
+    // restore FFA PvP area state, remove not allowed for GM mounts
+    UpdateArea(m_areaUpdateId);
 
- getHostileRefManager().setOnlineOfflineState(true);
- m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
- spectateCanceled = false;
- spectatorFlag = false;
- RestoreDisplayId();
- UpdateSpeed(MOVE_RUN, true);
- }
- UpdateObjectVisibility();
+    getHostileRefManager().setOnlineOfflineState(true);
+    m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
+    spectateCanceled = false;
+    spectatorFlag = false;
+    RestoreDisplayId();
+    UpdateSpeed(MOVE_RUN, true);
+  }
+  UpdateObjectVisibility();
 }
 
 bool Player::HaveSpectators()
 {
- if (isSpectator())
- return false;
+  if (isSpectator())
+    return false;
 
- if (Battleground *bg = GetBattleground())
- if (bg->isArena())
- {
- if (bg->GetStatus() != STATUS_IN_PROGRESS)
- return false;
+  if (Battleground *bg = GetBattleground())
+    if (bg->isArena())
+    {
+      if (bg->GetStatus() != STATUS_IN_PROGRESS)
+	return false;
 
- return bg->HaveSpectators();
- }
+      return bg->HaveSpectators();
+    }
 
- return false;
+  return false;
 }
 
 void Player::SendSpectatorAddonMsgToBG(SpectatorAddonMsg msg)
 {
- if (!HaveSpectators())
- return;
+  if (!HaveSpectators())
+    return;
 
- GetBattleground()->SendSpectateAddonsMsg(msg);
+  GetBattleground()->SendSpectateAddonsMsg(msg);
 }
 
 void Player::SetGameMaster(bool on)

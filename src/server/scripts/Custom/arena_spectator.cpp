@@ -241,61 +241,61 @@ public:
 
  static bool HandleSpectateResetCommand(ChatHandler* handler, const char *args)
  {
- Player* player = handler->GetSession()->GetPlayer();
+   Player* player = handler->GetSession()->GetPlayer();
 
- if (!player)
- {
- handler->PSendSysMessage("Cant find player.");
- handler->SetSentErrorMessage(true);
- return false;
- }
+   if (!player)
+   {
+     handler->PSendSysMessage("Cant find player.");
+     handler->SetSentErrorMessage(true);
+     return false;
+   }
 
- if (!player->isSpectator())
- {
- handler->PSendSysMessage("You are not spectator!");
- handler->SetSentErrorMessage(true);
- return false;
- }
+   if (!player->isSpectator())
+   {
+     handler->PSendSysMessage("You are not spectator!");
+     handler->SetSentErrorMessage(true);
+     return false;
+   }
 
- Battleground *bGround = player->GetBattleground();
- if (!bGround)
- return false;
+   Battleground *bGround = player->GetBattleground();
+   if (!bGround)
+     return false;
 
- if (bGround->GetStatus() != STATUS_IN_PROGRESS)
- return true;
+   if (bGround->GetStatus() != STATUS_IN_PROGRESS)
+     return true;
 
- for (Battleground::BattlegroundPlayerMap::const_iterator itr = bGround->GetPlayers().begin(); itr != bGround->GetPlayers().end(); ++itr)
- if (Player* tmpPlayer = ObjectAccessor::FindPlayer(itr->first))
- {
- if (tmpPlayer->isSpectator())
- continue;
+   for (Battleground::BattlegroundPlayerMap::const_iterator itr = bGround->GetPlayers().begin(); itr != bGround->GetPlayers().end(); ++itr)
+     if (Player* tmpPlayer = ObjectAccessor::FindPlayer(itr->first))
+     {
+       if (tmpPlayer->isSpectator())
+	 continue;
 
- uint32 tmpID = bGround->GetPlayerTeam(tmpPlayer->GetGUID());
+       uint32 tmpID = bGround->GetPlayerTeam(tmpPlayer->GetGUID());
 
- // generate addon massage
- std::string pName = tmpPlayer->GetName();
- std::string tName = "";
+       // generate addon massage
+       std::string pName = tmpPlayer->GetName();
+       std::string tName = "";
 
- if (Player *target = tmpPlayer->GetSelectedPlayer())
- tName = target->GetName();
+       if (Player *target = tmpPlayer->GetSelectedPlayer())
+	 tName = target->GetName();
 
- SpectatorAddonMsg msg;
- msg.SetPlayer(pName);
- if (tName != "")
- msg.SetTarget(tName);
- msg.SetStatus(tmpPlayer->isAlive());
- msg.SetClass(tmpPlayer->getClass());
- msg.SetCurrentHP(tmpPlayer->GetHealth());
- msg.SetMaxHP(tmpPlayer->GetMaxHealth());
- Powers powerType = tmpPlayer->getPowerType();
- msg.SetMaxPower(tmpPlayer->GetMaxPower(powerType));
- msg.SetCurrentPower(tmpPlayer->GetPower(powerType));
- msg.SetPowerType(powerType);
- msg.SetTeam(tmpID);
- msg.SendPacket(player->GetGUID());
- }
+       SpectatorAddonMsg msg;
+       msg.SetPlayer(pName);
+       if (tName != "")
+	 msg.SetTarget(tName);
+       msg.SetStatus(tmpPlayer->isAlive());
+       msg.SetClass(tmpPlayer->getClass());
+       msg.SetCurrentHP(tmpPlayer->GetHealth());
+       msg.SetMaxHP(tmpPlayer->GetMaxHealth());
+       Powers powerType = tmpPlayer->getPowerType();
+       msg.SetMaxPower(tmpPlayer->GetMaxPower(powerType));
+       msg.SetCurrentPower(tmpPlayer->GetPower(powerType));
+       msg.SetPowerType(powerType);
+       msg.SetTeam(tmpID);
+       msg.SendPacket(player->GetGUID());
+     }
 
- return true;
+   return true;
  }
 
  ChatCommand* GetCommands() const

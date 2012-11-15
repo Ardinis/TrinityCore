@@ -736,12 +736,13 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_VILE_SPIRIT:
                     {
                         summons.Summon(summon);
-                        if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
-                        {
-			  summon->DespawnOrUnsummon();
-			  //                            TeleportSpirit(summon);
+			if (IsHeroic())
+			  if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
+			  {
+			    summon->DespawnOrUnsummon();
+			    //                            TeleportSpirit(summon);
                             return;
-                        }
+			  }
 
                         summon->SetReactState(REACT_PASSIVE);
                         summon->SetSpeed(MOVE_FLIGHT, 0.5f);
@@ -1179,13 +1180,14 @@ class boss_the_lich_king : public CreatureScript
 	  void SummonAnotherSpirit()
 	  {
 	    //37799
-	    if (TempSummon* summon = me->GetMap()->SummonCreature(NPC_WICKED_SPIRIT, TerenasSpawnHeroicZ, NULL, 50000))
-	    {
-	      summon->SetReactState(REACT_PASSIVE);
-	      summon->SetSpeed(MOVE_FLIGHT, 0.5f);
-	      summon->m_Events.KillAllEvents(true);
-	      summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(1000));
-	    }
+	    if (IsHeroic())
+	      if (TempSummon* summon = me->GetMap()->SummonCreature(NPC_WICKED_SPIRIT, TerenasSpawnHeroicZ, NULL, 50000))
+	      {
+		summon->SetReactState(REACT_PASSIVE);
+		summon->SetSpeed(MOVE_FLIGHT, 0.5f);
+		summon->m_Events.KillAllEvents(true);
+		summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(1000));
+	      }
 	  }
 
             void SendMusicToPlayers(uint32 musicId) const

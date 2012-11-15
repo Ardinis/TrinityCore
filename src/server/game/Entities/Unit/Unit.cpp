@@ -1038,6 +1038,23 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 
     bool blocked = false;
     // Per-school calc
+    if (crit) // hunter marked of death
+    {
+      if (HasAura(53246) && victim->HasAura(53338))
+      {
+  // 49045 arcane shoot
+  // 53209 chimera shoot
+  // 49050 visee
+  // 49052 tir assure steady shot
+  // 53351 tir mortel
+	/*	std::cout <<"RANGED" <<  GetTotalAttackPowerValue(RANGED_ATTACK) << std::endl;
+	std::cout << "BASED" << GetTotalAttackPowerValue(BASE_ATTACK) << std::endl;
+	std::cout << "OFF" << GetTotalAttackPowerValue(OFF_ATTACK) << std::endl;*/
+	if (spellInfo->Id == 49045 || spellInfo->Id == 53209 || spellInfo->Id == 49050 || spellInfo->Id == 49052 || spellInfo->Id == 53351)
+	  damage *= 1.1;
+      }
+    }
+
     switch (spellInfo->DmgClass)
     {
         // Melee and Ranged Spells
@@ -12581,7 +12598,23 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
     if (attType == RANGED_ATTACK)
     {
         APbonus += victim->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
-
+	/*	if (victim->HasAura(53338))
+	{
+	  std::cout << APbonus << std::endl;
+	  int32 APbonusMark = 500;
+	  APbonus += APbonusMark;
+	  if (HasAura(19423))
+	  {
+	    APbonus += APbonusMark * 0.30;
+	    std::cout << "HasAura(19423)" << std::endl;
+	  }
+	  if (HasAura(56879))
+	  {
+	    APbonus += APbonusMark * 0.20;
+	    std::cout << "HasAura(56879)" << std::endl;
+	  }
+	    std::cout << APbonus << std::endl;
+	    }*/
         // ..done (base at attack power and creature type)
         AuraEffectList const& mCreatureAttackPower = GetAuraEffectsByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS);
         for (AuraEffectList::const_iterator i = mCreatureAttackPower.begin(); i != mCreatureAttackPower.end(); ++i)

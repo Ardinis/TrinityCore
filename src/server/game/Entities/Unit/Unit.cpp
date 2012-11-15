@@ -1053,6 +1053,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 	if (spellInfo->Id == 49045 || spellInfo->Id == 53209 || spellInfo->Id == 49050 || spellInfo->Id == 49052 || spellInfo->Id == 53351)
 	  damage *= 1.1;
       }
+      if (spellInfo->Id != 75 && HasAura(19490))
+	damage *= 1.3;
     }
 
     switch (spellInfo->DmgClass)
@@ -3884,7 +3886,6 @@ void Unit::RemoveAurasByTypeWithVanish(AuraType auraType, uint64 casterGUID, Aur
         if (aura != except && (!casterGUID || aura->GetCasterGUID() == casterGUID)
             && ((negative && !aurApp->IsPositive()) || (positive && aurApp->IsPositive())))
         {
-	  std::cout << "AURA : " << aura->GetId() << std::endl;
 	  uint32 removedAuras = m_removedAurasCount;
 	  RemoveAura(aurApp);
 	  if (m_removedAurasCount > removedAuras + 1)

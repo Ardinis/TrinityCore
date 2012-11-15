@@ -4242,7 +4242,7 @@ void AuraEffect::HandleModCastingSpeed(AuraApplication const* aurApp, uint8 mode
 
     target->ApplyCastTimePercentMod((float)GetAmount(), apply);
 }
-
+//ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
 void AuraEffect::HandleModMeleeRangedSpeedPct(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))

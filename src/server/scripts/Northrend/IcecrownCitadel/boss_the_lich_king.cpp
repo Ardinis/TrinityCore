@@ -506,7 +506,7 @@ class boss_the_lich_king : public CreatureScript
                 _vileSpiritExplosions = 0;
                 SetEquipmentSlots(true);
 		mui_dead = 30000;
-		mui_sumVile = 1000;
+		mui_sumVile = 10000;
             }
 
             void JustDied(Unit* /*killer*/)

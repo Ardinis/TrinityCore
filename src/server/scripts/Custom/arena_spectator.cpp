@@ -65,14 +65,14 @@ public:
 
     if (player->GetPet())
     {
-      handler->PSendSysMessage("You must hide your pet.");
+      handler->PSendSysMessage("Vous devez renvoyer votre familier.");
       handler->SetSentErrorMessage(true);
       return false;
     }
 
     if (player->GetMap()->IsBattlegroundOrArena() && !player->isSpectator())
     {
-      handler->PSendSysMessage("You are already on battleground or arena.");
+      handler->PSendSysMessage("Vous etes deja en champs de bataille ou arene.");
       handler->SetSentErrorMessage(true);
       return false;
     }
@@ -80,14 +80,14 @@ public:
     Map* cMap = target->GetMap();
     if (!cMap->IsBattleArena())
     {
-      handler->PSendSysMessage("Player didnt found in arena.");
+      handler->PSendSysMessage("Le joueur choisit n'est pas en arene.");
       handler->SetSentErrorMessage(true);
       return false;
     }
 
     if (player->GetMap()->IsBattleground())
     {
-      handler->PSendSysMessage("Cant do that while you are on battleground.");
+      handler->PSendSysMessage("Vous ne pouvez faire cela maintenant.");
       handler->SetSentErrorMessage(true);
       return false;
     }
@@ -101,7 +101,7 @@ public:
 
     if (target->isSpectator())
     {
-      handler->PSendSysMessage("Can`t do that. Your target is spectator.");
+      handler->PSendSysMessage("Votre cible est en train de regarder un match.");
       handler->SetSentErrorMessage(true);
       return false;
     }
@@ -148,8 +148,8 @@ public:
 	ArenaTeam *secondTeam = sArenaTeamMgr->GetArenaTeamById(secondTeamID);
 	if (firstTeam && secondTeam)
 	{
-	  handler->PSendSysMessage("You entered to rated arena.");
-	  handler->PSendSysMessage("Teams:");
+	  handler->PSendSysMessage("Vous venez d'etrer dans une arene cote.");
+	  handler->PSendSysMessage("Equipes : ");
 	  handler->PSendSysMessage("%s - %s", firstTeam->GetName().c_str(), secondTeam->GetName().c_str());
 	  handler->PSendSysMessage("%u(%u) - %u(%u)", firstTeam->GetRating(), firstTeam->GetAverageMMR(firstTeamMember->GetGroup()),
 				   secondTeam->GetRating(), secondTeam->GetAverageMMR(secondTeamMember->GetGroup()));
@@ -175,7 +175,7 @@ public:
 
     if (!player->isSpectator())
     {
-      handler->PSendSysMessage("You are not spectator.");
+      handler->PSendSysMessage("Vous n'etes pas spectateur.");
       handler->SetSentErrorMessage(true);
       return false;
     }
@@ -199,28 +199,28 @@ public:
 
     if (!target)
     {
-      handler->PSendSysMessage("Cant find player.");
+      handler->PSendSysMessage("Impossible de trouver le joueur.");
       handler->SetSentErrorMessage(true);
       return false;
     }
 
     if (!player->isSpectator())
     {
-      handler->PSendSysMessage("You are not spectator, spectate someone first.");
+      handler->PSendSysMessage("Vous n'etes pas spectateur d'arene.");
       handler->SetSentErrorMessage(true);
       return false;
     }
 
     if (target->isSpectator() && target != player)
     {
-      handler->PSendSysMessage("Can`t do that. Your target is spectator.");
+      handler->PSendSysMessage("Votre cible est spectateur.");
       handler->SetSentErrorMessage(true);
       return false;
     }
 
     if (player->GetMap() != target->GetMap())
     {
-      handler->PSendSysMessage("Cant do that. Different arenas?");
+      handler->PSendSysMessage("Impossible.");
       handler->SetSentErrorMessage(true);
       return false;
     }
@@ -229,7 +229,7 @@ public:
     // if exists than battle didn`t begin
     if (target->HasAura(32728) || target->HasAura(32727))
     {
-      handler->PSendSysMessage("Cant do that. Arena didn`t started.");
+      handler->PSendSysMessage("Attendez le debut de l'arene.");
       handler->SetSentErrorMessage(true);
       return false;
     }
@@ -245,14 +245,14 @@ public:
 
    if (!player)
    {
-     handler->PSendSysMessage("Cant find player.");
+     handler->PSendSysMessage("Impossible de trouver le joueur.");
      handler->SetSentErrorMessage(true);
      return false;
    }
 
    if (!player->isSpectator())
    {
-     handler->PSendSysMessage("You are not spectator!");
+     handler->PSendSysMessage("Vous n'etes pas spectateur !");
      handler->SetSentErrorMessage(true);
      return false;
    }
@@ -460,9 +460,9 @@ class npc_arena_spectator : public CreatureScript
       player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "Precedent", GOSSIP_SENDER_MAIN, 0);
     else
     {
-      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir les matches 2c2", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_LIST_GAMES);
-      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir les matches 3c3", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_LIST_GAMES+1);
-      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir les matches 5c5", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_LIST_GAMES+2);
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir les matchs 2c2", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_LIST_GAMES);
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir les matchs 3c3", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_LIST_GAMES+1);
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Voir les matchs 5c5", GOSSIP_SENDER_MAIN, NPC_SPECTATOR_ACTION_LIST_GAMES+2);
       return ;
     }
   }

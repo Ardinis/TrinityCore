@@ -446,7 +446,6 @@ class npc_arena_spectator : public CreatureScript
 	  if (!arena->GetPlayersSize())
 	    continue;
 
-	  std::cout << arena->GetPlayersSize() << std::endl;
 	  if (arena->GetPlayersSize() != teamSize)
 	    continue;
 

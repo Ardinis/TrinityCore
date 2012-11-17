@@ -234,6 +234,13 @@ public:
       return false;
     }
 
+    if (target->getClass() == CLASS_ROGUE || target->getClass() == CLASS_DRUID)
+    {
+      handler->PSendSysMessage("Mode suivit temporairement desactive pour cette classe.");
+      handler->SetSentErrorMessage(true);
+      return false;
+    }
+
     (target == player && player->getSpectateFrom()) ? player->SetViewpoint(player->getSpectateFrom(), false) :
       player->SetViewpoint(target, true);
     return true;

@@ -22656,25 +22656,25 @@ void Player::SendAurasForTarget(Unit* target)
  if (Player *stream = target->ToPlayer())
  if (stream->HaveSpectators() && isSpectator())
  {
- for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
- {
- AuraApplication * auraApp = itr->second;
- auraApp->BuildUpdatePacket(data, false);
- if (Aura* aura = auraApp->GetBase())
- {
- SpectatorAddonMsg msg;
- uint64 casterID = 0;
- if (aura->GetCaster())
- casterID = (aura->GetCaster()->ToPlayer()) ? aura->GetCaster()->GetGUID() : 0;
- msg.SetPlayer(stream->GetName());
- msg.CreateAura(casterID, aura->GetSpellInfo()->Id,
- aura->GetSpellInfo()->IsPositive(), aura->GetSpellInfo()->Dispel,
- aura->GetDuration(), aura->GetMaxDuration(),
- aura->GetStackAmount(), false);
- msg.SendPacket(GetGUID());
- }
+   for (Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
+   {
+     AuraApplication * auraApp = itr->second;
+     auraApp->BuildUpdatePacket(data, false);
+     if (Aura* aura = auraApp->GetBase())
+     {
+       SpectatorAddonMsg msg;
+       uint64 casterID = 0;
+       if (aura->GetCaster())
+	 casterID = (aura->GetCaster()->ToPlayer()) ? aura->GetCaster()->GetGUID() : 0;
+       msg.SetPlayer(stream->GetName());
+       msg.CreateAura(casterID, aura->GetSpellInfo()->Id,
+		      aura->GetSpellInfo()->IsPositive(), aura->GetSpellInfo()->Dispel,
+		      aura->GetDuration(), aura->GetMaxDuration(),
+		      aura->GetStackAmount(), false);
+       msg.SendPacket(GetGUID());
+     }
 
- }
+   }
 
  }
 
@@ -23635,62 +23635,62 @@ void Player::StopCastingBindSight()
 
 void Player::SetViewpoint(WorldObject* target, bool apply)
 {
-    if (apply)
+  if (apply)
+  {
+    if (target->ToPlayer() == this)
+      return;
+
+    //remove Viewpoint if already have
+    if (isSpectator() && spectateFrom)
     {
- if (target->ToPlayer() == this)
- return;
-
- //remove Viewpoint if already have
- if (isSpectator() && spectateFrom)
- {
-   SetViewpoint(spectateFrom, false);
-   spectateFrom = NULL;
- }
-
-        sLog->outDebug(LOG_FILTER_MAPS, "Player::CreateViewpoint: Player %s create seer %u (TypeId: %u).", GetName(), target->GetEntry(), target->GetTypeId());
-
-        if (!AddUInt64Value(PLAYER_FARSIGHT, target->GetGUID()))
-        {
-            sLog->outCrash("Player::CreateViewpoint: Player %s cannot add new viewpoint!", GetName());
-            return;
-        }
-
-        // farsight dynobj or puppet may be very far away
-        UpdateVisibilityOf(target);
-
-        if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
- {
- if (isSpectator())
- spectateFrom = (Unit*)target;
-
-            ((Unit*)target)->AddPlayerToVision(this);
- }
+      SetViewpoint(spectateFrom, false);
+      spectateFrom = NULL;
     }
-    else
+
+    sLog->outDebug(LOG_FILTER_MAPS, "Player::CreateViewpoint: Player %s create seer %u (TypeId: %u).", GetName(), target->GetEntry(), target->GetTypeId());
+
+    if (!AddUInt64Value(PLAYER_FARSIGHT, target->GetGUID()))
     {
- if (isSpectator() && !spectateFrom)
- return;
-
-        sLog->outDebug(LOG_FILTER_MAPS, "Player::CreateViewpoint: Player %s remove seer", GetName());
-
-        if (!RemoveUInt64Value(PLAYER_FARSIGHT, target->GetGUID()))
-        {
-            sLog->outCrash("Player::CreateViewpoint: Player %s cannot remove current viewpoint!", GetName());
-            return;
-        }
-
-        if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
-            ((Unit*)target)->RemovePlayerFromVision(this);
-
- if (isSpectator())
- spectateFrom = NULL;
-
-        //must immediately set seer back otherwise may crash
-        m_seer = this;
-
-        //WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
-        //GetSession()->SendPacket(&data);
+      sLog->outCrash("Player::CreateViewpoint: Player %s cannot add new viewpoint!", GetName());
+      return;
     }
+
+    // farsight dynobj or puppet may be very far away
+    UpdateVisibilityOf(target);
+
+    if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
+    {
+      if (isSpectator())
+	spectateFrom = (Unit*)target;
+
+      ((Unit*)target)->AddPlayerToVision(this);
+    }
+  }
+  else
+  {
+    if (isSpectator() && !spectateFrom)
+      return;
+
+    sLog->outDebug(LOG_FILTER_MAPS, "Player::CreateViewpoint: Player %s remove seer", GetName());
+
+    if (!RemoveUInt64Value(PLAYER_FARSIGHT, target->GetGUID()))
+    {
+      sLog->outCrash("Player::CreateViewpoint: Player %s cannot remove current viewpoint!", GetName());
+      return;
+    }
+
+    if (target->isType(TYPEMASK_UNIT) && !GetVehicle())
+      ((Unit*)target)->RemovePlayerFromVision(this);
+
+    if (isSpectator())
+      spectateFrom = NULL;
+
+    //must immediately set seer back otherwise may crash
+    m_seer = this;
+
+    //WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
+    //GetSession()->SendPacket(&data);
+  }
 }
 
 WorldObject* Player::GetViewpoint() const

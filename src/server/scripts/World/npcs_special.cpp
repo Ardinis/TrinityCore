@@ -48,6 +48,7 @@ EndContentData */
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "World.h"
+#include "Vehicle.h"
 
 /*########
 # npc_air_force_bots
@@ -5804,6 +5805,152 @@ public:
   };
 };
 
+/*################################
+# Pilgrim's Bounty - Wild Turkey
+#################################*/
+
+enum TheTurkinator
+{
+  SPELL_KILL_COUNTER_VISUAL       = 62015,
+  SPELL_KILL_COUNTER_VISUAL_MAX   = 62021,
+};
+
+
+
+enum WildTurkey
+{
+  SPELL_TURKEY_TRACKER = 62014,
+};
+
+class npc_wild_turkey : public CreatureScript
+{
+public:
+  npc_wild_turkey() : CreatureScript("npc_wild_turkey") { }
+
+  struct npc_wild_turkeyAI : public ScriptedAI
+  {
+    npc_wild_turkeyAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void JustDied(Unit* killer)
+    {
+      if (!killer)
+	return;
+
+      if (Player* player = killer->ToPlayer())
+	player->CastSpell(player, SPELL_TURKEY_TRACKER, false);
+    }
+  };
+
+  CreatureAI* GetAI(Creature* creature) const
+  {
+    return new npc_wild_turkeyAI(creature);
+  }
+};
+
+/*######################################
+# Pilgrim's Bounty - spell_gen_feast_on
+######################################*/
+
+class spell_gen_feast_on : public SpellScriptLoader
+{
+public:
+  spell_gen_feast_on() : SpellScriptLoader("spell_gen_feast_on") { }
+
+  class spell_gen_feast_on_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_gen_feast_on_SpellScript);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+      int32 basePoints0 = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
+
+      if (Unit* caster = GetCaster())
+	if (caster->IsVehicle())
+	  if (Unit* passenger = caster->GetVehicleKit()->GetPassenger(0))
+	    if (Player* player = passenger->ToPlayer())
+	      player->CastSpell(player, basePoints0, true);
+    }
+
+    void Register()
+    {
+      OnEffectHitTarget += SpellEffectFn(spell_gen_feast_on_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_gen_feast_on_SpellScript();
+  }
+};
+
+
+/*##################################
+# Pilgrim's bounty - The Turkinator
+###################################*/
+
+class spell_gen_turkey_tracker : public SpellScriptLoader
+{
+public:
+  spell_gen_turkey_tracker() : SpellScriptLoader("spell_gen_turkey_tracker") {}
+
+  class spell_gen_turkey_tracker_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_gen_turkey_tracker_SpellScript);
+
+    bool Validate(SpellInfo const* /*spellEntry*/)
+    {
+      if (!sSpellMgr->GetSpellInfo(SPELL_KILL_COUNTER_VISUAL))
+	return false;
+      if (!sSpellMgr->GetSpellInfo(SPELL_KILL_COUNTER_VISUAL_MAX))
+	return false;
+      return true;
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+      Player* target = GetHitPlayer();
+      if (!target)
+	return;
+
+      if (Aura* aura = GetCaster()->ToPlayer()->GetAura(GetSpellInfo()->Id))
+      {
+	switch (aura->GetStackAmount())
+	{
+	case 10:
+	  target->MonsterTextEmote("Turkey Hunter!", 0, true);
+	  GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+	  break;
+	case 20:
+	  target->MonsterTextEmote("Turkey Domination!", 0, true);
+	  GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+	  break;
+	case 30:
+	  target->MonsterTextEmote("Turkey Slaughter!", 0, true);
+	  GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+	  break;
+	case 40:
+	  target->MonsterTextEmote("TURKEY TRIUMPH!", 0, true);
+	  GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+	  GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL_MAX, true, NULL); // Achievement Credit
+	  break;
+	default:
+	  break;
+	}
+      }
+    }
+
+    void Register()
+    {
+      OnEffectHitTarget += SpellEffectFn(spell_gen_turkey_tracker_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_gen_turkey_tracker_SpellScript();
+  }
+};
+
 void AddSC_npcs_special()
 {
 new npc_air_force_bots;
@@ -5865,7 +6012,12 @@ new npc_air_force_bots;
     new npc_anchorite_barada();
     new npc_darkness_released();
     new npc_foul_purge();
-new npc_mana_bomb();
+    new npc_mana_bomb();
 
     new npc_raise_ally();
+
+
+    new npc_wild_turkey();
+    new spell_gen_feast_on();
+    new spell_gen_turkey_tracker();
 }

@@ -164,7 +164,8 @@ public:
     player->TeleportTo(target->GetMapId(), x, y, z, player->GetAngle(target), TELE_TO_GM_MODE);
     player->SetPhaseMask(target->GetPhaseMask(), true);
     player->SetSpectate(true);
-    target->GetBattleground()->AddSpectator(player->GetGUID());
+    if (target->GetBattleground())
+      target->GetBattleground()->AddSpectator(player->GetGUID());
 
     return true;
   }
@@ -180,7 +181,8 @@ public:
       return false;
     }
 
-    player->GetBattleground()->RemoveSpectator(player->GetGUID());
+    if (player->GetBattleground())
+      player->GetBattleground()->RemoveSpectator(player->GetGUID());
     player->CancelSpectate();
     player->TeleportToBGEntryPoint();
 

@@ -120,10 +120,10 @@ class boss_lord_marrowgar : public CreatureScript
 	  {
 	    if (spell->Id == 69055 || spell->Id == 70814)
 	    {
-	      for (std::list<Unit *>::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
-		if ((*it) && (*it)->GetGUID() == who->GetGUID())
+	      for (std::list<uint64 >::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+		if ((*it) != 0 && (*it) == who->GetGUID())
 		  return ;
-	      _saberSlashPlayers.push_back(who);
+	      _saberSlashPlayers.push_back(who->GetGUID());
 	    }
 	  }
 
@@ -315,7 +315,7 @@ class boss_lord_marrowgar : public CreatureScript
 	  bool _bstorm;
 
 	public:
-	  std::list<Unit *> _saberSlashPlayers;
+	  std::list<uint64 > _saberSlashPlayers;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -585,7 +585,7 @@ class bone_spike_graveyard_TargetCheck : public std::unary_function<Unit*, bool>
 {
 
 public:
-  bone_spike_graveyard_TargetCheck(std::list<Unit *> saberSlashPlayers)
+  bone_spike_graveyard_TargetCheck(std::list<uint64 > saberSlashPlayers)
     : _saberSlashPlayers(saberSlashPlayers)
   {}
 
@@ -595,16 +595,16 @@ public:
       return false;
     if (unit && (!unit->isAlive() || unit->GetTypeId() != TYPEID_PLAYER || unit->HasAura(SPELL_IMPALED)))
 	return false;
-    for (std::list<Unit *>::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+    for (std::list<uint64 >::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
     {
-      if ((*it) && (*it)->GetGUID() == unit->GetGUID())
+      if ((*it) != 0 && (*it) == unit->GetGUID())
 	return false;
     }
     return true;
   }
 
 private:
-      std::list<Unit *> _saberSlashPlayers;
+      std::list<uint64 > _saberSlashPlayers;
 };
 
 class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader

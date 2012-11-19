@@ -2885,7 +2885,7 @@ void ObjectMgr::LoadPetLevelInfo()
     uint32 oldMSTime = getMSTime();
 
     //                                                 0               1      2   3     4    5    6    7     8    9
-    QueryResult result  = WorldDatabase.Query("SELECT creature_entry, level, hp, mana, str, agi, sta, inte, spi, armor FROM pet_levelstats");
+    QueryResult result  = WorldDatabase.Query("SELECT creature_entry, level, hp, mana, str, agi, sta, inte, spi, armor, mindmg, maxdmg, attackpower FROM pet_levelstats");
 
     if (!result)
     {
@@ -2936,6 +2936,9 @@ void ObjectMgr::LoadPetLevelInfo()
         pLevelInfo->health = fields[2].GetUInt16();
         pLevelInfo->mana   = fields[3].GetUInt16();
         pLevelInfo->armor  = fields[9].GetUInt16();
+        pLevelInfo->mindmg = fields[10].GetUInt16();
+        pLevelInfo->maxdmg = fields[11].GetUInt16();
+        pLevelInfo->attackpower = fields[12].GetUInt16();
 
         for (int i = 0; i < MAX_STATS; i++)
         {
@@ -2946,15 +2949,21 @@ void ObjectMgr::LoadPetLevelInfo()
     }
     while (result->NextRow());
 
+    PetLevelInfo* petBaseInfo = _petInfoStore[1];
+    uint16 maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) - 1;
+
     // Fill gaps and check integrity
     for (PetLevelInfoContainer::iterator itr = _petInfoStore.begin(); itr != _petInfoStore.end(); ++itr)
     {
+        // Don't fill data for default pet
+        if (itr->first == 1) 
+            continue;
         PetLevelInfo* pInfo = itr->second;
 
-        // fatal error if no level 1 data
-        if (!pInfo || pInfo[0].health == 0)
+        // fatal error if no level 1 or no max health data
+        if(!pInfo || pInfo[0].health == 0 || pInfo[maxLevel].health == 0 )
         {
-            sLog->outErrorDb("Creature %u does not have pet stats data for Level 1!", itr->first);
+            sLog->outErrorDb("Creature %u does not have pet stats data for Levels 1 or %u! Must be exist!", itr->first, maxLevel);
             exit(1);
         }
 
@@ -2965,6 +2974,42 @@ void ObjectMgr::LoadPetLevelInfo()
             {
                 sLog->outErrorDb("Creature %u has no data for Level %i pet stats data, using data of Level %i.", itr->first, level+1, level);
                 pInfo[level] = pInfo[level-1];
+            }
+        }
+
+        for (uint8 level = 1; level < maxLevel; ++level)
+        {
+            if(   pInfo[level].health == 0
+               || pInfo[level].mana == 0
+               || pInfo[level].armor == 0
+               || pInfo[level].mindmg == 0
+               || pInfo[level].maxdmg == 0
+               || pInfo[level].stats[STAT_STRENGTH] == 0
+               || pInfo[level].stats[STAT_STAMINA] == 0
+               || pInfo[level].stats[STAT_AGILITY] == 0
+               || pInfo[level].stats[STAT_INTELLECT] == 0
+               || pInfo[level].stats[STAT_SPIRIT] == 0
+            )
+            {
+                sLog->outErrorDb("Creature %u has no full data set for Level %i pet stats data, using approximated (from default pet progression) data",itr->first,level+1);
+
+                if(pInfo[level].health == 0)
+                    pInfo[level].health = uint16(pInfo[maxLevel].health * (petBaseInfo[level].health / petBaseInfo[maxLevel].health));
+                if(pInfo[level].mana == 0)
+                    pInfo[level].mana = uint16(pInfo[maxLevel].mana * (petBaseInfo[level].mana / petBaseInfo[maxLevel].mana));
+                if(pInfo[level].armor == 0)
+                    pInfo[level].armor = uint16(pInfo[maxLevel].armor * (petBaseInfo[level].armor / petBaseInfo[maxLevel].armor));
+                if(pInfo[level].mindmg == 0)
+                    pInfo[level].mindmg = uint16(pInfo[maxLevel].mindmg * (petBaseInfo[level].mindmg / petBaseInfo[maxLevel].mindmg));
+                if(pInfo[level].maxdmg == 0)
+                    pInfo[level].mana = uint16(pInfo[maxLevel].maxdmg * (petBaseInfo[level].maxdmg / petBaseInfo[maxLevel].maxdmg));
+                if(pInfo[level].attackpower == 0)
+                    pInfo[level].mana = uint16(pInfo[maxLevel].attackpower * (petBaseInfo[level].attackpower / petBaseInfo[maxLevel].attackpower));
+                for (int i = 0; i < MAX_STATS; i++)
+                {
+                    if(pInfo[level].stats[i] == 0)
+                        pInfo[level].stats[i] = uint16(pInfo[maxLevel].stats[i] * (petBaseInfo[level].stats[i] / petBaseInfo[maxLevel].stats[i]));
+                }
             }
         }
     }

@@ -1529,10 +1529,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     // Do we have talent Master of Ghouls?
                     if (m_caster->HasAura(52143))
                         // summon as pet
-                        bp = 52150;
+		      bp = m_spellInfo->Effects[EFFECT_2].CalcValue();
                     else
                         // or guardian
-                        bp = 46585;
+		      bp = m_spellInfo->Effects[EFFECT_1].CalcValue();
 
                     if (m_targets.HasDst())
                         targets.SetDst(*m_targets.GetDst());
@@ -3153,6 +3153,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
     }
 
     //    m_caster->GetMap()->SummonCreature(28017, pos, properties, duration);
+
 
     switch (properties->Category)
     {
@@ -7427,6 +7428,20 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
             else
                 summon->SetDisplayId(1126);
         }
+
+            // Eye of Kilrogg
+            if (summon->GetEntry() == 4277)
+            {
+                summon->CastSpell(summon, 2585, true);
+                // Glyph of Kilrogg
+                if (m_caster->HasAura(58081))
+                {
+                    uint32 v_map = GetVirtualMapForMapAndZone(m_caster->GetMapId(), m_caster->GetZoneId());
+                    MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
+                    if (mapEntry && mapEntry->addon > 0 && mapEntry->IsContinent())
+                        summon->CastSpell(summon, 58083, true);
+                }
+            }
 
         summon->AI()->EnterEvadeMode();
 

@@ -24,7 +24,7 @@
 
 TempSummon::TempSummon(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) :
 Creature(isWorldObject), m_Properties(properties), m_type(TEMPSUMMON_MANUAL_DESPAWN),
-m_timer(0), m_lifetime(0)
+m_timer(0), m_lifetime(0), m_bonusSpellDamage(0)
 {
     m_summonerGUID = owner ? owner->GetGUID() : 0;
     m_unitTypeMask |= UNIT_MASK_SUMMON;
@@ -307,7 +307,7 @@ bool Minion::IsGuardianPet() const
 }
 
 Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) : Minion(properties, owner, isWorldObject)
-, m_bonusSpellDamage(0)
+, m_meleeCrit(0), m_spellCrit(0)
 {
     memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;

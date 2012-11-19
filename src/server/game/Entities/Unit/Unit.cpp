@@ -1040,7 +1040,7 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
     // Per-school calc
     if (crit) // hunter marked of death
     {
-      if (HasAura(53246) && victim->HasAura(53338))
+      /*  if (HasAura(53246) && victim->HasAura(53338))
       {
   // 49045 arcane shoot
   // 53209 chimera shoot
@@ -1050,9 +1050,9 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 	/*	std::cout <<"RANGED" <<  GetTotalAttackPowerValue(RANGED_ATTACK) << std::endl;
 	std::cout << "BASED" << GetTotalAttackPowerValue(BASE_ATTACK) << std::endl;
 	std::cout << "OFF" << GetTotalAttackPowerValue(OFF_ATTACK) << std::endl;*/
-	if (spellInfo->Id == 49045 || spellInfo->Id == 53209 || spellInfo->Id == 49050 || spellInfo->Id == 49052 || spellInfo->Id == 53351)
+    /*	if (spellInfo->Id == 49045 || spellInfo->Id == 53209 || spellInfo->Id == 49050 || spellInfo->Id == 49052 || spellInfo->Id == 53351)
 	  damage *= 1.1;
-      }
+	  }*/
       if (spellInfo->Id != 75 && HasAura(19490))
 	damage *= 1.3;
     }
@@ -2789,6 +2789,8 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* victi
     else
     {
         crit = 5.0f;
+        if (isGuardian())
+            crit += ((Guardian*)this)->GetMeleeCrit();
         crit += GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
         crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
     }
@@ -4162,6 +4164,27 @@ void Unit::RemoveAllAurasExceptType(AuraType type)
     {
         Aura* aura = iter->second;
         if (!aura->GetSpellInfo()->HasAura(type))
+            RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveAllNonPassiveAurasExceptType(AuraType type)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (!aura->GetSpellInfo()->HasAura(type) && !aura->GetSpellInfo()->IsPassive())
+            _UnapplyAura(iter, AURA_REMOVE_BY_DEFAULT);
+        else
+            ++iter;
+    }
+
+    for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
+    {
+        Aura* aura = iter->second;
+        if (!aura->GetSpellInfo()->HasAura(type) && !aura->GetSpellInfo()->IsPassive())
             RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
         else
             ++iter;
@@ -10228,6 +10251,90 @@ void Unit::SetMinion(Minion *minion, bool apply)
     }
 }
 
+void Unit::RecalculatePetsScalingResistance(uint32 school)
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingResistance(school);
+    }
+}
+
+void Unit::RecalculatePetsScalingStats(Stats stats)
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingStats(stats);
+    }
+}
+
+void Unit::RecalculatePetsScalingHitRating()
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingHitRating();
+    }
+}
+
+void Unit::RecalculatePetsScalingCritRating()
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingCritRating();
+    }
+}
+
+void Unit::RecalculatePetsScalingAttackSpeed(WeaponAttackType att)
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingAttackSpeed(att);
+    }
+}
+
+void Unit::RecalculatePetsScalingAttackPower()
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingAttackPower();
+    }
+}
+
+void Unit::RecalculatePetsScalingDamageDone()
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)unit)->RecalculatePetScalingDamageDone();
+    }
+}
+
 void Unit::GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry)
 {
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
@@ -11052,8 +11159,8 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusForVictim(spellProto->GetSchoolMask(), victim);
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
-    if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
-        DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
+    if (isSummon() && isCharmedOwnedByPlayerOrPlayer())
+        DoneAdvertisedBenefit += ToTempSummon()->GetBonusDamage();
 
     // Check for table values
     float coeff = 0;
@@ -11068,6 +11175,9 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
 		float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
+                // Exception for Dancing Rune Weapon
+                if (HasUnitTypeMask(UNIT_MASK_GUARDIAN) && GetEntry() == 27893 && (spellProto->SchoolMask & SPELL_SCHOOL_MASK_MAGIC))
+                    APbonus = ((Guardian*)this)->GetBonusDamage();
                 DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
             }
         }
@@ -11079,6 +11189,9 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
 		float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
+                // Exception for Dancing Rune Weapon
+                if (HasUnitTypeMask(UNIT_MASK_GUARDIAN) && GetEntry() == 27893 && (spellProto->SchoolMask & SPELL_SCHOOL_MASK_MAGIC))
+                    APbonus =  ((Guardian*)this)->GetBonusDamage();
                 DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
             }
         }
@@ -14771,7 +14884,7 @@ void Unit::SetPower(Powers power, uint32 val)
 
         // Update the pet's character sheet with happiness damage bonus
         if (pet->getPetType() == HUNTER_PET && power == POWER_HAPPINESS)
-            pet->UpdateDamagePhysical(BASE_ATTACK);
+            pet->RecalculateHappinessEffect();
     }
 }
 

@@ -615,7 +615,6 @@ void Creature::RegenerateMana()
         {
             float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
             float Spirit = GetStat(STAT_SPIRIT);
-
             addvalue = uint32((Spirit / 5.0f + 17.0f) * ManaIncreaseRate);
         }
     }
@@ -650,12 +649,19 @@ void Creature::RegenerateHealth()
     if (GetCharmerOrOwnerGUID())
     {
         float HealthIncreaseRate = sWorld->getRate(RATE_HEALTH);
-        float Spirit = GetStat(STAT_SPIRIT);
+        if (isGuardian())
+        {
+            addvalue = ((Guardian*)this)->OCTRegenHPPerSpirit() * HealthIncreaseRate;
+        }
+        if (!addvalue)
+        {
+            float Spirit = GetStat(STAT_SPIRIT);
 
-        if (GetPower(POWER_MANA) > 0)
-            addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
-        else
-            addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
+            if (GetPower(POWER_MANA) > 0)
+                addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
+            else
+                addvalue = uint32(Spirit * 0.80 * HealthIncreaseRate);
+        }
     }
     else
         addvalue = maxValue/3;

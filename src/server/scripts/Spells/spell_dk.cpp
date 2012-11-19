@@ -827,6 +827,304 @@ class spell_dk_death_grip : public SpellScriptLoader
         }
 };
 
+class spell_dk_avoidance_passive : public SpellScriptLoader
+{
+    public:
+        spell_dk_avoidance_passive() : SpellScriptLoader("spell_dk_avoidance_passive") { }
+
+        class spell_dk_avoidance_passive_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_avoidance_passive_AuraScript);
+
+            bool Load()
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateAvoidanceAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                {
+                    Unit* owner = pet->GetOwner();
+                    if (!owner)
+                        return;
+
+                    // Night of the dead
+                    if (owner->HasAura(55623))
+                        amount = 90;
+                    else if (owner->HasAura(55620))
+                        amount = 45;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_avoidance_passive_AuraScript::CalculateAvoidanceAmount, EFFECT_0, SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_avoidance_passive_AuraScript();
+        }
+};
+
+class spell_dk_pet_scaling_01 : public SpellScriptLoader
+{
+    public:
+        spell_dk_pet_scaling_01() : SpellScriptLoader("spell_dk_pet_scaling_01") { }
+
+        class spell_dk_pet_scaling_01_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_pet_scaling_01_AuraScript);
+
+            bool Load()
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateStaminaAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                {
+                    if (!pet->isGuardian())
+                        return;
+
+                    Unit* owner = pet->GetOwner();
+                    if (!owner)
+                        return;
+
+                    float mod = 0.3f;
+
+                    // Ravenous Dead
+                    AuraEffect const* aurEff = NULL;
+                    // Check just if owner has Ravenous Dead since it's effect is not an aura
+                    aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
+                    if (aurEff)
+                    {
+                        mod += CalculatePctN(mod, aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue());                   // Ravenous Dead edits the original scale
+                    }
+                    // Glyph of the Ghoul
+                    aurEff = owner->GetAuraEffect(58686, 0);
+                    if (aurEff)
+                        mod += CalculatePctN(1.0f, aurEff->GetAmount());                                                    // Glyph of the Ghoul adds a flat value to the scale mod
+                    float ownerBonus = float(owner->GetStat(STAT_STAMINA)) * mod;
+                    amount += ownerBonus;
+                }
+            }
+
+            void CalculateStrengthAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                {
+                    if (!pet->isGuardian())
+                        return;
+
+                    Unit* owner = pet->GetOwner();
+                    if (!owner)
+                        return;
+
+                    float mod = 0.7f;
+
+                    // Ravenous Dead
+                    AuraEffect const* aurEff = NULL;
+                    // Check just if owner has Ravenous Dead since it's effect is not an aura
+                    aurEff = owner->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DEATHKNIGHT, 3010, 0);
+                    if (aurEff)
+                    {
+                        mod += CalculatePctN(mod, aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue());                   // Ravenous Dead edits the original scale
+                    }
+                    // Glyph of the Ghoul
+                    aurEff = owner->GetAuraEffect(58686, 0);
+                    if (aurEff)
+                        mod += CalculatePctN(1.0f, aurEff->GetAmount());                                                    // Glyph of the Ghoul adds a flat value to the scale mod
+                    float ownerBonus = float(owner->GetStat(STAT_STRENGTH)) * mod;
+                    amount += ownerBonus;
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_01_AuraScript::CalculateStaminaAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_01_AuraScript::CalculateStrengthAmount, EFFECT_1, SPELL_AURA_MOD_STAT);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_pet_scaling_01_AuraScript();
+        }
+};
+
+class spell_dk_pet_scaling_02 : public SpellScriptLoader
+{
+    public:
+        spell_dk_pet_scaling_02() : SpellScriptLoader("spell_dk_pet_scaling_02") { }
+
+        class spell_dk_pet_scaling_02_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_pet_scaling_02_AuraScript);
+
+            bool Load()
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateAmountMeleeHaste(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    // For others recalculate it from:
+                    float HasteMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    HasteMelee += (1-owner->m_modAttackSpeedPct[BASE_ATTACK])*100;
+
+                    amount += int32(HasteMelee);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_02_AuraScript::CalculateAmountMeleeHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_pet_scaling_02_AuraScript();
+        }
+};
+
+class spell_dk_pet_scaling_03 : public SpellScriptLoader
+{
+    public:
+        spell_dk_pet_scaling_03() : SpellScriptLoader("spell_dk_pet_scaling_03") { }
+
+        class spell_dk_pet_scaling_03_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_pet_scaling_03_AuraScript);
+
+            bool Load()
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateAmountMeleeHit(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    // For others recalculate it from:
+                    float HitMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+                    // Increase hit melee from meele hit ratings
+                    HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+
+                    amount += int32(HitMelee);
+                }
+            }
+
+            void CalculateAmountSpellHit(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    // For others recalculate it from:
+                    float HitSpell = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
+                    HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+                    // Increase hit spell from spell hit ratings
+                    HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+
+                    amount += int32(HitSpell);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_03_AuraScript::CalculateAmountMeleeHit, EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_03_AuraScript::CalculateAmountSpellHit, EFFECT_1, SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_pet_scaling_03_AuraScript();
+        }
+};
+
+class spell_dk_rune_weapon_scaling_02 : public SpellScriptLoader
+{
+    public:
+        spell_dk_rune_weapon_scaling_02() : SpellScriptLoader("spell_dk_rune_weapon_scaling_02") { }
+
+        class spell_dk_rune_weapon_scaling_02_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_rune_weapon_scaling_02_AuraScript);
+
+            bool Load()
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateDamageDoneAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                {
+                    Unit* owner = pet->GetOwner();
+                    if (!owner)
+                        return;
+
+                    if (pet->isGuardian())
+                        ((Guardian*)pet)->SetBonusDamage(owner->GetTotalAttackPowerValue(BASE_ATTACK));
+
+                    amount += owner->CalculateDamage(BASE_ATTACK, true, true);;
+                }
+            }
+
+            void CalculateAmountMeleeHaste(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    // For others recalculate it from:
+                    float HasteMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    HasteMelee += (1-owner->m_modAttackSpeedPct[BASE_ATTACK])*100;
+
+                    amount += int32(HasteMelee);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_rune_weapon_scaling_02_AuraScript::CalculateDamageDoneAmount, EFFECT_0, SPELL_AURA_MOD_DAMAGE_DONE);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_rune_weapon_scaling_02_AuraScript::CalculateAmountMeleeHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_rune_weapon_scaling_02_AuraScript();
+        }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     new spell_dk_anti_magic_shell_raid();
@@ -845,4 +1143,9 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_strike();
     new spell_dk_death_coil();
     new spell_dk_death_grip();
+    new spell_dk_avoidance_passive();
+    new spell_dk_pet_scaling_01();
+    new spell_dk_pet_scaling_02();
+    new spell_dk_pet_scaling_03();
+    new spell_dk_rune_weapon_scaling_02();
 }

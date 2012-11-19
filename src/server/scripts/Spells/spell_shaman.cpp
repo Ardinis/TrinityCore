@@ -204,7 +204,7 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
 
         class spell_sha_earthbind_totem_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_sha_earthbind_totem_AuraScript);	
+            PrepareAuraScript(spell_sha_earthbind_totem_AuraScript);
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
@@ -255,7 +255,7 @@ class EarthenPowerTargetSelector
 {
     public:
         EarthenPowerTargetSelector() { }
- 
+
         bool operator() (Unit* target)
         {
             if (!target->HasAuraWithMechanic(1 << MECHANIC_SNARE))
@@ -601,6 +601,70 @@ class spell_sha_lava_lash : public SpellScriptLoader
 };
 
 
+class spell_sha_pet_scaling_04 : public SpellScriptLoader
+{
+    public:
+        spell_sha_pet_scaling_04() : SpellScriptLoader("spell_sha_pet_scaling_04") { }
+
+        class spell_sha_pet_scaling_04_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_sha_pet_scaling_04_AuraScript);
+
+            bool Load()
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                    return false;
+                return true;
+            }
+
+            void CalculateAmountMeleeHit(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    // For others recalculate it from:
+                    float HitMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+                    // Increase hit melee from meele hit ratings
+                    HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+
+                    amount += int32(HitMelee);
+                }
+            }
+
+            void CalculateAmountSpellHit(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    // For others recalculate it from:
+                    float HitSpell = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
+                    HitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+                    // Increase hit spell from spell hit ratings
+                    HitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+
+                    amount += int32(HitSpell);
+                }
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_pet_scaling_04_AuraScript::CalculateAmountMeleeHit, EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_pet_scaling_04_AuraScript::CalculateAmountSpellHit, EFFECT_1, SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_sha_pet_scaling_04_AuraScript();
+        }
+};
+
+
 void AddSC_shaman_spell_scripts()
 {
     new spell_sha_astral_shift();
@@ -615,4 +679,5 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_healing_stream_totem();
     new spell_sha_mana_spring_totem();
     new spell_sha_lava_lash();
+    new spell_sha_pet_scaling_04();
 }

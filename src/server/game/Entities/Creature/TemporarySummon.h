@@ -36,6 +36,8 @@ class TempSummon : public Creature
         Unit* GetSummoner() const;
         uint64 GetSummonerGUID() { return m_summonerGUID; }
         TempSummonType const& GetSummonType() { return m_type; }
+        int32 GetBonusDamage() { return m_bonusSpellDamage; }
+        void SetBonusDamage(int32 damage);
 
         const SummonPropertiesEntry* const m_Properties;
     private:
@@ -43,6 +45,7 @@ class TempSummon : public Creature
         uint32 m_timer;
         uint32 m_lifetime;
         uint64 m_summonerGUID;
+        int32  m_bonusSpellDamage;
 };
 
 class Minion : public TempSummon
@@ -77,11 +80,28 @@ class Guardian : public Minion
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
+        void UpdateSpellCritChance();
+        void UpdateMeleeCritChance();
 
-        int32 GetBonusDamage() { return m_bonusSpellDamage; }
-        void SetBonusDamage(int32 damage);
+        float GetSpellCritFromIntellect();
+        float GetMeleeCritFromAgility();
+        float OCTRegenHPPerSpirit();
+        float OCTRegenMPPerSpirit();
+
+        void RecalculatePetScalingResistance(uint32 school);
+        void RecalculatePetScalingStats(Stats stat);
+        void RecalculatePetScalingAttackPower();
+        void RecalculatePetScalingDamageDone();
+        void RecalculatePetScalingAttackSpeed(WeaponAttackType att);
+        void RecalculatePetScalingHitRating();
+        void RecalculatePetScalingCritRating();
+        void RecalculateHappinessEffect();
+
+        int32 GetSpellCrit() { return m_spellCrit; }
+        int32 GetMeleeCrit() { return m_meleeCrit; }
     protected:
-        int32   m_bonusSpellDamage;
+        float   m_spellCrit;
+        float   m_meleeCrit;
         float   m_statFromOwner[MAX_STATS];
 };
 

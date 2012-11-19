@@ -1694,6 +1694,14 @@ class Unit : public WorldObject
         Player* GetCharmerOrOwnerPlayerOrPlayerItself() const;
         Player* GetAffectingPlayer() const;
 
+        void RecalculatePetsScalingResistance(uint32 school);
+        void RecalculatePetsScalingStats(Stats stats);
+        void RecalculatePetsScalingAttackPower();
+        void RecalculatePetsScalingDamageDone();
+        void RecalculatePetsScalingAttackSpeed(WeaponAttackType att);
+        void RecalculatePetsScalingHitRating();
+        void RecalculatePetsScalingCritRating();
+
         void SetMinion(Minion *minion, bool apply);
         void GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry);
         void RemoveAllMinionsByEntry(uint32 entry);
@@ -1790,6 +1798,7 @@ class Unit : public WorldObject
         void RemoveAllAurasOnDeath();
         void RemoveAllAurasRequiringDeadTarget();
         void RemoveAllAurasExceptType(AuraType type);
+        void RemoveAllNonPassiveAurasExceptType(AuraType type);
         void DelayOwnedAuras(uint32 spellId, uint64 caster, int32 delaytime);
 
         void _RemoveAllAuraStatMods();

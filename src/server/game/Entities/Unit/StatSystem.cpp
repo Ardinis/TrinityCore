@@ -1080,7 +1080,7 @@ bool Guardian::UpdateStats(Stats stat)
     float mod = 0.75f;
     if (IsPetGhoul() && (stat == STAT_STAMINA || stat == STAT_STRENGTH))
     {
-        switch (stat)
+      /*        switch (stat)
         {
             case STAT_STAMINA: mod = 0.3f; break; // Default Owner's Stamina scale
             case STAT_STRENGTH: mod = 0.7f; break; // Default Owner's Strength scale
@@ -1100,7 +1100,7 @@ bool Guardian::UpdateStats(Stats stat)
         if (aurEff)
             mod += CalculatePctN(1.0f, aurEff->GetAmount()); // Glyph of the Ghoul adds a flat value to the scale mod
         ownersBonus = float(owner->GetStat(stat)) * mod;
-        value += ownersBonus;
+        value += ownersBonus;*/
     }
     else if (stat == STAT_STAMINA)
     {

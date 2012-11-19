@@ -125,13 +125,15 @@ void PetAI::UpdateAI(const uint32 diff)
 	  AttackStart(nextTarget);
 	else
 	{
-	  me->GetCharmInfo()->SetIsCommandAttack(false);
+	  if (me->GetCharmInfo())
+	    me->GetCharmInfo()->SetIsCommandAttack(false);
 	  HandleReturnMovement();
 	}
       }
       else
       {
-	me->GetCharmInfo()->SetIsCommandAttack(false);
+	if (me->GetCharmInfo())
+	  me->GetCharmInfo()->SetIsCommandAttack(false);
 	HandleReturnMovement();
       }
     }

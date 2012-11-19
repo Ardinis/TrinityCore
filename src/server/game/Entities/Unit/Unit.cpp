@@ -627,16 +627,19 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
-    if (victim->GetTypeId() == TYPEID_PLAYER)
+    if (victim && victim->GetTypeId() == TYPEID_PLAYER)
     {
       //      if (victim->ToPlayer()->GetCommandStatus(CHEAT_GOD))
       //	return 0;
 
       // Signal to pets that their owner was attacked
-      Pet* pet = victim->ToPlayer()->GetPet();
+      if (victim->ToPlayer())
+      {
+	Pet* pet = victim->ToPlayer()->GetPet();
 
-      if (pet && pet->isAlive())
-	pet->AI()->OwnerDamagedBy(this);
+	if (pet && pet->isAlive() && pet->AI())
+	  pet->AI()->OwnerDamagedBy(this);
+      }
     }
 
     if (damagetype != NODAMAGE)

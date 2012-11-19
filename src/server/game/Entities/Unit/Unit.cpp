@@ -627,8 +627,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
-<<<<<<< HEAD
-=======
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
       //      if (victim->ToPlayer()->GetCommandStatus(CHEAT_GOD))
@@ -641,7 +639,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 	pet->AI()->OwnerDamagedBy(this);
     }
 
->>>>>>> parent of 9a91dc4... Revert "Remove Holy Resistance from Players"
     if (damagetype != NODAMAGE)
     {
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)

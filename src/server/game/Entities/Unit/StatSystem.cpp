@@ -1072,7 +1072,7 @@ bool Guardian::UpdateStats(Stats stat)
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value = GetTotalStatValue(stat);
-    ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
+    /*    ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
     float ownersBonus = 0.0f;
 
     Unit* owner = GetOwner();
@@ -1100,20 +1100,20 @@ bool Guardian::UpdateStats(Stats stat)
         if (aurEff)
             mod += CalculatePctN(1.0f, aurEff->GetAmount()); // Glyph of the Ghoul adds a flat value to the scale mod
         ownersBonus = float(owner->GetStat(stat)) * mod;
-        value += ownersBonus;*/
+        value += ownersBonus;
     }
     else if (stat == STAT_STAMINA)
     {
         if (owner->getClass() == CLASS_WARLOCK && isPet())
         {
-            ownersBonus = CalculatePctN(owner->GetStat(STAT_STAMINA), 75);
-            value += ownersBonus;
+	  //            ownersBonus = CalculatePctN(owner->GetStat(STAT_STAMINA), 75);
+          //  value += ownersBonus;
         }
         else
         {
 
             mod = 0.45f;
-            if (isPet())
+	    /*            if (isPet())
             {
                 PetSpellMap::const_iterator itr = (ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
                 if (itr == ToPet()->m_spells.end())
@@ -1124,23 +1124,23 @@ bool Guardian::UpdateStats(Stats stat)
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
                     AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
                 }
-            }
-
-			float Vie = 0.0f;
-			mod = 0.45f;
+		}*/
+    //
+    //			float Vie = 0.0f;
+    //		mod = 0.45f;
             if (isPet())
             {
-				Vie = 0.0f;
+	      /*				Vie = 0.0f;
 				if(ToPet()->HasSpell(62762))	// chasse sauvage Range 2
 					Vie += owner->GetStat(stat) * 0.40f; // (UNIT_MOD_STAT_STAMINA, TOTAL_PCT)
 				else
 					if(ToPet()->HasSpell(62758)) // chasse sauvage
-						Vie += owner->GetStat(stat) * 0.20f;
+					Vie += owner->GetStat(stat) * 0.20f;*/
             }
-			float EnduSup =0.0f;
+	    //		float EnduSup =0.0f;
             if (isPet())
             {
-				EnduSup = 0.0f;
+	      /*				EnduSup = 0.0f;
 				if(ToPet()->HasSpell(61688))	// Endu Sup Rang 3
 					EnduSup += owner->GetStat(stat) * 0.101f;
 				else
@@ -1148,22 +1148,22 @@ bool Guardian::UpdateStats(Stats stat)
 						EnduSup += owner->GetStat(stat) * 0.067f;
 					else
 						if(ToPet()->HasSpell(61686)) //  Endu Sup Rang 1
-							EnduSup += owner->GetStat(stat) * 0.033f;
+						EnduSup += owner->GetStat(stat) * 0.033f;*/
             }
 
-			ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);
+	    //	    ownersBonus *= GetModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);
             // ownersBonus is multiplied by TOTAL_PCT too
-            ownersBonus = float(owner->GetStat(stat))* mod + Vie + EnduSup;
-            value += ownersBonus;
-        }
-    }
+	    //            ownersBonus = float(owner->GetStat(stat))* mod + Vie + EnduSup;
+	    //    value += ownersBonus;
+	    //        }
+	    // }
                                                             //warlock's and mage's pets gain 30% of owner's intellect
     else if (stat == STAT_INTELLECT)
     {
-        if (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE)
+      //        if (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE)
         {
-            ownersBonus = CalculatePctN(owner->GetStat(stat), 30);
-            value += ownersBonus;
+	  //            ownersBonus = CalculatePctN(owner->GetStat(stat), 30);
+	  //   value += ownersBonus;
         }
     }
 /*

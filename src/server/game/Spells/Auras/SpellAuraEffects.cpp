@@ -3126,6 +3126,8 @@ void AuraEffect::HandleModPossess(AuraApplication const* aurApp, uint8 mode, boo
     Unit* target = aurApp->GetTarget();
 
     Unit* caster = GetCaster();
+    if (!caster)
+      return ;
 
     // no support for posession AI yet
     if (caster && caster->GetTypeId() == TYPEID_UNIT)
@@ -3135,14 +3137,14 @@ void AuraEffect::HandleModPossess(AuraApplication const* aurApp, uint8 mode, boo
     }
 
     if (apply)
-	{
-        if (target->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp))
-            caster->ToPlayer()->SetMover(target);
+    {
+      if (target->SetCharmedBy(caster, CHARM_TYPE_POSSESS, aurApp))
+	caster->ToPlayer()->SetMover(target);
     }
     else
-	{
-        target->RemoveCharmedBy(caster);
-		caster->ToPlayer()->SetMover(caster);
+    {
+      target->RemoveCharmedBy(caster);
+      caster->ToPlayer()->SetMover(caster);
     }
 
 }

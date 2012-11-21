@@ -8215,8 +8215,10 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
     }
 
     if (getClass() == CLASS_HUNTER)
-      ApplyAttackTimePercentMod(RANGED_ATTACK, 0.15, true);
+    {
 
+      //      ApplyAttackTimePercentMod(RANGED_ATTACK, 0.15, true);
+    }
     // Apply Spell Power from ScalingStatValue if set
     if (ssv)
         if (int32 spellbonus = ssv->getSpellBonus(proto->ScalingStatValue))

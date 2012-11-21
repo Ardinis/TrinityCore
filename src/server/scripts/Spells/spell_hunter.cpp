@@ -717,6 +717,7 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
 
                     float mod = 1.0f;                                                 //Hunter contribution modifier
                     float bonusAP = 0.0f;
+                    float bonusAPWild = 0.0f;
 
                     PetSpellMap::const_iterator itr = (pet->ToPet()->m_spells.find(62758)); // Wild Hunt rank 1
                     if (itr == pet->ToPet()->m_spells.end())
@@ -725,10 +726,10 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     if (itr != pet->ToPet()->m_spells.end()) // If pet has Wild Hunt
                     {
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-                        mod += CalculatePctN(1.0f, spellInfo->Effects[EFFECT_1].CalcValue());
+			bonusAPWild = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * CalculatePctN(1.0f, spellInfo->Effects[EFFECT_1].CalcValue());
                     }
 
-                    bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod;
+                    bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod + bonusAPWild;
 
                     amount += bonusAP;
                 }
@@ -1045,13 +1046,13 @@ class spell_hun_pet_passive_crit : public SpellScriptLoader
                     // For others recalculate it from:
                     float CritSpell = 0.0f;
                     // Crit from Intellect
-                    // CritSpell += owner->GetSpellCritFromIntellect();
+		    //		    CritSpell += owner->GetSpellCritFromIntellect();
                     // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
-                    // CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+		    //  CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
                     // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-                    // CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
+		    // CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                     // Increase crit spell from spell crit ratings
-                    // CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+		    // CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
 
                     amount += (CritSpell*0.8f);
                 }
@@ -1066,13 +1067,13 @@ class spell_hun_pet_passive_crit : public SpellScriptLoader
                     // For others recalculate it from:
                     float CritMelee = 0.0f;
                     // Crit from Agility
-                    // CritMelee += owner->GetMeleeCritFromAgility();
+		    // CritMelee += owner->GetMeleeCritFromAgility();
                     // Increase crit from SPELL_AURA_MOD_WEAPON_CRIT_PERCENT
-                    // CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
+		    // CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
                     // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-                    // CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
+		    // CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
                     // Increase crit melee from melee crit ratings
-                    // CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
+		    // CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
 
                     amount += (CritMelee*0.8f);
                 }

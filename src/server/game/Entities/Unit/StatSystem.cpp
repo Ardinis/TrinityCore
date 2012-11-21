@@ -1069,11 +1069,10 @@ bool Guardian::UpdateStats(Stats stat)
 {
     if (stat >= MAX_STATS)
         return false;
-
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value = GetTotalStatValue(stat);
-    /*    ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
-    float ownersBonus = 0.0f;
+    //  ApplyStatBuffMod(stat, m_statFromOwner[stat], false);
+    /*    float ownersBonus = 0.0f;
 
     Unit* owner = GetOwner();
     // Handle Death Knight Glyphs and Talents
@@ -1173,10 +1172,14 @@ if (IsPetGhoul())
 value += float(owner->GetStat(stat)) * 0.3f;
 }
 */
-
     SetStat(stat, int32(value));
     //m_statFromOwner[stat] = ownersBonus;
     //ApplyStatBuffMod(stat, m_statFromOwner[stat], true);
+
+   if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
+    {
+        RecalculatePetsScalingStats(stat);
+    }
 
     switch (stat)
     {
@@ -1275,6 +1278,8 @@ void Guardian::UpdateMaxHealth()
     value += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * multiplicator;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
+    if (value <= GetHealth() / 3)
+      return;
     SetMaxHealth((uint32)value);
 }
 

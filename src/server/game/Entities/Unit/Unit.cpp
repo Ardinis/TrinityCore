@@ -693,7 +693,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 	    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 3.5f);
 	    if (cleanDamage->hitOutCome == MELEE_HIT_CRIT)
 	      weaponSpeedHitFactor *= 2;
-	    std::cout << "BASE_ATTACK RewardRage : " << rage_damage << std::endl;
 	    RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
 	    break;
@@ -703,7 +702,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 	    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType) / 1000.0f * 1.75f);
 	    if (cleanDamage->hitOutCome == MELEE_HIT_CRIT)
 	      weaponSpeedHitFactor *= 2;
-	    std::cout << "OFF_ATTACK RewardRage : " << rage_damage << std::endl;
 	    RewardRage(rage_damage, weaponSpeedHitFactor, true);
 
 	    break;
@@ -720,7 +718,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         // Rage from absorbed damage
         if (cleanDamage && cleanDamage->absorbed_damage && victim->getPowerType() == POWER_RAGE)
 	{
-	  std::cout << "Rage from absorbed damage RewardRage : " << cleanDamage->absorbed_damage << std::endl;
             victim->RewardRage(cleanDamage->absorbed_damage, 0, false);
 	}
         return 0;

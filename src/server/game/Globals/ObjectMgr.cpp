@@ -2956,7 +2956,7 @@ void ObjectMgr::LoadPetLevelInfo()
     for (PetLevelInfoContainer::iterator itr = _petInfoStore.begin(); itr != _petInfoStore.end(); ++itr)
     {
         // Don't fill data for default pet
-        if (itr->first == 1)
+        if (itr->first == 1) 
             continue;
         PetLevelInfo* pInfo = itr->second;
 

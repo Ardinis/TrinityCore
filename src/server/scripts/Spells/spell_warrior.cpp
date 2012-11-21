@@ -191,7 +191,7 @@ class spell_warr_deep_wounds : public SpellScriptLoader
 						// prevent deep wound tick exceed 20000 damage, temp fix for really high damage when server has high diff
 						if(damage > 20000)
 							damage = 1;
-							
+
                         caster->CastCustomSpell(target, SPELL_DEEP_WOUNDS_RANK_PERIODIC, &damage, NULL, NULL, true);
                     }
             }
@@ -422,5 +422,5 @@ void AddSC_warrior_spell_scripts()
     //  new spell_warr_slam();
     //  new spell_warr_execute();
     new spell_warr_concussion_blow();
-    new spell_warr_bloodthirst();
+    //    new spell_warr_bloodthirst();
 }

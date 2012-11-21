@@ -1327,7 +1327,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_WARRIOR:
             // Charge
-            if (m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_WARRIOR_CHARGE && m_spellInfo->SpellVisual[0] == 867)
+	  /*            if (m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_WARRIOR_CHARGE && m_spellInfo->SpellVisual[0] == 867)
             {
                 int32 chargeBasePoints0 = damage;
                 m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
@@ -1336,7 +1336,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 if (m_caster->HasAura(64976))
                     m_caster->CastSpell(m_caster, 65156, true);
                 return;
-            }
+		}*/
             // Slam
             if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_SLAM && m_spellInfo->SpellIconID == 559)
             {

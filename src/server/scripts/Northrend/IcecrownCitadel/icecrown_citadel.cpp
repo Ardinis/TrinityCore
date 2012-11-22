@@ -2535,7 +2535,7 @@ public:
     instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
     if (spellId != 0)
       instanceScript->DoCastSpellOnPlayers(spellId);
-    instanceScript->SetData(DATA_BUFF, spellId);
+    /*    instanceScript->SetData(DATA_BUFF, spellId);
     Map::PlayerList const &players = instanceScript->instance->GetPlayers();
     for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
       if (Player* player = it->getSource())
@@ -2549,7 +2549,7 @@ public:
 	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
 	  if (spellId != 0)
 	    pet->CastSpell(pet, spellId, true);
-	}
+	    }*/
     return true;
   }
 

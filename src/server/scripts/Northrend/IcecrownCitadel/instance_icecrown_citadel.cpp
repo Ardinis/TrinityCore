@@ -209,7 +209,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
 	      if (_buffSelect != 0)
 		player->CastSpell(player, _buffSelect, true);
-	      if (Pet* pet = player->GetPet())
+	      /*      if (Pet* pet = player->GetPet())
 	      {
 		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
 		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
@@ -219,7 +219,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
 		if (_buffSelect != 0)
 		  pet->CastSpell(pet, _buffSelect, true);
-	      }
+		  }*/
 	      if (!TeamInInstance)
 		TeamInInstance = player->GetTeam();
 
@@ -1387,7 +1387,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             void Update(uint32 diff)
             {
-	      if (mui_rebuffTimer <= diff)
+	      /*	      if (mui_rebuffTimer <= diff)
 	      {
 		Map::PlayerList const &players = instance->GetPlayers();
 		for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
@@ -1411,7 +1411,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 		    }
 		mui_rebuffTimer = 5000;
 	      }
-	      mui_rebuffTimer -= diff;
+	      mui_rebuffTimer -= diff;*/
 
                 if (GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
                 {

@@ -1042,20 +1042,28 @@ class spell_hun_pet_passive_crit : public SpellScriptLoader
             {
                 if (!GetCaster() || !GetCaster()->GetOwner())
                     return;
+		return ;
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
                     // For others recalculate it from:
-                    float CritSpell = 0.0f;
-                    // Crit from Intellect
-		    //		    CritSpell += owner->GetSpellCritFromIntellect();
-                    // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
-		    //  CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
-                    // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-		    // CritSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
-                    // Increase crit spell from spell crit ratings
-		    // CritSpell += owner->GetRatingBonusValue(CR_CRIT_SPELL);
+                    float CritMelee = 0.0f;
+		    if (GetCaster()->HasAura(53205))
+		    {
+		      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53205); // Then get the SpellProto and add the dummy effect values
+		      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+		    }
+		    else if (GetCaster()->HasAura(53204))
+                    {
+                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53204); // Then get the SpellProto and add the dummy effect values
+                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                    }
+		    else if (GetCaster()->HasAura(53203))
+                    {
+                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53203); // Then get the SpellProto and add the dummy effect values
+                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                    }
 
-                    amount += (CritSpell*0.8f);
+                    amount += CritMelee;
                 }
             }
 
@@ -1063,20 +1071,28 @@ class spell_hun_pet_passive_crit : public SpellScriptLoader
             {
                 if (!GetCaster() || !GetCaster()->GetOwner())
                     return;
+		return ;
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
                     // For others recalculate it from:
                     float CritMelee = 0.0f;
-                    // Crit from Agility
-		    // CritMelee += owner->GetMeleeCritFromAgility();
-                    // Increase crit from SPELL_AURA_MOD_WEAPON_CRIT_PERCENT
-		    // CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
-                    // Increase crit from SPELL_AURA_MOD_CRIT_PCT
-		    // CritMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
-                    // Increase crit melee from melee crit ratings
-		    // CritMelee += owner->GetRatingBonusValue(CR_CRIT_MELEE);
-
-                    amount += (CritMelee*0.8f);
+		    if (GetCaster()->HasAura(53205))
+		    {
+		      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53205); // Then get the SpellProto and add the dummy effect values
+		      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+		      std::cout << "MELEE CRIT END " << CritMelee << std::endl;
+		    }
+		    else if (GetCaster()->HasAura(53204))
+                    {
+                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53204); // Then get the SpellProto and add the dummy effect values
+                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                    }
+		    else if (GetCaster()->HasAura(53203))
+                    {
+                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53203); // Then get the SpellProto and add the dummy effect values
+                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                    }
+                    amount += CritMelee;
                 }
             }
 

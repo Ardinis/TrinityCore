@@ -2536,6 +2536,20 @@ public:
     if (spellId != 0)
       instanceScript->DoCastSpellOnPlayers(spellId);
     instanceScript->SetData(DATA_BUFF, spellId);
+    Map::PlayerList const &players = instanceScript->instance->GetPlayers();
+    for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
+      if (Player* player = it->getSource())
+	if (Pet* pet = player->GetPet())
+	{
+	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
+	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
+	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
+	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
+	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
+	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
+	  if (spellId != 0)
+	    pet->CastSpell(pet, spellId, true);
+	}
     return true;
   }
 

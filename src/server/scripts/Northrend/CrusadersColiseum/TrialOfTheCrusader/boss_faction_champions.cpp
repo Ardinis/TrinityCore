@@ -562,6 +562,7 @@ struct boss_faction_championsAI : public BossAI
         if (instance)
             if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
                 pChampionController->AI()->SetData(2, FAIL);
+	instance->SetData(DATA_PAUSE, NOT_STARTED);
         me->DespawnOrUnsummon();
     }
 
@@ -613,6 +614,7 @@ struct boss_faction_championsAI : public BossAI
             if (instance)
                 if (Creature* pChampionController = Unit::GetCreature((*me), instance->GetData64(NPC_CHAMPIONS_CONTROLLER)))
                     pChampionController->AI()->SetData(2, DONE);
+	instance->SetData(DATA_PAUSE, NOT_STARTED);
     }
 
     void EnterCombat(Unit* /*who*/)

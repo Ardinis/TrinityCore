@@ -186,7 +186,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                 GbBattleMageGUID = 0;
                 isPrepared = false;
 		tempete = 0;
-		_buffSelect = ALLIANCE ? 73828 : 73822;
+		_buffSelect = 0;
+		mui_rebuffTimer = 1000;
             }
 
             void FillInitialWorldStates(WorldPacket& data)
@@ -208,6 +209,17 @@ class instance_icecrown_citadel : public InstanceMapScript
 	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
 	      if (_buffSelect != 0)
 		player->CastSpell(player, _buffSelect, true);
+	      if (Pet* pet = player->GetPet())
+	      {
+		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
+		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
+		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
+		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
+		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
+		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
+		if (_buffSelect != 0)
+		  pet->CastSpell(pet, _buffSelect, true);
+	      }
 	      if (!TeamInInstance)
 		TeamInInstance = player->GetTeam();
 
@@ -1375,6 +1387,32 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             void Update(uint32 diff)
             {
+	      if (mui_rebuffTimer <= diff)
+	      {
+		Map::PlayerList const &players = instance->GetPlayers();
+		for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
+		  if (Player* player = it->getSource())
+		    if (Pet* pet = player->GetPet())
+		    {
+		      if (!pet->HasAura(73762) && !pet->HasAura(73762) && !pet->HasAura(73816)
+			  && !pet->HasAura(73818) && !pet->HasAura(73825) && !pet->HasAura(73819)
+			  && !pet->HasAura(73826) && !pet->HasAura(73820) && !pet->HasAura(73827)
+			  && !pet->HasAura(73821) && !pet->HasAura(73828) && !pet->HasAura(73822))
+		      {
+			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
+			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
+			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
+			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
+			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
+			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
+			if (_buffSelect != 0)
+			  pet->CastSpell(pet, _buffSelect, true);
+		      }
+		    }
+		mui_rebuffTimer = 5000;
+	      }
+	      mui_rebuffTimer -= diff;
+
                 if (GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
                 {
                     if (GameObject* go = instance->GetGameObject(DeathbringersCacheGUID))
@@ -1787,6 +1825,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
 	  uint32 tempete;
 	  uint32 _buffSelect;
+	  uint32 mui_rebuffTimer;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

@@ -695,7 +695,7 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     if (itr != pet->ToPet()->m_spells.end()) // If pet has Wild Hunt
                     {
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-                        AddPctN(mod, spellInfo->Effects[EFFECT_0].CalcValue());
+			mod += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
                     }
 
                     ownerBonus = owner->GetStat(STAT_STAMINA)*mod;
@@ -715,7 +715,7 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     if (!owner)
                         return;
 
-                    float mod = 1.0f;                                                 //Hunter contribution modifier
+                    float mod = 0.22f;                                                 //Hunter contribution modifier
                     float bonusAP = 0.0f;
                     float bonusAPWild = 0.0f;
 
@@ -726,10 +726,11 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     if (itr != pet->ToPet()->m_spells.end()) // If pet has Wild Hunt
                     {
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-			bonusAPWild = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * CalculatePctN(1.0f, spellInfo->Effects[EFFECT_1].CalcValue());
+			mod += (float)((float)(spellInfo->Effects[EFFECT_1].CalcValue()) / 100.0f);
                     }
 
-                    bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f * mod + bonusAPWild;
+
+                    bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * mod;
 
                     amount += bonusAP;
                 }

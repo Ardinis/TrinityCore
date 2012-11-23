@@ -744,18 +744,26 @@ class npc_blood_beast : public CreatureScript
 	    Map::PlayerList::const_iterator iter;
 
             Unit* target;
+	    std::list<Unit *> newListTarget;
             for (iter = tList.begin(); iter!=tList.end(); ++iter)
             {
 	      target = iter->getSource();
 	      if (target && target->getPowerType() == POWER_MANA && target->isAlive() && me->GetDistance2d(target->GetPositionX(), target->GetPositionY()) > 12.0f)
-		return target;
+		newListTarget.push_back(target);
 	    }
-	    for (iter = tList.begin(); iter!=tList.end(); ++iter)
-            {
-	      target = iter->getSource();
-              if (target && target->getPowerType() == POWER_MANA && target->isAlive())
-                return target;
-            }
+	    if (newListTarget.empty() || newListTarget.size() <= 1)
+	      for (iter = tList.begin(); iter!=tList.end(); ++iter)
+	      {
+		target = iter->getSource();
+		if (target && target->getPowerType() == POWER_MANA && target->isAlive())
+		  newListTarget.push_back(target);
+	      }
+	    if (newListTarget.size() > 0)
+	    {
+	      std::list<Unit*>::iterator itr = newListTarget.begin();
+	      std::advance(itr, urand(0, newListTarget.size() - 1));
+	      return *itr;
+	    }
 	    return SelectTarget(SELECT_TARGET_RANDOM);
 	  }
 

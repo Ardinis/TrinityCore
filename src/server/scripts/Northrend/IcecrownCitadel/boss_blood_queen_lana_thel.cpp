@@ -150,9 +150,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLOOD_MIRROR_VISUAL);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BLOOD_MIRROR_DUMMY);
                 instance->DoRemoveAurasDueToSpellOnPlayers(DELIRIOUS_SLASH);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_PACT_OF_THE_DARKFALLEN);		
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_PACT_OF_THE_DARKFALLEN);
 			}
-			
+
             void Reset()
             {
                 _Reset();
@@ -197,21 +197,22 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 Talk(SAY_DEATH);
                 Cleanup();
 				// Blah, credit the quest
-                if (_creditBloodQuickening)
-                {
+		if (Is25ManRaid())
+		  if (_creditBloodQuickening)
+		  {
                     instance->SetData(DATA_BLOOD_QUICKENING_STATE, DONE);
                     if (Player* player = killer->ToPlayer())
-                        player->RewardPlayerAndGroupAtEvent(NPC_INFILTRATOR_MINCHAR_BQ, player);
+		      player->RewardPlayerAndGroupAtEvent(NPC_INFILTRATOR_MINCHAR_BQ, player);
                     if (Creature* minchar = me->FindNearestCreature(NPC_INFILTRATOR_MINCHAR_BQ, 200.0f))
                     {
-                        minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                        minchar->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-                        minchar->SetFlying(false);
-                        minchar->SendMovementFlagUpdate();
-                        minchar->RemoveAllAuras();
-                        minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE/3.0f);
+		      minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+		      minchar->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
+		      minchar->SetFlying(false);
+		      minchar->SendMovementFlagUpdate();
+		      minchar->RemoveAllAuras();
+		      minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE/3.0f);
                     }
-                }
+		  }
             }
 
             void DoAction(int32 const action)

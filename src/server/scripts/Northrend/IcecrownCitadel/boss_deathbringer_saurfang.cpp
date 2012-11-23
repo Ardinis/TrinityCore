@@ -780,7 +780,7 @@ class npc_blood_beast : public CreatureScript
 		    me->SetInCombatWith(target);
 		    target->SetInCombatWith(me);
 		    //		    DoStartMovement(target);
-		  me->AI()->AttackStart(target);
+		    me->AI()->AttackStart(target);
 		    me->AddThreat(target, 100000000.0f * 9.0f);
 		    mui_freeze2 = 2000;
 		  }

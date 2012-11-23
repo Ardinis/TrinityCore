@@ -227,6 +227,7 @@ class boss_lord_marrowgar : public CreatureScript
                                 pStorm->SetDuration(int32(_boneStormDuration));
                             me->SetSpeed(MOVE_RUN, _baseSpeed*3.0f, true);
                             Talk(SAY_BONE_STORM);
+			    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                             events.ScheduleEvent(EVENT_BONE_STORM_END, _boneStormDuration+1);
                             // no break here
                         case EVENT_BONE_STORM_MOVE:
@@ -242,6 +243,7 @@ class boss_lord_marrowgar : public CreatureScript
                         }
                         case EVENT_BONE_STORM_END:
 			  instance->SetData(DATA_TEMPETE, NOT_STARTED);
+			    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
                             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                                 me->GetMotionMaster()->MovementExpired();
 			    //me->DeleteThreatList();

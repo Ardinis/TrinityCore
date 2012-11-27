@@ -5101,6 +5101,39 @@ SpellCastResult Spell::CheckCast(bool strict)
 	  return SPELL_FAILED_BAD_TARGETS;
     }
 
+	bool hasDispellableAura = false;
+    bool hasNonDispelEffect = false;
+	for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
+	{
+        if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_DISPEL)
+        {
+            if (m_spellInfo->Effects[i].IsTargetingArea() || m_spellInfo->AttributesEx & SPELL_ATTR1_MELEE_COMBAT_START)
+            {
+                hasDispellableAura = true;
+                break;
+            }
+            if (Unit* target = m_targets.GetUnitTarget())
+            {
+                DispelChargesList dispelList;
+                uint32 dispelMask = SpellInfo::GetDispelMask(DispelType(m_spellInfo->Effects[i].MiscValue));
+                target->GetDispellableAuraList(m_caster, dispelMask, dispelList);
+                if (!dispelList.empty())
+                {
+                    hasDispellableAura = true;
+                    break;
+                }
+            }
+        }
+        else if (m_spellInfo->Effects[i].IsEffect())
+        {
+            hasNonDispelEffect = true;
+            break;
+        }
+	}
+
+    if (!hasNonDispelEffect && !hasDispellableAura && m_spellInfo->HasEffect(SPELL_EFFECT_DISPEL) && m_spellInfo->CalcPowerCost(m_caster, SPELL_SCHOOL_MASK_NONE))
+        return SPELL_FAILED_NOTHING_TO_DISPEL;
+
     for (int i = 0; i < MAX_SPELL_EFFECTS; i++)
     {
         // for effects of spells that have only one target

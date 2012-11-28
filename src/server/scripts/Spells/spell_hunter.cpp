@@ -674,6 +674,12 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_pet_scaling_01_AuraScript);
 
+	  bool Load()
+	  {
+	    _tempHealth = 0;
+            return true;
+	  }
+
             void CalculateStaminaAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Unit* pet = GetUnitOwner())
@@ -703,6 +709,19 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     amount += ownerBonus;
                 }
             }
+
+	  void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	  {
+            if (Unit* pet = GetUnitOwner())
+	      if (_tempHealth)
+		pet->SetHealth(_tempHealth);
+	  }
+
+	  void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	  {
+            if (Unit* pet = GetUnitOwner())
+	      _tempHealth = pet->GetHealth();
+	  }
 
             void CalculateAttackPowerAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
@@ -769,11 +788,17 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
 
             void Register()
             {
+	      OnEffectRemove += AuraEffectRemoveFn(spell_hun_pet_scaling_01_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+	      AfterEffectApply += AuraEffectApplyFn(spell_hun_pet_scaling_01_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateStaminaAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateAttackPowerAmount, EFFECT_1, SPELL_AURA_MOD_ATTACK_POWER);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_pet_scaling_01_AuraScript::CalculateDamageDoneAmount, EFFECT_2, SPELL_AURA_MOD_DAMAGE_DONE);
             }
+
+	private:
+	  uint32 _tempHealth;
         };
+
 
         AuraScript* GetAuraScript() const
         {

@@ -884,6 +884,7 @@ class spell_dk_pet_scaling_01 : public SpellScriptLoader
             {
                 if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
                     return false;
+		_tempHealth = 0;
                 return true;
             }
 
@@ -918,6 +919,19 @@ class spell_dk_pet_scaling_01 : public SpellScriptLoader
                 }
             }
 
+	  void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	  {
+            if (Unit* pet = GetUnitOwner())
+	      if (_tempHealth)
+		pet->SetHealth(_tempHealth);
+	  }
+
+	  void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	  {
+            if (Unit* pet = GetUnitOwner())
+	      _tempHealth = pet->GetHealth();
+	  }
+
             void CalculateStrengthAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Unit* pet = GetUnitOwner())
@@ -950,9 +964,15 @@ class spell_dk_pet_scaling_01 : public SpellScriptLoader
 
             void Register()
             {
+	      OnEffectRemove += AuraEffectRemoveFn(spell_dk_pet_scaling_01_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+	      AfterEffectApply += AuraEffectApplyFn(spell_dk_pet_scaling_01_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_01_AuraScript::CalculateStaminaAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_01_AuraScript::CalculateStrengthAmount, EFFECT_1, SPELL_AURA_MOD_STAT);
             }
+
+	private:
+	  uint32 _tempHealth;
+
         };
 
         AuraScript* GetAuraScript() const

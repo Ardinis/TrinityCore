@@ -453,6 +453,14 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
           {
               PrepareAuraScript(spell_warl_pet_scaling_01_AuraScript);
 
+	    bool Load()
+	    {
+	      if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+	      _tempBonus = 0;
+	      return true;
+	    }
+
               void CalculateStaminaAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
               {
                   if (Unit* pet = GetUnitOwner())
@@ -471,6 +479,51 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
                       amount += ownerBonus;
                  }
               }
+
+
+	    void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	    {
+	      if (Unit* pet = GetUnitOwner())
+                if (_tempBonus)
+                {
+                  if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
+                  {
+                    uint32 healthMod = 0;
+                    uint32 baseHealth = pInfo->health;
+                    switch (pet->GetEntry())
+                    {
+		    case ENTRY_IMP:
+		      healthMod = uint32(_tempBonus * 8.4f);
+		      break;
+		    case ENTRY_FELGUARD:
+		    case ENTRY_VOIDWALKER:
+		      healthMod = _tempBonus * 11;
+		      break;
+		    case ENTRY_SUCCUBUS:
+		      healthMod = uint32(_tempBonus * 9.1f);
+		      break;
+		    case ENTRY_FELHUNTER:
+		      healthMod = uint32(_tempBonus * 9.5f);
+		      break;
+		    default:
+		      healthMod = 0;
+		      break;
+                    }
+                    if (healthMod)
+		      pet->ToPet()->SetCreateHealth(baseHealth + healthMod);
+                  }
+                }
+	    }
+
+	    void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	    {
+	      if (Unit* pet = GetUnitOwner())
+		if (pet->isPet() && pet->ToPet())
+                {
+                  if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
+                    pet->ToPet()->SetCreateHealth(pInfo->health);
+                }
+	    }
 
               void CalculateAttackPowerAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
               {
@@ -529,10 +582,16 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
 
               void Register()
               {
+		OnEffectRemove += AuraEffectRemoveFn(spell_warl_pet_scaling_01_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+		AfterEffectApply += AuraEffectApplyFn(spell_warl_pet_scaling_01_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
                   DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_01_AuraScript::CalculateStaminaAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
                   DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_01_AuraScript::CalculateAttackPowerAmount, EFFECT_1, SPELL_AURA_MOD_ATTACK_POWER);
                   DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_01_AuraScript::CalculateDamageDoneAmount, EFFECT_2, SPELL_AURA_MOD_DAMAGE_DONE);
               }
+
+	  private:
+	    uint32 _tempBonus;
+
          };
 
           AuraScript* GetAuraScript() const
@@ -549,6 +608,14 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
           class spell_warl_pet_scaling_02_AuraScript : public AuraScript
           {
               PrepareAuraScript(spell_warl_pet_scaling_02_AuraScript);
+
+	    bool Load()
+	    {
+	      if (!GetCaster() || !GetCaster()->GetOwner() || GetCaster()->GetOwner()->GetTypeId() != TYPEID_PLAYER)
+                return false;
+	      _tempBonus = 0;
+	      return true;
+	    }
 
               void CalculateIntellectAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
               {
@@ -568,6 +635,47 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
                       amount += ownerBonus;
                  }
               }
+
+	    void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	    {
+	      if (Unit* pet = GetUnitOwner())
+		if (pet->isPet() && pet->ToPet())
+		  if (_tempBonus)
+		  {
+		    if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
+		    {
+		      uint32 manaMod = 0;
+		      uint32 baseMana = pInfo->mana;
+		      switch (pet->GetEntry())
+		      {
+		      case ENTRY_IMP:
+                        manaMod = uint32(_tempBonus * 4.9f);
+                        break;
+		      case ENTRY_VOIDWALKER:
+		      case ENTRY_SUCCUBUS:
+		      case ENTRY_FELHUNTER:
+		      case ENTRY_FELGUARD:
+                        manaMod = uint32(_tempBonus * 11.5f);
+                        break;
+		      default:
+                        manaMod = 0;
+                        break;
+		      }
+		      if (manaMod)
+                        pet->ToPet()->SetCreateMana(baseMana + manaMod);
+		    }
+		  }
+	    }
+
+	    void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+	    {
+	      if (Unit* pet = GetUnitOwner())
+		if (pet->isPet() && pet->ToPet())
+                {
+                  if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
+                    pet->ToPet()->SetCreateMana(pInfo->mana);
+                }
+	    }
 
 	    void CalculateArmorAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
 	    {
@@ -609,10 +717,16 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
 
 	    void Register()
 	    {
+	      OnEffectRemove += AuraEffectRemoveFn(spell_warl_pet_scaling_02_AuraScript::RemoveEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
+	      AfterEffectApply += AuraEffectApplyFn(spell_warl_pet_scaling_02_AuraScript::ApplyEffect, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK);
 	      DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_02_AuraScript::CalculateIntellectAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
 	      DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_02_AuraScript::CalculateArmorAmount, EFFECT_1, SPELL_AURA_MOD_RESISTANCE);
 	      DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_pet_scaling_02_AuraScript::CalculateFireResistanceAmount, EFFECT_2, SPELL_AURA_MOD_RESISTANCE);
 	    }
+
+	  private:
+	    uint32 _tempBonus;
+
 	  };
 
   AuraScript* GetAuraScript() const

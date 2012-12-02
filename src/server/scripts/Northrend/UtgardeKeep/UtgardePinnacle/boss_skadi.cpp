@@ -186,7 +186,9 @@ public:
         uint32 m_uiMountTimer;
         uint32 m_uiSummonTimer;
         uint8  m_uiSpellHitCount;
+        uint8  m_uiSpellHFHitCount;
         bool   m_bSaidEmote;
+        bool validHFskadi;
 
         eCombatPhase Phase;
 
@@ -201,9 +203,11 @@ public:
             m_uiWaypointId = 0;
             m_bSaidEmote = false;
             m_uiSpellHitCount = 0;
+            m_uiSpellHFHitCount = 0;
+	    validHFskadi = false;
 
             Phase = SKADI;
-			
+
 			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             Summons.DespawnAll();
@@ -316,8 +320,10 @@ public:
 
                     if (me->GetPositionX() >= 480)
                     {
-						me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        if (m_uiSpellHitCount >= 3)
+		      me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+		      if (m_uiSpellHFHitCount >= 3)
+			validHFskadi = true;
+		      if (m_uiSpellHitCount >= 3)
                         {
                             Phase = SKADI;
                             me->SetFlying(false);
@@ -344,8 +350,9 @@ public:
                     else
                     {
                         //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
-						me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        m_bSaidEmote = false;
+		      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+		      m_bSaidEmote = false;
+		      m_uiSpellHFHitCount = 0;
                     }
 
                     if (m_uiMountTimer && m_uiMountTimer <= diff)
@@ -436,6 +443,9 @@ public:
             Summons.DespawnAll();
             if (m_instance)
                 m_instance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, DONE);
+	    if (IsHeroic())
+	      if (validHFskadi)
+		m_instance->DoCompleteAchievement(2156);
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -496,6 +506,7 @@ public:
             {
                 player->CastSpell(pSkadi, SPELL_RAPID_FIRE, true);
                 CAST_AI(boss_skadi::boss_skadiAI, pSkadi->AI())->m_uiSpellHitCount++;
+                CAST_AI(boss_skadi::boss_skadiAI, pSkadi->AI())->m_uiSpellHFHitCount++;
             }
         }
         return false;

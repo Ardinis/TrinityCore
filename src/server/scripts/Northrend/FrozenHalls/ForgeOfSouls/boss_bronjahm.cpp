@@ -117,6 +117,8 @@ class boss_bronjahm : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
+	      if (me->HasUnitState(UNIT_STATE_CASTING))
+		return ;
                 if (events.GetPhaseMask() & (1 << PHASE_1) && !HealthAbovePct(30))
                 {
                     events.SetPhase(PHASE_2);

@@ -545,6 +545,11 @@ public:
       me->GetMotionMaster()->MoveRandom(10.0f);
     }
 
+    void DamageTaken(Unit* /*attacker*/, uint32& damage)
+    {
+      damage = 0;
+    }
+
     void UpdateAI(const uint32(diff))
     {
       if(_instanceScript->GetBossState(DATA_TYRANNUS) != DONE)

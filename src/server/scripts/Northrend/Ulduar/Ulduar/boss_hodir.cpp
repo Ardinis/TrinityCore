@@ -122,7 +122,7 @@ enum HodirEvents
     EVENT_ICICLE,
     EVENT_BLOWS,
     EVENT_RARE_CACHE,
-    EVENT_BERSERK, 
+    EVENT_BERSERK,
 };
 
 enum HodirActions
@@ -174,7 +174,7 @@ class npc_flash_freeze : public CreatureScript
             {
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
-            }            
+            }
 
             void Reset()
             {
@@ -195,7 +195,7 @@ class npc_flash_freeze : public CreatureScript
 		  std::cout << "checkDespawnTimer" << std::endl;
 		  if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
 		    {
-		      if (!target->isAlive() || (target->GetTypeId() != TYPEID_PLAYER && 
+		      if (!target->isAlive() || (target->GetTypeId() != TYPEID_PLAYER &&
 						 target->GetEntry() != 32941 &&
 						 target->GetEntry() != 33333 &&
 						 target->GetEntry() != 33325 &&
@@ -286,7 +286,7 @@ class npc_ice_block : public CreatureScript
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
                 targetGUID = 0;
-            }            
+            }
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -313,7 +313,7 @@ class npc_ice_block : public CreatureScript
 	    if (Creature* Helper = ObjectAccessor::GetCreature(*me, targetGUID))
 	      {
 		Helper->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_STUNNED | UNIT_FLAG_PACIFIED);
-		
+
 		if (Creature* Hodir = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(BOSS_HODIR) : 0))
 		  {
 		    if (!Hodir->isInCombat())
@@ -348,7 +348,7 @@ class boss_hodir : public CreatureScript
         {
             boss_hodirAI(Creature* creature) : BossAI(creature, BOSS_HODIR)
             {
-            }            
+            }
 
             void Reset()
             {
@@ -600,7 +600,8 @@ class npc_icicle : public CreatureScript
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
-            }           
+		Reset();
+            }
 
             void Reset()
             {
@@ -621,6 +622,11 @@ class npc_icicle : public CreatureScript
                         DoCast(me, SPELL_ICICLE_FALL);
                         DoCast(me, SPELL_FALL_DAMAGE, true);
                     }
+		    else if (me->GetEntry() == 33169)
+		    {
+		      DoCast(me, SPELL_ICICLE_FALL);
+		      DoCast(me, SPELL_FALL_DAMAGE, true);
+		    }
                     icicleTimer = 10000;
                 }
                 else
@@ -633,7 +639,7 @@ class npc_icicle : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetUlduarAI<npc_icicleAI>(creature);
+            return new npc_icicleAI(creature);
         };
 };
 
@@ -649,7 +655,7 @@ class npc_snowpacked_icicle : public CreatureScript
                 me->SetDisplayId(15880);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->SetReactState(REACT_PASSIVE);
-            }            
+            }
 
             void Reset()
             {
@@ -811,7 +817,7 @@ class npc_hodir_shaman : public CreatureScript
                                 }
                                 else
                                     events.ScheduleEvent(EVENT_STORM_CLOUD, urand(2000, 3000)); // No target found, check again in a short period of time
-                            
+
                             }
                             break;
                         default:

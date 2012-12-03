@@ -252,8 +252,7 @@ public:
             if (instance)
             {
                 instance->SetData(DATA_MAL_GANIS_EVENT, DONE);
-
-
+		me->SummonCreature(30997, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 1);
             }
         }
 
@@ -263,7 +262,6 @@ public:
                 return;
 
             DoScriptText(RAND(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3, SAY_SLAY_4), me);
-	    me->SummonCreature(30997, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 1);
         }
     };
 

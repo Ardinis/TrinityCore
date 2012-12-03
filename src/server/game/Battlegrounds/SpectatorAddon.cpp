@@ -36,6 +36,10 @@ SpectatorAddonMsg::SpectatorAddonMsg()
   team = ALLIANCE;
 }
 
+SpectatorAddonMsg::~SpectatorAddonMsg()
+{
+}
+
 bool SpectatorAddonMsg::CanSandAura(uint32 auraID)
 {
   const SpellInfo *spell = sSpellMgr->GetSpellInfo(auraID);
@@ -68,13 +72,42 @@ std::string SpectatorAddonMsg::GetMsgData()
 {
   std::string addonData = "";
 
+  std::string msg = "";
+  if (isFilledIn(SPECTATOR_PREFIX_ARENALIST))
+  {
+    msg = "ARENALIST2C2";
+    for (std::list<std::pair<std::string, uint64 > >::iterator it = arena2c2.begin(); it != arena2c2.end(); it++)
+    {
+      char buffer[30];
+      sprintf(buffer, "%i", (*it).second);
+      msg += " " + (*it).first + ":" + buffer;
+    }
+        msg += " ARENALIST3C3 ";
+    for (std::list<std::pair<std::string, uint64 > >::iterator it = arena3c3.begin(); it != arena3c3.end(); it++)
+    {
+      char buffer[30];
+      sprintf(buffer, "%i", (*it).second);
+      msg += " " + (*it).first + ":" + buffer;
+    }
+    msg += " ARENALIST5C5 ";
+    for (std::list<std::pair<std::string, uint64 > >::iterator it = arena5c5.begin(); it != arena5c5.end(); it++)
+    {
+      char buffer[30];
+      sprintf(buffer, "%i", (*it).second);
+      msg += " " + (*it).first + ":" + buffer;
+    }
+    addonData = msg;
+    DisableFlag(SPECTATOR_PREFIX_ARENALIST);
+    std::cout << addonData << std::endl;
+    return addonData;
+  }
+
   if (!isFilledIn(SPECTATOR_PREFIX_PLAYER))
   {
     sLog->outString("SPECTATOR ADDON: player is not filled in.");
     return addonData;
   }
 
-  std::string msg = "";
   for (uint8 i = 0; i < SPECTATOR_PREFIX_COUNT; ++i)
     if (isFilledIn(i))
     {

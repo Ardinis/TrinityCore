@@ -32,12 +32,15 @@ enum SpectatorPrefix {
  SPECTATOR_PREFIX_TEAM,
  SPECTATOR_PREFIX_SPELL,
  SPECTATOR_PREFIX_AURA,
+ SPECTATOR_PREFIX_ARENALIST,
  SPECTATOR_PREFIX_COUNT // must be at the end of list
+
 };
 
 class SpectatorAddonMsg {
  public:
  SpectatorAddonMsg();
+ ~SpectatorAddonMsg();
 
  void SetPlayer(std::string _player) { player = _player; EnableFlag(SPECTATOR_PREFIX_PLAYER); }
  void SetStatus(bool _isAlive) { isAlive = _isAlive; EnableFlag(SPECTATOR_PREFIX_STATUS); }
@@ -50,6 +53,10 @@ class SpectatorAddonMsg {
  void SetMaxPower(uint16 power) { maxPower = power; EnableFlag(SPECTATOR_PREFIX_MAXPOWER); }
  void SetCurrentPower(uint16 power) { currPower = power; EnableFlag(SPECTATOR_PREFIX_CURPOWER); }
  void SetPowerType(Powers power) { powerType = power; EnableFlag(SPECTATOR_PREFIX_POWERTYPE); }
+
+ void Set2c2PlayerList(std::pair<std::string, uint64 > val) { arena2c2.push_back(val); EnableFlag(SPECTATOR_PREFIX_ARENALIST); }
+ void Set3c3PlayerList(std::pair<std::string, uint64 > val) { arena3c3.push_back(val); EnableFlag(SPECTATOR_PREFIX_ARENALIST); }
+ void Set5c5PlayerList(std::pair<std::string, uint64 > val) { arena5c5.push_back(val); EnableFlag(SPECTATOR_PREFIX_ARENALIST); }
 
  void CastSpell(uint32 _spellId, uint32 _castTime) { spellId = _spellId; castTime = _castTime; EnableFlag(SPECTATOR_PREFIX_SPELL); }
  void CreateAura(uint32 _caster, uint32 _spellId, bool _isDebuff, uint8 _type, int32 _duration, int32 _expire, uint16 _stack, bool _isRemove);
@@ -65,6 +72,7 @@ class SpectatorAddonMsg {
  private:
 
  void EnableFlag(uint8 prefix) { prefixFlags[prefix] = true; }
+ void DisableFlag(uint8 prefix) { prefixFlags[prefix] = false; }
  std::string player;
  bool isAlive;
  std::string target;
@@ -92,4 +100,9 @@ class SpectatorAddonMsg {
  bool aRemove;
 
  bool prefixFlags[SPECTATOR_PREFIX_COUNT];
+
+ std::list<std::pair<std::string, uint64 > > arena2c2;
+ std::list<std::pair<std::string, uint64 > > arena3c3;
+ std::list<std::pair<std::string, uint64 > > arena5c5;
+
 };

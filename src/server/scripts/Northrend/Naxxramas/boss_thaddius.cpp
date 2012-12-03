@@ -118,35 +118,39 @@ public:
     {
         boss_thaddiusAI(Creature* c) : BossAI(c, BOSS_THADDIUS)
         {
-            // init is a bit tricky because thaddius shall track the life of both adds, but not if there was a wipe
-            // and, in particular, if there was a crash after both adds were killed (should not respawn)
-
-            // Moreover, the adds may not yet be spawn. So just track down the status if mob is spawn
-            // and each mob will send its status at reset (meaning that it is alive)
-            checkFeugenAlive = false;
-            if (Creature* pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
-                checkFeugenAlive = pFeugen->isAlive();
-
-            checkStalaggAlive = false;
-            if (Creature* pStalagg = me->GetCreature(*me, instance->GetData64(DATA_STALAGG)))
-                checkStalaggAlive = pStalagg->isAlive();
-
-            if (!checkFeugenAlive && !checkStalaggAlive)
-            {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
-                me->SetReactState(REACT_AGGRESSIVE);
-            }
-            else
-            {
-	      //                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
-	                      me->SetReactState(REACT_PASSIVE);
-            }
+	  beginFight = false;
+	  Reset();
         }
 
-        bool checkStalaggAlive;
-        bool checkFeugenAlive;
-        bool polaritySwitch;
-        uint32 uiAddsTimer;
+      void Reset()
+      {
+	checkFeugenAlive = true;
+	checkStalaggAlive = true;
+
+	//	me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+	me->SetReactState(REACT_PASSIVE);
+      }
+
+      bool checkStalaggAlive;
+      bool checkFeugenAlive;
+      bool polaritySwitch;
+      uint32 uiAddsTimer;
+      bool beginFight;
+
+      void JustReachedHome()
+      {
+	if (!beginFight)
+	  return;
+	if (Creature *a = me->FindNearestCreature(15929, 100, false))
+	  if (Creature *b = me->FindNearestCreature(15930, 100, false))
+	    {
+	      a->Respawn();
+	      b->Respawn();
+	      beginFight = false;
+	    }
+	//	me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+	me->SetReactState(REACT_PASSIVE);
+      }
 
         void KilledUnit(Unit* /*victim*/)
         {
@@ -186,8 +190,8 @@ public:
             }
             else
             {
-	      //                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
-                me->SetReactState(REACT_PASSIVE);
+	      //	      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+	      me->SetReactState(REACT_PASSIVE);
             }
         }
 
@@ -203,6 +207,7 @@ public:
         void DamageTaken(Unit* /*pDoneBy*/, uint32 & /*uiDamage*/)
         {
             me->SetReactState(REACT_AGGRESSIVE);
+	    beginFight = true;
         }
 
         void SetData(uint32 id, uint32 data)

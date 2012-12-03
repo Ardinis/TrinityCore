@@ -307,6 +307,115 @@ public:
    return true;
  }
 
+  static std::string GetClassNameById(uint8 id)
+  {
+    std::string sClass = "";
+    switch (id)
+    {
+    case CLASS_WARRIOR: sClass = "Warrior "; break;
+    case CLASS_PALADIN: sClass = "Pala "; break;
+    case CLASS_HUNTER: sClass = "Hunt "; break;
+    case CLASS_ROGUE: sClass = "Rogue "; break;
+    case CLASS_PRIEST: sClass = "Priest "; break;
+    case CLASS_DEATH_KNIGHT: sClass = "DK "; break;
+    case CLASS_SHAMAN: sClass = "Shama "; break;
+    case CLASS_MAGE: sClass = "Mage "; break;
+    case CLASS_WARLOCK: sClass = "Warlock "; break;
+    case CLASS_DRUID: sClass = "Druid "; break;
+    }
+    return sClass;
+  }
+
+  static std::string GetGamesStringData(Battleground *arena, uint16 mmr)
+  {
+    std::string teamsMember[BG_TEAMS_COUNT];
+    uint32 firstTeamId = 0;
+    for (Battleground::BattlegroundPlayerMap::const_iterator itr = arena->GetPlayers().begin(); itr != arena->GetPlayers().end(); ++itr)
+      if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+      {
+	if (player->isSpectator())
+	  continue;
+
+	uint32 team = itr->second.Team;
+	if (!firstTeamId)
+	  firstTeamId = team;
+
+	teamsMember[firstTeamId == team] += GetClassNameById(player->getClass());
+      }
+
+    std::string data = teamsMember[0] + " - ";
+    std::stringstream ss;
+    ss << mmr;
+    data += ss.str();
+    data += " - " + teamsMember[1];
+    return data;
+  }
+
+  static uint64 GetFirstPlayerGuid(Battleground *arena)
+  {
+    for (Battleground::BattlegroundPlayerMap::const_iterator itr = arena->GetPlayers().begin(); itr != arena->GetPlayers().end(); ++itr)
+      if (Player* player = ObjectAccessor::FindPlayer(itr->first))
+        return itr->first;
+    return 0;
+  }
+
+ static bool HandleSpectateListeCommand(ChatHandler* handler, const char *args)
+ {
+   Player* player = handler->GetSession()->GetPlayer();
+
+   if (!player)
+   {
+     handler->PSendSysMessage("Impossible de trouver le joueur.");
+     handler->SetSentErrorMessage(true);
+     return false;
+   }
+
+   if (player->isSpectator())
+   {
+     handler->PSendSysMessage("Vous etes deja spectateur !");
+     handler->SetSentErrorMessage(true);
+     return false;
+   }
+
+   Battleground *bGround = player->GetBattleground();
+   if (bGround)
+     return false;
+
+   std::list<std::pair<std::string, uint64 > > arena2c2;
+   std::list<std::pair<std::string, uint64 > > arena3c3;
+   std::list<std::pair<std::string, uint64 > > arena5c5;
+
+   SpectatorAddonMsg msg;
+   for (uint8 i = BATTLEGROUND_NA; i <= BATTLEGROUND_RV; ++i)
+   {
+     if (!sBattlegroundMgr->IsArenaType((BattlegroundTypeId)i))
+       continue;
+
+     BattlegroundSet bgs = sBattlegroundMgr->GetBattlegroundsByType((BattlegroundTypeId)i);
+     for (BattlegroundSet::iterator itr = bgs.begin(); itr != bgs.end(); ++itr)
+     {
+       Battleground* arena = itr->second;
+
+       if (!arena->GetPlayersSize())
+	 continue;
+
+       uint16 mmr = arena->GetArenaMatchmakerRatingByIndex(0) + arena->GetArenaMatchmakerRatingByIndex(1);
+       mmr /= 2;
+       std::string ListName = arena_spectator_commands::GetGamesStringData(arena, mmr);
+       uint64 FirstPlayerGUID = arena_spectator_commands::GetFirstPlayerGuid(arena);
+       std::pair<std::string, uint64 > plInfos(ListName, FirstPlayerGUID);
+       if (arena->GetPlayersSize() == 4)
+	 msg.Set2c2PlayerList(plInfos);
+       else if (arena->GetPlayersSize() == 6)
+	 msg.Set3c3PlayerList(plInfos);
+       else if (arena->GetPlayersSize() == 10)
+	 msg.Set5c5PlayerList(plInfos);
+     }
+   }
+   msg.SendPacket(player->GetGUID());
+   return true;
+ }
+
  ChatCommand* GetCommands() const
  {
    static ChatCommand spectateCommandTable[] =
@@ -315,6 +424,7 @@ public:
        { "watch", SEC_PLAYER, true, &HandleSpectateFromCommand, "", NULL },
        { "reset", SEC_PLAYER, true, &HandleSpectateResetCommand, "", NULL },
        { "leave", SEC_PLAYER, true, &HandleSpectateCancelCommand, "", NULL },
+       { "liste", SEC_PLAYER, true, &HandleSpectateListeCommand, "", NULL },
        { NULL, 0, false, NULL, "", NULL }
      };
 

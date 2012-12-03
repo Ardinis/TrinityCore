@@ -73,7 +73,7 @@ std::string SpectatorAddonMsg::GetMsgData()
   std::string addonData = "";
 
   std::string msg = "";
-  if (isFilledIn(SPECTATOR_PREFIX_ARENALIST))
+  /*  if (isFilledIn(SPECTATOR_PREFIX_ARENALIST))
   {
     msg = "ARENALIST2C2";
     for (std::list<std::pair<std::string, uint64 > >::iterator it = arena2c2.begin(); it != arena2c2.end(); it++)
@@ -100,7 +100,7 @@ std::string SpectatorAddonMsg::GetMsgData()
     DisableFlag(SPECTATOR_PREFIX_ARENALIST);
     std::cout << addonData << std::endl;
     return addonData;
-  }
+    }*/
 
   if (!isFilledIn(SPECTATOR_PREFIX_PLAYER))
   {

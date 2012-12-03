@@ -424,7 +424,7 @@ public:
        { "watch", SEC_PLAYER, true, &HandleSpectateFromCommand, "", NULL },
        { "reset", SEC_PLAYER, true, &HandleSpectateResetCommand, "", NULL },
        { "leave", SEC_PLAYER, true, &HandleSpectateCancelCommand, "", NULL },
-       { "liste", SEC_PLAYER, true, &HandleSpectateListeCommand, "", NULL },
+       //       { "liste", SEC_PLAYER, true, &HandleSpectateListeCommand, "", NULL },
        { NULL, 0, false, NULL, "", NULL }
      };
 

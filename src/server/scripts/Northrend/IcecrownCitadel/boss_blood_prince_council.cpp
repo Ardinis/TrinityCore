@@ -260,9 +260,9 @@ class boss_blood_council_controller : public CreatureScript
                         }
 		    }
 		    }*/
-		
+
             }
-		
+
             void SetData(uint32 /*type*/, uint32 data)
             {
                 _resetCounter += uint8(data);
@@ -1033,7 +1033,7 @@ class boss_prince_valanar_icc : public CreatureScript
                                 DoCast(target, SPELL_KINETIC_BOMB_TARGET);
                                 Talk(SAY_VALANAR_SPECIAL);
                             }
-                            events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
+                            events.ScheduleEvent(EVENT_KINETIC_BOMB, RAID_MODE<uint32 >(30000, 20000, 30000, 20000));
                             break;
                         case EVENT_SHOCK_VORTEX:
                             if (_isEmpowered)
@@ -1280,7 +1280,7 @@ class npc_kinetic_bomb : public CreatureScript
                 me->SetSpeed(MOVE_FLIGHT, IsHeroic() ? 0.2f : 0.1f, true);
                 me->GetPosition(_x, _y, _groundZ);
                 _groundZ = me->GetMap()->GetHeight(me->GetPhaseMask(), _x, _y, _groundZ, true, 500.0f);
-		_events.ScheduleEvent(EVENT_BOMB_DESPAWN, 57000);
+		_events.ScheduleEvent(EVENT_BOMB_DESPAWN, 60000);
             }
 
             void DoAction(int32 const action)
@@ -1290,7 +1290,7 @@ class npc_kinetic_bomb : public CreatureScript
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
                     me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 15.0f, 1.0f, 15.0f);
+                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 30.0f, 1.0f, 15.0f);
                     _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 700);
                 }
             }

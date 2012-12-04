@@ -635,7 +635,7 @@ class DistancePredicate : public std::binary_function<Player*, Player*, bool>
         bool __dim3;
 };
 
-class GetNearestPlayers 
+class GetNearestPlayers
 {
     public:
         GetNearestPlayers(float distance, uint32 cap) : __distance(distance), __cap(cap) {}
@@ -779,10 +779,10 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
 		case ACTION_YOGGSARON_KILLED:
 		  if (Creature* yogg = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_YOGGSARON)))
 		    yogg->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-		  
+
 		  if (Creature* sara = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_SARA)))
 		    me->Kill(sara);
-		  
+
 		  if (events.GetNextEventTime(EVENT_ENRAGE) >= 480000)
 		    instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_HE_S_NOT_GETTING_ANY_OLDER_10, ACHIEVMENT_HE_S_NOT_GETTING_ANY_OLDER_25));
 		  if (!usedMindcontrol)
@@ -1740,7 +1740,7 @@ class boss_sara : public CreatureScript
 
             void UpdateAI(const uint32 diff)
             {
-	      if (myPhase == PHASE_NONE/* || me->HasUnitState(UNIT_STATE_CASTING)*/)		  
+	      if (myPhase == PHASE_NONE/* || me->HasUnitState(UNIT_STATE_CASTING)*/)
                     return;
 
                 events.Update(diff);
@@ -1833,7 +1833,8 @@ class boss_sara : public CreatureScript
                                         DoCast(SPELL_MALADY_OF_MIND);
                                         break;
                                     case 1:
-                                        DoCast(SPELL_BRAIN_LINK);
+				      me->CastCustomSpell(SPELL_BRAIN_LINK, SPELLVALUE_MAX_TARGETS, 2, me);
+				      //                                        DoCast(SPELL_BRAIN_LINK);
                                         break;
                                     case 2:
                                         DoCast(SPELL_DEATH_RAY_SUMMON);
@@ -2627,12 +2628,12 @@ class npc_influence_tentacle : public CreatureScript
 	      brain->AI()->DoAction(ACTION_TENTACLE_COUNT);
 	  }
 
-	  void Reset() 
+	  void Reset()
 	  {
 	    notStarted = false;
 	  }
 
-	  
+
 	  void DamageTaken(Unit* attacker, uint32 &damage)
 	  {
 	    if(attacker->ToPlayer())

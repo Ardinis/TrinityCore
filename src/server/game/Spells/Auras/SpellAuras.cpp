@@ -2559,8 +2559,8 @@ DynObjAura::DynObjAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* 
 {
     LoadScripts();
     ASSERT(GetDynobjOwner());
-    ASSERT(GetDynobjOwner()->IsInWorld());
-    ASSERT(GetDynobjOwner()->GetMap() == caster->GetMap());
+    //    ASSERT(GetDynobjOwner()->IsInWorld());
+    //    ASSERT(GetDynobjOwner()->GetMap() == caster->GetMap());
     _InitEffects(effMask, caster, baseAmount);
     GetDynobjOwner()->SetAura(this);
 }

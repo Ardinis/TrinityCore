@@ -730,12 +730,50 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equ
   (139422, 36847, 658, 3, 1, 0, 0, 1062.55, -23.7222, 634.076, 0.628319, 604800, 0, 0, 42, 0, 0, 0, 0, 0);
 */
 
+class spell_tyrannus_icy_blast : public SpellScriptLoader
+{
+public:
+  spell_tyrannus_icy_blast() : SpellScriptLoader("spell_tyrannus_icy_blast") { }
+
+  class spell_tyrannus_icy_blast_SpellScript : public SpellScript
+  {
+    PrepareSpellScript(spell_tyrannus_icy_blast_SpellScript);
+
+    bool Validate(SpellInfo const* /*spell*/)
+    {
+      if (!sSpellMgr->GetSpellInfo(SPELL_ICY_BLAST_AURA))
+	return false;
+      return true;
+    }
+
+    void HandleTriggerMissile(SpellEffIndex effIndex)
+    {
+      PreventHitDefaultEffect(effIndex);
+      if (Position const* pos = GetTargetDest())
+	if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICY_BLAST, *pos, TEMPSUMMON_TIMED_DESPAWN, 40000))
+	  summon->CastSpell(summon, SPELL_ICY_BLAST_AURA, true);
+    }
+
+    void Register()
+    {
+      OnEffectHitTarget += SpellEffectFn(spell_tyrannus_icy_blast_SpellScript::HandleTriggerMissile, EFFECT_1, SPELL_EFFECT_TRIGGER_MISSILE);
+    }
+  };
+
+  SpellScript* GetSpellScript() const
+  {
+    return new spell_tyrannus_icy_blast_SpellScript();
+  }
+};
+
+
 void AddSC_boss_tyrannus()
 {
     new boss_tyrannus();
     new boss_rimefang();
     new spell_tyrannus_overlord_brand();
     new spell_tyrannus_mark_of_rimefang();
+    new spell_tyrannus_icy_blast();
     new at_tyrannus_event_starter();
     new npc_tyrannus_icicle();
 }

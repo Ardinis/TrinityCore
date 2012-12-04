@@ -7319,7 +7319,12 @@ void Spell::EffectTitanGrip(SpellEffIndex /*effIndex*/)
         return;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_caster->ToPlayer()->SetCanTitanGrip(true);
+      if (Player* player = m_caster->ToPlayer())
+      {
+	player->SetCanTitanGrip(true);
+	if (player->HasTwoHandWeaponInOneHand() && !player->HasAura(49152))
+	  player->CastSpell(player, 49152, true);
+      }
 }
 
 void Spell::EffectRedirectThreat(SpellEffIndex /*effIndex*/)

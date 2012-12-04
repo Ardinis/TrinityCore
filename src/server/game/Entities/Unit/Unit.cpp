@@ -6094,6 +6094,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!target)
                         return false;
 
+		    if (HasAura(46924))
+		       return false;
+
                     triggered_spell_id = 26654;
                     break;
                 }

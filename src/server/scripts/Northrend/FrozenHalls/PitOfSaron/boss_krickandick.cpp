@@ -263,7 +263,7 @@ class boss_ick : public CreatureScript
                         case EVENT_PURSUIT:
                             if (Creature* krick = GetKrick())
                                 DoScriptText(RAND(SAY_KRICK_CHASE_1, SAY_KRICK_CHASE_2, SAY_KRICK_CHASE_3), krick);
-			    me->CastCustomSpell(SPELL_PURSUIT, SPELLVALUE_MAX_TARGETS, 1, me);
+                            DoCast(me, SPELL_PURSUIT);
                             break;
                         default:
                             break;
@@ -619,12 +619,6 @@ class spell_exploding_orb_hasty_grow : public SpellScriptLoader
         }
 };
 
-
-
-
-
-
-
 class spell_krick_pursuit : public SpellScriptLoader
 {
     public:
@@ -638,13 +632,11 @@ class spell_krick_pursuit : public SpellScriptLoader
             {
                 if (GetCaster()->GetTypeId() != TYPEID_UNIT)
                     return;
+
                 Unit* caster = GetCaster();
-		if (caster->ToCreature()->HasSpellCooldown(SPELL_PURSUIT))
-		  return;
                 CreatureAI* ickAI = caster->ToCreature()->AI();
-                if (Unit* target = ickAI->SelectTarget(SELECT_TARGET_RANDOM, 0))
+                if (Unit* target = ickAI->SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                 {
-		  caster->ToCreature()->_AddCreatureSpellCooldown(SPELL_PURSUIT, uint32 (time(NULL) + 3));
                     DoScriptText(SAY_ICK_CHASE_1, caster, target);
                     caster->AddAura(GetSpellInfo()->Id, target);
                     CAST_AI(boss_ick::boss_ickAI, ickAI)->SetTempThreat(caster->getThreatManager().getThreat(target));

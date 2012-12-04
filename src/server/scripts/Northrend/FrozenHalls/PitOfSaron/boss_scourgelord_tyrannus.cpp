@@ -521,30 +521,25 @@ class npc_tyrannus_icicle : public CreatureScript
 public:
   npc_tyrannus_icicle() : CreatureScript("npc_tyrannus_icicle") { }
 
-  struct npc_tyrannus_icicleAI : public ScriptedAI
+  struct npc_tyrannus_icicleAI : public Scripted_NoMovementAI
   {
-    npc_tyrannus_icicleAI(Creature *creature) : ScriptedAI(creature), _instanceScript(creature->GetInstanceScript())
+    npc_tyrannus_icicleAI(Creature *creature) : Scripted_NoMovementAI(creature), _instanceScript(creature->GetInstanceScript())
     {
-      InitializeAI();
     }
 
     void InitializeAI()
     {
       if (!_instanceScript || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != sObjectMgr->GetScriptId(PoSScriptName))
 	me->IsAIEnabled = false;
-      Reset();
     }
 
     uint32 IcicleTimer;
-    uint32 IcicleDTimer;
 
     void Reset()
     {
-      me->SetReactState(REACT_PASSIVE);
       IcicleTimer = urand(urand(10000, 15000), urand(20000, 30000));
-      IcicleDTimer = 3600000;
-      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-      me->GetMotionMaster()->MoveRandom(10.0f);
+      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+      me->SetReactState(REACT_PASSIVE);
     }
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage)
@@ -558,23 +553,11 @@ public:
       {
 	if (IcicleTimer <= diff)
 	{
-	  //	  DoCast(me, SPELL_FALL_DAMAGE);
-	  //	  DoCast(me, SPELL_ICICLE_FALL);
+	  DoCast(me, SPELL_FALL_DAMAGE);
+	  DoCast(me, SPELL_ICICLE_FALL);
 	  DoCast(me, SPELL_ICICLE);
-	  //  me->GetMotionMaster()->Clear();
-	  // me->StopMoving();
-	  // DoCast(me, 62462);
-	  IcicleTimer = urand(10000, 15000);
-	  IcicleDTimer = 4000;
+	  IcicleTimer = urand(urand(10000, 15000), urand(20000, 30000));
 	} else IcicleTimer -= diff;
-	if (IcicleDTimer <= diff)
-	{
-	  //	  DoCast(me, SPELL_FALL_DAMAGE);
-	  //	  DoCast(me, SPELL_ICICLE_FALL);
-	  //	  DoCast(me, SPELL_ICICLE);
-	  IcicleDTimer = 3600000;
-	  me->GetMotionMaster()->MoveRandom(10.0f);
-	} else IcicleDTimer -= diff;
       }
     }
 

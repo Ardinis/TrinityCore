@@ -224,6 +224,8 @@ class boss_tyrannus : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_INTRO_1:
+			  //victus 37580 alliance
+			  // gorkun 37581 horde
                             //DoScriptText(SAY_GORKUN_INTRO_2, pGorkunOrVictus);
                             break;
                         case EVENT_INTRO_2:

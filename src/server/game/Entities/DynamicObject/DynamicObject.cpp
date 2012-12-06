@@ -213,12 +213,6 @@ void DynamicObject::BindToCaster()
 {
     ASSERT(!_caster);
     _caster = ObjectAccessor::GetUnit(*this, GetCasterGUID());
-    if (!_caster)
-      {
-	WorldObject::RemoveFromWorld();
-        sObjectAccessor->RemoveObject(this);
-	return ;
-      }
     ASSERT(_caster);
     ASSERT(_caster->GetMap() == GetMap());
     _caster->_RegisterDynObject(this);

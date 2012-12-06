@@ -619,12 +619,6 @@ class spell_exploding_orb_hasty_grow : public SpellScriptLoader
         }
 };
 
-
-
-
-
-
-
 class spell_krick_pursuit : public SpellScriptLoader
 {
     public:
@@ -638,9 +632,11 @@ class spell_krick_pursuit : public SpellScriptLoader
             {
                 if (GetCaster()->GetTypeId() != TYPEID_UNIT)
                     return;
+
                 Unit* caster = GetCaster();
 		if (caster->ToCreature()->HasSpellCooldown(SPELL_PURSUIT))
-		  return;
+		    return;
+
                 CreatureAI* ickAI = caster->ToCreature()->AI();
                 if (Unit* target = ickAI->SelectTarget(SELECT_TARGET_RANDOM, 0))
                 {

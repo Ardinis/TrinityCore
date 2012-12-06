@@ -787,8 +787,8 @@ class npc_yogg_saron_encounter_controller : public CreatureScript   // Should be
 		    instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_HE_S_NOT_GETTING_ANY_OLDER_10, ACHIEVMENT_HE_S_NOT_GETTING_ANY_OLDER_25));
 		  if (!usedMindcontrol)
 		    instance->DoCompleteAchievement(RAID_MODE(ACHIEVMENT_DRIVE_ME_CRAZY_10, ACHIEVMENT_DRIVE_ME_CRAZY_25));
-		  if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL && CountKeepersActive() == 0)
-		    instance->DoCompleteAchievement(ACHIEVMENT_REALM_FIRST_DEATHS_DEMISE);
+		  //		  if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL && CountKeepersActive() == 0)
+		  //   instance->DoCompleteAchievement(ACHIEVMENT_REALM_FIRST_DEATHS_DEMISE);
 		  switch (CountKeepersActive())
 		    {
 		    case 0:

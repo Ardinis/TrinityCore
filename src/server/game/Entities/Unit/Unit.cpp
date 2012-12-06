@@ -1068,8 +1068,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
     /*	if (spellInfo->Id == 49045 || spellInfo->Id == 53209 || spellInfo->Id == 49050 || spellInfo->Id == 49052 || spellInfo->Id == 53351)
 	  damage *= 1.1;
 	  }*/
-      if (spellInfo->Id != 75 && HasAura(19490))
-	damage *= 1.3;
+      //      if (spellInfo->Id != 75 && HasAura(19490))
+      //	damage *= 0.3;
     }
 
     switch (spellInfo->DmgClass)

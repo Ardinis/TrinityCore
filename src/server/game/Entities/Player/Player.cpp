@@ -23723,7 +23723,8 @@ WorldObject* Player::GetViewpoint() const
 
 bool Player::CanUseBattlegroundObject(GameObject* gameobject)
 {
-
+  if (gameobject == NULL)
+    return false;
   FactionTemplateEntry const* playerFaction = getFactionTemplateEntry();
   FactionTemplateEntry const* faction = sFactionTemplateStore.LookupEntry(gameobject->GetUInt32Value(GAMEOBJECT_FACTION));
 

@@ -1390,12 +1390,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 					}
                 break;
             }
-            // Concussion Blow
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_CONCUSSION_BLOW)
-            {
-                m_damage += CalculatePctF(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                return;
-            }
             switch (m_spellInfo->Id)
             {
                 // Bloodthirst

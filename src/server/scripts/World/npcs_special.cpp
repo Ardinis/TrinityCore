@@ -5955,8 +5955,34 @@ public:
   }
 };
 
+
+#define GOSSIP_ITEM_MARIAGE   "Direction le mariage !"
+
+class npc_jump_mariage : public CreatureScript
+{
+public:
+  npc_jump_mariage() : CreatureScript("npc_jump_mariage") { }
+
+  bool OnGossipHello(Player* player, Creature* creature)
+  {
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MARIAGE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+    player->SEND_GOSSIP_MENU(TEXT_ID_DEFAULT, creature->GetGUID());
+    return true;
+  }
+
+  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+  {
+    player->PlayerTalkClass->ClearMenus();
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
+      player->GetMotionMaster()->MoveJump(3836.35f, -2867.5f, 131.5f, 50, 50);
+    return true;
+  }
+};
+
 void AddSC_npcs_special()
 {
+  new npc_jump_mariage;
 new npc_air_force_bots;
     new npc_lunaclaw_spirit;
     new npc_chicken_cluck;

@@ -1751,14 +1751,17 @@ class mob_toc_dk : public CreatureScript
                             events.ScheduleEvent(EVENT_DEATH_COIL, urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                             return;
                         case EVENT_DEATH_GRIP:
-                            if (me->IsInRange(me->getVictim(), 5.0f, 30.0f, false))
+			  {
+			    Unit *vic = me->getVictim();
+                            if (vic && me->IsInRange(vic, 5.0f, 30.0f, false))
                             {
-                                DoCast(me->getVictim(), SPELL_DEATH_GRIP);
+                                DoCast(vic, SPELL_DEATH_GRIP);
                                 events.RescheduleEvent(EVENT_DEATH_GRIP, 35*IN_MILLISECONDS);
                             }
                             else
                                 events.RescheduleEvent(EVENT_DEATH_GRIP, 3*IN_MILLISECONDS);
                             return;
+			  }
                         case EVENT_FROST_STRIKE:
                             DoCastVictim(SPELL_FROST_STRIKE);
                             events.ScheduleEvent(EVENT_FROST_STRIKE, urand(6*IN_MILLISECONDS, 10*IN_MILLISECONDS));

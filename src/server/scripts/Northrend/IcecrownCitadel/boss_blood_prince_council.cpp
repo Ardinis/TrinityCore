@@ -1290,12 +1290,15 @@ class npc_kinetic_bomb : public CreatureScript
                     _events.ScheduleEvent(EVENT_BOMB_DESPAWN, 1000);
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
+		  //if (!me->HasAura(SPELL_KINETIC_BOMB_KNOCKBACK))
+		  //  me->GetMotionMaster()->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
+		  // _events.RescheduleEvent(EVENT_CONTINUE_FALLING, 3000);
 		  if (!me->HasAura(SPELL_KINETIC_BOMB_KNOCKBACK))
-		    me->GetMotionMaster()->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
-		  _events.RescheduleEvent(EVENT_CONTINUE_FALLING, 3000);
-		  //                    me->GetMotionMaster()->Clear();
-		  //                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 30.0f, 1.0f, 15.0f);
-		  //      _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 700);
+		  {
+		    me->GetMotionMaster()->Clear();
+		    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 30.0f, 1.0f, 15.0f);
+		  }
+		  _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 3000);
                 }
             }
 

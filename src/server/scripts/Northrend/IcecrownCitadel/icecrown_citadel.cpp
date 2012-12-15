@@ -2637,6 +2637,11 @@ class npc_ess_disjointe : public CreatureScript
 	      me->SetMaxHealth(RAID_MODE(126000, 315000, 126000, 315000));
             }
 
+	  void JustReachedHome()
+	  {
+	    me->DespawnOrUnsummon();
+	  }
+
             void DoAction(int32 const action)
             {
 	      classPlayer = action;

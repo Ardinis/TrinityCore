@@ -145,10 +145,10 @@ class boss_rotface : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                _JustDied();	
+                _JustDied();
                 Talk(SAY_DEATH);
                 instance->DoRemoveAurasDueToSpellOnPlayers(MUTATED_INFECTION);
-                summons.DespawnAll();		
+                summons.DespawnAll();
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
             }
@@ -231,7 +231,7 @@ class boss_rotface : public CreatureScript
                                 Talk(EMOTE_SLIME_SPRAY);
 				//me->SetOrientation(me->GetOrientation() + 2.748895f);
                                 DoCast(stalker, SPELL_SLIME_SPRAY);
-                                instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); //utile pour Quete Rendez Vous. 
+                                instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); //utile pour Quete Rendez Vous.
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;
@@ -282,6 +282,7 @@ class npc_little_ooze : public CreatureScript
         {
             npc_little_oozeAI(Creature* creature) : ScriptedAI(creature)
             {
+	      me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             }
 
             void IsSummonedBy(Unit* summoner)
@@ -501,10 +502,10 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
 
                 std::list<Creature*> triggers;
                 GetHitUnit()->GetCreatureListWithEntryInGrid(triggers, GetHitUnit()->GetEntry(), 12.5f);
-				
-		if (triggers.empty())		  
+
+		if (triggers.empty())
                     return;
-					
+
                 triggers.sort(Trinity::ObjectDistanceOrderPred(GetHitUnit()));
                 GetHitUnit()->CastSpell(triggers.back(), uint32(GetEffectValue()), false, NULL, NULL, GetOriginalCaster() ? GetOriginalCaster()->GetGUID() : 0);
             }

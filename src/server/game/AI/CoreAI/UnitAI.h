@@ -22,6 +22,7 @@
 #include "Define.h"
 #include <list>
 #include "Unit.h"
+#include "Containers.h"
 
 class Unit;
 class Player;

@@ -307,9 +307,10 @@ class boss_lady_deathwhisper : public CreatureScript
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
                         if (unit->isAlive() && unit->GetEntry() != NPC_VENGEFUL_SHADE)
-                            livingAddEntries.insert(unit->GetEntry());
-
-                if (livingAddEntries.size() >= 5)
+			{
+			  livingAddEntries.insert(unit->GetEntry());
+			}
+                if (livingAddEntries.size() >= 4)
                     instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_FULL_HOUSE, 0, me);
 
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))
@@ -692,7 +693,6 @@ class npc_cult_fanatic : public CreatureScript
 	  {
 	    if (action == ACTION_PHASE_2)
 	    {
-	      me->MonsterYell("Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM)", LANG_UNIVERSAL, 0);
 	      Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
 	    }
 	  }
@@ -767,7 +767,6 @@ class npc_cult_adherent : public CreatureScript
 	  {
 	    if (action == ACTION_PHASE_2)
 	    {
-	      me->MonsterYell("Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM)", LANG_UNIVERSAL, 0);
 	      Events.CancelEvent(EVENT_CULTIST_DARK_MARTYRDOM);
 	    }
 	  }

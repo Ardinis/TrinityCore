@@ -103,6 +103,7 @@ enum Spells
     SPELL_UNSTABLE                      = 72059,
     SPELL_KINETIC_BOMB_VISUAL           = 72054,
     SPELL_KINETIC_BOMB_EXPLOSION        = 72052,
+    SPELL_KINETIC_BOMB_KNOCKBACK        = 72087,
 
     // Shock Vortex
     SPELL_SHOCK_VORTEX_PERIODIC         = 71945,
@@ -1289,9 +1290,12 @@ class npc_kinetic_bomb : public CreatureScript
                     _events.ScheduleEvent(EVENT_BOMB_DESPAWN, 1000);
                 else if (action == ACTION_KINETIC_BOMB_JUMP)
                 {
-                    me->GetMotionMaster()->Clear();
-                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 30.0f, 1.0f, 15.0f);
-                    _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 700);
+		  if (!me->HasAura(SPELL_KINETIC_BOMB_KNOCKBACK))
+		    me->GetMotionMaster()->MoveCharge(_x, _y, me->GetPositionZ() + 100.0f, me->GetSpeed(MOVE_RUN), 0);
+		  _events.RescheduleEvent(EVENT_CONTINUE_FALLING, 3000);
+		  //                    me->GetMotionMaster()->Clear();
+		  //                    me->GetMotionMaster()->MoveJump(_x, _y, me->GetPositionZ() + 30.0f, 1.0f, 15.0f);
+		  //      _events.ScheduleEvent(EVENT_CONTINUE_FALLING, 700);
                 }
             }
 

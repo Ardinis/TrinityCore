@@ -590,6 +590,7 @@ class boss_sindragosa : public CreatureScript
                             }
                             else
                             {
+                                events.RescheduleEvent(EVENT_ICY_GRIP, urand(35000, 40000));
                                 events.DelayEvents(11000, EVENT_GROUP_LAND_PHASE);
                                 me->GetMotionMaster()->MovePoint(POINT_LAND, SindragosaLandPos);
                             }

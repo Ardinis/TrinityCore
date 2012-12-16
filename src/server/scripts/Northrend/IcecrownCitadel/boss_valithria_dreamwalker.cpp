@@ -223,6 +223,9 @@ class ValithriaDespawner : public BasicEvent
         {
             Trinity::CreatureWorker<ValithriaDespawner> worker(_creature, *this);
             _creature->VisitNearbyGridObject(333.0f, worker);
+	    if (InstanceScript* instance = _creature->GetInstanceScript())
+	      if (Creature* triggerLK = ObjectAccessor::GetCreature(*_creature, instance->GetData64(DATA_VALITHRIA_LICH_KING)))
+		triggerLK->Respawn();
             return true;
         }
 

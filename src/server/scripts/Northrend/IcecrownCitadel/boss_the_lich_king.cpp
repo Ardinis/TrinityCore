@@ -1899,6 +1899,11 @@ class npc_strangulate_vehicle : public CreatureScript
                     lichKing->AI()->SummonedCreatureDespawn(me);
             }
 
+	  void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool /*apply*/)
+	  {
+	    passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+	  }
+
             void UpdateAI(uint32 const diff)
             {
                 UpdateVictim();
@@ -2155,7 +2160,7 @@ class npc_spirit_warden : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SOUL_RIP:
-                            DoCastVictim(SPELL_SOUL_RIP);
+			  //                            DoCastVictim(SPELL_SOUL_RIP);
                             _events.ScheduleEvent(EVENT_SOUL_RIP, urand(23000, 27000));
                             break;
                         default:

@@ -115,6 +115,7 @@ class boss_rotface : public CreatureScript
           {
             if (action == 42)
               {
+		std::cout << "do act 42 !!!" << std::endl;
 		std::list<Unit*> targets;
                 uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
                 SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
@@ -145,10 +146,10 @@ class boss_rotface : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                _JustDied();	
+                _JustDied();
                 Talk(SAY_DEATH);
                 instance->DoRemoveAurasDueToSpellOnPlayers(MUTATED_INFECTION);
-                summons.DespawnAll();		
+                summons.DespawnAll();
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
             }
@@ -231,7 +232,7 @@ class boss_rotface : public CreatureScript
                                 Talk(EMOTE_SLIME_SPRAY);
 				//me->SetOrientation(me->GetOrientation() + 2.748895f);
                                 DoCast(stalker, SPELL_SLIME_SPRAY);
-                                instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); //utile pour Quete Rendez Vous. 
+                                instance->DoCastSpellOnPlayers(SPELL_GREEN_BLIGHT_RESIDUE); //utile pour Quete Rendez Vous.
                             }
                             events.ScheduleEvent(EVENT_SLIME_SPRAY, 20000);
                             break;
@@ -282,6 +283,13 @@ class npc_little_ooze : public CreatureScript
         {
             npc_little_oozeAI(Creature* creature) : ScriptedAI(creature)
             {
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT, true);
+	      me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_THREAT, true);
+	      me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CRITICAL_THREAT, true);
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_THREAT_ALL, true);
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_MODIFY_THREAT_PERCENT, true);
+	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_REDIRECT_THREAT, true);
+	      me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             }
 
             void IsSummonedBy(Unit* summoner)
@@ -289,8 +297,18 @@ class npc_little_ooze : public CreatureScript
                 DoCast(me, SPELL_LITTLE_OOZE_COMBINE, true);
                 DoCast(me, SPELL_WEAK_RADIATING_OOZE, true);
                 events.ScheduleEvent(EVENT_STICKY_OOZE, 5000);
-                me->AddThreat(summoner, 500000.0f);
             }
+
+	  void EnterCombat(Unit* who)
+	  {
+	    if (Player* summoner = me->FindNearestPlayer(10))
+	      {
+		me->AddThreat(summoner, 50000000.0f);
+		std::cout << "NAME : " << summoner->GetName() << std::endl;
+		//		me->GetMotionMaster()->MoveFollow(summoner, 0.0f, 0.0f);
+	      }
+	    DoZoneInCombat();
+	  }
 
             void JustDied(Unit* /*killer*/)
             {
@@ -307,7 +325,7 @@ class npc_little_ooze : public CreatureScript
                 if (events.ExecuteEvent() == EVENT_STICKY_OOZE)
                 {
                     DoCastVictim(SPELL_STICKY_OOZE);
-                    events.ScheduleEvent(EVENT_STICKY_OOZE, 15000);
+		    events.ScheduleEvent(EVENT_STICKY_OOZE, 15000);
                 }
 
                 DoMeleeAttackIfReady();
@@ -501,10 +519,10 @@ class spell_rotface_ooze_flood : public SpellScriptLoader
 
                 std::list<Creature*> triggers;
                 GetHitUnit()->GetCreatureListWithEntryInGrid(triggers, GetHitUnit()->GetEntry(), 12.5f);
-				
-		if (triggers.empty())		  
+
+		if (triggers.empty())
                     return;
-					
+
                 triggers.sort(Trinity::ObjectDistanceOrderPred(GetHitUnit()));
                 GetHitUnit()->CastSpell(triggers.back(), uint32(GetEffectValue()), false, NULL, NULL, GetOriginalCaster() ? GetOriginalCaster()->GetGUID() : 0);
             }

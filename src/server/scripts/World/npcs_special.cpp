@@ -5980,8 +5980,65 @@ public:
   }
 };
 
+
+class npc_maggoc : public CreatureScript
+{
+public:
+  npc_maggoc() : CreatureScript("npc_maggoc") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_maggocAI (pCreature);
+  }
+
+  struct npc_maggocAI : public ScriptedAI
+  {
+    npc_maggocAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      Reset();
+    }
+
+    bool frenzie, loot;
+
+    void Reset()
+    {
+      frenzie = false;
+      loot = false;
+    }
+
+    void DamageTaken(Unit* doneBy, uint32& damage)
+    {
+      if (((me->GetHealth() - damage) * 100) / me->GetMaxHealth() <= 30 && !frenzie)
+      {
+	me->CastSpell(me, 36406, true);
+	frenzie = true;
+      }
+
+      if ((me->GetHealth() - damage) <= 0 && !loot)
+      {
+	if (doneBy->GetTypeId() == TYPEID_PLAYER)
+	  if (doneBy->ToPlayer()->GetQuestStatus(10996) == QUEST_STATUS_INCOMPLETE)
+	  {
+	    DoCast(39891);
+	    doneBy->ToPlayer()->AddItem(32380, 1);
+	  }
+	loot = true;
+      }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!UpdateVictim())
+	return;
+
+      DoMeleeAttackIfReady();
+    }
+  };
+};
+
 void AddSC_npcs_special()
 {
+  new npc_maggoc;
   new npc_jump_mariage;
 new npc_air_force_bots;
     new npc_lunaclaw_spirit;

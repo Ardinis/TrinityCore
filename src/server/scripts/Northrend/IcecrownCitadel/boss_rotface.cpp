@@ -304,7 +304,6 @@ class npc_little_ooze : public CreatureScript
 	    if (Player* summoner = me->FindNearestPlayer(10))
 	      {
 		me->AddThreat(summoner, 50000000.0f);
-		std::cout << "NAME : " << summoner->GetName() << std::endl;
 		//		me->GetMotionMaster()->MoveFollow(summoner, 0.0f, 0.0f);
 	      }
 	    DoZoneInCombat();

@@ -2252,7 +2252,7 @@ public:
         {
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDed(Unit* /*killer*/)
         {
             // Stop Feeding Gargoyle when it dies
             if (Unit* owner = me->GetOwner())
@@ -6013,16 +6013,17 @@ public:
 	me->CastSpell(me, 36406, true);
 	frenzie = true;
       }
+    }
 
-      if ((me->GetHealth() - damage) <= 0 && !loot)
+    void JustDied(Unit* doneBy)
+    {
+      if (doneBy->GetTypeId() == TYPEID_PLAYER)
       {
-	if (doneBy->GetTypeId() == TYPEID_PLAYER)
-	  if (doneBy->ToPlayer()->GetQuestStatus(10996) == QUEST_STATUS_INCOMPLETE)
-	  {
-	    DoCast(39891);
-	    doneBy->ToPlayer()->AddItem(32380, 1);
-	  }
-	loot = true;
+	if (doneBy->ToPlayer()->GetQuestStatus(10996) == QUEST_STATUS_INCOMPLETE)
+	{
+	  DoCast(39891);
+	  doneBy->ToPlayer()->AddItem(32380, 1);
+	}
       }
     }
 
@@ -6036,9 +6037,145 @@ public:
   };
 };
 
+class npc_grolloc : public CreatureScript
+{
+public:
+  npc_grolloc() : CreatureScript("npc_grolloc") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_grollocAI (pCreature);
+  }
+
+  struct npc_grollocAI : public ScriptedAI
+  {
+    npc_grollocAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      Reset();
+    }
+
+    bool frenzie, loot;
+
+    void Reset()
+    {
+      frenzie = false;
+      loot = false;
+      mui_cast1 = 1000;
+      mui_cast2 = 2000;
+    }
+    //20216
+    void DamageTaken(Unit* doneBy, uint32& damage)
+    {
+      if (((me->GetHealth() - damage) * 100) / me->GetMaxHealth() <= 30 && !frenzie)
+      {
+	if (me->HasUnitState(UNIT_STATE_CASTING))
+	  return;
+	me->CastSpell(me, 38771, true);
+	frenzie = true;
+      }
+    }
+
+    void JustDied(Unit* doneBy)
+    {
+      if (doneBy->GetTypeId() == TYPEID_PLAYER)
+      {
+	if (doneBy->ToPlayer()->GetQuestStatus(10995) == QUEST_STATUS_INCOMPLETE)
+	{
+	  doneBy->ToPlayer()->AddItem(32379, 1);
+	}
+      }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!UpdateVictim())
+	return;
+
+
+      if (me->HasUnitState(UNIT_STATE_CASTING))
+	return;
+
+      if (mui_cast1 <= uiDiff)
+      {
+	DoCast(21055);
+	mui_cast1 = 10000;
+      }
+      else mui_cast1 -= uiDiff;
+
+      if (mui_cast2 <= uiDiff)
+      {
+	if (Unit *un = me->getVictim())
+	  me->CastSpell(un, 38772, true);
+	mui_cast2 = 5000;
+      }
+      else mui_cast2 -= uiDiff;
+
+      DoMeleeAttackIfReady();
+    }
+
+    uint32 mui_cast2, mui_cast1;
+  };
+};
+
+class npc_skori : public CreatureScript
+{
+public:
+  npc_skori() : CreatureScript("npc_skori") { }
+
+  CreatureAI* GetAI(Creature* pCreature) const
+  {
+    return new npc_skoriAI (pCreature);
+  }
+
+  struct npc_skoriAI : public ScriptedAI
+  {
+    npc_skoriAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+      Reset();
+    }
+
+    bool frenzie, loot;
+
+    void Reset()
+    {
+      frenzie = false;
+      loot = false;
+    }
+
+    //20216
+    void DamageTaken(Unit* doneBy, uint32& damage)
+    {
+      if (((me->GetHealth() - damage) * 100) / me->GetMaxHealth() <= 30 && !frenzie)
+      {
+	me->CastSpell(me, 33958, true);
+	frenzie = true;
+      }
+    }
+
+    void JustDied(Unit* doneBy)
+    {
+      if (doneBy->GetTypeId() == TYPEID_PLAYER)
+      {
+	if (doneBy->ToPlayer()->GetQuestStatus(10997) == QUEST_STATUS_INCOMPLETE)
+	{
+	  doneBy->ToPlayer()->AddItem(32382, 1);
+	}
+      }
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+      if (!UpdateVictim())
+	return;
+
+      DoMeleeAttackIfReady();
+    }
+
+  };
+};
+
 void AddSC_npcs_special()
 {
-  new npc_maggoc;
   new npc_jump_mariage;
 new npc_air_force_bots;
     new npc_lunaclaw_spirit;
@@ -6107,4 +6244,8 @@ new npc_air_force_bots;
     new npc_wild_turkey();
     new spell_gen_feast_on();
     new spell_gen_turkey_tracker();
+
+  new npc_maggoc;
+  new npc_grolloc;
+  new npc_skori;
 }

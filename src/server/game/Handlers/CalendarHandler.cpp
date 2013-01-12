@@ -641,13 +641,19 @@ void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recvData)
   recvData >> mapId >> difficulty>> toggleExtend;
   sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
 
+  std::cout << "S:" << toggleExtend << std::endl;
+
   InstancePlayerBind* instanceBind = _player->GetBoundInstance(mapId, Difficulty(difficulty));
   if (!instanceBind || !instanceBind->save)
     return;
 
+  std::cout << toggleExtend << std::endl;
+  _player->BindToInstance(instanceBind->save, instanceBind->perm, false, toggleExtend == 1 ? instanceBind->extend | INSTANCE_EXTEND_EXTEND : instanceBind->extend & (~INSTANCE_EXTEND_EXTEND));
+
   InstanceSave* save = instanceBind->save;
+
   // http://www.wowwiki.com/Instance_Lock_Extension
-  // SendCalendarRaidLockoutUpdated(save);
+  SendCalendarRaidLockoutUpdated(save);
 }
 
 // ----------------------------------- SEND ------------------------------------

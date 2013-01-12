@@ -42,7 +42,7 @@ class LFGScripts: public GroupScript, public PlayerScript, public GameEventScrip
         void OnLevelChanged(Player* player, uint8 oldLevel);
         void OnLogout(Player* player);
         void OnLogin(Player* player);
-        void OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent);
+        void OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool permanent, bool extend);
 
 		// GameEvent Hooks
 		void OnEventStart(uint16 event_id);

@@ -362,7 +362,7 @@ class boss_devourer_of_souls : public CreatureScript
                             me->StopMoving();
 			    float x, y;
 			    me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
-			    if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 500))
+			    if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 2000))
 			      me->SetTarget(temp->GetGUID());
                             DoCast(me, SPELL_WAILING_SOULS);
 
@@ -373,7 +373,8 @@ class boss_devourer_of_souls : public CreatureScript
                                 me->SetReactState(REACT_AGGRESSIVE);
                                 me->SetDisplayId(DISPLAY_ANGER);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                                me->GetMotionMaster()->MoveChase(me->getVictim());
+				if (Unit *vic = me->getVictim())
+				  me->GetMotionMaster()->MoveChase(vic);
                                 events.ScheduleEvent(EVENT_WAILING_SOULS, urand(60000, 70000));
                             }
                             break;

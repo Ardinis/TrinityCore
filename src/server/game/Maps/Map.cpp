@@ -1028,6 +1028,28 @@ void Map::UnloadAll()
     }
 }
 
+void Map::DeleteRespawnTimes()
+{
+  //  _creatureRespawnTimes.clear();
+  //  _goRespawnTimes.clear();
+
+  DeleteRespawnTimesInDB(GetId(), GetInstanceId());
+}
+
+void Map::DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId)
+{
+  PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CREATURE_RESPAWN_BY_INSTANCE);
+  //  stmt->setUInt16(0, mapId);
+  stmt->setUInt32(0, instanceId);
+  CharacterDatabase.Execute(stmt);
+
+  stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GO_RESPAWN_BY_INSTANCE);
+  //  stmt->setUInt16(0, mapId);
+  stmt->setUInt32(0, instanceId);
+  CharacterDatabase.Execute(stmt);
+}
+
+
 // *****************************
 // Grid function
 // *****************************

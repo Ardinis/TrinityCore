@@ -461,6 +461,10 @@ class Map : public GridRefManager<NGridType>
         void Insert(const GameObjectModel& mdl) { _dynamicTree.insert(mdl); }
         bool Contains(const GameObjectModel& mdl) const { return _dynamicTree.contains(mdl);}
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
+
+	void DeleteRespawnTimes();
+	void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);

@@ -177,7 +177,7 @@ enum eArgentValiant
     SPELL_CHARGE                = 63010,
     SPELL_SHIELD_BREAKER        = 65147,
     SPELL_DEFEND                = 62719,
-    SPELL_THRUST                = 62544,	
+    SPELL_THRUST                = 62544,
 
     NPC_ARGENT_VALIANT_CREDIT   = 24108
 };
@@ -204,7 +204,7 @@ public:
     {
         npc_argent_valiantAI(Creature* creature) : ScriptedAI(creature)
         {
-		
+
             me->CastSpell(me, SPELL_DEFEND, true);
             me->CastSpell(me, SPELL_DEFEND, true);
             creature->GetMotionMaster()->MovePoint(0, 8599.258f, 963.951f, 547.553f);
@@ -298,7 +298,7 @@ public:
                 DoCastVictim(SPELL_SHIELD_BREAKER);
                 uiShieldBreakerTimer = 10000;
             } else uiShieldBreakerTimer -= uiDiff;
-			
+
             if (uiDefendTimer <= uiDiff)
             {
                me->CastSpell(me, SPELL_DEFEND, true);
@@ -564,7 +564,7 @@ class npc_tournament_training_dummy : public CreatureScript
 };
 
 /*######
-## Squire Danny 
+## Squire Danny
 ## Quest The Valiant's Challenge 13699-13713-13723-13724-13725-13726-13727-13728-13729-13731.
 SELECT * FROM quest_template WHERE title LIKE 'The Valiant%s Challenge'
 ######*/
@@ -573,13 +573,13 @@ enum eSquireDanny
 {
     NPC_ARGENT_CHAMPION_CREDIT                          = 33708,
     NPC_ARGENT_CHAMPION                                 = 33707,
-    SAY_START_VALIANT                                   = -1850013,//"You believe you are ready to be a champion? Defend yourself!"  
+    SAY_START_VALIANT                                   = -1850013,//"You believe you are ready to be a champion? Defend yourself!"
     SAY_END_VALIANT                                     = -1850014//"Most impressive. You are worthy to gain the rank of champion"
 };
 
 struct QUEST_THE_VALIANT_CHALLENGE
-{ 
-  uint32 quest_id; 
+{
+  uint32 quest_id;
 };
 
 QUEST_THE_VALIANT_CHALLENGE m_quest[] = {13699, 13713, 13723, 13724, 13725, 13726, 13727, 13728, 13729, 13731};
@@ -592,7 +592,7 @@ public:
     npc_squire_danny() : CreatureScript("npc_squire_danny") { }
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
-    {    
+    {
         for (int i = 0; i < 10; i++)
         {
             if (((pPlayer->GetQuestStatus(m_quest[i].quest_id) == QUEST_STATUS_INCOMPLETE))&&
@@ -652,7 +652,7 @@ class npc_training_dummy_argent : public CreatureScript
 {
 public:
        npc_training_dummy_argent(): CreatureScript("npc_training_dummy_argent"){}
-             
+
        struct npc_training_dummy_argentAI : Scripted_NoMovementAI
        {
            npc_training_dummy_argentAI(Creature *pCreature) : Scripted_NoMovementAI(pCreature)
@@ -694,7 +694,7 @@ public:
            }
 
                void SpellHit(Unit* caster,const SpellInfo* spell)
-               {              
+               {
                        if(caster->GetCharmerOrOwner())
                        {
                        Player * pPlayer = caster->GetCharmerOrOwner()->ToPlayer();
@@ -734,7 +734,7 @@ public:
                    return;
                if (!me->HasUnitState(UNIT_STATE_STUNNED))
                    me->SetControlled(true,UNIT_STATE_STUNNED);//disable rotate
-                      
+
                if (Npc_Entry != NPC_ADVANCED_TARGET_DUMMY && Npc_Entry != NPC_TARGET_DUMMY)
                {
                        if (ResetTimer <= diff)
@@ -810,7 +810,7 @@ public:
 	pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,GOSSIP_VALIANT_1,GOSSIP_SENDER_MAIN,GOSSIP_ACTION_INFO_DEF);
 	pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
       }
-    else if((pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_1) == QUEST_STATUS_INCOMPLETE)|| 
+    else if((pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_1) == QUEST_STATUS_INCOMPLETE)||
 	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_2) == QUEST_STATUS_INCOMPLETE) ||
 	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_3) == QUEST_STATUS_INCOMPLETE) ||
 	    (pPlayer->GetQuestStatus(QUEST_THE_GRAND_MELEE_4) == QUEST_STATUS_INCOMPLETE) ||
@@ -828,7 +828,7 @@ public:
       pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetGUID());
     return true;
   }
-  
+
   bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
   {
     if (!pPlayer)
@@ -844,9 +844,11 @@ public:
 	  pCreature->SetReactState(REACT_AGGRESSIVE);
 	  pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 	  pCreature->AddThreat(veh, 100000.0f);
+	  pCreature->AI()->SetGUID(veh->GetGUID(), 0);
 	  pCreature->AI()->AttackStart(veh);
 	  pCreature->AI()->DoAction(1);
 	  pCreature->AI()->DoAction(SAY_AGG);
+
 	  break;
 	}
       case GOSSIP_ACTION_INFO_DEF+1:
@@ -855,6 +857,7 @@ public:
 	  pCreature->SetReactState(REACT_AGGRESSIVE);
 	  pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 	  pCreature->AddThreat(veh, 100000.0f);
+	  pCreature->AI()->SetGUID(veh->GetGUID(), 0);
 	  pCreature->AI()->AttackStart(veh);
 	  pCreature->AI()->DoAction(2);
 	  pCreature->AI()->DoAction(SAY_AGG);
@@ -864,20 +867,21 @@ public:
     pPlayer->CLOSE_GOSSIP_MENU();
     return true;
   }
-       
+
 
 struct npc_valiantAI : public ScriptedAI
 {
-  Unit *pTargetit;
   uint32 SpellTimer;
   uint32 MoviTimer;
   uint32 act;
+  uint64 plGUID;
 
 public:
-  npc_valiantAI(Creature* creature) : ScriptedAI(creature) 
+  npc_valiantAI(Creature* creature) : ScriptedAI(creature)
   {
     me->setFaction(35);
     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    plGUID = 0;
   }
 
   enum Spells
@@ -903,7 +907,7 @@ public:
     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     if (act != 1 && act != 2)
       act = 0;
-    pTargetit = NULL;
+    plGUID = 0;
   }
 
   void EnterCombat(Unit* who)
@@ -916,10 +920,13 @@ public:
   {
     me->MonsterSay(SAY_END, LANG_UNIVERSAL, 0);
     me->setFaction(35);
-    if (act == 1 && pTargetit)
-      pTargetit->CastSpell(pTargetit, MUNTED_MELEE_VICTORY, true);
-    else if (act == 2 && pTargetit)
-      pTargetit->CastSpell(pTargetit, MUNTED_MELEE2_VICTORY, true);
+    Creature* victims = Unit::GetCreature(*me, plGUID);
+    if (!victims)
+      return;
+    if (act == 1)
+      victims->CastSpell(victims, MUNTED_MELEE_VICTORY, true);
+    else if (act == 2)
+      victims->CastSpell(victims, MUNTED_MELEE2_VICTORY, true);
     me->Respawn(true);
     EnterEvadeMode();
   }
@@ -950,8 +957,8 @@ public:
 	      break;
 	    }
 	  break;
-	}	
-      default : 
+	}
+      default :
 	break;
       }
   }
@@ -961,7 +968,7 @@ public:
     Reset();
     EnterEvadeMode();
   }
-       
+
   void SpellHit(Unit *caster, const SpellInfo *spell)
   {
     if (spell->Id == SHIELD_BREAKER)
@@ -969,7 +976,7 @@ public:
 	me->RemoveAura(DEFEND);
       }
   }
-       
+
   void SpellHitTarget(Unit *pTarget, const SpellInfo *spell)
   {
     if (spell->Id == SHIELD_BREAKER && pTarget)
@@ -983,74 +990,84 @@ public:
 
     if (me->isAttackReady())
       {
-	if (me->getVictim())
-	  if (me->IsWithinMeleeRange(me->getVictim()))
+	Creature* victims = Unit::GetCreature(*me, plGUID);
+	if (!victims)
+	  return;
+	  if (me->IsWithinMeleeRange(victims))
 	    {
-	      DoCastVictim(SPELL_THRUST);
+	      me->CastSpell(victims, SPELL_THRUST, true);
 	      me->resetAttackTimer();
 	    }
       }
   }
 
-       
+  void SetGUID(uint64 guid, int32 id)
+  {
+    plGUID = guid;
+  }
+
   void UpdateAI(const uint32 uiDiff)
   {
-    if (!UpdateVictim())
-      return;
+
 	if (SpellTimer <= uiDiff)
 	  {
-	    if (pTargetit = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
+	    Creature* victims = Unit::GetCreature(*me, plGUID);
+	    if (!victims)
+	    {
+	    SpellTimer = urand(TIMER_SPELL_MIN, TIMER_SPELL_MAX);
+	      return;
+	    }
 	      {
-		if (((pTargetit->GetPositionX() - me->GetPositionX()) <= 2) && ((pTargetit->GetPositionY() - me->GetPositionY()) <= 2))
+		if (((victims->GetPositionX() - me->GetPositionX()) <= 2) && ((victims->GetPositionY() - me->GetPositionY()) <= 2))
 		  {
 		    switch (urand(0,4))
 		      {
-		      case 0: 
+		      case 0:
 			me->CastSpell(me, DEFEND, true);
-		      break; 
-		      case 1: 
+		      break;
+		      case 1:
 			DoCastAOE(THRUST, true);
 			break;
-		      case 2: 
+		      case 2:
 			DoCastAOE(THRUST, true);
 			break;
-		      case 3: 
+		      case 3:
 			DoCastAOE(THRUST, true);
 		      break;
-		      case 4: 
+		      case 4:
 			DoCastAOE(THRUST, true);
 			break;
 		      }
-		  } 
-		if (((pTargetit->GetPositionX() - me->GetPositionX()) > 2) && ((pTargetit->GetPositionY() - me->GetPositionY()) > 2))
+		  }
+		if (((victims->GetPositionX() - me->GetPositionX()) > 2) && ((victims->GetPositionY() - me->GetPositionY()) > 2))
 		  {
 		    switch (urand(0,7))
 		      {
-		      case 0: 
+		      case 0:
 			DoCastAOE(SHIELD_BREAKER, true);
-			pTargetit->RemoveAura(DEFEND);
+			victims->RemoveAura(DEFEND);
 			break;
-		      case 1: 
+		      case 1:
 			DoCastAOE(SHIELD_BREAKER, true);
-			pTargetit->RemoveAura(DEFEND);
+			victims->RemoveAura(DEFEND);
 		    break;
-		      case 2: 
+		      case 2:
 			DoCastAOE(SHIELD_BREAKER, true);
-			pTargetit->RemoveAura(DEFEND);
+			victims->RemoveAura(DEFEND);
 			break;
-		      case 3: 
+		      case 3:
 			DoCastAOE(CHARGE, true);
 			break;
-		      case 4: 
+		      case 4:
 			DoCastAOE(CHARGE, true);
 			break;
- 		      case 5: 
+ 		      case 5:
 			DoCastAOE(CHARGE, true);
 			break;
-		      case 6: 
+		      case 6:
 			DoCastAOE(CHARGE, true);
 			break;
-		      case 7: 
+		      case 7:
 			me->CastSpell(me, DEFEND, true);
 			break;
 		      }
@@ -1062,35 +1079,40 @@ public:
 
 	if (MoviTimer <= uiDiff)
 	  {
-	    if (pTargetit = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 200, true))
+	    Creature* victims = Unit::GetCreature(*me, plGUID);
+            if (!victims)
+	    {
+	      MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
+              return;
+	    }
 	      switch (urand(0,8))
 		{
-		case 0: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() + 4), pTargetit->GetPositionY(), pTargetit->GetPositionZ());
+		case 0:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() + 4), victims->GetPositionY(), victims->GetPositionZ());
 		  break;
-		case 1: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX()), (pTargetit->GetPositionY() - 5), pTargetit->GetPositionZ());
+		case 1:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX()), (victims->GetPositionY() - 5), victims->GetPositionZ());
 		  break;
-		case 2: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 2), (pTargetit->GetPositionY() + 1), pTargetit->GetPositionZ());
+		case 2:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() - 2), (victims->GetPositionY() + 1), victims->GetPositionZ());
 		break;
-		case 3: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 3), (pTargetit->GetPositionY() - 4), pTargetit->GetPositionZ());
+		case 3:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() - 3), (victims->GetPositionY() - 4), victims->GetPositionZ());
 		  break;
-		case 4: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 1), (pTargetit->GetPositionY() + 5), pTargetit->GetPositionZ());
+		case 4:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() - 1), (victims->GetPositionY() + 5), victims->GetPositionZ());
 		  break;
-		case 5: 
-		me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 4), (pTargetit->GetPositionY() + 5), pTargetit->GetPositionZ());
+		case 5:
+		me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() - 4), (victims->GetPositionY() + 5), victims->GetPositionZ());
 		break;
-		case 6: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX()), (pTargetit->GetPositionY()), pTargetit->GetPositionZ());
+		case 6:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX()), (victims->GetPositionY()), victims->GetPositionZ());
 		  break;
-		case 7: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 5), (pTargetit->GetPositionY() + 2), pTargetit->GetPositionZ());
+		case 7:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() - 5), (victims->GetPositionY() + 2), victims->GetPositionZ());
 		  break;
-		case 8: 
-		  me->GetMotionMaster()->MovePoint(0, (pTargetit->GetPositionX() - 5), (pTargetit->GetPositionY() - 1), pTargetit->GetPositionZ());
+		case 8:
+		  me->GetMotionMaster()->MovePoint(0, (victims->GetPositionX() - 5), (victims->GetPositionY() - 1), victims->GetPositionZ());
 		  break;
 		}
 	    MoviTimer = urand(TIMER_MoviTimer_MIN,TIMER_MoviTimer_MAX);
@@ -1112,5 +1134,5 @@ void AddSC_icecrown()
   new npc_vereth_the_cunning();
   new npc_tournament_training_dummy();
   // new npc_training_dummy_argent();
-  //  new npc_valiant();
+    new npc_valiant();
 }

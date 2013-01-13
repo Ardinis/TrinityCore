@@ -1148,7 +1148,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char *args)
                         {
                             QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
 
-							switch (status) 
+							switch (status)
                             {
                                 case QUEST_STATUS_COMPLETE:
                                     statusStr = GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
@@ -1196,7 +1196,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char *args)
             {
                 QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
 
-				switch (status) 
+				switch (status)
                 {
                     case QUEST_STATUS_COMPLETE:
                         statusStr = GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
@@ -4200,8 +4200,13 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char *args)
             {
                 std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
                 PSendSysMessage("unbinding map: %d inst: %d perm: %s diff: %d canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no", save->GetDifficulty(), save->CanReset() ? "yes" : "no", timeleft.c_str());
-                player->UnbindInstance(itr, Difficulty(i));
-                counter++;
+                if (player->UnbindInstance(itr, Difficulty(i)))
+		  counter++;
+		else
+		{
+		  PSendSysMessage("unbinding map fail because extend was active !");
+		  ++itr;
+		}
             }
             else
                 ++itr;

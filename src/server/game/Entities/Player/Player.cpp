@@ -18600,18 +18600,32 @@ InstanceSave* Player::GetInstanceSave(uint32 mapid, bool raid)
     return pSave;
 }
 
-void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
+bool Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
 {
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-    UnbindInstance(itr, difficulty, unload);
+    return UnbindInstance(itr, difficulty, unload);
 }
 
-void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
+bool Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload)
 {
     if (itr != m_boundInstances[difficulty].end())
     {
         if (!unload)
         {
+	  if (itr->second.isExtended())
+	  {
+	    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_INSTANCE_EXTEND_BY_GUID);
+
+	    stmt->setBool(0, false);
+	    stmt->setUInt32(1, GetGUIDLow());
+	    stmt->setUInt32(2, itr->second.save->GetInstanceId());
+
+	    CharacterDatabase.Execute(stmt);
+	    itr->second.extend = 0;
+	    SendRaidInfo();
+	    return false;
+	  }
+
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INSTANCE_BY_INSTANCE_GUID);
 
             stmt->setUInt32(0, GetGUIDLow());
@@ -18626,6 +18640,7 @@ void Player::UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficu
         itr->second.save->RemovePlayer(this);               // save can become invalid
         m_boundInstances[difficulty].erase(itr++);
     }
+    return true;
 }
 
 InstancePlayerBind* Player::BindToInstance(InstanceSave* save, bool permanent, bool load, uint8 extend)
@@ -18792,7 +18807,8 @@ void Player::ConvertInstancesToGroup(Player* player, Group* group, bool switchLe
             if (switchLeader && !itr->second.perm)
             {
                 // increments itr in call
-                player->UnbindInstance(itr, Difficulty(i), false);
+	      if (!player->UnbindInstance(itr, Difficulty(i), false))
+		++itr;
             }
             else
                 ++itr;

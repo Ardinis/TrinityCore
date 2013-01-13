@@ -627,20 +627,21 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     if (IsAIEnabled)
         GetAI()->DamageDealt(victim, damage, damagetype);
 
-    if (victim && victim->GetTypeId() == TYPEID_PLAYER)
+    if (victim && victim->GetTypeId() == TYPEID_PLAYER && this != victim)
     {
-      //      if (victim->ToPlayer()->GetCommandStatus(CHEAT_GOD))
-      //	return 0;
-
       // Signal to pets that their owner was attacked
       if (victim->ToPlayer())
       {
 	Pet* pet = victim->ToPlayer()->GetPet();
 
 	if (pet && pet->isAlive() && pet->AI())
-	  pet->AI()->OwnerDamagedBy(this);
+	  pet->AI()->OwnerAttackedBy(this);
       }
     }
+
+    // Signal the pet it was attacked so the AI can respond if needed
+    if (victim->GetTypeId() == TYPEID_UNIT && this != victim && victim->isPet() && victim->isAlive())
+      victim->ToPet()->AI()->AttackedBy(this);
 
     if (damagetype != NODAMAGE)
     {
@@ -18825,6 +18826,16 @@ uint32 Unit::GetResistance(SpellSchoolMask mask) const
 void CharmInfo::SetIsCommandAttack(bool val)
 {
     m_isCommandAttack = val;
+}
+
+void CharmInfo::SetIsCommandFollow(bool val)
+{
+  _isCommandFollow = val;
+}
+
+bool CharmInfo::IsCommandFollow()
+{
+  return _isCommandFollow;
 }
 
 bool CharmInfo::IsCommandAttack()

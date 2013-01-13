@@ -87,7 +87,7 @@ void LFGScripts::OnRemoveMember(Group* group, uint64 guid, RemoveMethod method, 
     {
         if (method == GROUP_REMOVEMETHOD_LEAVE && player->GetMap()->IsDungeon() && sLFGMgr->GetState(gguid) != LFG_STATE_FINISHED_DUNGEON)
             player->CastSpell(player, LFG_SPELL_DUNGEON_DESERTER, true);
-	
+
         /*
         if (method == GROUP_REMOVEMETHOD_LEAVE)
             // Add deserter flag
@@ -167,7 +167,7 @@ void LFGScripts::OnLogin(Player* player)
     // TODO - Restore LfgPlayerData and send proper status to player if it was in a group
 }
 
-void LFGScripts::OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool /*permanent*/)
+void LFGScripts::OnBindToInstance(Player* player, Difficulty difficulty, uint32 mapId, bool /*permanent*/, bool /*extend*/)
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (mapEntry->IsDungeon() && difficulty > DUNGEON_DIFFICULTY_NORMAL)

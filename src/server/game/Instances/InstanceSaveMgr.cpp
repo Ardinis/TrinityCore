@@ -107,16 +107,7 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
 
     //    sLog->outDebug("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d", mapId, instanceId);
 
-    time_t lastResetTime = 0;
-
-    QueryResult result = CharacterDatabase.PQuery("SELECT lastresettime FROM instance WHERE id = %u", instanceId);
-    if (result)
-    {
-      Field* fields = result->Fetch();
-      uint32 lastResetTime = fields[0].GetUInt32();
-    }
-
-    InstanceSave *save = new InstanceSave(mapId, instanceId, difficulty, resetTime, canReset, lastResetTime);
+    InstanceSave* save = new InstanceSave(mapId, instanceId, difficulty, resetTime, canReset);
     if (!load)
         save->SaveToDB();
 
@@ -171,8 +162,8 @@ void InstanceSaveManager::RemoveInstanceSave(uint32 InstanceId)
     }
 }
 
-InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, Difficulty difficulty, time_t resetTime, bool canReset, time_t lastResetTime)
-  : m_resetTime(resetTime), m_lastResetTime(lastResetTime), m_instanceid(InstanceId), m_mapid(MapId),
+InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, Difficulty difficulty, time_t resetTime, bool canReset)
+: m_resetTime(resetTime), m_instanceid(InstanceId), m_mapid(MapId),
   m_difficulty(difficulty), m_canReset(canReset)
 {
 }
@@ -206,7 +197,7 @@ void InstanceSave::SaveToDB()
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_INSTANCE_SAVE);
     stmt->setUInt32(0, m_instanceid);
     stmt->setUInt16(1, GetMapId());
-    stmt->setUInt32(2, uint32(GetResetTime()));
+    stmt->setUInt32(2, uint32(GetResetTimeForDB()));
     stmt->setUInt8(3, uint8(GetDifficulty()));
     stmt->setUInt32(4, completedEncounters);
     stmt->setString(5, data);
@@ -221,25 +212,6 @@ time_t InstanceSave::GetResetTimeForDB()
         return 0;
     else
         return GetResetTime();
-}
-
-time_t InstanceSave::GetDefaultResetTime()
-{
-  return sInstanceSaveMgr->GetResetTimeFor(m_mapid, m_difficulty);
-}
-
-time_t InstanceSave::GetNextResetTime()
-{
-  uint64 period = 0;
-  MapDifficulty const* mapDiff = GetMapDifficultyData(m_mapid, m_difficulty);
-  if (mapDiff && mapDiff->resetTime)
-  {
-    period = uint64(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
-    if (period < DAY)
-      period = DAY;
-  }
-
-  return GetDefaultResetTime() + period;
 }
 
 // to cache or not to cache, that is the question
@@ -277,11 +249,8 @@ void InstanceSaveManager::LoadInstances()
     uint32 oldMSTime = getMSTime();
 
     // Delete expired instances (Instance related spawns are removed in the following cleanup queries)
-    //    CharacterDatabase.DirectExecute("DELETE i FROM instance i LEFT JOIN instance_reset ir ON mapid = map AND i.difficulty = ir.difficulty "
-    //                             "WHERE (i.resettime > 0 AND i.resettime < UNIX_TIMESTAMP()) OR (ir.resettime IS NOT NULL AND ir.resettime < UNIX_TIMESTAMP())");
-
-    // Delete expired instances
-    //CharacterDatabase.DirectExecute("DELETE FROM instance i WHERE i.lastresettime > 0 AND i.lastresettime + INTERVAL 31 DAY < UNIX_TIMESTAMP()");
+    CharacterDatabase.DirectExecute("DELETE i FROM instance i LEFT JOIN instance_reset ir ON mapid = map AND i.difficulty = ir.difficulty "
+                                    "WHERE (i.resettime > 0 AND i.resettime < UNIX_TIMESTAMP()) OR (ir.resettime IS NOT NULL AND ir.resettime < UNIX_TIMESTAMP())");
 
     // Delete invalid character_instance and group_instance references
     CharacterDatabase.DirectExecute("DELETE ci.* FROM character_instance AS ci LEFT JOIN characters AS c ON ci.guid = c.guid WHERE c.guid IS NULL");
@@ -367,14 +336,10 @@ void InstanceSaveManager::LoadResetTimes()
                 time_t resettime = time_t(fields[0].GetUInt32() + 2 * HOUR);
                 InstResetTimeMapDiffType::iterator itr = instResetTime.find(instance);
                 if (itr != instResetTime.end() && itr->second.second != resettime)
-		{
-		  const MapEntry *entry = sMapStore.LookupEntry(PAIR32_LOPART(itr->second.first));
-		  if (entry && entry->map_type != MAP_RAID)
-		  {
-		    CharacterDatabase.DirectPExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u' AND difficulty = 0", uint64(resettime), instance);
-		    itr->second.second = resettime;
-		  }
-		}
+                {
+                    CharacterDatabase.DirectPExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u'", uint64(resettime), instance);
+                    itr->second.second = resettime;
+                }
             }
             while (result->NextRow());
         }

@@ -13837,7 +13837,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 		speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
 	      }
 	      else
-		speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
+		speed *= sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_run;
+	      //		speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
 	    }
 
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need

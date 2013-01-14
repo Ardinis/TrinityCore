@@ -1623,7 +1623,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, Unit const* target, b
      */
     if (!caster->IsVehicle() && !(caster->GetCharmerOrOwner() == target))
     {
-      if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
+      if (TargetAuraState && !target->HasAuraState(AuraStateType(TargetAuraState), this, caster))
 	return SPELL_FAILED_TARGET_AURASTATE;
 
       if (TargetAuraStateNot && target->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))

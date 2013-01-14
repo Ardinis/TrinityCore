@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,8 +23,10 @@ SDComment: Darkglare tracking issue
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "temple_of_ahnqiraj.h"
+#include "Player.h"
 
 /*
  * This is a 2 phases events. Here follows an explanation of the main events and transition between phases and sub-phases.
@@ -56,8 +58,6 @@ EndScriptData */
  * - the current phase is stored in the instance data to be easily shared between the eye and cthun.
  */
 
-#define PI                          3.14
-
 enum Phases
 {
     PHASE_NOT_STARTED                           = 0,
@@ -72,24 +72,6 @@ enum Phases
     PHASE_CTHUN_WEAK                            = 5,
 
     PHASE_CTHUN_DONE                            = 6,
-};
-
-enum Creatures
-{
-    MOB_CTHUN_PORTAL                            = 15896,
-
-    // ***** Main Phase 1 ********
-    BOSS_EYE_OF_CTHUN                           = 15589,
-    MOB_CLAW_TENTACLE                           = 15725,
-    MOB_EYE_TENTACLE                            = 15726,
-    MOB_SMALL_PORTAL                            = 15904,
-
-    // ***** Main Phase 2 ********
-    MOB_BODY_OF_CTHUN                           = 15809,
-    MOB_GIANT_CLAW_TENTACLE                     = 15728,
-    MOB_GIANT_EYE_TENTACLE                      = 15334,
-    MOB_FLESH_TENTACLE                          = 15802,
-    MOB_GIANT_PORTAL                            = 15910,
 };
 
 enum Spells
@@ -140,7 +122,7 @@ enum Actions
 enum Yells
 {
     //Text emote
-    EMOTE_WEAKENED                              = -1531011,
+    EMOTE_WEAKENED                              = 0,
 
     // ****** Out of Combat ******
     // Random Wispers - No txt only sound
@@ -176,11 +158,11 @@ public:
 
     struct eye_of_cthunAI : public Scripted_NoMovementAI
     {
-        eye_of_cthunAI(Creature* c) : Scripted_NoMovementAI(c)
+        eye_of_cthunAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             if (!instance)
-                sLog->outError("TSCR: No Instance eye_of_cthunAI");
+                sLog->outError("No Instance eye_of_cthunAI");
         }
 
         InstanceScript* instance;
@@ -480,13 +462,13 @@ public:
 
     struct cthunAI : public Scripted_NoMovementAI
     {
-        cthunAI(Creature* c) : Scripted_NoMovementAI(c)
+        cthunAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             SetCombatMovement(false);
 
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             if (!instance)
-                sLog->outError("TSCR: No Instance eye_of_cthunAI");
+                sLog->outError("No Instance eye_of_cthunAI");
         }
 
         InstanceScript* instance;
@@ -607,7 +589,8 @@ public:
                 if (WisperTimer <= diff)
                 {
                     Map* map = me->GetMap();
-                    if (!map->IsDungeon()) return;
+                    if (!map->IsDungeon())
+                        return;
 
                     //Play random sound to the zone
                     Map::PlayerList const &PlayerList = map->GetPlayers();
@@ -709,7 +692,7 @@ public:
                     {
                         instance->SetData(DATA_CTHUN_PHASE, PHASE_CTHUN_WEAK);
 
-                        DoScriptText(EMOTE_WEAKENED, me);
+                        Talk(EMOTE_WEAKENED);
                         PhaseTimer = 45000;
 
                         DoCast(me, SPELL_PURPLE_COLORATION, true);
@@ -935,7 +918,7 @@ public:
 
     struct eye_tentacleAI : public Scripted_NoMovementAI
     {
-        eye_tentacleAI(Creature* c) : Scripted_NoMovementAI(c)
+        eye_tentacleAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             if (Creature* pPortal = me->SummonCreature(MOB_SMALL_PORTAL, *me, TEMPSUMMON_CORPSE_DESPAWN))
             {
@@ -948,7 +931,7 @@ public:
         uint32 KillSelfTimer;
         uint64 Portal;
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (Unit* p = Unit::GetUnit(*me, Portal))
                 p->Kill(p);
@@ -1008,7 +991,7 @@ public:
 
     struct claw_tentacleAI : public Scripted_NoMovementAI
     {
-        claw_tentacleAI(Creature* c) : Scripted_NoMovementAI(c)
+        claw_tentacleAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             SetCombatMovement(false);
 
@@ -1024,7 +1007,7 @@ public:
         uint32 EvadeTimer;
         uint64 Portal;
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (Unit* p = Unit::GetUnit(*me, Portal))
                 p->Kill(p);
@@ -1118,7 +1101,7 @@ public:
 
     struct giant_claw_tentacleAI : public Scripted_NoMovementAI
     {
-        giant_claw_tentacleAI(Creature* c) : Scripted_NoMovementAI(c)
+        giant_claw_tentacleAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             SetCombatMovement(false);
 
@@ -1135,7 +1118,7 @@ public:
         uint32 EvadeTimer;
         uint64 Portal;
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (Unit* p = Unit::GetUnit(*me, Portal))
                 p->Kill(p);
@@ -1237,7 +1220,7 @@ public:
 
     struct giant_eye_tentacleAI : public Scripted_NoMovementAI
     {
-        giant_eye_tentacleAI(Creature* c) : Scripted_NoMovementAI(c)
+        giant_eye_tentacleAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             SetCombatMovement(false);
 
@@ -1251,7 +1234,7 @@ public:
         uint32 BeamTimer;
         uint64 Portal;
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (Unit* p = Unit::GetUnit(*me, Portal))
                 p->Kill(p);
@@ -1301,7 +1284,7 @@ public:
 
     struct flesh_tentacleAI : public Scripted_NoMovementAI
     {
-        flesh_tentacleAI(Creature* c) : Scripted_NoMovementAI(c)
+        flesh_tentacleAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
             SetCombatMovement(false);
         }

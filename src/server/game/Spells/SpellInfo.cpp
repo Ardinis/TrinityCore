@@ -1614,11 +1614,21 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, Unit const* target, b
     if (target->HasUnitState(UNIT_STATE_IN_FLIGHT))
         return SPELL_FAILED_BAD_TARGETS;
 
-    if (TargetAuraState && !target->HasAuraState(AuraStateType(TargetAuraState), this, caster))
-        return SPELL_FAILED_TARGET_AURASTATE;
+    // TARGET_UNIT_MASTER gets blocked here for passengers, because the whole idea of this check is to
+    // not allow passengers to be implicitly hit by spells, however this target type should be an exception,
+    // if this is left it kills spells that award kill credit from vehicle to master and some or all* spells,
+    // the use of these 2 covers passenger target check
+    /*
+      blablabla
+     */
+    if (!caster->IsVehicle() && !(caster->GetCharmerOrOwner() == target))
+    {
+      if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
+	return SPELL_FAILED_TARGET_AURASTATE;
 
-    if (TargetAuraStateNot && target->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))
+      if (TargetAuraStateNot && target->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))
         return SPELL_FAILED_TARGET_AURASTATE;
+    }
 
     if (TargetAuraSpell && !target->HasAura(sSpellMgr->GetSpellIdForDifficulty(TargetAuraSpell, caster)))
         return SPELL_FAILED_TARGET_AURASTATE;

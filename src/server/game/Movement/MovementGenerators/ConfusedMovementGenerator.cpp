@@ -33,46 +33,56 @@ template<class T>
 void ConfusedMovementGenerator<T>::Initialize(T &unit)
 {
   unit.StopMoving();
-    const float wander_distance=4;
-    float x,y,z;
-    x = unit.GetPositionX();
-    y = unit.GetPositionY();
-    z = unit.GetPositionZ();
+  float const wander_distance = 4;
+  float x = unit.GetPositionX();
+  float y = unit.GetPositionY();
+  float z = unit.GetPositionZ();
 
-    Map const* map = unit.GetBaseMap();
+  Map const* map = unit.GetBaseMap();
 
-    i_nextMove = 1;
+  i_nextMove = 1;
 
-    bool is_water_ok, is_land_ok;
-    _InitSpecific(unit, is_water_ok, is_land_ok);
+  bool is_water_ok, is_land_ok;
+  _InitSpecific(unit, is_water_ok, is_land_ok);
 
-    for (uint8 idx = 0; idx < MAX_CONF_WAYPOINTS + 1; ++idx)
+  for (uint8 idx = 0; idx < MAX_CONF_WAYPOINTS + 1; ++idx)
+  {
+    float wanderX = x + (wander_distance * (float)rand_norm() - wander_distance/2);
+    float wanderY = y + (wander_distance * (float)rand_norm() - wander_distance/2);
+
+    // prevent invalid coordinates generation
+    Trinity::NormalizeMapCoord(wanderX);
+    Trinity::NormalizeMapCoord(wanderY);
+
+    if (unit.IsWithinLOS(wanderX, wanderY, z))
     {
-        const float wanderX=wander_distance*(float)rand_norm() - wander_distance/2;
-        const float wanderY=wander_distance*(float)rand_norm() - wander_distance/2;
+      bool is_water = map->IsInWater(wanderX, wanderY, z);
 
-        i_waypoints[idx][0] = x + wanderX;
-        i_waypoints[idx][1] = y + wanderY;
-
-        // prevent invalid coordinates generation
-        Trinity::NormalizeMapCoord(i_waypoints[idx][0]);
-        Trinity::NormalizeMapCoord(i_waypoints[idx][1]);
-
-        bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1],z);
-        // if generated wrong path just ignore
-        if ((is_water && !is_water_ok) || (!is_water && !is_land_ok))
-        {
-            i_waypoints[idx][0] = idx > 0 ? i_waypoints[idx-1][0] : x;
-            i_waypoints[idx][1] = idx > 0 ? i_waypoints[idx-1][1] : y;
-        }
-
-        unit.UpdateAllowedPositionZ(i_waypoints[idx][0], i_waypoints[idx][1], z);
-        i_waypoints[idx][2] =  z;
+      if ((is_water && !is_water_ok) || (!is_water && !is_land_ok))
+      {
+	//! Cannot use coordinates outside our InhabitType. Use the current or previous position.
+	wanderX = idx > 0 ? i_waypoints[idx-1][0] : x;
+	wanderY = idx > 0 ? i_waypoints[idx-1][1] : y;
+      }
+    }
+    else
+    {
+      //! Trying to access path outside line of sight. Skip this by using the current or previous position.
+      wanderX = idx > 0 ? i_waypoints[idx-1][0] : x;
+      wanderY = idx > 0 ? i_waypoints[idx-1][1] : y;
     }
 
-    unit.StopMoving();
-    unit.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-    unit.AddUnitState(UNIT_STATE_CONFUSED|UNIT_STATE_CONFUSED_MOVE);
+    unit.UpdateAllowedPositionZ(wanderX, wanderY, z);
+
+    //! Positions are fine - apply them to this waypoint
+    i_waypoints[idx][0] = wanderX;
+    i_waypoints[idx][1] = wanderY;
+    i_waypoints[idx][2] = z + 0.5f; // for undemarp gestion
+  }
+
+  unit.StopMoving();
+  unit.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+  unit.AddUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_CONFUSED_MOVE);
 }
 
 template<>

@@ -182,7 +182,7 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
                 {
                     x = temp_x;
                     y = temp_y;
-                    z = new_z;
+                    z = new_z + 0.5f; // anti undermap
                     return true;
                 }
             }

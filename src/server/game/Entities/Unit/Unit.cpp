@@ -14004,14 +14004,6 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
     }
 }
 
-void Unit::SetHover(bool on)
-{
-    if (on)
-        CastSpell(this, 11010, true);
-    else
-        RemoveAurasDueToSpell(11010);
-}
-
 void Unit::setDeathState(DeathState s)
 {
     // death state needs to be updated before RemoveAllAurasOnDeath() calls HandleChannelDeathItem(..) so that
@@ -18652,6 +18644,22 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
     return (relocated || turn);
 }
 
+//! Only server-side orientation update, does not broadcast to client
+void Unit::UpdateOrientation(float orientation)
+{
+  SetOrientation(orientation);
+  if (IsVehicle())
+    GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+}
+
+//! Only server-side height update, does not broadcast to client
+void Unit::UpdateHeight(float newZ)
+{
+  Relocate(GetPositionX(), GetPositionY(), newZ);
+  if (IsVehicle())
+    GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+}
+
 void Unit::SendThreatListUpdate()
 {
     if (!getThreatManager().isThreatListEmpty())
@@ -18956,9 +18964,9 @@ bool Unit::SetDisableGravity(bool disable, bool /*packetOnly = false*/)
     return false;
 
   if (disable)
-    AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+    AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
   else
-    RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+    RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
 
   return true;
 }

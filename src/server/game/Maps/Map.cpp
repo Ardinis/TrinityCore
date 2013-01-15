@@ -1590,7 +1590,6 @@ float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NU
         ZLiquidStatus res = getLiquidStatus(x, y, ground_z, MAP_ALL_LIQUIDS, &liquid_status);
         return res ? liquid_status.level : ground_z;
     }
-
     return VMAP_INVALID_HEIGHT_VALUE;
 }
 

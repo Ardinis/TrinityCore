@@ -103,6 +103,12 @@ public:
                 DoScriptText(SAY_END_IRO, me);
                 SetRun(false);
                 break;
+	    case 29:
+	      me->SetVisible(false);
+	      break;
+	    case 30:
+	      me->SetVisible(true);
+	      break;
             }
         }
 
@@ -137,19 +143,27 @@ public:
         player->PlayerTalkClass->ClearMenus();
         if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
         {
-            CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
-            CAST_AI(npc_escortAI, (creature->AI()))->SetMaxPlayerDistance(35.0f);
-            creature->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
-            DoScriptText(SAY_START_IRO, creature);
+	  if (Creature *c = creature->SummonCreature(creature->GetEntry(),
+						     creature->GetPositionX(),
+						     creature->GetPositionY(),
+						     creature->GetPositionZ(),
+						     creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 120000))
+	  {
+            CAST_AI(npc_escortAI, (c->AI()))->Start(true, false, player->GetGUID());
+            CAST_AI(npc_escortAI, (c->AI()))->SetMaxPlayerDistance(35.0f);
+            c->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
+            DoScriptText(SAY_START_IRO, c);
 
             switch (player->GetTeam()){
             case ALLIANCE:
-                creature->setFaction(FACTION_ESCORTEE_A);
+                c->setFaction(FACTION_ESCORTEE_A);
                 break;
             case HORDE:
-                creature->setFaction(FACTION_ESCORTEE_H);
+                c->setFaction(FACTION_ESCORTEE_H);
                 break;
             }
+	    creature->DespawnOrUnsummon();
+	  }
         }
         return true;
     }

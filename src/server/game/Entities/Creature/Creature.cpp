@@ -420,12 +420,26 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
         ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
     }
 
-    // TODO: In fact monster move flags should be set - not movement flags.
-    if (cInfo->InhabitType & INHABIT_AIR)
-        AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
+    // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
+    float ground = GetPositionZ();
+    GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &ground);
 
-    if (cInfo->InhabitType & INHABIT_WATER)
-        AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    bool isInAir = G3D::fuzzyGt(GetPositionZ(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZ(), ground - 0.05f); // Can be underground too, prevent the falling
+
+    if (cInfo->InhabitType & INHABIT_AIR && cInfo->InhabitType & INHABIT_GROUND && isInAir)
+      SetCanFly(true);
+    else if (cInfo->InhabitType & INHABIT_AIR && isInAir)
+      SetDisableGravity(true);
+    else
+    {
+      SetCanFly(false);
+      SetDisableGravity(false);
+    }
+
+    if (cInfo->InhabitType & INHABIT_WATER && IsInWater())
+      AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    else
+      RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
 
     return true;
 }
@@ -2463,15 +2477,52 @@ bool Creature::IsDungeonBoss() const
     return cinfo && (cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS);
 }
 
-void Creature::SetWalk(bool enable)
+bool Creature::SetWalk(bool enable)
 {
-    if (enable)
-        AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-    else
-        RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
-    data.append(GetPackGUID());
-    SendMessageToSet(&data, true);
+  if (!Unit::SetWalk(enable))
+    return false;
+
+  WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
+  data.append(GetPackGUID());
+  SendMessageToSet(&data, false);
+  return true;
+}
+
+bool Creature::SetDisableGravity(bool disable, bool packetOnly/*=false*/)
+{
+  //! It's possible only a packet is sent but moveflags are not updated
+  //! Need more research on this
+  if (!packetOnly && !Unit::SetDisableGravity(disable))
+    return false;
+
+  if (!movespline->Initialized())
+    return true;
+
+  WorldPacket data(disable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
+  data.append(GetPackGUID());
+  SendMessageToSet(&data, false);
+  return true;
+}
+
+bool Creature::SetHover(bool enable)
+{
+  if (!Unit::SetHover(enable))
+    return false;
+
+  //! Unconfirmed for players:
+  if (enable)
+    SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_HOVER);
+  else
+    RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_HOVER);
+
+  if (!movespline->Initialized())
+    return true;
+
+  //! Not always a packet is sent
+  WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
+  data.append(GetPackGUID());
+  SendMessageToSet(&data, false);
+  return true;
 }
 
 void Creature::SetLevitate(bool enable)

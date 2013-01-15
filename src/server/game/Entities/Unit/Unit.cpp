@@ -18936,3 +18936,55 @@ void Unit::SetFacingToObject(WorldObject* pObject)
     // TODO: figure out under what conditions creature will move towards object instead of facing it where it currently is.
     SetFacingTo(GetAngle(pObject));
 }
+
+bool Unit::SetWalk(bool enable)
+{
+  if (enable == IsWalking())
+    return false;
+
+  if (enable)
+    AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+  else
+    RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+
+  return true;
+}
+
+bool Unit::SetDisableGravity(bool disable, bool /*packetOnly = false*/)
+{
+  if (disable == IsLevitating())
+    return false;
+
+  if (disable)
+    AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+  else
+    RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+
+  return true;
+}
+
+bool Unit::SetHover(bool enable)
+{
+  if (enable == HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+    return false;
+
+  if (enable)
+  {
+    //! No need to check height on ascent
+    AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
+    if (float hh = GetFloatValue(UNIT_FIELD_HOVERHEIGHT))
+      UpdateHeight(GetPositionZ() + hh);
+  }
+  else
+  {
+    RemoveUnitMovementFlag(MOVEMENTFLAG_HOVER);
+    if (float hh = GetFloatValue(UNIT_FIELD_HOVERHEIGHT))
+    {
+      float newZ = GetPositionZ() - hh;
+      UpdateAllowedPositionZ(GetPositionX(), GetPositionY(), newZ);
+      UpdateHeight(newZ);
+    }
+  }
+
+  return true;
+}

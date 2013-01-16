@@ -139,7 +139,7 @@ class boss_ayamiss : public CreatureScript
                 events.ScheduleEvent(EVENT_SWARMER_ATTACK, 60000);
                 events.ScheduleEvent(EVENT_PARALYZE, 15000);
 
-                me->SetCanFly(true);
+                me->SetFlying(true);
                 me->SetDisableGravity(true);
                 me->GetMotionMaster()->MovePoint(POINT_AIR, AyamissAirPos);
             }
@@ -155,7 +155,7 @@ class boss_ayamiss : public CreatureScript
                 {
                     _phase = PHASE_GROUND;
                     SetCombatMovement(true);
-                    me->SetCanFly(false);
+                    me->SetFlying(false);
                     Position VictimPos;
                     me->getVictim()->GetPosition(&VictimPos);
                     me->GetMotionMaster()->MovePoint(POINT_GROUND, VictimPos);

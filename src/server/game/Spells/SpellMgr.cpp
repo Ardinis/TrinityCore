@@ -3750,9 +3750,6 @@ void SpellMgr::LoadDbcDataCorrections()
 			case 53648:
 			  spellInfo->EffectSpellClassMask[0] = flag96(0x00000000, 0x00000000, 0x00000020);
 			  break;
-	case 45524: // Chains of Ice
-	  spellInfo->EffectImplicitTargetA[EFFECT_2] = 0;
-	  break;
 	case 2378: // Minor Fortitude
 	  spellInfo->manaCost = 0;
 	  spellInfo->manaPerSecond = 0;

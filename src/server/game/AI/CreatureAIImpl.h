@@ -611,6 +611,9 @@ inline void UnitAI::DoCast(Unit* victim, uint32 spellId, bool triggered)
 
 inline void UnitAI::DoCastVictim(uint32 spellId, bool triggered)
 {
+  if (!me->getVictim() || (me->HasUnitState(UNIT_STATE_CASTING) && !triggered))
+    return;
+
     me->CastSpell(me->getVictim(), spellId, triggered);
 }
 

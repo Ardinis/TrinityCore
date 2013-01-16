@@ -136,9 +136,7 @@ void InstanceSaveManager::DeleteInstanceFromDB(uint32 instanceid)
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INSTANCE_BY_INSTANCE);
     stmt->setUInt32(0, instanceid);
-    QueryResult result = CharacterDatabase.PQuery("SELECT instance.id, instance.difficulty FROM character_instance, instance WHERE character_instance.instance = instance.id AND character_instance.extend = 0 AND character_instance.instance = %u", instanceid);
-    if (!result)
-      trans->Append(stmt);
+    trans->Append(stmt);
 
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INSTANCE_BY_INSTANCE);
     stmt->setUInt32(0, instanceid);
@@ -543,7 +541,6 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     lock_instLists = true;
 
     InstanceSave::PlayerListType &pList = itr->second->m_playerList;
-
     while (!pList.empty())
     {
         Player* player = *(pList.begin());
@@ -646,19 +643,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INSTANCE_BY_MAP_DIFF);
         stmt->setUInt16(0, uint16(mapid));
         stmt->setUInt8(1, uint8(difficulty));
-	QueryResult result = CharacterDatabase.PQuery("SELECT instance.id FROM character_instance, instance WHERE character_instance.instance = instance.id AND character_instance.extend != 1 AND instance.map = %u and instance.difficulty = %u", mapid, difficulty);
-        if (result)
-	{
-	  do
-	  {
-	    uint32 instanceId = result->Fetch()[0].GetUInt32();
-	    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INSTANCE_BY_INSTANCE);
-	    stmt->setUInt32(0, uint32(instanceId));
-	    trans->Append(stmt);
-	  } while (result->NextRow());
-	}
-	else
-	  trans->Append(stmt);
+        trans->Append(stmt);
 
         CharacterDatabase.CommitTransaction(trans);
 

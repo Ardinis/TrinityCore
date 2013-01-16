@@ -74,6 +74,23 @@ void ConfusedMovementGenerator<T>::Initialize(T &unit)
 
     unit.UpdateAllowedPositionZ(wanderX, wanderY, z);
 
+    float maxZ = 5.0f;
+    if (map->GetId() == 617)
+      maxZ = 2.0f;
+    float diffZ = ((idx > 0 ? i_waypoints[idx-1][2] : x) - 0.5f) - z;
+    if (idx > 0 && diffZ > maxZ)
+    {
+      wanderX = i_waypoints[idx-1][0];
+      wanderY = i_waypoints[idx-1][1];
+      z = i_waypoints[idx-1][2];
+    }
+    else if (diffZ > maxZ)
+    {
+      wanderX = x;
+      wanderY = y;
+      z = unit.GetPositionZ();
+    }
+
     //! Positions are fine - apply them to this waypoint
     i_waypoints[idx][0] = wanderX;
     i_waypoints[idx][1] = wanderY;

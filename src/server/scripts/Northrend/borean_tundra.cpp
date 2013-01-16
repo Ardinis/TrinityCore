@@ -2583,7 +2583,7 @@ void AddSC_borean_tundra()
     new npc_mootoo_the_younger;
     new npc_bonker_togglevolt;
     new npc_trapped_mammoth_calf;
-    new npc_magmoth_crusher;
+    //  new npc_magmoth_crusher;
     new npc_seaforium_depth_charge;
     new npc_valiance_keep_cannoneer;
     new npc_warmage_coldarra;

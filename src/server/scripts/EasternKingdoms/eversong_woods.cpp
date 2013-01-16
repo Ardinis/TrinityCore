@@ -629,6 +629,6 @@ void AddSC_eversong_woods()
     new npc_second_trial_controller();
     new npc_second_trial_paladin();
     new go_second_trial();
-    new npc_apprentice_mirveda();
+    //    new npc_apprentice_mirveda();
     new npc_infused_crystal();
 }

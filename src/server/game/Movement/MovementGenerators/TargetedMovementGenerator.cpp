@@ -103,31 +103,14 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
             return;
     */
 
-    float ground = z;
-    CreatureTemplate const* cinfo = NULL;
-
-    if (owner.GetTypeId() != TYPEID_PLAYER)
-      cinfo = owner.ToCreature()->GetCreatureInfo();
-
-    if (cinfo && !(cinfo->InhabitType & INHABIT_AIR) && !owner.IsFlying() && !owner.canFly() && owner.GetTransport() == NULL)
-    {
-      Map const* map = owner.GetMap();
-      map->GetWaterOrGroundLevel(x, y, z, &ground);
-      if (ground == -200000 && map->IsNonRaidDungeon())
-      {
-	ground = z;
-	map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, &ground);
-      }
-      if (ground == -200000)
-	ground = z;
-    }
+    owner.UpdateAllowedPositionZ(x, y, z);
 
     D::_addUnitStateMove(owner);
     i_targetReached = false;
     i_recalculateTravel = false;
 
     Movement::MoveSplineInit init(owner);
-    init.MoveTo(x,y,ground);
+    init.MoveTo(x,y,z);
     init.SetWalk(((D*)this)->EnableWalking());
     init.Launch();
 }
@@ -198,26 +181,10 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
 
 	float dist = 0.0f;
 	CreatureTemplate const* cinfo = NULL;
+	float ground = i_target->GetPositionZ();
+	owner.UpdateAllowedPositionZ(i_target->GetPositionX(), i_target->GetPositionY(), ground);
 
-	if (owner.GetTypeId() != TYPEID_PLAYER)
-	  cinfo = owner.ToCreature()->GetCreatureInfo();
-
-	if (cinfo && !(cinfo->InhabitType & INHABIT_AIR) && !owner.IsFlying() && !owner.canFly() && owner.GetTransport() == NULL)
-	{
-	  float ground = i_target->GetPositionZ();
-	  i_target->GetMap()->GetWaterOrGroundLevel(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ(), &ground);
-	  if (ground == -200000 && i_target->GetMap()->IsNonRaidDungeon())
-	  {
-	    ground = i_target->GetPositionZ();
-	    i_target->GetMap()->GetWaterOrGroundLevel(i_target->GetPositionX(), i_target->GetPositionY(), MAX_HEIGHT, &ground);
-	  }
-	  if (ground == -200000)
-	    ground = i_target->GetPositionZ();
-
-	  dist = (owner.movespline->FinalDestination() - G3D::Vector3(i_target->GetPositionX(),i_target->GetPositionY(), ground)).squaredLength();
-	}
-	else
-	  dist = (owner.movespline->FinalDestination() - G3D::Vector3(i_target->GetPositionX(),i_target->GetPositionY(),i_target->GetPositionZ())).squaredLength();
+	dist = (owner.movespline->FinalDestination() - G3D::Vector3(i_target->GetPositionX(),i_target->GetPositionY(), ground)).squaredLength();
 
         if (dist >= allowed_dist * allowed_dist)
 	  _setTargetLocation(owner);

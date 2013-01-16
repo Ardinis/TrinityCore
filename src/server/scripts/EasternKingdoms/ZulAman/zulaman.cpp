@@ -468,7 +468,11 @@ class spell_banging_the_gong : public SpellScriptLoader
             void Activate(SpellEffIndex index)
             {
                 PreventHitDefaultEffect(index);
-                GetHitGObj()->SendCustomAnim(0);
+		if (Unit *c = GetCaster())
+		{
+		    if (GameObject *gob = c->FindNearestGameObject(187359, 100))
+		      gob->SendCustomAnim(0);
+		}
             }
 
             void Register()

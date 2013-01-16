@@ -187,7 +187,11 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
 	dist = (owner.movespline->FinalDestination() - G3D::Vector3(i_target->GetPositionX(),i_target->GetPositionY(), ground)).squaredLength();
 
         if (dist >= allowed_dist * allowed_dist)
-	  _setTargetLocation(owner);
+	{
+	  if (!(owner.GetTypeId() == TYPEID_UNIT && !owner.ToCreature()->canWalk() && owner.ToCreature()->canSwim() && !i_target->IsInWater()) &&
+	      !(owner.GetTypeId() == TYPEID_UNIT && !owner.ToCreature()->canSwim() && i_target->IsInWater()))
+	    _setTargetLocation(owner);
+	}
     }
 
     if (owner.movespline->Finalized())

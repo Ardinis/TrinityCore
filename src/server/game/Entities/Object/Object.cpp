@@ -1573,6 +1573,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                     if (z > max_z)
                         z = max_z;
                     else //if (z < ground_z)
+		      if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
                         z = ground_z;
                 }
 		else if (!map->IsDungeon() && !map->IsRaid())
@@ -1586,7 +1587,8 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                     if (z > max_z)
 		      z = max_z;
                     else //if (z < ground_z)
-		      z = ground_z;
+		      if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
+			z = ground_z;
 		  }
 		}
             }

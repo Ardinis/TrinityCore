@@ -18,7 +18,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "scholomance.h"
-#include "MoveSplineInit.h"
+// #include "MoveSplineInit.h"
 #include "GameObjectAI.h"
 #include "Player.h"
 
@@ -173,7 +173,7 @@ class boss_kirtonos_the_herald : public CreatureScript
                                 me->SetWalk(true);
                                 me->SetDisableGravity(false);
                                 DoCast(me, SPELL_KIRTONOS_TRANSFORM);
-                                me->SetCanFly(false);
+                                me->SetFlying(false);
                                 _introTimer = 1000;
                                 _introEvent = INTRO_5;
                                 break;
@@ -240,13 +240,13 @@ class boss_kirtonos_the_herald : public CreatureScript
                             {
                                 me->RemoveAura(SPELL_KIRTONOS_TRANSFORM);
                                 me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(0));
-                                me->SetCanFly(false);
+                                me->SetFlying(false);
                             }
                             else
                             {
                                 DoCast(me, SPELL_KIRTONOS_TRANSFORM);
                                 me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(WEAPON_KIRTONOS_STAFF));
-                                me->SetCanFly(true);
+                                me->SetFlying(true);
                             }
                             events.ScheduleEvent(EVENT_KIRTONOS_TRANSFORM, urand(16000, 18000));
                             break;

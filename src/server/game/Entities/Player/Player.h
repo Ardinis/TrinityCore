@@ -36,6 +36,7 @@
 #include "Unit.h"
 #include "Util.h"                                           // for Tokens typedef
 #include "WorldSession.h"
+#include "InstanceSaveMgr.h"
 
 // for template
 #include "SpellMgr.h"
@@ -845,15 +846,22 @@ enum PlayerDelayedOperations
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
 #define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+#define INSTANCE_EXTEND_EXTEND              1
+#define INSTANCE_EXTEND_LOCK                2
 
 struct InstancePlayerBind
 {
     InstanceSave* save;
     bool perm;
+    uint8 extend;
+  bool isExtended() const { return extend & INSTANCE_EXTEND_EXTEND; }
+  bool isLock() const { return extend & INSTANCE_EXTEND_LOCK; }
+  bool isExpired() const { return save && (save->GetResetTime() < time(NULL) && !isExtended() && !isLock()); }
+
     /* permanent PlayerInstanceBinds are created in Raid/Heroic instances for players
        that aren't already permanently bound when they are inside when a boss is killed
        or when they enter an instance that the group leader is permanently bound to. */
-    InstancePlayerBind() : save(NULL), perm(false) {}
+   InstancePlayerBind() : save(NULL), perm(false), extend(0) {}
 };
 
 enum DungeonStatusFlag
@@ -2433,7 +2441,7 @@ class Player : public Unit, public GridObject<Player>
         InstanceSave* GetInstanceSave(uint32 mapid, bool raid);
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
         void UnbindInstance(BoundInstancesMap::iterator &itr, Difficulty difficulty, bool unload = false);
-        InstancePlayerBind* BindToInstance(InstanceSave* save, bool permanent, bool load = false);
+        InstancePlayerBind* BindToInstance(InstanceSave* save, bool permanent, bool load = false, uint8 extend = 0);
         void BindToInstance();
         void SetPendingBind(uint32 instanceId, uint32 bindTimer) { _pendingBindId = instanceId; _pendingBindTimer = bindTimer; }
         bool HasPendingBind() const { return _pendingBindId > 0; }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,9 +23,10 @@ SDComment:
 SDCategory: Zul'Aman
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulaman.h"
-//#include "spell.h"
+#include "SpellInfo.h"
 
 #define YELL_AGGRO "Get on your knees and bow to da fang and claw!"
 #define SOUND_AGGRO                    12020
@@ -83,9 +84,9 @@ class boss_halazzi : public CreatureScript
 
         struct boss_halazziAI : public ScriptedAI
         {
-            boss_halazziAI(Creature* c) : ScriptedAI(c)
+            boss_halazziAI(Creature* creature) : ScriptedAI(creature)
             {
-                instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
             InstanceScript* instance;
@@ -108,7 +109,7 @@ class boss_halazzi : public CreatureScript
                 if (instance)
                     instance->SetData(DATA_HALAZZIEVENT, NOT_STARTED);
 
-		LynxGUID = 0;
+                LynxGUID = 0;
                 TransformCount = 0;
                 BerserkTimer = 600000;
                 CheckTimer = 1000;
@@ -325,7 +326,7 @@ class boss_halazzi : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
                 if (instance)
                     instance->SetData(DATA_HALAZZIEVENT, DONE);
@@ -353,7 +354,7 @@ class mob_halazzi_lynx : public CreatureScript
 
         struct mob_halazzi_lynxAI : public ScriptedAI
         {
-            mob_halazzi_lynxAI(Creature* c) : ScriptedAI(c) {}
+            mob_halazzi_lynxAI(Creature* creature) : ScriptedAI(creature) {}
 
             uint32 FrenzyTimer;
             uint32 shredder_timer;

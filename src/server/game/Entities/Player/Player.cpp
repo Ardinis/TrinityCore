@@ -16428,7 +16428,7 @@ void Player::CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id)
                                 CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(entry);
 				if (!cinfo)
 				{
-				  sLog->outError(LOG_FILTER_PLAYER, "Player::CastedCreatureOrGO: GetCreatureTemplate failed for entry %u. Skipping.", entry);
+				  sLog->outError("Player::CastedCreatureOrGO: GetCreatureTemplate failed for entry %u. Skipping.", entry);
 				  continue;
 				}
 

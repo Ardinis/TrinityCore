@@ -16426,6 +16426,12 @@ void Player::CastedCreatureOrGO(uint32 entry, uint64 guid, uint32 spell_id)
                             if (reqTarget != entry) // if entry doesn't match, check for killcredits referenced in template
                             {
                                 CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(entry);
+				if (!cinfo)
+				{
+				  sLog->outError(LOG_FILTER_PLAYER, "Player::CastedCreatureOrGO: GetCreatureTemplate failed for entry %u. Skipping.", entry);
+				  continue;
+				}
+
                                 for (uint8 j = 0; j < MAX_KILL_CREDIT; ++j)
                                     if (cinfo->KillCredit[j] == reqTarget)
                                         entry = cinfo->KillCredit[j];

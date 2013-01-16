@@ -206,7 +206,7 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
 	{
 	  float ground = i_target->GetPositionZ();
 	  i_target->GetMap()->GetWaterOrGroundLevel(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ(), &ground);
-	  if (ground == -200000 && !i_target->GetMap()->IsNonRaidDungeon())
+	  if (ground == -200000 && i_target->GetMap()->IsNonRaidDungeon())
 	  {
 	    ground = i_target->GetPositionZ();
 	    i_target->GetMap()->GetWaterOrGroundLevel(i_target->GetPositionX(), i_target->GetPositionY(), MAX_HEIGHT, &ground);

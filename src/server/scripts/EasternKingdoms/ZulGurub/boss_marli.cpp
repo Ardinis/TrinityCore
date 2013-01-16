@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,22 +23,26 @@ SDComment: Charging healers and casters not working. Perhaps wrong Spell Timers.
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
-#define SAY_AGGRO               -1309005
-#define SAY_TRANSFORM           -1309006
-#define SAY_SPIDER_SPAWN        -1309007
-#define SAY_DEATH               -1309008
+enum Marli
+{
+    SAY_AGGRO               = 0,
+    SAY_TRANSFORM           = 1,
+    SAY_SPIDER_SPAWN        = 2,
+    SAY_DEATH               = 3,
 
-#define SPELL_CHARGE              22911
-#define SPELL_ASPECT_OF_MARLI     24686                     // A stun spell
-#define SPELL_ENVOLWINGWEB        24110
-#define SPELL_POISONVOLLEY        24099
-#define SPELL_SPIDER_FORM         24084
+    SPELL_CHARGE            = 22911,
+    SPELL_ASPECT_OF_MARLI   = 24686,                     // A stun spell
+    SPELL_ENVOLWINGWEB      = 24110,
+    SPELL_POISONVOLLEY      = 24099,
+    SPELL_SPIDER_FORM       = 24084,
 
 //The Spider Spells
-#define SPELL_LEVELUP             24312                     //Not right Spell.
+    SPELL_LEVELUP           = 24312                     //Not right Spell.
+};
 
 class boss_marli : public CreatureScript
 {
@@ -51,12 +55,12 @@ class boss_marli : public CreatureScript
 
         struct boss_marliAI : public ScriptedAI
         {
-            boss_marliAI(Creature* c) : ScriptedAI(c)
+            boss_marliAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
 
             uint32 SpawnStartSpiders_Timer;
             uint32 PoisonVolley_Timer;
@@ -85,14 +89,14 @@ class boss_marli : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
-                DoScriptText(SAY_AGGRO, me);
+                Talk(SAY_AGGRO);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
-                DoScriptText(SAY_DEATH, me);
-                if (m_instance)
-                    m_instance->SetData(DATA_MARLI, DONE);
+                Talk(SAY_DEATH);
+                if (instance)
+                    instance->SetData(DATA_MARLI, DONE);
             }
 
             void UpdateAI(const uint32 diff)
@@ -116,7 +120,7 @@ class boss_marli : public CreatureScript
 
                     if (!Spawned && SpawnStartSpiders_Timer <= diff)
                     {
-                        DoScriptText(SAY_SPIDER_SPAWN, me);
+                        Talk(SAY_SPIDER_SPAWN);
 
                         Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
                         if (!target)
@@ -154,7 +158,7 @@ class boss_marli : public CreatureScript
 
                     if (!PhaseTwo && Transform_Timer <= diff)
                     {
-                        DoScriptText(SAY_TRANSFORM, me);
+                        Talk(SAY_TRANSFORM);
                         DoCast(me, SPELL_SPIDER_FORM);
                         const CreatureTemplate* cinfo = me->GetCreatureInfo();
                         me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (cinfo->mindmg +((cinfo->mindmg/100) * 35)));
@@ -230,7 +234,7 @@ class mob_spawn_of_marli : public CreatureScript
 
         struct mob_spawn_of_marliAI : public ScriptedAI
         {
-            mob_spawn_of_marliAI(Creature* c) : ScriptedAI(c) {}
+            mob_spawn_of_marliAI(Creature* creature) : ScriptedAI(creature) {}
 
             uint32 LevelUp_Timer;
 
@@ -271,4 +275,3 @@ void AddSC_boss_marli()
     new boss_marli();
     new mob_spawn_of_marli();
 }
-

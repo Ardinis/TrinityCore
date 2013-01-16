@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,25 +23,28 @@ SDComment: Problem in finding the right flying batriders for spawning and making
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
-#define SAY_AGGRO                   -1309002
-#define SAY_RAIN_FIRE               -1309003
-#define SAY_DEATH                   -1309004
+enum Jeklik
+{
+    SAY_AGGRO                   = 0,
+    SAY_RAIN_FIRE               = 1,
+    SAY_DEATH                   = 2,
 
-#define SPELL_CHARGE              22911
-#define SPELL_SONICBURST          23918
-#define SPELL_SCREECH             6605
-#define SPELL_SHADOW_WORD_PAIN    23952
-#define SPELL_MIND_FLAY           23953
-#define SPELL_CHAIN_MIND_FLAY     26044                     //Right ID unknown. So disabled
-#define SPELL_GREATERHEAL         23954
-#define SPELL_BAT_FORM            23966
+    SPELL_CHARGE                = 22911,
+    SPELL_SONICBURST            = 23918,
+    SPELL_SCREECH               = 6605,
+    SPELL_SHADOW_WORD_PAIN      = 23952,
+    SPELL_MIND_FLAY             = 23953,
+    SPELL_CHAIN_MIND_FLAY       = 26044, //Right ID unknown. So disabled
+    SPELL_GREATERHEAL           = 23954,
+    SPELL_BAT_FORM              = 23966,
 
-// Batriders Spell
-
-#define SPELL_BOMB                40332                     //Wrong ID but Magmadars bomb is not working...
+    // Batriders Spell
+    SPELL_BOMB                  = 40332 //Wrong ID but Magmadars bomb is not working...
+};
 
 class boss_jeklik : public CreatureScript
 {
@@ -54,12 +57,12 @@ class boss_jeklik : public CreatureScript
 
         struct boss_jeklikAI : public ScriptedAI
         {
-            boss_jeklikAI(Creature* c) : ScriptedAI(c)
+            boss_jeklikAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
 
             uint32 Charge_Timer;
             uint32 SonicBurst_Timer;
@@ -90,16 +93,16 @@ class boss_jeklik : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
-                DoScriptText(SAY_AGGRO, me);
+                Talk(SAY_AGGRO);
                 DoCast(me, SPELL_BAT_FORM);
             }
 
-            void JustDied(Unit* /*Killer*/)
+            void JustDied(Unit* /*killer*/)
             {
-                DoScriptText(SAY_DEATH, me);
+                Talk(SAY_DEATH);
 
-                if (m_instance)
-                    m_instance->SetData(DATA_JEKLIK, DONE);
+                if (instance)
+                    instance->SetData(DATA_JEKLIK, DONE);
             }
 
             void UpdateAI(const uint32 diff)
@@ -236,12 +239,12 @@ class mob_batrider : public CreatureScript
 
         struct mob_batriderAI : public ScriptedAI
         {
-            mob_batriderAI(Creature* c) : ScriptedAI(c)
+            mob_batriderAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = c->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
 
             uint32 Bomb_Timer;
             uint32 Check_Timer;
@@ -274,9 +277,9 @@ class mob_batrider : public CreatureScript
                 //Check_Timer
                 if (Check_Timer <= diff)
                 {
-                    if (m_instance)
+                    if (instance)
                     {
-                        if (m_instance->GetData(DATA_JEKLIK) == DONE)
+                        if (instance->GetData(DATA_JEKLIK) == DONE)
                         {
                             me->setDeathState(JUST_DIED);
                             me->RemoveCorpse();

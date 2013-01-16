@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,14 +23,15 @@ SDComment: Wrong cleave and red aura is missing.
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "zulgurub.h"
 
 enum eYells
 {
-    SAY_AGGRO                   = -1309011,
-    SAY_FEAST_PANTHER           = -1309012,
-    SAY_DEATH                   = -1309013,
+    SAY_AGGRO                   = 0,
+    SAY_FEAST_PANTHER           = 1,
+    SAY_DEATH                   = 2,
 };
 
 enum eSpells
@@ -61,10 +62,10 @@ class boss_arlokk : public CreatureScript
         {
             boss_arlokkAI(Creature* creature) : ScriptedAI(creature)
             {
-                m_instance = creature->GetInstanceScript();
+                instance = creature->GetInstanceScript();
             }
 
-            InstanceScript* m_instance;
+            InstanceScript* instance;
 
             uint32 m_uiShadowWordPain_Timer;
             uint32 m_uiGouge_Timer;
@@ -105,13 +106,13 @@ class boss_arlokk : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
-                DoScriptText(SAY_AGGRO, me);
+                Talk(SAY_AGGRO);
             }
 
             void JustReachedHome()
             {
-                if (m_instance)
-                    m_instance->SetData(DATA_ARLOKK, NOT_STARTED);
+                if (instance)
+                    instance->SetData(DATA_ARLOKK, NOT_STARTED);
 
                 //we should be summoned, so despawn
                 me->DespawnOrUnsummon();
@@ -119,19 +120,19 @@ class boss_arlokk : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
-                DoScriptText(SAY_DEATH, me);
+                Talk(SAY_DEATH);
 
                 me->SetDisplayId(MODEL_ID_NORMAL);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-                if (m_instance)
-                    m_instance->SetData(DATA_ARLOKK, DONE);
+                if (instance)
+                    instance->SetData(DATA_ARLOKK, DONE);
             }
 
             void DoSummonPhanters()
             {
-                if (Unit* pMarkedTarget = Unit::GetUnit(*me, MarkedTargetGUID))
-                    DoScriptText(SAY_FEAST_PANTHER, me, pMarkedTarget);
+                if (MarkedTargetGUID)
+                    Talk(SAY_FEAST_PANTHER, MarkedTargetGUID);
 
                 me->SummonCreature(NPC_ZULIAN_PROWLER, -11532.7998f, -1649.6734f, 41.4800f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
                 me->SummonCreature(NPC_ZULIAN_PROWLER, -11532.9970f, -1606.4840f, 41.2979f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000);
@@ -170,7 +171,7 @@ class boss_arlokk : public CreatureScript
                             MarkedTargetGUID = pMarkedTarget->GetGUID();
                         }
                         else
-                            sLog->outError("TSCR: boss_arlokk could not accuire pMarkedTarget.");
+                            sLog->outError("boss_arlokk could not accuire pMarkedTarget.");
 
                         m_uiMark_Timer = 15000;
                     }
@@ -271,12 +272,12 @@ class go_gong_of_bethekk : public GameObjectScript
 
         bool OnGossipHello(Player* /*player*/, GameObject* go)
         {
-            if (InstanceScript* m_instance = go->GetInstanceScript())
+            if (InstanceScript* instance = go->GetInstanceScript())
             {
-                if (m_instance->GetData(DATA_ARLOKK) == DONE || m_instance->GetData(DATA_ARLOKK) == IN_PROGRESS)
+                if (instance->GetData(DATA_ARLOKK) == DONE || instance->GetData(DATA_ARLOKK) == IN_PROGRESS)
                     return true;
 
-                m_instance->SetData(DATA_ARLOKK, IN_PROGRESS);
+                instance->SetData(DATA_ARLOKK, IN_PROGRESS);
                 return true;
             }
 
@@ -287,5 +288,5 @@ class go_gong_of_bethekk : public GameObjectScript
 void AddSC_boss_arlokk()
 {
     new boss_arlokk();
-    //    new go_gong_of_bethekk();
+    new go_gong_of_bethekk();
 }

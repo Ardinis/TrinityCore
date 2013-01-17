@@ -845,6 +845,7 @@ public:
 	  pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 	  pCreature->AddThreat(veh, 100000.0f);
 	  pCreature->AI()->SetGUID(veh->GetGUID(), 0);
+	  pCreature->AI()->SetGUID(pPlayer->GetGUID(), 1);
 	  pCreature->AI()->AttackStart(veh);
 	  pCreature->AI()->DoAction(1);
 	  pCreature->AI()->DoAction(SAY_AGG);
@@ -858,6 +859,7 @@ public:
 	  pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 	  pCreature->AddThreat(veh, 100000.0f);
 	  pCreature->AI()->SetGUID(veh->GetGUID(), 0);
+	  pCreature->AI()->SetGUID(pPlayer->GetGUID(), 1);
 	  pCreature->AI()->AttackStart(veh);
 	  pCreature->AI()->DoAction(2);
 	  pCreature->AI()->DoAction(SAY_AGG);
@@ -875,6 +877,7 @@ struct npc_valiantAI : public ScriptedAI
   uint32 MoviTimer;
   uint32 act;
   uint64 plGUID;
+  uint64 playerGUID;
 
 public:
   npc_valiantAI(Creature* creature) : ScriptedAI(creature)
@@ -908,6 +911,7 @@ public:
     if (act != 1 && act != 2)
       act = 0;
     plGUID = 0;
+    playerGUID = 0;
   }
 
   void EnterCombat(Unit* who)
@@ -920,8 +924,8 @@ public:
   {
     me->MonsterSay(SAY_END, LANG_UNIVERSAL, 0);
     me->setFaction(35);
-    Creature* victims = Unit::GetCreature(*me, plGUID);
-    if (!victims)
+    Player* victims = ObjectAccessor::FindPlayer(playerGUID);
+    if (!victims || !victims->IsInWorld())
       return;
     if (act == 1)
       victims->CastSpell(victims, MUNTED_MELEE_VICTORY, true);
@@ -1003,7 +1007,10 @@ public:
 
   void SetGUID(uint64 guid, int32 id)
   {
-    plGUID = guid;
+    if (id == 0)
+      plGUID = guid;
+    else
+      playerGUID = guid;
   }
 
   void UpdateAI(const uint32 uiDiff)

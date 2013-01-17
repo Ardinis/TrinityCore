@@ -1123,6 +1123,93 @@ public:
 };
 };
 
+enum eAchievementsTournamentFactionChampion {
+  ACHIEVEMENT_CHAMPION_OF_DARNASSUS = 2777,
+  ACHIEVEMENT_CHAMPION_OF_EXODAR = 2778,
+  ACHIEVEMENT_CHAMPION_OF_GNOMEREGAN = 2779,
+  ACHIEVEMENT_CHAMPION_OF_IRONFORGE = 2780,
+  ACHIEVEMENT_CHAMPION_OF_STORMWIND = 2781,
+  ACHIEVEMENT_CHAMPION_OF_ORGRIMMAR = 2783,
+  ACHIEVEMENT_CHAMPION_OF_DARKSPEARS = 2784,
+  ACHIEVEMENT_CHAMPION_OF_SILVERMOON = 2785,
+  ACHIEVEMENT_CHAMPION_OF_THUNDERBLUFF = 2786,
+  ACHIEVEMENT_CHAMPION_OF_UNDERCITY = 2787,
+};
+
+enum eNPCVendorEntrys {
+  ENTRY_EXODAR_VENDOR = 33657,
+  ENTRY_GNOMEREGAN_VENDOR = 33650,
+  ENTRY_DARNASSUS_VENDOR = 33653,
+  ENTRY_STORMWIND_VENDOR = 33307,
+  ENTRY_IRONFORGE_VENDOR = 33310,
+
+  ENTRY_ORGRIMMAR_VENDOR = 33553,
+  ENTRY_DARKSPEARS_VENDOR = 33554,
+  ENTRY_SILVERMOON_VENDOR = 33557,
+  ENTRY_THUNDERBLUFF_VENDOR = 33556,
+  ENTRY_UNDERCITY_VENDOR = 33555,
+};
+
+class npc_vendor_tournament_fraction_champion: public CreatureScript
+{
+public:
+  npc_vendor_tournament_fraction_champion() :
+    CreatureScript("npc_vendor_tournament_fraction_champion") {}
+
+  bool OnGossipHello(Player* player, Creature* creature)
+  {
+    bool showVendor = false;
+
+    switch (creature->GetEntry())
+    {
+    case ENTRY_EXODAR_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_EXODAR);
+      break;
+    case ENTRY_GNOMEREGAN_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_GNOMEREGAN);
+      break;
+    case ENTRY_DARNASSUS_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_DARNASSUS);
+      break;
+    case ENTRY_STORMWIND_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_STORMWIND);
+      break;
+    case ENTRY_IRONFORGE_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_IRONFORGE);
+      break;
+    case ENTRY_ORGRIMMAR_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_ORGRIMMAR);
+      break;
+    case ENTRY_DARKSPEARS_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_DARKSPEARS);
+      break;
+    case ENTRY_SILVERMOON_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_SILVERMOON);
+      break;
+    case ENTRY_THUNDERBLUFF_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_THUNDERBLUFF);
+      break;
+    case ENTRY_UNDERCITY_VENDOR:
+      showVendor = player->HasAchieved(ACHIEVEMENT_CHAMPION_OF_UNDERCITY);
+      break;
+    }
+
+    if (showVendor)
+    {
+      player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+      player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+    }
+    return true;
+  }
+
+  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+  {
+    player->PlayerTalkClass->ClearMenus();
+    if (uiAction == GOSSIP_ACTION_TRADE)
+      player->GetSession()->SendListInventory(creature->GetGUID());
+    return true;
+  }
+};
 
 void AddSC_icecrown()
 {
@@ -1134,5 +1221,6 @@ void AddSC_icecrown()
   new npc_vereth_the_cunning();
   new npc_tournament_training_dummy();
   // new npc_training_dummy_argent();
-    new npc_valiant();
+  new npc_valiant();
+  new npc_vendor_tournament_fraction_champion();
 }

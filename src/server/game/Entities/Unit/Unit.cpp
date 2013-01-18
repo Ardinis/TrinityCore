@@ -7161,7 +7161,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (!stacker && !damager)
                         return false;
 
-                    triggered_spell_id = 31803;
+                    triggered_spell_id = 53742;
 
                     // On target with 5 stacks of Blood Corruption direct damage is done
                     if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))

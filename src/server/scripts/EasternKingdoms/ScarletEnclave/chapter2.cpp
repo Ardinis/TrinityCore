@@ -181,10 +181,19 @@ public:
     {
         if (quest->GetQuestId() == QUEST_BREAKOUT)
         {
-            creature->SetStandState(UNIT_STAND_STATE_STAND);
-
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_koltira_deathweaver::npc_koltira_deathweaverAI, creature->AI()))
+	    if (Creature *c = creature->SummonCreature(creature->GetEntry(),
+						       creature->GetPositionX(),
+						       creature->GetPositionY(),
+						       creature->GetPositionZ(),
+						       creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 150000))
+	    {
+	      if (npc_escortAI* pEscortAI = CAST_AI(npc_koltira_deathweaver::npc_koltira_deathweaverAI, c->AI()))
+	      {
+		c->SetStandState(UNIT_STAND_STATE_STAND);
                 pEscortAI->Start(false, false, player->GetGUID());
+	      }
+	      creature->DespawnOrUnsummon();
+	    }
         }
         return true;
     }
@@ -215,6 +224,8 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->LoadEquipment(0, true);
                 me->RemoveAura(SPELL_ANTI_MAGIC_ZONE);
+		me->SetReactState(REACT_PASSIVE);
+		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             }
         }
 
@@ -224,7 +235,7 @@ public:
             {
                 case 0:
                     DoScriptText(SAY_BREAKOUT1, me);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+		    //                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     break;
                 case 1:
                     me->SetStandState(UNIT_STAND_STATE_KNEEL);
@@ -258,12 +269,12 @@ public:
             if (Player* player = GetPlayerForEscort())
             {
                 summoned->AI()->AttackStart(player);
+		summoned->AddThreat(player, 100000.0f);
             }
 
             if (summoned->GetEntry() == NPC_HIGH_INQUISITOR_VALROTH)
                 m_uiValrothGUID = summoned->GetGUID();
 
-            summoned->AddThreat(me, 0.0f);
             summoned->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
         }
 

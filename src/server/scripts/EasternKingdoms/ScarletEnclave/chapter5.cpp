@@ -293,10 +293,21 @@ public:
         switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF+1:
+	    {
+	      if (Creature *c = creature->SummonCreature(creature->GetEntry(),
+							 creature->GetPositionX(),
+							 creature->GetPositionY(),
+							 creature->GetPositionZ(),
+							 creature->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 900000))
+	      {
                 player->CLOSE_GOSSIP_MENU();
-                CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, creature->AI())->uiStep = 1;
-                CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, creature->AI())->Start(true, false, player->GetGUID(), NULL, true);
-                break;
+                CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, c->AI())->uiStep = 1;
+                CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, c->AI())->Start(true, false, player->GetGUID(), NULL, true);
+		CAST_AI(npc_highlord_darion_mograine::npc_highlord_darion_mograineAI, c->AI())->SetMaxPlayerDistance(1000.0f);
+		creature->DespawnOrUnsummon();
+	      }
+	      break;
+	    }
         }
         return true;
     }

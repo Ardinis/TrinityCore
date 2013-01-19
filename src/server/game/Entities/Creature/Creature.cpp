@@ -420,26 +420,12 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
         ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
     }
 
-    // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
-    float ground = GetPositionZ();
-    GetMap()->GetWaterOrGroundLevel(GetPositionX(), GetPositionY(), GetPositionZ(), &ground);
+    // TODO: In fact monster move flags should be set - not movement flags.
+    if (cInfo->InhabitType & INHABIT_AIR)
+      AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_FLYING);
 
-    bool isInAir = G3D::fuzzyGt(GetPositionZ(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZ(), ground - 0.05f); // Can be underground too, prevent the falling
-
-    if (cInfo->InhabitType & INHABIT_AIR && cInfo->InhabitType & INHABIT_GROUND && isInAir)
-      SetFlying(true);
-    else if (cInfo->InhabitType & INHABIT_AIR && isInAir)
-      SetDisableGravity(true);
-    else
-    {
-      SetFlying(false);
-      SetDisableGravity(false);
-    }
-
-    if (cInfo->InhabitType & INHABIT_WATER && IsInWater())
+    if (cInfo->InhabitType & INHABIT_WATER)
       AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
-    else
-      RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
 
     return true;
 }

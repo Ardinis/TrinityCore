@@ -312,7 +312,7 @@ public:
             introTimer = 3000;
 
             me->SetFlying(true);
-            
+
 	    m_uiWipeCheckTimer = 2500;
 
             if (instance)
@@ -331,7 +331,7 @@ public:
             return 0;
         }
 
-      void AttackStart(Unit* pWho) 
+      void AttackStart(Unit* pWho)
       {
 	if (pWho && me->Attack(pWho, true))
 	  {
@@ -513,7 +513,7 @@ public:
             // I think he should descend a little
             me->RemoveAurasByType(SPELL_AURA_MOD_RESISTANCE); // CoE, FF
             me->RemoveAurasByType(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS); //Hunter's Mark
-            
+
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
@@ -567,7 +567,7 @@ public:
 
             //DoCast(SPELL_BERSEKER);
             events.ScheduleEvent(EVENT_BERSERK, 10*MINUTE*IN_MILLISECONDS);
-            
+
             if (instance)
                 instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
         }
@@ -846,7 +846,7 @@ public:
 
 
             // at 50 % health malygos switch to phase 2
-            if (me->GetHealthPct() <= 50.0f && _phase == PHASE_ONE)	      
+            if (me->GetHealthPct() <= 50.0f && _phase == PHASE_ONE)
                 PreparePhaseTwo();
 
             // We can't cast if we are casting already.
@@ -886,9 +886,12 @@ public:
                         Talk(SAY_AGGRO_P_TWO);
                         break;
                     case EVENT_ARCANE_BREATH:
-                        DoCast(me->getVictim(), SPELL_ARCANE_BREATH);
-                        events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(35, 60)*IN_MILLISECONDS, 0, PHASE_ONE);
-                        break;
+		    {
+		      if (Unit *u = me->getVictim())
+                        DoCast(u, SPELL_ARCANE_BREATH);
+		      events.ScheduleEvent(EVENT_ARCANE_BREATH, urand(35, 60)*IN_MILLISECONDS, 0, PHASE_ONE);
+		      break;
+		    }
                     case EVENT_ARCANE_STORM:
 		  //std::cout << "EVENT_ARCANE_STORM" << std::endl;
 		      DoCast(SPELL_ARCANE_STORM);
@@ -941,10 +944,13 @@ public:
                         events.ScheduleEvent(EVENT_SURGE_POWER_PHASE_3, urand(7, 23)*IN_MILLISECONDS, 0, PHASE_THREE);
                         break;
                     case EVENT_STATIC_FIELD:
+		    {
 		      Talk(SAY_SPELL_CASTING_P_THREE); // does he really say that? I haven't seen it on youtube
-                        DoCast(GetTargetPhaseThree(), SPELL_STATIC_FIELD);
-                        events.ScheduleEvent(EVENT_STATIC_FIELD, urand(20, 30)*IN_MILLISECONDS, 0, PHASE_THREE);
-			return;
+		      if (Unit* TargetPhaseThree = GetTargetPhaseThree())
+                        DoCast(TargetPhaseThree, SPELL_STATIC_FIELD);
+		      events.ScheduleEvent(EVENT_STATIC_FIELD, urand(20, 30)*IN_MILLISECONDS, 0, PHASE_THREE);
+		      return;
+		    }
                     case EVENT_ARCANE_PULSE:
                        DoCastAOE(SPELL_ARCANE_PULSE, true);
                         events.ScheduleEvent(EVENT_ARCANE_PULSE, 1*IN_MILLISECONDS, 0, PHASE_THREE);
@@ -955,7 +961,6 @@ public:
                         break;
                     case EVENT_START_PHASE_2:
 		  //std::cout << "EVENT_START_PHASE_2" << std::endl;
-
                        StartPhaseTwo();
                         break;
                     case EVENT_START_PHASE_3:
@@ -1009,7 +1014,7 @@ public:
             Talk(SAY_DEATH);
             _JustDied();
             //me->ClearUnitState(UNIT_STAT_ROOT);
-            me->GetMotionMaster()->Clear(); 
+            me->GetMotionMaster()->Clear();
             me->GetMotionMaster()->MoveCharge(me->GetPositionX(), me->GetPositionY(), 55.0f, SPEED_CHARGE, EVENT_FALL_GROUND);
             //me->GetMotionMaster()->MoveFall(ground_Z, EVENT_FALL_GROUND);
 	    //            me->setDeathState(DEAD_FALLING);
@@ -1109,8 +1114,8 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
 
                         malygos->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                         malygos->SetFlying(false);
-
-                        malygos->GetMotionMaster()->MoveChase(caster->getVictim());
+			if (Unit *u = caster->getVictim())
+			  malygos->GetMotionMaster()->MoveChase(u);
                         malygos->RemoveAura(SPELL_VORTEX_1);
                         malygos->resetAttackTimer(); //so he won't hit the tank while he is falling
                     }
@@ -1423,7 +1428,7 @@ public:
             {
                 malygos->SetUInt64Value(UNIT_FIELD_TARGET, me->GetGUID());
                 malygos->CastSpell(me, SPELL_ARCANE_BOMB_DUMMY, true);
-            }    
+            }
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
@@ -1432,7 +1437,7 @@ public:
             {
                 DoCast(me, SPELL_ARCANE_BOMB_2, true);
                 DoCast(me, SPELL_ARCANE_OVERLOAD, true);
-            }        
+            }
         }
 
         void UpdateAI(const uint32 diff)

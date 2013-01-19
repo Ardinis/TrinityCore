@@ -495,6 +495,7 @@ class boss_sindragosa : public CreatureScript
                             Talk(SAY_AIR_PHASE);
                             me->RemoveAurasDueToSpell(SPELL_FROST_AURA);
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_AURA);
+			    std::cout << "set flying true !" << std::endl;
                             me->SetFlying(true);
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             me->SetReactState(REACT_PASSIVE);

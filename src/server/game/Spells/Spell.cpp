@@ -55,6 +55,8 @@
 #include "SpellInfo.h"
 #include "OutdoorPvPWG.h"
 #include "OutdoorPvPMgr.h"
+#include "MoveSplineInit.h"
+#include <G3D/Vector3.h>
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -2357,6 +2359,9 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                     m_caster->GetNearPosition(pos, dist, angle);
                     break;
             }
+	    if (!pos.IsPositionValid())
+	      m_caster->GetPosition(&pos);
+
             m_targets.SetDst(*m_caster);
             m_targets.ModDst(pos);
             break;
@@ -5282,8 +5287,65 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_ROOTED;
 		if (m_caster->GetTypeId() == TYPEID_PLAYER)
 		  if (Unit* target = m_targets.GetUnitTarget())
-		    if (!target->isAlive())
+		    if (!target || !target->isAlive())
 		      return SPELL_FAILED_BAD_TARGETS;
+
+		if (m_caster->GetMapId() == 617)
+		{
+		  Unit* target = m_targets.GetUnitTarget();
+		  if (!target)
+		    return SPELL_FAILED_DONT_REPORT;
+		  Position startPos, endPos;
+		  float angle = m_caster->GetOrientation();
+		  m_caster->GetPosition(&startPos);
+		  target->GetContactPoint(m_caster, endPos.m_positionX, endPos.m_positionY, endPos.m_positionZ);
+		  target->GetFirstCollisionPosition(endPos, target->GetObjectSize(), angle);
+		  Vector3 startPoint = Vector3(startPos.m_positionX, startPos.m_positionY, startPos.m_positionZ);
+		  if (startPoint[2] < 7)
+		  {
+		    Vector3 endPoint = Vector3(endPos.m_positionX, endPos.m_positionY, endPos.m_positionZ);
+		    float startEndDist = (startPoint - endPoint).squaredLength();
+		    Movement::PointsArray _pathPoints;
+		    float dist = 100.0f;
+		    if (startPoint[0] <= 1265.033223f || startPoint[1] <= 765.0f)// && startPoint[1] >= 9.000000f) // Canal 1#
+		    {
+		      // Path X,y,z
+		      _pathPoints.resize(4);
+		      _pathPoints[0] = startPoint;
+		      _pathPoints[1] = Vector3(1264.635395f, 763.831680f, 4.7559000f);
+		      _pathPoints[2] = Vector3(1267.575395f, 766.541680f, 6.659000f);
+		      //              _pathPoints[3] = Vector3(1252.425395f, 764.971680f, 8.000000f);
+		      _pathPoints[3] = endPoint;
+		      dist = _pathPoints[1][0] - _pathPoints[0][0] + _pathPoints[1][1] - _pathPoints[0][1];
+		      dist += _pathPoints[2][0] - _pathPoints[1][0] + _pathPoints[2][1] - _pathPoints[1][1];
+		      dist *= dist;
+		      dist = sqrt(dist);
+		      //		      dist = (_pathPoints[1] - _pathPoints[0]).squaredLength();
+		      //  dist += (_pathPoints[2] - _pathPoints[1]).squaredLength();
+		    }
+		    else
+		    {
+		      // Path X,y,z
+		      _pathPoints.resize(4);
+		      _pathPoints[0] = startPoint;
+		      _pathPoints[1] = Vector3(1320.519268f, 818.602539f, 4.0000000f);
+		      _pathPoints[2] = Vector3(1316.120268f, 815.342539f, 6.7000000f);
+		      //              _pathPoints[3] = Vector3(1332.749268f, 816.274780f, 8.355900f);
+		      _pathPoints[3] = endPoint;
+		      //		      dist = (_pathPoints[1] - _pathPoints[0]).squaredLength();
+		      //  dist += (_pathPoints[2] - _pathPoints[1]).squaredLength();
+		      dist = _pathPoints[1][0] - _pathPoints[0][0] + _pathPoints[1][1] - _pathPoints[0][1];
+		      dist += _pathPoints[2][0] - _pathPoints[1][0] + _pathPoints[2][1] - _pathPoints[1][1];
+		      dist *= dist;
+		      dist = sqrt(dist);
+		    }
+		    std::cout << "DISTANCE CHARGE = " << dist << std::endl;
+		    std::cout << "DISTANCE SPELL CHARGE = " << m_spellInfo->GetMaxRange(true) << std::endl;
+		    if (m_spellInfo->GetMaxRange(true) < dist)
+		      return SPELL_FAILED_OUT_OF_RANGE;
+		  }
+		}
+
                 break;
             }
             case SPELL_EFFECT_SKINNING:

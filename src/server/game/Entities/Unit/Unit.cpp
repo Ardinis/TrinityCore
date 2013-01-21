@@ -7142,6 +7142,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 			  CastSpell(this, 71432, true);
                         if (aur->GetStackAmount() == 5)
                         {
+			  if (stacker)
+			    aur->RefreshDuration();
 			  CastSpell(victim, 42463, true);
 			  return true;
                         }

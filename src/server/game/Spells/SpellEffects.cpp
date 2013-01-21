@@ -4202,8 +4202,16 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         {
 	  if (m_spellInfo->Id == 20424)
 	  {
-	    if (roll_chance_i(45))
-	      m_caster->CastSpell(m_caster, 71432, true); //Anger Capacitor tiny abomination in jar
+	    if (roll_chance_i(50))
+	      if (m_caster->HasAura(71406) || m_caster->HasAura(71545))
+	      {
+		Aura const* dummy =  m_caster->GetAura(71432);
+		int maxStack = m_caster->HasAura(71406) ?  8 : 7;
+		if (dummy && dummy->GetStackAmount() < maxStack)
+		   m_caster->CastSpell( m_caster, 71432, true);
+		else if (!dummy)
+		   m_caster->CastSpell( m_caster, 71432, true);
+	      }
 	  }
             // Seal of Command Unleashed
             if (m_spellInfo->Id == 20467)

@@ -7010,8 +7010,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Add remaining ticks to damage done
                 basepoints0 += victim->GetRemainingPeriodicAmount(GetGUID(), triggered_spell_id, SPELL_AURA_PERIODIC_DAMAGE);
 		if (victim && victim->isAlive())
-		  if (roll_chance_i(45))
-		    CastSpell(this, 71432, true);
+		  if (roll_chance_i(50))
+		    if (HasAura(71406) || HasAura(71545))
+		    {
+		      Aura const* dummy = GetAura(71432);
+		      int maxStack = HasAura(71406) ?  8 : 7;
+		      if (dummy && dummy->GetStackAmount() < maxStack)
+			CastSpell(this, 71432, true);
+		      else if (!dummy)
+			CastSpell(this, 71432, true);
+		    }
                 break;
             }
             // Sheath of Light
@@ -7138,8 +7146,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))
                     {
 		      if (victim && victim->isAlive())
-			if (roll_chance_i(45))
-			  CastSpell(this, 71432, true);
+			if (roll_chance_i(50))
+			  if (HasAura(71406) || HasAura(71545))
+			  {
+			    Aura const* dummy = GetAura(71432);
+			    int maxStack = HasAura(71406) ?  8 : 7;
+			    if (dummy && dummy->GetStackAmount() < maxStack)
+			      CastSpell(this, 71432, true);
+			    else if (!dummy)
+			      CastSpell(this, 71432, true);
+			  }
                         if (aur->GetStackAmount() == 5)
                         {
 			  if (stacker)
@@ -7173,8 +7189,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))
                     {
 		      if (victim && victim->isAlive())
-			if (roll_chance_i(45))
-			  CastSpell(this, 71432, true);
+			if (roll_chance_i(50))
+			  if (HasAura(71406) || HasAura(71545))
+			  {
+			    Aura const* dummy = GetAura(71432);
+			    int maxStack = HasAura(71406) ?  8 : 7;
+			    if (dummy && dummy->GetStackAmount() < maxStack)
+			      CastSpell(this, 71432, true);
+			    else if (!dummy)
+			      CastSpell(this, 71432, true);
+			  }
 		      if (aur->GetStackAmount() == 5)
 		      {
 			if (stacker)
@@ -7259,6 +7283,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         return false;
 
                     RemoveAurasDueToSpell(71432);
+		    if (victim && victim->isAlive())
+		      if (roll_chance_i(50))
+			CastSpell(this, 71432, true);
                     triggered_spell_id = 71433;  // default main hand attack
                     // roll if offhand
                     if (Player const* player = ToPlayer())

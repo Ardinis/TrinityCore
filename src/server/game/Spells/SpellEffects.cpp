@@ -4200,6 +4200,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_PALADIN:
         {
+	  if (m_spellInfo->Id == 20424)
+	  {
+	    if (roll_chance_i(45))
+	      m_caster->CastSpell(m_caster, 71432, true); //Anger Capacitor tiny abomination in jar
+	  }
             // Seal of Command Unleashed
             if (m_spellInfo->Id == 20467)
             {

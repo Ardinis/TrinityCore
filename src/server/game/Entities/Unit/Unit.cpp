@@ -246,6 +246,8 @@ m_HostileRefManager(this)
 
     _focusSpell = NULL;
     _targetLocked = false;
+
+    _lastLiquid = NULL;
 }
 
 ////////////////////////////////////////////////////////////
@@ -373,10 +375,10 @@ bool Unit::haveOffhandWeapon() const
         return m_canDualWield;
 }
 
-void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed)
+void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath, bool forceDestination)
 {
-    Movement::MoveSplineInit init(*this);
-    init.MoveTo(x,y,z);
+  Movement::MoveSplineInit init(this);
+  init.MoveTo(x, y, z, generatePath, forceDestination);
     init.SetVelocity(speed);
     init.Launch();
 }
@@ -3180,6 +3182,51 @@ bool Unit::IsInWater() const
 bool Unit::IsUnderWater() const
 {
     return GetBaseMap()->IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ());
+}
+
+void Unit::UpdateUnderwaterState(Map* m, float x, float y, float z)
+{
+  if (!isPet() && !IsVehicle())
+    return;
+
+  LiquidData liquid_status;
+  ZLiquidStatus res = m->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
+  if (!res)
+  {
+    if (_lastLiquid && _lastLiquid->SpellId)
+      RemoveAurasDueToSpell(_lastLiquid->SpellId);
+
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+    _lastLiquid = NULL;
+    return;
+  }
+
+  if (uint32 liqEntry = liquid_status.entry)
+  {
+    LiquidTypeEntry const* liquid = sLiquidTypeStore.LookupEntry(liqEntry);
+    if (_lastLiquid && _lastLiquid->SpellId && _lastLiquid->Id != liqEntry)
+      RemoveAurasDueToSpell(_lastLiquid->SpellId);
+
+    if (liquid && liquid->SpellId)
+    {
+      if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
+      {
+	if (!HasAura(liquid->SpellId))
+	  CastSpell(this, liquid->SpellId, true);
+      }
+      else
+	RemoveAurasDueToSpell(liquid->SpellId);
+    }
+
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_ABOVEWATER);
+    _lastLiquid = liquid;
+  }
+  else if (_lastLiquid && _lastLiquid->SpellId)
+  {
+    RemoveAurasDueToSpell(_lastLiquid->SpellId);
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+    _lastLiquid = NULL;
+  }
 }
 
 void Unit::DeMorph()
@@ -16111,7 +16158,7 @@ void Unit::StopMoving()
   if (!IsInWorld())
     return;
 
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     init.SetFacing(GetOrientation());
     init.Launch();
 }
@@ -18681,6 +18728,9 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
       GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
     //      GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
 
+    // code block for underwater state update
+    UpdateUnderwaterState(GetMap(), x, y, z);
+
     return (relocated || turn);
 }
 
@@ -18969,7 +19019,7 @@ void Unit::SetInFront(Unit const* target)
 
 void Unit::SetFacingTo(float ori)
 {
-    Movement::MoveSplineInit init(*this);
+    Movement::MoveSplineInit init(this);
     //    init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
     init.SetFacing(ori);
     init.Launch();
@@ -19035,4 +19085,11 @@ bool Unit::SetHover(bool enable)
   }
 
   return true;
+}
+
+TransportBase* Unit::GetDirectTransport() const
+{
+  if (Vehicle* veh = GetVehicle())
+    return veh;
+  return GetTransport();
 }

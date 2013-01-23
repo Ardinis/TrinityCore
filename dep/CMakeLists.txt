@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+# Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -15,17 +15,15 @@ elseif( MSVC )
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  if(SERVERS)
-    add_subdirectory(jemalloc)
+  if(SERVERS AND NOT NOJEM)
+    add_subdirectory(jemalloc)  
   endif()
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  if(SERVERS)
-    add_subdirectory(acelite)
-    if(USE_MYSQL_SOURCES)
+  add_subdirectory(acelite)
+  if(USE_MYSQL_SOURCES)
       add_subdirectory(mysqllite)
-    endif()
   endif()
   if(TOOLS)
     add_subdirectory(bzip2)
@@ -34,6 +32,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
 endif()
 
 add_subdirectory(g3dlite)
+add_subdirectory(recastnavigation)
 
 if(SERVERS)
   add_subdirectory(gsoap)

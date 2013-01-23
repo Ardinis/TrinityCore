@@ -163,7 +163,7 @@ class FrostwyrmLandEvent : public BasicEvent
 
         bool Execute(uint64 /*eventTime*/, uint32 /*updateTime*/)
         {
-            _owner.GetMotionMaster()->MoveLand(POINT_FROSTWYRM_LAND, _dest, 8.247422f);
+	  _owner.GetMotionMaster()->MoveLand(POINT_FROSTWYRM_LAND, _dest/*, 8.247422f*/);
             return true;
         }
 
@@ -501,7 +501,7 @@ class boss_sindragosa : public CreatureScript
                             Position pos;
                             pos.Relocate(me);
                             pos.m_positionZ += 17.0f;
-                            me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos, 8.30078125f);
+                            me->GetMotionMaster()->MoveTakeoff(POINT_TAKEOFF, pos/*, 8.30078125f*/);
                             events.DelayEvents(25000, EVENT_ICY_GRIP);
                             events.DelayEvents(45000, EVENT_GROUP_LAND_PHASE);
                             events.ScheduleEvent(EVENT_AIR_PHASE, 110000);

@@ -2238,11 +2238,11 @@ void ObjectMgr::LoadItemTemplates()
                     itemTemplate.Class = dbcitem->Class;
             }
 
-            if (itemTemplate.Unk0 != dbcitem->Unk0)
+            if (itemTemplate.Unk0 != dbcitem->SoundOverrideSubclass)
             {
-                sLog->outErrorDb("Item (Entry: %u) does not have a correct Unk0 (%i), must be %i .", entry, itemTemplate.Unk0, dbcitem->Unk0);
+                sLog->outErrorDb("Item (Entry: %u) does not have a correct Unk0 (%i), must be %i .", entry, itemTemplate.Unk0, dbcitem->SoundOverrideSubclass);
                 if (enforceDBCAttributes)
-                    itemTemplate.Unk0 = dbcitem->Unk0;
+                    itemTemplate.Unk0 = dbcitem->SoundOverrideSubclass;
             }
             if (itemTemplate.Material != dbcitem->Material)
             {
@@ -3032,43 +3032,37 @@ PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint8 level) 
 
 void ObjectMgr::PlayerCreateInfoAddItemHelper(uint32 race_, uint32 class_, uint32 itemId, int32 count)
 {
-    if (count > 0)
-        _playerInfo[race_][class_].item.push_back(PlayerCreateInfoItem(itemId, count));
-    else
+  //  if (!_playerInfo[race_][class_])
+  //   return;
+
+  if (count > 0)
+    _playerInfo[race_][class_].item.push_back(PlayerCreateInfoItem(itemId, count));
+  else
+  {
+    if (count < -1)
+      sLog->outError("Invalid count %i specified on item %u be removed from original player create info (use -1)!", count, itemId);
+
+    for (uint32 gender = 0; gender < GENDER_NONE; ++gender)
     {
-        if (count < -1)
-            sLog->outErrorDb("Invalid count %i specified on item %u be removed from original player create info (use -1)!", count, itemId);
+      if (CharStartOutfitEntry const* entry = GetCharStartOutfitEntry(race_, class_, gender))
+      {
+	bool found = false;
+	for (uint8 x = 0; x < MAX_OUTFIT_ITEMS; ++x)
+	{
+	  if (entry->ItemId[x] > 0 && uint32(entry->ItemId[x]) == itemId)
+	  {
+	    found = true;
+	    const_cast<CharStartOutfitEntry*>(entry)->ItemId[x] = 0;
+	    break;
+	  }
+	}
 
-        uint32 RaceClass = (race_) | (class_ << 8);
-        bool doneOne = false;
-        for (uint32 i = 1; i < sCharStartOutfitStore.GetNumRows(); ++i)
-        {
-            if (CharStartOutfitEntry const* entry = sCharStartOutfitStore.LookupEntry(i))
-            {
-                if (entry->RaceClassGender == RaceClass || entry->RaceClassGender == (RaceClass | (1 << 16)))
-                {
-                    bool found = false;
-                    for (uint8 x = 0; x < MAX_OUTFIT_ITEMS; ++x)
-                    {
-                        if (entry->ItemId[x] > 0 && uint32(entry->ItemId[x]) == itemId)
-                        {
-                            found = true;
-                            const_cast<CharStartOutfitEntry*>(entry)->ItemId[x] = 0;
-                            break;
-                        }
-                    }
-
-                    if (!found)
-                        sLog->outErrorDb("Item %u specified to be removed from original create info not found in dbc!", itemId);
-
-                    if (!doneOne)
-                        doneOne = true;
-                    else
-                        break;
-                }
-            }
-        }
+	if (!found)
+	  sLog->outError("Item %u specified to be removed from original create info not found in dbc!", itemId);
+      }
     }
+  }
+
 }
 
 void ObjectMgr::LoadPlayerInfo()

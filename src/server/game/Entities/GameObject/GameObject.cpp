@@ -134,7 +134,7 @@ void GameObject::AddToWorld()
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
         bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false);
         if (m_model)
-            GetMap()->Insert(*m_model);
+            GetMap()->InsertGameObjectModel(*m_model);
         if ((startOpen && !toggledState) || (!startOpen && toggledState))
             EnableCollision(false);
 
@@ -152,8 +152,8 @@ void GameObject::RemoveFromWorld()
 
         RemoveFromOwner();
         if (m_model)
-	  if (GetMap()->Contains(*m_model))
-	    GetMap()->Remove(*m_model);
+	  if (GetMap()->ContainsGameObjectModel(*m_model))
+	    GetMap()->RemoveGameObjectModel(*m_model);
         WorldObject::RemoveFromWorld();
         sObjectAccessor->RemoveObject(this);
     }
@@ -1999,10 +1999,10 @@ void GameObject::UpdateModel()
     if (!IsInWorld())
         return;
     if (m_model)
-        if (GetMap()->Contains(*m_model))
-            GetMap()->Remove(*m_model);
+        if (GetMap()->ContainsGameObjectModel(*m_model))
+            GetMap()->RemoveGameObjectModel(*m_model);
     delete m_model;
     m_model = GameObjectModel::Create(*this);
     if (m_model)
-        GetMap()->Insert(*m_model);
+        GetMap()->InsertGameObjectModel(*m_model);
 }

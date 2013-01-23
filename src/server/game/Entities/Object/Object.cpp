@@ -2706,7 +2706,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
 
     // Prevent invalid coordinates here, position is unchanged
 
-    if (!Trinity::IsValidMapCoord(destx, desty))
+    if (!Trinity::IsValidMapCoord(destx, desty, pos.m_positionZ))
     {
        sLog->outCrash("WorldObject::MovePositionToFirstCollision invalid coordinates X: %f and Y: %f were passed!", destx, desty);
        return;

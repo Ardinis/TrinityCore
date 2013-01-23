@@ -69,8 +69,8 @@ void MapManager::LoadTransports()
             continue;
         }
 
-               //		
-		
+               //
+
         if (goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             sLog->outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", entry, name.c_str());
@@ -349,7 +349,7 @@ void MapManager::LoadTransportForPlayers(Player* player)
 void MapManager::UnLoadTransportForPlayers(Player* player)
 {
     MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
- 
+
     UpdateData transData;
 
     MapManager::TransportSet& tset = tmap[player->GetInstanceId()];
@@ -913,4 +913,24 @@ void Transport::UpdatePlayerPositions()
         transData.BuildPacket(&packet);
         plr->SendDirectMessage(&packet);
     }
+}
+
+void Transport::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
+{
+  float inx = x, iny = y, inz = z, ino = o;
+  o = GetOrientation() + ino;
+  x = GetPositionX() + inx * std::cos(GetOrientation()) - iny * std::sin(GetOrientation());
+  y = GetPositionY() + iny * std::cos(GetOrientation()) + inx * std::sin(GetOrientation());
+  z = GetPositionZ() + inz;
+}
+
+void Transport::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
+{
+  o -= GetOrientation();
+  z -= GetPositionZ();
+  y -= GetPositionY();    // y = searchedY * std::cos(o) + searchedX * std::sin(o)
+  x -= GetPositionX();    // x = searchedX * std::cos(o) + searchedY * std::sin(o + pi)
+  float inx = x, iny = y;
+  y = (iny - inx * tan(GetOrientation())) / (cos(GetOrientation()) + std::sin(GetOrientation()) * tan(GetOrientation()));
+  x = (inx + iny * tan(GetOrientation())) / (cos(GetOrientation()) + std::sin(GetOrientation()) * tan(GetOrientation()));
 }

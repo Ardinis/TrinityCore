@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -124,7 +124,7 @@ class MapManager
         void LoadTransports();
         void LoadTransportNPCs();
 
-        //Load transport to instance
+	//Load transport to instance
         Transport* LoadTransportInMap(Map* instance, uint32 goEntry, uint32 period);
         void UnLoadTransportFromMap(Transport* t);
         void LoadTransportForPlayers(Player* player);
@@ -135,7 +135,7 @@ class MapManager
 
         typedef std::map<uint32, TransportSet> TransportMap;
         TransportMap m_TransportsByMap;
-        TransportMap m_TransportsByInstanceIdMap;
+	TransportMap m_TransportsByInstanceIdMap;
 
         bool CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck = false);
         void InitializeVisibilityDistanceInfo();
@@ -150,7 +150,7 @@ class MapManager
         void RegisterInstanceId(uint32 instanceId);
         void FreeInstanceId(uint32 instanceId);
 
-        uint32 GetNextInstanceId() { return _nextInstanceId; };
+        uint32 GetNextInstanceId() const { return _nextInstanceId; };
         void SetNextInstanceId(uint32 nextInstanceId) { _nextInstanceId = nextInstanceId; };
 
         MapUpdater * GetMapUpdater() { return &m_updater; }

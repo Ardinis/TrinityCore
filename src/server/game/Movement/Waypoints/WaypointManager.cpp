@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -43,12 +43,13 @@ void WaypointMgr::Load()
 {
     uint32 oldMSTime = getMSTime();
 
+    //                                                0    1         2           3          4            5           6        7      8           9
     QueryResult result = WorldDatabase.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_flag, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
 
     if (!result)
     {
-        sLog->outErrorDb(">> Loaded 0 waypoints. DB table `waypoint_data` is empty!");
-        sLog->outString();
+      sLog->outError(">> Loaded 0 waypoints. DB table `waypoint_data` is empty!");
+
         return;
     }
 
@@ -78,7 +79,7 @@ void WaypointMgr::Load()
         wp->run = fields[6].GetBool();
         wp->delay = fields[7].GetUInt32();
         wp->event_id = fields[8].GetUInt32();
-        wp->event_chance = fields[9].GetUInt8();
+        wp->event_chance = fields[9].GetInt16();
 
         path.push_back(wp);
         ++count;
@@ -86,7 +87,7 @@ void WaypointMgr::Load()
     while (result->NextRow());
 
     sLog->outString(">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    sLog->outString();
+
 }
 
 void WaypointMgr::ReloadPath(uint32 id)
@@ -100,7 +101,12 @@ void WaypointMgr::ReloadPath(uint32 id)
         _waypointStore.erase(itr);
     }
 
-    QueryResult result = WorldDatabase.PQuery("SELECT point, position_x, position_y, position_z, orientation, move_flag, delay, action, action_chance FROM waypoint_data WHERE id = %u ORDER BY point", id);
+    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_WAYPOINT_DATA_BY_ID);
+
+    stmt->setUInt32(0, id);
+
+    PreparedQueryResult result = WorldDatabase.Query(stmt);
+
     if (!result)
         return;
 

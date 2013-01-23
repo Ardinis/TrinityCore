@@ -73,7 +73,6 @@ void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
 void AddSC_gps_commandscript();
 void AddSC_report_commandscript();
-void AddSC_mmaps_commandscript();
 
 #ifdef SCRIPTS
 //world
@@ -696,7 +695,6 @@ void AddCommandScripts()
     AddSC_wp_commandscript();
     AddSC_gps_commandscript();
     AddSC_report_commandscript();
-    AddSC_mmaps_commandscript();
 }
 
 void AddWorldScripts()

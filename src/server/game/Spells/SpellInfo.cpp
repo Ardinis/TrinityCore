@@ -633,19 +633,14 @@ bool SpellEffectInfo::HasRadius() const
 
 float SpellEffectInfo::CalcRadius(Unit* caster, Spell* spell) const
 {
-  if (!HasRadius())
-    return 0.0f;
+    if (!HasRadius())
+        return 0.0f;
 
-  float radius = RadiusEntry->RadiusMin;
-  if (caster)
-  {
-    radius += RadiusEntry->RadiusPerLevel * caster->getLevel();
-    radius = std::min(radius, RadiusEntry->RadiusMax);
-    if (Player* modOwner = caster->GetSpellModOwner())
-      modOwner->ApplySpellMod(_spellInfo->Id, SPELLMOD_RADIUS, radius, spell);
-  }
+    float radius = RadiusEntry->radiusMax;
+    if (Player* modOwner = (caster ? caster->GetSpellModOwner() : NULL))
+        modOwner->ApplySpellMod(_spellInfo->Id, SPELLMOD_RADIUS, radius, spell);
 
-  return radius;
+    return radius;
 }
 
 uint32 SpellEffectInfo::GetProvidedTargetMask() const

@@ -19,7 +19,6 @@
 #include "MoveSpline.h"
 #include <sstream>
 #include "Log.h"
-#include "Creature.h"
 
 namespace Movement{
 
@@ -32,7 +31,7 @@ Location MoveSpline::ComputePosition() const
     ASSERT(Initialized());
 
     float u = 1.f;
-    int32 seg_time = spline.length(point_Idx, point_Idx+1);
+    int32 seg_time = spline.length(point_Idx,point_Idx+1);
     if (seg_time > 0)
         u = (time_passed - spline.length(point_Idx)) / (float)seg_time;
     Location c;
@@ -51,15 +50,15 @@ Location MoveSpline::ComputePosition() const
         if (splineflags.final_angle)
             c.orientation = facing.angle;
         else if (splineflags.final_point)
-            c.orientation = atan2(facing.f.y - c.y, facing.f.x - c.x);
+            c.orientation = atan2(facing.f.y-c.y, facing.f.x-c.x);
         //nothing to do for MoveSplineFlag::Final_Target flag
     }
     else
     {
-        if (!splineflags.hasFlag(MoveSplineFlag::OrientationFixed | MoveSplineFlag::Falling))
+        if (!splineflags.hasFlag(MoveSplineFlag::OrientationFixed|MoveSplineFlag::Falling))
         {
             Vector3 hermite;
-            spline.evaluate_derivative(point_Idx, u, hermite);
+            spline.evaluate_derivative(point_Idx,u,hermite);
             c.orientation = atan2(hermite.y, hermite.x);
         }
 
@@ -103,12 +102,12 @@ struct FallInitializer
     float start_elevation;
     inline int32 operator()(Spline<int32>& s, int32 i)
     {
-        return Movement::computeFallTime(start_elevation - s.getPoint(i+1).z, false) * 1000.f;
+        return Movement::computeFallTime(start_elevation - s.getPoint(i+1).z,false) * 1000.f;
     }
 };
 
 enum{
-    minimal_duration = 1
+    minimal_duration = 1,
 };
 
 struct CommonInitializer
@@ -125,7 +124,7 @@ struct CommonInitializer
 
 void MoveSpline::init_spline(const MoveSplineInitArgs& args)
 {
-    const SplineBase::EvaluationMode modes[2] = {SplineBase::ModeLinear, SplineBase::ModeCatmullrom};
+    const SplineBase::EvaluationMode modes[2] = {SplineBase::ModeLinear,SplineBase::ModeCatmullrom};
     if (args.flags.cyclic)
     {
         uint32 cyclic_point = 0;
@@ -168,7 +167,6 @@ void MoveSpline::Initialize(const MoveSplineInitArgs& args)
     point_Idx_offset = args.path_Idx_offset;
     initialOrientation = args.initialOrientation;
 
-    onTransport = false;
     time_passed = 0;
     vertical_acceleration = 0.f;
     effect_start_time = 0;
@@ -196,16 +194,16 @@ MoveSpline::MoveSpline() : m_Id(0), time_passed(0),
 
 /// ============================================================================================
 
-bool MoveSplineInitArgs::Validate(Unit* unit) const
+bool MoveSplineInitArgs::Validate() const
 {
 #define CHECK(exp) \
     if (!(exp))\
     {\
-        sLog->outError("MoveSplineInitArgs::Validate: expression '%s' failed for GUID: %u Entry: %u", #exp, unit->GetTypeId() == TYPEID_PLAYER ? unit->GetGUIDLow() : unit->ToCreature()->GetDBTableGUIDLow(), unit->GetEntry());\
+        sLog->outError("MoveSplineInitArgs::Validate: expression '%s' failed", #exp);\
         return false;\
     }
     CHECK(path.size() > 1);
-    CHECK(velocity > 0.1f);
+    CHECK(velocity > 0.f);
     CHECK(time_perc >= 0.f && time_perc <= 1.f);
     //CHECK(_checkPathBounds());
     return true;
@@ -219,7 +217,7 @@ bool MoveSplineInitArgs::_checkPathBounds() const
     if (!(flags & MoveSplineFlag::Mask_CatmullRom) && path.size() > 2)
     {
         enum{
-            MAX_OFFSET = (1 << 11) / 2
+            MAX_OFFSET = (1 << 11) / 2,
         };
         Vector3 middle = (path.front()+path.back()) / 2;
         Vector3 offset;
@@ -290,7 +288,7 @@ std::string MoveSpline::ToString() const
         str << "facing  angle: " << facing.angle;
     else if (splineflags.final_target)
         str << "facing target: " << facing.target;
-    else if (splineflags.final_point)
+    else if(splineflags.final_point)
         str << "facing  point: " << facing.f.x << " " << facing.f.y << " " << facing.f.z;
     str << std::endl;
     str << "time passed: " << time_passed << std::endl;

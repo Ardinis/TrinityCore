@@ -26,7 +26,7 @@ struct VehicleEntry;
 struct Position;
 class Unit;
 
-class Vehicle : public TransportBase
+class Vehicle
 {
     public:
         explicit Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry);
@@ -60,9 +60,6 @@ class Vehicle : public TransportBase
         SeatMap Seats;
 
         VehicleSeatEntry const* GetSeatForPassenger(Unit* passenger);
-
-	void CalculatePassengerPosition(float& x, float& y, float& z, float& o);
-	void CalculatePassengerOffset(float& x, float& y, float& z, float& o);
 
     private:
         SeatMap::iterator GetSeatIteratorForPassenger(Unit* passenger);

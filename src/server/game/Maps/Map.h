@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -76,8 +76,6 @@ struct map_fileheader
     uint32 heightMapSize;
     uint32 liquidMapOffset;
     uint32 liquidMapSize;
-    uint32 holesOffset;
-    uint32 holesSize;
 };
 
 #define MAP_AREA_NO_AREA      0x0001
@@ -138,8 +136,7 @@ enum ZLiquidStatus
 
 struct LiquidData
 {
-    uint32 type_flags;
-    uint32 entry;
+    uint32 type;
     float  level;
     float  depth_level;
 };
@@ -166,8 +163,7 @@ class GridMap
 
     // Liquid data
     float _liquidLevel;
-    uint16* _liquidEntry;
-    uint8* _liquidFlags;
+    uint8* _liquidData;
     float* _liquidMap;
     uint16 _gridArea;
     uint16 _liquidType;
@@ -178,7 +174,7 @@ class GridMap
 
 
     bool loadAreaData(FILE* in, uint32 offset, uint32 size);
-    bool loadHeightData(FILE* in, uint32 offset, uint32 size);
+    bool loadHeihgtData(FILE* in, uint32 offset, uint32 size);
     bool loadLiquidData(FILE* in, uint32 offset, uint32 size);
 
     // Get height functions and pointers
@@ -195,10 +191,10 @@ public:
     bool loadData(char* filaname);
     void unloadData();
 
-    uint16 getArea(float x, float y) const;
-    inline float getHeight(float x, float y) const {return (this->*_gridGetHeight)(x, y);}
-    float getLiquidLevel(float x, float y) const;
-    uint8 getTerrainType(float x, float y) const;
+    uint16 getArea(float x, float y);
+    inline float getHeight(float x, float y) {return (this->*_gridGetHeight)(x, y);}
+    float getLiquidLevel(float x, float y);
+    uint8 getTerrainType(float x, float y);
     ZLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data = 0);
 };
 
@@ -208,6 +204,30 @@ public:
 #else
 #pragma pack(push, 1)
 #endif
+
+class DynamicLOSObject
+{
+    public:
+        DynamicLOSObject();
+        bool IsBetween(float x, float y, float z, float x2, float y2, float z2);
+        bool IsInside(float x, float y);
+        bool IsOverOrUnder(float z);
+        float GetDistance(float x, float y);
+        bool IsActive();
+        void SetActiveState(bool state);
+        void SetCoordinates(float x, float y);
+        void SetZ(float z);
+        void SetRadius(float r);
+        void SetHeight(float h);
+        bool HasHeightInfo();
+    private:
+        float _x;
+        float _y;
+        float _z;
+        float _height;
+        float _radius;
+        bool _active;
+};
 
 struct InstanceTemplate
 {
@@ -230,7 +250,7 @@ enum LevelRequirementVsMode
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
 #define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 #define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find VMap ground if it is available, just larger than MAX_HEIGHT - INVALID_HEIGHT
-#define DEFAULT_HEIGHT_SEARCH     50.0f                     // default search distance to find height at nearby locations
+#define DEFAULT_HEIGHT_SEARCH     10.0f                     // default search distance to find height at nearby locations
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
 
 typedef std::map<uint32/*leaderDBGUID*/, CreatureGroup*>        CreatureGroupHolderType;
@@ -247,12 +267,8 @@ class Map : public GridRefManager<NGridType>
         // currently unused for normal maps
         bool CanUnload(uint32 diff)
         {
-            if (!m_unloadTimer)
-                return false;
-
-            if (m_unloadTimer <= diff)
-                return true;
-
+            if (!m_unloadTimer) return false;
+            if (m_unloadTimer <= diff) return true;
             m_unloadTimer -= diff;
             return false;
         }
@@ -441,47 +457,18 @@ class Map : public GridRefManager<NGridType>
         float GetHeight(uint32 phasemask, float x, float y, float z, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
         void Balance() { _dynamicTree.balance(); }
-        void RemoveGameObjectModel(const GameObjectModel& model) { _dynamicTree.remove(model); }
-        void InsertGameObjectModel(const GameObjectModel& model) { _dynamicTree.insert(model); }
-        bool ContainsGameObjectModel(const GameObjectModel& model) const { return _dynamicTree.contains(model);}
+        void Remove(const GameObjectModel& mdl) { _dynamicTree.remove(mdl); }
+        void Insert(const GameObjectModel& mdl) { _dynamicTree.insert(mdl); }
+        bool Contains(const GameObjectModel& mdl) const { return _dynamicTree.contains(mdl);}
         bool getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float modifyDist);
 
-        /*
-            RESPAWN TIMES
-        */
-        time_t GetLinkedRespawnTime(uint64 guid) const;
-        time_t GetCreatureRespawnTime(uint32 dbGuid) const
-        {
-            UNORDERED_MAP<uint32 /*dbGUID*/, time_t>::const_iterator itr = _creatureRespawnTimes.find(dbGuid);
-            if (itr != _creatureRespawnTimes.end())
-                return itr->second;
-
-            return time_t(0);
-        }
-
-        time_t GetGORespawnTime(uint32 dbGuid) const
-        {
-            UNORDERED_MAP<uint32 /*dbGUID*/, time_t>::const_iterator itr = _goRespawnTimes.find(dbGuid);
-            if (itr != _goRespawnTimes.end())
-                return itr->second;
-
-            return time_t(0);
-        }
-
-        void SaveCreatureRespawnTime(uint32 dbGuid, time_t respawnTime);
-        void RemoveCreatureRespawnTime(uint32 dbGuid);
-        void SaveGORespawnTime(uint32 dbGuid, time_t respawnTime);
-        void RemoveGORespawnTime(uint32 dbGuid);
-        void LoadRespawnTimes();
-        void DeleteRespawnTimes();
-
-        static void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
+	void DeleteRespawnTimes();
+	void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
 
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
         void LoadMap(int gx, int gy, bool reload = false);
-        void LoadMMap(int gx, int gy);
         GridMap* GetGrid(float x, float y);
 
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
@@ -502,7 +489,6 @@ class Map : public GridRefManager<NGridType>
 
         bool IsGridLoaded(const GridCoord &) const;
         void EnsureGridCreated(const GridCoord &);
-        void EnsureGridCreated_i(const GridCoord &);
         bool EnsureGridLoaded(Cell const&);
         void EnsureGridLoadedForActiveObject(Cell const&, WorldObject* object);
 
@@ -524,12 +510,10 @@ class Map : public GridRefManager<NGridType>
         void ScriptsProcess();
 
         void UpdateActiveCells(const float &x, const float &y, const uint32 t_diff);
-
     protected:
         void SetUnloadReferenceLock(const GridCoord &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
         ACE_Thread_Mutex Lock;
-        ACE_Thread_Mutex GridLock;
 
         MapEntry const* i_mapEntry;
         uint8 i_spawnMode;
@@ -547,6 +531,21 @@ class Map : public GridRefManager<NGridType>
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
 
+    /*
+     **********************
+     * DYNAMIC LOS SYSTEM *
+     **********************
+    */
+    public:
+        uint32 AddDynLOSObject(float x, float y, float radius);
+        uint32 AddDynLOSObject(float x, float y, float z, float radius, float height);
+        void SetDynLOSObjectState(uint32 id, bool state);
+        bool GetDynLOSObjectState(uint32 id);
+        bool IsInDynLOS(float x, float y, float z, float x2, float y2, float z2);
+    private:
+        std::map<uint32, DynamicLOSObject*> m_dynamicLOSObjects;
+        uint32 m_dynamicLOSCounter;
+    /* END */
     private:
         Player* _GetScriptPlayerSourceOrTarget(Object* source, Object* target, const ScriptInfo* scriptInfo) const;
         Creature* _GetScriptCreatureSourceOrTarget(Object* source, Object* target, const ScriptInfo* scriptInfo, bool bReverse = false) const;
@@ -608,9 +607,6 @@ class Map : public GridRefManager<NGridType>
             else
                 m_activeNonPlayers.erase(obj);
         }
-
-        UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _creatureRespawnTimes;
-        UNORDERED_MAP<uint32 /*dbGUID*/, time_t> _goRespawnTimes;
 };
 
 enum InstanceResetMethod

@@ -382,7 +382,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         }
     }
 
-    if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING))
+    if (seat->second.SeatInfo->m_flags && !(seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_UNK1))
       {
 	switch (GetVehicleInfo()->m_ID)
 	  {
@@ -598,24 +598,4 @@ void Vehicle::Relocate(Position pos)
     _me->UpdatePosition(pos, true);
     // problems, and impossible to do delayed enter
     //pPlayer->EnterVehicle(veh);
-}
-
-void Vehicle::CalculatePassengerPosition(float& x, float& y, float& z, float& o)
-{
-  float inx = x, iny = y, inz = z, ino = o;
-  o = GetBase()->GetOrientation() + ino;
-  x = GetBase()->GetPositionX() + inx * std::cos(GetBase()->GetOrientation()) - iny * std::sin(GetBase()->GetOrientation());
-  y = GetBase()->GetPositionY() + iny * std::cos(GetBase()->GetOrientation()) + inx * std::sin(GetBase()->GetOrientation());
-  z = GetBase()->GetPositionZ() + inz;
-}
-
-void Vehicle::CalculatePassengerOffset(float& x, float& y, float& z, float& o)
-{
-  o -= GetBase()->GetOrientation();
-  z -= GetBase()->GetPositionZ();
-  y -= GetBase()->GetPositionY();    // y = searchedY * std::cos(o) + searchedX * std::sin(o)
-  x -= GetBase()->GetPositionX();    // x = searchedX * std::cos(o) + searchedY * std::sin(o + pi)
-  float inx = x, iny = y;
-  y = (iny - inx * tan(GetBase()->GetOrientation())) / (cos(GetBase()->GetOrientation()) + std::sin(GetBase()->GetOrientation()) * tan(GetBase()->GetOrientation()));
-  x = (inx + iny * tan(GetBase()->GetOrientation())) / (cos(GetBase()->GetOrientation()) + std::sin(GetBase()->GetOrientation()) * tan(GetBase()->GetOrientation()));
 }

@@ -25,7 +25,7 @@
 #include <set>
 #include <string>
 
-class Transport : public GameObject, public TransportBase
+class Transport : public GameObject
 {
     public:
         Transport(uint32 period, uint32 script);
@@ -53,8 +53,6 @@ class Transport : public GameObject, public TransportBase
         void BuildWaitMovePacket(Map const* targetMap);
         void BuildStopMovePacket(Map const* targetMap);
         uint32 GetScriptId() const { return ScriptId; }
-	void CalculatePassengerPosition(float& x, float& y, float& z, float& o);
-        void CalculatePassengerOffset(float& x, float& y, float& z, float& o);
     private:
         struct WayPoint
         {
@@ -98,3 +96,4 @@ class Transport : public GameObject, public TransportBase
         WayPointMap::const_iterator GetNextWayPoint();
 };
 #endif
+

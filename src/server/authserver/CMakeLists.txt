@@ -60,7 +60,6 @@ include_directories(
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
-  /usr/lib64/libpthread.so.0
 )
 
 set(authserver_LINK_FLAGS "")
@@ -116,3 +115,4 @@ if( USE_COREPCH )
     add_native_precompiled_header(authserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/authPCH)
   endif()
 endif()
+

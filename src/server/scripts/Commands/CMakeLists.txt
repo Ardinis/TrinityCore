@@ -29,7 +29,6 @@ set(scripts_STAT_SRCS
   Commands/cs_tele.cpp
   Commands/cs_titles.cpp
   Commands/cs_wp.cpp
-  Commands/cs_mmaps.cpp
   Commands/cs_transmo.cpp
   Commands/cs_report.cpp
 #  Commands/cs_character.cpp

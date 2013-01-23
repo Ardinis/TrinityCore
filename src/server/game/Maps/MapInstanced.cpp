@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,11 +21,11 @@
 #include "MapManager.h"
 #include "Battleground.h"
 #include "VMapFactory.h"
-#include "MMapFactory.h"
 #include "InstanceSaveMgr.h"
 #include "World.h"
 #include "Group.h"
-#include "Player.h"
+#include "LFGMgr.h"
+#include "InstanceScript.h"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, DUNGEON_DIFFICULTY_NORMAL)
 {
@@ -118,21 +118,19 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
         return NULL;
 
     Map* map = NULL;
-    uint32 newInstanceId = 0;                       // instanceId of the resulting map
+    uint32 NewInstanceId = 0;                       // instanceId of the resulting map
 
     if (IsBattlegroundOrArena())
     {
         // instantiate or find existing bg map for player
         // the instance id is set in battlegroundid
-        newInstanceId = player->GetBattlegroundId();
-        if (!newInstanceId)
-            return NULL;
-
-        map = sMapMgr->FindMap(mapId, newInstanceId);
+        NewInstanceId = player->GetBattlegroundId();
+        if (!NewInstanceId) return NULL;
+        map = sMapMgr->FindMap(mapId, NewInstanceId);
         if (!map)
         {
             if (Battleground* bg = player->GetBattleground())
-                map = CreateBattleground(newInstanceId, bg);
+                map = CreateBattleground(NewInstanceId, bg);
             else
             {
                 player->TeleportToBGEntryPoint();
@@ -162,24 +160,42 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
         if (pSave)
         {
             // solo/perm/group
-            newInstanceId = pSave->GetInstanceId();
-            map = FindInstanceMap(newInstanceId);
+            NewInstanceId = pSave->GetInstanceId();
+            map = FindInstanceMap(NewInstanceId);
             // it is possible that the save exists but the map doesn't
             if (!map)
-                map = CreateInstance(newInstanceId, pSave, pSave->GetDifficulty());
+			{
+                map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
+				if (player->GetGroup() && player->GetGroup()->isLFGGroup() && map && ((InstanceMap*)map)->GetInstanceScript())
+				{
+					if (uint32 dungeonId = sLFGMgr->GetDungeon(player->GetGroup()->GetGUID(), true))
+						if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+							if (dungeon->map == map->GetId() && dungeon->difficulty == map->GetDifficulty())
+								((InstanceMap*)map)->GetInstanceScript()->SetIsLfg(true);
+				}
+			}
         }
         else
         {
             // if no instanceId via group members or instance saves is found
             // the instance will be created for the first time
-            newInstanceId = sMapMgr->GenerateInstanceId();
+            NewInstanceId = sMapMgr->GenerateInstanceId();
 
             Difficulty diff = player->GetGroup() ? player->GetGroup()->GetDifficulty(IsRaid()) : player->GetDifficulty(IsRaid());
             //Seems it is now possible, but I do not know if it should be allowed
             //ASSERT(!FindInstanceMap(NewInstanceId));
-            map = FindInstanceMap(newInstanceId);
+            map = FindInstanceMap(NewInstanceId);
             if (!map)
-                map = CreateInstance(newInstanceId, NULL, diff);
+			{
+                map = CreateInstance(NewInstanceId, NULL, diff);
+				if (player->GetGroup() && player->GetGroup()->isLFGGroup() && map && ((InstanceMap*)map)->GetInstanceScript())
+				{
+					if (uint32 dungeonId = sLFGMgr->GetDungeon(player->GetGroup()->GetGUID(), true))
+						if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId))
+							if (dungeon->map == map->GetId() && dungeon->difficulty == map->GetDifficulty())
+								((InstanceMap*)map)->GetInstanceScript()->SetIsLfg(true);
+				}
+			}
         }
     }
 
@@ -195,13 +211,13 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
     const MapEntry* entry = sMapStore.LookupEntry(GetId());
     if (!entry)
     {
-        sLog->outError( "CreateInstance: no entry for map %d", GetId());
+        sLog->outError("CreateInstance: no entry for map %d", GetId());
         ASSERT(false);
     }
     const InstanceTemplate* iTemplate = sObjectMgr->GetInstanceTemplate(GetId());
     if (!iTemplate)
     {
-        sLog->outError( "CreateInstance: no instance template for map %d", GetId());
+        sLog->outError("CreateInstance: no instance template for map %d", GetId());
         ASSERT(false);
     }
 
@@ -212,8 +228,6 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
 
     InstanceMap* map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
     ASSERT(map->IsDungeon());
-
-    map->LoadRespawnTimes();
 
     bool load_data = save != NULL;
     map->CreateInstanceData(load_data);
@@ -262,7 +276,6 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
     if (m_InstancedMaps.size() <= 1 && sWorld->getBoolConfig(CONFIG_GRID_UNLOAD))
     {
         VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
-        MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(itr->second->GetId());
         // in that case, unload grids of the base map, too
         // so in the next map creation, (EnsureGridCreated actually) VMaps will be reloaded
         Map::UnloadAll();

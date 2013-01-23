@@ -2,27 +2,23 @@
 
 #include "wdt.h"
 
-u_map_fcc MWMOMagic = { {'O', 'M', 'W', 'M'} };
-u_map_fcc MPHDMagic = { {'D', 'H', 'P', 'M'} };
-u_map_fcc MAINMagic = { {'N', 'I', 'A', 'M'} };
-
 bool wdt_MWMO::prepareLoadedData()
 {
-    if (fcc != MWMOMagic.fcc)
+    if (fcc != 'MWMO')
         return false;
     return true;
 }
 
 bool wdt_MPHD::prepareLoadedData()
 {
-    if (fcc != MPHDMagic.fcc)
+    if (fcc != 'MPHD')
         return false;
     return true;
 }
 
 bool wdt_MAIN::prepareLoadedData()
 {
-    if (fcc != MAINMagic.fcc)
+    if (fcc != 'MAIN')
         return false;
     return true;
 }

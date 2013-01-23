@@ -29,12 +29,6 @@ typedef uint8_t            uint8;
 
 #define FILE_FORMAT_VERSION    18
 
-union u_map_fcc
-{
-    char   fcc_txt[4];
-    uint32 fcc;
-};
-
 //
 // File version chunk
 //

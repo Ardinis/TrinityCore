@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -33,9 +33,6 @@
 #include "Language.h"
 #include "WorldPacket.h"
 #include "Group.h"
-#include "Player.h"
-#include "WorldSession.h"
-#include "Opcodes.h"
 
 extern GridState* si_GridStates[];                          // debugging code, should be deleted some day
 
@@ -99,33 +96,32 @@ void MapManager::checkAndCorrectGridStatesArray()
 
 Map* MapManager::CreateBaseMap(uint32 id)
 {
-    Map* map = FindBaseMap(id);
+    Map* m = FindBaseMap(id);
 
-    if (map == NULL)
+    if (m == NULL)
     {
         TRINITY_GUARD(ACE_Thread_Mutex, Lock);
 
         const MapEntry* entry = sMapStore.LookupEntry(id);
         if (entry && entry->Instanceable())
         {
-            map = new MapInstanced(id, i_gridCleanUpDelay);
+            m = new MapInstanced(id, i_gridCleanUpDelay);
         }
         else
         {
-            map = new Map(id, i_gridCleanUpDelay, 0, REGULAR_DIFFICULTY);
-            map->LoadRespawnTimes();
+            m = new Map(id, i_gridCleanUpDelay, 0, REGULAR_DIFFICULTY);
         }
-        i_maps[id] = map;
+        i_maps[id] = m;
     }
 
-    ASSERT(map);
-    return map;
+    ASSERT(m != NULL);
+    return m;
 }
 
 Map* MapManager::FindBaseNonInstanceMap(uint32 mapId) const
 {
     Map* map = FindBaseMap(mapId);
-    if (map && map->Instanceable())
+    if(map && map->Instanceable())
         return NULL;
     return map;
 }
@@ -179,7 +175,6 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         else    // attempt to downscale
             mapDiff = GetDownscaledMapDifficultyData(entry->MapID, targetDifficulty);
     }
-    // FIXME: mapDiff is never used
 
     //Bypass checks for GMs
     if (player->isGameMaster())

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -221,8 +221,7 @@ struct AchievementCriteriaEntry
         // ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA              = 32
         struct
         {
-            uint32 mapID;                                   // 3 Reference to Map.dbc
-            uint32 count;                                   // 4 Number of times that the arena must be won.
+            uint32  mapID;                                  // 3 Reference to Map.dbc
         } win_arena;
 
         // ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA             = 33
@@ -528,7 +527,6 @@ struct AreaTableEntry
     char*   area_name[16];                                  // 11-26
                                                             // 27, string flags, unused
     uint32  team;                                           // 28
-    uint32  LiquidTypeOverride[4];                          // 29-32 liquid override by type
 
     // helpers
     bool IsSanctuary() const
@@ -629,13 +627,13 @@ struct BattlemasterListEntry
 struct CharStartOutfitEntry
 {
     //uint32 Id;                                            // 0
-    uint8 Race;                                             // 1
-    uint8 Class;                                            // 2
-    uint8 Gender;                                           // 3
-    //uint8 Unused;                                         // 4
-    int32 ItemId[MAX_OUTFIT_ITEMS];                         // 5-28
-    //int32 ItemDisplayId[MAX_OUTFIT_ITEMS];                // 29-52 not required at server side
-    //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 53-76 not required at server side
+    uint32 RaceClassGender;                                 // 1 (UNIT_FIELD_BYTES_0 & 0x00FFFFFF) comparable (0 byte = race, 1 byte = class, 2 byte = gender)
+    int32 ItemId[MAX_OUTFIT_ITEMS];                         // 2-13
+    //int32 ItemDisplayId[MAX_OUTFIT_ITEMS];                // 14-25 not required at server side
+    //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 26-37 not required at server side
+    //uint32 Unknown1;                                      // 38, unique values (index-like with gaps ordered in other way as ids)
+    //uint32 Unknown2;                                      // 39
+    //uint32 Unknown3;                                      // 40
 };
 
 struct CharTitlesEntry
@@ -1053,7 +1051,7 @@ struct GtRegenMPPerSptEntry
 /* no used
 struct HolidayDescriptionsEntry
 {
-    uint32 ID;                                              // 0, m_holidayDescriptionID
+    uint32 ID;                                              // 0, this is NOT holiday id
     //char*     name[16]                                    // 1-16 m_name_lang
                                                             // 17 name flags
 };
@@ -1062,7 +1060,7 @@ struct HolidayDescriptionsEntry
 /* no used
 struct HolidayNamesEntry
 {
-    uint32 ID;                                              // 0, m_holidayNameID
+    uint32 ID;                                              // 0, this is NOT holiday id
     //char*     name[16]                                    // 1-16 m_name_lang
     // 17 name flags
 };
@@ -1074,26 +1072,27 @@ struct HolidayNamesEntry
 
 struct HolidaysEntry
 {
-    uint32 Id;                                              // 0        m_ID
-    uint32 Duration[MAX_HOLIDAY_DURATIONS];                 // 1-10     m_duration
-    uint32 Date[MAX_HOLIDAY_DATES];                         // 11-36    m_date (dates in unix time starting at January, 1, 2000)
-    uint32 Region;                                          // 37       m_region (wow region)
-    uint32 Looping;                                         // 38       m_looping
-    uint32 CalendarFlags[MAX_HOLIDAY_FLAGS];                // 39-48    m_calendarFlags
-    //uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
-    //uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
-    char* TextureFilename;                                  // 51       m_textureFilename
-    uint32 Priority;                                        // 52       m_priority
-    uint32 CalendarFilterType;                              // 53       m_calendarFilterType (-1 = Fishing Contest, 0 = Unk, 1 = Darkmoon Festival, 2 = Yearly holiday)
-    //uint32 flags;                                         // 54       m_flags (0 = Darkmoon Faire, Fishing Contest and Wotlk Launch, rest is 1)
+  uint32 Id;                                              // 0        m_ID
+  uint32 Duration[MAX_HOLIDAY_DURATIONS];                 // 1-10     m_duration
+  uint32 Date[MAX_HOLIDAY_DATES];                         // 11-36    m_date (dates in unix time starting at January, 1, 2000)
+  uint32 Region;                                          // 37       m_region (wow region)
+  uint32 Looping;                                         // 38       m_looping
+  uint32 CalendarFlags[MAX_HOLIDAY_FLAGS];                // 39-48    m_calendarFlags
+  //uint32 holidayNameId;                                 // 49       m_holidayNameID (HolidayNames.dbc)
+  //uint32 holidayDescriptionId;                          // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
+  char* TextureFilename;                                  // 51       m_textureFilename
+  uint32 Priority;                                        // 52       m_priority
+  uint32 CalendarFilterType;                              // 53       m_calendarFilterType (-1 = Fishing Contest, 0 = Unk, 1 = Darkmoon Festival, 2 = Yearly holiday)
+  //uint32 flags;                                         // 54       m_flags (0 = Darkmoon Faire, Fishing Contest and Wotlk Launch, rest is 1)
 };
+
 
 struct ItemEntry
 {
    uint32   ID;                                             // 0
    uint32   Class;                                          // 1
-   uint32   SubClass;                                       // 2 some items have strange subclasses
-   int32    SoundOverrideSubclass;                          // 3
+   uint32   SubClass;                                       // 2 some items have strnage subclasses
+   int32    Unk0;                                           // 3
    int32    Material;                                       // 4
    uint32   DisplayId;                                      // 5
    uint32   InventoryType;                                  // 6
@@ -1196,7 +1195,7 @@ struct ItemSetEntry
 struct LFGDungeonEntry
 {
     uint32  ID;                                             // 0
-    char*   name[16];                                       // 1-17 Name lang
+    //char*   name[16];                                     // 1-17 Name lang
     uint32  minlevel;                                       // 18
     uint32  maxlevel;                                       // 19
     uint32  reclevel;                                       // 20
@@ -1204,7 +1203,7 @@ struct LFGDungeonEntry
     uint32  recmaxlevel;                                    // 22
     int32   map;                                            // 23
     uint32  difficulty;                                     // 24
-    uint32  flags;                                          // 25
+    //uint32  flags;                                        // 25
     uint32  type;                                           // 26
     //uint32  unk;                                          // 27
     //char*   iconname;                                     // 28
@@ -1216,29 +1215,27 @@ struct LFGDungeonEntry
     uint32 Entry() const { return ID + (type << 24); }
 };
 
-
+/*
 struct LiquidTypeEntry
 {
-    uint32 Id;
-    //char*  Name;
-    //uint32 Flags;
-    uint32 Type;
-    //uint32 SoundId;
-    uint32 SpellId;
-    //float MaxDarkenDepth;
-    //float FogDarkenIntensity;
-    //float AmbDarkenIntensity;
-    //float DirDarkenIntensity;
-    //uint32 LightID;
-    //float ParticleScale;
-    //uint32 ParticleMovement;
-    //uint32 ParticleTexSlots;
-    //uint32 LiquidMaterialID;
-    //char* Texture[6];
-    //uint32 Color[2];
-    //float Unk1[18];
-    //uint32 Unk2[4];
+    uint32      ID;                                         // 0
+    char*       name;                                       // 1
+    uint32      flags;                                      // 2        Water: 1|2|4|8, Magma: 8|16|32|64, Slime: 2|64|256, WMO Ocean: 1|2|4|8|512
+    uint32      type;                                       // 3        0: Water, 1: Ocean, 2: Magma, 3: Slime
+    uint32      soundid;                                    // 4        Reference to SoundEntries.dbc
+    uint32      spellID;                                    // 5        Reference to Spell.dbc
+    float       unk0[4];                                    // 6-9
+    uint32      unk1;                                       // 10       Light?
+    float       particleScale                               // 11       0: Slime, 1: Water/Ocean, 4: Magma
+    uint32      particleMovement;                           // 12
+    uint32      unk2                                        // 13
+    uint32      LiquidMaterialID                            // 14       Reference to LiquidMaterial.dbc
+    char*       texture[6];                                 // 15-20
+    uint32      unk3[2]                                     // 21-22
+    float       unk4[18];                                   // 23-40
+    uint32      unk5[4]                                     // 41-44
 };
+*/
 
 #define MAX_LOCK_CASE 8
 
@@ -1293,7 +1290,6 @@ struct MapEntry
     bool IsBattleground() const { return map_type == MAP_BATTLEGROUND; }
     bool IsBattleArena() const { return map_type == MAP_ARENA; }
     bool IsBattlegroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
-    bool IsWorldMap() const { return map_type == MAP_COMMON; }
 
     bool GetEntrancePos(int32 &mapid, float &x, float &y) const
     {
@@ -1395,63 +1391,60 @@ struct ScalingStatValuesEntry
     uint32  ssdMultiplier[4];                               // 2-5 Multiplier for ScalingStatDistribution
     uint32  armorMod[4];                                    // 6-9 Armor for level
     uint32  dpsMod[6];                                      // 10-15 DPS mod for level
-    uint32  spellPower;                                     // 16 spell power for level
+    uint32  spellBonus;                                     // 16 spell power for level
     uint32  ssdMultiplier2;                                 // 17 there's data from 3.1 dbc ssdMultiplier[3]
     uint32  ssdMultiplier3;                                 // 18 3.3
-    uint32  armorMod2[5];                                   // 19-23 Armor for level
+    //uint32 unk2;                                          // 19 unk, probably also Armor for level (flag 0x80000?)
+    uint32  armorMod2[4];                                   // 20-23 Armor for level
 
-    uint32 getssdMultiplier(uint32 mask) const
+    uint32  getssdMultiplier(uint32 mask) const
     {
         if (mask & 0x4001F)
         {
-            if (mask & 0x00000001) return ssdMultiplier[0]; // Shoulder
-            if (mask & 0x00000002) return ssdMultiplier[1]; // Trinket
-            if (mask & 0x00000004) return ssdMultiplier[2]; // Weapon1H
+            if (mask & 0x00000001) return ssdMultiplier[0];
+            if (mask & 0x00000002) return ssdMultiplier[1];
+            if (mask & 0x00000004) return ssdMultiplier[2];
             if (mask & 0x00000008) return ssdMultiplier2;
-            if (mask & 0x00000010) return ssdMultiplier[3]; // Ranged
+            if (mask & 0x00000010) return ssdMultiplier[3];
             if (mask & 0x00040000) return ssdMultiplier3;
         }
         return 0;
     }
 
-    uint32 getArmorMod(uint32 mask) const
+    uint32  getArmorMod(uint32 mask) const
     {
         if (mask & 0x00F001E0)
         {
-            if (mask & 0x00000020) return armorMod[0];      // Cloth shoulder
-            if (mask & 0x00000040) return armorMod[1];      // Leather shoulder
-            if (mask & 0x00000080) return armorMod[2];      // Mail shoulder
-            if (mask & 0x00000100) return armorMod[3];      // Plate shoulder
+            if (mask & 0x00000020) return armorMod[0];
+            if (mask & 0x00000040) return armorMod[1];
+            if (mask & 0x00000080) return armorMod[2];
+            if (mask & 0x00000100) return armorMod[3];
 
-            if (mask & 0x00080000) return armorMod2[0];      // cloak
-            if (mask & 0x00100000) return armorMod2[1];      // cloth
-            if (mask & 0x00200000) return armorMod2[2];      // leather
-            if (mask & 0x00400000) return armorMod2[3];      // mail
-            if (mask & 0x00800000) return armorMod2[4];      // plate
+            if (mask & 0x00100000) return armorMod2[0];      // cloth
+            if (mask & 0x00200000) return armorMod2[1];      // leather
+            if (mask & 0x00400000) return armorMod2[2];      // mail
+            if (mask & 0x00800000) return armorMod2[3];      // plate
         }
         return 0;
     }
-
     uint32 getDPSMod(uint32 mask) const
     {
-        if (mask & 0x7E00)
+        if (mask&0x7E00)
         {
-            if (mask & 0x00000200) return dpsMod[0];        // Weapon 1h
-            if (mask & 0x00000400) return dpsMod[1];        // Weapon 2h
-            if (mask & 0x00000800) return dpsMod[2];        // Caster dps 1h
-            if (mask & 0x00001000) return dpsMod[3];        // Caster dps 2h
-            if (mask & 0x00002000) return dpsMod[4];        // Ranged
-            if (mask & 0x00004000) return dpsMod[5];        // Wand
+            if (mask & 0x00000200) return dpsMod[0];
+            if (mask & 0x00000400) return dpsMod[1];
+            if (mask & 0x00000800) return dpsMod[2];
+            if (mask & 0x00001000) return dpsMod[3];
+            if (mask & 0x00002000) return dpsMod[4];
+            if (mask & 0x00004000) return dpsMod[5];         // not used?
         }
         return 0;
     }
-
     uint32 getSpellBonus(uint32 mask) const
     {
-        if (mask & 0x00008000) return spellPower;
+        if (mask & 0x00008000) return spellBonus;
         return 0;
     }
-
     uint32 getFeralBonus(uint32 mask) const                 // removed in 3.2.x?
     {
         if (mask & 0x00010000) return 0;                    // not used?
@@ -1677,9 +1670,9 @@ struct SpellFocusObjectEntry
 struct SpellRadiusEntry
 {
     uint32    ID;
-    float     RadiusMin;
-    float     RadiusPerLevel;
-    float     RadiusMax;
+    float     radiusMin;
+    //uint32    Unk    //always 0
+    float     radiusMax;
 };
 
 struct SpellRangeEntry
@@ -1987,7 +1980,7 @@ struct WorldMapAreaEntry
     float   x2;                                             // 7
     int32   virtual_map_id;                                 // 8 -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
     // int32   dungeonMap_id;                               // 9 pointer to DungeonMap.dbc (owerride x1, x2, y1, y2 coordinates)
-    // uint32  parentMapID;                                 // 10
+    // uint32  someMapID;                                   // 10
 };
 
 #define MAX_WORLD_MAP_OVERLAY_AREA_IDX 4

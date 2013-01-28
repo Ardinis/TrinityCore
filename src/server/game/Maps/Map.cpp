@@ -144,7 +144,7 @@ void Map::LoadMap(int gx, int gy, bool reload)
 
         // load grid map for base map
         if (!m_parentMap->GridMaps[gx][gy])
-            m_parentMap->EnsureGridCreated(GridCoord(63-gx, 63-gy));
+            m_parentMap->EnsureGridCreated_i(GridCoord(63-gx, 63-gy));
 
         ((MapInstanced*)(m_parentMap))->AddGridMapReference(GridCoord(gx, gy));
         GridMaps[gx][gy] = m_parentMap->GridMaps[gx][gy];
@@ -316,9 +316,14 @@ void Map::DeleteFromWorld(Player* player)
 //But object data is not loaded here
 void Map::EnsureGridCreated(const GridCoord &p)
 {
+  TRINITY_GUARD(ACE_Thread_Mutex, GridLock);
+  EnsureGridCreated_i(p);
+}
+
+void Map::EnsureGridCreated_i(const GridCoord &p)
+{
     if (!getNGrid(p.x_coord, p.y_coord))
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, Lock);
         if (!getNGrid(p.x_coord, p.y_coord))
         {
             sLog->outDebug(LOG_FILTER_MAPS, "Creating grid[%u, %u] for map %u instance %u", p.x_coord, p.y_coord, GetId(), i_InstanceId);

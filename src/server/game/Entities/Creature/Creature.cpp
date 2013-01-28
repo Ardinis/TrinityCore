@@ -755,8 +755,8 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
     SetMap(map);
     SetPhaseMask(phaseMask, false);
 
-	//if(guidlow > 12053233 && map->GetZoneId(x,y,z) != 4812)
-	//	sLog->outError(" Mob Pop : GUID = %u, Entry = %u , MapName = %s, AreaId = %u, X= %f, Y =%f, Z= %f", guidlow, Entry, map->GetMapName(), map->GetZoneId(x,y,z), x,y,z);
+    if(guidlow > 12053233 && map->GetZoneId(x,y,z) != 4812)
+      sLog->outError(" Mob Pop : GUID = %u, Entry = %u , MapName = %s, AreaId = %u, X= %f, Y =%f, Z= %f", guidlow, Entry, map->GetMapName(), map->GetZoneId(x,y,z), x,y,z);
 
     CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(Entry);
     if (!cinfo)

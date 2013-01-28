@@ -4771,6 +4771,9 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
+  if (m_spellInfo && (m_spellInfo->Id == 12749 || m_spellInfo->Id == 19804 || m_spellInfo->Id == 4073))
+    sLog->outError("POSSIBLE SPELL CHEATER: Casting not allowed spell, Name - %s LowGuid - %u", m_caster->GetName(), m_caster->GetGUIDLow());
+
     // check death state
     if (!m_caster->isAlive() && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !((m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD) || (IsTriggered() && !m_triggeredByAuraSpell)))
         return SPELL_FAILED_CASTER_DEAD;

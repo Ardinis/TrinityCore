@@ -241,7 +241,7 @@ public:
 	found = true;
 	ItemIds[cnt].push_back(itr->second.ItemId);
       }
-      if (ItemIds[cnt].size() > MAX_MAIL_ITEMS)
+      if (ItemIds[cnt].size() >= MAX_MAIL_ITEMS)
       {
 	changeSize = true;
 	cnt++;
@@ -258,7 +258,7 @@ public:
       return false;
     }
 
-    for (int cnt2 = 0; cnt2 < cnt; cnt2++)
+    for (int cnt2 = 0; cnt2 <= cnt; cnt2++)
     {
       // from console show not existed sender
       MailSender sender(MAIL_NORMAL, handler->GetSession() ? handler->GetSession()->GetPlayer()->GetGUIDLow() : 0, MAIL_STATIONERY_GM);

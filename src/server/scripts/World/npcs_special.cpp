@@ -6188,8 +6188,7 @@ public:
   {
     if (CAST_AI(npc_paragon_5_years_01::npc_paragon_5_years_01AI, creature->AI())->GetData(42) < 5)
       {
-	player->ADD_GOSSIP_ITEM(0, "Bienvenue chers aventuriers, etes vous prets a entrer dans la salle des tortures ? un defis de taille vous y attendra", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_IN\
-				FO_DEF + 1);
+	player->ADD_GOSSIP_ITEM(0, "Bienvenue chers aventuriers, etes vous prets a entrer dans la salle des tortures ? un defis de taille vous y attendra", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 	player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
       }
     else

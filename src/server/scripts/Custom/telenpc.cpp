@@ -26,6 +26,7 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include <cstring>
 #include "Config.h"
+#include "GameEventMgr.h"
 
 #ifdef WIN32
 #pragma warning(disable:4700) // uninitialized local variable
@@ -100,7 +101,8 @@ bool OnGossipHello(Player* Plr, GameObject* pCrea)
     Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Villes de la Horde ->", GOSSIP_SENDER_MAIN, 2000);
   Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Villes neutres ->", GOSSIP_SENDER_MAIN, 3000);
   Plr->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Donjons ->", GOSSIP_SENDER_MAIN, 5000);
-  //  Plr->ADD_GOSSIP_ITEM( 5, "Ceremonie PVP", GOSSIP_SENDER_MAIN, 3501);
+  if (IsEventActive(42))
+    Plr->ADD_GOSSIP_ITEM( 5, "event 5 ans de paragon !", GOSSIP_SENDER_MAIN, 3501);
 
   Plr->SEND_GOSSIP_MENU(Plr->GetGossipTextId(pCrea), pCrea->GetGUID());
   return true;
@@ -561,7 +563,7 @@ void OnSendDefaultMenu(Player* Plr, GameObject* pCrea, uint32 action)
     case 3501: // Arena PvP Option
       Plr->PlayerTalkClass->ClearMenus();
       Plr->CLOSE_GOSSIP_MENU();
-      Plr->TeleportTo(1, -8673.44f, 1955.63f, 109.12f, 0.38f);
+      Plr->TeleportTo(1, 7331.89f, -1532.03f, 160.0f, 0.65f);
       /*      if (Plr->GetTeam() == ALLIANCE) // Gurubashi for Alliance
         Plr->TeleportTo(1, -3818.0f, 1094.0f, 133.0f, 6.22f);
       else // Gurubashi for Horde

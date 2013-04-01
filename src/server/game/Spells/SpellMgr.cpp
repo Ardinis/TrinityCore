@@ -59,7 +59,15 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
 {
     if (spellproto->IsPositive())
         return DIMINISHING_NONE;
-
+    switch (spellproto->Id)
+    {
+        // Noblegarden Bunny transforms
+    case 61716:
+    case 61734:
+        return DIMINISHING_NONE;
+    default:
+        break;
+    }
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
         if (spellproto->Effects[i].ApplyAuraName == SPELL_AURA_MOD_TAUNT)

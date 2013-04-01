@@ -1011,6 +1011,8 @@ public:
                         car->Relocate(car->GetPositionX(), car->GetPositionY(), me->GetPositionZ() + 1);
                         car->StopMoving();
                         car->RemoveAura(SPELL_CART_DRAG);
+                        if (Vehicle * veh = car->GetVehicleKit())
+                            veh->RemoveAllPassengers();
                     }
                     me->MonsterSay(SAY_SCARLET_MINER2, LANG_UNIVERSAL, 0);
                     break;

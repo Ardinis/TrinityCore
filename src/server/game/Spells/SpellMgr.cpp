@@ -3036,20 +3036,42 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
-	case 49575:
-	  spellInfo->EffectMiscValue[0] = 70;
-	  break;
-	    case 63311:
-	      spellInfo->rangeIndex = 1;
-	      spellInfo->EffectImplicitTargetA[0] = 104;
-	      spellInfo->EffectRadiusIndex[0] = 13;
-	      break;
-	    case 51490:
-	    case 59156:
-	    case 59158:
-	    case 59159:
-	         spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
-	         break;
+            case 3738:
+            case 58643:
+            case 8177:
+            case 58753:
+            case 58749:
+            case 58739:
+            case 58745:
+            case 2062:
+            case 33663:
+            case 8512:
+            case 58656:
+            case 58582:
+            case 2484:
+            case 58734:
+            case 32982:
+            case 58704:
+            case 8170:
+            case 8143:
+            case 58774:
+            case 58757:
+              spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;    // 5yd
+              break;
+            case 49575:
+                spellInfo->EffectMiscValue[0] = 70;
+                break;
+	        case 63311:
+                spellInfo->rangeIndex = 1;
+                spellInfo->EffectImplicitTargetA[0] = 104;
+                spellInfo->EffectRadiusIndex[0] = 13;
+                break;
+	        case 51490:
+	        case 59156:
+	        case 59158:
+	        case 59159:
+                spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+                break;
             case 40244: case 40245: // Simon Game Visual
             case 40246: case 40247: // Simon Game Visual
             case 42835: // Spout, remove damage effect, only anim is needed

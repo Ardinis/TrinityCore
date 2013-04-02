@@ -100,6 +100,8 @@ struct CreatureTemplate
     uint32  npcflag;
     float   speed_walk;
     float   speed_run;
+    float   speed_swim;
+    float   speed_fly;
     float   scale;
     uint32  rank;
     float   mindmg;

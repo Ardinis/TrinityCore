@@ -333,10 +333,16 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             *data << uint8(0);                              // unk PGUID!
             *data << ((WorldObject*)this)->GetPositionX();
             *data << ((WorldObject*)this)->GetPositionY();
-            *data << ((WorldObject*)this)->GetPositionZ();
+            if (isType(TYPEMASK_UNIT))
+                *data << ((Unit*)this)->GetPositionZMinusOffset();
+            else
+                *data << ((WorldObject*)this)->GetPositionZ();
             *data << ((WorldObject*)this)->GetPositionX();
             *data << ((WorldObject*)this)->GetPositionY();
-            *data << ((WorldObject*)this)->GetPositionZ();
+            if (isType(TYPEMASK_UNIT))
+                *data << ((Unit*)this)->GetPositionZMinusOffset();
+            else
+                *data << ((WorldObject*)this)->GetPositionZ();
             *data << ((WorldObject*)this)->GetOrientation();
 
             if (GetTypeId() == TYPEID_CORPSE)
@@ -361,7 +367,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
                 {
                     *data << ((WorldObject*)this)->GetPositionX();
                     *data << ((WorldObject*)this)->GetPositionY();
-                    *data << ((WorldObject*)this)->GetPositionZ();
+                    if (isType(TYPEMASK_UNIT))
+                        *data << ((Unit*)this)->GetPositionZMinusOffset();
+                    else
+                        *data << ((WorldObject*)this)->GetPositionZ();
                     *data << ((WorldObject*)this)->GetOrientation();
                 }
             }
@@ -1562,7 +1571,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
             if (!ToCreature()->canFly())
             {
-	      Map *map = GetMap();
+                Map *map = GetMap();
                 bool canSwim = ToCreature()->canSwim();
                 float ground_z = z;
                 float max_z = canSwim
@@ -1573,24 +1582,24 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                     if (z > max_z)
                         z = max_z;
                     else //if (z < ground_z)
-		      if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
-                        z = ground_z;
+                        if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
+                            z = ground_z;
                 }
-		else if (!map->IsDungeon() && !map->IsRaid())
-		{
-		  ground_z = z;
-		  max_z = canSwim
-		    ? GetBaseMap()->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, &ground_z, !ToUnit()->HasAuraType(SPELL_AURA_WATER_WALK))
-		    : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, MAX_HEIGHT, true)));
-		  if (max_z > INVALID_HEIGHT)
-		  {
-                    if (z > max_z)
-		      z = max_z;
-                    else //if (z < ground_z)
-		      if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
-			z = ground_z;
-		  }
-		}
+                else if (!map->IsDungeon() && !map->IsRaid())
+                {
+                    ground_z = z;
+                    max_z = canSwim
+                        ? GetBaseMap()->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, &ground_z, !ToUnit()->HasAuraType(SPELL_AURA_WATER_WALK))
+                        : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, MAX_HEIGHT, true)));
+                    if (max_z > INVALID_HEIGHT)
+                    {
+                        if (z > max_z)
+                            z = max_z;
+                        else //if (z < ground_z)
+                            if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
+                                z = ground_z;
+                    }
+                }
             }
             else
             {
@@ -1598,6 +1607,8 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
                 if (z < ground_z)
                     z = ground_z;
             }
+            if (ToCreature()->HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+                z += ToCreature()->GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             break;
         }
         case TYPEID_PLAYER:

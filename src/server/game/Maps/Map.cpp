@@ -712,6 +712,9 @@ void Map::PlayerRelocation(Player* player, float x, float y, float z, float orie
     Cell old_cell(player->GetPositionX(), player->GetPositionY());
     Cell new_cell(x, y);
 
+    if (player->HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+        z += player->GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+
     player->Relocate(x, y, z, orientation);
     if (player->IsVehicle())
       player->GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
@@ -740,6 +743,9 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
 
     if (!respawnRelocationOnFail && !getNGrid(new_cell.GridX(), new_cell.GridY()))
         return;
+
+    if (creature->HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+        z += creature->GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
 
     // delay creature move for grid/cell to grid/cell moves
     if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))

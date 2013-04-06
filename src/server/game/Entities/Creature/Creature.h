@@ -136,6 +136,7 @@ struct CreatureTemplate
     std::string AIName;
     uint32  MovementType;
     uint32  InhabitType;
+    float   HoverHeight;
     float   ModHealth;
     float   ModMana;
     float   ModArmor;

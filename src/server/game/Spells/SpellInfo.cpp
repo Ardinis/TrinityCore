@@ -2606,3 +2606,16 @@ uint32 SpellInfo::GetMaxTicks() const
 
   return 6;
 }
+
+
+bool SpellEffectInfo::TriggeredNeedsLosChecks() const
+{
+    switch (TargetA.GetTarget())
+    {
+    case TARGET_DEST_CASTER:
+    case TARGET_UNIT_CONE_ENEMY_104:
+    case TARGET_SRC_CASTER:
+        return true;
+    }
+    return false;
+}

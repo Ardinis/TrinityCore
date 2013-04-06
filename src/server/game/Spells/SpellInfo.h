@@ -284,6 +284,7 @@ public:
     bool IsFarUnitTargetEffect() const;
     bool IsFarDestTargetEffect() const;
     bool IsUnitOwnedAuraEffect() const;
+    bool TriggeredNeedsLosChecks() const;
 
     int32 CalcValue(Unit const* caster = NULL, int32 const* basePoints = NULL, Unit const* target = NULL) const;
     int32 CalcBaseValue(int32 value) const;

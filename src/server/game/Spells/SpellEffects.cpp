@@ -320,9 +320,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
     if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209 && m_spellInfo->Id != 57965)
       if (Player* player = m_caster->ToPlayer())
 	if (player->HasAura(67210))
-	{
 	  player->RemoveAura(67210);
-	}
 
     if (unitTarget && unitTarget->isAlive())
     {
@@ -1591,8 +1589,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
 void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET
-        && effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT && effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
@@ -1607,7 +1604,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
     // todo: move those to spell scripts
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL
-        && effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+        && effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
         // special cases
         switch (triggered_spell_id)
@@ -1624,8 +1621,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             // Vanish (not exist)
             case 18461:
             {
-	      unitTarget->RemoveMovementImpairingAuras();
-	      unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
+                unitTarget->RemoveMovementImpairingAuras();
+                unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
 
                 // If this spell is given to an NPC, it must handle the rest using its own AI
                 if (unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -1714,7 +1711,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     }
 
     SpellCastTargets targets;
-    if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+    if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
         if (!spellInfo->NeedsToBeTriggeredByCaster())
             return;

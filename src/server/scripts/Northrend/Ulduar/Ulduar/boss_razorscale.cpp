@@ -353,6 +353,7 @@ class boss_razorscale : public CreatureScript
                     controller->AI()->DoAction(ACTION_REMOVE_HARPOON);
                     controller->AI()->DoAction(ACTION_PLACE_BROKEN_HARPOON);
                 }
+                //                me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 summons.DoAction(NPC_MOLE_MACHINE_TRIGGER, ACTION_DESPAWN_ADDS);
                 _Reset();
                 me->SetFlying(true);
@@ -374,7 +375,7 @@ class boss_razorscale : public CreatureScript
                 phase = PHASE_GROUND;
                 events.SetPhase(PHASE_GROUND);
                 FlyCount = 0;
-                EnrageTimer = 15*MINUTE*IN_MILLISECONDS; // 15 minutes 
+                EnrageTimer = 15*MINUTE*IN_MILLISECONDS; // 15 minutes
                 Enraged = false;
                 events.ScheduleEvent(EVENT_FLIGHT, 0, 0, PHASE_GROUND);
             }
@@ -773,7 +774,7 @@ class npc_mole_machine_trigger : public CreatureScript
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                 me->SetVisible(false);
-            }           
+            }
 
             void Reset()
             {
@@ -798,12 +799,12 @@ class npc_mole_machine_trigger : public CreatureScript
                         case EVENT_SUMMON_GOB:
                             DoCast(SPELL_SUMMON_MOLE_MACHINE);
                             break;
-                        case EVENT_SUMMON_NPC:                     
+                        case EVENT_SUMMON_NPC:
                             switch (RAND(SPELL_SUMMON_IRON_DWARVES, SPELL_SUMMON_IRON_DWARVES_2))
                             {
                                 case SPELL_SUMMON_IRON_DWARVES:
                                     // Emulator for DoCast(SPELL_SUMMON_IRON_DWARVES); -> SpellScript did not work!
-                                    for (uint8 n = 0; n < urand(1, 2); ++n) 
+                                    for (uint8 n = 0; n < urand(1, 2); ++n)
                                         me->CastSpell(me, SPELL_SUMMON_IRON_DWARF_GUARDIAN, false);
                                     me->CastSpell(me, SPELL_SUMMON_IRON_DWARF_WATCHER, false);
                                     break;
@@ -889,12 +890,12 @@ class npc_darkrune_watcher : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
-                
+
                 while (uint32 event = events.ExecuteEvent())
                 {
                     switch (event)
                     {
-                        case EVENT_CHAIN_LIGHTNING:                            
+                        case EVENT_CHAIN_LIGHTNING:
                             DoCast(me->getVictim(), SPELL_CHAIN_LIGHTNING);
                             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(10000, 15000));
                             break;
@@ -984,7 +985,7 @@ class npc_darkrune_sentinel : public CreatureScript
 
             void Reset()
             {
-                events.ScheduleEvent(EVENT_HEROIC_STRIKE, urand(4000, 8000));                
+                events.ScheduleEvent(EVENT_HEROIC_STRIKE, urand(4000, 8000));
                 if (Is25ManRaid())
                     events.ScheduleEvent(EVENT_WHIRLWIND, urand(5000, 10000));  // Due to wowhead, whirlwind is only scheduled in 25-man-raid
                 events.ScheduleEvent(EVENT_BATTLE_SHOUT, urand(15000, 30000));
@@ -994,11 +995,11 @@ class npc_darkrune_sentinel : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
-                
+
                 while (uint32 event = events.ExecuteEvent())
                 {
                     switch (event)
-                    {   
+                    {
                         case EVENT_HEROIC_STRIKE:
                             DoCast(me->getVictim(), SPELL_HEROIC_STRIKE);
                             events.ScheduleEvent(EVENT_HEROIC_STRIKE, urand(4000, 6000));
@@ -1122,7 +1123,7 @@ class achievement_quick_shave : public AchievementCriteriaScript
 
 void AddSC_boss_razorscale()
 {
-    new boss_razorscale_controller();    
+    new boss_razorscale_controller();
     new boss_razorscale();
     new npc_expedition_commander();
     new npc_mole_machine_trigger();
@@ -1143,4 +1144,3 @@ void AddSC_boss_razorscale()
 #undef SPELL_FIREBALL
 #undef SPELL_FLAMEBREATH
 #undef SPELL_BATTLE_SHOUT
-

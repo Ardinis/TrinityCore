@@ -402,7 +402,7 @@ void ObjectMgr::LoadCreatureTemplates()
     //                                          54      55      56      57      58      59      60          61            62       63       64       65         66
                                              "spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, "
     //                                             67          68         69         70          71           72          73          74          75          76          77
-                                             "InhabitType, Health_mod, Mana_mod, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, "
+                                             "InhabitType, HoverHeight, Health_mod, Mana_mod, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, questItem6, "
     //                                            78           79           80               81                82           83
                                              "movementId, RegenHealth, equipment_id, mechanic_immune_mask, flags_extra, ScriptName "
                                              "FROM creature_template;");
@@ -448,6 +448,8 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.npcflag           = fields[19].GetUInt32();
         creatureTemplate.speed_walk        = fields[20].GetFloat();
         creatureTemplate.speed_run         = fields[21].GetFloat();
+        creatureTemplate.speed_swim         = fields[22].GetFloat();
+        creatureTemplate.speed_fly         = fields[23].GetFloat();
         creatureTemplate.scale             = fields[24].GetFloat();
         creatureTemplate.rank              = uint32(fields[25].GetUInt8());
         creatureTemplate.mindmg            = fields[26].GetFloat();

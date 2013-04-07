@@ -1314,6 +1314,8 @@ class instance_ulduar : public InstanceMapScript
                         return ThorimGUID;
                     case NPC_THORIM_CTRL:
                         return ThorimCtrlGUID;
+                    case DATA_HODIR_RARE_CACHE:
+                        return HodirRareCacheGUID;
                 }
 
                 return 0;

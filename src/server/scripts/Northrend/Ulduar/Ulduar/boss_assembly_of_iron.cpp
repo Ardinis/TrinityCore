@@ -1008,6 +1008,7 @@ class boss_stormcaller_brundir : public CreatureScript
                 RespawnEncounter(instance, me);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 		//		me->SetReactState(REACT_PASSIVE);
+                me->SetHover(false);
             }
 
             void EnterCombat(Unit* who)
@@ -1115,6 +1116,7 @@ class boss_stormcaller_brundir : public CreatureScript
                             me->SetLootRecipient(NULL);
                     }
                 }
+                me->SetHover(false);
             }
 
             void KilledUnit(Unit* /*who*/)

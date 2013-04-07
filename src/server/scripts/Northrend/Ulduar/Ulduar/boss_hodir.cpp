@@ -358,6 +358,11 @@ public:
             summonAddVerif = false;
             doCbt = false;
             me->RemoveAura(SPELL_BITING_COLD);
+            if (GameObject* HodirRareCache = instance->instance->GetGameObject(instance->GetData64(DATA_HODIR_RARE_CACHE)))
+            {
+                HodirRareCache->Respawn();
+                HodirRareCache->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            }
         }
 
         void EnterCombat(Unit* /*who*/)

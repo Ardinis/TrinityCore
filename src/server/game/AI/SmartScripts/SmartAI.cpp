@@ -375,7 +375,7 @@ void SmartAI::UpdateAI(const uint32 diff)
     if (!UpdateVictim())
         return;
 
-    if (mCanAutoAttack)
+    if (mCanAutoAttack && !me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
         DoMeleeAttackIfReady();
 }
 
@@ -517,7 +517,7 @@ void SmartAI::MoveInLineOfSight(Unit* who)
 
 bool SmartAI::CanAIAttack(const Unit* /*who*/) const
 {
-    if (me->GetReactState() == REACT_PASSIVE)
+    if (me->GetReactState() == REACT_PASSIVE || me->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
         return false;
     return true;
 }

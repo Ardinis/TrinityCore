@@ -3081,6 +3081,13 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             triggeredByAura->GetBase()->SetDuration(0);
         }
 
+        // Restore spellmods
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            m_caster->ToPlayer()->RestoreSpellMods(this);
+            m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+        }
+
         SendCastResult(result);
 
         finish(false);

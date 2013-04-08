@@ -386,65 +386,71 @@ class npc_saronite_vapors : public CreatureScript
             void InitializeAI()
             {
                 DoScriptText(EMOTE_VAPORS, me);
-		instance = me->GetInstanceScript();
+                instance = me->GetInstanceScript();
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-		me->SetReactState(REACT_PASSIVE);
-		me->ClearUnitState(UNIT_STATE_CASTING);
-		me->GetMotionMaster()->MoveRandom(30.0f);
-		isPassive = false;
-		mui_wave = 1000;
-		Reset();
+                me->SetReactState(REACT_PASSIVE);
+                me->ClearUnitState(UNIT_STATE_CASTING);
+                me->GetMotionMaster()->MoveRandom(30.0f);
+                isPassive = false;
+                mui_wave = 1000;
+                Reset();
+                stopMove = false;
             }
 
             void Reset()
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_RANDOM_MOVE, urand(3000, 4500));
-		mui_wave = 1000;
+                mui_wave = 1000;
+                stopMove = false;
             }
 
             void UpdateAI(uint32 const diff)
             {
-	      if (!instance || instance->GetBossState(BOSS_VEZAX) != IN_PROGRESS)
-		me->DisappearAndDie();
+                if (!instance || instance->GetBossState(BOSS_VEZAX) != IN_PROGRESS)
+                    me->DisappearAndDie();
 
-		if (isPassive)
-		  {
-		    if (mui_wave <= diff)
-		      {
-			Map::PlayerList const& players = me->GetMap()->GetPlayers();
-			if (!players.isEmpty())
-			  for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-			    if (Player* player = itr->getSource())
-			      if (player->isAlive())
-				{
-				  Position basePos;
-				  me->GetPosition(&basePos);
-				  if (player->GetDistance(basePos) > 8.0f)
-				    {
-				      mui_wave = 1000;
-				      player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
-				      continue;
-				    }
-				  uint8 stackCount = 0;
-				  if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))
-				    stackCount = vaporaura->GetStackAmount() + 1;
-				  else
-				    stackCount = 1;
-				  int32 manaGain = std::max( 100 << (stackCount-1), 0 );
-				  uint32 healthDamage = 2*manaGain;
-				  player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-				  player->ModifyPower(POWER_MANA, manaGain);
-				  player->AddAura(SPELL_SARONITE_VAPOR_AURA, player);
-				}
-			mui_wave = 1000;
-		      }
-		    else
-		      mui_wave -= diff;
-		  }
+                if (isPassive)
+                {
+                    if (mui_wave <= diff)
+                    {
+                        Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                        if (!players.isEmpty())
+                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                if (Player* player = itr->getSource())
+                                    if (player->isAlive())
+                                    {
+                                        Position basePos;
+                                        me->GetPosition(&basePos);
+                                        if (player->GetDistance(basePos) > 8.0f)
+                                        {
+                                            mui_wave = 1000;
+                                            player->RemoveAurasDueToSpell(SPELL_SARONITE_VAPOR_AURA);
+                                            continue;
+                                        }
+                                        uint8 stackCount = 0;
+                                        if (Aura* vaporaura = player->GetAura(SPELL_SARONITE_VAPOR_AURA))
+                                            stackCount = vaporaura->GetStackAmount() + 1;
+                                        else
+                                            stackCount = 1;
+                                        int32 manaGain = std::max( 100 << (stackCount-1), 0 );
+                                        uint32 healthDamage = 2*manaGain;
+                                        player->DealDamage(player, healthDamage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
+                                        player->ModifyPower(POWER_MANA, manaGain);
+                                        player->AddAura(SPELL_SARONITE_VAPOR_AURA, player);
+                                    }
+                        mui_wave = 1000;
+                    }
+                    else
+                        mui_wave -= diff;
+                }
+
+
+                if (stopMove)
+                    return;
 
                 events.Update(diff);
 
@@ -469,8 +475,10 @@ class npc_saronite_vapors : public CreatureScript
                 if (damage >= me->GetHealth())
                 {
                     damage = 0;
-		    if (isPassive)
-		      return;
+                    stopMove = true;
+                    if (isPassive)
+                        return;
+                    me->StopMoving();
                     isPassive = true;
                     me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->Clear(false);
@@ -482,16 +490,17 @@ class npc_saronite_vapors : public CreatureScript
                     DoCast(me, SPELL_SARONITE_VAPORS);
                     me->DespawnOrUnsummon(30000);
 
-		    if (Creature* Vezax = me->GetCreature(*me, instance->GetData64(BOSS_VEZAX)))
-		      Vezax->AI()->DoAction(ACTION_VAPORS_DIE);
+                    if (Creature* Vezax = me->GetCreature(*me, instance->GetData64(BOSS_VEZAX)))
+                        Vezax->AI()->DoAction(ACTION_VAPORS_DIE);
                 }
             }
 
-	private:
-	  InstanceScript* instance;
-	  EventMap events;
-	  bool isPassive;
-	  uint32 mui_wave;
+        private:
+            InstanceScript* instance;
+            EventMap events;
+            bool isPassive;
+            uint32 mui_wave;
+            bool stopMove;
         };
 
         CreatureAI* GetAI(Creature* creature) const

@@ -3094,17 +3094,17 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 spellInfo->EffectImplicitTargetB[0] = 0;
                 break;
-	case 74509: // Repelling wave
-	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
-	  spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
-	  spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
-	  break;
+            case 74509: // Repelling wave
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
+                spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_20_YARDS; // 100yards instead of 50000?!
+                break;
             case 31344: // Howl of Azgalor
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS; // 100yards instead of 50000?!
                 break;
             case 71465:
-	    case 71468:
-	    case 71469:
+	        case 71468:
+	        case 71469:
             case 71464:
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS; // 100yards instead of 50000?!
                 break;
@@ -3116,6 +3116,8 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectTriggerSpell[0] = 36325; // They Must Burn Bomb Drop (DND)
                 break;
             case 49838: // Stop Time
+            case 5171:  // Slice and Dice
+            case 6774:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
             case 61407: // Energize Cores
@@ -3125,9 +3127,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENTRY;
                 break;
-	case 52212:
-	  spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
-	  break;
+            case 52212:
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+                break;
             case 50785: // Energize Cores
             case 59372: // Energize Cores
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_SRC_AREA_ENEMY;
@@ -3486,8 +3488,8 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 62584: // Lifebinder's Gift
             case 64185: // Lifebinder's Gift
-                spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_NEARBY_ENTRY;
-                spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_NEARBY_ENTRY;
+                spellInfo->EffectImplicitTargetB[1] = TARGET_DEST_CASTER;
+                spellInfo->EffectBasePoints[1] = 0;
                 break;
             case 62301: // Cosmic Smash (Algalon the Observer)
                 spellInfo->MaxAffectedTargets = 1;
@@ -3780,38 +3782,38 @@ void SpellMgr::LoadDbcDataCorrections()
 			case 53648:
 			  spellInfo->EffectSpellClassMask[0] = flag96(0x00000000, 0x00000000, 0x00000020);
 			  break;
-	case 2378: // Minor Fortitude
-	  spellInfo->manaCost = 0;
-	  spellInfo->manaPerSecond = 0;
-	  break;
-	case 18754: // Improved succubus - problems with apply if target is pet
-	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER; // it's affects duration of seduction, let's minimize affection
-	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.22; // reduce cast time of seduction by 22%
-	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-	  break;
-	case 18755:
-	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
-	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.44; // reduce cast time of seduction by 44%
-	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-	  break;
-	case 18756:
-	  spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
-	  spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.66; // reduce cast time of seduction by 66%
-	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-	  break;
-	case 45524: // Chains of Ice
-	  spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
-	  break;
-	case 66359: // Mistress' Kiss
-	case 67073:
-	case 67074:
-	case 67075:
-	  spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
-	  spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
-	  break;
-	case 24259: // Spell Lock silence
-	  spellInfo->speed = 80;
-	  break;
+            case 2378: // Minor Fortitude
+                spellInfo->manaCost = 0;
+                spellInfo->manaPerSecond = 0;
+                break;
+            case 18754: // Improved succubus - problems with apply if target is pet
+                spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER; // it's affects duration of seduction, let's minimize affection
+                spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.22; // reduce cast time of seduction by 22%
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+                break;
+            case 18755:
+                spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+                spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.44; // reduce cast time of seduction by 44%
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+                break;
+            case 18756:
+                spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
+                spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.66; // reduce cast time of seduction by 66%
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+                break;
+            case 45524: // Chains of Ice
+                spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+                break;
+            case 66359: // Mistress' Kiss
+            case 67073:
+            case 67074:
+            case 67075:
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+                break;
+            case 24259: // Spell Lock silence
+                spellInfo->speed = 80;
+                break;
             default:
                 break;
         }

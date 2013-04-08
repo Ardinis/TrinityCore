@@ -2916,6 +2916,9 @@ GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes 
                 case GAMEOBJECT_TYPE_FISHINGHOLE:
                     maxdist = 20.0f+CONTACT_DISTANCE;       // max spell range
                     break;
+                case GAMEOBJECT_TYPE_QUESTGIVER:
+                    maxdist = INTERACTION_DISTANCE + go->GetFloatValue(OBJECT_FIELD_SCALE_X);
+                    break;
                 default:
                     maxdist = INTERACTION_DISTANCE;
                     break;
@@ -10381,7 +10384,7 @@ uint32 Player::GetItemCount(uint32 item, bool inBankAlso, Item* skipItem) const
 
     if (inBankAlso)
     {
-        for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+        for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BANK_END; ++i)
             if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 if (pItem != skipItem && pItem->GetEntry() == item)
                     count += pItem->GetCount();

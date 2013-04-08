@@ -543,7 +543,6 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
 {
     float basePointsPerLevel = RealPointsPerLevel;
     int32 basePoints = bp ? *bp : BasePoints;
-    int32 randomPoints = int32(DieSides);
 
     // base amount modification based on spell lvl vs caster lvl
     if (caster)
@@ -558,6 +557,7 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
     }
 
     // roll in a range <1;EffectDieSides> as of patch 3.3.3
+    int32 randomPoints = int32(DieSides);
     switch (randomPoints)
     {
         case 0: break;

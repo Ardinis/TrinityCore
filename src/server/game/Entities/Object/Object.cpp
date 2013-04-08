@@ -2792,7 +2792,7 @@ void WorldObject::MoveBlink(Position &pos, float dist, float angle)
 
     if (!Trinity::IsValidMapCoord(destx, desty)) // Prevent invalid coordinates here, position is unchanged
     {
-        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::MoveBlink invalid coordinates X: %f and Y: %f were passed!", destx, desty);
+        sLog->outCrash("WorldObject::MoveBlink invalid coordinates X: %f and Y: %f were passed!", destx, desty);
         return;
     }
 

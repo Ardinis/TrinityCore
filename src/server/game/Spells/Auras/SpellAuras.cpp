@@ -2451,6 +2451,114 @@ void Aura::CallScriptEffectAfterManaShieldHandlers(AuraEffect* aurEff, AuraAppli
     }
 }
 
+void Aura::CallScriptEffectSplitHandlers(AuraEffect* aurEff, AuraApplication const* aurApp, DamageInfo & dmgInfo, uint32 & splitAmount)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_SPLIT, aurApp);
+        std::list<AuraScript::EffectSplitHandler>::iterator effEndItr = (*scritr)->OnEffectSplit.end(), effItr = (*scritr)->OnEffectSplit.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                effItr->Call(*scritr, aurEff, dmgInfo, splitAmount);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
+bool Aura::CallScriptCheckProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+{
+    bool result = true;
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_CHECK_PROC, aurApp);
+        std::list<AuraScript::CheckProcHandler>::iterator hookItrEnd = (*scritr)->DoCheckProc.end(), hookItr = (*scritr)->DoCheckProc.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            result &= hookItr->Call(*scritr, eventInfo);
+
+        (*scritr)->_FinishScriptCall();
+    }
+
+    return result;
+}
+
+bool Aura::CallScriptPrepareProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+{
+    bool prepare = true;
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_PREPARE_PROC, aurApp);
+        std::list<AuraScript::AuraProcHandler>::iterator effEndItr = (*scritr)->DoPrepareProc.end(), effItr = (*scritr)->DoPrepareProc.begin();
+        for (; effItr != effEndItr; ++effItr)
+            effItr->Call(*scritr, eventInfo);
+
+        if (prepare)
+            prepare = !(*scritr)->_IsDefaultActionPrevented();
+
+        (*scritr)->_FinishScriptCall();
+    }
+
+    return prepare;
+}
+
+void Aura::CallScriptProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_PROC, aurApp);
+        std::list<AuraScript::AuraProcHandler>::iterator hookItrEnd = (*scritr)->OnProc.end(), hookItr = (*scritr)->OnProc.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            hookItr->Call(*scritr, eventInfo);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
+void Aura::CallScriptAfterProcHandlers(AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_AFTER_PROC, aurApp);
+        std::list<AuraScript::AuraProcHandler>::iterator hookItrEnd = (*scritr)->AfterProc.end(), hookItr = (*scritr)->AfterProc.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            hookItr->Call(*scritr, eventInfo);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
+bool Aura::CallScriptEffectProcHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+{
+    bool preventDefault = false;
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_PROC, aurApp);
+        std::list<AuraScript::EffectProcHandler>::iterator effEndItr = (*scritr)->OnEffectProc.end(), effItr = (*scritr)->OnEffectProc.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                effItr->Call(*scritr, aurEff, eventInfo);
+
+        if (!preventDefault)
+            preventDefault = (*scritr)->_IsDefaultActionPrevented();
+
+        (*scritr)->_FinishScriptCall();
+    }
+    return preventDefault;
+}
+
+void Aura::CallScriptAfterEffectProcHandlers(AuraEffect const* aurEff, AuraApplication const* aurApp, ProcEventInfo& eventInfo)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_AFTER_PROC, aurApp);
+        std::list<AuraScript::EffectProcHandler>::iterator effEndItr = (*scritr)->AfterEffectProc.end(), effItr = (*scritr)->AfterEffectProc.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                effItr->Call(*scritr, aurEff, eventInfo);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
 UnitAura::UnitAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID)
     : Aura(spellproto, owner, caster, castItem, casterGUID)
 {

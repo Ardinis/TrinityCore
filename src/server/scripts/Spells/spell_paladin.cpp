@@ -28,9 +28,9 @@
 enum PaladinSpells
 {
     PALADIN_SPELL_DIVINE_PLEA                    = 54428,
-    PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF     = 67480,
+    SPELL_PALADIN_BLESSING_OF_SANCTUARY_BUFF     = 67480,
+    SPELL_PALADIN_BLESSING_OF_SANCTUARY_ENERGIZE = 57319,
 
-    PALADIN_SPELL_BLESSING_OF_SANCTUARY_HELPER   = 20912,
 
     PALADIN_SPELL_HOLY_SHOCK_R1                  = 20473,
     PALADIN_SPELL_HOLY_SHOCK_R1_DAMAGE           = 25912,
@@ -189,30 +189,43 @@ class spell_pal_blessing_of_sanctuary : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*entry*/)
             {
-                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF))
+                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_BLESSING_OF_SANCTUARY_BUFF))
+                    return false;
+                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_BLESSING_OF_SANCTUARY_ENERGIZE))
                     return false;
                 return true;
             }
 
-        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-            if (Unit* pCaster = GetCaster())
-                pCaster->CastSpell(target, PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF, true);
-            target->CastSpell(target, PALADIN_SPELL_BLESSING_OF_SANCTUARY_HELPER, true);
-        }
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+                if (Unit* pCaster = GetCaster())
+                    pCaster->CastSpell(target, SPELL_PALADIN_BLESSING_OF_SANCTUARY_BUFF, true);
+            }
 
-        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-            target->RemoveAura(PALADIN_SPELL_BLESSING_OF_SANCTUARY_BUFF, GetCasterGUID());
-            target->RemoveAura(PALADIN_SPELL_BLESSING_OF_SANCTUARY_HELPER);
-        }
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+                target->RemoveAura(SPELL_PALADIN_BLESSING_OF_SANCTUARY_BUFF, GetCasterGUID());
+            }
+
+            bool CheckProc(ProcEventInfo& /*eventInfo*/)
+            {
+                return GetTarget()->getPowerType() == POWER_MANA;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_BLESSING_OF_SANCTUARY_ENERGIZE, true, NULL, aurEff);
+            }
 
             void Register()
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_pal_blessing_of_sanctuary_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
                 AfterEffectRemove += AuraEffectRemoveFn(spell_pal_blessing_of_sanctuary_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                DoCheckProc += AuraCheckProcFn(spell_pal_blessing_of_sanctuary_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_pal_blessing_of_sanctuary_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
             }
         };
 
@@ -268,8 +281,8 @@ class spell_pal_holy_shock : public SpellScriptLoader
             PrepareSpellScript(spell_pal_holy_shock_SpellScript)
             bool Validate(SpellInfo const* spellEntry)
             {
-	      if (!sSpellMgr)
-		return false;
+                if (!sSpellMgr)
+                    return false;
                 if (!sSpellMgr->GetSpellInfo(PALADIN_SPELL_HOLY_SHOCK_R1))
                     return false;
 
@@ -286,8 +299,8 @@ class spell_pal_holy_shock : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-	      if (!sSpellMgr)
-		return;
+                if (!sSpellMgr)
+                    return;
                 Unit* caster = GetCaster();
                 if (Unit* unitTarget = GetHitUnit())
                 {

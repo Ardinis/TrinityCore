@@ -1835,6 +1835,10 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
             // Check if aura was removed during iteration - we don't need to work on such auras
             if (!((*itr)->GetBase()->IsAppliedOnTarget(victim->GetGUID())))
                 continue;
+            AuraApplication const* aurApp = (*itr)->GetBase()->GetApplicationOfTarget(victim->GetGUID());
+            if (!aurApp)
+                continue;
+
             // check damage school mask
             if (!((*itr)->GetMiscValue() & schoolMask))
                 continue;
@@ -1879,6 +1883,12 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
                 continue;
 
             int32 splitDamage = CalculatePctN(dmgInfo.GetDamage(), (*itr)->GetAmount());
+            uint32 splitDamage1 = splitDamage;
+            if (splitDamage > 0)
+                splitDamage1 = splitDamage;
+            else
+                splitDamage1 = 0;
+            (*itr)->GetBase()->CallScriptEffectSplitHandlers((*itr), aurApp, dmgInfo, splitDamage1);
 
             // absorb must be smaller than the damage itself
             splitDamage = RoundToInterval(splitDamage, 0, int32(dmgInfo.GetDamage()));
@@ -7115,7 +7125,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
-                case 25899:                                 // Greater Blessing of Sanctuary
+                /*                case 25899:                                 // Greater Blessing of Sanctuary
                 case 20911:                                 // Blessing of Sanctuary
                 {
                     target = this;
@@ -7128,7 +7138,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             return false;
                     }
                     break;
-                }
+                    }*/
                 // Seal of Vengeance (damage calc on apply aura)
                 case 31801:
                 {
@@ -11280,7 +11290,7 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
             if (bonus->ap_dot_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
-		float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
+                float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 // Exception for Dancing Rune Weapon
                 if (HasUnitTypeMask(UNIT_MASK_GUARDIAN) && GetEntry() == 27893 && (spellProto->SchoolMask & SPELL_SCHOOL_MASK_MAGIC))
@@ -11294,7 +11304,7 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
             if (bonus->ap_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
-		float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
+                float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 // Exception for Dancing Rune Weapon
                 if (HasUnitTypeMask(UNIT_MASK_GUARDIAN) && GetEntry() == 27893 && (spellProto->SchoolMask & SPELL_SCHOOL_MASK_MAGIC))
@@ -11815,7 +11825,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (bonus->ap_dot_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
-		float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
+                float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
             }
@@ -11826,7 +11836,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             if (bonus->ap_bonus > 0)
             {
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
-		float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
+                float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
             }
@@ -15662,6 +15672,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 		}
 	    }
 
+    Unit* actor = isVictim ? target : this;
+    Unit* actionTarget = !isVictim ? target : this;
+
+    DamageInfo damageInfo = DamageInfo(actor, actionTarget, damage, procSpell, procSpell ? SpellSchoolMask(procSpell->SchoolMask) : SPELL_SCHOOL_MASK_NORMAL, SPELL_DIRECT_DAMAGE);
+    HealInfo healInfo = HealInfo(actor, actionTarget, damage, procSpell, procSpell ? SpellSchoolMask(procSpell->SchoolMask) : SPELL_SCHOOL_MASK_NORMAL);
+    ProcEventInfo eventInfo = ProcEventInfo(actor, actionTarget, target, procFlag, 0, 0, procExtra, NULL, &damageInfo, &healInfo);
+
     ProcTriggeredList procTriggered;
     // Fill procTriggered list
     for (AuraApplicationMap::const_iterator itr = GetAppliedAuras().begin(); itr!= GetAppliedAuras().end(); ++itr)
@@ -15687,6 +15704,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             active = true;
 
         if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent))
+            continue;
+
+        // AuraScript Hook
+        if (!triggerData.aura->CallScriptCheckProcHandlers(itr->second, eventInfo))
             continue;
 
         // Triggered spells not triggering additional spells
@@ -15737,14 +15758,20 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         SpellInfo const* spellInfo = i->aura->GetSpellInfo();
         uint32 Id = i->aura->GetId();
 
+        AuraApplication* aurApp = i->aura->GetApplicationOfTarget(GetGUID());
+
+        bool prepare = i->aura->CallScriptPrepareProcHandlers(aurApp, eventInfo);
+
         // For players set spell cooldown if need
         uint32 cooldown = 0;
-        if (GetTypeId() == TYPEID_PLAYER && i->spellProcEvent && i->spellProcEvent->cooldown)
+        if (prepare && GetTypeId() == TYPEID_PLAYER && i->spellProcEvent && i->spellProcEvent->cooldown)
             cooldown = i->spellProcEvent->cooldown;
 
         // Note: must SetCantProc(false) before return
         if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC)
             SetCantProc(true);
+
+        i->aura->CallScriptProcHandlers(aurApp, eventInfo);
 
         // This bool is needed till separate aura effect procs are still here
         bool handled = false;
@@ -15763,6 +15790,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 
                 AuraEffect* triggeredByAura = i->aura->GetEffect(effIndex);
                 ASSERT(triggeredByAura);
+
+                bool prevented = i->aura->CallScriptEffectProcHandlers(triggeredByAura, aurApp, eventInfo);
+                if (prevented)
+                {
+                    takeCharges = true;
+                    continue;
+                }
 
                 switch (triggeredByAura->GetAuraType())
                 {
@@ -15951,6 +15985,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 			}
 		      break;
                 } // switch (triggeredByAura->GetAuraType())
+                i->aura->CallScriptAfterEffectProcHandlers(triggeredByAura, aurApp, eventInfo);
             } // for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
         } // if (!handled)
 
@@ -15973,8 +16008,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 	      }
 
         // Remove charge (aura can be removed by triggers)
-        if (useCharges && takeCharges)
+        if (prepare && useCharges && takeCharges)
             i->aura->DropCharge();
+
+        i->aura->CallScriptAfterProcHandlers(aurApp, eventInfo);
 
         if (spellInfo->AttributesEx3 & SPELL_ATTR3_DISABLE_PROC)
             SetCantProc(false);

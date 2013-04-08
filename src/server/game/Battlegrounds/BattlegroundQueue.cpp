@@ -835,7 +835,6 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
       {
 	if (time(0) - sBattlegroundMgr->m_timerBatt < 240)
 	{
-	  std::cout << "NOT TIME TO OPEN QUEUE" << std::endl;
 	  return ;
 	}
       }
@@ -848,7 +847,6 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
 	  int32 playerHorde = m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount();
 	  int32 playerCount = playerAlliance < playerHorde ? playerHorde : playerAlliance;
 
-	  std::cout << "playerCount = " << playerCount << std::endl;
 
 	  Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, 0, false, playerCount);
             if (!bg2)
@@ -896,7 +894,6 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
 	int32 playerHorde = m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount();
 	int32 playerCount = playerAlliance < playerHorde ? playerHorde : playerAlliance;
 
-	std::cout << "playerCount = " << playerCount << std::endl;
 
 	Battleground* bg2 = sBattlegroundMgr->CreateNewBattleground(bgTypeId, bracketEntry, arenaType, false, playerCount);
 	if (!bg2)

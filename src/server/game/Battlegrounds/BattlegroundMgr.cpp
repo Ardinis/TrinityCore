@@ -520,27 +520,23 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
     {
         selectionWeights = &m_BGSelectionWeights;
         isRandom = true;
-	std::cout << "CREATE BATTLEGROUND" << std::endl;
-	if (m_timerCreateBattlegroundActive)
-	{
-	  if (time(0) - m_timerBatt >= 240)
-	  {
-	    m_timerCreateBattlegroundActive = false;
-	    std::cout << "CREATE BATTLEGROUND STARTED" << std::endl;
-	  }
-	  else
-	  {
-	    std::cout << "CREATE BATTLEGROUND IN WAITING FILE" << std::endl;
-	    return NULL;
-	  }
-	}
-	else
-	{
-	  std::cout << "CREATE BATTLEGROUND START WAITING" << std::endl;
-	  m_timerCreateBattlegroundActive = true;
-	  m_timerBatt = time(0);
-	  return NULL;
-	}
+        if (m_timerCreateBattlegroundActive)
+        {
+            if (time(0) - m_timerBatt >= 240)
+            {
+                m_timerCreateBattlegroundActive = false;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            m_timerCreateBattlegroundActive = true;
+            m_timerBatt = time(0);
+            return NULL;
+        }
     }
 
     if (selectionWeights)

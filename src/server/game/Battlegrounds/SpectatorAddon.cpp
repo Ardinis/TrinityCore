@@ -98,7 +98,6 @@ std::string SpectatorAddonMsg::GetMsgData()
     }
     addonData = msg;
     DisableFlag(SPECTATOR_PREFIX_ARENALIST);
-    std::cout << addonData << std::endl;
     return addonData;
     }*/
 

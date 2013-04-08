@@ -3413,7 +3413,13 @@ void Spell::cast(bool skipCheck)
     }
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Remove spell mods after cast
+        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
+            m_caster->ToPlayer()->RemoveSpellMods(this);
+
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+    }
 
     SetExecutedCurrently(false);
 }
@@ -3826,6 +3832,16 @@ void Spell::finish(bool ok)
         // mods are taken only on succesfull cast and independantly from targets of the spell
         m_caster->ToPlayer()->RemoveSpellMods(this);
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
+    }
+    // Certain spells are triggered by the pet but have to be dropped by owner (Cobra strikes)
+    else if (m_caster->isPet() && m_caster->GetOwner())
+    {
+        if (Player* owner = m_caster->GetOwner()->ToPlayer())
+        {
+            owner->SetSpellModTakingSpell(this, true);
+            owner->RemoveSpellMods(this);
+            owner->SetSpellModTakingSpell(this, false);
+        }
     }
 
     // Stop Attack for some spells
@@ -5859,21 +5875,25 @@ SpellCastResult Spell::CheckCasterAuras() const
     if (unitflag & UNIT_FLAG_STUNNED)
     {
         // spell is usable while stunned, check if caster has only mechanic stun auras, another stun types must prevent cast spell
+        if (m_spellInfo->Id == 10278 ||
+            m_spellInfo->Id == 5599 ||
+            m_spellInfo->Id == 1022)
+            return SPELL_FAILED_STUNNED;
         if (usableInStun)
         {
             bool foundNotStun = false;
             Unit::AuraEffectList const& stunAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
             for (Unit::AuraEffectList::const_iterator i = stunAuras.begin(); i != stunAuras.end(); ++i)
             {
-	      if ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() && !((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_STUN)))
+                if ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() && !((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_STUN)))
                 {
-		  // Ecorce needs to check the MECHANIC_SAPPED (Assomer) and MECHANIC_KNOCKOUT (Repentir, Suriner, etc)
-		  if (m_spellInfo->Id == 22812 &&
-		      (((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_KNOCKOUT)) ||
-		       ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_SAPPED))))
-		    continue;
+                    // Ecorce needs to check the MECHANIC_SAPPED (Assomer) and MECHANIC_KNOCKOUT (Repentir, Suriner, etc)
+                    if ((m_spellInfo->Id == 22812 &&
+                        (((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_KNOCKOUT)) ||
+                         ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & (1<<MECHANIC_SAPPED)))) || m_spellInfo->Id == 1044)
+                        continue;
 
-		  foundNotStun = true;
+                    foundNotStun = true;
                     break;
                 }
             }

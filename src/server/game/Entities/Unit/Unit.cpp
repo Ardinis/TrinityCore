@@ -1063,9 +1063,6 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
   // 49050 visee
   // 49052 tir assure steady shot
   // 53351 tir mortel
-	/*	std::cout <<"RANGED" <<  GetTotalAttackPowerValue(RANGED_ATTACK) << std::endl;
-	std::cout << "BASED" << GetTotalAttackPowerValue(BASE_ATTACK) << std::endl;
-	std::cout << "OFF" << GetTotalAttackPowerValue(OFF_ATTACK) << std::endl;*/
     /*	if (spellInfo->Id == 49045 || spellInfo->Id == 53209 || spellInfo->Id == 49050 || spellInfo->Id == 49052 || spellInfo->Id == 53351)
 	  damage *= 1.1;
 	  }*/
@@ -6941,51 +6938,51 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Light's Beacon - Beacon of Light
 	    if (dummySpell->Id == 53651)
 	    {
-	      if (!victim)
-		return false;
-	      triggered_spell_id = 0;
-	      Unit* beaconTarget = NULL;
-	      if (GetTypeId() != TYPEID_PLAYER)
-	      {
-		beaconTarget = triggeredByAura->GetBase()->GetCaster();
-		if (!beaconTarget || beaconTarget == this || !(beaconTarget->GetAura(53563, victim->GetGUID())))
-		  return false;
-		basepoints0 = int32(damage);
-		triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
-	      }
-	      else
-	      {    // Check Party/Raid Group
-		if (Group* group = ToPlayer()->GetGroup())
-		{
-		  for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
-		  {
-		    if (Player* member = itr->getSource())
-		    {
-		      // check if it was heal by paladin which casted this beacon of light
-		      if (member->GetAura(53563, victim->GetGUID()))
-		      {
-			// do not proc when target of beacon of light is healed
-			if (member == this)
-			  return false;
+            if (!victim)
+                return false;
+            triggered_spell_id = 0;
+            Unit* beaconTarget = NULL;
+            if (GetTypeId() != TYPEID_PLAYER)
+            {
+                beaconTarget = triggeredByAura->GetBase()->GetCaster();
+                if (!beaconTarget || beaconTarget == this || !(beaconTarget->GetAura(53563, victim->GetGUID())))
+                    return false;
+                basepoints0 = int32(damage);
+                triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+            }
+            else
+            {    // Check Party/Raid Group
+                if (Group* group = ToPlayer()->GetGroup())
+                {
+                    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                    {
+                        if (Player* member = itr->getSource())
+                        {
+                            // check if it was heal by paladin which casted this beacon of light
+                            if (member->GetAura(53563, victim->GetGUID()))
+                            {
+                                // do not proc when target of beacon of light is healed
+                                if (member == this)
+                                    return false;
 
-			beaconTarget = member;
-			basepoints0 = int32(damage);
-			triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
-			break;
-		      }
-		    }
-		  }
-		}
-	      }
+                                beaconTarget = member;
+                                basepoints0 = int32(damage);
+                                triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
 
-	      if (triggered_spell_id && beaconTarget)
-	      {
-		if (victim)
-		  victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true);
-		return true;
-	      }
+            if (triggered_spell_id && beaconTarget)
+            {
+                if (victim)
+                    victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true);
+                return true;
+            }
 
-	      return false;
+            return false;
 	    }
 
             // Judgements of the Wise
@@ -8442,12 +8439,10 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
 
 	  if (dummySpell->SpellIconID == 3041 || (dummySpell->SpellIconID == 22 && dummySpell->Id != 62459) || dummySpell->SpellIconID == 2622)
             {
-	      //	      std::cout << "a" << std::endl;
                 *handled = true;
                 // Convert recently used Blood Rune to Death Rune
                 if (Player* player = ToPlayer())
                 {
-		  //	      std::cout << "b" << std::endl;
                     if (player->getClass() != CLASS_DEATH_KNIGHT)
                         return false;
 
@@ -8456,11 +8451,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
 
 		    //                    if (rune == RUNE_DEATH)
 		    //   return false;
-		    //  std::cout << "c" << std::endl;
                     AuraEffect* aurEff = triggeredByAura->GetEffect(EFFECT_0);
                     if (!aurEff)
                         return false;
-		    //	      std::cout << "d" << std::endl;
                     // Reset amplitude - set death rune remove timer to 30s
                     aurEff->ResetPeriodic(true);
                     uint32 runesLeft;
@@ -11887,14 +11880,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
   float TakenTotalMod = 1.0f;
   float TakenTotalCasterMod = 0.0f;
 
-  // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
-  AuraEffectList const& IgnoreResistAuras = caster->GetAuraEffectsByType(SPELL_AURA_MOD_IGNORE_TARGET_RESIST);
-  for (AuraEffectList::const_iterator i = IgnoreResistAuras.begin(); i != IgnoreResistAuras.end(); ++i)
-  {
-    if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
-      TakenTotalCasterMod += (float((*i)->GetAmount()));
-  }
-
   // from positive and negative SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
   // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
   TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, spellProto->GetSchoolMask());
@@ -12820,6 +12805,7 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
     // Taken/Done fixed damage bonus auras
     int32 DoneFlatBenefit = 0;
     int32 TakenFlatBenefit = 0;
+    float TakenTotalCasterMod = 0.0f;
 
     // ..done (for creature type by mask) in taken
     AuraEffectList const& mDamageDoneCreature = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
@@ -12838,20 +12824,16 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
         APbonus += victim->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
 	/*	if (victim->HasAura(53338))
 	{
-	  std::cout << APbonus << std::endl;
 	  int32 APbonusMark = 500;
 	  APbonus += APbonusMark;
 	  if (HasAura(19423))
 	  {
 	    APbonus += APbonusMark * 0.30;
-	    std::cout << "HasAura(19423)" << std::endl;
 	  }
 	  if (HasAura(56879))
 	  {
 	    APbonus += APbonusMark * 0.20;
-	    std::cout << "HasAura(56879)" << std::endl;
 	  }
-	    std::cout << APbonus << std::endl;
 	    }*/
         // ..done (base at attack power and creature type)
         AuraEffectList const& mCreatureAttackPower = GetAuraEffectsByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS);
@@ -12882,6 +12864,14 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
                 }
         DoneFlatBenefit += int32(APbonus/14.0f * GetAPMultiplier(attType, normalized));
     }
+
+    // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
+    SpellSchoolMask attackSchoolMask = spellProto ? spellProto->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL;
+    AuraEffectList const& IgnoreResistAuras = GetAuraEffectsByType(SPELL_AURA_MOD_IGNORE_TARGET_RESIST);
+    for (AuraEffectList::const_iterator i = IgnoreResistAuras.begin(); i != IgnoreResistAuras.end(); ++i)
+        if ((*i)->GetMiscValue() & attackSchoolMask)
+            TakenTotalCasterMod += (float((*i)->GetAmount()));
+
 
     // ..taken
     AuraEffectList const& mDamageTaken = victim->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
@@ -13071,14 +13061,29 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
             AddPctN(TakenTotalMod, (*i)->GetAmount());
     }
 
-    float tmpDamage = float(int32(*pdamage) + DoneFlatBenefit) * DoneTotalMod;
+    float tmpDamageDone = float(int32(*pdamage) + DoneFlatBenefit) * DoneTotalMod;
 
     // apply spellmod to Done damage
     if (spellProto)
         if (Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamageDone);
 
-    tmpDamage = (tmpDamage + TakenFlatBenefit) * TakenTotalMod;
+    float tmpDamage = 0.0f;
+
+    if (TakenTotalCasterMod)
+    {
+        if (TakenFlatBenefit < 0)
+        {
+            if (TakenTotalMod < 1)
+                tmpDamage = ((float(CalculatePct(tmpDamageDone, TakenTotalCasterMod) + TakenFlatBenefit) * TakenTotalMod) + CalculatePct(tmpDamageDone, TakenTotalCasterMod));
+            else
+                tmpDamage = ((float(CalculatePct(tmpDamageDone, TakenTotalCasterMod) + TakenFlatBenefit) + CalculatePct(tmpDamageDone, TakenTotalCasterMod)) * TakenTotalMod);
+        }
+        else if (TakenTotalMod < 1)
+            tmpDamage = ((CalculatePct(float(tmpDamageDone) + TakenFlatBenefit, TakenTotalCasterMod) * TakenTotalMod) + CalculatePct(float(tmpDamageDone) + TakenFlatBenefit, TakenTotalCasterMod));
+    }
+    if (!tmpDamage)
+        tmpDamage = (tmpDamageDone + TakenFlatBenefit) * TakenTotalMod;
 
     // bonus result can be negative
     *pdamage = uint32(std::max(tmpDamage, 0.0f));

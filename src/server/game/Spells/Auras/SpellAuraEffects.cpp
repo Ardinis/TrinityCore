@@ -4798,18 +4798,21 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         target->ToPlayer()->RemoveAmmo();      // not use ammo and not allow use
                     break;
                 case 52916: // Honor Among Thieves
+                {
                     if (target->GetTypeId() == TYPEID_PLAYER)
-                        if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
-			  if (spellTarget && spellTarget->ToPlayer() /*&& spellTarget->isInCombat()*/)
-			    if (spellTarget->ToPlayer()->HasSpellCooldown(51699) == 0)
-			    {
-			      if (caster)
-			      {
-				caster->CastSpell(spellTarget, 51699, true);
-			      }
-			      spellTarget->ToPlayer()->AddSpellCooldown(51699, 0, uint32(time(NULL) + 1));
-			    }
-                   break;
+                    {
+                        Unit* spellTarget = ObjectAccessor::GetUnit(*caster, caster->ToPlayer()->GetComboTarget());
+                        if (!spellTarget)
+                            spellTarget = caster->ToPlayer()->GetSelectedUnit();
+                        if (spellTarget && !spellTarget->IsFriendlyTo(caster))
+                            if (caster->ToPlayer()->HasSpellCooldown(51699) == 0)
+                            {
+                                caster->CastSpell(spellTarget, 51699);
+                                caster->ToPlayer()->AddSpellCooldown(51699, 0, uint32(time(NULL) + 1));
+                            }
+                    }
+                    break;
+                }
                 case 28832: // Mark of Korth'azz
                 case 28833: // Mark of Blaumeux
                 case 28834: // Mark of Rivendare

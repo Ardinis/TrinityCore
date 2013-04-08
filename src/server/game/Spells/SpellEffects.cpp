@@ -6325,7 +6325,6 @@ void Spell::EffectLeap(SpellEffIndex /*effIndex*/)
 
     Position pos;
     m_targets.GetDst()->GetPosition(&pos);
-    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 2.0f), 0.0f);
     unitTarget->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), unitTarget == m_caster);
 }
 

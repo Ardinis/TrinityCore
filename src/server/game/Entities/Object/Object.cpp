@@ -2783,6 +2783,74 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     pos.m_orientation = m_orientation;
 }
 
+void WorldObject::MoveBlink(Position &pos, float dist, float angle)
+{
+    GetPosition(&pos);
+    angle += m_orientation;
+    float destx, desty, destz, ground, floor;
+    destx = pos.m_positionX + dist * cos(angle);
+    desty = pos.m_positionY + dist * sin(angle);
+    float savex = pos.m_positionX;
+    float savey = pos.m_positionY;
+    float savez = pos.m_positionZ;
+
+    if (!Trinity::IsValidMapCoord(destx, desty)) // Prevent invalid coordinates here, position is unchanged
+    {
+        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::MoveBlink invalid coordinates X: %f and Y: %f were passed!", destx, desty);
+        return;
+    }
+
+    ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
+    floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+    destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+    float colx = destx;
+    float coly = desty;
+    float colz = destz;
+    float cnt = 0.0f;
+    float newDist = 0.0f;
+
+    if (GetTypeId() == TYPEID_PLAYER)
+        if (ToPlayer()->IsFalling() && destz - savez > 2.0f)
+            return;
+
+    while (newDist <= dist)
+    {
+        cnt += 2.0f;
+        destx = savex + cnt * cos(angle);
+        desty = savey + cnt * sin(angle);
+        ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
+        floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+        destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+        float realDestz = destz;
+        destz += 2.0f; // for 2 yard x, y check 2 yard z limitation to allow or not blink to check next step
+        bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f,
+                                                                                destx, desty, destz, colx, coly, colz, -0.5f);
+        if (!col)
+            col = GetMap()->getObjectHitPos(GetPhaseMask(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz, colx, coly, colz, -0.5f);
+
+        if (col)
+        {
+            destx = colx - CONTACT_DISTANCE * cos(angle);
+            desty = coly - CONTACT_DISTANCE * sin(angle);
+            destz = colz;
+            dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+            pos.Relocate(destx, desty, destz);
+            break;
+        }
+
+        UpdateAllowedPositionZ(destx, desty, destz);
+        if (fabs(destz - pos.m_positionZ) > 2.0f) // possible destz position under map or map object revolved by UpdateAllowedPositionZ but core didn't supposed to allow blink in this case
+            break;
+        newDist = sqrt((destx - savex) * (destx - savex) + (desty - savey) * (desty - savey) + (realDestz - savez) * (realDestz - savez));
+        pos.Relocate(destx, desty, destz);
+    }
+
+    Trinity::NormalizeMapCoord(pos.m_positionX);
+    Trinity::NormalizeMapCoord(pos.m_positionY);
+    UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    pos.m_orientation = m_orientation;
+}
+
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
     m_phaseMask = newPhaseMask;

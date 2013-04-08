@@ -1459,7 +1459,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
     if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit) && !m_spellInfo->IsPositive())
     {
-        m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO));
+        m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT));
 
         if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
             if (!unit->IsStandState())
@@ -1502,34 +1502,39 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
     // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
     if (m_spellInfo->Speed && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)))
-      return SPELL_MISS_IMMUNE;
+    {
+        std::cout << "DoSpellHitOnUnit" << std::endl;
+        return SPELL_MISS_IMMUNE;
+    }
 
     // disable effects to which unit is immune
     SpellMissInfo returnVal = SPELL_MISS_IMMUNE;
     for (uint32 effectNumber = 0; effectNumber < MAX_SPELL_EFFECTS; ++effectNumber)
     {
-      if (effectMask & (1 << effectNumber))
-      {
-	if (unit->IsImmunedToSpellEffect(m_spellInfo, effectNumber))
-	  effectMask &= ~(1 << effectNumber);
-	else if (m_spellInfo->Effects[effectNumber].IsAura() && !m_spellInfo->IsPositiveEffect(effectNumber))
-	{
-	  int32 debuff_resist_chance = unit->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(m_spellInfo->Dispel));
-	  debuff_resist_chance += unit->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(m_spellInfo->Dispel));
+        if (effectMask & (1 << effectNumber))
+        {
+            if (unit->IsImmunedToSpellEffect(m_spellInfo, effectNumber))
+                effectMask &= ~(1 << effectNumber);
+            else if (m_spellInfo->Effects[effectNumber].IsAura() && !m_spellInfo->IsPositiveEffect(effectNumber))
+            {
+                int32 debuff_resist_chance = unit->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(m_spellInfo->Dispel));
+                debuff_resist_chance += unit->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(m_spellInfo->Dispel));
 
-	  if (debuff_resist_chance > 0)
-	    if (irand(0,10000) <= (debuff_resist_chance * 100))
-	    {
-	      effectMask &= ~(1 << effectNumber);
-	      returnVal = SPELL_MISS_RESIST;
-	    }
-	}
-      }
+                if (debuff_resist_chance > 0)
+                    if (irand(0,10000) <= (debuff_resist_chance * 100))
+                    {
+                        effectMask &= ~(1 << effectNumber);
+                        returnVal = SPELL_MISS_RESIST;
+                    }
+            }
+        }
     }
 
     if (!effectMask)
-      return returnVal;
-
+    {
+        std::cout << "!effectMask" << std::endl;
+        return returnVal;
+    }
 
     PrepareScriptHitHandlers();
     CallScriptBeforeHitHandlers();
@@ -1574,7 +1579,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->UpdatePvP(true);
             }
-            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO))
+            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT))
             {
                 m_caster->SetInCombatState(unit->GetCombatTimer() > 0, unit);
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
@@ -1649,7 +1654,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         if (effectMask & (1 << i) && m_spellInfo->Effects[i].Effect != SPELL_EFFECT_APPLY_AURA)
                             found = true;
                     if (!found)
+                    {
+                        std::cout << "!found" << std::endl;
                         return SPELL_MISS_IMMUNE;
+                    }
                 }
                 else
                 {
@@ -1683,7 +1691,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     }
 
     for (uint32 effectNumber = 0; effectNumber < MAX_SPELL_EFFECTS; ++effectNumber)
-        if (effectMask & (1 << effectNumber) && !unit->IsImmunedToSpellEffect(m_spellInfo, effectNumber)) //Handle effect only if the target isn't immune.
+        if (effectMask & (1 << effectNumber))
             HandleEffects(unit, NULL, NULL, effectNumber, SPELL_EFFECT_HANDLE_HIT_TARGET);
 
     return SPELL_MISS_NONE;
@@ -2349,6 +2357,8 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
             switch (cur.GetTarget())
             {
                 case TARGET_DEST_CASTER_FRONT_LEAP:
+                    m_caster->MoveBlink(pos, dist, angle);
+                    break;
                 case TARGET_DEST_CASTER_FRONT_LEFT:
                 case TARGET_DEST_CASTER_BACK_LEFT:
                 case TARGET_DEST_CASTER_BACK_RIGHT:
@@ -5895,7 +5905,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                 SpellInfo const* auraInfo = aura->GetSpellInfo();
                 if (auraInfo->GetAllEffectsMechanicMask() & mechanic_immune)
                     continue;
-		if (auraInfo->GetSchoolMask() & school_immune && !(auraInfo->AttributesEx & SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE))
+                if (auraInfo->GetSchoolMask() & school_immune && !(auraInfo->AttributesEx & SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE))
                     continue;
                 if (auraInfo->GetDispelMask() & dispel_immune)
                     continue;

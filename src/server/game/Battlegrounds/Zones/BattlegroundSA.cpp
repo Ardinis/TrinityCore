@@ -37,6 +37,8 @@ BattlegroundSA::BattlegroundSA()
     SignaledRoundTwo = false;
     SignaledRoundTwoHalfMin = false;
     InitSecondRound = false;
+    destroyedGateAllyHF = true;
+    destroyedGateHordeHF = true;
 }
 
 BattlegroundSA::~BattlegroundSA()
@@ -637,6 +639,10 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
             UpdatePlayerScore(player, SCORE_DESTROYED_WALL, 1);
             if (rewardHonor)
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(1));
+            if (player->GetTeamId() == TEAM_HORDE)
+                destroyedGateAllyHF = false;
+            else
+                destroyedGateHordeHF = false;
         }
     }
 }
@@ -852,7 +858,17 @@ void BattlegroundSA::EndBattleground(uint32 winner)
         RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
     else if (winner == HORDE)
         RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-
+    AchievementEntry const* pAEAlly = sAchievementStore.LookupEntry(1757);
+    AchievementEntry const* pAEHorde = sAchievementStore.LookupEntry(2200);
+    if (pAEAlly && pAEHorde)
+        for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+            if (Player* creditedPlayer = ObjectAccessor::FindPlayer(itr->first))
+            {
+                if (creditedPlayer->GetTeam() == ALLIANCE && destroyedGateAllyHF)
+                    creditedPlayer->CompletedAchievement(pAEAlly);
+                else if (creditedPlayer->GetTeam() == HORDE && destroyedGateHordeHF)
+                    creditedPlayer->CompletedAchievement(pAEHorde);
+            }
     //complete map_end rewards (even if no team wins)
     RewardHonorToTeam(GetBonusHonorFromKill(2), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(2), HORDE);
@@ -926,4 +942,3 @@ void BattlegroundSA::SendTransportsRemove(Player* player)
         player->GetSession()->SendPacket(&packet);
     }
 }
-

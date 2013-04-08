@@ -2624,7 +2624,10 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
 {
     // Check for immune
     if (victim->IsImmunedToSpell(spell))
+    {
+        std::cout << "if (victim->IsImmunedToSpell(spell))" << std::endl;
         return SPELL_MISS_IMMUNE;
+    }
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
@@ -2633,7 +2636,10 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
         return SPELL_MISS_NONE;
     // Check for immune
     if (victim->IsImmunedToDamage(spell))
+    {
+        std::cout << "if (victim->IsImmunedToDamage(spell))" << std::endl;
         return SPELL_MISS_IMMUNE;
+    }
 
     if (this == victim)
         return SPELL_MISS_NONE;
@@ -12711,8 +12717,11 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        {
+            std::cout << " A : " << spellInfo->Id << std::endl;
             if (itr->type == spellInfo->Mechanic)
                 return true;
+        }
     }
 
     bool immuneToAllEffects = true;
@@ -12738,7 +12747,10 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
             if ((itr->type & spellInfo->GetSchoolMask())
                 && !(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive())
                 && !spellInfo->CanPierceImmuneAura(immuneSpellInfo))
+            {
+                std::cout << " B : " << spellInfo->Id << std::endl;
                 return true;
+            }
         }
     }
 
@@ -12749,7 +12761,7 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
 {
   if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
-
+  std::cout << "fix vezax !!!!!" << std::endl;
   // Cloac Of Shadow exceptions
   if (HasAura(35729, EFFECT_0) || HasAura(31224, EFFECT_0))
     if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766 || spellInfo->Id == 58433)
@@ -15654,17 +15666,20 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
             continue;
         ProcTriggeredData triggerData(itr->second->GetBase());
         // Defensive procs are active on absorbs (so absorption effects are not a hindrance)
-	bool active = damage || (procExtra & PROC_EX_BLOCK && isVictim);
+        bool active = damage || (procExtra & PROC_EX_BLOCK && isVictim);
         if (isVictim)
             procExtra &= ~PROC_EX_INTERNAL_REQ_FAMILY;
 
         SpellInfo const* spellProto = itr->second->GetBase()->GetSpellInfo();
 
 
-	// only auras that has triggered spell should proc from fully absorbed damage
-	if (procExtra & PROC_EX_ABSORB && isVictim)
-	  if (damage || spellProto->Effects[EFFECT_0].TriggerSpell || spellProto->Effects[EFFECT_1].TriggerSpell || spellProto->Effects[EFFECT_2].TriggerSpell)
-	    active = true;
+        // only auras that has triggered spell should proc from fully absorbed damage
+        if (procExtra & PROC_EX_ABSORB && isVictim)
+            if (damage || spellProto->Effects[EFFECT_0].TriggerSpell || spellProto->Effects[EFFECT_1].TriggerSpell || spellProto->Effects[EFFECT_2].TriggerSpell)
+                active = true;
+
+        if (spellProto->Id == 21084 || spellProto->Id == 31801 || spellProto->Id == 53736 || spellProto->Id == 20375 || spellProto->Id == 20165 || spellProto->Id == 20166 || spellProto->Id == 20164)
+            active = true;
 
         if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent))
             continue;

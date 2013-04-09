@@ -12759,30 +12759,36 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
 {
   if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
-  std::cout << "fix vezax !!!!!" << std::endl;
+  //  std::cout << "fix vezax !!!!!" << std::endl;
   // Cloac Of Shadow exceptions
   if (HasAura(35729, EFFECT_0) || HasAura(31224, EFFECT_0))
-    if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766 || spellInfo->Id == 58433)
-	return true;
+      if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766 || spellInfo->Id == 58433)
+          return true;
 
   // Anti-magic Shell; immune to magical aura effects
   if (HasAura(48707, EFFECT_0))
-    if (spellInfo->Id == 68766 || spellInfo->Id == 58433 || spellInfo->Id == 6358 || spellInfo->Id == 1978 || spellInfo->Id == 55095 || spellInfo->Id == 55078 || (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->_IsPositiveSpell()) && spellInfo->Effects[index].Effect == SPELL_EFFECT_APPLY_AURA)
-      return true;
+      if (spellInfo->Id == 68766 || spellInfo->Id == 58433 || spellInfo->Id == 6358 || spellInfo->Id == 1978 || spellInfo->Id == 55095 || spellInfo->Id == 55078 || (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->_IsPositiveSpell()) && spellInfo->Effects[index].Effect == SPELL_EFFECT_APPLY_AURA)
+          return true;
 
     // If m_immuneToEffect type contain this effect type, IMMUNE effect.
     uint32 effect = spellInfo->Effects[index].Effect;
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
         if (itr->type == effect)
+        {
+            std::cout << "if (itr->type == effect)" << std::endl;
             return true;
+        }
 
     if (uint32 mechanic = spellInfo->Effects[index].Mechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
             if (itr->type == mechanic)
+            {
+                std::cout << "if (itr->type == mechanic)" << std::endl;
                 return true;
+            }
     }
 
     if (uint32 aura = spellInfo->Effects[index].ApplyAuraName)
@@ -12790,8 +12796,11 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
             if (itr->type == aura)
-	      if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))
-		return true;
+                if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))
+                {
+                    std::cout << "if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))" << std::endl;
+                    return true;
+                }
 
         // Check for immune to application of harmful magical effects
         AuraEffectList const& immuneAuraApply = GetAuraEffectsByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
@@ -12799,7 +12808,10 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
             if (spellInfo->Dispel == DISPEL_MAGIC &&                                      // Magic debuff
                 ((*iter)->GetMiscValue() & spellInfo->GetSchoolMask()) &&  // Check school
                 !spellInfo->IsPositiveEffect(index))                                  // Harmful
+            {
+                std::cout << "Check for immune to application of harmful magical effects" << std::endl;
                 return true;
+            }
     }
 
     return false;

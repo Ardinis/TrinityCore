@@ -272,7 +272,6 @@ class boss_mimiron : public CreatureScript
             boss_mimironAI(Creature* creature) : BossAI(creature, BOSS_MIMIRON)
             {
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
-                me->SetReactState(REACT_PASSIVE);
                 gotEncounterFinished = false;
             }
 
@@ -290,6 +289,7 @@ class boss_mimiron : public CreatureScript
 
             void Reset()
             {
+                me->SetReactState(REACT_PASSIVE);
                 gotEncounterFinished = gotEncounterFinished || (instance->GetBossState(BOSS_MIMIRON) == DONE);
                 if (gotEncounterFinished)
                     return;
@@ -529,43 +529,43 @@ class boss_mimiron : public CreatureScript
                         switch (phase)
                         {
                             case PHASE_INTRO:
-			      if(instance)
-				{
-				  if (Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
-				    me->EnterVehicle(Leviathan, 4);
-				}
-			      me->SetName("Computer");
-			      events.ScheduleEvent(EVENT_STEP_4, 2*IN_MILLISECONDS, 0, PHASE_INTRO);
-			      break;
-                            case PHASE_VX001_ACTIVATION:
-			      if (instance)
-                                    instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_READY);
-                                events.ScheduleEvent(EVENT_STEP_4, 5*IN_MILLISECONDS, 0, PHASE_VX001_ACTIVATION);
-                                break;
-                            case PHASE_AERIAL_ACTIVATION:
-                                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
-                                if (instance)
+                                if(instance)
                                 {
-				  //                                    if (Creature* AerialUnit = me->SummonCreature(NPC_AERIAL_COMMAND_UNIT, 2744.65f, 2569.46f, 380, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
-				  if (Creature* AerialUnit =  ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT)))
-				    {
-				      AerialUnit->SetVisible(true);
-				      AerialUnit->SetReactState(REACT_AGGRESSIVE);
-				    }
+                                    if (Creature* Leviathan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LEVIATHAN_MK_II)))
+                                        me->EnterVehicle(Leviathan, 4);
                                 }
-                                events.ScheduleEvent(EVENT_STEP_4, 5*IN_MILLISECONDS, 0, PHASE_AERIAL_ACTIVATION);
+                                me->SetName("Computer");
+                                events.ScheduleEvent(EVENT_STEP_4, 2*IN_MILLISECONDS, 0, PHASE_INTRO);
                                 break;
-                            case PHASE_V0L7R0N_ACTIVATION:
-                                if (instance)
-                                    if (Creature* VX_001 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001)))
-                                        if (Creature* AerialUnit = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT)))
-                                        {
-                                            AerialUnit->SetFlying(false);
-                                            AerialUnit->EnterVehicle(VX_001, 3);
-                                            DoScriptText(SAY_V07TRON_ACTIVATE, me);
-                                        }
-                                events.ScheduleEvent(EVENT_STEP_4, 10*IN_MILLISECONDS, 0, PHASE_V0L7R0N_ACTIVATION);
-                                break;
+                        case PHASE_VX001_ACTIVATION:
+                            if (instance)
+                                instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_READY);
+                            events.ScheduleEvent(EVENT_STEP_4, 5*IN_MILLISECONDS, 0, PHASE_VX001_ACTIVATION);
+                            break;
+                        case PHASE_AERIAL_ACTIVATION:
+                            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_STAND);
+                            if (instance)
+                            {
+                                //                                    if (Creature* AerialUnit = me->SummonCreature(NPC_AERIAL_COMMAND_UNIT, 2744.65f, 2569.46f, 380, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
+                                if (Creature* AerialUnit =  ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT)))
+                                {
+                                    AerialUnit->SetVisible(true);
+                                    AerialUnit->SetReactState(REACT_AGGRESSIVE);
+                                }
+                            }
+                            events.ScheduleEvent(EVENT_STEP_4, 5*IN_MILLISECONDS, 0, PHASE_AERIAL_ACTIVATION);
+                            break;
+                        case PHASE_V0L7R0N_ACTIVATION:
+                            if (instance)
+                                if (Creature* VX_001 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001)))
+                                    if (Creature* AerialUnit = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_AERIAL_UNIT)))
+                                    {
+                                        AerialUnit->SetFlying(false);
+                                        AerialUnit->EnterVehicle(VX_001, 3);
+                                        DoScriptText(SAY_V07TRON_ACTIVATE, me);
+                                    }
+                            events.ScheduleEvent(EVENT_STEP_4, 10*IN_MILLISECONDS, 0, PHASE_V0L7R0N_ACTIVATION);
+                            break;
                         }
                         break;
                     case EVENT_STEP_4:
@@ -584,11 +584,11 @@ class boss_mimiron : public CreatureScript
                                 if (instance)
                                 {
 				  //                                    if (Creature* VX_001 = me->SummonCreature(NPC_VX_001, 2744.65f, 2569.46f, 364.397f, 3.14159f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000))
-				  if (Creature* VX_001 =  ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001)))
+                                    if (Creature* VX_001 =  ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VX_001)))
                                     {
                                         instance->SetData(DATA_MIMIRON_ELEVATOR, GO_STATE_ACTIVE_ALTERNATIVE);
-					VX_001->SetVisible(true);
-										VX_001->SetReactState(REACT_AGGRESSIVE);
+                                        VX_001->SetVisible(true);
+                                        VX_001->SetReactState(REACT_AGGRESSIVE);
                                         for (uint8 n = 5; n < 7; ++n)
                                         {
                                             if (Creature* Rocket = me->SummonCreature(NPC_ROCKET, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_MANUAL_DESPAWN))
@@ -1008,7 +1008,7 @@ class boss_leviathan_mk : public CreatureScript
                 phase = PHASE_IDLE;
                 events.SetPhase(phase);
                 gotMimironHardMode = false;
-
+                me->GetVehicleKit()->RemoveAllPassengers();
                 if (Creature* turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
                 {
                     turret->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
@@ -1556,22 +1556,17 @@ class boss_vx_001 : public CreatureScript
                 {
                     if (spinTimer <= diff)
                     {
-                        SetCombatMovement(false);
                         float orient = me->GetOrientation() + (direction ? M_PI/60.0f : -M_PI/60.0f);
-                        me->SetOrientation(orient);
                         float x, y;
-                        me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
-                        if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 500))
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        me->GetNearPoint2D(x, y, 10.0f, orient);
+                        if (Creature *target = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 250))
                         {
-                            me->SetTarget(temp->GetGUID());
-                            me->SetFacingToObject(temp);
-                            if (Creature* leviathan = me->GetVehicleCreatureBase())
-                            {
-                                leviathan->SetFacingToObject(temp);
-                                leviathan->SendMovementFlagUpdate();
-                            }
+                            AttackStart(target);
+                            me->SetFacingToObject(target);
                             me->SendMovementFlagUpdate();
                         }
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         spinTimer = 250;
                     }
                     else
@@ -1580,6 +1575,7 @@ class boss_vx_001 : public CreatureScript
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                 {
+                    //                    return ;
                     me->ClearUnitState(UNIT_STATE_CASTING);
                 }
 
@@ -1599,27 +1595,12 @@ class boss_vx_001 : public CreatureScript
                         break;
                     case EVENT_LASER_BARRAGE:
                     {
-                        spinTimer = 4000;
-                        SetCombatMovement(false);
                         me->SetReactState(REACT_PASSIVE);
-                        SetCombatMovement(false);
+                        me->AttackStop();
+                        spinTimer = 100;
                         direction = RAND(true, false);
                         spinning = true;
                         float orient = me->GetOrientation() + (direction ? M_PI/60.0f : -M_PI/60.0f);
-                        me->SetOrientation(orient);
-                        float x, y;
-                        me->GetNearPoint2D(x, y, 10.0f, me->GetOrientation());
-                        if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 4000))
-                        {
-                            me->SetTarget(temp->GetGUID());
-                            me->SetFacingToObject(temp);
-                            if (Creature* leviathan = me->GetVehicleCreatureBase())
-                            {
-                                leviathan->SetFacingToObject(temp);
-                                leviathan->SendMovementFlagUpdate();
-                            }
-                            me->SendMovementFlagUpdate();
-                        }
                         DoCast(SPELL_SPINNING_UP); // The triggered spells should be casted on another target, seem to be self-casted 63274,66490
                         events.DelayEvents(15000);
                         events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000, 0, phase);

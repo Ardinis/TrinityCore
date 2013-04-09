@@ -2644,6 +2644,16 @@ void Player::Regenerate(Powers power)
         return;
 
     uint32 curValue = GetPower(power);
+    bool despairException = (power == POWER_MANA && (HasAura(62692) || HasAura(64848)) && !(
+                                                                                            HasAura(47755) &&
+                                                                                            HasAura(31930) &&
+                                                                                            HasAura(63375) &&
+                                                                                            HasAura(64904) &&
+                                                                                            HasAura(79949) &&
+                                                                                            HasAura(54428) &&
+                                                                                            HasAura(34075) &&
+                                                                                            HasAura(30824) &&
+                                                                                            HasAura(31786)));
 
     // TODO: possible use of miscvalueb instead of amount
     if (HasAuraTypeWithValue(SPELL_AURA_PREVENT_REGENERATE_POWER, power))
@@ -2686,12 +2696,6 @@ void Player::Regenerate(Powers power)
             }
         }   break;
         case POWER_RUNE:
-	  /*	  for(uint32 i = 0; i < MAX_RUNES; ++i)
-	    if(uint8 cd = GetRuneCooldown(i))
-	    {
-	      SetRuneCooldown(i, cd - 1);
-	    }
-	    break;*/
         case POWER_FOCUS:
         case POWER_HAPPINESS:
         case POWER_HEALTH:

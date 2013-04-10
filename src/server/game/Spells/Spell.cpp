@@ -6858,7 +6858,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
             if (m_targets.HasDst() && !m_targets.HasTraj())
             {
                 alreadyChecked = true;
-                if (target->IsWithinLOS(m_targets.GetDst()->m_positionX), m_targets.GetDst()->m_positionY, m_targets.GetDst()->m_positionZ)
+                if (target->IsWithinLOS(m_targets.GetDst()->m_positionX, m_targets.GetDst()->m_positionY, m_targets.GetDst()->m_positionZ))
                     return true;
             }
 

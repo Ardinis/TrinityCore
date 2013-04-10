@@ -443,9 +443,6 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
     if (!enemy)
         return;
 
-    if (_owner->HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
-        return;
-
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) flee from %s (GUID: %u)", _owner->GetGUIDLow(),

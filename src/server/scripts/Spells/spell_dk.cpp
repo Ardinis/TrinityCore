@@ -810,7 +810,13 @@ class spell_dk_death_grip : public SpellScriptLoader
                     GetSummonPosition(effIndex, pos, 0.0f, 0);
 
                     if (!target->HasAuraType(SPELL_AURA_DEFLECT_SPELLS)) // Deterrence
-                        target->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
+                    {
+                        Unit* spellTarget = GetSpell()->m_targets.GetUnitTarget();
+                        if (spellTarget && GetCaster() == target) // Spell reflect case
+                            GetCaster()->CastSpell(spellTarget->GetPositionX(), spellTarget->GetPositionY(), spellTarget->GetPositionZ(), damage, true);
+                        else
+                            target->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), damage, true);
+                    }
                 }
             }
 

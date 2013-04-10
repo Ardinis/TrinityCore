@@ -360,6 +360,14 @@ namespace Trinity
                     (spellProtoB->SpellIconID == 693))
                     return false;
 
+                // Cheat Death
+                if (spellProtoA->SpellFamilyName == SPELLFAMILY_ROGUE &&
+                    spellProtoA->SpellFamilyFlags[1] & 0x00000400)
+                    return false;
+                if (spellProtoB->SpellFamilyName == SPELLFAMILY_ROGUE &&
+                    spellProtoB->SpellFamilyFlags[1] & 0x00000400)
+                    return true;
+
                 return false;
             }
     };

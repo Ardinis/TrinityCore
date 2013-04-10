@@ -61,7 +61,7 @@ bool Player::UpdateStats(Stats stat)
 
     SetStat(stat, int32(value));
 
-    if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
+    if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH || stat == STAT_AGILITY)
     {
         RecalculatePetsScalingStats(stat);
     }
@@ -1176,7 +1176,7 @@ value += float(owner->GetStat(stat)) * 0.3f;
     //m_statFromOwner[stat] = ownersBonus;
     //ApplyStatBuffMod(stat, m_statFromOwner[stat], true);
 
-   if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH)
+   if (stat == STAT_STAMINA || stat == STAT_INTELLECT || stat == STAT_STRENGTH  || stat == STAT_AGILITY)
     {
         RecalculatePetsScalingStats(stat);
     }

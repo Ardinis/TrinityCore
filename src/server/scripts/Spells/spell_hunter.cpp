@@ -183,6 +183,7 @@ class spell_hun_chimera_shot : public SpellScriptLoader
 
                             // Refresh aura duration
                             aura->RefreshDuration();
+                            aura->RecalculateAmountOfEffects();
                         }
                         break;
                     }

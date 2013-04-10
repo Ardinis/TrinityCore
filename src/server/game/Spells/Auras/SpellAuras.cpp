@@ -1250,7 +1250,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             if (GameObject* obj = target->GetGameObject(48018))
                             {
                                 target->NearTeleportTo(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
-                                target->RemoveMovementImpairingAuras();
+                                target->RemoveAurasWithMechanic(MECHANIC_SNARE);
                             }
                         break;
                 }
@@ -2608,7 +2608,15 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* caster)
         }
         else
         {
-            float radius = GetSpellInfo()->Effects[effIndex].CalcRadius(caster);
+            // Some area auras are not removed uppon death but shouldn't be applying their effects anymore(Paladin auras for example)
+            if (!GetUnitOwner()->isAlive())
+                break;
+
+            float radius = 1.0f;
+            if (GetSpellInfo()->SpellIconID == 691)
+                radius = GetSpellInfo()->Effects[EFFECT_1].CalcRadius(caster);
+            else
+                radius = GetSpellInfo()->Effects[effIndex].CalcRadius(caster);
 
             if (!GetUnitOwner()->HasUnitState(UNIT_STATE_ISOLATED))
             {

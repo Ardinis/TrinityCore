@@ -1773,7 +1773,8 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
     if (obj->IsAlwaysDetectableFor(seer))
         return true;
 
-    if (!seer->CanDetectInvisibilityOf(obj))
+    // ToDo: Proof if this check is correct with respect to invisibility of mage
+    if (!ignoreStealth && !seer->CanDetectInvisibilityOf(obj))
         return false;
 
     if (!ignoreStealth && !seer->CanDetectStealthOf(obj))

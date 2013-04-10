@@ -807,11 +807,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             case SPELLFAMILY_PALADIN:
             {
                 // Hammer of the Righteous
-                if (m_spellInfo->SpellFamilyFlags[1]&0x00040000)
+                if (m_spellInfo->SpellFamilyFlags[1]&0x00040000 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
+                    float mindamage, maxdamage;
+                    m_caster->ToPlayer()->CalculateMinMaxDamage(BASE_ATTACK, false, false, mindamage, maxdamage);
+                    float average = (mindamage + maxdamage) / 2;
                     // Add main hand dps * effect[2] amount
-		            float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;
-		  //float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / float(m_caster->GetAttackTime(BASE_ATTACK) / 1000.0f);
                     int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_2);
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                     break;
@@ -2434,11 +2435,17 @@ void Spell::EffectHealthLeech(SpellEffIndex effIndex)
     if (!unitTarget || !unitTarget->isAlive() || damage < 0)
         return;
 
+    uint32 absorb = 0;
+    uint32 resist = 0;
+
     damage = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "HealthLeech :%i", damage);
 
     float healMultiplier = m_spellInfo->Effects[effIndex].CalcValueMultiplier(m_originalCaster, this);
+
+    m_caster->CalcAbsorbResist(unitTarget, m_spellInfo->GetSchoolMask(), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist, m_spellInfo);
+    damage -= absorb;
 
     m_damage += damage;
     // get max possible damage, don't count overkill for heal
@@ -3346,7 +3353,8 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
             uint8 charges = dispel_charges ? aura->GetCharges() : aura->GetStackAmount();
             if (charges > 0)
             {
-                dispel_list.push_back(std::make_pair(aura, charges));
+                for (uint8 i = 0; i < charges; ++i)
+                    dispel_list.push_back(std::make_pair(aura, 1));
                 totalspells += charges;
             }
         }
@@ -6488,7 +6496,8 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
 
         // not all charge effects used in negative spells
         if (!m_spellInfo->IsPositive() && m_caster->GetTypeId() == TYPEID_PLAYER)
-            m_caster->Attack(unitTarget, true);
+            if (unitTarget == m_caster->ToPlayer()->GetSelectedUnit())
+                m_caster->Attack(unitTarget, true);
     }
 }
 

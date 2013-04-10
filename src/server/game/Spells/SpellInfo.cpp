@@ -1803,7 +1803,7 @@ uint32 SpellInfo::GetExplicitTargetMask() const
     return ExplicitTargetMask;
 }
 
-AuraStateType SpellInfo::GetAuraState() const
+AuraStateType SpellInfo::GetAuraState(uint8 effMask) const
 {
     // Seals
     if (GetSpellSpecific() == SPELL_SPECIFIC_SEAL)
@@ -1842,7 +1842,7 @@ AuraStateType SpellInfo::GetAuraState() const
         return AURA_STATE_ENRAGE;
 
     // Bleeding aura state
-    if (GetAllEffectsMechanicMask() & 1<<MECHANIC_BLEED)
+    if (GetSpellMechanicMaskByEffectMask(effMask) & 1<<MECHANIC_BLEED)
         return AURA_STATE_BLEEDING;
 
     if (GetSchoolMask() & SPELL_SCHOOL_MASK_FROST)
@@ -2610,12 +2610,20 @@ uint32 SpellInfo::GetMaxTicks() const
 
 bool SpellEffectInfo::TriggeredNeedsLosChecks() const
 {
+    // Positive triggered spells don't require any LoS checks
+    if (_spellInfo->IsPositive())
+        return false;
+
     switch (TargetA.GetTarget())
     {
     case TARGET_DEST_CASTER:
     case TARGET_UNIT_CONE_ENEMY_104:
-    case TARGET_SRC_CASTER:
         return true;
+    case TARGET_SRC_CASTER:
+        // Need to make trap caster of entrapment so we can remove the exception
+        if (_spellInfo->Id != 64804)
+            return true;
+        break;
     }
     return false;
 }

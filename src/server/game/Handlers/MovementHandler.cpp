@@ -258,6 +258,13 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         return;
     }
 
+    // Don't process facing opcode when movement is controlled by server.
+    if (opcode == MSG_MOVE_SET_FACING && plMover && plMover->GetMotionMaster()->GetCurrentMovementGeneratorType())
+    {
+        recv_data.rfinish();
+        return;
+    }
+
     /* extract packet */
     uint64 guid;
 
@@ -369,9 +376,27 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
 
         switch (plMover->GetMapId())
         {
-            case 617: underMapValueZ = 3.0f; break; // Dalaran Sewers
-            case 618: underMapValueZ = 28.0f; break; // Ring of Valor
-            default: underMapValueZ = -500.0f; break;
+        case 617: // Dalaran Arena
+            underMapValueZ = 3.0f;
+            break;
+        case 562: // Blades Edge Arena
+            underMapValueZ = -1.0f;
+            break;
+        case 559: // Nagrand Arena
+            underMapValueZ = -1.0f;
+            break;
+        case 572: // Ruins of Lordaeron
+            underMapValueZ = -1.0f;
+            break;
+        case 618: // Ring of Valor
+             underMapValueZ = 28.0f;
+             break;
+        case 566: // Eye of the storm
+            underMapValueZ = 1000.0f;
+            break;
+        default:
+            underMapValueZ = -500.0f;
+            break;
         }
 
         if (movementInfo.pos.GetPositionZ() < underMapValueZ)
@@ -583,4 +608,3 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
 
     _player->SummonIfPossible(agree);
 }
-

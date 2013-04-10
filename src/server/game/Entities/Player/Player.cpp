@@ -2208,6 +2208,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
     }
 
+    // Remove unit lost control before teleport
+    if (HasUnitState(UNIT_STATE_LOST_CONTROL))
+    {
+        StopMoving();
+        GetMotionMaster()->Clear();
+    }
+
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
@@ -8410,6 +8417,10 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attac
 
     // generic not weapon specific case processes in aura code
     if (aura->GetSpellInfo()->EquippedItemClass == -1)
+        return;
+
+    // don't apply mod if item is broken
+    if (item->IsBroken() || !CanUseAttackType(attackType))
         return;
 
     BaseModGroup mod = BASEMOD_END;
@@ -21586,7 +21597,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
                 if (*i_scset == spellInfo->Id)                    // skip main spell, already handled above
                     continue;
 
-                AddSpellCooldown(*i_scset, itemId, catrecTime);
+                if (!HasSpellCooldown(*i_scset) || spellInfo->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE)
+                    AddSpellCooldown(*i_scset, itemId, catrecTime);
             }
         }
     }

@@ -144,12 +144,13 @@ bool Totem::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) con
     switch (spellInfo->Effects[index].ApplyAuraName)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
-	  for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)  
-	    if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)    
-	      return false;
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+                if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
+                    return false;
         case SPELL_AURA_PERIODIC_LEECH:
         case SPELL_AURA_MOD_FEAR:
         case SPELL_AURA_TRANSFORM:
+        case SPELL_AURA_MOD_STUN:
             return true;
         default:
             break;

@@ -1995,7 +1995,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         if (aurApp->GetRemoveMode())
             return;
 
-        if (modelid > 0)
+        SpellInfo const* modelInfo = sSpellMgr->GetSpellInfo(target->getTransForm());
+        if (!(modelInfo && modelInfo->AttributesEx3 & SPELL_ATTR3_UNK28) && modelid > 0)
             target->SetDisplayId(modelid);
 
         if (PowerType != POWER_MANA)
@@ -2169,7 +2170,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
     if (apply)
     {
         // update active transform spell only when transform or shapeshift not set or not overwriting negative by positive case
-        if (!target->GetModelForForm(target->GetShapeshiftForm()) || !GetSpellInfo()->IsPositive())
+        if (!target->GetModelForForm(target->GetShapeshiftForm()) || !GetSpellInfo()->IsPositive() || aurApp->GetBase()->GetSpellInfo()->AttributesEx3 & SPELL_ATTR3_UNK28)
         {
             // special case (spell specific functionality)
             if (GetMiscValue() == 0)
@@ -2554,6 +2555,10 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const* aurApp, uint8 mode, 
         attType=OFF_ATTACK;
         break;
     case SPELL_AURA_MOD_DISARM_RANGED:
+        // Don't disarm totems
+        if (target->getClass() == CLASS_SHAMAN)
+            return;
+
         field=UNIT_FIELD_FLAGS_2;
         flag=UNIT_FLAG2_DISARM_RANGED;
         slot=EQUIPMENT_SLOT_RANGED;
@@ -3274,6 +3279,7 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN, true);
 }
 
@@ -3341,6 +3347,7 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT, true);
@@ -3356,6 +3363,7 @@ void AuraEffect::HandleAuraModUseNormalSpeed(AuraApplication const* aurApp, uint
 
     Unit* target = aurApp->GetTarget();
 
+    target->UpdateSpeed(MOVE_WALK, true);
     target->UpdateSpeed(MOVE_RUN,  true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT,  true);
@@ -3947,15 +3955,27 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
 
     if (apply)
     {
+        double healthpercent = double(target->GetHealth()) / double(target->GetMaxHealth());
         target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
-        target->ModifyHealth(GetAmount());
+        if (aurApp->GetBase()->GetSpellInfo()->StartRecoveryCategory)
+            target->ModifyHealth(GetAmount() * healthpercent);
+        else
+            target->ModifyHealth(GetAmount());
     }
     else
     {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
+        if (aurApp->GetBase()->GetSpellInfo()->StartRecoveryCategory)
+        {
+            double healthpercent = double(target->GetHealth()) / double(target->GetMaxHealth());
+            target->ModifyHealth(-GetAmount() * healthpercent);
+        }
         else
-            target->SetHealth(1);
+        {
+            if (int32(target->GetHealth()) > GetAmount())
+                target->ModifyHealth(-GetAmount());
+            else
+                target->SetHealth(1);
+        }
         target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
     }
 }

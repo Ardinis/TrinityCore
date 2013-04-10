@@ -2727,6 +2727,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_AOE_CHARM:
                 case SPELL_AURA_MOD_FEAR:
                 case SPELL_AURA_MOD_STUN:
+                case SPELL_AURA_MOD_ROOT:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                     break;
                 case SPELL_AURA_PERIODIC_HEAL:
@@ -3309,8 +3310,13 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[EFFECT_2] = TARGET_UNIT_CASTER;
                 break;
 			case 55689: // Glyph of Shadow (to prevent glyph aura loss)
-				spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_NEED_SHAPESHIFT;
+                spellInfo->Stances = 0;
+                //				spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_NEED_SHAPESHIFT;
 				break;
+        case 41013: // Parasitic Shadowfiend Passive
+            spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
+            break;
+
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;
                 break;
@@ -3330,6 +3336,17 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->SpellFamilyFlags[2] = 0x10;
                 spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
                 break;
+        case 41357: // L1 Arcane Charge
+            spellInfo->MaxAffectedTargets = 3;
+            break;
+        case 57934:    // Tricks of the trade
+            spellInfo->procCharges = 1;
+            break;
+        case 57470: // Renewed Hope r1
+        case 57472: // Renewed Hope r2
+            spellInfo->EffectSpellClassMask[0][0] |= 0x00000800;
+            break;
+
             case 41913: // Parasitic Shadowfiend Passive
                 spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // proc debuff, and summon infinite fiends
                 break;
@@ -3341,6 +3358,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 27937: // Anchor to Skulls
                 spellInfo->rangeIndex = 13;
                 break;
+        case 48743: // Death Pact
+            spellInfo->AttributesEx &= ~SPELL_ATTR1_CANT_TARGET_SELF;
+            break;
+
             // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
             // this is the only known exception, probably just wrong data
             case 29214: // Wrath of the Plaguebringer
@@ -3359,6 +3380,16 @@ void SpellMgr::LoadDbcDataCorrections()
             case 63675: // Improved Devouring Plague
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                 break;
+        case 67201: // Item - Priest T9 Healing 2P Bonus
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
+            spellInfo->EffectMiscValue[0] = 0;
+            break;
+        case 67202: // Item - Priest T9 Healing 4P Bonus
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
+            spellInfo->EffectMiscValue[0] = 0;
+            spellInfo->EffectSpellClassMask[0] = flag96(0x00000000, 0x01000000, 0x00001000);
+            break;
+
             case 8145: // Tremor Totem (instant pulse)
             case 6474: // Earthbind Totem (instant pulse)
                 spellInfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
@@ -3402,6 +3433,16 @@ void SpellMgr::LoadDbcDataCorrections()
 	  spellInfo->EffectSpellClassMask[EFFECT_0] = flag96(0x00000000, 0x02000000, 0x00000000);
 	  spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_ADD_FLAT_MODIFIER;
 	  break;
+        case 42650: // Army of the Dead - now we can interrupt this
+        case 62661: // Searing Flames
+        case 66134: // Shadow Strike
+        case 66532: // Fel Fireball
+        case 66963:
+        case 66964:
+        case 66965:
+            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            break;
+
 	case 34231: // Libram of the Lightbringer
 	case 60792: // Libram of Tolerance
 	case 64956: // Libram of the Resolute
@@ -3622,7 +3663,11 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->AreaGroupId = 0; // originally, these require area 4522, which is... outside of Icecrown Citadel
                 break;
             case 70602: // Corruption
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+                break;
             case 48278: // Paralyze
+                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
+                spellInfo->EffectRadiusIndex[0] = 8;
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 70715: // Column of Frost (visual marker)
@@ -3708,6 +3753,10 @@ void SpellMgr::LoadDbcDataCorrections()
 	case 62383:
 	  spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
 	  break;
+        case 28299:
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
+
             case 74282: // Shadow Trap (searcher)
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;   // 3yd
                 break;
@@ -3796,6 +3845,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.44; // reduce cast time of seduction by 44%
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
                 break;
+        case 56278: // Read Pronouncement, missing EffectApplyAuraName
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            break;
+
             case 18756:
                 spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
                 spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.66; // reduce cast time of seduction by 66%
@@ -3814,6 +3867,25 @@ void SpellMgr::LoadDbcDataCorrections()
             case 24259: // Spell Lock silence
                 spellInfo->speed = 80;
                 break;
+            case 43202:
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ALLY;
+                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ALLY;
+                break;
+            case 42436: // Braufest: Drink!
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+                spellInfo->EffectImplicitTargetB[0] = 0;
+                break;
+            case 61306:     // Kirin Tor Commendation Badge
+            case 61308:     // Wyrmrest Commendation Badge
+            case 61311:     // Argent Crusade Commendation Badge
+            case 61312:     // Ebon Blade Commendadtion Badge
+            case 69757:     // Sons of Hodir Commendation Badge
+                spellInfo->EffectBasePoints[0] = 519;           // Some suggest a global multiplier is used for rep gain
+                // but basepoints * 1,3 hard coded in the tooltip says
+                break;                                          // otherwise.
+            case 45680: // Shadowbolt
+                spellInfo->MaxAffectedTargets = 1;
+                break;
             default:
                 break;
         }
@@ -3821,12 +3893,15 @@ void SpellMgr::LoadDbcDataCorrections()
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_HUNTER: // Monstrous Bite Error target spell
+                // Monstrous Bite target fix
+                // seems we incorrectly handle spell with "no target"
                 if (spellInfo->SpellIconID == 599)
                     spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
-                else
-                    break;
+                // Silencing Shot / Scatter Shot
+                if (spellInfo->SpellFamilyFlags[0] & 0x40000)
+                    spellInfo->speed = 0; // instant
                 break;
-            	case SPELLFAMILY_PRIEST:
+            case SPELLFAMILY_PRIEST:
                 // Twin Disciplines ahora es afectado a Prayer of Mending
                 if (spellInfo->SpellIconID == 2292)
                     spellInfo->EffectSpellClassMask[0][1] |= 0x20;

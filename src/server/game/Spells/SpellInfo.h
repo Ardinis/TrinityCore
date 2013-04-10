@@ -453,7 +453,7 @@ public:
     static uint32 GetDispelMask(DispelType type);
     uint32 GetExplicitTargetMask() const;
 
-    AuraStateType GetAuraState() const;
+    AuraStateType GetAuraState(uint8 effMask) const;
     SpellSpecificType GetSpellSpecific() const;
 
     float GetMinRange(bool positive = false) const;

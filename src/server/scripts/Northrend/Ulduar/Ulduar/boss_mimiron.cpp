@@ -78,7 +78,6 @@ enum Spells
    SPELL_PROXIMITY_MINES                       = 63027,
    SPELL_SHOCK_BLAST                           = 63631,
    SPELL_EXPLOSION                             = 66351,
-
    // VX 001
    SPELL_FROSTBOMB                             = 64623, // 64627 ?
    SPELL_FROST_BOMB_VISUAL                     = 64624,
@@ -1411,6 +1410,7 @@ class boss_vx_001 : public CreatureScript
                 phase = PHASE_IDLE;
                 events.SetPhase(phase);
                 MimironHardMode = false;
+                tempGUID = 0;
             }
 
             void KilledUnit(Unit* /*who*/)
@@ -1439,8 +1439,8 @@ class boss_vx_001 : public CreatureScript
                 }
 
                 events.ScheduleEvent(EVENT_RAPID_BURST, 2500, 0, PHASE_VX001_SOLO__GLOBAL_2);
-		events.ScheduleEvent(EVENT_PRE_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2); // Not works in phase 4 :(
-		events.ScheduleEvent(EVENT_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2);
+                events.ScheduleEvent(EVENT_PRE_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2); // Not works in phase 4 :(
+                events.ScheduleEvent(EVENT_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO__GLOBAL_2);
                 events.ScheduleEvent(EVENT_ROCKET_STRIKE, 20000, 0, PHASE_VX001_SOLO__GLOBAL_2);
                 events.ScheduleEvent(EVENT_HEAT_WAVE, urand(8000, 10000), 0, PHASE_VX001_SOLO__GLOBAL_2);
                 me->SetReactState(REACT_PASSIVE);
@@ -1488,9 +1488,9 @@ class boss_vx_001 : public CreatureScript
                     damage = 0;
                     spinning = false;
                     me->InterruptNonMeleeSpells(true);
-		    me->GetMotionMaster()->Clear(true);
+                    me->GetMotionMaster()->Clear(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-		    me->SetReactState(REACT_PASSIVE);
+                    me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
@@ -1527,10 +1527,10 @@ class boss_vx_001 : public CreatureScript
             {
                 switch (spell->Id)
                 {
-		case SPELL_FROSTBOMB:
-		  if (Creature *targets = me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))
-		    me->SummonCreature(NPC_FROST_BOMB, *targets, TEMPSUMMON_TIMED_DESPAWN, 11000);
-		  break;
+                    case SPELL_FROSTBOMB:
+                        if (Creature *targets = me->FindNearestCreature(NPC_FLAME_SPREAD, 100.0f))
+                            me->SummonCreature(NPC_FROST_BOMB, *targets, TEMPSUMMON_TIMED_DESPAWN, 11000);
+                        break;
                     case SPELL_ROCKET_STRIKE:
                         if (!target || !spell)
                             return;
@@ -1548,36 +1548,37 @@ class boss_vx_001 : public CreatureScript
                 if (!UpdateVictim() || phase == PHASE_IDLE)
                     return;
 
-                me->SetTarget(0);
-
-                events.Update(diff);
-
                 if (spinning)
                 {
+                    if (Creature *temp = Unit::GetCreature(*me, tempGUID))
+                    {
+                        me->SetTarget(tempGUID);
+                        me->SetFacingToObject(temp);
+                        me->SendMovementFlagUpdate();
+                    }
                     if (spinTimer <= diff)
                     {
-                        float orient = me->GetOrientation() + (direction ? M_PI/60.0f : -M_PI/60.0f);
-                        float x, y;
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                        float orient = me->GetOrientation() + (direction ? M_PI/60 : -M_PI/60);
+                        //                        me->SetFacingTo(orient);
+                        float x, y, z;
+                        z = me->GetPositionZ();
                         me->GetNearPoint2D(x, y, 10.0f, orient);
-                        if (Creature *target = me->SummonCreature(NPC_BURST_TARGET, x, y, me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 250))
+                        if (Creature *temp = Unit::GetCreature(*me, tempGUID))
                         {
-                            AttackStart(target);
-                            me->SetFacingToObject(target);
-                            me->SendMovementFlagUpdate();
+                            temp->GetMotionMaster()->MovePoint(1, x, y, z);
+                            //  me->SetTarget(tempGUID);
                         }
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                         spinTimer = 250;
                     }
                     else
                         spinTimer -= diff;
                 }
+                //                else
+                //    _DoAggroPulse(diff);
+                events.Update(diff);
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
-                {
-                    //                    return ;
-                    me->ClearUnitState(UNIT_STATE_CASTING);
-                }
+                    return;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -1587,7 +1588,7 @@ class boss_vx_001 : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             if (Creature* BurstTarget = me->SummonCreature(NPC_BURST_TARGET, *target, TEMPSUMMON_TIMED_DESPAWN, 3100))
                             {
-                                me->SetFacingToObject(BurstTarget);
+                                //       me->SetFacingToObject(BurstTarget);
                                 DoCast(BurstTarget, SPELL_RAPID_BURST);
                                 //DoCastAOE(SPELL_RAPID_BURST);
                             }
@@ -1596,13 +1597,25 @@ class boss_vx_001 : public CreatureScript
                     case EVENT_LASER_BARRAGE:
                     {
                         me->SetReactState(REACT_PASSIVE);
-                        me->AttackStop();
-                        spinTimer = 100;
-                        direction = RAND(true, false);
+                        direction = urand(0, 1);
                         spinning = true;
-                        float orient = me->GetOrientation() + (direction ? M_PI/60.0f : -M_PI/60.0f);
-                        DoCast(SPELL_SPINNING_UP); // The triggered spells should be casted on another target, seem to be self-casted 63274,66490
-                        events.DelayEvents(15000);
+                        spinTimer = 250;
+                        float orient = me->GetOrientation() + (direction ? M_PI/60 : -M_PI/60);
+                        //                        me->SetFacingTo(orient);
+                        float x, y, z;
+                        z = me->GetPositionZ();
+                        me->GetNearPoint2D(x, y, 10.0f, orient);
+                        if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                        {
+                            tempGUID = temp->GetGUID();
+                            me->SetTarget(tempGUID);
+                            me->SetFacingToObject(temp);
+                            DoCast(temp, SPELL_SPINNING_UP);
+                            me->ClearUnitState(UNIT_STATE_CASTING);
+                            me->GetMotionMaster()->MoveFollow(temp, 0.0f, 0.0f);
+                            me->SendMovementFlagUpdate();
+                        }
+                        events.DelayEvents(14500);
                         events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000, 0, phase);
                         events.RescheduleEvent(EVENT_LASER_BARRAGE_END, 14000, 0, phase);
                         break;
@@ -1676,6 +1689,7 @@ class boss_vx_001 : public CreatureScript
                 bool spinning;
                 bool direction;
                 uint32 spinTimer;
+            uint64 tempGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const

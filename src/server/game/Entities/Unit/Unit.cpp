@@ -2637,26 +2637,14 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
         bool bNegativeAura = true;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
-            if ((effectMask & (1 << i)) && (spell->Effects[i].ApplyAuraName != 0))
+            if (spell->Effects[i].ApplyAuraName == 0)
             {
                 bNegativeAura = false;
                 break;
             }
         }
 
-
-        // Direct Damage spells should not be fully resisted
-        bool bDirectDamage = false;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        {
-            if ((effectMask & (1 << i)) && ((spell->Effects[i].Effect == SPELL_EFFECT_SCHOOL_DAMAGE) || (spell->Effects[i].Effect == SPELL_EFFECT_HEALTH_LEECH)))
-            {
-                bDirectDamage = true;
-                break;
-            }
-        }
-
-        if (bNegativeAura && !bDirectDamage)
+        if (bNegativeAura)
         {
             tmp += victim->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel)) * 100;
             tmp += victim->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel)) * 100;

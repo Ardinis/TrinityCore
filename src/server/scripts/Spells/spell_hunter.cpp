@@ -675,11 +675,11 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
         {
             PrepareAuraScript(spell_hun_pet_scaling_01_AuraScript);
 
-	  bool Load()
-	  {
-	    _tempHealth = 0;
-            return true;
-	  }
+            bool Load()
+            {
+                _tempHealth = 0;
+                return true;
+            }
 
             void CalculateStaminaAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
@@ -702,7 +702,7 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     if (itr != pet->ToPet()->m_spells.end()) // If pet has Wild Hunt
                     {
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-			mod += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                        mod += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
                     }
 
                     ownerBonus = owner->GetStat(STAT_STAMINA)*mod;
@@ -711,18 +711,18 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                 }
             }
 
-	  void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-	  {
-            if (Unit* pet = GetUnitOwner())
-	      if (_tempHealth)
-		pet->SetHealth(_tempHealth);
-	  }
+            void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                    if (_tempHealth)
+                        pet->SetHealth(_tempHealth);
+            }
 
-	  void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-	  {
-            if (Unit* pet = GetUnitOwner())
-	      _tempHealth = pet->GetHealth();
-	  }
+            void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                    _tempHealth = pet->GetHealth();
+            }
 
             void CalculateAttackPowerAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
@@ -746,7 +746,7 @@ class spell_hun_pet_scaling_01 : public SpellScriptLoader
                     if (itr != pet->ToPet()->m_spells.end()) // If pet has Wild Hunt
                     {
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first); // Then get the SpellProto and add the dummy effect value
-			mod += (float)((float)(spellInfo->Effects[EFFECT_1].CalcValue()) / 100.0f);
+                        mod += (float)((float)(spellInfo->Effects[EFFECT_1].CalcValue()) / 100.0f);
                     }
 
 

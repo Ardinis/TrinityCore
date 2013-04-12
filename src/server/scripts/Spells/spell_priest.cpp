@@ -210,7 +210,7 @@ class spell_pri_penance : public SpellScriptLoader
                     if(!unitTarget->isAlive())
                         return;
 
-               // Part Dueld Fix 
+               // Part Dueld Fix
                if (caster->GetGUID() != unitTarget->GetGUID() && caster->IsFriendlyTo(unitTarget) && (unitTarget->ToPlayer() != NULL && unitTarget->ToPlayer()->duel != NULL))
                    return;
 	       if (!sSpellMgr)

@@ -2443,14 +2443,22 @@ public:
     {
         npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
 
-      void JustDied(Unit* killer)
-      {
-	if (me->isSummon())
-	  if (Unit* owner = me->ToTempSummon()->GetSummoner())
-	    if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
-	      owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+        void JustDied(Unit* killer)
+        {
+            if (me->isSummon())
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    if (owner->HasAura(GLYPH_OF_SHADOWFIEND))
+                        owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
+        }
 
-      }
+        void Reset()
+        {
+            me->SetSpeed(MOVE_WALK, 2.0f);
+            me->SetSpeed(MOVE_RUN, 2.0f);
+            if (me->isSummon())
+                if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                    AttackStart(owner->getAttackerForHelper());
+        }
 
     };
 

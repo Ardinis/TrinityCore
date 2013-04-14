@@ -21,6 +21,8 @@
 #include "ObjectMgr.h"
 #define UlduarScriptName "instance_ulduar"
 
+extern Position const AlgalonLandPos;
+
 enum UlduarBosses
 {
     MAX_ENCOUNTER            = 20,
@@ -60,7 +62,7 @@ enum UlduarBosses
     DATA_GARE_GEL,
 
     // Collosus (Leviathan)
-    DATA_COLOSSUS,               
+    DATA_COLOSSUS,
 
     // Assembly of Iorn
     DATA_STEELBREAKER,
@@ -122,6 +124,7 @@ enum UlduarBosses
     DATA_ALGALON_INTRO,
     DATA_ALGALON_TIMER,
     DATA_BRANN_ALGALON,
+    DATA_HEROLD,
 };
 
 enum UlduarBossDeadFlags
@@ -231,6 +234,9 @@ enum UlduarNPCs // TODO: Check if we also need the heroic-entries for the boss-N
     NPC_GUARDIAN_OF_LIFE         = 33528,
 
     NPC_BRANN_EVENT_START_ULDU = 33579,
+
+
+
 };
 
 enum UlduarGameObjects
@@ -298,7 +304,7 @@ enum UlduarGameObjects
     GO_LEVIATHAN_CHEST_25       = 444444
 };
 
-enum UlduarTowerEvents // Separated from other data, since that's the relevant point which decides for hardmode 
+enum UlduarTowerEvents // Separated from other data, since that's the relevant point which decides for hardmode
 {
     EVENT_TOWER_OF_STORM_DESTROYED      = 21031,
     EVENT_TOWER_OF_FROST_DESTROYED      = 21032,
@@ -306,7 +312,7 @@ enum UlduarTowerEvents // Separated from other data, since that's the relevant p
     EVENT_TOWER_OF_LIFE_DESTROYED       = 21030,
 };
 
-enum LeviathanData  
+enum LeviathanData
 {
     ACTION_TOWER_OF_STORM_DESTROYED     = 1,
     ACTION_TOWER_OF_FROST_DESTROYED     = 2,
@@ -371,7 +377,7 @@ enum UlduarAchievementCriteria
     ACHIEVEMENT_CRITERIA_KILL_WITHOUT_DEATHS_ALGALON_25             = 10570,
     ACHIEVEMENT_CRITERIA_CON_SPEED_ATORY                            = 21597,
     ACHIEVEMENT_CRITERIA_DISARMED                                   = 21687,
-    ACHIEVEMENT_CRITERIA_HERALD_OF_TITANS                           = 10678,
+    CRITERIA_HERALD_OF_TITANS                           = 10678,
 };
 
 // Achievements for "Do not die during boss-fights"
@@ -417,18 +423,6 @@ enum UlduarArea
     AREA_FORMATION_GROUNDS  = 4652
 };
 
-// Cute guard, really...
-template<class AI>
-CreatureAI* GetUlduarAI(Creature* creature)
-{
-    if (InstanceMap* instance = creature->GetMap()->ToInstanceMap())
-        if (instance->GetInstanceScript())
-            if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
-                return new AI(creature);
-
-    return NULL;
-}
-
 class PlayerOrPetCheck
 {
     public:
@@ -445,7 +439,17 @@ class PlayerOrPetCheck
 enum UlduarNPCsGO
   {
     NPC_ALGALON                 = 32871,
-    NPC_BRANN_ALGALON           = 34064,
+    NPC_BRANN_BRONZBEARD_ALG           = 34064,
+    NPC_AZEROTH                             = 34246,
+    NPC_LIVING_CONSTELLATION                = 33052,
+    NPC_ALGALON_STALKER                     = 33086,
+    NPC_COLLAPSING_STAR                     = 32955,
+    NPC_BLACK_HOLE                          = 32953,
+    NPC_WORM_HOLE                           = 34099,
+    NPC_ALGALON_VOID_ZONE_VISUAL_STALKER    = 34100,
+    NPC_ALGALON_STALKER_ASTEROID_TARGET_01  = 33104,
+    NPC_ALGALON_STALKER_ASTEROID_TARGET_02  = 33105,
+    NPC_UNLEASHED_DARK_MATTER               = 34097,
     GO_ALGALON_DOOR             = 194767,
     GO_ALGALON_FLOOR_COM        = 194715,
     GO_ALGALON_FLOOR_OOC        = 194716,
@@ -453,7 +457,8 @@ enum UlduarNPCsGO
     GO_ALGALON_BRIDGE           = 194253,
     GO_ALGALON_INVISDOOR        = 194910,
     GO_ALGALON_CONSOLE          = 194628,
-    GO_GIFT_OF_THE_OBSERVER     = 194821
+    GO_GIFT_OF_THE_OBSERVER_10  = 194821,
+    GO_GIFT_OF_THE_OBSERVER_25  = 194822,
   };
 
 
@@ -469,5 +474,26 @@ enum UlduarSharedActions
     ACTION_ALGALON_ASCEND      = -123460 //Wipe Raid, don't respawn
   };
 
+template<class AI>
+CreatureAI* GetUlduarAI(Creature* creature)
+{
+    if (InstanceMap* instance = creature->GetMap()->ToInstanceMap())
+        if (instance->GetInstanceScript())
+            if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
+                return new AI(creature);
+
+    return NULL;
+}
+
+template<class AI>
+GameObjectAI* GetUlduarAI(GameObject* go)
+{
+    if (InstanceMap* instance = go->GetMap()->ToInstanceMap())
+        if (instance->GetInstanceScript())
+            if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
+                return new AI(go);
+
+    return NULL;
+}
 
 #endif

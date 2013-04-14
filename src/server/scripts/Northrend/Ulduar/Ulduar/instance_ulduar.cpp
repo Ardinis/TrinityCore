@@ -174,6 +174,14 @@ class instance_ulduar : public InstanceMapScript
             uint32 uiAlgalonCountdown;
             uint32 uiAlgalonKillCount;
             uint32 uiCountdownTimer;
+            uint64 GiftOfTheObserverGUID;
+
+            EventMap _events;
+            uint32 _algalonTimer;
+            bool _summonAlgalon;
+            bool _algalonSummoned;
+            uint32 _maxArmorItemLevel;
+            uint32 _maxWeaponItemLevel;
 
             uint32 uiEncounter[MAX_ENCOUNTER];
 
@@ -313,6 +321,13 @@ class instance_ulduar : public InstanceMapScript
                 uiAlgalonCountdown        = 62;
                 uiCountdownTimer          = 1*MINUTE*IN_MILLISECONDS;
                 AlgalonIntroDone = false;
+                GiftOfTheObserverGUID            = 0;
+                _algalonSummoned                 = false;
+                _summonAlgalon                   = false;
+
+                _algalonTimer                    = 61;
+                _maxArmorItemLevel               = 0;
+                _maxWeaponItemLevel              = 0;
 
                 // Creatures
                 std::fill(KeeperGUIDs, KeeperGUIDs + 3, 0);
@@ -332,29 +347,29 @@ class instance_ulduar : public InstanceMapScript
 
             void Update(uint32 diff)
             {
-                if (SignalTimerState == IN_PROGRESS)
+                if (_events.Empty())
+                    return;
+
+                _events.Update(diff);
+
+                while (uint32 eventId = _events.ExecuteEvent())
                 {
-                    if (SignalTimer <= diff)
+                    switch (eventId)
                     {
-                        --SignalTimerMinutes;
-                        SignalTimer = 60000;
-                        if (SignalTimerMinutes)
-                        {
-                            DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 1);
-                            DoUpdateWorldState(WORLDSTATE_ALGALON_TIMER, SignalTimerMinutes);
-                        }
+                    case EVENT_UPDATE_ALGALON_TIMER:
+                        SaveToDB();
+                        DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, --_algalonTimer);
+                        if (_algalonTimer)
+                            _events.ScheduleEvent(EVENT_UPDATE_ALGALON_TIMER, 60000);
                         else
                         {
-                            SignalTimerState = FAIL;
-                            DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 0);
-                            if (Creature* Algalon = instance->GetCreature(uiAlgalonGUID))
-                                Algalon->AI()->DoAction(ACTION_ALGALON_ASCEND);
-                            SetBossState(TYPE_ALGALON, FAIL);
+                            DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 0);
+                            _events.CancelEvent(EVENT_UPDATE_ALGALON_TIMER);
+                            if (Creature* algalon = instance->GetCreature(uiAlgalonGUID))
+                                algalon->AI()->DoAction(EVENT_DESPAWN_ALGALON);
                         }
-                        SaveToDB();
+                        break;
                     }
-                    else
-                        SignalTimer -= diff;
                 }
             }
 
@@ -378,6 +393,17 @@ class instance_ulduar : public InstanceMapScript
             {
                 if (!TeamInInstance)
 					TeamInInstance = player->GetTeam();
+
+
+                if (_summonAlgalon)
+                {
+                    _summonAlgalon = false;
+                    TempSummon* algalon = instance->SummonCreature(NPC_ALGALON, AlgalonLandPos);
+                    if (_algalonTimer && _algalonTimer <= 60)
+                        algalon->AI()->DoAction(ACTION_INIT_ALGALON);
+                    else
+                        algalon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                }
             }
 
             void __OnPlayerDeath(Player* /*player*/)
@@ -555,7 +581,7 @@ class instance_ulduar : public InstanceMapScript
                             creature->DespawnOrUnsummon();
                         creature->setActive(true);
                         return;
-                    case NPC_BRANN_ALGALON:
+                    case NPC_BRANN_BRONZBEARD_ALG:
                         AlgalonBrannGUID = creature->GetGUID();
                         creature->setActive(true);
                         return;
@@ -745,6 +771,17 @@ class instance_ulduar : public InstanceMapScript
                         YoggSaronBrainGUID = creature->GetGUID();
                         break;
 
+                }
+            }
+
+            void OnCreatureRemove(Creature* creature)
+            {
+                switch (creature->GetEntry())
+                {
+                    case NPC_BRANN_BRONZBEARD_ALG:
+                        if (AlgalonBrannGUID == creature->GetGUID())
+                            AlgalonBrannGUID = 0;
+                        break;
                 }
             }
 
@@ -957,7 +994,10 @@ class instance_ulduar : public InstanceMapScript
                         YoggSaronBrainDoor3GUID = gameObject->GetGUID();
                         HandleGameObject(NULL, false, gameObject);
                         break;
-
+                    case GO_GIFT_OF_THE_OBSERVER_10:
+                    case GO_GIFT_OF_THE_OBSERVER_25:
+                        GiftOfTheObserverGUID = gameObject->GetGUID();
+                        break;
                 }
             }
 
@@ -1124,6 +1164,58 @@ class instance_ulduar : public InstanceMapScript
                                 gameObject->SetGoState(state == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
                         }
                         break;
+                    case BOSS_ALGALON:
+                    {
+                        if (state == DONE)
+                        {
+                            _events.CancelEvent(EVENT_UPDATE_ALGALON_TIMER);
+                            _events.CancelEvent(EVENT_DESPAWN_ALGALON);
+                            DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 0);
+                            _algalonTimer = 61;
+                            if (GameObject* gameObject = instance->GetGameObject(GiftOfTheObserverGUID))
+                                gameObject->SetRespawnTime(gameObject->GetRespawnDelay());
+                            // get item level (recheck weapons)
+                            Map::PlayerList const& players = instance->GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                                if (Player* player = itr->getSource())
+                                    for (uint8 slot = EQUIPMENT_SLOT_MAINHAND; slot <= EQUIPMENT_SLOT_RANGED; ++slot)
+                                        if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                                            if (item->GetTemplate()->ItemLevel > _maxWeaponItemLevel)
+                                                _maxWeaponItemLevel = item->GetTemplate()->ItemLevel;
+
+                        }
+
+                        if (state == IN_PROGRESS)
+                        {
+                            // get item level (armor cannot be swapped in combat)
+                            Map::PlayerList const& players = instance->GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                            {
+                                if (Player* player = itr->getSource())
+                                {
+                                    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+                                    {
+                                        if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY)
+                                            continue;
+
+                                        if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                                        {
+                                            if (slot >= EQUIPMENT_SLOT_MAINHAND && slot <= EQUIPMENT_SLOT_RANGED)
+                                            {
+                                                if (item->GetTemplate()->ItemLevel > _maxWeaponItemLevel)
+                                                    _maxWeaponItemLevel = item->GetTemplate()->ItemLevel;
+                                            }
+                                            else if (item->GetTemplate()->ItemLevel > _maxArmorItemLevel)
+                                                _maxArmorItemLevel = item->GetTemplate()->ItemLevel;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
                 }
                 if (GetBossState(BOSS_FREYA) == DONE &&
                     GetBossState(BOSS_MIMIRON) == DONE &&
@@ -1230,6 +1322,16 @@ class instance_ulduar : public InstanceMapScript
                         if (Creature* Leviathan = instance->GetCreature(LeviathanGUID))
                             Leviathan->AI()->SetData(type, data);
                         break;
+                    case EVENT_DESPAWN_ALGALON:
+                        DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
+                        DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, 60);
+                        _algalonTimer = 60;
+                        _events.ScheduleEvent(EVENT_DESPAWN_ALGALON, 3600000);
+                        _events.ScheduleEvent(EVENT_UPDATE_ALGALON_TIMER, 60000);
+                        break;
+                    case DATA_ALGALON_SUMMON_STATE:
+                        _algalonSummoned = true;
+                        break;
                     default:
                         break;
                 }
@@ -1242,7 +1344,7 @@ class instance_ulduar : public InstanceMapScript
                     case NPC_BRANN_EVENT_START_ULDU :   return uiBrannGUID;
                     case TYPE_ALGALON:              return uiAlgalonGUID;
                     case GO_ALGALON_DOOR:           return AlgalonDoorGUID;
-                    case NPC_BRANN_ALGALON:	    return AlgalonBrannGUID;
+                    case NPC_BRANN_BRONZBEARD_ALG:	    return AlgalonBrannGUID;
                     case BOSS_IGNIS:                return IgnisGUID;
                     case BOSS_KOLOGARN:             return KologarnGUID;
                     case BOSS_AURIAYA:              return AuriayaGUID;
@@ -1325,6 +1427,8 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (type)
                 {
+                    case DATA_HEROLD:
+                        return uint32(_maxArmorItemLevel <= MAX_HERALD_ARMOR_ITEMLEVEL && _maxWeaponItemLevel <= MAX_HERALD_WEAPON_ITEMLEVEL);
                     case DATA_ALGALON_INTRO:
                         return AlgalonIntroDone;
                     case DATA_ALGALON_TIMER:
@@ -1352,10 +1456,10 @@ class instance_ulduar : public InstanceMapScript
                 return 0;
             }
 
-            void FillInitialWorldStates(WorldPacket& data)
+            void FillInitialWorldStates(WorldPacket& packet)
             {
-                data << uint32(WORLDSTATE_SHOW_TIMER)            << uint32(SignalTimerState == IN_PROGRESS);
-                data << uint32(WORLDSTATE_ALGALON_TIMER)         << uint32(SignalTimerMinutes ? SignalTimerMinutes : 60);
+                packet << uint32(WORLD_STATE_ALGALON_TIMER_ENABLED) << uint32(_algalonTimer && _algalonTimer <= 60);
+                packet << uint32(WORLD_STATE_ALGALON_DESPAWN_TIMER) << uint32(std::min<uint32>(_algalonTimer, 60));
             }
 
 
@@ -1364,7 +1468,7 @@ class instance_ulduar : public InstanceMapScript
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << "U U " << GetBossSaveData() << GetData(DATA_COLOSSUS) << " " << PlayerDeathFlag << " " << uiAlgalonCountdown;
+                saveStream << "U U " << GetBossSaveData() << GetData(DATA_COLOSSUS) << ' ' << _algalonTimer << ' ' << (_algalonSummoned ? 1 : 0) << ' ' << PlayerDeathFlag;
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -1396,9 +1500,27 @@ class instance_ulduar : public InstanceMapScript
                         SetBossState(i, EncounterState(tmpState));
                     }
 
-                    loadStream >> ColossusData;
-                    loadStream >> PlayerDeathFlag;
-                    loadStream >> uiAlgalonCountdown;
+                    uint32 tempState;
+                    loadStream >> tempState;
+                    if (tempState == IN_PROGRESS || tempState > SPECIAL)
+                        tempState = NOT_STARTED;
+                    SetData(DATA_COLOSSUS, tempState);
+
+                    loadStream >> _algalonTimer;
+                    loadStream >> tempState;
+                    _algalonSummoned = tempState != 0;
+                    if (_algalonSummoned && GetBossState(BOSS_ALGALON) != DONE)
+                    {
+                        _summonAlgalon = true;
+                        if (_algalonTimer && _algalonTimer <= 60)
+                        {
+                            _events.ScheduleEvent(EVENT_UPDATE_ALGALON_TIMER, 60000);
+                            DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
+                            DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, _algalonTimer);
+                        }
+                    }
+                    loadStream >> tempState;
+                    PlayerDeathFlag = tempState;
                 }
                 OUT_LOAD_INST_DATA_COMPLETE;
             }

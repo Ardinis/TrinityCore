@@ -2453,8 +2453,8 @@ public:
 
         void Reset()
         {
-            me->SetSpeed(MOVE_WALK, 2.0f);
-            me->SetSpeed(MOVE_RUN, 2.0f);
+            me->SetSpeed(MOVE_WALK, 1.5f);
+            me->SetSpeed(MOVE_RUN, 1.5f);
             if (me->isSummon())
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
                     AttackStart(owner->getAttackerForHelper());

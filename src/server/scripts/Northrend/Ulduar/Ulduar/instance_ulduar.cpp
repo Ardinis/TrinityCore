@@ -183,6 +183,12 @@ class instance_ulduar : public InstanceMapScript
             uint32 _maxArmorItemLevel;
             uint32 _maxWeaponItemLevel;
 
+
+            uint64 AlgalonSigilDoorGUID[3];
+            uint64 AlgalonFloorGUID[2];
+            uint64 AlgalonUniverseGUID;
+            uint64 AlgalonTrapdoorGUID;
+
             uint32 uiEncounter[MAX_ENCOUNTER];
 
             // Creatures
@@ -329,6 +335,10 @@ class instance_ulduar : public InstanceMapScript
                 _maxArmorItemLevel               = 0;
                 _maxWeaponItemLevel              = 0;
 
+                memset(AlgalonSigilDoorGUID, 0, sizeof(AlgalonSigilDoorGUID));
+                memset(AlgalonFloorGUID, 0, sizeof(AlgalonFloorGUID));
+                AlgalonUniverseGUID = 0;
+                AlgalonTrapdoorGUID = 0;
                 // Creatures
                 std::fill(KeeperGUIDs, KeeperGUIDs + 3, 0);
 
@@ -789,44 +799,50 @@ class instance_ulduar : public InstanceMapScript
             {
                 switch (gameObject->GetEntry())
                 {
-                    case GO_ALGALON_DOOR:
-                        AlgalonDoorGUID = gameObject->GetGUID();
-                        gameObject->SetGoState(GO_STATE_READY);
-                        if (AlgalonIntroDone)
+                    case GO_CELESTIAL_PLANETARIUM_ACCESS_10:
+                    case GO_CELESTIAL_PLANETARIUM_ACCESS_25:
+                        //if (_algalonSummoned)
+                        //   gameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                        break;
+                    case GO_DOODAD_UL_SIGILDOOR_01:
+                        AlgalonSigilDoorGUID[0] = gameObject->GetGUID();
+                        HandleGameObject(0, false, gameObject);
+                        if (_algalonSummoned)
+                        {
+                            std::cout << "_algalonSummoned" << std::endl;
+                            //                            gameObject->SetGoState(GO_STATE_ACTIVE);
+                        }
+                        break;
+                    case GO_DOODAD_UL_SIGILDOOR_02:
+                        AlgalonSigilDoorGUID[1] = gameObject->GetGUID();
+                        HandleGameObject(0, false, gameObject);
+                        if (_algalonSummoned)
                             gameObject->SetGoState(GO_STATE_ACTIVE);
                         break;
-                    case GO_ALGALON_FLOOR_OOC:
-                        AlgalonFloorOOCGUID = gameObject->GetGUID();
-                        gameObject->SetGoState(GO_STATE_READY);
-                        gameObject->setActive(true);
-                        gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
-                        break;
-                    case GO_ALGALON_FLOOR_COM:
-                        AlgalonFloorCOMGUID = gameObject->GetGUID();
-                        gameObject->SetGoState(GO_STATE_ACTIVE);
-                        gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
-                        break;
-                    case GO_ALGALON_BRIDGE:
-                        AlgalonBridgeGUID = gameObject->GetGUID();
-                        gameObject->SetGoState(GO_STATE_READY);
-                        gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
-                        break;
-                    case GO_ALGALON_GLOBE:
-                        AlgalonGlobeGUID = gameObject->GetGUID();
-                        HandleGameObject(0, false, gameObject);
-                        gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
-                        break;
-                    case GO_ALGALON_INVISDOOR:
-                        AlgalonForceFieldGUID = gameObject->GetGUID();
+                    case GO_DOODAD_UL_SIGILDOOR_03:
+                        AlgalonSigilDoorGUID[2] = gameObject->GetGUID();
+                        HandleGameObject(0, true, gameObject);
                         AddDoor(gameObject, true);
-                        gameObject->SetGoState(GO_STATE_ACTIVE);
-                        gameObject->SetPhaseMask(PHASEMASK_ANYWHERE,false);
                         break;
-                    case GO_ALGALON_CONSOLE:
-                        if (AlgalonIntroDone)
-                        {
-                            gameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
-                        }
+                    case GO_DOODAD_UL_UNIVERSEFLOOR_01:
+                        AlgalonFloorGUID[0] = gameObject->GetGUID();
+                        HandleGameObject(0, false, gameObject);
+                        AddDoor(gameObject, true);
+                        break;
+                    case GO_DOODAD_UL_UNIVERSEFLOOR_02:
+                        AlgalonFloorGUID[1] = gameObject->GetGUID();
+                        HandleGameObject(0, false, gameObject);
+                        AddDoor(gameObject, true);
+                        break;
+                    case GO_DOODAD_UL_UNIVERSEGLOBE01:
+                        AlgalonUniverseGUID = gameObject->GetGUID();
+                        HandleGameObject(0, false, gameObject);
+                        AddDoor(gameObject, true);
+                        break;
+                    case GO_DOODAD_UL_ULDUAR_TRAPDOOR_03:
+                        AlgalonTrapdoorGUID = gameObject->GetGUID();
+                        HandleGameObject(0, false, gameObject);
+                        AddDoor(gameObject, true);
                         break;
 
                     case GO_ULDUAR_DOME:
@@ -1184,7 +1200,14 @@ class instance_ulduar : public InstanceMapScript
                                                 _maxWeaponItemLevel = item->GetTemplate()->ItemLevel;
 
                         }
-
+                        if (state != IN_PROGRESS)
+                        {
+                            //                            HandleGameObject(AlgalonTrapdoorGUID, true);
+                            HandleGameObject(AlgalonSigilDoorGUID[0], true);
+                            HandleGameObject(AlgalonSigilDoorGUID[1], true);
+                            HandleGameObject(AlgalonSigilDoorGUID[2], true);
+                            HandleGameObject(AlgalonUniverseGUID, false);
+                        }
                         if (state == IN_PROGRESS)
                         {
                             // get item level (armor cannot be swapped in combat)
@@ -1211,6 +1234,11 @@ class instance_ulduar : public InstanceMapScript
                                     }
                                 }
                             }
+                            HandleGameObject(AlgalonSigilDoorGUID[0], false);
+                            HandleGameObject(AlgalonSigilDoorGUID[1], false);
+                            HandleGameObject(AlgalonSigilDoorGUID[2], false);
+                            //                            HandleGameObject(AlgalonTrapdoorGUID, false);
+                            HandleGameObject(AlgalonUniverseGUID, true);
                         }
                         break;
                     }
@@ -1343,7 +1371,6 @@ class instance_ulduar : public InstanceMapScript
                 {
                     case NPC_BRANN_EVENT_START_ULDU :   return uiBrannGUID;
                     case TYPE_ALGALON:              return uiAlgalonGUID;
-                    case GO_ALGALON_DOOR:           return AlgalonDoorGUID;
                     case NPC_BRANN_BRONZBEARD_ALG:	    return AlgalonBrannGUID;
                     case BOSS_IGNIS:                return IgnisGUID;
                     case BOSS_KOLOGARN:             return KologarnGUID;
@@ -1418,6 +1445,21 @@ class instance_ulduar : public InstanceMapScript
                         return ThorimCtrlGUID;
                     case DATA_HODIR_RARE_CACHE:
                         return HodirRareCacheGUID;
+
+                case DATA_SIGILDOOR_01:
+                    return AlgalonSigilDoorGUID[0];
+                case DATA_SIGILDOOR_02:
+                    return AlgalonSigilDoorGUID[1];
+                case DATA_SIGILDOOR_03:
+                    return AlgalonSigilDoorGUID[2];
+                case DATA_UNIVERSE_FLOOR_01:
+                    return AlgalonFloorGUID[0];
+                case DATA_UNIVERSE_FLOOR_02:
+                    return AlgalonFloorGUID[1];
+                case DATA_UNIVERSE_GLOBE:
+                    return AlgalonUniverseGUID;
+                case DATA_ALGALON_TRAPDOOR:
+                    return AlgalonTrapdoorGUID;
                 }
 
                 return 0;

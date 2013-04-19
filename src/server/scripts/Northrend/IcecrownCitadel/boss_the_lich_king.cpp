@@ -1666,15 +1666,14 @@ class npc_valkyr_shadowguard : public CreatureScript
 
                 if (me->HealthBelowPctDamaged(50, damage))
                 {
-		  HadGrab = false;
-		  endPhase = false;
-		    mui_check = 3600000;
-		    mui_check2 = 3600000;
+                    HadGrab = false;
+                    endPhase = false;
+                    mui_check = 3600000;
+                    mui_check2 = 3600000;
                     _events.Reset();
                     DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
                     me->GetMotionMaster()->MoveTargetedHome();
                     me->ClearUnitState(UNIT_STATE_EVADE);
-
                 }
             }
 
@@ -1768,49 +1767,49 @@ class npc_valkyr_shadowguard : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-		if (mui_check <= diff)
-		  {
-		//std::cout << "check" << std::endl;
-		    if (_grabbedPlayer)
-		      {
-			if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
-			  {
-			    //std::cout << "check start" << std::endl;
-			    HadGrab = true;
-			    //std::cout << "check end" << std::endl;
-			  }
-			else if (HadGrab)
-			  {
-			    if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
-			      lichKing->AI()->EnterEvadeMode();
-			    _instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-			    HadGrab = false;
-			  }
-		      }
-		    mui_check = 3000;
-		  }
-		else mui_check -= diff;
+                if (mui_check <= diff)
+                {
+                    //std::cout << "check" << std::endl;
+                    if (_grabbedPlayer)
+                    {
+                        if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
+                        {
+                            //std::cout << "check start" << std::endl;
+                            HadGrab = true;
+                            //std::cout << "check end" << std::endl;
+                        }
+                        else if (HadGrab)
+                        {
+                            if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                                lichKing->AI()->EnterEvadeMode();
+                            _instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                            HadGrab = false;
+                        }
+                    }
+                    mui_check = 3000;
+                }
+                else mui_check -= diff;
 
-		if (endPhase)
-		  {
-		    if (mui_check2 <= diff)
-		      {
-			mui_check2 = 1000;
-			if (me->IsWithinDistInMap(_trig, 1.0f))
-			  {
-			    endPhase = false;
-			    DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
-			    if (!IsHeroic())
-			      me->DespawnOrUnsummon(1000);
-			    else
-			      {
-				me->GetMotionMaster()->MoveTargetedHome();
-				me->ClearUnitState(UNIT_STATE_EVADE);
-			      }
-			  }
-		      }
-		    else mui_check2 -= diff;
-		  }
+                if (endPhase)
+                {
+                    if (mui_check2 <= diff)
+                    {
+                        mui_check2 = 1000;
+                        if (me->IsWithinDistInMap(_trig, 1.0f))
+                        {
+                            endPhase = false;
+                            DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
+                            if (!IsHeroic())
+                                me->DespawnOrUnsummon(1000);
+                            else
+                            {
+                                me->GetMotionMaster()->MoveTargetedHome();
+                                me->ClearUnitState(UNIT_STATE_EVADE);
+                            }
+                        }
+                    }
+                    else mui_check2 -= diff;
+                }
                 while (uint32 eventId = _events.ExecuteEvent())
                 {
                     switch (eventId)

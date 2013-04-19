@@ -47,7 +47,8 @@ enum UlduarBosses
     BOSS_VEZAX               = 17,
     BOSS_YOGGSARON           = 18,
     BOSS_ALGALON             = 19,
-    BOSS_SARA                = 20,
+
+    BOSS_SARA,
     DATA_BRAIN_DOOR_1,
     DATA_BRAIN_DOOR_2,
     DATA_BRAIN_DOOR_3,
@@ -450,13 +451,15 @@ enum UlduarNPCsGO
     NPC_ALGALON_STALKER_ASTEROID_TARGET_01  = 33104,
     NPC_ALGALON_STALKER_ASTEROID_TARGET_02  = 33105,
     NPC_UNLEASHED_DARK_MATTER               = 34097,
-    GO_ALGALON_DOOR             = 194767,
-    GO_ALGALON_FLOOR_COM        = 194715,
-    GO_ALGALON_FLOOR_OOC        = 194716,
-    GO_ALGALON_GLOBE            = 194148,
-    GO_ALGALON_BRIDGE           = 194253,
-    GO_ALGALON_INVISDOOR        = 194910,
-    GO_ALGALON_CONSOLE          = 194628,
+    GO_CELESTIAL_PLANETARIUM_ACCESS_10      = 194628,
+    GO_CELESTIAL_PLANETARIUM_ACCESS_25      = 194752,
+    GO_DOODAD_UL_SIGILDOOR_01               = 194767,
+    GO_DOODAD_UL_SIGILDOOR_02               = 194911,
+    GO_DOODAD_UL_SIGILDOOR_03               = 194910,
+    GO_DOODAD_UL_UNIVERSEFLOOR_01           = 194715,
+    GO_DOODAD_UL_UNIVERSEFLOOR_02           = 194716,
+    GO_DOODAD_UL_UNIVERSEGLOBE01            = 194148,
+    GO_DOODAD_UL_ULDUAR_TRAPDOOR_03         = 194253,
     GO_GIFT_OF_THE_OBSERVER_10  = 194821,
     GO_GIFT_OF_THE_OBSERVER_25  = 194822,
   };
@@ -481,17 +484,6 @@ CreatureAI* GetUlduarAI(Creature* creature)
         if (instance->GetInstanceScript())
             if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
                 return new AI(creature);
-
-    return NULL;
-}
-
-template<class AI>
-GameObjectAI* GetUlduarAI(GameObject* go)
-{
-    if (InstanceMap* instance = go->GetMap()->ToInstanceMap())
-        if (instance->GetInstanceScript())
-            if (instance->GetScriptId() == sObjectMgr->GetScriptId(UlduarScriptName))
-                return new AI(go);
 
     return NULL;
 }

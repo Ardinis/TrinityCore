@@ -3449,7 +3449,7 @@ void Spell::cast(bool skipCheck)
                 m_caster->CastSpell(m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster, *i, true);
     }
 
-    Unit::AuraEffectList const& stateAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    /*    Unit::AuraEffectList const& stateAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
     for (Unit::AuraEffectList::const_iterator j = stateAuras.begin(); j != stateAuras.end();)
     {
         if ((*j)->IsAffectedOnSpell(m_spellInfo))
@@ -3463,7 +3463,7 @@ void Spell::cast(bool skipCheck)
             }
         }
         j++;
-    }
+        }*/
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {

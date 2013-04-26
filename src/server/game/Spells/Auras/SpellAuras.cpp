@@ -581,6 +581,21 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
                         }
                     }
                 }
+                // Prevent exploiting with doubling auras
+                else if (caster)
+                {
+                    // check if not stacking aura already on target and remove not own aura
+                    for (Unit::AuraApplicationMap::iterator iter = itr->first->GetAppliedAuras().begin(); iter != itr->first->GetAppliedAuras().end(); ++iter)
+                    {
+                        Aura const * aura = iter->second->GetBase();
+                        if (aura->GetCasterGUID() != GetCasterGUID() && !CanStackWith(aura))
+                        {
+                            caster->RemoveAurasDueToSpell(aura->GetId(), aura->GetCasterGUID());
+                            break;
+                        }
+                    }
+                }
+
             }
         }
         if (!addUnit)
@@ -1264,8 +1279,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     // Improved Devouring Plague
                     if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 1))
                     {
-                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * caster->SpellDamageBonus(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT) / 100;
-                        int32 heal = int32(CalculatePctN(basepoints0, 15));
+                        uint32 damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT);
+                        damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT);
+                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * int32(damage) / 100;
+                        int32 heal = int32(CalculatePct(basepoints0, 15));
+
                         caster->CastCustomSpell(target, 63675, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
                         caster->CastCustomSpell(caster, 75999, &heal, NULL, NULL, true, NULL, GetEffect(0));
                     }

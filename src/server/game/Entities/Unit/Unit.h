@@ -1771,6 +1771,19 @@ class Unit : public WorldObject
         void _RemoveNoStackAurasDueToAura(Aura* aura);
         bool _IsNoStackAuraDueToAura(Aura* appliedAura, Aura* existingAura) const;
         void _RegisterAuraEffect(AuraEffect* aurEff, bool apply);
+        bool IsSingleStackingAura(uint32 auraId) const
+        {
+            switch(auraId)
+            {
+            case 22959: // Scorch
+            case 58567:  // sunder armor
+            case 12579: // Winterchill
+                return true;
+                break;
+            }
+
+            return false;
+        }
 
         // m_ownedAuras container management
         AuraMap      & GetOwnedAuras()       { return m_ownedAuras; }

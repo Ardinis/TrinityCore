@@ -3845,6 +3845,34 @@ void AuraEffect::HandleModHealingDone(AuraApplication const* aurApp, uint8 mode,
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
+float AuraEffect::GetStatAmountCumul(const uint32 spellId, const Stats stateType, const float amount, Unit *target) const
+{
+    float newAmount = amount;
+    switch (spellId)
+    {
+    case 20217:
+    case 25898:
+        if (stateType == STAT_STAMINA || stateType == STAT_STRENGTH)
+        {
+            if (AuraEffect* aur = target->GetAuraEffect(67480, 0))
+                newAmount = 0;
+        }
+        break;
+    case 67480:
+        if (stateType == STAT_STAMINA || stateType == STAT_STRENGTH)
+        {
+            if (AuraEffect* aur = target->GetAuraEffect(20217, 0))
+                newAmount = amount - aur->GetAmount();
+            if (AuraEffect* aur = target->GetAuraEffect(25898, 0))
+                newAmount = amount - aur->GetAmount();
+        }
+        break;
+    }
+    if (newAmount < 0)
+        newAmount = 0;
+    return newAmount;
+}
+
 void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
@@ -3861,22 +3889,28 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     // save current health state
     float healthPct = target->GetHealthPct();
     bool alive = target->isAlive();
+    const SpellInfo *spellInfo = aurApp->GetBase()->GetSpellInfo();
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         if (GetMiscValue() == i || GetMiscValue() == -1)
         {
-            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
+            //            if (spellInfo && (spellInfo->Id == 20217 || spellInfo->Id == 67480) &&  (i == STAT_STAMINA || i == STAT_STRENGTH))
+            //                continue;
+            target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, GetStatAmountCumul(spellInfo->Id, Stats(i), float(GetAmount()), target), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
             {
                 //43223 roi sup
                 //67480 sanctuary
-                if ((Stats(i) == STAT_STAMINA || Stats(i) == STAT_STRENGTH) && (target->HasAura(67480) || target->HasAura(43223)))
-                    continue;
-                target->ApplyStatPercentBuffMod(Stats(i), float(GetAmount()), apply);
+                //STAMINA + FORCE
+                target->ApplyStatPercentBuffMod(Stats(i), GetStatAmountCumul(spellInfo->Id, Stats(i), float(GetAmount()), target), apply);
             }
         }
     }
+
+    //bene des rois 20217
+    if (spellInfo /*&& (spellInfo->Id == 20217 || spellInfo->Id == 67480)*/)
+        std::cout << "wtf : " << spellInfo->Id << std::endl;
 
     // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_UNK4 0x00000010 flag)
     // this check is total bullshit i think

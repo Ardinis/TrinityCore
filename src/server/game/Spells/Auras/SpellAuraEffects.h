@@ -208,6 +208,7 @@ class AuraEffect
         void HandleModBaseResistance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModTargetResistance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         //    stat
+        float GetStatAmountCumul(const uint32 spellId, const Stats stateType, const float amount, Unit *target) const;
         void HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModPercentStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModSpellDamagePercentFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;

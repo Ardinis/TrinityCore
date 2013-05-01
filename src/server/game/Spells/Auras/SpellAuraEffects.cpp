@@ -3895,16 +3895,9 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     {
         if (GetMiscValue() == i || GetMiscValue() == -1)
         {
-            //            if (spellInfo && (spellInfo->Id == 20217 || spellInfo->Id == 67480) &&  (i == STAT_STAMINA || i == STAT_STRENGTH))
-            //                continue;
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, GetStatAmountCumul(spellInfo->Id, Stats(i), float(GetAmount()), target), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
-            {
-                //43223 roi sup
-                //67480 sanctuary
-                //STAMINA + FORCE
                 target->ApplyStatPercentBuffMod(Stats(i), GetStatAmountCumul(spellInfo->Id, Stats(i), float(GetAmount()), target), apply);
-            }
         }
     }
 

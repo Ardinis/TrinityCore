@@ -197,22 +197,22 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 Talk(SAY_DEATH);
                 Cleanup();
 				// Blah, credit the quest
-		if (Is25ManRaid())
-		  if (_creditBloodQuickening)
-		  {
-                    instance->SetData(DATA_BLOOD_QUICKENING_STATE, DONE);
-                    if (Player* player = killer->ToPlayer())
-		      player->RewardPlayerAndGroupAtEvent(NPC_INFILTRATOR_MINCHAR_BQ, player);
-                    if (Creature* minchar = me->FindNearestCreature(NPC_INFILTRATOR_MINCHAR_BQ, 200.0f))
+                if (Is25ManRaid())
+                    if (_creditBloodQuickening)
                     {
-		      minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-		      minchar->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
-		      minchar->SetFlying(false);
-		      minchar->SendMovementFlagUpdate();
-		      minchar->RemoveAllAuras();
-		      minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE/3.0f);
+                        instance->SetData(DATA_BLOOD_QUICKENING_STATE, DONE);
+                        if (Player* player = killer->ToPlayer())
+                            player->RewardPlayerAndGroupAtEvent(NPC_INFILTRATOR_MINCHAR_BQ, player);
+                        if (Creature* minchar = me->FindNearestCreature(NPC_INFILTRATOR_MINCHAR_BQ, 200.0f))
+                        {
+                            minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                            minchar->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);
+                            minchar->SetFlying(false);
+                            minchar->SendMovementFlagUpdate();
+                            minchar->RemoveAllAuras();
+                            minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE/3.0f);
+                        }
                     }
-		  }
             }
 
             void DoAction(int32 const action)
@@ -550,13 +550,13 @@ class spell_blood_queen_vampiric_bite : public SpellScriptLoader
                 GetCaster()->RemoveAura(spellId, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
                 GetCaster()->CastSpell(GetCaster(), SPELL_ESSENCE_OF_THE_BLOOD_QUEEN_PLR, true);
                 // Presence of the Darkfallen buff on Blood-Queen
-		if (GetCaster()->GetMap())
-		  if (GetCaster()->GetMap()->IsHeroic())
-		    GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
-		//  if (GetCaster()->GetMap()->IsHeroic())
-		  //		  GetCaster()->AddAura(SPELL_PRESENCE_OF_THE_DARKFALLEN, GetCaster());
-		//  GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
-		    //                // Shadowmourne questline
+                if (GetCaster()->GetMap())
+                    if (GetCaster()->GetMap()->IsHeroic())
+                        GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
+                //  if (GetCaster()->GetMap()->IsHeroic())
+                //		  GetCaster()->AddAura(SPELL_PRESENCE_OF_THE_DARKFALLEN, GetCaster());
+                //  GetCaster()->CastSpell(GetCaster(), SPELL_PRESENCE_OF_THE_DARKFALLEN, true);
+                //                // Shadowmourne questline
                 if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_BLOOD_INFUSION) == QUEST_STATUS_INCOMPLETE)
                 {
                     if (Aura* aura = GetCaster()->GetAura(SPELL_GUSHING_WOUND))
@@ -821,8 +821,8 @@ class achievement_once_bitten_twice_shy_n : public AchievementCriteriaScript
                 return false;
 
             if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
-	      if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
-		return !lanaThelAI->WasVampire(source->GetGUID());
+                if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+                    return !lanaThelAI->WasVampire(source->GetGUID());
             return false;
         }
 };
@@ -838,8 +838,8 @@ class achievement_once_bitten_twice_shy_v : public AchievementCriteriaScript
                 return false;
 
             if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
-	      if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
-		return lanaThelAI->WasVampire(source->GetGUID());
+                if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC)
+                    return lanaThelAI->WasVampire(source->GetGUID());
             return false;
         }
 };
@@ -856,7 +856,7 @@ public:
 
     if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
       if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-	return !lanaThelAI->WasVampire(source->GetGUID());
+          return !lanaThelAI->WasVampire(source->GetGUID());
 
     return false;
   }
@@ -874,7 +874,7 @@ public:
 
     if (LanaThelAI* lanaThelAI = CAST_AI(LanaThelAI, target->GetAI()))
       if (lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || lanaThelAI->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-	return lanaThelAI->WasVampire(source->GetGUID());
+          return lanaThelAI->WasVampire(source->GetGUID());
 
     return false;
   }

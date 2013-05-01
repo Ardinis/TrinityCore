@@ -330,7 +330,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 DoCast(me, SPELL_RUNE_OF_BLOOD_S, true);
                 me->RemoveAurasDueToSpell(SPELL_BERSERK);
                 me->RemoveAurasDueToSpell(SPELL_FRENZY);
-		me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
+                me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
                 events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 40000, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BERSERK, IsHeroic() ? 360000 : 480000, 0, PHASE_COMBAT);
                 events.ScheduleEvent(EVENT_BOILING_BLOOD, 15500, 0, PHASE_COMBAT);
@@ -491,7 +491,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     _frenzied = true;
                 }
 
-                uint32 power = me->GetPower(POWER_ENERGY);
+                /*                uint32 power = me->GetPower(POWER_ENERGY);
                 if (power >= 100)
                     me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 20);
                 else if (power >= 95 && power < 100)
@@ -534,7 +534,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 1);
                 else if (power >= 0 && power < 5)
                     me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
-
+                */
                 if(me->isAttackReady())
                 {
                     uint32 Markdmg;
@@ -738,86 +738,85 @@ class npc_blood_beast : public CreatureScript
             {
             }
 
-	  Unit* SelectEnemyCaster()
-	  {
-	    Map::PlayerList const &tList = me->GetMap()->GetPlayers();
-	    Map::PlayerList::const_iterator iter;
-
-            Unit* target;
-	    std::list<Unit *> newListTarget;
-            for (iter = tList.begin(); iter!=tList.end(); ++iter)
+            Unit* SelectEnemyCaster()
             {
-	      target = iter->getSource();
-	      if (target && target->getPowerType() == POWER_MANA && target->isAlive() && me->GetDistance2d(target->GetPositionX(), target->GetPositionY()) > 12.0f)
-		newListTarget.push_back(target);
-	    }
-	    if (newListTarget.empty() || newListTarget.size() <= 1)
-	      for (iter = tList.begin(); iter!=tList.end(); ++iter)
-	      {
-		target = iter->getSource();
-		if (target && target->getPowerType() == POWER_MANA && target->isAlive())
-		  newListTarget.push_back(target);
-	      }
-	    if (newListTarget.size() > 0)
-	    {
-	      std::list<Unit*>::iterator itr = newListTarget.begin();
-	      std::advance(itr, urand(0, newListTarget.size() - 1));
-	      return *itr;
-	    }
-	    return SelectTarget(SELECT_TARGET_RANDOM);
-	  }
+                Map::PlayerList const &tList = me->GetMap()->GetPlayers();
+                Map::PlayerList::const_iterator iter;
+
+                Unit* target;
+                std::list<Unit *> newListTarget;
+                for (iter = tList.begin(); iter!=tList.end(); ++iter)
+                {
+                    target = iter->getSource();
+                    if (target && target->getPowerType() == POWER_MANA && target->isAlive() && me->GetDistance2d(target->GetPositionX(), target->GetPositionY()) > 12.0f)
+                        newListTarget.push_back(target);
+                }
+                if (newListTarget.empty() || newListTarget.size() <= 1)
+                    for (iter = tList.begin(); iter!=tList.end(); ++iter)
+                    {
+                        target = iter->getSource();
+                        if (target && target->getPowerType() == POWER_MANA && target->isAlive())
+                            newListTarget.push_back(target);
+                    }
+                if (newListTarget.size() > 0)
+                {
+                    std::list<Unit*>::iterator itr = newListTarget.begin();
+                    std::advance(itr, urand(0, newListTarget.size() - 1));
+                    return *itr;
+                }
+                return SelectTarget(SELECT_TARGET_RANDOM);
+            }
 
             void UpdateAI(uint32 const diff)
             {
-	      if (!defreeze)
-	      {
-		if (mui_freeze <= diff)
-		{
-		  me->SetReactState(REACT_AGGRESSIVE);
-		  if (target = SelectEnemyCaster())
-		  {
-		    me->DeleteThreatList();
-		    me->SetInCombatWith(target);
-		    target->SetInCombatWith(me);
-		    //		    DoStartMovement(target);
-		    me->AI()->AttackStart(target);
-		    me->AddThreat(target, 100000000.0f * 9.0f);
-		    mui_freeze2 = 2000;
-		  }
-		  defreeze = true;
-		}
-		else
-		  mui_freeze -= diff;
-	      }
-	      else
-	      {
-		if (mui_freeze2 > diff)
-		{
-		  mui_freeze2 -= diff;
-		  me->DeleteThreatList();
-		  me->SetInCombatWith(target);
-		  target->SetInCombatWith(me);
-		  me->AI()->AttackStart(target);
-		  //  DoStartMovement(target);
-		  me->AddThreat(target, 100000000.0f * 9.0f);
-		}
-	      }
+                if (!defreeze)
+                {
+                    if (mui_freeze <= diff)
+                    {
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        if (target = SelectEnemyCaster())
+                        {
+                            me->DeleteThreatList();
+                            me->SetInCombatWith(target);
+                            target->SetInCombatWith(me);
+                            //		    DoStartMovement(target);
+                            me->AI()->AttackStart(target);
+                            me->AddThreat(target, 100000000.0f * 9.0f);
+                            mui_freeze2 = 2000;
+                        }
+                        defreeze = true;
+                    }
+                    else
+                        mui_freeze -= diff;
+                }
+                else
+                {
+                    if (mui_freeze2 > diff)
+                    {
+                        mui_freeze2 -= diff;
+                        me->DeleteThreatList();
+                        me->SetInCombatWith(target);
+                        target->SetInCombatWith(me);
+                        me->AI()->AttackStart(target);
+                        //  DoStartMovement(target);
+                        me->AddThreat(target, 100000000.0f * 9.0f);
+                    }
+                }
 
-	      DoMeleeAttackIfReady();
+                DoMeleeAttackIfReady();
             }
 
-	private :
+        private :
+            Unit* target;
+            uint32 mui_freeze;
+            uint32 mui_freeze2;
+            bool defreeze;
+        };
 
-	  Unit* target;
-	  uint32 mui_freeze;
-	  uint32 mui_freeze2;
-	  bool defreeze;
-            };
-
-            CreatureAI* GetAI(Creature* creature) const
-            {
-                return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
-            }
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return GetIcecrownCitadelAI<npc_blood_beastAI>(creature);
+    }
 };
 
 class npc_high_overlord_saurfang_icc : public CreatureScript

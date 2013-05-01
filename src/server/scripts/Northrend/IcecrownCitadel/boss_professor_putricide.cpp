@@ -441,36 +441,37 @@ class boss_professor_putricide : public CreatureScript
                         if (IsHeroic())
                             events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, urand(15000, 20000), 0, PHASE_ROTFACE);
                         // init random sequence of floods
-			if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
+                        if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
                         {
-			  std::list<Creature*> list;
-			  GetCreatureListWithEntryInGrid(list, rotface, NPC_PUDDLE_STALKER, 36.0f);
-			  if (list.size() > 4)
-			  {
-			    list.sort(Trinity::ObjectDistanceOrderPred(rotface));
+                            std::list<Creature*> list;
+                            GetCreatureListWithEntryInGrid(list, rotface, NPC_PUDDLE_STALKER, 50.0f);
+                            list.remove_if(RotfaceHeightCheck(rotface));
+                            if (list.size() > 4)
+                            {
+                                list.sort(Trinity::ObjectDistanceOrderPred(rotface));
                                 do
                                 {
-				  list.pop_back();
+                                    list.pop_back();
                                 } while (list.size() > 4);
-			  }
+                            }
 
-			  uint8 i = 0;
-			  while (!list.empty())
-			  {
-			    std::list<Creature*>::iterator itr = list.begin();
-			    std::advance(itr, urand(0, list.size()-1));
-			    _oozeFloodDummyGUIDs[i++] = (*itr)->GetGUID();
-			    list.erase(itr);
-			  }
-			}
+                            uint8 i = 0;
+                            while (!list.empty())
+                            {
+                                std::list<Creature*>::iterator itr = list.begin();
+                                std::advance(itr, urand(0, list.size()-1));
+                                _oozeFloodDummyGUIDs[i++] = (*itr)->GetGUID();
+                                list.erase(itr);
+                            }
+                        }
                         break;
                     }
                     case ACTION_ROTFACE_OOZE:
                         Talk(SAY_ROTFACE_OOZE_FLOOD);
                         if (Creature* dummy = Unit::GetCreature(*me, _oozeFloodDummyGUIDs[_oozeFloodStage]))
-			{
+                        {
                             dummy->CastSpell(dummy, oozeFloodSpells[_oozeFloodStage], true, NULL, NULL, me->GetGUID()); // cast from self for LoS (with prof's GUID for logs)
-			}
+                        }
                         if (++_oozeFloodStage == 4)
                             _oozeFloodStage = 0;
                         break;

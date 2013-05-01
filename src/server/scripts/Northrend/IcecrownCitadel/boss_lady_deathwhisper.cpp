@@ -489,30 +489,49 @@ class boss_lady_deathwhisper : public CreatureScript
                             events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(13000, 15000), 0, PHASE_TWO);
                             break;
                         case EVENT_P2_TOUCH_OF_INSIGNIFICANCE:
-			    DoZoneInCombat();
+                            DoZoneInCombat();
                             DoCastVictim(SPELL_TOUCH_OF_INSIGNIFICANCE);
                             events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(9000, 13000), 0, PHASE_TWO);
                             break;
                         case EVENT_P2_SUMMON_SHADE:
-			{
-                            if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        {
+                            int cnt = 0;
+                            bool found = false;
+                            while (!found && cnt < 10)
                             {
-                                _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
-                                DoCast(shadeTarget, SPELL_SUMMON_SHADE);
+                                if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                {
+                                    if (me->GetDistance(shadeTarget) >= 20.0f)
+                                    {
+                                        _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
+                                        DoCast(shadeTarget, SPELL_SUMMON_SHADE);
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                cnt++;
                             }
-			    int shaderCount = RAID_MODE(1, 2, 1, 3);
-			    if (_shaderCount + 1 < shaderCount)
-			    {
-			      _shaderCount++;
-			      events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, 100, 0, PHASE_TWO);
-			    }
-			    else
-			    {
-			      _shaderCount = 0;
-			      events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(10000, 13000), 0, PHASE_TWO);
-			    }
+                            if (!found)
+                            {
+                                if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                {
+                                    _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
+                                    DoCast(shadeTarget, SPELL_SUMMON_SHADE);
+                                }
+                            }
+                            int shaderCount = RAID_MODE(1, 2, 1, 3);
+                            if (_shaderCount + 1 < shaderCount)
+                            {
+                                _shaderCount++;
+                                events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, 100, 0, PHASE_TWO);
+                            }
+                            else
+                            {
+                                _shaderCount = 0;
+                                events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(10000, 13000), 0, PHASE_TWO);
+                            }
                             break;
-			}
+                        }
                         case EVENT_P2_SUMMON_WAVE:
                             SummonWaveP2();
                             events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, 45000, 0, PHASE_TWO);

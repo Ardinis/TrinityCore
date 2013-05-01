@@ -216,23 +216,26 @@ class boss_lord_marrowgar : public CreatureScript
                             Talk(EMOTE_BONE_STORM);
                             me->FinishSpell(CURRENT_MELEE_SPELL, false);
                             DoCast(me, SPELL_BONE_STORM);
-			    _bstorm = true;
+                            _bstorm = true;
                             events.DelayEvents(3000, EVENT_GROUP_SPECIAL);
                             events.ScheduleEvent(EVENT_BONE_STORM_BEGIN, 3050);
                             events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(90000, 95000));
                             break;
                         case EVENT_BONE_STORM_BEGIN:
-			  instance->SetData(DATA_TEMPETE, IN_PROGRESS);
+                            instance->SetData(DATA_TEMPETE, IN_PROGRESS);
                             if (Aura* pStorm = me->GetAura(SPELL_BONE_STORM))
                                 pStorm->SetDuration(int32(_boneStormDuration));
                             me->SetSpeed(MOVE_RUN, _baseSpeed*3.0f, true);
                             Talk(SAY_BONE_STORM);
-			    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                            me->SetSpeed(MOVE_WALK, me->GetSpeedRate(MOVE_WALK) / 2);
+                            me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) / 2);
                             events.ScheduleEvent(EVENT_BONE_STORM_END, _boneStormDuration+1);
                             // no break here
                         case EVENT_BONE_STORM_MOVE:
                         {
-			  instance->SetData(DATA_TEMPETE, IN_PROGRESS);
+                            instance->SetData(DATA_TEMPETE, IN_PROGRESS);
                             events.ScheduleEvent(EVENT_BONE_STORM_MOVE, _boneStormDuration/3);
                             Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me));
                             if (!unit)
@@ -242,19 +245,21 @@ class boss_lord_marrowgar : public CreatureScript
                             break;
                         }
                         case EVENT_BONE_STORM_END:
-			  instance->SetData(DATA_TEMPETE, NOT_STARTED);
-			    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                            instance->SetData(DATA_TEMPETE, NOT_STARTED);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+                            me->SetSpeed(MOVE_WALK, me->GetSpeedRate(MOVE_WALK) * 2);
+                            me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) * 2);
                             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                                 me->GetMotionMaster()->MovementExpired();
-			    //me->DeleteThreatList();
-			    DoZoneInCombat();
+                            DoZoneInCombat();
                             DoStartMovement(me->getVictim());
                             me->SetSpeed(MOVE_RUN, _baseSpeed, true);
                             events.CancelEvent(EVENT_BONE_STORM_MOVE);
                             events.ScheduleEvent(EVENT_ENABLE_BONE_SLICE, 10000);
                             if (!IsHeroic())
                                 events.RescheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(15000, 20000), EVENT_GROUP_SPECIAL);
-			    _endstorm = true;
+                            _endstorm = true;
                             break;
                         case EVENT_ENABLE_BONE_SLICE:
                             _boneSlice = true;
@@ -335,10 +340,10 @@ class npc_coldflame : public CreatureScript
 
         struct npc_coldflameAI : public ScriptedAI
         {
-	  npc_coldflameAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
-	  {
-	    poss = 0;
-	  }
+            npc_coldflameAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
+            {
+                poss = 0;
+            }
 
             void IsSummonedBy(Unit* owner)
             {
@@ -385,19 +390,19 @@ class npc_coldflame : public CreatureScript
                     Position newPos;
                     me->GetNearPosition(newPos, 5.0f, 0.0f);
                     me->NearTeleportTo(newPos.GetPositionX(), newPos.GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-		    poss++;
-		    if (_instance->GetData(DATA_TEMPETE) == IN_PROGRESS)
-		      poss = 3;
-		    if (poss >= 3)
-		      DoCast(SPELL_COLDFLAME_SUMMON);
+                    poss++;
+                    if (_instance->GetData(DATA_TEMPETE) == IN_PROGRESS)
+                        poss = 3;
+                    if (poss >= 3)
+                        DoCast(SPELL_COLDFLAME_SUMMON);
                     _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 900);
                 }
             }
 
         private:
-	  uint32 poss;
+            uint32 poss;
             EventMap _events;
-	  InstanceScript* _instance;
+            InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -413,13 +418,13 @@ class npc_bone_spike : public CreatureScript
 
         struct npc_bone_spikeAI : public Scripted_NoMovementAI
         {
-	  npc_bone_spikeAI(Creature* creature) : Scripted_NoMovementAI(creature), _hasTrappedUnit(false), _instance(creature->GetInstanceScript())
-	  {
-	    ASSERT(creature->GetVehicleKit());
-	    me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-	    me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-	    ui_des = 2000;
-	  }
+            npc_bone_spikeAI(Creature* creature) : Scripted_NoMovementAI(creature), _hasTrappedUnit(false), _instance(creature->GetInstanceScript())
+            {
+                ASSERT(creature->GetVehicleKit());
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+                ui_des = 2000;
+            }
 
             void JustDied(Unit* /*killer*/)
             {
@@ -442,7 +447,7 @@ class npc_bone_spike : public CreatureScript
                 summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
                 _events.ScheduleEvent(EVENT_FAIL_BONED, 8000);
                 _hasTrappedUnit = true;
-		ui_des = 2000;
+                ui_des = 2000;
             }
 
             void UpdateAI(uint32 const diff)

@@ -3688,6 +3688,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 71357: // Order Whelp
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_200_YARDS;   // 200yd
                 break;
+            case 70530:
+                spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
+                break;
             case 70598: // Sindragosa's Fury
                 spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_CASTER;
                 break;

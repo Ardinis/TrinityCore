@@ -2683,10 +2683,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
 {
     // Check for immune
     if (victim->IsImmunedToSpell(spell))
-    {
-        std::cout << "if (victim->IsImmunedToSpell(spell))" << std::endl;
         return SPELL_MISS_IMMUNE;
-    }
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
@@ -2695,10 +2692,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
         return SPELL_MISS_NONE;
     // Check for immune
     if (victim->IsImmunedToDamage(spell))
-    {
-        std::cout << "if (victim->IsImmunedToDamage(spell))" << std::endl;
         return SPELL_MISS_IMMUNE;
-    }
 
     if (this == victim)
         return SPELL_MISS_NONE;
@@ -11345,7 +11339,6 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
         for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
             if (mechanicMask & uint32(1<<((*i)->GetMiscValue())))
             {
-                std::cout << "add SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT 1 : " << (*i)->GetAmount() << std::endl;
                 if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), SameEffectSpellGroup))
                     AddPct(TakenTotalMod, (*i)->GetAmount());
                 /*                if ((*i)->GetSpellInfo()->Id != 65142) // Check if not disease damage modifier
@@ -12018,8 +12011,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
       for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
           if (mechanicMask & uint32(1<<((*i)->GetMiscValue())))
           {
-              std::cout << spellProto->Id << std::endl;
-              std::cout << "add SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT 2 : " << (*i)->GetAmount() << std::endl;
               if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), SameEffectSpellGroup))
                   if (spellProto->Id != 12868)
                       AddPct(TakenTotalMod, (*i)->GetAmount());
@@ -12825,11 +12816,8 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
-        {
-            std::cout << " A : " << spellInfo->Id << std::endl;
             if (itr->type == spellInfo->Mechanic)
                 return true;
-        }
     }
 
     bool immuneToAllEffects = true;
@@ -12855,10 +12843,7 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
             if ((itr->type & spellInfo->GetSchoolMask())
                 && !(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive())
                 && !spellInfo->CanPierceImmuneAura(immuneSpellInfo))
-            {
-                std::cout << " B : " << spellInfo->Id << std::endl;
                 return true;
-            }
         }
     }
 
@@ -12869,7 +12854,7 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
 {
   if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
-  //  std::cout << "fix vezax !!!!!" << std::endl;
+
   // Cloac Of Shadow exceptions
   if (HasAura(35729, EFFECT_0) || HasAura(31224, EFFECT_0))
       if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766 || spellInfo->Id == 58433)
@@ -12885,20 +12870,14 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
         if (itr->type == effect)
-        {
-            std::cout << "if (itr->type == effect)" << std::endl;
             return true;
-        }
 
     if (uint32 mechanic = spellInfo->Effects[index].Mechanic)
     {
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
             if (itr->type == mechanic)
-            {
-                std::cout << "if (itr->type == mechanic)" << std::endl;
                 return true;
-            }
     }
 
     if (uint32 aura = spellInfo->Effects[index].ApplyAuraName)
@@ -12907,10 +12886,7 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
             if (itr->type == aura)
                 if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))
-                {
-                    std::cout << "if (!(spellInfo->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT))" << std::endl;
                     return true;
-                }
 
         // Check for immune to application of harmful magical effects
         AuraEffectList const& immuneAuraApply = GetAuraEffectsByType(SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL);
@@ -12918,10 +12894,7 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
             if (spellInfo->Dispel == DISPEL_MAGIC &&                                      // Magic debuff
                 ((*iter)->GetMiscValue() & spellInfo->GetSchoolMask()) &&  // Check school
                 !spellInfo->IsPositiveEffect(index))                                  // Harmful
-            {
-                std::cout << "Check for immune to application of harmful magical effects" << std::endl;
                 return true;
-            }
     }
 
     return false;
@@ -13151,10 +13124,7 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
             AuraEffectList const& mDamageDoneMechanic = victim->GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
             for (AuraEffectList::const_iterator i = mDamageDoneMechanic.begin(); i != mDamageDoneMechanic.end(); ++i)
                 if (mechanicMask & uint32(1<<((*i)->GetMiscValue())))
-                {
-                    std::cout << "add SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT 3 : " << (*i)->GetAmount() << std::endl;
                     AddPctN(TakenTotalMod, (*i)->GetAmount());
-                }
         }
     }
 

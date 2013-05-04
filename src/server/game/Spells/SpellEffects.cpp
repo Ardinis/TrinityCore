@@ -1831,7 +1831,6 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
         switch (m_spellInfo->Id)
         {
             case 64163:
-                std::cout << triggered_spell_id << std::endl;
                 spellInfo = sSpellMgr->GetSpellInfo(64168);
                 if (!spellInfo)
                     return;

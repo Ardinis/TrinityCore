@@ -1509,10 +1509,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
     // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
     if (m_spellInfo->Speed && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)))
-    {
-        std::cout << "DoSpellHitOnUnit" << std::endl;
         return SPELL_MISS_IMMUNE;
-    }
 
     // disable effects to which unit is immune
     SpellMissInfo returnVal = SPELL_MISS_IMMUNE;
@@ -1538,10 +1535,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     }
 
     if (!effectMask)
-    {
-        std::cout << "!effectMask" << std::endl;
         return returnVal;
-    }
 
     PrepareScriptHitHandlers();
     CallScriptBeforeHitHandlers();
@@ -1662,10 +1656,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         if (effectMask & (1 << i) && m_spellInfo->Effects[i].Effect != SPELL_EFFECT_APPLY_AURA)
                             found = true;
                     if (!found)
-                    {
-                        std::cout << "!found" << std::endl;
                         return SPELL_MISS_IMMUNE;
-                    }
                 }
                 else
                 {

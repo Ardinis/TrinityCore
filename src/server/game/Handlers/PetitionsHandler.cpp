@@ -59,7 +59,6 @@ enum CharterCosts
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Received opcode CMSG_PETITION_BUY");
-
     uint64 guidNPC;
     uint32 clientIndex;                                     // 1 for guild and arenaslot+1 for arenas in client
     std::string name;
@@ -97,9 +96,11 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         return;
     }
 
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
 
     uint32 charterid = 0;
     uint32 cost = 0;
@@ -180,6 +181,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         }
     }
 
+
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(charterid);
     if (!pProto)
     {
@@ -248,7 +250,6 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
     uint8 signs = 0;
     uint64 petitionguid;
     recv_data >> petitionguid;                              // petition guid
-
     // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
     uint32 petitionguid_low = GUID_LOPART(petitionguid);
 
@@ -289,7 +290,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
 
         result->NextRow();
     }
-    SendPacket(&data);
+   SendPacket(&data);
 }
 
 void WorldSession::HandlePetitionQueryOpcode(WorldPacket & recv_data)
@@ -301,7 +302,6 @@ void WorldSession::HandlePetitionQueryOpcode(WorldPacket & recv_data)
     recv_data >> guildguid;                                 // in Trinity always same as GUID_LOPART(petitionguid)
     recv_data >> petitionguid;                              // petition guid
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_PETITION_QUERY Petition GUID %u Guild GUID %u", GUID_LOPART(petitionguid), guildguid);
-
     SendPetitionQueryOpcode(petitionguid);
 }
 
@@ -314,20 +314,18 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     // TODO: Use CHAR_LOAD_PETITION PS
     QueryResult result = CharacterDatabase.PQuery("SELECT ownerguid, name, type "
         "FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
-
     if (result)
     {
         Field* fields = result->Fetch();
         ownerguid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
         name      = fields[1].GetString();
-        type      = fields[2].GetUInt32();
+        type      = fields[2].GetUInt8();
     }
     else
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_PETITION_QUERY failed for petition (GUID: %u)", GUID_LOPART(petitionguid));
         return;
     }
-
     WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+1+4*12+2+10));
     data << uint32(GUID_LOPART(petitionguid));              // guild/team guid (in Trinity always same as GUID_LOPART(petition guid)
     data << uint64(ownerguid);                              // charter owner guid
@@ -445,7 +443,6 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     uint8 unk;
     recv_data >> petitionGuid;                              // petition guid
     recv_data >> unk;
-
     QueryResult result = CharacterDatabase.PQuery(
         "SELECT ownerguid, "
         "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs, "
@@ -461,7 +458,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     fields = result->Fetch();
     uint64 ownerGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
     uint8 signs = fields[1].GetUInt8();
-    uint32 type = fields[2].GetUInt32();
+    uint32 type = fields[2].GetUInt8();
 
     uint32 playerGuid = _player->GetGUIDLow();
     if (GUID_LOPART(ownerGuid) == playerGuid)

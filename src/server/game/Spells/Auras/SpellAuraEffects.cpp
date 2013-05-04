@@ -3901,10 +3901,6 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
         }
     }
 
-    //bene des rois 20217
-    if (spellInfo /*&& (spellInfo->Id == 20217 || spellInfo->Id == 67480)*/)
-        std::cout << "wtf : " << spellInfo->Id << std::endl;
-
     // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_UNK4 0x00000010 flag)
     // this check is total bullshit i think
     if (GetMiscValue() == STAT_STAMINA && (m_spellInfo->Attributes & SPELL_ATTR0_ABILITY))

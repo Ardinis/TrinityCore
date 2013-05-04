@@ -43,6 +43,8 @@
 #include "ConditionMgr.h"
 #include <functional>
 
+#define MAX_FREE_GUID 1000000
+
 class Item;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
@@ -943,6 +945,7 @@ class ObjectMgr
         uint32 m_jailconf_horde_m;
         uint32 m_jailconf_ban;          // Banear la cuenta si se ha llegado al limite
         uint32 m_jailconf_radius;       // Radio maximo donde se puede caminar en la carcel
+        std::queue<uint32 > _freeItemGuid;
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint8 level);
@@ -957,6 +960,9 @@ class ObjectMgr
         void ReturnOrDeleteOldMails(bool serverUp);
 
         CreatureBaseStats const* GetCreatureBaseStats(uint8 level, uint8 unitClass);
+
+        unsigned int GenrateFreeItemGuid();
+        void AddFreeItemGuid(uint32 guid);
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);

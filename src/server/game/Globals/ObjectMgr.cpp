@@ -6189,6 +6189,29 @@ AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
     return NULL;
 }
 
+unsigned int ObjectMgr::GenrateFreeItemGuid()
+{
+    QueryResult result = CharacterDatabase.Query("SELECT MAX(guid) FROM item_instance");
+    if (result)
+    {
+        _hiItemGuid = (*result)[0].GetUInt32()+1;
+        for (uint32 cnt = 42; (cnt < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt++)
+        {
+            QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid = '%u'", cnt);
+            if (notFreeGuid)
+                ;
+            else
+                _freeItemGuid.push(cnt);
+        }
+    }
+    return _freeItemGuid.size();
+}
+
+void ObjectMgr::AddFreeItemGuid(uint32 guid)
+{
+    _freeItemGuid.push(guid);
+}
+
 void ObjectMgr::SetHighestGuids()
 {
     QueryResult result = CharacterDatabase.Query("SELECT MAX(guid) FROM characters");
@@ -6203,6 +6226,8 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         _hiItemGuid = (*result)[0].GetUInt32()+1;
 
+    sLog->outString("start generating free items guids...");
+    sLog->outString("generate %u free guid", GenrateFreeItemGuid());
     // Cleanup other tables from not existed guids ( >= _hiItemGuid)
     CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item >= '%u'", _hiItemGuid);     // One-time query
     CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid >= '%u'", _hiItemGuid);         // One-time query
@@ -6281,12 +6306,20 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
     switch (guidhigh)
     {
         case HIGHGUID_ITEM:
-            if (_hiItemGuid >= 0xFFFFFFFE)
+        {
+            if (!_freeItemGuid.empty())
+            {
+                uint32 freeSlot = _freeItemGuid.front();
+                _freeItemGuid.pop();
+                return freeSlot;
+            }
+            else if (_hiItemGuid >= 0xFFFFFFFE)
             {
                 sLog->outError("Item guid overflow!! Can't continue, shutting down server. ");
                 World::StopNow(ERROR_EXIT_CODE);
             }
             return _hiItemGuid++;
+        }
         case HIGHGUID_UNIT:
             if (_hiCreatureGuid >= 0x00FFFFFE)
             {

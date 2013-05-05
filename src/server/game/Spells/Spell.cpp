@@ -1462,11 +1462,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         }
     }
 
-    if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit))
+    //    if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit))
+    if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit) && !m_spellInfo->IsPositive())
     {
-        bool startCombat = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT);
-        if (!m_caster->HasUnitTypeMask(TYPEMASK_OBJECT))
-            m_caster->CombatStart(unit, startCombat);
+        //CHECK FIXES
+        m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT));
+        //        bool startCombat = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT);
+        //  if (!m_caster->HasUnitTypeMask(TYPEMASK_OBJECT))
+        //    m_caster->CombatStart(unit, startCombat);
 
         if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
             if (!unit->IsStandState())
@@ -1580,8 +1583,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     m_caster->ToPlayer()->UpdatePvP(true);
             }
-            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && (!m_triggeredByAuraSpell || m_triggeredByAuraSpell->IsChanneled())
-                && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT))
+            //CHECK FIXES
+            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT))
+            //            if (unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && (!m_triggeredByAuraSpell || m_triggeredByAuraSpell->IsChanneled())
+            //    && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT))
             {
                 m_caster->SetInCombatState(unit->GetCombatTimer() > 0, unit);
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
@@ -3112,15 +3117,15 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             m_caster->ToPlayer()->RestoreSpellMods(this);
             m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
         }
-
-        bool startCombat = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT);
+        //CHECK FIXES
+        /*        bool startCombat = !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT);
 
         Unit* combatTarget = m_targets.GetUnitTarget();
         if (combatTarget && combatTarget->isAlive() && combatTarget->IsInWorld())
             // We don't need to check for IsPositiveSpell because any spell even if positive should cause combat against an unfriendly target.
             if (!m_caster->IsFriendlyTo(combatTarget))
                 m_caster->CombatStart(combatTarget, !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO));
-
+        */
         SendCastResult(result);
 
         finish(false);

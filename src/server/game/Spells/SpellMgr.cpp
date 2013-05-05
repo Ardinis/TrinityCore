@@ -3893,6 +3893,9 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
             break;
+        case 62603: //sif blizzard
+            spellInfo->EffectAmplitude[0] = 5000;
+            break;
         default:
             break;
         }

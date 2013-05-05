@@ -1114,7 +1114,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             case CREATURE_FAMILY_DEVILSAUR:
             case CREATURE_FAMILY_CORE_HOUND:
             case CREATURE_FAMILY_RHINO:
-                scale *= 3.0f;
+                scale *= 2.5f;
                 break;
             default:
                 break;

@@ -7278,28 +7278,28 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 53742;
 
                     // On target with 5 stacks of Blood Corruption direct damage is done
-                    if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))
-                    {
-		      if (victim && victim->isAlive())
-			if (roll_chance_i(50))
-			  if (HasAura(71406) || HasAura(71545))
-			  {
-			    Aura const* dummy = GetAura(71432);
-			    int maxStack = HasAura(71406) ?  8 : 7;
-			    if (dummy && dummy->GetStackAmount() < maxStack)
-			      CastSpell(this, 71432, true);
-			    else if (!dummy)
-			      CastSpell(this, 71432, true);
-			  }
-		      if (aur->GetStackAmount() == 5)
-		      {
-			if (stacker)
-			  aur->RefreshDuration();
-			CastSpell(victim, 53739, true);
-			return true;
-		      }
-                    }
-
+		    if (victim)
+		      if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))
+			{
+			  if (victim && victim->isAlive())
+			    if (roll_chance_i(50))
+			      if (HasAura(71406) || HasAura(71545))
+				{
+				  Aura const* dummy = GetAura(71432);
+				  int maxStack = HasAura(71406) ?  8 : 7;
+				  if (dummy && dummy->GetStackAmount() < maxStack)
+				    CastSpell(this, 71432, true);
+				  else if (!dummy)
+				    CastSpell(this, 71432, true);
+				}
+			  if (aur->GetStackAmount() == 5)
+			    {
+			      if (stacker)
+				aur->RefreshDuration();
+			      CastSpell(victim, 53739, true);
+			      return true;
+			    }
+			}
                     if (!stacker)
                         return false;
                     break;

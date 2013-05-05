@@ -198,8 +198,8 @@ class boss_sindragosa : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MYSTIC_BUFFET);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ASPHYXIATION);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FROST_AURA, false);
-		me->SetHomePosition(SindragosaLandPos);
-		me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetHomePosition(SindragosaLandPos);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void Reset()
@@ -220,14 +220,14 @@ class boss_sindragosa : public CreatureScript
                 _isThirdPhase = false;
                 _bCanLand     = true;
                 _bombsLanded  = 0;
-		_bombes = 0;
+                _bombes = 0;
                 if (instance->GetData(DATA_SINDRAGOSA_FROSTWYRMS) != 255)
                 {
                     me->SetFlying(true);
                     me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                 }
-		me->SetHomePosition(SindragosaLandPos);
-		me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetHomePosition(SindragosaLandPos);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             void JustDied(Unit* killer)
@@ -333,7 +333,7 @@ class boss_sindragosa : public CreatureScript
                         events.ScheduleEvent(EVENT_AIR_MOVEMENT, 1);
                         break;
                     case POINT_AIR_PHASE:
-		      _bombes = 0;
+                        _bombes = 0;
                         me->CastCustomSpell(SPELL_ICE_TOMB_TARGET, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 5, 2, 6), NULL);
                         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_AURA);
                         me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FROST_AURA, true);
@@ -481,9 +481,9 @@ class boss_sindragosa : public CreatureScript
                         case EVENT_BLISTERING_COLD:
                             Talk(EMOTE_WARN_BLISTERING_COLD);
                             DoCast(me, SPELL_BLISTERING_COLD);
-			    me->SetReactState(REACT_AGGRESSIVE);
-			    if (Unit* target = me->getVictim())
-			      DoStartMovement(target);
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            if (Unit* target = me->getVictim())
+                                DoStartMovement(target);
                             events.ScheduleEvent(EVENT_BLISTERING_COLD_YELL, 5000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_BLISTERING_COLD_YELL:
@@ -517,67 +517,70 @@ class boss_sindragosa : public CreatureScript
                             {
                                 if(target)
                                 {
-				  DoScriptText(EMOTE_WARN_FROZEN_ORB, me, target);
-				  DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
+                                    DoScriptText(EMOTE_WARN_FROZEN_ORB, me, target);
+                                    DoCast(target, SPELL_ICE_TOMB_DUMMY, true);
                                 }
                             }
                             events.ScheduleEvent(EVENT_ICE_TOMB, urand(16000, 23000));
                             break;
                         case EVENT_FROST_BOMB:
                         {
-			  if (_bombes <= 2)
-			    {
-			      float myX, myY, myZ;
-			      me->GetPosition(myX, myY, myZ);
-			      Position pos;
+                            int bombCount = 2;
+                            if (Is25ManRaid() && IsHeroic())
+                                bombCount = 3;
+                            if (_bombes <= bombCount)
+                            {
+                                float myX, myY, myZ;
+                                me->GetPosition(myX, myY, myZ);
+                                Position pos;
 
-			      VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-			      int tryNumber = 0;
-			      while (tryNumber++ < 50)
-				{
-				  float destX, destY, destZ;
-				  destX = float(rand_norm()) * 95.25f + 4365.25f;
-				  if (destX > 4371.5f && destX < 4432.0f)
-                                    destY = float(rand_norm()) * 100.0f + 2434.0f;
-				  else
-                                    destY = float(rand_norm()) * 36.23f + 2457.64f;
-				  destZ = 205.0f; // random number close to ground, get exact in next call
-				  me->UpdateGroundPositionZ(destX, destY, destZ);
+                                VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+                                int tryNumber = 0;
+                                while (tryNumber++ < 50)
+                                {
+                                    float destX, destY, destZ;
+                                    destX = float(rand_norm()) * 95.25f + 4365.25f;
+                                    if (destX > 4371.5f && destX < 4432.0f)
+                                        destY = float(rand_norm()) * 100.0f + 2434.0f;
+                                    else
+                                        destY = float(rand_norm()) * 36.23f + 2457.64f;
+                                    destZ = 205.0f; // random number close to ground, get exact in next call
+                                    me->UpdateGroundPositionZ(destX, destY, destZ);
 
-				  std::list<Creature*> tomb_creatures;
-				  GetCreatureListWithEntryInGrid(tomb_creatures, me, NPC_ICE_TOMB, 150.0f);
-				  std::list<Unit*> tombs;
-				  bool bTooCloseOrTooFarFromBomb = false;
-				  // Try to put bomb not too close and not too far away from entombed players
-				  for (std::list<Creature*>::const_iterator itr = tomb_creatures.begin(); itr != tomb_creatures.end(); ++itr)
-                                    if ((*itr)->GetDistance2d(destX, destY) < 15.0f || (*itr)->GetDistance2d(destX, destY) > 50.0f)
-				      {
-                                        bTooCloseOrTooFarFromBomb = true;
-                                        break;
-				      }
-				  if (!bTooCloseOrTooFarFromBomb)
-				    if (vMapManager->isInLineOfSight(me->GetMapId(), myX, myY, myZ+2.0f, destX, destY, destZ+2.0f))
-				      {
-					pos.Relocate(destX, destY, destZ+2.0f);
-					break;
-				      }
-				}
-			      if (TempSummon* summ = me->SummonCreature(NPC_FROST_BOMB, pos, TEMPSUMMON_TIMED_DESPAWN, 40000))
-				{
-				  summ->CastSpell(summ, SPELL_FROST_BOMB_VISUAL, true);
-				  //Triggered to avoid LoS
-				  _bCanLand = false;
-				  DoCast(summ, SPELL_FROST_BOMB_TRIGGER, true);
-				  //me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
-				}
-			    }
-			  if (_bombes >= 2)
-			    _bombes = 0;
-			  else
-			    _bombes++;
+                                    std::list<Creature*> tomb_creatures;
+                                    GetCreatureListWithEntryInGrid(tomb_creatures, me, NPC_ICE_TOMB, 150.0f);
+                                    std::list<Unit*> tombs;
+                                    bool bTooCloseOrTooFarFromBomb = false;
+                                    // Try to put bomb not too close and not too far away from entombed players
+                                    for (std::list<Creature*>::const_iterator itr = tomb_creatures.begin(); itr != tomb_creatures.end(); ++itr)
+                                        if ((*itr)->GetDistance2d(destX, destY) < 15.0f || (*itr)->GetDistance2d(destX, destY) > 50.0f)
+                                        {
+                                            bTooCloseOrTooFarFromBomb = true;
+                                            break;
+                                        }
+                                    if (!bTooCloseOrTooFarFromBomb)
+                                        if (vMapManager->isInLineOfSight(me->GetMapId(), myX, myY, myZ+2.0f, destX, destY, destZ+2.0f))
+                                        {
+                                            pos.Relocate(destX, destY, destZ+2.0f);
+                                            break;
+                                        }
+                                }
+                                if (TempSummon* summ = me->SummonCreature(NPC_FROST_BOMB, pos, TEMPSUMMON_TIMED_DESPAWN, 40000))
+                                {
+                                    summ->CastSpell(summ, SPELL_FROST_BOMB_VISUAL, true);
+                                    //Triggered to avoid LoS
+                                    _bCanLand = false;
+                                    DoCast(summ, SPELL_FROST_BOMB_TRIGGER, true);
+                                    //me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
+                                }
+                            }
+                            if (_bombes >= bombCount)
+                                _bombes = 0;
+                            else
+                                _bombes++;
                             //Will be scheduled when bomb will land
                             //events.ScheduleEvent(EVENT_FROST_BOMB, urand(5000, 10000));
-			  break;
+                            break;
                         }
                         case EVENT_LAND:
                         {
@@ -1320,12 +1323,12 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                 if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICE_TOMB, pos))
                 {
                     summon->AI()->SetGUID(GetHitUnit()->GetGUID(), DATA_TRAPPED_PLAYER);
-		    if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
+                    if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
                     {
                         go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
-			go->EnableCollision(false);
+                        go->EnableCollision(false);
                         summon->AddGameObject(go);
-		    }
+                    }
                 }
             }
 
@@ -1371,14 +1374,10 @@ class FrostBombTargetSelector
             if (unit->HasAura(SPELL_ICE_TOMB_DAMAGE) || unit->GetTypeId() != TYPEID_PLAYER)
                 return true;
             for (std::list<GameObject*>::const_iterator itr = _collisionList.begin(); itr != _collisionList.end(); ++itr)
-	      //	      if (GameObject* go = (*itr)->GetGameObject(0))
-		{
-		  //std::cout << "WTFFFFFFFF" << std::endl;
-		  //		if (go->IsInBetween(_caster, unit, 2.0f)
-		  //  && _caster->GetExactDist2d(unit->GetPositionX(), unit->GetPositionY()) - _caster->GetExactDist2d(go->GetPositionX(), go->GetPositionY()) < 5.0f)
-		  if ((*itr)->IsInBetween(_caster, unit, 2.0f))
+            {
+                if ((*itr)->IsInBetween(_caster, unit, 2.0f))
                     return true;
-		}
+            }
             return false;
         }
 
@@ -1405,16 +1404,14 @@ class spell_sindragosa_collision_filter : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-	      //                std::list<Creature*> tombs;
                 std::list<GameObject*> tombs;
-		GetGameObjectListWithEntryInGrid(tombs, GetCaster(), GO_ICE_BLOCK, 200.0f);
-		  //                GetCreatureListWithEntryInGrid(tombs, GetCaster(), NPC_ICE_TOMB, 200.0f);
+                GetGameObjectListWithEntryInGrid(tombs, GetCaster(), GO_ICE_BLOCK, 200.0f);
                 unitList.remove_if (FrostBombTargetSelector(GetCaster(), tombs));
             }
 
             void Register()
             {
-	      OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragosa_collision_filter_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragosa_collision_filter_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 

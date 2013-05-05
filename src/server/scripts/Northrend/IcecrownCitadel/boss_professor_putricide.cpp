@@ -215,6 +215,23 @@ private:
     Creature* _rotface;
 };
 
+class StartEvent : public BasicEvent
+{
+public:
+    StartEvent(Creature* owner) : BasicEvent(), _owner(owner) { }
+
+    bool Execute(uint64 /*eventTime*/, uint32 /*diff*/)
+    {
+        _owner->CastSpell(_owner, SPELL_CHOKING_GAS_BOMB_PERIODIC, true);
+        _owner->CastSpell(_owner, SPELL_CHOKING_GAS_EXPLOSION_TRIGGER, true);
+
+        return true;
+    }
+
+private:
+    Creature *_owner;
+};
+
 class boss_professor_putricide : public CreatureScript
 {
     public:
@@ -245,6 +262,7 @@ class boss_professor_putricide : public CreatureScript
 
                 if (instance->GetBossState(DATA_ROTFACE) == DONE && instance->GetBossState(DATA_FESTERGUT) == DONE)
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                lowOzzeTargets.clear();
             }
 
             void EnterCombat(Unit* who)
@@ -279,6 +297,7 @@ class boss_professor_putricide : public CreatureScript
             {
                 _JustReachedHome();
                 me->SetWalk(false);
+                lowOzzeTargets.clear();
                 if (events.GetPhaseMask() & PHASE_MASK_COMBAT)
                     instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, FAIL);
             }
@@ -323,13 +342,12 @@ class boss_professor_putricide : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         break;
                     case NPC_CHOKING_GAS_BOMB:
-                        summon->CastSpell(summon, SPELL_CHOKING_GAS_BOMB_PERIODIC, true);
-                        summon->CastSpell(summon, SPELL_CHOKING_GAS_EXPLOSION_TRIGGER, true);
+                        summon->m_Events.AddEvent(new StartEvent(summon), 3000);
                         return;
                     case NPC_MUTATED_ABOMINATION_10:
                     case NPC_MUTATED_ABOMINATION_25:
-		      summon->SetPower(POWER_ENERGY, 10);
-                        return;
+                       summon->SetPower(POWER_ENERGY, 10);
+                       return;
                     default:
                         break;
                 }
@@ -548,9 +566,12 @@ class boss_professor_putricide : public CreatureScript
                     case DATA_PHASE:
                         return _phase;
                     case DATA_ABOMINATION:
-		      return uint32(summons.HasEntry(NPC_MUTATED_ABOMINATION_10) || summons.HasEntry(NPC_MUTATED_ABOMINATION_25));
+                        return uint32(summons.HasEntry(NPC_MUTATED_ABOMINATION_10) || summons.HasEntry(NPC_MUTATED_ABOMINATION_25));
                     default:
-                        break;
+                        for (std::list<uint32 >::iterator itr = lowOzzeTargets.begin(); itr != lowOzzeTargets.end(); itr++)
+                            if ((*itr) == type)
+                                return 1;
+                        return 0;
                 }
 
                 return 0;
@@ -560,6 +581,8 @@ class boss_professor_putricide : public CreatureScript
             {
                 if (id == DATA_EXPERIMENT_STAGE)
                     _experimentState = bool(data);
+                else
+                    lowOzzeTargets.push_back(data);
             }
 
             void UpdateAI(uint32 const diff)
@@ -634,10 +657,13 @@ class boss_professor_putricide : public CreatureScript
                             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_OOZE_VARIABLE);
                             break;
                         case EVENT_MALLEABLE_GOO:
-                            if (Is25ManRaid())
+                            if (Is25ManRaid() || IsHeroic())
                             {
                                 std::list<Unit*> targets;
-                                SelectTargetList(targets, 2, SELECT_TARGET_RANDOM, -7.0f, true);
+                                int targetCount = 2;
+                                if (IsHeroic())
+                                    targetCount = 3;
+                                SelectTargetList(targets, targetCount, SELECT_TARGET_RANDOM, -7.0f, true);
                                 if (!targets.empty())
                                 {
                                     Talk(EMOTE_MALLEABLE_GOO);
@@ -715,6 +741,7 @@ class boss_professor_putricide : public CreatureScript
             float const _baseSpeed;
             uint8 _oozeFloodStage;
             bool _experimentState;
+            std::list<uint32 > lowOzzeTargets;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -891,11 +918,23 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
                     GetCaster()->ToCreature()->DespawnOrUnsummon(1);    // despawn next update
                     return;
                 }
-
-                Unit* target = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.clear();
-                targets.push_back(target);
-                _target = target;
+                if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                {
+                    Unit* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                    int cnt = 0;
+                    if (Creature *putri = instance->instance->GetCreature(instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                    {
+                        while (putri->AI()->GetData(target->GetGUIDLow()) == 0 && cnt < 25)
+                        {
+                            target = Trinity::Containers::SelectRandomContainerElement(targets);
+                            cnt++;
+                        }
+                        targets.clear();
+                        targets.push_back(target);
+                        putri->AI()->SetData(42, target->GetGUIDLow());
+                        _target = target;
+                    }
+                }
             }
 
             void SetTarget(std::list<Unit*>& targets)

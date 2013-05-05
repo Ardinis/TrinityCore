@@ -974,13 +974,21 @@ class instance_icecrown_citadel : public InstanceMapScript
                  return true;
             }
 
+            /*            void SetData64(uint32 type, uint64 data) //putr target system only
+            {
+                if (type == 42)
+                    _oozeTargets.clear();
+                else
+                    _oozeTargets.push_back(data);
+                    }*/
+
             void SetData(uint32 type, uint32 data)
             {
                 switch (type)
                 {
-		case DATA_BUFF:
-		  _buffSelect = data;
-		  break;
+                    case DATA_BUFF:
+                        _buffSelect = data;
+                        break;
                     case DATA_BONED_ACHIEVEMENT:
                         IsBonedEligible = data ? true : false;
                         break;

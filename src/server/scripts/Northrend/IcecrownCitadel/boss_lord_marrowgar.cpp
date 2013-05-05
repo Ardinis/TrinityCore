@@ -109,23 +109,23 @@ class boss_lord_marrowgar : public CreatureScript
                 events.ScheduleEvent(EVENT_COLDFLAME, 5000, EVENT_GROUP_SPECIAL);
                 events.ScheduleEvent(EVENT_WARN_BONE_STORM, urand(45000, 50000));
                 events.ScheduleEvent(EVENT_ENRAGE, 600000);
-		instance->SetData(DATA_TEMPETE, NOT_STARTED);
-		_saberSlashPlayers.clear();
+                instance->SetData(DATA_TEMPETE, NOT_STARTED);
+                _saberSlashPlayers.clear();
                 _boneSlice = false;
-		_bstorm = false;
-		_endstorm = false;
+                _bstorm = false;
+                _endstorm = false;
             }
 
-	  void SpellHitTarget(Unit* who, SpellInfo const* spell)
-	  {
-	    if (spell->Id == 69055 || spell->Id == 70814)
-	    {
-	      for (std::list<uint64 >::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
-		if ((*it) != 0 && (*it) == who->GetGUID())
-		  return ;
-	      _saberSlashPlayers.push_back(who->GetGUID());
-	    }
-	  }
+            void SpellHitTarget(Unit* who, SpellInfo const* spell)
+            {
+                if (spell->Id == 69055 || spell->Id == 70814)
+                {
+                    for (std::list<uint64 >::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+                        if ((*it) != 0 && (*it) == who->GetGUID())
+                            return ;
+                    _saberSlashPlayers.push_back(who->GetGUID());
+                }
+            }
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -148,8 +148,8 @@ class boss_lord_marrowgar : public CreatureScript
                 _JustReachedHome();
                 instance->SetBossState(DATA_LORD_MARROWGAR, FAIL);
                 instance->SetData(DATA_BONED_ACHIEVEMENT, uint32(true));    // reset
-		instance->SetData(DATA_TEMPETE, NOT_STARTED);
-		_saberSlashPlayers.clear();
+                instance->SetData(DATA_TEMPETE, NOT_STARTED);
+                _saberSlashPlayers.clear();
             }
 
             void KilledUnit(Unit* victim)
@@ -229,8 +229,8 @@ class boss_lord_marrowgar : public CreatureScript
                             Talk(SAY_BONE_STORM);
                             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-                            me->SetSpeed(MOVE_WALK, me->GetSpeedRate(MOVE_WALK) / 2);
-                            me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) / 2);
+                            //me->SetSpeed(MOVE_WALK, me->GetSpeedRate(MOVE_WALK) / 2);
+                            //me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) / 2);
                             events.ScheduleEvent(EVENT_BONE_STORM_END, _boneStormDuration+1);
                             // no break here
                         case EVENT_BONE_STORM_MOVE:
@@ -248,8 +248,8 @@ class boss_lord_marrowgar : public CreatureScript
                             instance->SetData(DATA_TEMPETE, NOT_STARTED);
                             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
                             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
-                            me->SetSpeed(MOVE_WALK, me->GetSpeedRate(MOVE_WALK) * 2);
-                            me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) * 2);
+                            //me->SetSpeed(MOVE_WALK, me->GetSpeedRate(MOVE_WALK) * 2);
+                            // me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) * 2);
                             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                                 me->GetMotionMaster()->MovementExpired();
                             DoZoneInCombat();
@@ -592,26 +592,26 @@ class bone_spike_graveyard_TargetCheck : public std::unary_function<Unit*, bool>
 {
 
 public:
-  bone_spike_graveyard_TargetCheck(std::list<uint64 > saberSlashPlayers)
-    : _saberSlashPlayers(saberSlashPlayers)
-  {}
+    bone_spike_graveyard_TargetCheck(std::list<uint64 > saberSlashPlayers)
+        : _saberSlashPlayers(saberSlashPlayers)
+    {}
 
-  bool operator()(Unit* unit) const
-  {
-    if (!unit)
-      return false;
-    if (unit && (!unit->isAlive() || unit->GetTypeId() != TYPEID_PLAYER || unit->HasAura(SPELL_IMPALED)))
-	return false;
-    for (std::list<uint64 >::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+    bool operator()(Unit* unit) const
     {
-      if ((*it) != 0 && (*it) == unit->GetGUID())
-	return false;
+        if (!unit)
+            return false;
+        if (unit && (!unit->isAlive() || unit->GetTypeId() != TYPEID_PLAYER || unit->HasAura(SPELL_IMPALED)))
+            return false;
+        for (std::list<uint64 >::const_iterator it = _saberSlashPlayers.begin(); it != _saberSlashPlayers.end(); it++)
+        {
+            if ((*it) != 0 && (*it) == unit->GetGUID())
+                return false;
+        }
+        return true;
     }
-    return true;
-  }
 
 private:
-      std::list<uint64 > _saberSlashPlayers;
+    std::list<uint64 > _saberSlashPlayers;
 };
 
 class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
@@ -638,9 +638,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                     uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
                     for (uint8 i = 0; i < boneSpikeCount; ++i)
                     {
-                        // select any unit but not the tank
-		      //                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 1, 75.0f, true, -SPELL_IMPALED);
-		      Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 0, bone_spike_graveyard_TargetCheck(CAST_AI(boss_lord_marrowgar::boss_lord_marrowgarAI, marrowgarAI)->_saberSlashPlayers));
+                        Unit* target = marrowgarAI->SelectTarget(SELECT_TARGET_RANDOM, 0, bone_spike_graveyard_TargetCheck(CAST_AI(boss_lord_marrowgar::boss_lord_marrowgarAI, marrowgarAI)->_saberSlashPlayers));
                         if (!target)
                             break;
 
@@ -681,7 +679,7 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
                 {
                     const float distance = GetHitUnit()->GetExactDist2d(caster);
                     const int32 damage   = GetHitDamage();
-                    SetHitDamage((int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))) + 1500) * 2.1);
+                    SetHitDamage((int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))) + 1500));
                 }
             }
 

@@ -481,49 +481,49 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
               }
 
 
-	    void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-	    {
-	      if (Unit* pet = GetUnitOwner())
-                if (_tempBonus)
-                {
-                  if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
-                  {
-                    uint32 healthMod = 0;
-                    uint32 baseHealth = pInfo->health;
-                    switch (pet->GetEntry())
-                    {
-		    case ENTRY_IMP:
-		      healthMod = uint32(_tempBonus * 8.4f);
-		      break;
-		    case ENTRY_FELGUARD:
-		    case ENTRY_VOIDWALKER:
-		      healthMod = _tempBonus * 11;
-		      break;
-		    case ENTRY_SUCCUBUS:
-		      healthMod = uint32(_tempBonus * 9.1f);
-		      break;
-		    case ENTRY_FELHUNTER:
-		      healthMod = uint32(_tempBonus * 9.5f);
-		      break;
-		    default:
-		      healthMod = 0;
-		      break;
-                    }
-                    if (healthMod)
-		      pet->ToPet()->SetCreateHealth(baseHealth + healthMod);
-                  }
-                }
-	    }
+              void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+              {
+                  if (Unit* pet = GetUnitOwner())
+                      if (_tempBonus)
+                      {
+                          if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
+                          {
+                              uint32 healthMod = 0;
+                              uint32 baseHealth = pInfo->health;
+                              switch (pet->GetEntry())
+                              {
+                                  case ENTRY_IMP:
+                                      healthMod = uint32(_tempBonus * 8.4f);
+                                      break;
+                                  case ENTRY_FELGUARD:
+                                  case ENTRY_VOIDWALKER:
+                                      healthMod = _tempBonus * 11;
+                                      break;
+                                  case ENTRY_SUCCUBUS:
+                                      healthMod = uint32(_tempBonus * 9.1f);
+                                      break;
+                                  case ENTRY_FELHUNTER:
+                                      healthMod = uint32(_tempBonus * 9.5f);
+                                      break;
+                                  default:
+                                      healthMod = 0;
+                                      break;
+                              }
+                              if (healthMod)
+                                  pet->ToPet()->SetCreateHealth(baseHealth + healthMod);
+                          }
+                      }
+              }
 
-	    void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-	    {
-	      if (Unit* pet = GetUnitOwner())
-		if (pet->isPet() && pet->ToPet())
-                {
-                  if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
-                    pet->ToPet()->SetCreateHealth(pInfo->health);
-                }
-	    }
+              void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+              {
+                  if (Unit* pet = GetUnitOwner())
+                      if (pet->isPet() && pet->ToPet())
+                      {
+                          if (PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(pet->GetEntry(), pet->getLevel()))
+                              pet->ToPet()->SetCreateHealth(pInfo->health);
+                      }
+              }
 
               void CalculateAttackPowerAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
               {
@@ -535,11 +535,11 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
                       Unit* owner = pet->ToPet()->GetOwner();
                      if (!owner)
                            return;
- int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+                     int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
                      int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
                      int32 maximum  = (fire > shadow) ? fire : shadow;
                      if (maximum < 0)
-                           maximum = 0;
+                         maximum = 0;
                      float bonusAP = maximum * 0.57f;
 
                       amount += bonusAP;
@@ -549,14 +549,14 @@ class spell_warl_pet_scaling_01 : public SpellScriptLoader
                       {
                             if (AuraEffect* aurEffect = owner->GetAuraEffect(56246, EFFECT_0))
                               {
-	                            float base_attPower = pet->GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE) * pet->GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_PCT);
-	                            amount += CalculatePctN(amount+base_attPower, aurEffect->GetAmount());
-	                        }
-                        }
+                                  float base_attPower = pet->GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE) * pet->GetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_PCT);
+                                  amount += CalculatePctN(amount + base_attPower, aurEffect->GetAmount());
+                              }
+                      }
                  }
               }
 
-  void CalculateDamageDoneAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+              void CalculateDamageDoneAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
               {
                   if (Unit* pet = GetUnitOwner())
                     {

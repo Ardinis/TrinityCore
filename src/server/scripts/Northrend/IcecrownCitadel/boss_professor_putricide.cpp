@@ -462,8 +462,7 @@ class boss_professor_putricide : public CreatureScript
                         if (Creature* rotface = Unit::GetCreature(*me, instance->GetData64(DATA_ROTFACE)))
                         {
                             std::list<Creature*> list;
-                            GetCreatureListWithEntryInGrid(list, rotface, NPC_PUDDLE_STALKER, 50.0f);
-                            list.remove_if(RotfaceHeightCheck(rotface));
+                            GetCreatureListWithEntryInGrid(list, rotface, NPC_PUDDLE_STALKER, 36.0f);
                             if (list.size() > 4)
                             {
                                 list.sort(Trinity::ObjectDistanceOrderPred(rotface));

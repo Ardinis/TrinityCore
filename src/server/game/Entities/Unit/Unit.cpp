@@ -10667,7 +10667,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth)
 Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
 {
     // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-	if ( (spellInfo->Attributes & SPELL_ATTR0_ABILITY || spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REDIRECTED || spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY) && spellInfo->SpellIconID != 225 && spellInfo->Id != 16857 && spellInfo->Id != 527 && spellInfo->Id != 988)
+	if ((spellInfo->Attributes & SPELL_ATTR0_ABILITY || spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REDIRECTED || spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY) && spellInfo->SpellIconID != 225 && spellInfo->Id != 16857 && spellInfo->Id != 527 && spellInfo->Id != 988)
         return victim;
 
     // Magic case
@@ -10697,7 +10697,15 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
         if (Unit* magnet = (*itr)->GetBase()->GetUnitOwner())
 			if (magnet->isAlive())
             {
-                (*itr)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
+                if (magnet->HasAura(8178)) // Grounding totem
+                {
+                    (*itr)->GetBase()->DropCharge();
+                    // Totems are destroyed upon redirection
+                    if (magnet->ToTotem())
+                        magnet->DealDamage(magnet, magnet->GetMaxHealth());
+                }
+                else
+                    (*itr)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
                 return magnet;
             }
 	}

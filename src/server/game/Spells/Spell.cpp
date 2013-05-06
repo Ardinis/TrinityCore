@@ -5784,11 +5784,27 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 if (SpellInfo const* se = sSpellMgr->GetSpellInfo(m_caster->getTransForm()))
                     if (se->AttributesEx3 & SPELL_ATTR3_UNK28)
-                        return SPELL_FAILED_NOT_SHAPESHIFT;
+                    {
+                        switch (se->Id)
+                        {
+                            case 71484: //exception for Deathbringer's Will
+                            case 71491:
+                            case 71492:
+                            case 71486:
+                            case 71485:
+                            case 71561:
+                            case 71559:
+                            case 71560:
+                            case 71558:
+                            case 71556:
+                                break;
+                            default:
+                                return SPELL_FAILED_NOT_SHAPESHIFT;
+                        }
+                    }
 
                 if (m_caster->IsInDisallowedMountForm())
                     return SPELL_FAILED_NOT_SHAPESHIFT;
-
                 break;
             }
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:

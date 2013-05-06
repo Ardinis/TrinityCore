@@ -2082,6 +2082,9 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
     if (Attributes & SPELL_ATTR0_REQ_AMMO && (!IsAutoRepeatRangedSpell()))
         castTime += 500;
 
+    if (caster->getClass() == CLASS_HUNTER)
+        castTime *= 0.85;
+
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 

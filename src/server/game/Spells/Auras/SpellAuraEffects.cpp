@@ -3735,8 +3735,6 @@ void AuraEffect::HandleAuraModStat(AuraApplication const* aurApp, uint8 mode, bo
     {
         // -1 or -2 is all stats (misc < -2 checked in function beginning)
                 //67480 sanctuary
-        if ((i == STAT_STAMINA || i == STAT_STRENGTH) && (target->HasAura(67480) || target->HasAura(43223)))
-            continue;
         if (GetMiscValue() < 0 || GetMiscValue() == i)
         {
             //target->ApplyStatMod(Stats(i), m_amount, apply);

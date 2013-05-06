@@ -1258,7 +1258,7 @@ class player_hex_mendingAI : public PlayerAI
         void HealReceived(Unit* healer, uint32 & addHealth)
         {
             PlayerAI::HealReceived(healer, addHealth);
-            me->CastCustomSpell(SPELL_HEX_OF_MENDING_HEAL, SPELLVALUE_BASE_POINT0, int32(addHealth*2.0f), me, true);
+            //            me->CastCustomSpell(SPELL_HEX_OF_MENDING_HEAL, SPELLVALUE_BASE_POINT0, int32(addHealth*2.0f), me, true);
         }
 
         void UpdateAI(const uint32 /*diff*/) { }

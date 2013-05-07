@@ -4720,6 +4720,7 @@ float Unit::GetTotalAuraMultiplierByMiscMask(AuraType auratype, uint32 misc_mask
                 {
                     for (int it = 0; it < MAX_ATTACK; ++it)
                         if (Item* pItem = ToPlayer()->GetWeaponForAttack(WeaponAttackType(it), true))
+                        {
                             if (pItem->IsFitToSpellRequirements((*i)->GetSpellInfo()))
                             {
                                 addPct = true;
@@ -4727,6 +4728,7 @@ float Unit::GetTotalAuraMultiplierByMiscMask(AuraType auratype, uint32 misc_mask
                             }
                             else
                                 addPct = false;
+                        }
                 }
             }
             // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup

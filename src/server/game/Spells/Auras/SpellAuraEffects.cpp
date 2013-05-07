@@ -4862,7 +4862,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         if (spellTarget && !spellTarget->IsFriendlyTo(caster))
                             if (caster->ToPlayer()->HasSpellCooldown(51699) == 0)
                             {
-                                caster->CastSpell(spellTarget, 51699);
+                                caster->CastSpell(spellTarget, 51699, true);
                                 caster->ToPlayer()->AddSpellCooldown(51699, 0, uint32(time(NULL) + 1));
                             }
                     }

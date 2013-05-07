@@ -652,18 +652,18 @@ class boss_the_lich_king : public CreatureScript
                 if (events.GetPhaseMask() & PHASE_MASK_ONE && !HealthAbovePct(70))
                 {
                     events.SetPhase(PHASE_TRANSITION);
-		    SetImmuneToTaunt(true);
+                    SetImmuneToTaunt(true);
                     me->GetMotionMaster()->MovePoint(POINT_CENTER_1, CenterPosition);
-		    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                     return;
                 }
 
                 if (events.GetPhaseMask() & PHASE_MASK_TWO && !HealthAbovePct(40))
                 {
                     events.SetPhase(PHASE_TRANSITION);
-		    SetImmuneToTaunt(true);
+                    SetImmuneToTaunt(true);
                     me->GetMotionMaster()->MovePoint(POINT_CENTER_2, CenterPosition);
-		    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                     return;
                 }
 
@@ -1628,32 +1628,32 @@ class npc_valkyr_shadowguard : public CreatureScript
             npc_valkyr_shadowguardAI(Creature* creature) : ScriptedAI(creature),
                 _grabbedPlayer(0), _instance(creature->GetInstanceScript())
             {
-	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
             {
                 _events.Reset();
-		endPhase = false;
-		stuStarted = false;
-		HadGrab = false;
+                endPhase = false;
+                stuStarted = false;
+                HadGrab = false;
                 me->SetReactState(REACT_PASSIVE);
-		// DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
-		//me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
-		//	me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
-		//me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
-		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
-		me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
-		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
-		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-		me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
-		mui_check = 3000;
-		mui_check2 = 3000;
+                // DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
+                //me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
+                //	me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
+                //me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
+                mui_check = 3000;
+                mui_check2 = 3000;
             }
 
             void IsSummonedBy(Unit* /*summoner*/)

@@ -9351,23 +9351,23 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 52914:
         case 52915:
         case 52910:
-	{
-	  target = triggeredByAura->GetBase()->GetCaster();
-	  if (!target)
-	    return false;
+        {
+            target = triggeredByAura->GetBase()->GetCaster();
+            if (!target)
+                return false;
 
-	  if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
-	    return false;
+            if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
+                return false;
 
-	  //	  if (target->Get
-	  if (target->isAlive())
-	    target->AddAura(trigger_spell_id, target);
-	  // CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
+            //	  if (target->Get
+            if (target->isAlive())
+                target->AddAura(trigger_spell_id, target);
+            // CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
-	  if (cooldown && GetTypeId() == TYPEID_PLAYER)
-	    ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
-	  return true;
-	}
+            if (cooldown && GetTypeId() == TYPEID_PLAYER)
+                ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
+            return true;
+        }
         // Honor Among Thieves
         case 52916:
         {
@@ -9375,10 +9375,10 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (!target)
                 return false;
 
-	    if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
+            if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
                 return false;
 
-	  CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
+            CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
             if (cooldown && GetTypeId() == TYPEID_PLAYER)
                 ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);

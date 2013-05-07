@@ -4803,9 +4803,9 @@ void Spell::HandleThreatSpells()
         (m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO))
         return;
 
-    if (m_caster)
-        if (m_caster->HasAura(70867) || m_caster->HasAura(71473)  || m_caster->HasAura(71532)  || m_caster->HasAura(71533)) //blodd queen lanathel, players with essence of the blood queen is not supposed to generate threat
-            return;
+    //    if (m_caster)
+    //    if (m_caster->HasAura(70867) || m_caster->HasAura(71473)  || m_caster->HasAura(71532)  || m_caster->HasAura(71533)) //blodd queen lanathel, players with essence of the blood queen is not supposed to generate threat
+              //       return;
 
     float threat = 0.0f;
     if (SpellThreatEntry const* threatEntry = sSpellMgr->GetSpellThreatEntry(m_spellInfo->Id))

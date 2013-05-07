@@ -1299,37 +1299,15 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 	  case 27829: // Ebon Gargoyle
 	  {
 	    if (!pInfo)
-            SetCreateHealth(28 + 30 * petlevel);
-
-        // Impurity (dummy effect)
-        float impurityMod = 1.0f;
-        if (Player* owner = m_owner->ToPlayer())
         {
-            PlayerSpellMap playerSpells = owner->GetSpellMap();
-            for (PlayerSpellMap::const_iterator itr = playerSpells.begin(); itr != playerSpells.end(); ++itr)
-            {
-                if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
-                    continue;
-
-                switch (itr->first)
-                {
-                    case 49220:
-                    case 49633:
-                    case 49635:
-                    case 49636:
-                    case 49638:
-                    {
-                        if (SpellInfo const* proto = sSpellMgr->GetSpellInfo(itr->first))
-                            AddPctN(impurityMod, proto->Effects[0].CalcValue());
-                    }
-                    break;
-                }
-            }
+            SetMaxHealth(m_owner->GetMaxHealth() * 0.8f);
+            SetHealth(m_owner->GetMaxHealth() * 0.8f);
+            SetCreateMana(28 + 10*petlevel);
         }
-	    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.33f * impurityMod));
-        // Gargoyle's haste should be influenced based on owners melee haste.
-        SetFloatValue(UNIT_MOD_CAST_SPEED, m_owner->m_modAttackSpeedPct[BASE_ATTACK]);
-	    ApplyCastTimePercentMod((1-m_owner->m_modAttackSpeedPct[BASE_ATTACK])*100, true);
+        SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f));
+        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+        ApplyCastTimePercentMod((1-m_owner->m_modAttackSpeedPct[BASE_ATTACK])*100, true);
 	    RemoveAurasDueToSpell(61697);
 	    CastSpell(this, 61697, true);
 	    RemoveAurasDueToSpell(62137);

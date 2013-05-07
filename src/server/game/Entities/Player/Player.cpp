@@ -6228,7 +6228,7 @@ void Player::UpdateRating(CombatRating cr)
         if ((*i)->GetMiscValue() & (1<<cr))
         {
             amount += int32(CalculatePctN(GetStat(Stats((*i)->GetMiscValueB())), (*i)->GetAmount()));
-            amount -= m_createStats[Stats((*i)->GetMiscValueB())];
+            //            amount -= m_createStats[Stats((*i)->GetMiscValueB())];
         }
     if (amount < 0)
         amount = 0;

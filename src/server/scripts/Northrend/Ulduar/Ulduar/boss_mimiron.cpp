@@ -995,6 +995,13 @@ class boss_leviathan_mk : public CreatureScript
             {
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_PASSIVE);
+                if (Creature* turret = me->FindNearestCreature(34071, 100))
+                {
+                    turret->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+                    turret->SetReactState(REACT_PASSIVE);
+                }
+                Reset();
             }
 
             void Reset()
@@ -1008,7 +1015,17 @@ class boss_leviathan_mk : public CreatureScript
                 events.SetPhase(phase);
                 gotMimironHardMode = false;
                 me->GetVehicleKit()->RemoveAllPassengers();
-                if (Creature* turret = CAST_CRE(me->GetVehicleKit()->GetPassenger(3)))
+                if (Creature* turret = me->FindNearestCreature(34071, 100))
+                {
+                    turret->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
+                    turret->SetReactState(REACT_PASSIVE);
+                }
+            }
+
+            void JustReachedHome()
+            {
+                me->SetReactState(REACT_PASSIVE);
+                if (Creature* turret = me->FindNearestCreature(34071, 100))
                 {
                     turret->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
                     turret->SetReactState(REACT_PASSIVE);
@@ -1199,6 +1216,7 @@ class boss_leviathan_mk_turret : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
                 instance = me->GetInstanceScript();
+                Reset();
             }
 
             void Reset()
@@ -1393,7 +1411,7 @@ class boss_vx_001 : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
-		Reset();
+                Reset();
             }
 
             void Reset()
@@ -1404,6 +1422,9 @@ class boss_vx_001 : public CreatureScript
 
                 events.Reset();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_DISABLE_MOVE);
+                //                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                //  me->SetSpeed(MOVE_RUN, 0.1f);
+                //   me->SetSpeed(MOVE_WALK, 0.1f);
                 me->SetStandState(UNIT_STAND_STATE_STAND);
                 me->SetVisible(false);
                 me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
@@ -1548,14 +1569,17 @@ class boss_vx_001 : public CreatureScript
                 if (!UpdateVictim() || phase == PHASE_IDLE)
                     return;
 
+                me->SetTarget(0);
+
+                if (Creature *temp = Unit::GetCreature(*me, tempGUID))
+                {
+                    me->SetTarget(tempGUID);
+                    me->SetFacingToObject(temp);
+                    me->SendMovementFlagUpdate();
+                }
+
                 if (spinning)
                 {
-                    //                    if (Creature *temp = Unit::GetCreature(*me, tempGUID))
-                    {
-                        //   me->SetTarget(tempGUID);
-                        //  me->SetFacingToObject(temp);
-                        //  me->SendMovementFlagUpdate();
-                    }
                     if (spinTimer <= diff)
                     {
                         float orient = me->GetOrientation() + (direction ? M_PI/60 : -M_PI/60);
@@ -1567,6 +1591,9 @@ class boss_vx_001 : public CreatureScript
                         {
                             temp->GetMotionMaster()->MovePoint(1, x, y, z);
                             //  me->SetTarget(tempGUID);
+                            me->SetTarget(tempGUID);
+                            me->SetFacingToObject(temp);
+                            me->SendMovementFlagUpdate();
                         }
                         spinTimer = 250;
                     }
@@ -1596,22 +1623,43 @@ class boss_vx_001 : public CreatureScript
                         break;
                     case EVENT_LASER_BARRAGE:
                     {
-                        me->SetReactState(REACT_PASSIVE);
+                        //                        me->SetReactState(REACT_PASSIVE);
                         direction = urand(0, 1);
                         spinning = true;
-                        spinTimer = 250;
-                        float orient = me->GetOrientation() + (direction ? M_PI/60 : -M_PI/60);
+                        spinTimer = urand(250, 4000);
+                        //                        float orient = me->GetOrientation() + (direction ? 2 * M_PI/60 : -2 * M_PI/60);
                         //                        me->SetFacingTo(orient);
-                        float x, y, z;
-                        z = me->GetPositionZ();
-                        me->GetNearPoint2D(x, y, 10.0f, orient);
-                        if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                        //  float x, y, z;
+                        //   z = me->GetPositionZ();
+                        //  me->GetNearPoint2D(x, y, 10.0f, orient);
+                        if (Creature* temp = me->SummonCreature(NPC_BURST_TARGET, 2748.44f, 2587.51f, 365.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000))
                         {
+                            DoResetThreat();
                             tempGUID = temp->GetGUID();
                             me->SetTarget(tempGUID);
+                            //                            me->SetFacingToObject(temp);
+                            me->SetTarget(tempGUID);
                             me->SetFacingToObject(temp);
-                            DoCast(temp, SPELL_SPINNING_UP);
-                            //  me->ClearUnitState(UNIT_STATE_CASTING);
+                            me->SendMovementFlagUpdate();
+                            me->GetMotionMaster()->Clear(false);
+                            me->GetMotionMaster()->MoveChase(temp);
+                            me->AddThreat(temp, 10000000.0f);
+                            AttackStart(temp);
+                            me->Attack(temp, true);
+
+                            DoCast(temp, SPELL_SPINNING_UP, true);
+                            me->ClearUnitState(UNIT_STATE_CASTING);
+                            //                            temp->GetMotionMaster()->MovePoint(1, x, y, z);
+
+                            //  me->SetTarget(tempGUID);
+                            me->SetTarget(tempGUID);
+                            me->SetFacingToObject(temp);
+                            me->SendMovementFlagUpdate();
+                            me->GetMotionMaster()->Clear(false);
+                            me->GetMotionMaster()->MoveChase(temp);
+                            me->AddThreat(temp, 10000000.0f);
+                            AttackStart(temp);
+                            me->Attack(temp, true);
                             //                            me->GetMotionMaster()->MoveFollow(temp, 0.0f, 0.0f);
                             //  me->SendMovementFlagUpdate();
                         }
@@ -1621,14 +1669,14 @@ class boss_vx_001 : public CreatureScript
                         break;
                     }
                     case EVENT_LASER_BARRAGE_END:
-                        if (Unit *vic = me->getVictim())
-                            me->GetMotionMaster()->MoveChase(vic);
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        if (me->getVictim())
-                            AttackStart(me->getVictim());
-                        else
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                                AttackStart(target);
+                        //                        if (Unit *vic = me->getVictim())
+                        //     me->GetMotionMaster()->MoveChase(vic);
+                        //    me->SetReactState(REACT_AGGRESSIVE);
+                        //   if (me->getVictim())
+                        //     AttackStart(me->getVictim());
+                        //   else
+                        //    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                        //        AttackStart(target);
                         spinning = false;
                         break;
                     case EVENT_ROCKET_STRIKE:
@@ -1663,7 +1711,9 @@ class boss_vx_001 : public CreatureScript
                         break;
                     case EVENT_HAND_PULSE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                        {
                             DoCast(target, SPELL_HAND_PULSE);
+                        }
                         events.RescheduleEvent(EVENT_HAND_PULSE, urand(3000, 4000), 0 , PHASE_VX001_ASSEMBLED__GLOBAL_4);
                         break;
                     case EVENT_FROST_BOMB:

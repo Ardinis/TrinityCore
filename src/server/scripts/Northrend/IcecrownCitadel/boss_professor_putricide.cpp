@@ -569,8 +569,8 @@ class boss_professor_putricide : public CreatureScript
                     default:
                         for (std::list<uint32 >::iterator itr = lowOzzeTargets.begin(); itr != lowOzzeTargets.end(); itr++)
                             if ((*itr) == type)
-                                return 1;
-                        return 0;
+                                return 0;
+                        return 1;
                 }
 
                 return 0;

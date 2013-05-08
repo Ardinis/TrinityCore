@@ -1550,11 +1550,11 @@ class boss_vx_001 : public CreatureScript
 
                 if (spinning)
                 {
-                    if (Creature *temp = Unit::GetCreature(*me, tempGUID))
+                    //                    if (Creature *temp = Unit::GetCreature(*me, tempGUID))
                     {
-                        me->SetTarget(tempGUID);
-                        me->SetFacingToObject(temp);
-                        me->SendMovementFlagUpdate();
+                        //   me->SetTarget(tempGUID);
+                        //  me->SetFacingToObject(temp);
+                        //  me->SendMovementFlagUpdate();
                     }
                     if (spinTimer <= diff)
                     {
@@ -1611,9 +1611,9 @@ class boss_vx_001 : public CreatureScript
                             me->SetTarget(tempGUID);
                             me->SetFacingToObject(temp);
                             DoCast(temp, SPELL_SPINNING_UP);
-                            me->ClearUnitState(UNIT_STATE_CASTING);
-                            me->GetMotionMaster()->MoveFollow(temp, 0.0f, 0.0f);
-                            me->SendMovementFlagUpdate();
+                            //  me->ClearUnitState(UNIT_STATE_CASTING);
+                            //                            me->GetMotionMaster()->MoveFollow(temp, 0.0f, 0.0f);
+                            //  me->SendMovementFlagUpdate();
                         }
                         events.DelayEvents(14500);
                         events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000, 0, phase);

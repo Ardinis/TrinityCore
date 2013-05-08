@@ -7021,8 +7021,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     return false;
                 triggered_spell_id = 25742;
                 float ap = GetTotalAttackPowerValue(BASE_ATTACK);
-                int32 holy = SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY) +
-                             SpellBaseDamageBonusForVictim(SPELL_SCHOOL_MASK_HOLY, victim);
+                int32 holy = SpellBaseDamageBonus(SPELL_SCHOOL_MASK_HOLY);
+                if (victim)
+                    holy += SpellBaseDamageBonusForVictim(SPELL_SCHOOL_MASK_HOLY, victim);
                 basepoints0 = (int32)GetAttackTime(BASE_ATTACK) * int32(ap * 0.022f + 0.044f * holy) / 1000;
                 break;
             }
@@ -12158,6 +12159,8 @@ int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
 
 int32 Unit::SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit* victim)
 {
+    if (victim == NULL)
+        return;
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
 
     int32 TakenAdvertisedBenefit = 0;

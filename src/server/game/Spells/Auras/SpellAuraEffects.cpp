@@ -4857,7 +4857,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     break;
                 case 52916: // Honor Among Thieves
                 {
-                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         Unit* spellTarget = ObjectAccessor::GetUnit(*caster, caster->ToPlayer()->GetComboTarget());
                         if (!spellTarget)

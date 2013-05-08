@@ -12160,7 +12160,7 @@ int32 Unit::SpellBaseDamageBonus(SpellSchoolMask schoolMask)
 int32 Unit::SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit* victim)
 {
     if (victim == NULL)
-        return;
+        return 0;
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
 
     int32 TakenAdvertisedBenefit = 0;

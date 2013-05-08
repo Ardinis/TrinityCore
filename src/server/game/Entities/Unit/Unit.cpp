@@ -13995,36 +13995,37 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         {
             // Set creature speed rate
             if (GetTypeId() == TYPEID_UNIT)
-	    {
-	      Unit* pOwner = GetCharmerOrOwner();
-	      if ((isPet() || isGuardian()) && !isInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
-	      {
-		// For every yard over 5, increase speed by 0.01
-		//  to help prevent pet from lagging behind and despawning
-		float dist = GetDistance(pOwner);
-		float base_rate = 1.00f; // base speed is 100% of owner speed
+            {
+                Unit* pOwner = GetCharmerOrOwner();
+                if ((isPet() || isGuardian()) && !isInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
+                {
+                    // For every yard over 5, increase speed by 0.01
+                    //  to help prevent pet from lagging behind and despawning
+                    float dist = GetDistance(pOwner);
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
 
-		if (dist < 5)
-		  dist = 5;
+                    if (dist < 5)
+                        dist = 5;
 
-		float mult = base_rate + ((dist - 5) * 0.01f);
+                    float mult = base_rate + ((dist - 5) * 0.01f);
 
-		speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
-	      }
-	      else
-		speed *= sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_run;
-	      //		speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
-	    }
+                    speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
+                }
+                else
+                    speed *= sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_run;
+                //		speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
+            }
 
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
             // TODO: possible affect only on MOVE_RUN
-            if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
-            {
-                // Use speed from aura
-                float max_speed = normalization / (IsControlledByPlayer() ? playerBaseMoveSpeed[mtype] : baseMoveSpeed[mtype]);
-                if (speed > max_speed)
-                    speed = max_speed;
-            }
+            if (getLevel() < 83)
+                if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
+                {
+                    // Use speed from aura
+                    float max_speed = normalization / (IsControlledByPlayer() ? playerBaseMoveSpeed[mtype] : baseMoveSpeed[mtype]);
+                    if (speed > max_speed)
+                        speed = max_speed;
+                }
             break;
         }
         default:

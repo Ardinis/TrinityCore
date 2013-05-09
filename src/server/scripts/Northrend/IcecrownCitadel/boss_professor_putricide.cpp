@@ -706,6 +706,7 @@ class boss_professor_putricide : public CreatureScript
                                         me->SetFacingToObject(face);
                                     me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
                                     Talk(SAY_TRANSFORM_1);
+                                    events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000) + 5500);
                                     events.ScheduleEvent(EVENT_RESUME_ATTACK, 5500, 0, PHASE_COMBAT_2);
                                     break;
                                 case PHASE_COMBAT_3:

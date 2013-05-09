@@ -209,6 +209,32 @@ class CharacterCreateInfo
         virtual ~CharacterCreateInfo(){};
 };
 
+class PacketThrottler
+{
+ public:
+  PacketThrottler();
+  ~PacketThrottler();
+  bool MustDiscard(uint16 opcode, uint32 account, const std::string &address);
+  void LogDiscarded(uint32 account, const std::string &address);
+
+ private:
+  struct Entry
+  {
+  Entry() : time(0), count(0) { }
+    time_t time;
+    uint32 count;
+  };
+  
+  typedef std::map<uint16, uint32> DiscardMap;
+  
+  enum { LOG_INTERVAL = 60 };
+  Entry *m_opcodes;
+  DiscardMap m_discarded;
+  time_t m_lastLog;
+};
+
+
+
 /// Player session in the World
 class WorldSession
 {
@@ -968,7 +994,7 @@ class WorldSession
         uint32 recruiterId;
         bool isRecruiter;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
-        time_t timeLastWhoCommand;
+	PacketThrottler m_packetThrottler;
 };
 #endif
 /// @}

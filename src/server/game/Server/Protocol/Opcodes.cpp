@@ -23,6 +23,8 @@
 #include "Opcodes.h"
 #include "WorldSession.h"
 
+
+uint32 opcodePerSecond[NUM_MSG_TYPES];
 /// Correspondence between opcodes and their names
 OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
 {

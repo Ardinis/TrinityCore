@@ -1385,5 +1385,8 @@ inline const char* LookupOpcodeName(uint16 id)
         return "Received unknown opcode, it's more than max!";
     return opcodeTable[id].name;
 }
+
+extern uint32 opcodePerSecond[NUM_MSG_TYPES];
+
 #endif
 /// @}

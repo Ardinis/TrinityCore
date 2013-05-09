@@ -96,7 +96,7 @@ m_playerRecentlyLogout(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
 m_sessionDbLocaleIndex(locale),
 m_latency(0), m_TutorialsChanged(false), recruiterId(recruiter),
-isRecruiter(isARecruiter), timeLastWhoCommand(0),_warden(NULL)
+isRecruiter(isARecruiter), _warden(NULL)
 {
     if (sock)
     {
@@ -200,6 +200,12 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
 {
+  if (m_packetThrottler.MustDiscard(new_packet->GetOpcode(), GetAccountId(), GetRemoteAddress()))
+    {
+      delete new_packet;
+      return;
+    }
+
     _recvQueue.add(new_packet);
 }
 
@@ -1134,3 +1140,58 @@ void WorldSession::InitWarden(BigNumber* k, std::string os)
         // _warden->Init(this, k);
     }
 }
+
+
+bool PacketThrottler::MustDiscard(uint16 opcode, uint32 account, const std::string &address)
+{
+  if (uint32 maxCount = opcodePerSecond[opcode])
+    {
+      time_t now = time(NULL);
+
+      if (now == m_opcodes[opcode].time)
+	{
+	  if (++m_opcodes[opcode].count > maxCount)
+	    {
+	      DiscardMap::iterator itr = m_discarded.find(opcode);
+	      if (itr != m_discarded.end())
+		++(itr->second);
+	      else
+		m_discarded[opcode] = 1;
+
+	      if (m_lastLog + LOG_INTERVAL < now)
+		LogDiscarded(account, address);
+
+	      return true;
+	    }
+	}
+      else
+	{
+	  m_opcodes[opcode].time = now;
+	  m_opcodes[opcode].count = 1;
+	}
+    }
+
+  return false;
+}
+
+
+void PacketThrottler::LogDiscarded(uint32 account, const std::string &address)
+{
+  m_lastLog = time(NULL);
+
+
+  //  for (DiscardMap::iterator itr = m_discarded.begin(); itr != m_discarded.end(); ++itr)
+  //    sLog->outDebug(LOG_FILTER_NETWORKIO, "Discarded %u %s from Account: %u, IP: %s", itr->second, GetOpcodeNameForLogging(Opcodes(itr->first)).c_str(), account, address.c_str());
+  m_discarded.clear();
+}
+
+PacketThrottler::PacketThrottler() : m_lastLog(0)
+{
+  m_opcodes = new Entry[NUM_MSG_TYPES];
+}
+
+PacketThrottler::~PacketThrottler()
+{
+    delete[] m_opcodes;
+}
+

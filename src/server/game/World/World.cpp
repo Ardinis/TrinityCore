@@ -1321,6 +1321,8 @@ void World::SetInitialWorldSettings()
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
 
+    InitPacketThrottling();
+
     sLog->outString("Loading spell dbc data corrections...");
     sSpellMgr->LoadDbcDataCorrections();
 
@@ -3062,3 +3064,13 @@ void World::SendWintergraspState()
         }
     }
 }
+
+void World::InitPacketThrottling()
+{
+  memset(opcodePerSecond, 0, sizeof(uint32) * NUM_MSG_TYPES);
+
+  opcodePerSecond[CMSG_WHO] = 1;
+  opcodePerSecond[CMSG_INSPECT] = 1;
+  opcodePerSecond[CMSG_CHAR_ENUM] = 1;
+}
+

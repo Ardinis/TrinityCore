@@ -34,7 +34,7 @@ endif()
 
 if(_GIT_VERSION_OK)
   execute_process(
-    COMMAND "${_GIT_EXEC}" describe --match v3 --dirty=+ --abbrev=12
+    COMMAND "${_GIT_EXEC}" describe --match v4 --dirty=+ --abbrev=12
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE rev_info
     OUTPUT_STRIP_TRAILING_WHITESPACE

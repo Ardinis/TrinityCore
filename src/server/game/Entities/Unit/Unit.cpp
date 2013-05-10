@@ -15775,18 +15775,18 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
     }
     if (GetEntry() == 5925) //Grounding totem and (wand, periodic effects)
       if (HasAura(8178))
-	for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-	  if (procSpell && procSpell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && (procSpell->Id == 5019 || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_LEECH || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)) // wand proc
-	    {
-	      Aura * aura = GetAura(8178);
-	      if (aura->GetMaxDuration() != 0)
-		{
-		  aura->SetMaxDuration(0);
-		  AuraEffect * aurEff = GetAuraEffect(8179, 0);
-		  aurEff->SetPeriodicTimer(10000);
-		  aura->SetDuration(600);
-		}
-	    }
+          for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+              if (procSpell && procSpell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && (procSpell->Id == 5019 || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_LEECH || procSpell->Effects[j].ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)) // wand proc
+              {
+                  Aura * aura = GetAura(8178);
+                  if (aura->GetMaxDuration() != 0)
+                  {
+                      aura->SetMaxDuration(0);
+                      AuraEffect * aurEff = GetAuraEffect(8179, 0);
+                      aurEff->SetPeriodicTimer(10000);
+                      aura->SetDuration(600);
+                  }
+              }
 
     Unit* actor = isVictim ? target : this;
     Unit* actionTarget = !isVictim ? target : this;
@@ -16878,9 +16878,11 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
     }
     // Get chance from spell
     float chance = float(spellProto->ProcChance);
+
     // If in spellProcEvent exist custom chance, chance = spellProcEvent->customChance;
     if (spellProcEvent && spellProcEvent->customChance)
         chance = spellProcEvent->customChance;
+
     // If PPM exist calculate chance from PPM
     if (spellProcEvent && spellProcEvent->ppmRate != 0)
     {
@@ -16895,20 +16897,25 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
             chance = victim->GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate, spellProto);
         }
     }
+
     //Earthliving with blessing of the eternals
     if (victim && spellProto->GetFirstRankSpell()->Id == 51940 && victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
       {
-	if (GetSpellModOwner()->HasAura(51554))
-	  chance += 40;
-	if (GetSpellModOwner()->HasAura(51555))
-	  chance += 80;
+          if (GetSpellModOwner()->HasAura(51554))
+              chance += 40;
+          if (GetSpellModOwner()->HasAura(51555))
+              chance += 80;
       }
+
     // Apply chance modifer aura
     if (Player* modOwner = GetSpellModOwner())
     {
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
     }
-    return roll_chance_f(chance);
+    //    if (spellProto->Id == 71878)
+    //     std::cout << "last chance !! : " << roll_chance_i(chance) << std::endl;
+
+    return roll_chance_i(chance);
 }
 
 bool Unit::HandleAuraRaidProcFromChargeWithValue(AuraEffect* triggeredByAura)

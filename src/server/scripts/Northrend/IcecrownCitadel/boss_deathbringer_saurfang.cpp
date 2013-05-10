@@ -406,7 +406,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                 _JustReachedHome();
                 instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, FAIL);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-		me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
+                me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
             }
 
             void KilledUnit(Unit* victim)
@@ -424,7 +424,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
 				summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
 
-	       if (IsHeroic())
+                if (IsHeroic())
                 {
                     summon->AddAura(SPELL_SCENT_OF_BLOOD_TRIGGERED,summon);
 					std::list<Unit*> playerList;
@@ -491,7 +491,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     _frenzied = true;
                 }
 
-                /*                uint32 power = me->GetPower(POWER_ENERGY);
+                uint32 power = me->GetPower(POWER_ENERGY);
                 if (power >= 100)
                     me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 20);
                 else if (power >= 95 && power < 100)
@@ -534,7 +534,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     me->SetAuraStack(SPELL_DAMAGE_BUFF, me, 1);
                 else if (power >= 0 && power < 5)
                     me->RemoveAurasDueToSpell(SPELL_DAMAGE_BUFF);
-                */
+
                 if(me->isAttackReady())
                 {
                     uint32 Markdmg;

@@ -1130,10 +1130,29 @@ public:
             if (mui_damage <= diff)
             {
                 DamagePlayers();
-                mui_damage = 250;
+                mui_damage = 150;
             }
             else
                 mui_damage -= diff;
+        }
+
+        void createDamegeOrb(float x, float y)
+        {
+            Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
+
+            for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+            {
+                if (Player* pPlayer = i->getSource())
+                {
+                    if ((int)(pPlayer->GetDistance2d(x, y)) == 0)
+                    {
+                        int32 damage = 2000000;
+                        if ((i->getSource())->HasAura(SPELL_AURA_TWILIGHT))
+                            me->DealDamage(i->getSource(), damage, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
+                        me->SetFlying(false);
+                    }
+                }
+            }
         }
 
         void DamagePlayers()
@@ -1154,7 +1173,6 @@ public:
                 if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
                     southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
                 {
-
                     if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250))
                     {
                         //                        orbDamage->SetFacingToObject(me);
@@ -1163,8 +1181,9 @@ public:
                         destx = posEnd.GetPositionX();
                         desty = posEnd.GetPositionY();
                         destz = posEnd.GetPositionZ();
-                        for (int cnt = 0; cnt <= 100; cnt += 5)
-                            me->SummonCreature(8852000, pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250);
+                        for (int cnt = 0; cnt < 80; cnt += 3)
+                            createDamegeOrb(pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle));
+                        //                            me->SummonCreature(8852000, pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 100);
                         //                        orbDamage->SetFlying(false);
                         //  orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
                     }
@@ -1245,20 +1264,21 @@ public:
 
     void Reset()
     {
-      //          me->SetDisplayId(10045);
-      //    me->SetDisplayId(11686);
-      me->SetFlying(false);
-      me->SetRespawnDelay(7*DAY);
-      SetCombatMovement(false);
-      me->SetPhaseMask(32, true);
-      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-      MovementStarted = false;
-      //      me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
-      me->SetSpeed(MOVE_RUN, 30.0f, true);
-      me->SetSpeed(MOVE_WALK, 30.0f, true);
-      me->SetFlying(false);
-      //            me->SetSpeed(MOVE_FLY, 6.0f, true);
+        //          me->SetDisplayId(10045);
+        //    me->SetDisplayId(11686);
+        me->SetFlying(false);
+        me->SetRespawnDelay(7*DAY);
+        SetCombatMovement(false);
+        me->SetPhaseMask(32, true);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        MovementStarted = false;
+        //      me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING); //or remove???
+        me->SetSpeed(MOVE_RUN, 30.0f, true);
+        me->SetSpeed(MOVE_WALK, 30.0f, true);
+        me->SetFlying(false);
+        mui_damage = 0;
+        //            me->SetSpeed(MOVE_FLY, 6.0f, true);
     }
 
     void AttackStart(Unit *pWho)
@@ -1272,36 +1292,10 @@ public:
     }
 
 
-    void mob_orb_carrierDamage()
-    {
-      Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
-
-      for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
-        {
-          if (Player* pPlayer = i->getSource())
-            {
-              if(pPlayer->GetDistance2d(me->GetPositionX(), me->GetPositionY()) <= 3)
-                {
-                  int32 damage = 2000000;
-                  if ((i->getSource())->HasAura(SPELL_AURA_TWILIGHT))
-                    me->DealDamage(i->getSource(), damage, NULL, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-		  me->SetFlying(false);
-                }
-            }
-        }
-    }
-
-
     void UpdateAI(const uint32 diff)
     {
-      if (mui_damage <= diff)
-	{
-	  mob_orb_carrierDamage();
-	  mui_damage = 100;
-	}
-      else
-	mui_damage -= diff;
     }
+
   private :
     uint32 mui_damage;
   };

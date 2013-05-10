@@ -2646,7 +2646,7 @@ void Spell::EffectCreateRandomItem(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectPersistentAA(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
     if (!m_spellAura)

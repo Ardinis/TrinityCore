@@ -2646,14 +2646,8 @@ void Spell::EffectCreateRandomItem(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectPersistentAA(SpellEffIndex effIndex)
 {
-    if (m_spellInfo->Id != 1543)
-    {
-        if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
-            return;
-    }
-    else
-        if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
-            return;
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
 
     if (!m_spellAura)
     {

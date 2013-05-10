@@ -1075,140 +1075,149 @@ typedef npc_halion_controller::npc_halion_controllerAI controllerAI;
 
 class npc_orb_carrier : public CreatureScript
 {
-    public:
-        npc_orb_carrier() : CreatureScript("npc_orb_carrier") { }
+public:
+    npc_orb_carrier() : CreatureScript("npc_orb_carrier") { }
 
-        struct npc_orb_carrierAI : public ScriptedAI
+    struct npc_orb_carrierAI : public ScriptedAI
+    {
+        npc_orb_carrierAI(Creature* creature) : ScriptedAI(creature)
         {
-            npc_orb_carrierAI(Creature* creature) : ScriptedAI(creature)
+            ASSERT(creature->GetVehicleKit());
+            mui_rotate = 1000;
+            mui_relocate = 1500;
+            me->SetPhaseMask(0x20, true);
+            me->Respawn();
+            me->SetPhaseMask(0x20, true);
+            Vehicle* vehicle = me->GetVehicleKit();
+            Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
+            Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
+            if (southOrb && northOrb)
             {
-                ASSERT(creature->GetVehicleKit());
-		mui_rotate = 1000;
-		mui_relocate = 1500;
-		me->SetPhaseMask(0x20, true);
-		me->Respawn();
-		me->SetPhaseMask(0x20, true);
-		Vehicle* vehicle = me->GetVehicleKit();
-		Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
-		Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
-		if (southOrb && northOrb)
-		  {
-		    southOrb->SetPhaseMask(0x20, true);
-		    northOrb->SetPhaseMask(0x20, true);
-		  }
-		Unit* eastOrb = vehicle->GetPassenger(SEAT_EAST);
-		Unit* westOrb = vehicle->GetPassenger(SEAT_WEST);
-		if (eastOrb && westOrb)
-		  {
-		    eastOrb->SetPhaseMask(0x20, true);
-		    westOrb->SetPhaseMask(0x20, true);
-		  }
+                southOrb->SetPhaseMask(0x20, true);
+                northOrb->SetPhaseMask(0x20, true);
             }
-
-            void UpdateAI(uint32 const diff)
+            Unit* eastOrb = vehicle->GetPassenger(SEAT_EAST);
+            Unit* westOrb = vehicle->GetPassenger(SEAT_WEST);
+            if (eastOrb && westOrb)
             {
-	      // from sniff but dont work yet on trinitycore
-	      //	      if (!me->HasUnitState(UNIT_STATE_CASTING))
-	      //		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
-
-	      if (mui_relocate <= diff)
-		{
-		  me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-		  mui_relocate = 500;
-		}
-	      else
-		mui_relocate -= diff;
-
-	      if (mui_rotate <= diff)
-		{
-		  me->GetMotionMaster()->MoveRotate(45000, ROTATE_DIRECTION_LEFT);
-		  mui_rotate =  40000;
-		  mui_rotate -= diff;
-		}
-	      else mui_rotate -= diff;
-
-	      if (mui_damage <= diff)
-		{
-		  DamagePlayers();
-		  mui_damage = 100;
-		}
-	      else
-		mui_damage -= diff;
+                eastOrb->SetPhaseMask(0x20, true);
+                westOrb->SetPhaseMask(0x20, true);
             }
+        }
 
-	  void DamagePlayers()
-	  {
-	    Vehicle* vehicle = me->GetVehicleKit();
-	    Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
-	    Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
-	    Position pos;
-	    Position posEnd;
-	    Position posMid;
-	    if (southOrb && northOrb)
-	      {
-		northOrb->GetPosition(&pos);
-		southOrb->GetPosition(&posEnd);
-		me->GetPosition(&posMid);
-		if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
-		  return;
-		if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
-		    southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
-		{
-		  if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
-		    {
-		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
-		    }
-		  if (Creature* orbDamage = me->SummonCreature(8852000, posEnd.GetPositionX(), posEnd.GetPositionY(), posEnd.GetPositionZ() + 5, posEnd.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
-		    {
-		      orbDamage->SetFlying(false);
-		      orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
-		    }
-		}
-	      }
-	  }
+        void UpdateAI(uint32 const diff)
+        {
+            // from sniff but dont work yet on trinitycore
+            //	      if (!me->HasUnitState(UNIT_STATE_CASTING))
+            //		me->CastSpell((Unit*)NULL, SPELL_TRACK_ROTATION, false);
 
-	  void DoAction(int32 const action)
-	  {
-	    Unit* southOrb = NULL;
-	    Unit* northOrb = NULL;
-	    if (Vehicle* vehicle = me->GetVehicleKit())
-	      {
-		southOrb = vehicle->GetPassenger(SEAT_SOUTH);
-		northOrb = vehicle->GetPassenger(SEAT_NORTH);
-	      }
-	    switch (action)
-	      {
-	      case ACTION_PREPARE_SHOOT :
-		northOrb->ToCreature()->AI()->Talk(EMOTE_WARN_LASER);
-		break;
-	      case ACTION_SHOOT :
-		{
-		  if (southOrb && northOrb)
-		    {
-		      if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
-			return;
-		      northOrb->CastSpell(northOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
-		      southOrb->CastSpell(southOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
-		      northOrb->CastSpell(southOrb, SPELL_TWILIGHT_CUTTER, false);
-		    }
-		  break;
-		}
-	      default :
-		break;
-	      }
-	  }
+            if (mui_relocate <= diff)
+            {
+                me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                mui_relocate = 500;
+            }
+            else
+                mui_relocate -= diff;
+
+            if (mui_rotate <= diff)
+            {
+                me->GetMotionMaster()->MoveRotate(45000, ROTATE_DIRECTION_LEFT);
+                mui_rotate =  40000;
+                mui_rotate -= diff;
+            }
+            else mui_rotate -= diff;
+
+            if (mui_damage <= diff)
+            {
+                DamagePlayers();
+                mui_damage = 250;
+            }
+            else
+                mui_damage -= diff;
+        }
+
+        void DamagePlayers()
+        {
+            Vehicle* vehicle = me->GetVehicleKit();
+            Unit* southOrb = vehicle->GetPassenger(SEAT_SOUTH);
+            Unit* northOrb = vehicle->GetPassenger(SEAT_NORTH);
+            Position pos;
+            Position posEnd;
+            Position posMid;
+            if (southOrb && northOrb)
+            {
+                northOrb->GetPosition(&pos);
+                southOrb->GetPosition(&posEnd);
+                me->GetPosition(&posMid);
+                if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
+                    return;
+                if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
+                    southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
+                {
+
+                    if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250))
+                    {
+                        //                        orbDamage->SetFacingToObject(me);
+                        float angle = orbDamage->GetOrientation() - M_PI / 2;
+                        float destx, desty, destz;
+                        destx = posEnd.GetPositionX();
+                        desty = posEnd.GetPositionY();
+                        destz = posEnd.GetPositionZ();
+                        for (int cnt = 0; cnt <= 100; cnt += 5)
+                            me->SummonCreature(8852000, pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250);
+                        //                        orbDamage->SetFlying(false);
+                        //  orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
+                    }
+                    //                    if (Creature* orbDamage = me->SummonCreature(8852000, posEnd.GetPositionX(), posEnd.GetPositionY(), posEnd.GetPositionZ() + 5, posEnd.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
+                    {
+                        //                        orbDamage->SetFlying(false);
+                        //  orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
+                    }
+                }
+            }
+        }
+
+        void DoAction(int32 const action)
+        {
+            Unit* southOrb = NULL;
+            Unit* northOrb = NULL;
+            if (Vehicle* vehicle = me->GetVehicleKit())
+            {
+                southOrb = vehicle->GetPassenger(SEAT_SOUTH);
+                northOrb = vehicle->GetPassenger(SEAT_NORTH);
+            }
+            switch (action)
+            {
+            case ACTION_PREPARE_SHOOT :
+                northOrb->ToCreature()->AI()->Talk(EMOTE_WARN_LASER);
+                break;
+            case ACTION_SHOOT :
+            {
+                if (southOrb && northOrb)
+                {
+                    if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
+                        return;
+                    northOrb->CastSpell(northOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
+                    southOrb->CastSpell(southOrb, SPELL_TWILIGHT_PULSE_PERIODIC, true);
+                    northOrb->CastSpell(southOrb, SPELL_TWILIGHT_CUTTER, false);
+                }
+                break;
+            }
+            default :
+                break;
+            }
+        }
 
 	private :
-	  uint32 mui_rotate;
-	  uint32 mui_damage;
-	  uint32 mui_relocate;
-        };
+        uint32 mui_rotate;
+        uint32 mui_damage;
+        uint32 mui_relocate;
+    };
 
-  CreatureAI* GetAI(Creature* creature) const
-  {
-    return GetRubySanctumAI<npc_orb_carrierAI>(creature);
-  }
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return GetRubySanctumAI<npc_orb_carrierAI>(creature);
+    }
 };
 
 

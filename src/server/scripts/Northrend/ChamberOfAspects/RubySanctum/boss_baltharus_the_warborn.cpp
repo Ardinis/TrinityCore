@@ -84,7 +84,7 @@ class boss_baltharus_the_warborn : public CreatureScript
                 events.SetPhase(PHASE_INTRO);
                 events.ScheduleEvent(EVENT_OOC_CHANNEL, 0, 0, PHASE_INTRO);
 		//     _cloneCount = RAID_MODE<uint8>(1, 2, 2, 2);
-		_cloneCount = 3;
+                _cloneCount = 3;
                 instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetMaxHealth());
             }
 

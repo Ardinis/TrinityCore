@@ -263,7 +263,7 @@ class npc_thorim_controller : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 gotActivated = false;
-		spawned = false;
+                spawned = false;
             }
 
             void Reset()
@@ -272,26 +272,26 @@ class npc_thorim_controller : public CreatureScript
                 {
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), true); // Open the entrance door.
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), false); // Close the up-way door.
-		    //		    instance->OpenDoor(instance->GetData64(GO_THORIM_LIGHTNING_FIELD));
-		    //  instance->CloseDoor(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS));
+                    //		    instance->OpenDoor(instance->GetData64(GO_THORIM_LIGHTNING_FIELD));
+                    //  instance->CloseDoor(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS));
                     events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);
-		    if (!spawned)
-		      {
-			for (uint8 i = 0; i < 6; i++)   // Spawn Pre-Phase Adds
-			  me->SummonCreature(preAddLocations[i].entry, preAddLocations[i].pos, TEMPSUMMON_CORPSE_DESPAWN);
-			spawned = true;
-		      }
+                    if (!spawned)
+                    {
+                        for (uint8 i = 0; i < 6; i++)   // Spawn Pre-Phase Adds
+                            me->SummonCreature(preAddLocations[i].entry, preAddLocations[i].pos, TEMPSUMMON_CORPSE_DESPAWN);
+                        spawned = true;
+                    }
                 }
             }
 
-	  void DoAction(int32 const action)
-	  {
-	    if (action != 42)
-	      return;
-	    gotActivated = false;
-	    spawned = false;
-	    summons.DespawnAll();
-	  }
+            void DoAction(int32 const action)
+            {
+                if (action != 42)
+                    return;
+                gotActivated = false;
+                spawned = false;
+                summons.DespawnAll();
+            }
 
 
             void JustSummoned(Creature* summon)
@@ -318,8 +318,8 @@ class npc_thorim_controller : public CreatureScript
                         thorim->AI()->SetGUID(attackTarget, ACTION_PREPHASE_ADDS_DIED);
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_LIGHTNING_FIELD), false); // Close the entrance door.
                     instance->HandleGameObject(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS), true); // Open the up-way door.
-		    //		    instance->CloseDoor(instance->GetData64(GO_THORIM_LIGHTNING_FIELD));
-		    //  instance->OpenDoor(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS));
+                    //		    instance->CloseDoor(instance->GetData64(GO_THORIM_LIGHTNING_FIELD));
+                    //  instance->OpenDoor(instance->GetData64(GO_THORIM_DARK_IRON_PROTCULLIS));
                 }
             }
 
@@ -343,8 +343,8 @@ class npc_thorim_controller : public CreatureScript
                                 if (player)
                                     if (!player->isGameMaster())
                                     {
-				      summons.DoZoneInCombat();
-				      gotActivated = true;
+                                        summons.DoZoneInCombat();
+                                        gotActivated = true;
                                     }
                                 if (!gotActivated)
                                     events.ScheduleEvent(EVENT_CHECK_PLAYER_IN_RANGE, 1000);

@@ -3896,6 +3896,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 62603: //sif blizzard
             spellInfo->EffectAmplitude[0] = 5000;
             break;
+        case 74502:
+            spellInfo->MaxAffectedTargets = 1;
+            break;
         default:
             break;
         }

@@ -1200,7 +1200,9 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 	  {
 	  case 510: // mage Water Elemental
 	  {
-	    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+          SetCreateHealth(m_owner->GetMaxHealth() / 2);
+          SetCreateMana(m_owner->GetMaxPower(POWER_MANA)/ 2);
+          SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.4f));
 	    break;
 	  }
 	  case 1964: //force of nature

@@ -2656,7 +2656,7 @@ void World::UpdateSessions(uint32 diff)
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
-	sLog->outBasic("UpdateSessions account id %u", itr->second->GetAccountId());
+	//	sLog->outBasic("UpdateSessions account id %u", itr->second->GetAccountId());
         if (!pSession->Update(diff, updater))    // As interval = 0
         {
 	  sLog->outError("DELETE SESSION");

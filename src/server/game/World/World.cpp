@@ -2008,6 +2008,7 @@ void World::Update(uint32 diff)
     RecordTimeDiff(NULL);
     UpdateSessions(diff);
     RecordTimeDiff("UpdateSessions");
+    sLog->outBasic("WORLD UPDATE: Update sessions end");
 
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())
@@ -2017,6 +2018,7 @@ void World::Update(uint32 diff)
       WeatherMgr::Update(uint32(m_timers[WUPDATE_WEATHERS].GetInterval()));
     }
 
+    sLog->outBasic("WORLD UPDATE: 2");
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
@@ -2037,6 +2039,7 @@ void World::Update(uint32 diff)
         LoginDatabase.Execute(stmt);
     }
 
+    sLog->outBasic("WORLD UPDATE: 3");
     /// <li> Clean logs table
     if (sWorld->getIntConfig(CONFIG_LOGDB_CLEARTIME) > 0) // if not enabled, ignore the timer
     {
@@ -2653,6 +2656,7 @@ void World::UpdateSessions(uint32 diff)
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
+	sLog->outBasic("UpdateSessions account id %u", itr->second->GetAccountId());
         if (!pSession->Update(diff, updater))    // As interval = 0
         {
 	  sLog->outError("DELETE SESSION");

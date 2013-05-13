@@ -986,7 +986,7 @@ class boss_the_lich_king : public CreatureScript
                                 Talk(EMOTE_DEFILE_WARNING);
                                 DoCast(target, SPELL_DEFILE);
                             }
-                            events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
+                            events.ScheduleEvent(EVENT_DEFILE, 33000, 0, PHASE_TWO_THREE);
                             break;
                         case EVENT_HARVEST_SOUL:
                             Talk(SAY_LK_HARVEST_SOUL);
@@ -1703,17 +1703,17 @@ class npc_valkyr_shadowguard : public CreatureScript
                 {
                     case POINT_DROP_PLAYER:
 		      //		      if (!stu)
-			{
+                    {
 			  //			  DoCastAOE(SPELL_EJECT_ALL_PASSENGERS);
 			  //	  me->DespawnOrUnsummon(1000);
-			}
+                    }
 			//else
-			{
+                    {
 			  //			  DoTeleportTo(_x, _y, _z);
 			  //me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
 			  //stu = true;
-			}
-                        break;
+                    }
+                    break;
                     case POINT_CHARGE:
                         if (Player* target = ObjectAccessor::GetPlayer(*me, _grabbedPlayer))
                         {
@@ -1730,18 +1730,25 @@ class npc_valkyr_shadowguard : public CreatureScript
                                 DoCast(target, SPELL_VALKYR_CARRY);
                                 _dropPoint.Relocate(triggers.front());
                                 _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 1500);
-				_trig = triggers.front();
-				endPhase = true;
+                                _trig = triggers.front();
+                                endPhase = true;
                             }
                         }
                         else
-			  if (!IsHeroic())
-                            me->DespawnOrUnsummon();
+                            if (!IsHeroic())
+                                me->DespawnOrUnsummon();
                         break;
                     default:
                         break;
                 }
             }
+
+            /*            void PassengerBoarded(Unit* who, int8 seatId, bool Apply)
+            {
+                if (apply)
+                who->Remove
+            }*/
+
 
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
@@ -1768,6 +1775,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                     {
                         if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
                         {
+                            player->ClearUnitState(UNIT_STATE_ONVEHICLE);
                             //std::cout << "check start" << std::endl;
                             HadGrab = true;
                             //std::cout << "check end" << std::endl;

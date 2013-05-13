@@ -1936,7 +1936,6 @@ void World::Update(uint32 diff)
 {
     m_updateTime = diff;
 
-    sLog->outBasic("/!\\ BEGIN UPDATE /!\\");
     if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] && diff > m_int_configs[CONFIG_MIN_LOG_UPDATE])
     {
         if (m_updateTimeSum > m_int_configs[CONFIG_INTERVAL_LOG_UPDATE])
@@ -1952,7 +1951,6 @@ void World::Update(uint32 diff)
     }
 
     ///- Update the different timers
-    sLog->outBasic("WORLD UPDATE: Update timers");
     for (int i = 0; i < WUPDATE_COUNT; ++i)
     {
         if (m_timers[i].GetCurrent() >= 0)
@@ -1962,11 +1960,9 @@ void World::Update(uint32 diff)
     }
 
     ///- Update the game time and check for shutdown tim
-    sLog->outBasic("WORLD UPDATE: Update game time");
     _UpdateGameTime();
 
     /// Handle daily quests reset time
-    sLog->outBasic("WORLD UPDATE: Reset daily quests");
     if (m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
@@ -1975,18 +1971,15 @@ void World::Update(uint32 diff)
 
     if (m_gameTime > m_NextWeeklyQuestReset)
     {
-      sLog->outBasic("WORLD UPDATE: Reset weekly quests");
       ResetWeeklyQuests();
     }
 
     if (m_gameTime > m_NextRandomBGReset)
     {
-      sLog->outBasic("WORLD UPDATE: Reset random BG");
       ResetRandomBG();
     }
 
     /// <ul><li> Handle auctions when the timer has passed
-    sLog->outBasic("WORLD UPDATE: Update Auction House");
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
         m_timers[WUPDATE_AUCTIONS].Reset();
@@ -2004,7 +1997,6 @@ void World::Update(uint32 diff)
     }
 
     /// <li> Handle session updates when the timer has passed
-    sLog->outBasic("WORLD UPDATE: Update sessions");
     RecordTimeDiff(NULL);
     UpdateSessions(diff);
     RecordTimeDiff("UpdateSessions");
@@ -2013,7 +2005,6 @@ void World::Update(uint32 diff)
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())
     {
-      sLog->outBasic("WORLD UPDATE: Update weather");
       m_timers[WUPDATE_WEATHERS].Reset();
       WeatherMgr::Update(uint32(m_timers[WUPDATE_WEATHERS].GetInterval()));
     }
@@ -2022,7 +2013,6 @@ void World::Update(uint32 diff)
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
-      sLog->outBasic("WORLD UPDATE: Update uptimes");
         uint32 tmpDiff = uint32(m_gameTime - m_startTime);
         uint32 maxOnlinePlayers = GetMaxPlayerCount();
 
@@ -2035,7 +2025,6 @@ void World::Update(uint32 diff)
         stmt->setUInt32(2, realmID);
         stmt->setUInt64(3, uint64(m_startTime));
 
-	sLog->outBasic("WORLD UPDATE: Update uptimes : executing statement on Login DB");
         LoginDatabase.Execute(stmt);
     }
 
@@ -2043,7 +2032,6 @@ void World::Update(uint32 diff)
     /// <li> Clean logs table
     if (sWorld->getIntConfig(CONFIG_LOGDB_CLEARTIME) > 0) // if not enabled, ignore the timer
     {
-      sLog->outBasic("WORLD UPDATE: Clean logs table");
         if (m_timers[WUPDATE_CLEANDB].Passed())
         {
             m_timers[WUPDATE_CLEANDB].Reset();
@@ -2059,14 +2047,12 @@ void World::Update(uint32 diff)
 
     /// <li> Handle all other objects
     ///- Update objects when the timer has passed (maps, transport, creatures, ...)
-    sLog->outBasic("WORLD UPDATE: Update objects (maps, transport, creatures, ...)");
     RecordTimeDiff(NULL);
     sMapMgr->Update(diff);
     RecordTimeDiff("UpdateMapMgr");
 
     if (sWorld->getBoolConfig(CONFIG_AUTOBROADCAST))
     {
-      sLog->outBasic("WORLD UPDATE: Autobroadcast");
         if (m_timers[WUPDATE_AUTOBROADCAST].Passed())
         {
             m_timers[WUPDATE_AUTOBROADCAST].Reset();
@@ -2074,36 +2060,29 @@ void World::Update(uint32 diff)
         }
     }
 
-    sLog->outBasic("WORLD UPDATE: Update battlegrounds");
     sBattlegroundMgr->Update(diff);
     RecordTimeDiff("UpdateBattlegroundMgr");
 
-    sLog->outBasic("WORLD UPDATE: Update outdoor PvP");
     sOutdoorPvPMgr->Update(diff);
     RecordTimeDiff("UpdateOutdoorPvPMgr");
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
     {
-      sLog->outBasic("WORLD UPDATE: Delete characters");
         m_timers[WUPDATE_DELETECHARS].Reset();
         Player::DeleteOldCharacters();
     }
 
-
-    sLog->outBasic("WORLD UPDATE: Update LFG");
     sLFGMgr->Update(diff);
     RecordTimeDiff("UpdateLFGMgr");
 
     // execute callbacks from sql queries that were queued recently
-    sLog->outBasic("WORLD UPDATE: Process query Callbacks");
     ProcessQueryCallbacks();
     RecordTimeDiff("ProcessQueryCallbacks");
 
     ///- Erase corpses once every 20 minutes
     if (m_timers[WUPDATE_CORPSES].Passed())
     {
-      sLog->outBasic("WORLD UPDATE: Erase corpses");
         m_timers[WUPDATE_CORPSES].Reset();
         sObjectAccessor->RemoveOldCorpses();
     }
@@ -2111,7 +2090,6 @@ void World::Update(uint32 diff)
     ///- Process Game events when necessary
     if (m_timers[WUPDATE_EVENTS].Passed())
     {
-      sLog->outBasic("WORLD UPDATE: Process game events");
         m_timers[WUPDATE_EVENTS].Reset();                   // to give time for Update() to be processed
         uint32 nextGameEvent = sGameEventMgr->Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
@@ -2121,7 +2099,6 @@ void World::Update(uint32 diff)
     ///- Ping to keep MySQL connections alive
     if (m_timers[WUPDATE_PINGDB].Passed())
     {
-      sLog->outBasic("WORLD UPDATE: Ping MySQL");
         m_timers[WUPDATE_PINGDB].Reset();
         sLog->outDetail("Ping MySQL to keep connection alive");
         CharacterDatabase.KeepAlive();
@@ -2130,17 +2107,12 @@ void World::Update(uint32 diff)
     }
 
     // update the instance reset times
-    sLog->outBasic("WORLD UPDATE: Update instance");
     sInstanceSaveMgr->Update();
 
     // And last, but not least handle the issued cli commands
-    sLog->outBasic("WORLD UPDATE: Process CLI commands");
     ProcessCliCommands();
 
-    sLog->outBasic("WORLD UPDATE: Script manager hook");
     sScriptMgr->OnWorldUpdate(diff);
-
-    sLog->outBasic("\\!/ END UPDATE \\!/");
 }
 
 void World::ForceGameEventUpdate()

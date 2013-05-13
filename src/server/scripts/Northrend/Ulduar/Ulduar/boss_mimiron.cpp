@@ -1569,14 +1569,14 @@ class boss_vx_001 : public CreatureScript
                 if (!UpdateVictim() || phase == PHASE_IDLE)
                     return;
 
-                me->SetTarget(0);
+		/*                me->SetTarget(0);
 
                 if (Creature *temp = Unit::GetCreature(*me, tempGUID))
                 {
                     me->SetTarget(tempGUID);
                     me->SetFacingToObject(temp);
                     me->SendMovementFlagUpdate();
-                }
+		    }*/
 
                 if (spinning)
                 {

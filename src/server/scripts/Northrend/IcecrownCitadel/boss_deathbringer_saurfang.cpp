@@ -726,6 +726,7 @@ class npc_blood_beast : public CreatureScript
 	      defreeze = false;
 	      me->SetReactState(REACT_PASSIVE);
 	      mui_freeze2 = 2000;
+	      targetGUID = 0;
 	  }
 
 	  void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
@@ -761,8 +762,11 @@ class npc_blood_beast : public CreatureScript
                 if (newListTarget.size() > 0)
                 {
                     std::list<Unit*>::iterator itr = newListTarget.begin();
-                    std::advance(itr, urand(0, newListTarget.size() - 1));
-                    return *itr;
+		    if (!newListTarget.empty())
+		      {
+			std::advance(itr, urand(0, newListTarget.size() - 1));
+			return *itr;
+		      }
                 }
                 return SelectTarget(SELECT_TARGET_RANDOM);
             }
@@ -774,16 +778,18 @@ class npc_blood_beast : public CreatureScript
                     if (mui_freeze <= diff)
                     {
                         me->SetReactState(REACT_AGGRESSIVE);
-                        if (target = SelectEnemyCaster())
-                        {
-                            me->DeleteThreatList();
-                            me->SetInCombatWith(target);
-                            target->SetInCombatWith(me);
-                            //		    DoStartMovement(target);
-                            me->AI()->AttackStart(target);
-                            me->AddThreat(target, 100000000.0f * 9.0f);
-                            mui_freeze2 = 2000;
-                        }
+                        Unit *target = SelectEnemyCaster();
+			if (target != NULL)
+			  {
+			    targetGUID = target->GetGUID();
+			    me->DeleteThreatList();
+			    me->SetInCombatWith(target);
+			    target->SetInCombatWith(me);
+			    //		    DoStartMovement(target);
+			    me->AI()->AttackStart(target);
+			    me->AddThreat(target, 100000000.0f * 9.0f);
+			    mui_freeze2 = 2000;
+			  }
                         defreeze = true;
                     }
                     else
@@ -795,22 +801,24 @@ class npc_blood_beast : public CreatureScript
                     {
                         mui_freeze2 -= diff;
                         me->DeleteThreatList();
-                        me->SetInCombatWith(target);
-                        target->SetInCombatWith(me);
-                        me->AI()->AttackStart(target);
-                        //  DoStartMovement(target);
-                        me->AddThreat(target, 100000000.0f * 9.0f);
+			if (Unit *target = Unit::GetUnit(*me, targetGUID))
+			  {
+			    me->SetInCombatWith(target);
+			    target->SetInCombatWith(me);
+			    me->AI()->AttackStart(target);
+			    //  DoStartMovement(target);
+			    me->AddThreat(target, 100000000.0f * 9.0f);
+			  }
                     }
                 }
-
                 DoMeleeAttackIfReady();
             }
 
         private :
-            Unit* target;
-            uint32 mui_freeze;
-            uint32 mui_freeze2;
-            bool defreeze;
+	  uint64 targetGUID;
+	  uint32 mui_freeze;
+	  uint32 mui_freeze2;
+	  bool defreeze;
         };
 
     CreatureAI* GetAI(Creature* creature) const

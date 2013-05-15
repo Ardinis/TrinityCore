@@ -60,6 +60,9 @@ public:
     bool _HandleXferCancel();
     bool _HandleXferAccept();
 
+    //anti auth flood
+    bool _authChallengeSent;
+
     void _SetVSFields(const std::string& rI);
 
     FILE* pPatch;

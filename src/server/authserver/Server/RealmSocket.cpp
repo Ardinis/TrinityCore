@@ -31,6 +31,8 @@ RealmSocket::Session::Session(void) {}
 
 RealmSocket::Session::~Session(void) { }
 
+AntiConnectionFloodMap activeConnections;
+
 RealmSocket::RealmSocket(void) : input_buffer_(4096), session_(NULL), _remoteAddress()
 {
     reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
@@ -46,6 +48,14 @@ RealmSocket::~RealmSocket(void)
 
     // delete RealmSocketObject must never be called from our code.
     closing_ = true;
+
+    AntiConnectionFloodMap::iterator itr = activeConnections.find(_remoteAddress);
+    if (itr != activeConnections.end())
+      {
+	--itr->second.connectionAmount;
+	if (!itr->second.connectionAmount)
+	  activeConnections.erase(itr);
+      }
 
     if (session_)
         delete session_;
@@ -64,6 +74,27 @@ int RealmSocket::open(void * arg)
     }
 
     _remoteAddress = addr.get_host_addr();
+
+    time_t currentTime = time(NULL);
+
+    AntiConnectionFloodMap::iterator itr = activeConnections.find(_remoteAddress);
+    if (itr != activeConnections.end())
+      {
+	if (itr->second.lastConnectionTime == currentTime || itr->second.connectionAmount == MAX_CONNECTION_PER_IP)
+	  {
+	    return -1;
+	  }
+	else
+	  {
+	    itr->second.lastConnectionTime = currentTime;
+	    ++itr->second.connectionAmount;
+	  }
+      }
+    else
+      {
+	activeConnections.insert(AntiConnectionFloodMap::value_type(_remoteAddress, ConnectionInfo(currentTime)));
+      }
+
     _remotePort = addr.get_port_number();
 
     // Register with ACE Reactor

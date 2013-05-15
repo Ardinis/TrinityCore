@@ -200,7 +200,12 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
 {
-  if (m_packetThrottler.MustDiscard(new_packet->GetOpcode(), GetAccountId(), GetRemoteAddress()))
+    if (new_packet && new_packet->GetOpcode() >= NUM_MSG_TYPES)
+    {
+        delete new_packet;
+        return;
+    }
+    if (m_packetThrottler.MustDiscard(new_packet->GetOpcode(), GetAccountId(), GetRemoteAddress()))
     {
       delete new_packet;
       return;
@@ -1194,4 +1199,3 @@ PacketThrottler::~PacketThrottler()
 {
     delete[] m_opcodes;
 }
-

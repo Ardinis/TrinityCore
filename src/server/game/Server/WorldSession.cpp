@@ -253,6 +253,8 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     //! delayed packets that were re-enqueued due to improper timing. To prevent an infinite
     //! loop caused by re-enqueueing the same packets over and over again, we stop updating this session
     //! and continue updating others. The re-enqueued packets will be handled in the next Update call for this session.
+    //    if (m_Socket && !m_Socket->IsClosed() &&  !_recvQueue.empty())
+    //   sLog->outError("SESSION: queue size %u", _recvQueue.size());
     while (m_Socket && !m_Socket->IsClosed() &&
             !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&
             _recvQueue.next(packet, updater))
@@ -275,17 +277,24 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                             // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
                             //! If player didn't log out a while ago, it means packets are being sent while the server does not recognize
                             //! the client to be in world yet. We will re-add the packets to the bottom of the queue and process them later.
-                            if (!m_playerRecentlyLogout)
+			  if (!m_playerRecentlyLogout)
                             {
                                 //! Prevent infinite loop
                                 if (!firstDelayedPacket)
                                     firstDelayedPacket = packet;
                                 //! Because checking a bool is faster than reallocating memory
                                 deletePacket = false;
-                                QueuePacket(packet);
                                 //! Log
-                                sLog->outDebug(LOG_FILTER_NETWORKIO, "Re-enqueueing packet with opcode %s (0x%.4X) with with status STATUS_LOGGEDIN. "
-                                    "Player is currently not in world yet.", opHandle.name, packet->GetOpcode());
+				if (packet->GetOpcode() == CMSG_NAME_QUERY)
+				  {
+				    delete packet;
+				  }
+				else
+				  {
+				    QueuePacket(packet);
+				    sLog->outDebug(LOG_FILTER_NETWORKIO, "Re-enqueueing packet with opcode %s (0x%.4X) with with status STATUS_LOGGEDIN. "
+						   "Player is currently not in world yet.", opHandle.name, packet->GetOpcode());
+				  }
                             }
 
                         }

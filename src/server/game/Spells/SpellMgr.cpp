@@ -3851,7 +3851,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 56278: // Read Pronouncement, missing EffectApplyAuraName
             spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
             break;
-
             case 18756:
                 spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
                 spellInfo->EffectBasePoints[0] = -1.5*IN_MILLISECONDS*0.66; // reduce cast time of seduction by 66%

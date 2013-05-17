@@ -26,6 +26,17 @@
 #include <ace/Basic_Types.h>
 #include "Common.h"
 
+#define MAX_CONNECTION_PER_IP 10
+
+struct ConnectionInfo
+{
+    ConnectionInfo(time_t currentTime) : lastConnectionTime(currentTime), connectionAmount(1) {}
+    time_t lastConnectionTime;
+    uint16 connectionAmount;
+};
+
+typedef std::map<std::string, ConnectionInfo> AntiConnectionFloodMap;
+
 class RealmSocket : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 {
 private:

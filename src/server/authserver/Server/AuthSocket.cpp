@@ -202,6 +202,7 @@ AuthSocket::AuthSocket(RealmSocket& socket) : socket_(socket)
     g.SetDword(7);
     _authed = false;
     _accountSecurityLevel = SEC_PLAYER;
+    _authChallengeSent = false;
 }
 
 // Close patch file descriptor before leaving
@@ -298,6 +299,10 @@ void AuthSocket::_SetVSFields(const std::string& rI)
 bool AuthSocket::_HandleLogonChallenge()
 {
     sLog->outStaticDebug("Entering _HandleLogonChallenge");
+
+    if (_authChallengeSent)
+      return false;
+
     if (socket().recv_len() < sizeof(sAuthLogonChallenge_C))
         return false;
 
@@ -499,6 +504,7 @@ bool AuthSocket::_HandleLogonChallenge()
     }
 
     socket().send((char const*)pkt.contents(), pkt.size());
+    _authChallengeSent = true;
     return true;
 }
 

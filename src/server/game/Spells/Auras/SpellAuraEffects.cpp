@@ -3088,9 +3088,37 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
-    Unit* target = aurApp->GetTarget();
+    if (Unit* target = aurApp->GetTarget())
+    {
+        if (GetId() == 6358)
+        {
+            if (Unit* pet = GetCaster())
+            {
+                if (!pet->isPet())
+                    return;
+                Unit* owner = pet->ToPet()->GetOwner();
+                if (!owner)
+                    return;
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    for (uint8 i = 0; i < MAX_GLYPH_SLOT_INDEX; ++i)
+                        if (owner->ToPlayer() && owner->getClass() == CLASS_WARLOCK)
+                            if (uint32 glyph = owner->ToPlayer()->GetGlyph(i))
+                            {
+                                if (glyph == 290) //succub glyphe
+                                {
+                                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                                }
+                                break;
+                            }
+                }
+            }
+        }
 
-    target->SetControlled(apply, UNIT_STATE_STUNNED);
+        target->SetControlled(apply, UNIT_STATE_STUNNED);
+    }
 }
 
 void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bool apply) const

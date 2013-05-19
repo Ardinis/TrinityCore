@@ -1775,7 +1775,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                     {
                         if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
                         {
-                            player->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                            //                            player->ClearUnitState(UNIT_STATE_ONVEHICLE);
                             //std::cout << "check start" << std::endl;
                             HadGrab = true;
                             //std::cout << "check end" << std::endl;

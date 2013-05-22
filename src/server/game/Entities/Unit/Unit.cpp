@@ -654,6 +654,18 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         else
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
 
+        // get the owner of the pet in combat only when the pet does damage
+        if (GetOwner() && !IsFriendlyTo(victim))
+        {
+            SetInCombatWith(victim);
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                victim->SetInCombatWith(this);
+            AddThreat(victim, 0.0f);
+
+            GetOwner()->SetInCombatWith(victim);
+            GetOwner()->AddThreat(victim, 0.0f);
+        }
+
         // We're going to call functions which can modify content of the list during iteration over it's elements
         // Let's copy the list so we can prevent iterator invalidation
         AuraEffectList vCopyDamageCopy(victim->GetAuraEffectsByType(SPELL_AURA_SHARE_DAMAGE_PCT));
@@ -19174,6 +19186,16 @@ void CharmInfo::SetIsReturning(bool val)
 bool CharmInfo::IsReturning()
 {
     return m_isReturning;
+}
+
+void CharmInfo::SetIsMovingForCast(bool val)
+{
+    _isMovingForCast = val;
+}
+
+bool CharmInfo::IsMovingForCast()
+{
+    return _isMovingForCast;
 }
 
 void Unit::SetInFront(Unit const* target)

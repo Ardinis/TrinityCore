@@ -3470,6 +3470,27 @@ void Spell::cast(bool skipCheck)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
     }
 
+    if (Pet* pet = m_caster->ToPet())
+    {
+        if (pet->GetCharmInfo() && pet->IsAIEnabled)
+        {
+            // If pet is passive or was sent to cast a spell on a friendly target.
+            if ((pet->HasReactState(REACT_PASSIVE) || m_caster->IsFriendlyTo(unitTarget)) && pet->GetCharmInfo()->IsMovingForCast())
+            {
+                CharmInfo* charmInfo = pet->GetCharmInfo();
+                pet->AttackStop();
+                pet->InterruptNonMeleeSpells(false);
+                pet->SendMeleeAttackStop(); // Should stop pet's attack button from flashing
+                charmInfo->SetIsAtStay(false);
+                charmInfo->SetIsCommandAttack(false);
+                charmInfo->SetIsCommandFollow(false);
+                charmInfo->SetIsFollowing(false);
+                charmInfo->SetIsReturning(false);
+            }
+            pet->GetCharmInfo()->SetIsMovingForCast(false);
+        }
+    }
+
     SetExecutedCurrently(false);
 }
 

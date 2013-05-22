@@ -25,6 +25,7 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "Player.h"
+#include "Spell.h"
 
 #include <cmath>
 
@@ -170,6 +171,25 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     {
         D::_clearUnitStateMove(owner);
         return true;
+    }
+
+    // Check whether pet got send to cast a spell
+    if (i_spell)
+    {
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(i_spell);
+        Spell* spell = new Spell(owner.ToUnit(), spellInfo, TRIGGERED_NONE);
+        SpellCastResult result = spell->CheckPetCast(i_target.getTarget());
+        if (result == SPELL_CAST_OK)
+        {
+            spell->prepare(&(spell->m_targets));
+            // Reset i_spell here to prevent chaincasting.
+            i_spell = 0;
+        }
+        else
+        {
+            spell->finish(false);
+            delete spell;
+        }
     }
 
     i_recheckDistance.Update(time_diff);

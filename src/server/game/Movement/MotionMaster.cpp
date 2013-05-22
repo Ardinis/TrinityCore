@@ -231,7 +231,7 @@ void MotionMaster::MoveConfused()
     }
 }
 
-void MotionMaster::MoveChase(Unit* target, float dist, float angle)
+void MotionMaster::MoveChase(Unit* target, float dist, float angle, uint32 spellId)
 {
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -244,7 +244,7 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle)
             _owner->GetGUIDLow(),
             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
-        Mutate(new ChaseMovementGenerator<Player>(*target,dist,angle), MOTION_SLOT_ACTIVE);
+        Mutate(new ChaseMovementGenerator<Player>(*target, dist, angle, spellId), MOTION_SLOT_ACTIVE);
     }
     else
     {
@@ -252,11 +252,11 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle)
             _owner->GetEntry(), _owner->GetGUIDLow(),
             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
-        Mutate(new ChaseMovementGenerator<Creature>(*target,dist,angle), MOTION_SLOT_ACTIVE);
+        Mutate(new ChaseMovementGenerator<Creature>(*target, dist, angle, spellId), MOTION_SLOT_ACTIVE);
     }
 }
 
-void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slot)
+void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slot, uint32 spellId)
 {
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
@@ -268,7 +268,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
         sLog->outStaticDebug("Player (GUID: %u) follow to %s (GUID: %u)", _owner->GetGUIDLow(),
             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
-        Mutate(new FollowMovementGenerator<Player>(*target,dist,angle), slot);
+        Mutate(new FollowMovementGenerator<Player>(*target,dist,angle, spellId), slot);
     }
     else
     {
@@ -276,7 +276,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
             _owner->GetEntry(), _owner->GetGUIDLow(),
             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
-        Mutate(new FollowMovementGenerator<Creature>(*target,dist,angle), slot);
+        Mutate(new FollowMovementGenerator<Creature>(*target,dist,angle, spellId), slot);
     }
 }
 

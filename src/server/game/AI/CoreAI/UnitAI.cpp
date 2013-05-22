@@ -32,6 +32,12 @@ void UnitAI::AttackStart(Unit* victim)
         me->GetMotionMaster()->MoveChase(victim);
 }
 
+void UnitAI::AttackStart(Unit* victim, uint32 spellId)
+{
+    if (victim && me->Attack(victim, true))
+        me->GetMotionMaster()->MoveChase(victim);
+}
+
 void UnitAI::AttackStartCaster(Unit* victim, float dist)
 {
     if (victim && me->Attack(victim, false))

@@ -36,11 +36,13 @@ class PetAI : public CreatureAI
 
         void KilledUnit(Unit* /*victim*/);
         void AttackStart(Unit* target);
+        void AttackStart(Unit* target, uint32 spellId);
         void MovementInform(uint32 moveType, uint32 data);
         void OwnerAttackedBy(Unit* attacker);
         void OwnerAttacked(Unit* target);
         void AttackedBy(Unit* attacker);
         void ReceiveEmote(Player* player, uint32 textEmote);
+        void HandleReturnMovement();
 
         // The following aren't used by the PetAI but need to be defined to override
         //  default CreatureAI functions which interfere with the PetAI
@@ -62,8 +64,7 @@ class PetAI : public CreatureAI
         uint32 m_updateAlliesTimer;
 
         Unit* SelectNextTarget(bool allowAutoSelect) const;
-        void HandleReturnMovement();
-        void DoAttack(Unit* target, bool chase);
+        void DoAttack(Unit* target, bool chase, uint32 spellId = 0);
         bool CanAttack(Unit* target);
         void ClearCharmInfoFlags();
 };

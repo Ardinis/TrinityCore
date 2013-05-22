@@ -38,10 +38,10 @@ class TargetedMovementGeneratorMedium
 : public MovementGeneratorMedium< T, D >, public TargetedMovementGeneratorBase
 {
     protected:
-        TargetedMovementGeneratorMedium(Unit &target, float offset, float angle) :
+ TargetedMovementGeneratorMedium(Unit &target, float offset, float angle, uint32 spellId = 0) :
             TargetedMovementGeneratorBase(target), i_recheckDistance(0),
             i_offset(offset), i_angle(angle),
-            i_recalculateTravel(false), i_targetReached(false)
+                i_recalculateTravel(false), i_targetReached(false), i_spell(spellId)
         {
         }
         ~TargetedMovementGeneratorMedium() {}
@@ -61,6 +61,7 @@ class TargetedMovementGeneratorMedium
         float i_angle;
         bool i_recalculateTravel : 1;
         bool i_targetReached : 1;
+        uint32 i_spell;
 };
 
 template<class T>
@@ -69,8 +70,8 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
     public:
         ChaseMovementGenerator(Unit &target)
             : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target) {}
-        ChaseMovementGenerator(Unit &target, float offset, float angle)
-            : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle) {}
+        ChaseMovementGenerator(Unit &target, float offset, float angle,  uint32 spellId = 0)
+            : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T> >(target, offset, angle, spellId) {}
         ~ChaseMovementGenerator() {}
 
         MovementGeneratorType GetMovementGeneratorType() { return CHASE_MOTION_TYPE; }
@@ -93,8 +94,8 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
     public:
         FollowMovementGenerator(Unit &target)
             : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target){}
-        FollowMovementGenerator(Unit &target, float offset, float angle)
-            : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle) {}
+        FollowMovementGenerator(Unit &target, float offset, float angle, uint32 spellId = 0)
+            : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle, spellId) {}
         ~FollowMovementGenerator() {}
 
         MovementGeneratorType GetMovementGeneratorType() { return FOLLOW_MOTION_TYPE; }
@@ -114,4 +115,3 @@ class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, Follow
 };
 
 #endif
-

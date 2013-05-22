@@ -381,6 +381,42 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                 result = SPELL_CAST_OK;
             }
 
+            if (result == SPELL_FAILED_LINE_OF_SIGHT || result == SPELL_FAILED_OUT_OF_RANGE)
+            {
+                if (pet->ToPet())
+                {
+                    uint32 spellId = spell->GetSpellInfo()->Id;
+                    unit_target = spell->m_targets.GetUnitTarget();
+                    if (unit_target)
+                    {
+                        if (!unit_target->IsFriendlyTo(pet))
+                        {
+                            if (pet->getVictim() != unit_target || (pet->getVictim() == unit_target && !charmInfo->IsCommandAttack()))
+                            {
+                                if (pet->getVictim())
+                                    pet->AttackStop();
+                                pet->GetMotionMaster()->Clear();
+                                if (pet->ToCreature()->IsAIEnabled)
+                                    pet->GetAI()->AttackStart(unit_target, spellId);
+                            }
+                        }
+                        else
+                        {
+                            pet->AttackStop();
+                            pet->InterruptNonMeleeSpells(false);
+                            pet->GetMotionMaster()->MoveFollow(unit_target, PET_FOLLOW_DIST, pet->GetFollowAngle(), MOTION_SLOT_ACTIVE, spellId);
+
+                            charmInfo->SetIsCommandAttack(false);
+                            charmInfo->SetIsAtStay(false);
+                            charmInfo->SetIsReturning(true);
+                            charmInfo->SetIsCommandFollow(true);
+                            charmInfo->SetIsFollowing(false);
+                        }
+                        charmInfo->SetIsMovingForCast(true);
+                    }
+                }
+            }
+
             if (result == SPELL_CAST_OK)
             {
                 pet->ToCreature()->AddCreatureSpellCooldown(spellid);
@@ -392,9 +428,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                 if (pet->ToCreature()->isPet() && (((Pet*)pet)->getPetType() == SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
                     pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
                 else
-                {
                     pet->SendPetAIReaction(guid1);
-                }
 
                 if (unit_target && !GetPlayer()->IsFriendlyTo(unit_target) && !pet->isPossessed() && !pet->IsVehicle())
                 {

@@ -1160,6 +1160,8 @@ struct CharmInfo
         bool IsFollowing();
         void SetIsReturning(bool val);
         bool IsReturning();
+        void SetIsMovingForCast(bool val);
+        bool IsMovingForCast();
         void SaveStayPosition();
         void GetStayPosition(float &x, float &y, float &z);
 
@@ -1176,10 +1178,11 @@ struct CharmInfo
         ReactStates     m_oldReactState;
 
         bool m_isCommandAttack;
-  bool _isCommandFollow;
+        bool _isCommandFollow;
         bool m_isAtStay;
         bool m_isFollowing;
         bool m_isReturning;
+        bool _isMovingForCast;
         float m_stayX;
         float m_stayY;
         float m_stayZ;

@@ -135,6 +135,7 @@ class UnitAI
 
         virtual bool CanAIAttack(Unit const* /*target*/) const { return true; }
         virtual void AttackStart(Unit* /*target*/);
+        virtual void AttackStart(Unit* /*target*/, uint32 spellId);
         virtual void UpdateAI(uint32 const diff) = 0;
 
         virtual void InitializeAI() { if (!me->isDead()) Reset(); }
@@ -228,6 +229,8 @@ class UnitAI
             else
                 targetList.resize(maxTargets);
         }
+
+        virtual void HandleReturnMovement() {}
 
         // Called at any Damage to any victim (before damage apply)
         virtual void DamageDealt(Unit* /*victim*/, uint32& /*damage*/, DamageEffectType /*damageType*/) { }

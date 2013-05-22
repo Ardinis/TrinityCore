@@ -333,6 +333,19 @@ void PetAI::AttackStart(Unit* target)
     DoAttack(target, (!me->GetCharmInfo()->HasCommandState(COMMAND_STAY) || me->GetCharmInfo()->IsCommandAttack()));
 }
 
+void PetAI::AttackStart(Unit* target, uint32 spellId)
+{
+    // Overrides Unit::AttackStart to correctly evaluate Pet states
+
+    // Check all pet states to decide if we can attack this target
+    if (!CanAttack(target))
+        return;
+
+    // Only chase if not commanded to stay or if stay but commanded to attack
+    DoAttack(target, ((!me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
+        || me->GetCharmInfo()->IsCommandAttack()), spellId);
+}
+
 void PetAI::OwnerAttackedBy(Unit* attacker)
 {
     // Called when owner takes damage. This function helps keep pets from running off
@@ -459,15 +472,13 @@ void PetAI::HandleReturnMovement()
     }
 }
 
-void PetAI::DoAttack(Unit* target, bool chase)
+void PetAI::DoAttack(Unit* target, bool chase, uint32 spellId)
 {
     // Handles attack with or without chase and also resets flags
     // for next update / creature kill
 
     if (me->Attack(target, true))
     {
-        if (Unit* owner = me->GetOwner())
-            owner->SetInCombatWith(target);
 
         // Play sound to let the player know the pet is attacking something it picked on its own
         if (me->HasReactState(REACT_AGGRESSIVE) && !me->GetCharmInfo()->IsCommandAttack())
@@ -478,7 +489,7 @@ void PetAI::DoAttack(Unit* target, bool chase)
         {
            ClearCharmInfoFlags();
            me->GetMotionMaster()->Clear();
-           me->GetMotionMaster()->MoveChase(target);
+           me->GetMotionMaster()->MoveChase(target, 0.0f, 0.0f, spellId);
         }
         else // (Stay && ((Aggressive || Defensive) && In Melee Range)))
         {

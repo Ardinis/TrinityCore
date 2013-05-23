@@ -3110,8 +3110,8 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
                                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
                                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                                     target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+                                    break;
                                 }
-                                break;
                             }
                 }
             }

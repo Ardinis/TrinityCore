@@ -23,6 +23,7 @@
 #include "FollowerReference.h"
 #include "Timer.h"
 #include "Unit.h"
+#include "PathGenerator.h"
 
 class TargetedMovementGeneratorBase
 {
@@ -38,23 +39,23 @@ class TargetedMovementGeneratorMedium
 : public MovementGeneratorMedium< T, D >, public TargetedMovementGeneratorBase
 {
     protected:
- TargetedMovementGeneratorMedium(Unit &target, float offset, float angle, uint32 spellId = 0) :
-            TargetedMovementGeneratorBase(target), i_recheckDistance(0),
+     TargetedMovementGeneratorMedium(Unit &target, float offset, float angle, uint32 spellId = 0) :
+        TargetedMovementGeneratorBase(target), i_recheckDistance(0), i_path(NULL),
             i_offset(offset), i_angle(angle),
                 i_recalculateTravel(false), i_targetReached(false), i_spell(spellId)
         {
         }
-        ~TargetedMovementGeneratorMedium() {}
+        ~TargetedMovementGeneratorMedium() { delete i_path; }
 
     public:
         bool Update(T &, const uint32 &);
         Unit* GetTarget() const { return i_target.getTarget(); }
 
         void unitSpeedChanged() { i_recalculateTravel=true; }
-        void UpdateFinalDistance(float fDistance);
+        bool IsReachable() const { return (i_path) ? (i_path->GetPathType() & PATHFIND_NORMAL) : true; }
 
     protected:
-        void _setTargetLocation(T &);
+        void _setTargetLocation(T& owner, bool updateDestination);
 
         TimeTrackerSmall i_recheckDistance;
         float i_offset;
@@ -62,6 +63,7 @@ class TargetedMovementGeneratorMedium
         bool i_recalculateTravel : 1;
         bool i_targetReached : 1;
         uint32 i_spell;
+        PathGenerator* i_path;
 };
 
 template<class T>

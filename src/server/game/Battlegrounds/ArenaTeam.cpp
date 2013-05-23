@@ -622,7 +622,7 @@ float ArenaTeam::GetChanceAgainst(uint32 ownRating, uint32 opponentRating)
 {
     // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
     // ELO system
-    return 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponentRating - (float)ownRating) / 400.0f));
+    return 1.0f / (1.0f + exp(log(10.0f) * (float)((float)opponentRating - (float)ownRating) / 650.0f));
 }
 
 int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating, bool won /*, float& confidence_factor*/)
@@ -650,24 +650,7 @@ int32 ArenaTeam::GetMatchmakerRatingMod(uint32 ownRating, uint32 opponentRating,
     return (int32)ceil(mod);
 }
 
-int32 ArenaTeam::GetPursuitMod(uint32 ownRating, uint32 ownMMRRating)
-{
-	float pursuit_mod;
-	if (ownMMRRating < 2000)
-		if (ownRating > 1000)
-			pursuit_mod = float(ownMMRRating) / float(ownRating);
-		else
-			pursuit_mod = float(ownMMRRating) / 1000.0f;
-	else
-		if (ownRating > 1000)
-			pursuit_mod = 2000.0f / float(ownRating);
-		else
-			pursuit_mod = 2000.0f / 1000.0f;
-
-    return ceil(pursuit_mod);
-}
-
-int32 ArenaTeam::GetRatingModWon(uint32 ownRating, uint32 ownMMRRating, uint32 opponentRating, bool won /*, float confidence_factor*/)
+int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won /*, float confidence_factor*/)
 {
     float chance = GetChanceAgainst(ownRating, opponentRating);
     float won_mod = (won) ? 1.0f : 0.0f;
@@ -677,33 +660,12 @@ int32 ArenaTeam::GetRatingModWon(uint32 ownRating, uint32 ownMMRRating, uint32 o
 	if(won && ownRating < 1300)
 	{
 		if(ownRating < 1000)
-			mod = 48.0f * (won_mod - chance);
+			mod = 96.0f * (won_mod - chance);
 		else
-			mod = (24.0f + (24.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);
+			mod = (48.0f + (48.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);
 	}
 	else
-		mod = 24.0f * (won_mod - chance);
-
-    return (int32)ceil(mod);
-}
-
-int32 ArenaTeam::GetRatingMod(uint32 ownRating, uint32 opponentRating, bool won /*, float confidence_factor*/)
-{
-    // 'Chance' calculation - to beat the opponent
-    // This is a simulation. Not much info on how it really works
-    float chance = GetChanceAgainst(ownRating, opponentRating);
-    float won_mod = (won) ? 1.0f : 0.0f;
-    float mod;
-
-	if(won && ownRating < 1300)
-	{
-		if(ownRating < 1000)
-			mod = 48.0f * (won_mod - chance);
-		else
-			mod = (24.0f + (24.0f * (1300.0f - float(ownRating)) / 300.0f)) * (won_mod - chance);
-	}
-	else
-		mod = 24.0f * (won_mod - chance);
+		mod = 48.0f * (won_mod - chance);
 
     return (int32)ceil(mod);
 }
@@ -744,7 +706,7 @@ int32 ArenaTeam::WonAgainst(uint32 Own_MMRating, uint32 Opponent_MMRating, int32
     int32 mod = GetMatchmakerRatingMod(Own_MMRating, Opponent_MMRating, true);
 
     // Change in Team Rating
-    rating_change = GetRatingModWon(Stats.Rating, Own_MMRating, Opponent_MMRating, true);
+    rating_change = GetRatingMod(Stats.Rating, Opponent_MMRating, true);
 
     // Modify the team stats accordingly
     FinishGame(rating_change);
@@ -781,7 +743,7 @@ void ArenaTeam::MemberLost(Player* plr, uint32 againstMatchmakerRating, int32 Ma
         if (itr->Guid == plr->GetGUID())
         {
             // Update personal rating
-            int32 mod = GetRatingModWon(itr->PersonalRating, itr->MatchMakerRating, againstMatchmakerRating, false);
+            int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, false);
             itr->ModifyPersonalRating(plr, mod, GetSlot());
 
             // Update matchmaker rating

@@ -510,6 +510,7 @@ class Battleground
         void CheckArenaWinConditions();
         void UpdateArenaWorldState();
 
+
         // Triggers handle
         // must be implemented in BG subclass
         virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}

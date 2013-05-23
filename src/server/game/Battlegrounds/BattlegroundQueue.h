@@ -51,6 +51,8 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  ArenaMatchmakerRating;                          // if rated match, inited to the rating of the team
     uint32  OpponentsTeamRating;                            // for rated arena matches
     uint32  OpponentsMatchmakerRating;                      // for rated arena matches
+    uint32  ratingRange;                                    // for rated arena matches
+    uint32  ratingRangeIncreaseCounter;                     // for rated arena matches
 };
 
 enum BattlegroundQueueGroupTypes
@@ -82,6 +84,7 @@ class BattlegroundQueue
         bool GetPlayerGroupInfoData(uint64 guid, GroupQueueInfo* ginfo);
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id) const;
+        void IncreaseTeamMMrRange(GroupQueueInfo* ginfo);
 
         typedef std::map<uint64, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers;

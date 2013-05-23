@@ -33,9 +33,12 @@ void PointMovementGenerator<T>::Initialize(T &unit)
         unit.StopMoving();
 
     unit.AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
-    i_recalculateSpeed = false;
+
+    if (id == EVENT_CHARGE)
+        return;
+
     Movement::MoveSplineInit init(unit);
-    init.MoveTo(i_x, i_y, i_z);
+    init.MoveTo(i_x, i_y, i_z, m_generatePath);
     if (speed > 0.0f)
         init.SetVelocity(speed);
     init.Launch();
@@ -55,11 +58,11 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 & /*diff*/)
 
     unit.AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
-    if (i_recalculateSpeed && !unit.movespline->Finalized())
+    if (id != EVENT_CHARGE && i_recalculateSpeed && !unit.movespline->Finalized())
     {
         i_recalculateSpeed = false;
         Movement::MoveSplineInit init(unit);
-        init.MoveTo(i_x, i_y, i_z);
+        init.MoveTo(i_x, i_y, i_z, m_generatePath);
         if (speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
             init.SetVelocity(speed);
         init.Launch();
@@ -71,7 +74,8 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 & /*diff*/)
 template<class T>
 void PointMovementGenerator<T>:: Finalize(T &unit)
 {
-    unit.ClearUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
+    if (unit.HasUnitState(UNIT_STATE_CHARGING))
+        unit.ClearUnitState(UNIT_STATE_CHARGING | UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
 
     if (unit.movespline->Finalized())
         MovementInform(unit);
@@ -132,6 +136,14 @@ void EffectMovementGenerator::Finalize(Unit &unit)
     if (((Creature&)unit).AI() && unit.movespline->Finalized())
         ((Creature&)unit).AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
     // Need restore previous movement since we have no proper states system
+    if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
+    {
+        if (Unit* victim = unit.getVictim())
+            unit.GetMotionMaster()->MoveChase(victim);
+        else
+            unit.GetMotionMaster()->Initialize();
+    }
+
     //if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED|UNIT_STATE_FLEEING))
     //{
     //    if (Unit * victim = unit.getVictim())

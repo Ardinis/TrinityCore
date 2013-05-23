@@ -1,0 +1,43 @@
+--- src/server/game/Movement/MotionMaster.cpp
++++ src/server/game/Movement/MotionMaster.cpp
+@@ -248,7 +248,7 @@
+             _owner->GetGUIDLow(),
+             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
+             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
+-        Mutate(new ChaseMovementGenerator<Player>(target, dist, angle), MOTION_SLOT_ACTIVE);
++        Mutate(new ChaseMovementGenerator<Player>(target, dist, angle, spellId), MOTION_SLOT_ACTIVE);
+     }
+     else
+     {
+@@ -256,11 +256,11 @@
+             _owner->GetEntry(), _owner->GetGUIDLow(),
+             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
+             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
+-        Mutate(new ChaseMovementGenerator<Creature>(target, dist, angle), MOTION_SLOT_ACTIVE);
++        Mutate(new ChaseMovementGenerator<Creature>(target, dist, angle, spellId), MOTION_SLOT_ACTIVE);
+     }
+ }
+ 
+-void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slot)
++void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slot, uint32 spellId)
+ {
+     // ignore movement request if target not exist
+     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+@@ -272,7 +272,7 @@
+         sLog->outDebug(LOG_FILTER_GENERAL, "Player (GUID: %u) follow to %s (GUID: %u)", _owner->GetGUIDLow(),
+             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
+             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
+-        Mutate(new FollowMovementGenerator<Player>(target, dist, angle), slot);
++        Mutate(new FollowMovementGenerator<Player>(target, dist, angle, spellId), slot);
+     }
+     else
+     {
+@@ -280,7 +280,7 @@
+             _owner->GetEntry(), _owner->GetGUIDLow(),
+             target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
+             target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
+-        Mutate(new FollowMovementGenerator<Creature>(target, dist, angle), slot);
++        Mutate(new FollowMovementGenerator<Creature>(target, dist, angle, spellId), slot);
+     }
+ }
+ 

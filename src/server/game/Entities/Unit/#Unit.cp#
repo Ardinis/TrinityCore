@@ -1,0 +1,9 @@
+if (GetTypeId() == TYPEID_PLAYER && HasAuraType(SPELL_AURA_MOD_COOLDOWN))
+        {
+            AuraEffectList const& ModCoolDown = GetAuraEffectsByType(SPELL_AURA_MOD_COOLDOWN);
+            for (AuraEffectList::const_iterator j = ModCoolDown.begin(); j != ModCoolDown.end(); ++j)
+            {
+                std::cout << "mod cooldown : " << (*j)->GetAmount() << std::endl;
+                cooldown += (*j)->GetAmount();
+            }
+        }

@@ -73,7 +73,7 @@ namespace MMAP
 
         delete [] fileName;
 
-        sLog->outString( "MMAP:loadMapData: Loaded %03i.mmap", mapId);
+        sLog->outDebug(LOG_FILTER_MAPS, "MMAP:loadMapData: Loaded %03i.mmap", mapId);
 
         // store inside our map list
         MMapData* mmap_data = new MMapData(mesh);
@@ -154,7 +154,7 @@ namespace MMAP
         {
             mmap->mmapLoadedTiles.insert(std::pair<uint32, dtTileRef>(packedGridPos, tileRef));
             ++loadedTiles;
-            sLog->outString( "MMAP:loadMap: Loaded mmtile %03i[%02i,%02i] into %03i[%02i,%02i]", mapId, x, y, mapId, header->x, header->y);
+            sLog->outDebug(LOG_FILTER_MAPS, "MMAP:loadMap: Loaded mmtile %03i[%02i,%02i] into %03i[%02i,%02i]", mapId, x, y, mapId, header->x, header->y);
             return true;
         }
         else

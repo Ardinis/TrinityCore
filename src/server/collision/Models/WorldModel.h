@@ -58,6 +58,7 @@ namespace VMAP
             uint32 GetFileSize();
             bool writeToFile(FILE* wf);
             static bool readFromFile(FILE* rf, WmoLiquid* &liquid);
+            void getPosInfo(uint32 &tilesX, uint32 &tilesY, Vector3 &corner) const;
         private:
             WmoLiquid(): iHeight(0), iFlags(0) {};
             uint32 iTilesX;  //!< number of tiles in x direction, each
@@ -66,6 +67,7 @@ namespace VMAP
             uint32 iType;    //!< liquid type
             float *iHeight;  //!< (tilesX + 1)*(tilesY + 1) height values
             uint8 *iFlags;   //!< info if liquid tile is used
+
     };
 
     /*! holding additional info for WMO group files */
@@ -90,6 +92,7 @@ namespace VMAP
             const G3D::AABox& GetBound() const { return iBound; }
             uint32 GetMogpFlags() const { return iMogpFlags; }
             uint32 GetWmoID() const { return iGroupWMOID; }
+            void getMeshData(std::vector<Vector3> &vertices, std::vector<MeshTriangle> &triangles, WmoLiquid* &liquid);
         protected:
             G3D::AABox iBound;
             uint32 iMogpFlags;// 0x8 outdor; 0x2000 indoor
@@ -114,6 +117,7 @@ namespace VMAP
             bool writeFile(const std::string &filename);
             bool readFile(const std::string &filename);
             uint32 Flags;
+            void getGroupModels(std::vector<GroupModel> &groupModels);
         protected:
             uint32 RootWMOID;
             std::vector<GroupModel> groupModels;

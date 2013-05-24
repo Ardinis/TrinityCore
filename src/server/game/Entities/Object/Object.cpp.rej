@@ -1,0 +1,39 @@
+--- src/server/game/Entities/Object/Object.cpp
++++ src/server/game/Entities/Object/Object.cpp
+@@ -2691,12 +2691,11 @@
+     GetPosition(&pos);
+     angle += m_orientation;
+     float destx, desty, destz, ground, floor;
+-    pos.m_positionZ += 2.0f;
+     destx = pos.m_positionX + dist * cos(angle);
+     desty = pos.m_positionY + dist * sin(angle);
+     float savex = pos.m_positionX;
+     float savey = pos.m_positionY;
+-    float savez = pos.m_positionZ - 2.0f;
++    float savez = pos.m_positionZ;
+ 
+     if (!Trinity::IsValidMapCoord(destx, desty))    // Prevent invalid coordinates here, position is unchanged
+     {
+@@ -2713,16 +2712,20 @@
+     int cnt = 0;
+     float newDist  = 0.0f;
+ 
++    if (GetTypeId() == TYPEID_PLAYER)
++        if (ToPlayer()->IsFalling() && destz - savez > 2.0f)
++            return;
++
+     while (newDist <= dist)
+     {
+-        cnt += 2;
++        cnt++;
+         destx = savex + (float)(cnt) * cos(angle);
+         desty = savey + (float)(cnt) * sin(angle);
+         ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
+         floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+         destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+         float realDestz = destz;
+-        destz += 2.0f; // 2 yard x, y and 1 yard z limitation for level check to allow blink continuing it's way
++        destz += 1.0f; // 1 yard x, y and 1 yard z limitation for level check to allow blink continuing it's way
+         bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f,
+                                                                            destx, desty, destz+0.5f, colx, coly, colz, -0.5f);
+         if (!col)

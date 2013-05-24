@@ -40,7 +40,7 @@ namespace
 
     DisableMap m_DisableMap;
 
-    uint8 MAX_DISABLE_TYPES = 7;
+    uint8 MAX_DISABLE_TYPES = 8;
 }
 
 void LoadDisables()
@@ -216,6 +216,34 @@ void LoadDisables()
                         break;
                     default:
                         break;
+                }
+                break;
+            }
+            case DISABLE_TYPE_MMAP:
+            {
+                MapEntry const* mapEntry = sMapStore.LookupEntry(entry);
+                if (!mapEntry)
+                {
+                    sLog->outError("Map entry %u from `disables` doesn't exist in dbc, skipped.", entry);
+                    continue;
+                }
+                switch (mapEntry->map_type)
+                {
+                case MAP_COMMON:
+                    sLog->outString("Pathfinding disabled for world map %u.", entry);
+                    break;
+                case MAP_INSTANCE:
+                case MAP_RAID:
+                    sLog->outString("Pathfinding disabled for instance map %u.", entry);
+                    break;
+                case MAP_BATTLEGROUND:
+                    sLog->outString("Pathfinding disabled for battleground map %u.", entry);
+                    break;
+                case MAP_ARENA:
+                    sLog->outString("Pathfinding disabled for arena map %u.", entry);
+                    break;
+                default:
+                    break;
                 }
                 break;
             }

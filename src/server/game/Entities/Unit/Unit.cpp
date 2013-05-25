@@ -15837,8 +15837,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (procExtra & PROC_EX_ABSORB && !isVictim && spellProto->ProcFlags & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG))
             active = true;
 
-        if (spellProto->Id == 21084 || spellProto->Id == 31801 || spellProto->Id == 53736 || spellProto->Id == 20375 || spellProto->Id == 20165 || spellProto->Id == 20166 || spellProto->Id == 20164)
-            active = true;
+        //        if (spellProto->Id == 21084 || spellProto->Id == 31801 || spellProto->Id == 53736 || spellProto->Id == 20375 || spellProto->Id == 20165 || spellProto->Id == 20166 || spellProto->Id == 20164)
+        //    active = true;
 
         uint32 tempProcEx = procExtra;
         if (isVictim && damage && !(procExtra & PROC_EX_CRITICAL_HIT) && !(procFlag & PROC_FLAG_TAKEN_PERIODIC)

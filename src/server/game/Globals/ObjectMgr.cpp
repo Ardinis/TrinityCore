@@ -6195,7 +6195,7 @@ unsigned int ObjectMgr::GenrateFreeItemGuid()
     if (result)
     {
         _hiItemGuid = (*result)[0].GetUInt32()+1;
-        for (uint32 cnt = 42; (cnt < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt++)
+        for (uint64 cnt = 5700000; (cnt < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt++)
         {
             QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid = '%u'", cnt);
             if (notFreeGuid)

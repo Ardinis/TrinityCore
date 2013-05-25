@@ -71,7 +71,7 @@ bool PathGenerator::CalculatePath(float destX, float destY, float destZ, bool fo
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if (!_navMesh || !_navMeshQuery || _sourceUnit->HasUnitState(UNIT_STATE_IGNORE_PATHFINDING) ||
-        !HaveTile(start) || !HaveTile(dest) || (_sourceUnit->ToCreature() && !_sourceUnit->ToCreature()->isPet()))
+        !HaveTile(start) || !HaveTile(dest) || (_sourceUnit->ToCreature() && !_sourceUnit->ToCreature()->isPet()) || _sourceUnit->GetTransport())
     {
         BuildShortcut();
         _type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);

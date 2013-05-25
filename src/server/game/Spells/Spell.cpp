@@ -5431,7 +5431,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 target->GetFirstCollisionPosition(pos, CONTACT_DISTANCE, target->GetRelativeAngle(m_caster));
 
                 m_preGeneratedPath.SetPathLengthLimit(m_spellInfo->GetMaxRange(true) * 5.0f);
-                bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize());
+                bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ + 0.5f);
                 if (!result || m_preGeneratedPath.GetPathType() & PATHFIND_INCOMPLETE)
                     return SPELL_FAILED_NOPATH;
 

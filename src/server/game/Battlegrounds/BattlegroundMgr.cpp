@@ -57,7 +57,6 @@ BattlegroundMgr::BattlegroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
         m_Battlegrounds[i].clear();
     m_NextRatingDiscardUpdate = sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
     m_Testing=false;
-    m_timerCreateBattlegroundActive = false;
 }
 
 BattlegroundMgr::~BattlegroundMgr()
@@ -501,7 +500,7 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
 }
 
 // create a new battleground that will really be used to play
-Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, int32 playerCount)
+Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated)
 {
     // get the template BG
     Battleground* bg_template = GetBattlegroundTemplate(bgTypeId);
@@ -520,23 +519,6 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
     {
         selectionWeights = &m_BGSelectionWeights;
         isRandom = true;
-        if (m_timerCreateBattlegroundActive)
-        {
-            if (time(0) - m_timerBatt >= 240)
-            {
-                m_timerCreateBattlegroundActive = false;
-            }
-            else
-            {
-                return NULL;
-            }
-        }
-        else
-        {
-            m_timerCreateBattlegroundActive = true;
-            m_timerBatt = time(0);
-            return NULL;
-        }
     }
 
     if (selectionWeights)
@@ -553,88 +535,24 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
             return NULL;
         // Select a random value
         selectedWeight = urand(0, Weight-1);
-	//
-	if (bgTypeId == BATTLEGROUND_RB)
-	{
-	  if (playerCount < 8)
-	  {
-	    bgTypeId = BATTLEGROUND_WS; // goulet
-	  }
-	  else if (playerCount < 20)
-	  {
-	    switch (urand(0, 4))
-	    {
-	    case 0:
-	      bgTypeId = BATTLEGROUND_WS; // goulet
-	      break;
-	    case 1:
-	      bgTypeId = BATTLEGROUND_AB;
-	      break;
-	    case 2:
-	      bgTypeId = BATTLEGROUND_SA;
-	      break;
-	    case 3:
-	      bgTypeId = BATTLEGROUND_EY;
-	      break;
-	    default :
-	      bgTypeId = BATTLEGROUND_WS; // goulet
-	      break;
-	    }
-	  }
-	  else
-	  {
-	    switch (urand(0, 6))
-	    {
-	    case 0:
-	      bgTypeId = BATTLEGROUND_WS;  //ggoulet
-	      break;
-	    case 1:
-	      bgTypeId = BATTLEGROUND_AB; // arathi
-	      break;
-	    case 2:
-	      bgTypeId = BATTLEGROUND_SA; // stand of the ancient
-	      break;
-	    case 3:
-	      bgTypeId = BATTLEGROUND_EY; // eye of storm
-	      break;
-	    case 4:
-	      bgTypeId = BATTLEGROUND_IC; // conquerents
-	      break;
-	    case 5:
-	      bgTypeId = BATTLEGROUND_AV; // alterac
-	      break;
-	    default :
-	      bgTypeId = BATTLEGROUND_WS; // goulet
-	      break;
-	    }
-	  }
-	  bg_template = GetBattlegroundTemplate(bgTypeId);
-	  if (!bg_template)
-	  {
-            sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
-            return NULL;
-	  }
-	}
-	else
-	{
-	  // Select the correct bg (if we have in DB A(10), B(20), C(10), D(15) --> [0---A---9|10---B---29|30---C---39|40---D---54])
-	  Weight = 0;
-	  for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
-	  {
+
+        // Select the correct bg (if we have in DB A(10), B(20), C(10), D(15) --> [0---A---9|10---B---29|30---C---39|40---D---54])
+        Weight = 0;
+        for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
+        {
             Weight += it->second;
             if (selectedWeight < Weight)
             {
-	      bgTypeId = it->first;
-	      break;
+                bgTypeId = it->first;
+                break;
             }
-	  }
-	  bg_template = GetBattlegroundTemplate(bgTypeId);
-	  if (!bg_template)
-	  {
+        }
+        bg_template = GetBattlegroundTemplate(bgTypeId);
+        if (!bg_template)
+        {
             sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
             return NULL;
-	  }
-	}
+        }
     }
 
     Battleground* bg = NULL;
@@ -678,7 +596,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
             bg = new BattlegroundIC(*(BattlegroundIC*)bg_template);
             break;
         case BATTLEGROUND_RB:
-	  bg = new BattlegroundRB(*(BattlegroundRB*)bg_template);
+            bg = new BattlegroundRB(*(BattlegroundRB*)bg_template);
             break;
         default:
             //error, but it is handled few lines above

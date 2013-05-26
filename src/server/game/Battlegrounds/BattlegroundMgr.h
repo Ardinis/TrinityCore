@@ -82,7 +82,7 @@ class BattlegroundMgr
  BattlegroundSet GetBattlegroundsByType(BattlegroundTypeId bgTypeId) { return m_Battlegrounds[bgTypeId]; }
 
         Battleground* GetBattlegroundTemplate(BattlegroundTypeId bgTypeId);
-        Battleground* CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, int32 playerCount = 0);
+        Battleground* CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated);
 
         uint32 CreateBattleground(CreateBattlegroundData& data);
 
@@ -132,10 +132,6 @@ class BattlegroundMgr
         static HolidayIds BGTypeToWeekendHolidayId(BattlegroundTypeId bgTypeId);
         static BattlegroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattlegroundTypeId bgTypeId);
-
-	bool   m_timerCreateBattlegroundActive;
-	uint64 m_timerBatt;
-
     private:
         BattleMastersMap    mBattleMastersMap;
 
@@ -155,3 +151,4 @@ class BattlegroundMgr
 
 #define sBattlegroundMgr ACE_Singleton<BattlegroundMgr, ACE_Null_Mutex>::instance()
 #endif
+

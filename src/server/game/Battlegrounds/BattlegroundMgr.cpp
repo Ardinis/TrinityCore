@@ -522,7 +522,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
         isRandom = true;
         if (m_timerCreateBattlegroundActive)
         {
-            if (time(0) - m_timerBatt >= 300)
+            if (time(0) - m_timerBatt >= 240)
             {
                 m_timerCreateBattlegroundActive = false;
             }
@@ -554,108 +554,87 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
         // Select a random value
         selectedWeight = urand(0, Weight-1);
 	//
-        if (bgTypeId == BATTLEGROUND_RB)
-        {
-            if (playerCount < 8)
+	if (bgTypeId == BATTLEGROUND_RB)
+	{
+	  if (playerCount < 8)
+	  {
+	    bgTypeId = BATTLEGROUND_WS; // goulet
+	  }
+	  else if (playerCount < 20)
+	  {
+	    switch (urand(0, 4))
+	    {
+	    case 0:
+	      bgTypeId = BATTLEGROUND_WS; // goulet
+	      break;
+	    case 1:
+	      bgTypeId = BATTLEGROUND_AB;
+	      break;
+	    case 2:
+	      bgTypeId = BATTLEGROUND_SA;
+	      break;
+	    case 3:
+	      bgTypeId = BATTLEGROUND_EY;
+	      break;
+	    default :
+	      bgTypeId = BATTLEGROUND_WS; // goulet
+	      break;
+	    }
+	  }
+	  else
+	  {
+	    switch (urand(0, 6))
+	    {
+	    case 0:
+	      bgTypeId = BATTLEGROUND_WS;  //ggoulet
+	      break;
+	    case 1:
+	      bgTypeId = BATTLEGROUND_AB; // arathi
+	      break;
+	    case 2:
+	      bgTypeId = BATTLEGROUND_SA; // stand of the ancient
+	      break;
+	    case 3:
+	      bgTypeId = BATTLEGROUND_EY; // eye of storm
+	      break;
+	    case 4:
+	      bgTypeId = BATTLEGROUND_IC; // conquerents
+	      break;
+	    case 5:
+	      bgTypeId = BATTLEGROUND_AV; // alterac
+	      break;
+	    default :
+	      bgTypeId = BATTLEGROUND_WS; // goulet
+	      break;
+	    }
+	  }
+	  bg_template = GetBattlegroundTemplate(bgTypeId);
+	  if (!bg_template)
+	  {
+            sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
+            return NULL;
+	  }
+	}
+	else
+	{
+	  // Select the correct bg (if we have in DB A(10), B(20), C(10), D(15) --> [0---A---9|10---B---29|30---C---39|40---D---54])
+	  Weight = 0;
+	  for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
+	  {
+            Weight += it->second;
+            if (selectedWeight < Weight)
             {
-                bgTypeId = BATTLEGROUND_WS; // goulet
+	      bgTypeId = it->first;
+	      break;
             }
-            else if (playerCount < 20)
-            {
-                switch (urand(0, 4))
-                {
-                case 0:
-                    bgTypeId = BATTLEGROUND_WS; // goulet
-                    break;
-                case 1:
-                    bgTypeId = BATTLEGROUND_AB;
-                    break;
-                case 2:
-                    bgTypeId = BATTLEGROUND_AB;
-                    break;
-                case 3:
-                    bgTypeId = BATTLEGROUND_EY;
-                    break;
-                default :
-                    bgTypeId = BATTLEGROUND_WS; // goulet
-                    break;
-                }
-            }
-            else if (playerCount < 30)
-            {
-                switch (urand(0, 4))
-                {
-                case 0:
-                    bgTypeId = BATTLEGROUND_WS;  //ggoulet
-                    break;
-                case 1:
-                    bgTypeId = BATTLEGROUND_AB; // arathi
-                    break;
-                case 2:
-                    bgTypeId = BATTLEGROUND_SA; // stand of the ancient
-                    break;
-                case 3:
-                    bgTypeId = BATTLEGROUND_EY; // eye of storm
-                    break;
-                default :
-                    bgTypeId = BATTLEGROUND_WS; // goulet
-                    break;
-                }
-            }
-            else
-            {
-                switch (urand(0, 6))
-                {
-                case 0:
-                    bgTypeId = BATTLEGROUND_WS;  //ggoulet
-                    break;
-                case 1:
-                    bgTypeId = BATTLEGROUND_AB; // arathi
-                    break;
-                case 2:
-                    bgTypeId = BATTLEGROUND_SA; // stand of the ancient
-                    break;
-                case 3:
-                    bgTypeId = BATTLEGROUND_EY; // eye of storm
-                    break;
-                case 4:
-                    bgTypeId = BATTLEGROUND_IC; // conquerents
-                    break;
-                case 5:
-                    bgTypeId = BATTLEGROUND_AV; // alterac
-                    break;
-                default :
-                    bgTypeId = BATTLEGROUND_WS; // goulet
-                    break;
-                }
-            }
-            bg_template = GetBattlegroundTemplate(bgTypeId);
-            if (!bg_template)
-            {
-                sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
-                return NULL;
-            }
-        }
-        else
-        {
-            // Select the correct bg (if we have in DB A(10), B(20), C(10), D(15) --> [0---A---9|10---B---29|30---C---39|40---D---54])
-            Weight = 0;
-            for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
-            {
-                Weight += it->second;
-                if (selectedWeight < Weight)
-                {
-                    bgTypeId = it->first;
-                    break;
-                }
-            }
-            bg_template = GetBattlegroundTemplate(bgTypeId);
-            if (!bg_template)
-            {
-                sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
-                return NULL;
-            }
-        }
+	  }
+	  bg_template = GetBattlegroundTemplate(bgTypeId);
+	  if (!bg_template)
+	  {
+            sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
+            return NULL;
+	  }
+	}
     }
 
     Battleground* bg = NULL;

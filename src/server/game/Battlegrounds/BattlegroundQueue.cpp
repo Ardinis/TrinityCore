@@ -902,7 +902,6 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         if (m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty() && m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty())
             return;
 
-
         // found out the minimum and maximum ratings the newly added team should battle against
         // arenaRating is the rating of the latest joined team, or 0
         // 0 is on (automatic update call) and we must set it to team's with longest wait time
@@ -933,7 +932,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                     // (after what time the ratings aren't taken into account when making teams) then
                     // the discard time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
                     // else leave the discard time on 0, this way all ratings will be discarded
-                    uint32 discardTime = getMSTime() - sBattlegroundMgr->GetRatingDiscardTimer();
+                    //                    uint32 discardTime = getMSTime() - sBattlegroundMgr->GetRatingDiscardTimer();
 
                     // we need to find 2 teams which will play next game
                     GroupsQueueType::iterator itr_teams[BG_TEAMS_COUNT];
@@ -950,8 +949,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
                         {
                             // if group match conditions, then add it to pool
                             if (!(*itr2)->IsInvitedToBGInstanceGUID
-                                && (((*itr2)->ArenaMatchmakerRating >= arenaMinRating && (*itr2)->ArenaMatchmakerRating <= arenaMaxRating)
-                                    || (*itr2)->JoinTime < discardTime)
+                                && (((*itr2)->ArenaMatchmakerRating >= arenaMinRating && (*itr2)->ArenaMatchmakerRating <= arenaMaxRating))
                                 && (*itr_teams[0])->ArenaTeamId != (*itr2)->ArenaTeamId)
                             {
                                 itr_teams[found++] = itr2;

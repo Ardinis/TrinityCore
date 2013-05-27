@@ -536,7 +536,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
         for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
         {
             Weight += it->second;
-            if (selectedWeight < Weight)
+            if (selectedWeight < Weight && bgTypeId != BATTLEGROUND_AV && bgTypeId != BATTLEGROUND_IC)
             {
                 bgTypeId = it->first;
                 break;

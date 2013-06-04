@@ -1587,8 +1587,8 @@ class npc_sif : public CreatureScript
                                 me->DespawnOrUnsummon();
                                 return;
                             }
-                            //                            DoCast(me, SPELL_BLIZZARD, true);
-                            DoCast(me, 62577, true);
+                            DoCast(me, SPELL_BLIZZARD, true);
+                            //DoCast(me, 62577, true);
                             events.ScheduleEvent(EVENT_BLIZZARD, 45000);
                             break;
                         case EVENT_FROSTNOVA:

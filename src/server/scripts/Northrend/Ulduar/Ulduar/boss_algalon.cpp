@@ -255,13 +255,10 @@ class ActivateLivingConstellation : public BasicEvent
 
         bool Execute(uint64 execTime, uint32 /*diff*/)
         {
-            std::cout << "Execute" << std::endl;
             //            if (!_instance || _instance->GetBossState(BOSS_ALGALON) != IN_PROGRESS)
             //    return true;    // delete event
-            std::cout << "Execute 1" << std::endl;
             _owner->CastSpell((Unit*)NULL, SPELL_TRIGGER_3_ADDS, TRIGGERED_FULL_MASK);
             _owner->m_Events.AddEvent(this, execTime + urand(45000, 50000));
-            std::cout << "Execute 2" << std::endl;
             return false;
         }
 
@@ -462,8 +459,13 @@ class boss_algalon_the_observer : public CreatureScript
                         //                        summon->CastSpell(summon, SPELL_VOID_ZONE_VISUAL, TRIGGERED_FULL_MASK);
                         break;
                     case NPC_ALGALON_STALKER_ASTEROID_TARGET_01:
+                    {
+                        float z = summon->GetPositionZ();
+                        summon->Relocate(summon->GetPositionX(), summon->GetPositionY(), z - 65.0f);
+                        summon->NearTeleportTo(summon->GetPositionX(), summon->GetPositionY(), z - 65.0f, 0.0f);
                         summon->CastSpell(summon, SPELL_COSMIC_SMASH_VISUAL_STATE, TRIGGERED_FULL_MASK);
                         break;
+                    }
                     case NPC_ALGALON_STALKER_ASTEROID_TARGET_02:
                         summon->m_Events.AddEvent(new CosmicSmashDamageEvent(summon), summon->m_Events.CalculateTime(3250));
                         break;
@@ -471,6 +473,7 @@ class boss_algalon_the_observer : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         summon->CastSpell(summon, SPELL_WORM_HOLE_TRIGGER, TRIGGERED_FULL_MASK);
                         summon->CastSpell(summon, SPELL_SUMMON_VOID_ZONE_VISUAL, TRIGGERED_FULL_MASK);
+
                         break;
                     case NPC_UNLEASHED_DARK_MATTER:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
@@ -579,7 +582,6 @@ class boss_algalon_the_observer : public CreatureScript
                             for (uint32 i = 0; i < LIVING_CONSTELLATION_COUNT; ++i)
                                 if (Creature* summon = DoSummon(NPC_LIVING_CONSTELLATION, ConstellationPos[i], 0, TEMPSUMMON_DEAD_DESPAWN))
                                 {
-                                    summon->MonsterYell("BANDE DE BOULETS!!!!", LANG_UNIVERSAL, 0);
                                     summon->SetReactState(REACT_PASSIVE);
                                 }
 
@@ -587,7 +589,6 @@ class boss_algalon_the_observer : public CreatureScript
                             me->GetCreatureListWithEntryInGrid(stalkers, NPC_ALGALON_STALKER, 500.0f);
                             if (!stalkers.empty())
                             {
-                                std::cout << "Execute ??????????????" << std::endl;
                                 Unit* stalker = Trinity::Containers::SelectRandomContainerElement(stalkers);
                                 stalker->m_Events.AddEvent(new ActivateLivingConstellation(stalker), stalker->m_Events.CalculateTime(urand(45000, 50000)));
                             }
@@ -746,10 +747,8 @@ class npc_living_constellation : public CreatureScript
                 {
                     case ACTION_ACTIVATE_STAR:
                     {
-                        std::cout << "trololololo 1" << std::endl;
                         if (Creature* algalon = me->FindNearestCreature(NPC_ALGALON, 200.0f))
                         {
-                            std::cout << "trololololo 2" << std::endl;
                             if (Unit* target = algalon->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(algalon)))
                             {
                                 me->SetReactState(REACT_AGGRESSIVE);
@@ -861,7 +860,6 @@ public:
                     {
                         if (!(*itr)->HasAura(SPELL_BLACK_HOLE_AURA))
                         {
-                            depop = true;
                             (*itr)->AddAura(SPELL_BLACK_HOLE_AURA, (*itr));
                             break;
                         }
@@ -902,13 +900,18 @@ public:
             me->GetMotionMaster()->MoveRandom(15.0f);
         }
 
-        void DamageTaken(Unit * /*Who*/, uint32 &Damage)
+        void DamageTaken(Unit * Who, uint32 &Damage)
         {
             if(Damage > me->GetHealth())
             {
                 Damage = me->GetHealth() - 1;
                 Explode();
             }
+        }
+
+        void JustSummoned(Creature *sum)
+        {
+            sum->AddAura(SPELL_VISUAL_VOID_ZONE, sum);
         }
 
         void Explode()
@@ -1069,13 +1072,11 @@ public:
         if (player->HasItemCount(gameObject->GetEntry() == 194628 ? 45796 : 45798, 1))
             hasKey = true;
 
-        std::cout << "!hasKey" << std::endl;
         if (!hasKey)
         {
             player->CLOSE_GOSSIP_MENU();
             return false;
         }
-        std::cout << "hasKey" << std::endl;
 
         // Start Algalon event
         gameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
@@ -1199,7 +1200,6 @@ class spell_algalon_trigger_3_adds : public SpellScriptLoader
 
             void SelectTarget(std::list<Unit*>& targets)
             {
-                std::cout << "SelectTarget !!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
                 targets.clear();
                 std::list<Creature*> Ntargets;
                 GetCaster()->ToCreature()->GetCreatureListWithEntryInGrid(Ntargets, 33052, 1000.0f);
@@ -1217,11 +1217,9 @@ class spell_algalon_trigger_3_adds : public SpellScriptLoader
             void HandleDummy(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                std::cout << "trololololo -1" << std::endl;
                 Creature* target = GetHitCreature();
                 if (!target)
                     return;
-                std::cout << "trololololo -2 : " << target->GetEntry() << std::endl;
                 target->AI()->DoAction(ACTION_ACTIVATE_STAR);
             }
 
@@ -1345,7 +1343,7 @@ class spell_algalon_cosmic_smash : public SpellScriptLoader
 
             void ModDestHeight(SpellEffIndex /*effIndex*/)
             {
-                Position offset = {0.0f, 0.0f, 65.0f, 0.0f};
+                Position offset = {0.0f, 0.0f, -65.0f, 0.0f};
                 if (!GetTargetDest())
                     return;
                 const_cast<WorldLocation*>(GetTargetDest())->RelocateOffset(offset);
@@ -1380,7 +1378,7 @@ class spell_algalon_cosmic_smash_damage : public SpellScriptLoader
 
                 float distance = GetHitUnit()->GetDistance2d(GetTargetDest()->GetPositionX(), GetTargetDest()->GetPositionY());
                 if (distance > 6.0f)
-                    SetHitDamage(int32(float(GetHitDamage()) / distance) * 2);
+                    SetHitDamage(int32(float(GetHitDamage()) / distance) * 2 / 3);
             }
 
             void Register()

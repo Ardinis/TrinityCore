@@ -505,6 +505,8 @@ class boss_the_lich_king : public CreatureScript
                 SetEquipmentSlots(true);
                 mui_dead = 30000;
                 mui_sumVile = 10000;
+                _harvestGUID.clear();
+                special = false;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -550,6 +552,8 @@ class boss_the_lich_king : public CreatureScript
 
                 // Reset any light override
                 SendLightOverride(0, 5000);
+                _harvestGUID.clear();
+                special = false;
             }
 
             bool CanAIAttack(Unit const* target) const
@@ -696,6 +700,11 @@ class boss_the_lich_king : public CreatureScript
 	      //	      DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                 switch (summon->GetEntry())
                 {
+                    case NPC_RAGING_SPIRIT:
+
+                        _harvestGUID.push_back(summon->GetGUID());
+                        summons.Summon(summon);
+                        break;
                     case NPC_SHAMBLING_HORROR:
                     case NPC_DRUDGE_GHOUL:
                         summon->CastSpell(summon, SPELL_RISEN_WITCH_DOCTOR_SPAWN, true);
@@ -850,6 +859,8 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_VILE_SPIRITS, 79500, EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
                         events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 73500, 0, PHASE_THREE);
                         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+                        if (IsHeroic() && Is25ManRaid())
+                            special = true;
                         break;
                     case POINT_LK_OUTRO_1:
                         events.ScheduleEvent(EVENT_OUTRO_TALK_4, 1, 0, PHASE_OUTRO);
@@ -1030,8 +1041,21 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_START_ATTACK:
                             me->SetReactState(REACT_AGGRESSIVE);
+                            if (special)
+                            {
+                                special = false;
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                                    me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
+                            }
+                            for (std::list<uint64 >::iterator itr = _harvestGUID.begin(); itr != _harvestGUID.end(); ++itr)
+                            {
+                                if (Creature *c = Unit::GetCreature(*me, (*itr)))
+                                    c->SetReactState(REACT_AGGRESSIVE);
+                            }
                             if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
                                 events.SetPhase(PHASE_THREE);
+                            if (instance && IsHeroic())
+                                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HARVEST_SOULS_TELEPORT);
                             break;
                         case EVENT_VILE_SPIRITS:
                             SendMusicToPlayers(MUSIC_SPECIAL);
@@ -1055,6 +1079,14 @@ class boss_the_lich_king : public CreatureScript
                             events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
+                            for (std::list<uint64 >::iterator itr = _harvestGUID.begin(); itr != _harvestGUID.end(); ++itr)
+                            {
+                                if (Creature *c = Unit::GetCreature(*me, (*itr)))
+                                {
+                                    c->SetReactState(REACT_PASSIVE);
+                                    c->AttackStop();
+                                }
+                            }
                             events.ScheduleEvent(EVENT_WICKED_SPIRITS, events.GetNextEventTime(EVENT_VILE_SPIRITS) - events.GetTimer(), 0, PHASE_FROSTMOURNE);
                             events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
                             events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
@@ -1240,6 +1272,8 @@ class boss_the_lich_king : public CreatureScript
             uint32 _vileSpiritExplosions;
             uint32 mui_dead;
             uint32 mui_sumVile;
+            std::list<uint64 >  _harvestGUID;
+            bool special;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1583,7 +1617,7 @@ class npc_raging_spirit : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!UpdateVictim())
+                if (!UpdateVictim() || me->HasReactState(REACT_PASSIVE))
                     return;
 
                 _events.Update(diff);
@@ -1775,7 +1809,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                     {
                         if (Player *player = Unit::GetPlayer(*me, _grabbedPlayer))
                         {
-                            //                            player->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                            player->ClearUnitState(UNIT_STATE_ONVEHICLE);
                             //std::cout << "check start" << std::endl;
                             HadGrab = true;
                             //std::cout << "check end" << std::endl;
@@ -1902,7 +1936,8 @@ class npc_strangulate_vehicle : public CreatureScript
 
             void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool /*apply*/)
             {
-                passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                if (!IsHeroic())
+                    passenger->ClearUnitState(UNIT_STATE_ONVEHICLE);
             }
 
             void UpdateAI(uint32 const diff)
@@ -2199,7 +2234,7 @@ class npc_spirit_bomb : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-	      std::cout << "vile spirit bomb just summoned" << std::endl;
+
                 float destX, destY, destZ;
                 me->GetPosition(destX, destY);
                 //destZ = 870 + 10;    // approximation, gets more precise later
@@ -2685,6 +2720,8 @@ class ExactDistanceCheck
 
         bool operator()(Unit* unit)
         {
+            if (unit->GetVehicle())
+                return true;
             return _source->GetExactDist2d(unit) > _dist;
         }
 

@@ -205,7 +205,7 @@ class boss_baltharus_the_warborn : public CreatureScript
                             events.ScheduleEvent(EVENT_BLADE_TEMPEST, 24000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_ENERVATING_BRAND:
-                            for (uint8 i = 0; i < RAID_MODE<uint8>(1, 2, 2, 3); i++)
+                            for (uint8 i = 0; i < RAID_MODE<uint8>(2, 3, 3, 4); i++)
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
                                     DoCast(target, SPELL_ENERVATING_BRAND);
                             events.ScheduleEvent(EVENT_ENERVATING_BRAND, 26000, 0, PHASE_COMBAT);

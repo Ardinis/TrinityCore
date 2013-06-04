@@ -518,12 +518,12 @@ class boss_the_lich_king : public CreatureScript
 
             void EnterCombat(Unit* target)
             {
-                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
+	      /*	      if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
                 {
                     EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
                     return;
-                }
+		    }*/
 
                 me->setActive(true);
                 DoZoneInCombat();
@@ -701,7 +701,7 @@ class boss_the_lich_king : public CreatureScript
                         summon->CastSpell(summon, SPELL_RISEN_WITCH_DOCTOR_SPAWN, true);
                         summon->SetReactState(REACT_PASSIVE);
                         summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        summon->m_Events.AddEvent(new StartMovementEvent(me, summon), summon->m_Events.CalculateTime(5000));
+                        summon->m_Events.AddEvent(new StartMovementEvent(me, summon), summon->m_Events.CalculateTime(1000));
                         break;
                     case NPC_ICE_SPHERE:
                     {
@@ -2199,6 +2199,7 @@ class npc_spirit_bomb : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
+	      std::cout << "vile spirit bomb just summoned" << std::endl;
                 float destX, destY, destZ;
                 me->GetPosition(destX, destY);
                 //destZ = 870 + 10;    // approximation, gets more precise later

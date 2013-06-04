@@ -6531,7 +6531,11 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
         float dist = m_caster->GetDistance(pos);
         m_caster->GetFirstCollisionPosition(pos, dist, angle);
 
-        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+        bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+        if (result && !(m_preGeneratedPath.GetPathType() & PATHFIND_INCOMPLETE))
+            m_caster->GetMotionMaster()->MoveCharge(m_preGeneratedPath);
+        else
+            m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     }
 }
 

@@ -148,16 +148,30 @@ class boss_baltharus_the_warborn : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage, SpellInfo const* /*spellInfo*/)
             {
-	      if (me->GetHealth() > damage)
-		instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
+                if (me->GetHealth() > damage)
+                    instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
 
-	      if (me->HasUnitState(UNIT_STATE_CASTING))
-		return;
-	      if ((me->HealthBelowPctDamaged(66, damage) && _cloneCount == 3)
-		  || (me->HealthBelowPctDamaged(50, damage) && _cloneCount == 2)
-		  || (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 1))
-		DoAction(ACTION_CLONE);
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
 
+                if (!is25ManRaid() && !isHeroic())
+                {
+                    if ((me->HealthBelowPctDamaged(50, damage) && _cloneCount == 3))
+                        DoAction(ACTION_CLONE);
+                }
+                else if (is25ManRaid() && !isHeroic())
+                {
+                    if ((me->HealthBelowPctDamaged(66, damage) && _cloneCount == 3)
+                        || (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 2))
+                        DoAction(ACTION_CLONE);
+                }
+                else
+                {
+                    if ((me->HealthBelowPctDamaged(75, damage) && _cloneCount == 3)
+                        || (me->HealthBelowPctDamaged(50, damage) && _cloneCount == 2)
+                        || (me->HealthBelowPctDamaged(25, damage) && _cloneCount == 1))
+                        DoAction(ACTION_CLONE);
+                }
             }
 
             void UpdateAI(uint32 const diff)
@@ -191,7 +205,7 @@ class boss_baltharus_the_warborn : public CreatureScript
                             events.ScheduleEvent(EVENT_BLADE_TEMPEST, 24000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_ENERVATING_BRAND:
-                            for (uint8 i = 0; i < RAID_MODE<uint8>(4, 8, 8, 10); i++)
+                            for (uint8 i = 0; i < RAID_MODE<uint8>(1, 2, 2, 3); i++)
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true))
                                     DoCast(target, SPELL_ENERVATING_BRAND);
                             events.ScheduleEvent(EVENT_ENERVATING_BRAND, 26000, 0, PHASE_COMBAT);
@@ -223,7 +237,7 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
         struct npc_baltharus_the_warborn_cloneAI : public ScriptedAI
         {
             npc_baltharus_the_warborn_cloneAI(Creature* creature) : ScriptedAI(creature),
-                _instance(creature->GetInstanceScript())
+                                                                    _instance(creature->GetInstanceScript())
             {
                 if (_instance)
                     me->SetHealth(_instance->GetData(DATA_BALTHARUS_SHARED_HEALTH));
@@ -241,8 +255,8 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
             void DamageTaken(Unit* /*attacker*/, uint32& damage, SpellInfo const* /*spellInfo*/)
             {
                 // Setting DATA_BALTHARUS_SHARED_HEALTH to 0 when killed would bug the boss.
-	      //                if (_instance && me->GetHealth() > damage)
-	      //        _instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
+                //                if (_instance && me->GetHealth() > damage)
+                //        _instance->SetData(DATA_BALTHARUS_SHARED_HEALTH, me->GetHealth() - damage);
             }
 
             void JustDied(Unit* killer)
@@ -254,7 +268,6 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
             {
                 if (!UpdateVictim())
                     return;
-
 
                 _events.Update(diff);
 

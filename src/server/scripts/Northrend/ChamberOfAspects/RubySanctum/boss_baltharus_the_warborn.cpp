@@ -154,12 +154,12 @@ class boss_baltharus_the_warborn : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                if (!is25ManRaid() && !isHeroic())
+                if (!Is25ManRaid() && !IsHeroic())
                 {
                     if ((me->HealthBelowPctDamaged(50, damage) && _cloneCount == 3))
                         DoAction(ACTION_CLONE);
                 }
-                else if (is25ManRaid() && !isHeroic())
+                else if (Is25ManRaid() && !IsHeroic())
                 {
                     if ((me->HealthBelowPctDamaged(66, damage) && _cloneCount == 3)
                         || (me->HealthBelowPctDamaged(33, damage) && _cloneCount == 2))

@@ -473,7 +473,6 @@ class boss_algalon_the_observer : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         summon->CastSpell(summon, SPELL_WORM_HOLE_TRIGGER, TRIGGERED_FULL_MASK);
                         summon->CastSpell(summon, SPELL_SUMMON_VOID_ZONE_VISUAL, TRIGGERED_FULL_MASK);
-
                         break;
                     case NPC_UNLEASHED_DARK_MATTER:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
@@ -793,6 +792,7 @@ class npc_living_constellation : public CreatureScript
                     {
                         case EVENT_ARCANE_BARRAGE:
                             DoCastAOE(SPELL_ARCANE_BARRAGE);
+                            me->ClearUnitState(UNIT_STATE_CASTING);
                             _events.ScheduleEvent(EVENT_ARCANE_BARRAGE, 2500);
                             break;
                         case EVENT_RESUME_UPDATING:
@@ -857,13 +857,8 @@ public:
                     Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
                     me->VisitNearbyWorldObject(5.0f, searcher);
                     for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    {
                         if (!(*itr)->HasAura(SPELL_BLACK_HOLE_AURA))
-                        {
                             (*itr)->AddAura(SPELL_BLACK_HOLE_AURA, (*itr));
-                            break;
-                        }
-                    }
                 }
                 if (depop)
                     me->DespawnOrUnsummon();

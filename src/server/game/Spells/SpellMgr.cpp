@@ -3888,18 +3888,24 @@ void SpellMgr::LoadDbcDataCorrections()
             case 45680: // Shadowbolt
                 spellInfo->MaxAffectedTargets = 1;
                 break;
-        case 61698:
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
-            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
-            break;
-        case 62603: //sif blizzard
-            spellInfo->EffectAmplitude[0] = 5000;
-            break;
-        case 74502:
-            spellInfo->MaxAffectedTargets = 1;
-            break;
-        default:
-            break;
+            case 61698:
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+                spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+                break;
+            case 62603: //sif blizzard
+                spellInfo->EffectAmplitude[0] = 5000;
+                break;
+            case 74502:
+                spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 74648:
+            case 75877:
+            case 75878:
+            case 75879:
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_9_YARDS;
+                break;
+            default:
+                break;
         }
 
         switch (spellInfo->SpellFamilyName)

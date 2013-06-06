@@ -353,8 +353,8 @@ class boss_steelbreaker : public CreatureScript
                 phase = 0;
 				superChargedCnt = 0;
                 me->RemoveAllAuras();
-                me->ResetLootMode();
                 me->RemoveLootMode(LOOT_MODE_DEFAULT);
+                me->ResetLootMode();
                 ResetEncounter(instance, me);
                 RespawnEncounter(instance, me);
             }
@@ -400,7 +400,7 @@ class boss_steelbreaker : public CreatureScript
                             else
                                 nextSchedule = urand(20000, 30000);
                             events.RescheduleEvent(EVENT_OVERWHELMING_POWER, nextSchedule);
-                            me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+                            //                            me->AddLootMode(LOOT_MODE_HARD_MODE_2);
                         }
                         break;
                 }
@@ -428,7 +428,7 @@ class boss_steelbreaker : public CreatureScript
                     {
                         if (!Molgeim->isAlive() && !Brundir->isAlive())
                         {
-                            me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+                            me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                             instance->DoCompleteAchievement(RAID_MODE(2941, 2944));
                             AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
                             if (!pAE)
@@ -441,7 +441,9 @@ class boss_steelbreaker : public CreatureScript
                                             player->CompletedAchievement(pAE);
                         }
                         else
+                        {
                             me->SetLootRecipient(NULL);
+                        }
                     }
                 }
             }
@@ -995,8 +997,8 @@ class boss_stormcaller_brundir : public CreatureScript
                 forceLand = false;
                 couldNotDoThat = true;
                 me->RemoveAllAuras();
-                me->ResetLootMode();
                 me->RemoveLootMode(LOOT_MODE_DEFAULT);
+                me->ResetLootMode();
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING | MOVEMENTFLAG_WALKING);
                 me->SendMovementFlagUpdate();
 		//                me->SetSpeed(MOVE_RUN, 1.42857f);

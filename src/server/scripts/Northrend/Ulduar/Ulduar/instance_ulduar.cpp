@@ -1072,6 +1072,12 @@ class instance_ulduar : public InstanceMapScript
                 switch (type)
                 {
                     case TYPE_ALGALON :
+                    {
+                        if (state == DONE)
+                        {
+                            if (GameObject* AlgalonGift = instance->GetGameObject(GiftOfTheObserverGUID))
+                                AlgalonGift->SetRespawnTime(AlgalonGift->GetRespawnDelay());
+                        }
                         if (state == IN_PROGRESS)
                         {
                             HandleGameObject(AlgalonDoorGUID, false);     // Close Door
@@ -1090,6 +1096,7 @@ class instance_ulduar : public InstanceMapScript
                             HandleGameObject(AlgalonGlobeGUID,false);
                             HandleGameObject(AlgalonForceFieldGUID,true);
                         }
+                    }
                     case BOSS_LEVIATHAN:
                         for (std::list<uint64>::iterator i = LeviathanDoorGUIDList.begin(); i != LeviathanDoorGUIDList.end(); ++i)
                         {

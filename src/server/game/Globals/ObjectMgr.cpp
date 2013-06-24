@@ -6195,14 +6195,25 @@ unsigned int ObjectMgr::GenrateFreeItemGuid()
     if (result)
     {
         _hiItemGuid = (*result)[0].GetUInt32()+1;
-        for (uint64 cnt = 5700000; (cnt < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt++)
+        for (uint64 cnt = 5700000; (cnt  + 2000 < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt += 2000)
         {
-            QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid = '%u'", cnt);
-            if (notFreeGuid)
-                ;
-            else
-                _freeItemGuid.push(cnt);
-        }
+	  QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid >= '%u' AND guid < '%u' ORDER BY guid ASC", cnt, cnt + 2000);
+	  uint32 guid = 0;
+	  uint32 lguid = 0;
+	  do {
+	    Field* pFields = notFreeGuid->Fetch();
+	    lguid = pFields[0].GetInt32();
+	    if (guid == 0)
+	      guid = lguid;
+	    if (guid > 0 && guid < lguid)
+	      while (lguid - guid > 0)
+		{
+		  guid++;
+		  if (lguid != guid)
+		    _freeItemGuid.push(guid);
+		}
+	  } while (notFreeGuid->NextRow());
+	}
     }
     return _freeItemGuid.size();
 }

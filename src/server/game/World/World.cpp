@@ -3209,5 +3209,5 @@ void World::InitPacketThrottling()
   opcodePerSecond[MSG_PARTY_ASSIGNMENT] = 1;
   opcodePerSecond[MSG_RAID_READY_CHECK] = 1;
   opcodePerSecond[CMSG_QUEST_QUERY] = 25;
-
+  opcodePerSecond[CMSG_ITEM_QUERY_SINGLE] = 10;
 }

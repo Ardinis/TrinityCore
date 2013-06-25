@@ -205,6 +205,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
         delete new_packet;
         return;
     }
+    sLog->outError("QueuePacket : opcode %s, account %u", LookupOpcodeName(new_packet->GetOpcode()), GetAccountId());
     if (m_packetThrottler.MustDiscard(new_packet->GetOpcode(), GetAccountId(), GetRemoteAddress()))
     {
       delete new_packet;

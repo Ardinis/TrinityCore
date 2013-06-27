@@ -3070,7 +3070,7 @@ void World::SendWintergraspState()
 
 void World::InitPacketThrottling()
 {
-  memset(opcodePerSecond, 0, sizeof(uint32) * NUM_MSG_TYPES);
+  memset(opcodePerSecond, 1000, sizeof(uint32) * NUM_MSG_TYPES);
 
   opcodePerSecond[CMSG_WHO] = 1;
   opcodePerSecond[CMSG_INSPECT] = 1;

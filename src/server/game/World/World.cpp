@@ -3208,6 +3208,41 @@ void World::InitPacketThrottling()
   opcodePerSecond[MSG_RAID_TARGET_UPDATE] = 1;
   opcodePerSecond[MSG_PARTY_ASSIGNMENT] = 1;
   opcodePerSecond[MSG_RAID_READY_CHECK] = 1;
+
   opcodePerSecond[CMSG_QUEST_QUERY] = 25;
+
   opcodePerSecond[CMSG_ITEM_QUERY_SINGLE] = 50;
+  opcodePerSecond[CMSG_MESSAGECHAT] = 50;
+
+  opcodePerSecond[CMSG_ITEM_NAME_QUERY] = 200;
+  opcodePerSecond[CMSG_GUILD_QUERY] = 200;
+  opcodePerSecond[CMSG_NAME_QUERY] = 200;
+  opcodePerSecond[CMSG_PET_NAME_QUERY] = 200;
+  opcodePerSecond[CMSG_GAMEOBJECT_QUERY] = 200;
+  opcodePerSecond[CMSG_CREATURE_QUERY] = 200;
+  opcodePerSecond[CMSG_NPC_TEXT_QUERY] = 200;
+  opcodePerSecond[CMSG_ARENA_TEAM_QUERY] = 200;
+  opcodePerSecond[CMSG_TAXINODE_STATUS_QUERY] = 200;
+  opcodePerSecond[CMSG_TAXIQUERYAVAILABLENODES] = 200;
+  opcodePerSecond[CMSG_QUESTGIVER_QUERY_QUEST] = 200;
+  opcodePerSecond[CMSG_QUEST_QUERY] = 200;
+  opcodePerSecond[CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY] = 200;
+  opcodePerSecond[CMSG_QUERY_QUESTS_COMPLETED] = 200;
+  opcodePerSecond[CMSG_QUEST_POI_QUERY] = 200;
+  opcodePerSecond[CMSG_QUERY_TIME] = 200;
+  opcodePerSecond[CMSG_PAGE_TEXT_QUERY] = 200;
+  opcodePerSecond[CMSG_PETITION_QUERY] = 200;
+  opcodePerSecond[CMSG_QUERY_INSPECT_ACHIEVEMENTS] = 200;
+  opcodePerSecond[CMSG_AREA_SPIRIT_HEALER_QUERY] = 200;
+  opcodePerSecond[CMSG_CORPSE_MAP_POSITION_QUERY] = 200;
+  opcodePerSecond[CMSG_MOVE_TIME_SKIPPED] = 200;
+  opcodePerSecond[CMSG_GUILD_BANK_QUERY_TAB] = 200;
+  opcodePerSecond[MSG_GUILD_BANK_LOG_QUERY] = 200;
+  opcodePerSecond[MSG_QUERY_GUILD_BANK_TEXT] = 200;
+  opcodePerSecond[MSG_CORPSE_QUERY] = 200;
+  opcodePerSecond[MSG_QUERY_NEXT_MAIL_TIME] = 200;
+  opcodePerSecond[MSG_GUILD_EVENT_LOG_QUERY] = 200;
+  opcodePerSecond[MSG_MOVE_SET_FACING] = 200;
+  opcodePerSecond[CMSG_CANCEL_CAST] = 200;
+
 }

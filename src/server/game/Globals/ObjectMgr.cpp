@@ -6194,25 +6194,32 @@ unsigned int ObjectMgr::GenrateFreeItemGuid()
     QueryResult result = CharacterDatabase.Query("SELECT MAX(guid) FROM item_instance");
     if (result)
     {
+      Field* pFields = NULL;
         _hiItemGuid = (*result)[0].GetUInt32()+1;
         for (uint64 cnt = 5700000; (cnt  + 2000 < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt += 2000)
         {
 	  QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid >= '%u' AND guid < '%u' ORDER BY guid ASC", cnt, cnt + 2000);
 	  uint32 guid = 0;
 	  uint32 lguid = 0;
-	  do {
-	    Field* pFields = notFreeGuid->Fetch();
-	    lguid = pFields[0].GetInt32();
-	    if (guid == 0)
-	      guid = lguid;
-	    if (guid > 0 && guid < lguid)
-	      while (lguid - guid > 0)
+	  if (notFreeGuid)
+	  {
+	    do {
+	      pFields = notFreeGuid->Fetch();
+	      if (pFields)
 		{
-		  guid++;
-		  if (lguid != guid)
-		    _freeItemGuid.push(guid);
+		  lguid = pFields[0].GetInt32();
+		  if (guid == 0)
+		    guid = lguid;
+		  if (guid > 0 && guid < lguid)
+		    while (lguid - guid > 0)
+		      {
+			guid++;
+			if (lguid != guid)
+			  _freeItemGuid.push(guid);
+		      }
 		}
-	  } while (notFreeGuid->NextRow());
+	    } while (notFreeGuid->NextRow());
+	  }
 	}
     }
     return _freeItemGuid.size();

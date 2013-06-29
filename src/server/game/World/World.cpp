@@ -3211,7 +3211,7 @@ void World::InitPacketThrottling()
 
   opcodePerSecond[CMSG_QUEST_QUERY] = 25;
 
-  opcodePerSecond[CMSG_ITEM_QUERY_SINGLE] = 50;
+  opcodePerSecond[CMSG_ITEM_QUERY_SINGLE] = 200;
   opcodePerSecond[CMSG_MESSAGECHAT] = 50;
 
   opcodePerSecond[CMSG_ITEM_NAME_QUERY] = 200;

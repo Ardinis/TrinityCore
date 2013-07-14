@@ -6194,33 +6194,36 @@ unsigned int ObjectMgr::GenrateFreeItemGuid()
     QueryResult result = CharacterDatabase.Query("SELECT MAX(guid) FROM item_instance");
     if (result)
     {
-      Field* pFields = NULL;
+        Field* pFields = NULL;
         _hiItemGuid = (*result)[0].GetUInt32()+1;
-        for (uint64 cnt = 5700000; (cnt  + 2000 < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID); cnt += 2000)
+        for (uint64 cnt = 1; (cnt  + 100000 < _hiItemGuid && _freeItemGuid.size() < MAX_FREE_GUID * 10); cnt += 100000)
         {
-	  QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid >= '%u' AND guid < '%u' ORDER BY guid ASC", cnt, cnt + 2000);
-	  uint32 guid = 0;
-	  uint32 lguid = 0;
-	  if (notFreeGuid)
-	  {
-	    do {
-	      pFields = notFreeGuid->Fetch();
-	      if (pFields)
-		{
-		  lguid = pFields[0].GetInt32();
-		  if (guid == 0)
-		    guid = lguid;
-		  if (guid > 0 && guid < lguid)
-		    while (lguid - guid > 0)
-		      {
-			guid++;
-			if (lguid != guid)
-			  _freeItemGuid.push(guid);
-		      }
-		}
-	    } while (notFreeGuid->NextRow());
-	  }
-	}
+            QueryResult notFreeGuid = CharacterDatabase.PQuery("SELECT guid FROM item_instance WHERE guid >= '%u' AND guid < '%u' ORDER BY guid ASC", cnt, cnt + 100000);
+            uint32 guid = 0;
+            uint32 lguid = 0;
+            if (notFreeGuid)
+            {
+                do {
+                    pFields = notFreeGuid->Fetch();
+                    if (pFields)
+                    {
+                        lguid = pFields[0].GetInt32();
+                        if (guid == 0)
+                            guid = lguid;
+                        if (guid > 0 && guid < lguid)
+                            while (lguid - guid > 0)
+                            {
+                                guid++;
+                                if (lguid != guid)
+                                    _freeItemGuid.push(guid);
+                            }
+                    }
+                } while (notFreeGuid->NextRow());
+            }
+            else
+                for (uint64 i = cnt; i < cnt + 100000; i++)
+                    _freeItemGuid.push(i);
+        }
     }
     return _freeItemGuid.size();
 }

@@ -43,7 +43,7 @@
 #include "ConditionMgr.h"
 #include <functional>
 
-#define MAX_FREE_GUID 500000
+#define MAX_FREE_GUID 1500000
 
 class Item;
 

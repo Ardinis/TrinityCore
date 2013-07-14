@@ -366,7 +366,6 @@ void Item::SaveToDB(SQLTransaction& trans)
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
-            sObjectMgr->AddFreeItemGuid(guid);
             if (HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_WRAPPED))
             {
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GIFT);
@@ -375,8 +374,10 @@ void Item::SaveToDB(SQLTransaction& trans)
             }
 
             if (!isInTransaction)
+            {
+                sObjectMgr->AddFreeItemGuid(guid);
                 CharacterDatabase.CommitTransaction(trans);
-
+            }
             delete this;
             return;
         }
@@ -477,7 +478,6 @@ void Item::DeleteFromDB(SQLTransaction& trans, uint32 itemGuid)
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ITEM_INSTANCE);
     stmt->setUInt32(0, itemGuid);
     trans->Append(stmt);
-    sObjectMgr->AddFreeItemGuid(itemGuid);
 }
 
 void Item::DeleteFromDB(SQLTransaction& trans)

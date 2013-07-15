@@ -3211,10 +3211,10 @@ void World::InitPacketThrottling()
 
   opcodePerSecond[CMSG_QUEST_QUERY] = 25;
 
-  opcodePerSecond[CMSG_ITEM_QUERY_SINGLE] = 200;
+  //  opcodePerSecond[CMSG_ITEM_QUERY_SINGLE] = 200;
   opcodePerSecond[CMSG_MESSAGECHAT] = 50;
 
-  opcodePerSecond[CMSG_ITEM_NAME_QUERY] = 200;
+  //  opcodePerSecond[CMSG_ITEM_NAME_QUERY] = 200;
   opcodePerSecond[CMSG_GUILD_QUERY] = 200;
   opcodePerSecond[CMSG_NAME_QUERY] = 200;
   opcodePerSecond[CMSG_PET_NAME_QUERY] = 200;
@@ -3240,7 +3240,7 @@ void World::InitPacketThrottling()
   opcodePerSecond[MSG_GUILD_BANK_LOG_QUERY] = 200;
   opcodePerSecond[MSG_QUERY_GUILD_BANK_TEXT] = 200;
   opcodePerSecond[MSG_CORPSE_QUERY] = 200;
-  opcodePerSecond[MSG_QUERY_NEXT_MAIL_TIME] = 200;
+  //  opcodePerSecond[MSG_QUERY_NEXT_MAIL_TIME] = 200;
   opcodePerSecond[MSG_GUILD_EVENT_LOG_QUERY] = 200;
   opcodePerSecond[MSG_MOVE_SET_FACING] = 200;
   opcodePerSecond[CMSG_CANCEL_CAST] = 200;

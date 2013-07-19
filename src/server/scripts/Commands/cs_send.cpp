@@ -126,38 +126,37 @@ public:
 
       uint32 itemId = atoi(itemIdStr);
       if (!itemId)
-	return false;
+          return false;
 
       ItemTemplate const* item_proto = sObjectMgr->GetItemTemplate(itemId);
       if (!item_proto)
       {
-	handler->PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, itemId);
-	handler->SetSentErrorMessage(true);
-	return false;
+          handler->PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, itemId);
+          handler->SetSentErrorMessage(true);
+          continue;
       }
 
       uint32 itemCount = itemCountStr ? atoi(itemCountStr) : 1;
-      if (itemCount < 1 || (item_proto->MaxCount > 0 && itemCount > uint32(item_proto->MaxCount)))
-      {
-	handler->PSendSysMessage(LANG_COMMAND_INVALID_ITEM_COUNT, itemCount, itemId);
-	handler->SetSentErrorMessage(true);
-	return false;
-      }
+      if (itemCount < 1)
+          itemCount = 1;
+
+      if (item_proto->MaxCount > 0 && itemCount > uint32(item_proto->MaxCount))
+          itemCount = uint32(item_proto->MaxCount);
 
       while (itemCount > item_proto->GetMaxStackSize())
       {
-	items.push_back(ItemPair(itemId, item_proto->GetMaxStackSize()));
-	itemCount -= item_proto->GetMaxStackSize();
+          items.push_back(ItemPair(itemId, item_proto->GetMaxStackSize()));
+          itemCount -= item_proto->GetMaxStackSize();
+      }
+
+      if ((items.size() + 1) > MAX_MAIL_ITEMS)
+      {
+          handler->PSendSysMessage(LANG_COMMAND_MAIL_ITEMS_LIMIT, MAX_MAIL_ITEMS);
+          handler->SetSentErrorMessage(true);
+          break;
       }
 
       items.push_back(ItemPair(itemId, itemCount));
-
-      if (items.size() > MAX_MAIL_ITEMS)
-      {
-	handler->PSendSysMessage(LANG_COMMAND_MAIL_ITEMS_LIMIT, MAX_MAIL_ITEMS);
-	handler->SetSentErrorMessage(true);
-	return false;
-      }
     }
 
     // from console show not existed sender
@@ -170,11 +169,11 @@ public:
 
     for (ItemPairs::const_iterator itr = items.begin(); itr != items.end(); ++itr)
     {
-      if (Item* item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
-      {
-	item->SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
-	draft.AddItem(item);
-      }
+        if (Item* item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
+        {
+            item->SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
+            draft.AddItem(item);
+        }
     }
 
     draft.SendMailTo(trans, MailReceiver(receiver, GUID_LOPART(receiverGuid)), sender);

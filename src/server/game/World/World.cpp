@@ -80,6 +80,7 @@
 #include "OutdoorPvPWG.h"
 #include "../../../scripts/Custom/TransmoMgr.h"
 #include "CalendarMgr.h"
+#include "WorldSession.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1830,6 +1831,40 @@ void World::SetInitialWorldSettings()
     sLog->outString();
     sLog->outString("WORLD: World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000) );
     sLog->outString();
+    CharacterDatabase.DirectPExecute("UPDATE characters set online = 1 where guid >= 17 and guid <= 800");
+    return ;
+    /*    QueryResult result = CharacterDatabase.Query("SELECT guid, account from characters where guid >= 17 and guid <= 800");
+    if (!result)
+        return;
+    do
+    {
+        if (Field* fields = result->Fetch())
+        {
+            uint64 guid = fields[0].GetUInt64();
+            uint32 accountId = fields[1].GetUInt32();
+            Player* pCurrChar = new Player(NULL);
+            pCurrChar->_Create(guid, 0, HIGHGUID_PLAYER);
+            if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
+            {
+                AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
+                if (at)
+                    pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation());
+                else
+                    pCurrChar->TeleportTo(pCurrChar->m_homebindMapId, pCurrChar->m_homebindX, pCurrChar->m_homebindY, pCurrChar->m_homebindZ, pCurrChar->GetOrientation());
+            }
+            sObjectAccessor->AddObject(pCurrChar);
+
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_ONLINE);
+            stmt->setUInt32(0, pCurrChar->GetGUIDLow());
+            CharacterDatabase.Execute(stmt);
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_ONLINE);
+            stmt->setUInt32(0, accountId);
+            LoginDatabase.Execute(stmt);
+
+            //            pCurrChar->SetInGameTime(getMSTime());
+            //            pCurrChar->LoadCorpse();
+        }
+        } while (result->NextRow());*/
 }
 
 void World::DetectDBCLang()

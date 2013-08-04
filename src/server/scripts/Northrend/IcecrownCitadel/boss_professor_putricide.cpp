@@ -637,10 +637,13 @@ class boss_professor_putricide : public CreatureScript
                             break;
                         }
                         case EVENT_UNSTABLE_EXPERIMENT:
+                        {
                             Talk(EMOTE_UNSTABLE_EXPERIMENT);
                             DoCast(me, SPELL_UNSTABLE_EXPERIMENT);
-                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000));
+                            uint32 timer = RAID_MODE(urand(35000, 40000), urand(30000, 35000), urand(35000, 40000), urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, timer);
                             break;
+                        }
                         case EVENT_TEAR_GAS:
                             me->GetMotionMaster()->MovePoint(POINT_TABLE, tablePos);
                             DoCast(me, SPELL_TEAR_GAS_PERIODIC_TRIGGER, true);
@@ -706,7 +709,7 @@ class boss_professor_putricide : public CreatureScript
                                         me->SetFacingToObject(face);
                                     me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
                                     Talk(SAY_TRANSFORM_1);
-                                    //                                    events.ScheduleEvent(EVENT_UNSTABLE_EXPERIMENT, urand(35000, 40000) + 5500);
+                                    events.DelayEvents(EVENT_UNSTABLE_EXPERIMENT, 5500);
                                     events.ScheduleEvent(EVENT_RESUME_ATTACK, 5500, 0, PHASE_COMBAT_2);
                                     break;
                                 case PHASE_COMBAT_3:
@@ -849,38 +852,6 @@ class npc_gas_cloud : public CreatureScript
         CreatureAI* GetAI(Creature* creature) const
         {
             return GetIcecrownCitadelAI<npc_gas_cloudAI>(creature);
-        }
-};
-
-class spell_putricide_gaseous_bloat : public SpellScriptLoader
-{
-    public:
-        spell_putricide_gaseous_bloat() : SpellScriptLoader("spell_putricide_gaseous_bloat") { }
-
-        class spell_putricide_gaseous_bloat_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_putricide_gaseous_bloat_AuraScript);
-
-            void HandleExtraEffect(AuraEffect const* /*aurEff*/)
-            {
-                Unit* target = GetTarget();
-                if (Unit* caster = GetCaster())
-                {
-                    target->RemoveAuraFromStack(GetSpellInfo()->Id, GetCasterGUID());
-                    if (!target->HasAura(GetId()))
-                        caster->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, caster, false);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_putricide_gaseous_bloat_AuraScript::HandleExtraEffect, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_putricide_gaseous_bloat_AuraScript();
         }
 };
 
@@ -1626,6 +1597,172 @@ class spell_stinky_precious_decimate : public SpellScriptLoader
         }
 };
 
+class CheckDistReq
+{
+public:
+    CheckDistReq(Unit* caster) : _caster(caster)
+    {
+    }
+
+    bool operator()(Unit* target)
+    {
+        bool retVal = _caster->GetDistance(target) < 10.0f;
+        if (retVal)
+            if (Creature *c = target->FindNearestCreature(36678, 500))
+                if (Unit *u = c->getVictim())
+                    if (c->GetGUID() == target->GetGUID())
+                        retVal = false;
+        return retVal;
+    }
+
+    private:
+        Unit* _caster;
+};
+
+class spell_putricide_gaseous_bloat : public SpellScriptLoader
+{
+    public:
+        spell_putricide_gaseous_bloat() : SpellScriptLoader("spell_putricide_gaseous_bloat") { }
+
+        class spell_putricide_gaseous_bloat_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_putricide_gaseous_bloat_SpellScript);
+
+            void FilterTargets(std::list<Unit*>& targets)
+            {
+                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
+                uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_VOLATILE_OOZE_ADHESIVE, GetCaster());
+                targets.clear();
+                int cnt = 0;
+                if (Unit *caster = GetCaster())
+                {
+                    if (Creature *c = caster->FindNearestCreature(36678, 1000))
+                        if (Unit* target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId))
+                        {
+                            if (Unit *tank = c->getVictim())
+                            {
+                                while (target->GetGUID() == tank->GetGUID() && cnt < 100 && caster->GetDistance(target) < 15.0f)
+                                {
+                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+                                    cnt++;
+                                }
+                                cnt = 0;
+                                while (target->GetGUID() == tank->GetGUID() && cnt < 100)
+                                {
+                                    cnt++;
+                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+                                }
+                            }
+                            if (target)
+                                targets.push_back(target);
+                        }
+                }
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        class spell_putricide_gaseous_bloat_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_putricide_gaseous_bloat_AuraScript);
+
+            void HandleExtraEffect(AuraEffect const* /*aurEff*/)
+            {
+                Unit* target = GetTarget();
+                if (Unit* caster = GetCaster())
+                {
+                    target->RemoveAuraFromStack(GetSpellInfo()->Id, GetCasterGUID());
+                    if (Creature *c = target->FindNearestCreature(36678, 500))
+                        if (Unit *tank = c->getVictim())
+                            if (target->GetGUID() == tank->GetGUID())
+                                target->RemoveAurasDueToSpell(GetId());
+                    if (!target->HasAura(GetId()))
+                        caster->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, caster, false);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_putricide_gaseous_bloat_AuraScript::HandleExtraEffect, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_putricide_gaseous_bloat_AuraScript();
+        }
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_putricide_gaseous_bloat_SpellScript();
+        }
+};
+
+class spell_putricide_adhesive_limon : public SpellScriptLoader
+{
+
+    public:
+        spell_putricide_adhesive_limon() : SpellScriptLoader("spell_putricide_adhesive_limon") { }
+
+        class spell_putricide_adhesive_limon_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_putricide_adhesive_limon_SpellScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                return true;
+            }
+
+            void FilterTargets(std::list<Unit*>& targets)
+            {
+                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
+                uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_GASEOUS_BLOAT, GetCaster());
+                targets.clear();
+                int cnt = 0;
+                if (Unit *caster = GetCaster())
+                {
+                    if (Creature *c = caster->FindNearestCreature(36678, 1000))
+                        if (Unit* target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId))
+                        {
+                            if (Unit *tank = c->getVictim())
+                            {
+                                while (target->GetGUID() == tank->GetGUID() && cnt < 100 && caster->GetDistance(target) < 15.0f)
+                                {
+                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+                                    cnt++;
+                                }
+                                cnt = 0;
+                                while (target->GetGUID() == tank->GetGUID() && cnt < 100)
+                                {
+                                    cnt++;
+                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+                                }
+                            }
+                            if (target)
+                                targets.push_back(target);
+                        }
+                    }
+                }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_putricide_adhesive_limon_SpellScript();
+        }
+};
+
 void AddSC_boss_professor_putricide()
 {
     new boss_professor_putricide();
@@ -1648,4 +1785,5 @@ void AddSC_boss_professor_putricide()
     new spell_putricide_regurgitated_ooze();
     new spell_putricide_clear_aura_effect_value();
     new spell_stinky_precious_decimate();
+    new spell_putricide_adhesive_limon();
 }

@@ -810,10 +810,10 @@ class mob_toc_druid : public CreatureScript
                                 DoCast(target, SPELL_REJUVENATION);
                             events.ScheduleEvent(EVENT_REJUVENATION, urand(5*IN_MILLISECONDS, 15*IN_MILLISECONDS));
                             return;
-                        case EVENT_TRANQUILITY:
+                            /*                        case EVENT_TRANQUILITY:
                             DoCastAOE(SPELL_TRANQUILITY);
                             events.ScheduleEvent(EVENT_TRANQUILITY, urand(15*IN_MILLISECONDS, 40*IN_MILLISECONDS));
-                            return;
+                            return;*/
                         case EVENT_HEAL_BARKSKIN:
                             if (HealthBelowPct(30))
                             {

@@ -231,7 +231,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
                 events.SetPhase(PHASE_ONE);
                 _waveCounter = 0;
-		_shaderCount = 0;
+                _shaderCount = 0;
                 _nextVengefulShadeTargetGUID = 0;
                 _darnavanGUID = 0;
                 DoCast(me, SPELL_SHADOW_CHANNELING);
@@ -307,9 +307,9 @@ class boss_lady_deathwhisper : public CreatureScript
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                     if (Unit* unit = ObjectAccessor::GetUnit(*me, *itr))
                         if (unit->isAlive() && unit->GetEntry() != NPC_VENGEFUL_SHADE)
-			{
-			  livingAddEntries.insert(unit->GetEntry());
-			}
+                        {
+                            livingAddEntries.insert(unit->GetEntry());
+                        }
                 if (livingAddEntries.size() >= 4)
                     instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_FULL_HOUSE, 0, me);
 
@@ -346,7 +346,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, FAIL);
 
                 summons.DespawnAll();
-		_shaderCount = 0;
+                _shaderCount = 0;
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))
                 {
                     darnavan->DespawnOrUnsummon();
@@ -372,10 +372,10 @@ class boss_lady_deathwhisper : public CreatureScript
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
                     events.SetPhase(PHASE_TWO);
-		    for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-		      if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
-			if (temp->AI())
-			  temp->AI()->DoAction(ACTION_PHASE_2);
+                    for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                        if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
+                            if (temp->AI())
+                                temp->AI()->DoAction(ACTION_PHASE_2);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(6000, 9000), 0, PHASE_TWO);
@@ -407,17 +407,17 @@ class boss_lady_deathwhisper : public CreatureScript
                     target = SelectTarget(SELECT_TARGET_RANDOM);                        // Wave adds
 
                 summon->AI()->AttackStart(target);                                      // CAN be NULL
-		if (summon->GetEntry() == NPC_VENGEFUL_SHADE)
-		{
-		  summon->SetReactState(REACT_PASSIVE);
-		  summon->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
-		}
-		if (summon->GetEntry() == NPC_REANIMATED_FANATIC)
+                if (summon->GetEntry() == NPC_VENGEFUL_SHADE)
+                {
+                    summon->SetReactState(REACT_PASSIVE);
+                    summon->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
+                }
+                if (summon->GetEntry() == NPC_REANIMATED_FANATIC)
                     summon->AI()->DoCast(summon, SPELL_FANATIC_S_DETERMINATION);
                 else if (summon->GetEntry() == NPC_REANIMATED_ADHERENT)
                     summon->AI()->DoCast(summon, SPELL_ADHERENT_S_DETERMINATION);
-		if (events.GetPhaseMask() & PHASE_TWO_MASK)
-		  summon->AI()->DoAction(ACTION_PHASE_2);
+                if (events.GetPhaseMask() & PHASE_TWO_MASK)
+                    summon->AI()->DoAction(ACTION_PHASE_2);
             }
 
             void UpdateAI(uint32 const diff)

@@ -169,6 +169,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 _offtank = NULL;
                 _vampires.clear();
                 _creditBloodQuickening = false;
+                mui_threat = 1000;
                 _killMinchar = false;
             }
 
@@ -309,8 +310,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         me->SetFlying(false);
                         me->SendMovementFlagUpdate();
                         me->SetReactState(REACT_AGGRESSIVE);
-                        if (Unit* victim = me->SelectVictim())
-                            AttackStart(victim);
+                        //                        if (Unit* victim = me->SelectVictim())
+                        //    AttackStart(victim);
                         events.ScheduleEvent(EVENT_BLOOD_MIRROR, 2500, EVENT_GROUP_CANCELLABLE);
                         break;
                     case POINT_MINCHAR:
@@ -323,12 +324,31 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 }
             }
 
+            void manageThreatList()
+            {
+                std::list<HostileReference*> t_list = me->getThreatManager().getThreatList();
+                for (std::list<HostileReference*>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
+                {
+                    Unit* target = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+                    if (target && target->GetTypeId() == TYPEID_PLAYER && (target->HasAura(ESSENCE_OF_BLOOD_QUEEN) || target->HasAura(ESSENCE_OF_BLOOD_QUEEN_PLR)))
+                        DoModifyThreatPercent(target, -90);
+                }
+            }
+
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
 
                 events.Update(diff);
+
+                if (mui_threat <= diff)
+                {
+                    manageThreatList();
+                    mui_threat = 1000;
+                }
+                else mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -473,8 +493,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
                 for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
                     if (Unit* refTarget = (*itr)->getTarget())
-                        if (refTarget != me->getVictim() && refTarget->GetTypeId() == TYPEID_PLAYER && (includeOfftank ? true : (refTarget != _offtank)))
-                            tempTargets.push_back(refTarget->ToPlayer());
+                        if (Unit *vic = me->getVictim())
+                            if (refTarget->GetTypeId() == TYPEID_PLAYER && refTarget->GetGUID() != vic->GetGUID() && (includeOfftank ? true : (refTarget != _offtank)))
+                                tempTargets.push_back(refTarget->ToPlayer());
 
                 if (tempTargets.empty())
                     return NULL;
@@ -499,6 +520,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
             Player* _offtank;
             bool _creditBloodQuickening;
             bool _killMinchar;
+            uint32 mui_threat;
         };
 
         CreatureAI* GetAI(Creature* creature) const

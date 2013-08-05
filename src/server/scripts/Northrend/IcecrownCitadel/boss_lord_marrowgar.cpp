@@ -207,8 +207,6 @@ class boss_lord_marrowgar : public CreatureScript
                             _coldflameTarget = 0LL;
                             if (!me->HasAura(SPELL_BONE_STORM))
                                 DoCastAOE(SPELL_COLDFLAME_NORMAL);
-                            else
-                                DoCast(me, SPELL_COLDFLAME_BONE_STORM);
                             events.ScheduleEvent(EVENT_COLDFLAME, 5000, EVENT_GROUP_SPECIAL);
                             break;
                         case EVENT_WARN_BONE_STORM:
@@ -289,6 +287,10 @@ class boss_lord_marrowgar : public CreatureScript
 
                 // lock movement
                 DoStartNoMovement(me->getVictim());
+
+                if (id == POINT_TARGET_BONESTORM_PLAYER)
+                    if (me->HasAura(SPELL_BONE_STORM))
+                        DoCast(me, SPELL_COLDFLAME_BONE_STORM);
             }
 
             Position const* GetLastColdflamePosition() const

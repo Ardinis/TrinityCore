@@ -33,6 +33,7 @@ EndContentData */
 #define GOSSIP_START_EVENT1     "Je suis pret pour demarrer le challenge !"  // "I'm ready to start challenge."
 #define GOSSIP_START_EVENT2     "Je suis pret pour le prochain defi." // "I'm ready for the next challenge."
 #define GOSSIP_START_EVENT3     "Faisons face a notre dernier defi." // "Let's face our last challenge."
+#define GOSSIP_START_EVENT4     "Lancement rapide." // "Let's face our last challenge."
 
 #define ORIENTATION             4.714f
 
@@ -189,9 +190,18 @@ public:
         {
             eventIds[type] = data;
 
-            if (data == IN_PROGRESS)
+            if (data == IN_PROGRESS || data == 42)
             {
-                events.ScheduleEvent(1, 0);
+                if (data == IN_PROGRESS)
+                    events.ScheduleEvent(1, 0);
+                else
+                {
+                    // Open door
+                    if (GameObject* pGO = GameObject::GetGameObject(*me, instance->GetData64(DATA_MAIN_GATE)))
+                        instance->HandleGameObject(pGO->GetGUID(), true);
+                    events.ScheduleEvent(9, 3000);
+                }
+
                 if (type == EVENT_INTRO)
                 {
                     Map::PlayerList const &PlList = me->GetMap()->GetPlayers();
@@ -1410,7 +1420,10 @@ public:
         else if (instance->GetData(BOSS_GRAND_CHAMPIONS) != DONE)
         {
             if (CAST_AI(npc_announcer_toc5::npc_announcer_toc5AI, creature->AI())->AreAllPlayersMounted())
+            {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+            }
             gossipTextId = creature->GetEntry() == NPC_JAEREN ? GOSSIP_TEXT_NOT_MOUNTED_HORDE : GOSSIP_TEXT_NOT_MOUNTED_ALLIANCE;
         }else if (instance->GetData(BOSS_ARGENT_CHALLENGE_E) != DONE && instance->GetData(BOSS_ARGENT_CHALLENGE_P) != DONE)
         {
@@ -1443,6 +1456,14 @@ public:
                 if (creature->AI()->GetData(EVENT_INTRO) != IN_PROGRESS)
                 {
                     creature->AI()->SetData(EVENT_INTRO, IN_PROGRESS);
+                    creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    player->CLOSE_GOSSIP_MENU();
+                }
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                if (creature->AI()->GetData(EVENT_INTRO) != IN_PROGRESS)
+                {
+                    creature->AI()->SetData(EVENT_INTRO, 42);
                     creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     player->CLOSE_GOSSIP_MENU();
                 }

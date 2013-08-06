@@ -228,7 +228,7 @@ public:
             Talk(SAY_COMMON_KILL);
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 &damage)
+        void DamageTaken(Unit* /*done_by*/, uint32 &damage, SpellInfo const* spellInfo)
         {
             if(defeated)
             {
@@ -247,6 +247,9 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 Talk(SAY_COMMON_DEATH);
                 BindPlayersToInstance(me);
+                if (spellInfo->Id == 66905)
+                    if(InstanceScript* instance = me->GetInstanceScript())
+                        instance->DoCompleteAchievement(3803);
             }
         }
 

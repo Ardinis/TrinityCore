@@ -47,7 +47,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
             bool   NeedSave;
 
             uint32 DataDamageTwin;
-	  uint32 DataPause;
+            uint32 DataPause;
             uint32 FjolaCasting;
             uint32 EydisCasting;
 
@@ -85,7 +85,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
             void Initialize()
             {
-	        uiPortal = 0;
+                uiPortal = 0;
                 for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                     EncounterStatus[i] = NOT_STARTED;
 
@@ -94,7 +94,7 @@ class instance_trial_of_the_crusader : public InstanceMapScript
 
                 TributeChestGUID = 0;
                 DataDamageTwin = 0;
-		DataPause = NOT_STARTED;
+                DataPause = NOT_STARTED;
                 MainGateDoorGUID = 0;
                 EastPortcullisGUID = 0;
                 WebDoorGUID = 0;

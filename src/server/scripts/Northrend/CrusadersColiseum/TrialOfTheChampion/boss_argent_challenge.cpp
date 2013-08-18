@@ -247,7 +247,7 @@ public:
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 Talk(SAY_COMMON_DEATH);
                 BindPlayersToInstance(me);
-                if (spellInfo->Id == 66905)
+                if (spellInfo && spellInfo->Id == 66905)
                     if(InstanceScript* instance = me->GetInstanceScript())
                         instance->DoCompleteAchievement(3803);
             }

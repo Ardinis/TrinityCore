@@ -55,6 +55,12 @@ public:
       handler->SetSentErrorMessage(true);
       return false;
     }
+    if (player->IsMounted())
+    {
+      handler->PSendSysMessage("Vous devez renvoyer votre monture.");
+      handler->SetSentErrorMessage(true);
+      return false;
+    }
 
     if (!target)
     {

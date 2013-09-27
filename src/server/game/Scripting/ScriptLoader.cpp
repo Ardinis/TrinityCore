@@ -514,6 +514,8 @@ void AddSC_boss_general_zarithrian();
 void AddSC_boss_halion();
 void AddSC_instance_ruby_sanctum();
 
+void AddSC_boss_coren_direbrew();
+
 void AddSC_dalaran();
 void AddSC_borean_tundra();
 void AddSC_dragonblight();
@@ -1238,6 +1240,8 @@ void AddNorthrendScripts()
     AddSC_boss_general_zarithrian();
     AddSC_boss_halion();
     AddSC_instance_ruby_sanctum();
+
+    AddSC_boss_coren_direbrew();
 
     AddSC_dalaran();
     AddSC_borean_tundra();

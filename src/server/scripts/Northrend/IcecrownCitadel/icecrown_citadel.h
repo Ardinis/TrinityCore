@@ -21,7 +21,6 @@
 #include "SpellScript.h"
 #include "Map.h"
 #include "Creature.h"
-#include "ScriptPCH.h"
 
 #define ICCScriptName "instance_icecrown_citadel"
 

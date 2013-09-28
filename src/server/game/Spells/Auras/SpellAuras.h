@@ -21,7 +21,6 @@
 
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
-#include "Unit.h"
 
 class Unit;
 class SpellInfo;

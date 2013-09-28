@@ -22,16 +22,6 @@
  */
 
 
-#include "SpellScript.h"
-#include "Vehicle.h"
-#include "Spell.h"
-#include "SpellAuraEffects.h"
-#include "GridNotifiers.h"
-#include "SpellScript.h"
-#include "ScriptMgr.h"
-#include "CreatureAIImpl.h"
-
-
 enum MageSpells
 {
     SPELL_MAGE_COLD_SNAP                         = 11958,

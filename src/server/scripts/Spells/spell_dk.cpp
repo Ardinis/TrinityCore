@@ -21,13 +21,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_dk_".
  */
 
-
-#include "ScriptMgr.h"
-#include "GridNotifiers.h"
 #include "Spell.h"
-#include "SpellScript.h"
-#include "SpellAuraEffects.h"
-
 
 enum DeathKnightSpells
 {

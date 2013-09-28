@@ -16,7 +16,6 @@
  */
 
 #include "Player.h"
-#include "ObjectAccessor.h"
 
 SpectatorAddonMsg::SpectatorAddonMsg()
 {

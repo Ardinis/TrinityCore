@@ -22,14 +22,6 @@
  */
 
 #include "SkillDiscovery.h"
-#include "SpellScript.h"
-#include "Vehicle.h"
-#include "Spell.h"
-#include "SpellAuraEffects.h"
-#include "GridNotifiers.h"
-#include "SpellScript.h"
-#include "ScriptMgr.h"
-#include "CreatureAIImpl.h"
 
 // Generic script for handling item dummy effects which trigger another spell.
 class spell_item_trigger_spell : public SpellScriptLoader

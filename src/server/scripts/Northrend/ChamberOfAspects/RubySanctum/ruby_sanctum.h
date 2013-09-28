@@ -22,7 +22,6 @@
 #include "SpellScript.h"
 #include "Map.h"
 #include "Creature.h"
-#include "ScriptPCH.h"
 
 #define RSScriptName "instance_ruby_sanctum"
 uint32 const EncounterCount = 4;

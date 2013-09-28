@@ -6,10 +6,6 @@
 #include "ace/INET_Addr.h"
 #include "Player.h"
 #include "Pet.h"
-#include "Chat.h"
-#include "Mail.h"
-#include "ObjectMgr.h"
-#include "ScriptMgr.h"
 
 class send_commandscript : public CommandScript
 {

@@ -21,14 +21,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_q#questID_".
  */
 
-#include "SpellScript.h"
 #include "Vehicle.h"
-#include "Spell.h"
-#include "SpellAuraEffects.h"
-#include "GridNotifiers.h"
-#include "SpellScript.h"
-#include "ScriptMgr.h"
-#include "CreatureAIImpl.h"
 
 class spell_generic_quest_update_entry_SpellScript : public SpellScript
 {

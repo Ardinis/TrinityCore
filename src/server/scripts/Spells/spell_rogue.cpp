@@ -21,7 +21,11 @@
  * Scriptnames of files in this file should be prefixed with "spell_rog_".
  */
 
+#include "Spell.h"
 #include "SpellAuraEffects.h"
+#include "ScriptMgr.h"
+#include "GridNotifiers.h"
+#include "SpellScript.h"
 
 enum RogueSpells
 {

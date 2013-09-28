@@ -31,6 +31,7 @@ include(Examples/CMakeLists.txt)
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  ../game/Grids/Cells/CellImpl.cpp
   ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
   ../game/AI/ScriptedAI/ScriptedCreature.cpp
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp

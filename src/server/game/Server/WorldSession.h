@@ -28,6 +28,7 @@
 #include "AddonMgr.h"
 #include "DatabaseEnv.h"
 #include "World.h"
+#include "../Instances/InstanceSaveMgr.h"
 #include "WorldPacket.h"
 #include "Cryptography/BigNumber.h"
 

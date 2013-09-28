@@ -22,12 +22,16 @@
  * Scriptnames of files in this file should be prefixed with "spell_gen_"
  */
 
+
+#include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SkillDiscovery.h"
 #include "GridNotifiers.h"
 #include "Group.h"
 #include "LFGMgr.h"
 #include "Vehicle.h"
+#include "SpellScript.h"
+#include "InstanceScript.h"
 
 class spell_gen_absorb0_hitlimit1 : public SpellScriptLoader
 {

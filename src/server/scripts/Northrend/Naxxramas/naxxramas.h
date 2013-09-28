@@ -18,6 +18,8 @@
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
+#include "ScriptPCH.h"
+
 enum Encounter
 {
     BOSS_ANUBREKHAN,

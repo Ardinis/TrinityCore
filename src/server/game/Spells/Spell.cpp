@@ -56,6 +56,7 @@
 #include "OutdoorPvPWG.h"
 #include "OutdoorPvPMgr.h"
 #include "MoveSplineInit.h"
+#include "ScriptMgr.h"
 #include <G3D/Vector3.h>
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];

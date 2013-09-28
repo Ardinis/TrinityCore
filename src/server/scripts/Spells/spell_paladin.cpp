@@ -21,9 +21,15 @@
  * Scriptnames of files in this file should be prefixed with "spell_pal_".
  */
 
-#include "SpellAuraEffects.h"
 #include "Unit.h"
-
+#include "SpellScript.h"
+#include "Vehicle.h"
+#include "Spell.h"
+#include "SpellAuraEffects.h"
+#include "GridNotifiers.h"
+#include "SpellScript.h"
+#include "ScriptMgr.h"
+#include "CreatureAIImpl.h"
 
 enum PaladinSpells
 {

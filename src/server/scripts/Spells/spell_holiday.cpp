@@ -21,6 +21,9 @@
  */
 
 #include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "GridNotifiers.h"
+#include "SpellScript.h"
 
 // 45102 Romantic Picnic
 enum SpellsPicnic

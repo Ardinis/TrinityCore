@@ -16,6 +16,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Common.h"
 #include "Cryptography/BigNumber.h"
 #include <openssl/bn.h>
 #include <openssl/crypto.h>

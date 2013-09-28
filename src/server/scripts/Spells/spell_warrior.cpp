@@ -21,6 +21,14 @@
  * Scriptnames of files in this file should be prefixed with "spell_warr_".
  */
 
+#include "SpellScript.h"
+#include "Vehicle.h"
+#include "Spell.h"
+#include "SpellAuraEffects.h"
+#include "GridNotifiers.h"
+#include "SpellScript.h"
+#include "ScriptMgr.h"
+#include "CreatureAIImpl.h"
 
 enum WarriorSpells
 {

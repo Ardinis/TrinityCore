@@ -1,5 +1,7 @@
 #include "ScriptMgr.h"
 #include "GameEventMgr.h"
+#include "ObjectMgr.h"
+#include "Spell.h"
 
 enum EventMorph
 {

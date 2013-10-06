@@ -297,6 +297,7 @@ int32 BattlegroundAB::_GetNodeNameId(uint8 node)
 
 void BattlegroundAB::FillInitialWorldStates(WorldPacket& data)
 {
+    std::cout << "FillInitialWorldStates ! " << std::endl;
     const uint8 plusArray[] = {0, 2, 3, 0, 1};
 
     // Node icons

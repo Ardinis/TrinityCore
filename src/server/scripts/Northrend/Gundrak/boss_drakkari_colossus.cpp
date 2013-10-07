@@ -146,10 +146,15 @@ class boss_drakkari_colossus : public CreatureScript
                         DoCast(SPELL_EMERGE);
                         break;
                     case ACTION_FREEZE_COLOSSUS:
-                        me->GetMotionMaster()->MoveIdle();
-
                         me->SetReactState(REACT_PASSIVE);
+                        //                        me->AttackStop();
+                        //  me->InterruptNonMeleeSpells(true);
+                        me->StopMoving();
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveIdle();
+                        //  me->CombatStop(true);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        //                        me->AddAura(SPELL_FREEZE_ANIM, me);
                         DoCast(me, SPELL_FREEZE_ANIM);
                         break;
                     case ACTION_UNFREEZE_COLOSSUS:
@@ -172,20 +177,21 @@ class boss_drakkari_colossus : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage)
             {
-                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC) || me->HasAura(SPELL_FREEZE_ANIM))
                     damage = 0;
-
-                if (phase == COLOSSUS_PHASE_NORMAL ||
-                    phase == COLOSSUS_PHASE_FIRST_ELEMENTAL_SUMMON)
+                if (HealthBelowPct(50) && phase == COLOSSUS_PHASE_NORMAL)
                 {
-                    if (HealthBelowPct( phase == COLOSSUS_PHASE_NORMAL ? 50 : 5))
-                    {
-                        damage = 0;
-                        phase = (phase == COLOSSUS_PHASE_NORMAL ? COLOSSUS_PHASE_FIRST_ELEMENTAL_SUMMON : COLOSSUS_PHASE_SECOND_ELEMENTAL_SUMMON);
-                        DoAction(ACTION_FREEZE_COLOSSUS);
-                        DoAction(ACTION_SUMMON_ELEMENTAL);
-
-                    }
+                    damage = 0;
+                    phase = COLOSSUS_PHASE_FIRST_ELEMENTAL_SUMMON;
+                    DoAction(ACTION_FREEZE_COLOSSUS);
+                    DoAction(ACTION_SUMMON_ELEMENTAL);
+                }
+                if (HealthBelowPct(5) && phase == COLOSSUS_PHASE_FIRST_ELEMENTAL_SUMMON)
+                {
+                    damage = 0;
+                    phase = COLOSSUS_PHASE_SECOND_ELEMENTAL_SUMMON;
+                    DoAction(ACTION_FREEZE_COLOSSUS);
+                    DoAction(ACTION_SUMMON_ELEMENTAL);
                 }
             }
 
@@ -266,7 +272,6 @@ class boss_drakkari_elemental : public CreatureScript
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_SURGE, urand(5000, 15000));
-
                 me->AddAura(SPELL_MOJO_VOLLEY, me);
             }
 
@@ -319,8 +324,10 @@ class boss_drakkari_elemental : public CreatureScript
                         if (instance)
                         {
                             if (Creature* colossus = Unit::GetCreature(*me, instance->GetData64(DATA_DRAKKARI_COLOSSUS)))
-                                // what if the elemental is more than 80 yards from drakkari colossus ?
-                                DoCast(colossus, SPELL_MERGE, true);
+                            {
+                                colossus->AI()->DoAction(ACTION_UNFREEZE_COLOSSUS);
+                                me->DespawnOrUnsummon();
+                            }
                         }
                         break;
                 }
@@ -335,17 +342,6 @@ class boss_drakkari_elemental : public CreatureScript
                         if (colossus->AI()->GetData(DATA_COLOSSUS_PHASE) ==  COLOSSUS_PHASE_FIRST_ELEMENTAL_SUMMON)
                         {
                             damage = 0;
-
-                            // not sure about this, the idea of this code is to prevent bug the elemental
-                            // if it is not in a acceptable distance to cast the charge spell.
-                            /*if (me->GetDistance(colossus) > 80.0f)
-                            {
-                                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
-                                    return;
-
-                                me->GetMotionMaster()->MovePoint(0, colossus->GetPositionX(), colossus->GetPositionY(), colossus->GetPositionZ());
-                                return;
-                            }*/
                             DoAction(ACTION_RETURN_TO_COLOSSUS);
                         }
                     }

@@ -250,11 +250,11 @@ bool ChatHandler::HandleDiamondLevelCommand(const char* /*args*/)
   fields = result->Fetch();
   uint32 dataLvl = fields[0].GetUInt32();
 
-  if (chrLvl >= dataLvl)
-    {
+  if (chrLvl >= dataLvl || chrLvl >= 80)
+  {
       PSendSysMessage(LANG_DIAM_LVL_ERR);
       return true;
-    }
+  }
 
   result = StoreDatabase.PQuery("SELECT price, nblevel FROM level WHERE level = '%u'", chrLvl);
   fields = result->Fetch();

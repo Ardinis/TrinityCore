@@ -1731,13 +1731,13 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
                         {
                             if (Unit *tank = c->getVictim())
                             {
-                                while (target->GetGUID() == tank->GetGUID() && cnt < 100 && caster->GetDistance(target) < 15.0f && target->GetVehicle())
+                                while ((target->GetVehicle() || target->GetGUID() == tank->GetGUID()) && cnt < 100 && caster->GetDistance(target) < 15.0f)
                                 {
                                     target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
                                     cnt++;
                                 }
                                 cnt = 0;
-                                while (target->GetGUID() == tank->GetGUID() && cnt < 100 && target->GetVehicle())
+                                while ((target->GetVehicle() || target->GetGUID() == tank->GetGUID()) && cnt < 100)
                                 {
                                     cnt++;
                                     target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);

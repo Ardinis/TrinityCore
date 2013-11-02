@@ -1258,6 +1258,17 @@ bool AuraEffect::IsAffectedOnSpell(SpellInfo const* spell) const
         return false;
 
     // Check EffectClassMask
+    if ((m_spellInfo->Id == 64848 && m_effIndex == EFFECT_2) &&
+        (spell->Id == 47755 ||
+         spell->Id == 31930 ||
+         spell->Id == 63375 ||
+         spell->Id == 64904 ||
+         spell->Id == 79949 ||
+         spell->Id == 54428 ||
+         spell->Id == 34075 ||
+         spell->Id == 30824 ||
+         spell->Id == 31786))
+        return true;
     if (m_spellInfo->Effects[m_effIndex].SpellClassMask & spell->SpellFamilyFlags)
         return true;
     return false;

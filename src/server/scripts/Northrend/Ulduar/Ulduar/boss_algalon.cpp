@@ -1428,6 +1428,34 @@ class achievement_he_feeds_on_your_tears : public AchievementCriteriaScript
         }
 };
 
+class spell_trash_dg : public SpellScriptLoader
+{
+    public:
+        spell_trash_dg() : SpellScriptLoader("spell_trash_dg") { }
+
+        class spell_trash_dg_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_trash_dg_SpellScript);
+
+            void HandleDummy(SpellEffIndex effIndex)
+            {
+                if (Unit *target = GetHitUnit())
+                    if (Unit *caster = GetCaster())
+                        target->GetMotionMaster()->MoveJump(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), 20, 20);
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_trash_dg_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_trash_dg_SpellScript();
+        }
+};
+
 void AddSC_boss_algalon()
 {
     new boss_algalon_the_observer();
@@ -1446,4 +1474,5 @@ void AddSC_boss_algalon()
     new achievement_he_feeds_on_your_tears();
     new mob_collapsing_star();
     new mob_black_hole();
+    new spell_trash_dg();
 }

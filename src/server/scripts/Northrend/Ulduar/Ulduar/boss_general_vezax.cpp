@@ -193,12 +193,12 @@ class boss_general_vezax : public CreatureScript
                 switch (summoned->GetEntry())
                 {
                     case NPC_SARONITE_VAPOR:
-                        if (summons.size() >= 6) // summons include both vapors and saronite animus, but since the animus was not spawned yet...
+                        if (summons.size() >= 8) // summons include both vapors and saronite animus, but since the animus was not spawned yet...
                         {
-			  summons.DespawnAll();
-			  events.CancelEvent(EVENT_SUMMON_SARONITE_VAPOR);    // Should always be cancelled after six vapors got spawned
-			  if (!vaporKilled && notHardModed)                   // If animus was not spawned yet and no vapor got killed yet...
-			    DoCast(SPELL_SUMMON_SARONITE_ANIMUS);
+                            summons.DespawnAll();
+                            events.CancelEvent(EVENT_SUMMON_SARONITE_VAPOR);    // Should always be cancelled after six vapors got spawned
+                            if (!vaporKilled && notHardModed)                   // If animus was not spawned yet and no vapor got killed yet...
+                                DoCast(SPELL_SUMMON_SARONITE_ANIMUS);
                         }
                         break;
                     case NPC_SARONITE_ANIMUS:

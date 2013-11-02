@@ -450,9 +450,15 @@ class boss_thorim : public CreatureScript
                 DoScriptText(SAY_DEATH, me);
                 if (sif)
                     sif->DespawnOrUnsummon();
+                bool hf4 = false;
                 if (Creature* ctrl = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_THORIM_CTRL)))
+                {
+                    if (ctrl->HasAura(62320))
+                        hf4 = true;
                     ctrl->DespawnOrUnsummon();
-
+                }
+                if (hf4)
+                    instance->DoCompleteAchievement(RAID_MODE(2975, 2976));
                 // Kill credit
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 64985);
                 // Lose Your Illusion
@@ -1092,12 +1098,16 @@ class npc_thorim_arena_phase_add : public CreatureScript
                 events.ScheduleEvent(EVENT_SECONDARY_SKILL, urand (7000, 9000));
                 if (myIndex == INDEX_DARK_RUNE_CHAMPION)
                     events.ScheduleEvent(EVENT_CHARGE, 8000);
+                hf4 = false;
             }
 
             void EnterCombat(Unit* /*who*/)
             {
                 if (myIndex == INDEX_DARK_RUNE_WARBRINGER)
+                {
+                    hf4 = true;
                     DoCast(me, SPELL_AURA_OF_CELERITY);
+                }
             }
 
             // this should only happen if theres no alive player in the arena -> summon orb
@@ -1122,7 +1132,7 @@ class npc_thorim_arena_phase_add : public CreatureScript
                     return;
                 }
 
-		events.Update(diff);
+                events.Update(diff);
 
                 while (uint32 event = events.ExecuteEvent())
                 {
@@ -1171,6 +1181,7 @@ class npc_thorim_arena_phase_add : public CreatureScript
             ArenaPhaseAddHelper myHelper;
             bool IsInArena;
             bool amIhealer;
+            bool hf4;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1587,7 +1598,7 @@ class npc_sif : public CreatureScript
                                 me->DespawnOrUnsummon();
                                 return;
                             }
-                            DoCast(me, SPELL_BLIZZARD, true);
+                            //                            DoCast(me, SPELL_BLIZZARD, true);
                             //DoCast(me, 62577, true);
                             events.ScheduleEvent(EVENT_BLIZZARD, 45000);
                             break;

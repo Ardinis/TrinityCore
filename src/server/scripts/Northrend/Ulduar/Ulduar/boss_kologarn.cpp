@@ -437,6 +437,8 @@ public:
             DoCast(me, SPELL_FOCUSED_EYEBEAM);
             me->SetDisplayId(11686);
             checkTimer = 1500;
+            me->SetSpeed(MOVE_RUN, 0.5f);//run
+            me->SetSpeed(MOVE_WALK, 0.5f);//run
         }
 
         uint32 checkTimer;

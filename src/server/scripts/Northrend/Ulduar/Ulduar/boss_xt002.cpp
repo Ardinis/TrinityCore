@@ -269,6 +269,8 @@ class boss_xt002 : public CreatureScript
                 _JustDied();
                 if (_hfSpeedKill > 0)
                     instance->DoCompleteAchievement(RAID_MODE(2937, 2938));
+                if (_hardMode)
+                    instance->DoCompleteAchievement(RAID_MODE(3058, 3059));
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)

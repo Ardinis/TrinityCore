@@ -430,6 +430,7 @@ class boss_steelbreaker : public CreatureScript
                         {
                             me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                             instance->DoCompleteAchievement(RAID_MODE(2941, 2944));
+                            instance->DoCompleteAchievement(RAID_MODE(2947, 2948));
                             AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
                             if (!pAE)
                                 return;
@@ -462,7 +463,8 @@ class boss_steelbreaker : public CreatureScript
                 {
                 case SPELL_SUPERCHARGE:
                     me->SetHealth(me->GetMaxHealth());
-                    events.RescheduleEvent(EVENT_FUSION_PUNCH, 15000);
+                    events.CancelEvent(EVENT_FUSION_PUNCH);
+                    events.ScheduleEvent(EVENT_FUSION_PUNCH, 15000);
                     superChargedCnt++;
                     DoAction(ACTION_UPDATEPHASE);
                     // Crazy hack, but since - whyever - stacking does not work automatically when the casts are fired from different NPCs...
@@ -738,6 +740,7 @@ class boss_runemaster_molgeim : public CreatureScript
                     {
                         if (!Steelbreaker->isAlive() && !Brundir->isAlive())
                         {
+                            instance->DoCompleteAchievement(RAID_MODE(2947, 2948));
                             me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                             instance->DoCompleteAchievement(RAID_MODE(2939, 2942));
                             AchievementEntry const* pAE = sAchievementStore.LookupEntry(RAID_MODE(2945 ,2946));
@@ -805,6 +808,8 @@ class boss_runemaster_molgeim : public CreatureScript
                         case EVENT_RUNE_OF_POWER:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                             {
+                                if (Creature *c = me->FindNearestCreature(33705, 100))
+                                    c->DespawnOrUnsummon();
                                 Position pos;
                                 target->GetPosition(&pos);
                                 me->SummonCreature(33705, pos, TEMPSUMMON_TIMED_DESPAWN, 59000);

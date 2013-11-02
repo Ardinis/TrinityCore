@@ -439,6 +439,8 @@ public:
                     instance->DoCompleteAchievement(ACHIEVEMENT_COOLEST_FRIENDS);
                 if (instance->GetData(DATA_GARE_GEL) != FAIL)
                     instance->DoCompleteAchievement(ACHIEVEMENT_CHEESE_THE_FREEZE);
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65074);
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, 64899),
                 _JustDied();
             }
         }
@@ -1046,7 +1048,8 @@ class spell_biting_cold : public SpellScriptLoader
                 {
                     //                    if (itr->first != target->GetGUID())
                     //     return;
-
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        continue;
                     if (itr->second >= 4)
                     {
                         target->CastSpell(target, SPELL_BITING_COLD_TRIGGERED, true);

@@ -1641,16 +1641,16 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
                         {
                             if (Unit *tank = c->getVictim())
                             {
-                                while (target->GetGUID() == tank->GetGUID() && cnt < 100 && caster->GetDistance(target) < 15.0f)
+			      while ((target->GetGUID() == tank->GetGUID() || target->GetVehicle()) && cnt < 100 && caster->GetDistance(target) < 15.0f)
                                 {
-                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
-                                    cnt++;
+				  target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+				  cnt++;
                                 }
-                                cnt = 0;
-                                while (target->GetGUID() == tank->GetGUID() && cnt < 100)
+			      cnt = 0;
+			      while ((target->GetGUID() == tank->GetGUID() || target->GetVehicle()) && cnt < 100)
                                 {
-                                    cnt++;
-                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+				  cnt++;
+				  target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
                                 }
                             }
                             if (target)
@@ -1737,11 +1737,12 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
                                     cnt++;
                                 }
                                 cnt = 0;
-                                while ((target->GetVehicle() || target->GetGUID() == tank->GetGUID()) && cnt < 100)
-                                {
-                                    cnt++;
-                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
-                                }
+				if (!target)
+				  while ((target->GetVehicle() || target->GetGUID() == tank->GetGUID()) && cnt < 100)
+				    {
+				      cnt++;
+				      target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
+				    }
                             }
                             if (target)
                                 targets.push_back(target);

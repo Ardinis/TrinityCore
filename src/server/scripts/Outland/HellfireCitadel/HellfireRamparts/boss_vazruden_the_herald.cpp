@@ -377,7 +377,7 @@ class boss_vazruden_the_herald : public CreatureScript
                     summoned->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                     summoned->SetSpeed(MOVE_FLIGHT, 2.5f);
                     if (victim)
-                        AttackStartNoMove(victim);
+                        summoned->AI()->AttackStart(victim);
                 }
                 else
                     if (victim)
@@ -515,4 +515,3 @@ void AddSC_boss_vazruden_the_herald()
     new boss_nazan();
     new mob_hellfire_sentry();
 }
-

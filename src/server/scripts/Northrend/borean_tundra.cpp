@@ -1610,11 +1610,13 @@ public:
         npc_beryl_sorcererAI(Creature* creature) : FollowerAI(creature) {}
 
         bool bEnslaved;
+        uint64 casterGUID;
 
         void Reset()
         {
             me->SetReactState(REACT_AGGRESSIVE);
             bEnslaved = false;
+            casterGUID = 0;
         }
 
         void EnterCombat(Unit* who)
@@ -1632,7 +1634,8 @@ public:
                 StartFollow(pCaster->ToPlayer(), 0, NULL);
                 me->UpdateEntry(NPC_CAPTURED_BERLY_SORCERER, TEAM_NEUTRAL);
                 DoCast(me, SPELL_COSMETIC_ENSLAVE_CHAINS_SELF, true);
-                CAST_PLR(pCaster)->KilledMonsterCredit(NPC_CAPTURED_BERLY_SORCERER, 0);
+                casterGUID = pCaster->GetGUID();
+
                 bEnslaved = true;
             }
         }
@@ -1643,8 +1646,12 @@ public:
 
             if (who->GetEntry() == NPC_LIBRARIAN_DONATHAN && me->IsWithinDistInMap(who, INTERACTION_DISTANCE))
             {
-                SetFollowComplete();
-                me->DisappearAndDie();
+                if (Player* pcaster = Unit::GetPlayer(*me, casterGUID))
+                {
+                    SetFollowComplete();
+                    pcaster->KilledMonsterCredit(NPC_CAPTURED_BERLY_SORCERER, 0);
+                    me->DisappearAndDie();
+                }
             }
         }
 

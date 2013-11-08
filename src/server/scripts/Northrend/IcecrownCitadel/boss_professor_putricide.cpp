@@ -328,6 +328,7 @@ class boss_professor_putricide : public CreatureScript
                             summon->CastSpell(summon, SPELL_GROW, true);
                         break;
                     case NPC_GAS_CLOUD:
+                        summon->SetInCombatWithZone();
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
                         summon->CastSpell(summon, SPELL_GASEOUS_BLOAT_PROC, true);
@@ -335,6 +336,7 @@ class boss_professor_putricide : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         break;
                     case NPC_VOLATILE_OOZE:
+                        summon->SetInCombatWithZone();
                         // no possible aura seen in sniff adding the aurastate
                         summon->ModifyAuraState(AURA_STATE_UNKNOWN19, true);
                         summon->CastSpell(summon, SPELL_OOZE_ERUPTION_SEARCH_PERIODIC, true);
@@ -759,35 +761,36 @@ class npc_putricide_oozeAI : public ScriptedAI
         npc_putricide_oozeAI(Creature* creature, uint32 hitTargetSpellId) : ScriptedAI(creature),
             _hitTargetSpellId(hitTargetSpellId), _newTargetSelectTimer(0)
         {
+            _newTargetSelectTimer = 0;
         }
 
         void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
         {
             if (!_newTargetSelectTimer && spell->Id == sSpellMgr->GetSpellIdForDifficulty(_hitTargetSpellId, me))
-                _newTargetSelectTimer = 1000;
+                _newTargetSelectTimer = urand(1000, 3000);
         }
 
         void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
         {
             if (spell->Id == SPELL_TEAR_GAS_CREATURE)
-                _newTargetSelectTimer = 1000;
+                _newTargetSelectTimer = urand(1000, 3000);
         }
 
         void UpdateAI(uint32 const diff)
         {
-            if (!UpdateVictim() && !_newTargetSelectTimer)
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+            else if (!_newTargetSelectTimer && !me->IsNonMeleeSpellCasted(false, false, true, false, true))
+                _newTargetSelectTimer = urand(1000, 3000);
+
+            if (!_newTargetSelectTimer && (me->HasAura(SPELL_TEAR_GAS_CREATURE) || me->IsNonMeleeSpellCasted(false, false, true, false, true)))
                 return;
 
-            if (!_newTargetSelectTimer && !me->IsNonMeleeSpellCasted(false, false, true, false, true))
-                _newTargetSelectTimer = 1000;
+            //            if (!_newTargetSelectTimer && !me->IsNonMeleeSpellCasted(false, false, true, false, true))
+            //    _newTargetSelectTimer = 1000;
 
-            DoMeleeAttackIfReady();
-
-            if (!_newTargetSelectTimer)
-                return;
-
-            if (me->HasAura(SPELL_TEAR_GAS_CREATURE))
-                return;
+            //            if (me->HasAura(SPELL_TEAR_GAS_CREATURE))
+            //   return;
 
             if (_newTargetSelectTimer <= diff)
             {
@@ -1072,8 +1075,8 @@ class spell_putricide_ooze_eruption_searcher : public SpellScriptLoader
                 uint32 adhesiveId = sSpellMgr->GetSpellIdForDifficulty(SPELL_VOLATILE_OOZE_ADHESIVE, GetCaster());
                 if (GetHitUnit()->HasAura(adhesiveId))
                 {
-                    GetCaster()->CastSpell(GetHitUnit(), SPELL_OOZE_ERUPTION, true);
                     GetHitUnit()->RemoveAurasDueToSpell(adhesiveId, GetCaster()->GetGUID(), 0, AURA_REMOVE_BY_ENEMY_SPELL);
+                    GetCaster()->CastSpell(GetHitUnit(), SPELL_OOZE_ERUPTION, true);
                 }
             }
 
@@ -1619,6 +1622,28 @@ public:
         Unit* _caster;
 };
 
+
+class LimonTargetSelector
+{
+public:
+    LimonTargetSelector(Unit *caster) : _caster(caster) { }
+
+    bool operator()(Unit* unit)
+    {
+        Creature *c = _caster->FindNearestCreature(36678, 1000);
+        if (!c)
+            return true;
+        Unit *tank = c->getVictim();
+        if (!tank)
+            return true;
+        uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_GASEOUS_BLOAT_PROTECTION, _caster);
+        uint32 gaseousBloatId2 = sSpellMgr->GetSpellIdForDifficulty(SPELL_VOLATILE_OOZE_PROTECTION, _caster);
+        return unit->HasAura(gaseousBloatId) || unit->HasAura(gaseousBloatId2) || unit->GetVehicle() != NULL || unit->GetGUID() == tank->GetGUID();
+    }
+private:
+    Unit *_caster;
+};
+
 class spell_putricide_gaseous_bloat : public SpellScriptLoader
 {
     public:
@@ -1631,32 +1656,7 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
             void FilterTargets(std::list<Unit*>& targets)
             {
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
-                uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_VOLATILE_OOZE_ADHESIVE, GetCaster());
-                targets.clear();
-                int cnt = 0;
-                if (Unit *caster = GetCaster())
-                {
-                    if (Creature *c = caster->FindNearestCreature(36678, 1000))
-                        if (Unit* target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId))
-                        {
-                            if (Unit *tank = c->getVictim())
-                            {
-			      while ((target->GetGUID() == tank->GetGUID() || target->GetVehicle()) && cnt < 100 && caster->GetDistance(target) < 15.0f)
-                                {
-				  target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
-				  cnt++;
-                                }
-			      cnt = 0;
-			      while ((target->GetGUID() == tank->GetGUID() || target->GetVehicle()) && cnt < 100)
-                                {
-				  cnt++;
-				  target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
-                                }
-                            }
-                            if (target)
-                                targets.push_back(target);
-                        }
-                }
+                targets.remove_if (LimonTargetSelector(GetCaster()));
             }
 
             void Register()
@@ -1721,34 +1721,8 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
             void FilterTargets(std::list<Unit*>& targets)
             {
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
-                uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_GASEOUS_BLOAT, GetCaster());
-                targets.clear();
-                int cnt = 0;
-                if (Unit *caster = GetCaster())
-                {
-                    if (Creature *c = caster->FindNearestCreature(36678, 1000))
-                        if (Unit* target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId))
-                        {
-                            if (Unit *tank = c->getVictim())
-                            {
-                                while ((target->GetVehicle() || target->GetGUID() == tank->GetGUID()) && cnt < 100 && caster->GetDistance(target) < 15.0f)
-                                {
-                                    target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
-                                    cnt++;
-                                }
-                                cnt = 0;
-				if (!target)
-				  while ((target->GetVehicle() || target->GetGUID() == tank->GetGUID()) && cnt < 100)
-				    {
-				      cnt++;
-				      target = c->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -gaseousBloatId);
-				    }
-                            }
-                            if (target)
-                                targets.push_back(target);
-                        }
-                    }
-                }
+                targets.remove_if (LimonTargetSelector(GetCaster()));
+            }
 
             void Register()
             {

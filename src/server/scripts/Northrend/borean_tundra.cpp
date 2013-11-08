@@ -906,6 +906,7 @@ public:
                 if (Player* pHarpooner = Unit::GetPlayer(*me, HarpoonerGUID))
                 {
                     EnterEvadeMode();
+                    HarpoonerGUID = pHarpooner->GetGUID();
                     StartFollow(pHarpooner, 35, NULL);
 
                     DoCast(me, SPELL_SUBDUED, true);

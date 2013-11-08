@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -23,21 +23,29 @@ SDComment:Place Holder
 SDCategory: Sunken Temple
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "sunken_temple.h"
 
-#define GO_ATALAI_STATUE1 148830
-#define GO_ATALAI_STATUE2 148831
-#define GO_ATALAI_STATUE3 148832
-#define GO_ATALAI_STATUE4 148833
-#define GO_ATALAI_STATUE5 148834
-#define GO_ATALAI_STATUE6 148835
-#define GO_ATALAI_IDOL 148836
+enum Gameobject
+{
+    GO_ATALAI_STATUE1           = 148830,
+    GO_ATALAI_STATUE2           = 148831,
+    GO_ATALAI_STATUE3           = 148832,
+    GO_ATALAI_STATUE4           = 148833,
+    GO_ATALAI_STATUE5           = 148834,
+    GO_ATALAI_STATUE6           = 148835,
+    GO_ATALAI_IDOL              = 148836,
+    GO_ATALAI_LIGHT1            = 148883,
+    GO_ATALAI_LIGHT2            = 148937
 
-#define GO_ATALAI_LIGHT1 148883
-#define GO_ATALAI_LIGHT2 148937
+};
 
-#define NPC_MALFURION_STORMRAGE 15362
+enum CreatureIds
+{
+    NPC_MALFURION_STORMRAGE     = 15362
+};
+
 
 class instance_sunken_temple : public InstanceMapScript
 {
@@ -96,21 +104,21 @@ public:
         {
             switch (go->GetEntry())
             {
-                case GO_ATALAI_STATUE1: GOAtalaiStatue1 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE2: GOAtalaiStatue2 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE3: GOAtalaiStatue3 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE4: GOAtalaiStatue4 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE5: GOAtalaiStatue5 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE6: GOAtalaiStatue6 = go->GetGUID();   break;
-                case GO_ATALAI_IDOL:    GOAtalaiIdol = go->GetGUID();      break;
+            case GO_ATALAI_STATUE1: GOAtalaiStatue1 = go->GetGUID();   break;
+            case GO_ATALAI_STATUE2: GOAtalaiStatue2 = go->GetGUID();   break;
+            case GO_ATALAI_STATUE3: GOAtalaiStatue3 = go->GetGUID();   break;
+            case GO_ATALAI_STATUE4: GOAtalaiStatue4 = go->GetGUID();   break;
+            case GO_ATALAI_STATUE5: GOAtalaiStatue5 = go->GetGUID();   break;
+            case GO_ATALAI_STATUE6: GOAtalaiStatue6 = go->GetGUID();   break;
+            case GO_ATALAI_IDOL:    GOAtalaiIdol = go->GetGUID();      break;
             }
         }
 
-         virtual void Update(uint32 /*diff*/) // correct order goes form 1-6
-         {
-             switch (State)
-             {
-             case GO_ATALAI_STATUE1:
+        virtual void Update(uint32 /*diff*/) // correct order goes form 1-6
+        {
+            switch (State)
+            {
+            case GO_ATALAI_STATUE1:
                 if (!s1 && !s2 && !s3 && !s4 && !s5 && !s6)
                 {
                     if (GameObject* pAtalaiStatue1 = instance->GetGameObject(GOAtalaiStatue1))
@@ -119,7 +127,7 @@ public:
                     State = 0;
                 };
                 break;
-             case GO_ATALAI_STATUE2:
+            case GO_ATALAI_STATUE2:
                 if (s1 && !s2 && !s3 && !s4 && !s5 && !s6)
                 {
                     if (GameObject* pAtalaiStatue2 = instance->GetGameObject(GOAtalaiStatue2))
@@ -128,7 +136,7 @@ public:
                     State = 0;
                 };
                 break;
-             case GO_ATALAI_STATUE3:
+            case GO_ATALAI_STATUE3:
                 if (s1 && s2 && !s3 && !s4 && !s5 && !s6)
                 {
                     if (GameObject* pAtalaiStatue3 = instance->GetGameObject(GOAtalaiStatue3))
@@ -137,7 +145,7 @@ public:
                     State = 0;
                 };
                 break;
-             case GO_ATALAI_STATUE4:
+            case GO_ATALAI_STATUE4:
                 if (s1 && s2 && s3 && !s4 && !s5 && !s6)
                 {
                     if (GameObject* pAtalaiStatue4 = instance->GetGameObject(GOAtalaiStatue4))
@@ -146,7 +154,7 @@ public:
                     State = 0;
                 }
                 break;
-             case GO_ATALAI_STATUE5:
+            case GO_ATALAI_STATUE5:
                 if (s1 && s2 && s3 && s4 && !s5 && !s6)
                 {
                     if (GameObject* pAtalaiStatue5 = instance->GetGameObject(GOAtalaiStatue5))
@@ -155,17 +163,17 @@ public:
                     State = 0;
                 }
                 break;
-             case GO_ATALAI_STATUE6:
+            case GO_ATALAI_STATUE6:
                 if (s1 && s2 && s3 && s4 && s5 && !s6)
                 {
                     if (GameObject* pAtalaiStatue6 = instance->GetGameObject(GOAtalaiStatue6))
-                        UseStatue(pAtalaiStatue6);
+                        UseLastStatue(pAtalaiStatue6);
                     s6 = true;
                     State = 0;
                 }
                 break;
-             }
-         };
+            }
+        };
 
         void UseStatue(GameObject* go)
         {
@@ -173,31 +181,32 @@ public:
             go->SetUInt32Value(GAMEOBJECT_FLAGS, 4);
         }
 
-         /*
-         void UseLastStatue(GameObject* go)
-         {
-             AtalaiStatue1->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue1->GetPositionX(), AtalaiStatue1->GetPositionY(), AtalaiStatue1->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue2->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue2->GetPositionX(), AtalaiStatue2->GetPositionY(), AtalaiStatue2->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue3->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue3->GetPositionX(), AtalaiStatue3->GetPositionY(), AtalaiStatue3->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue4->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue4->GetPositionX(), AtalaiStatue4->GetPositionY(), AtalaiStatue4->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue5->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue5->GetPositionX(), AtalaiStatue5->GetPositionY(), AtalaiStatue5->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue6->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue6->GetPositionX(), AtalaiStatue6->GetPositionY(), AtalaiStatue6->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             go->SummonGameObject(148838, -488.997, 96.61, -189.019, -1.52, 0, 0, 0, 0, 100000);
-         }
-         */
 
-         void SetData(uint32 type, uint32 data)
-         {
+        void UseLastStatue(GameObject* go)
+        {
+            go->SummonGameObject(GO_ATALAI_LIGHT2, instance->GetGameObject(GOAtalaiStatue1)->GetPositionX(), instance->GetGameObject(GOAtalaiStatue1)->GetPositionY(), instance->GetGameObject(GOAtalaiStatue1)->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
+            go->SummonGameObject(GO_ATALAI_LIGHT2, instance->GetGameObject(GOAtalaiStatue2)->GetPositionX(), instance->GetGameObject(GOAtalaiStatue2)->GetPositionY(), instance->GetGameObject(GOAtalaiStatue2)->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
+            go->SummonGameObject(GO_ATALAI_LIGHT2, instance->GetGameObject(GOAtalaiStatue3)->GetPositionX(), instance->GetGameObject(GOAtalaiStatue3)->GetPositionY(), instance->GetGameObject(GOAtalaiStatue3)->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
+            go->SummonGameObject(GO_ATALAI_LIGHT2, instance->GetGameObject(GOAtalaiStatue4)->GetPositionX(), instance->GetGameObject(GOAtalaiStatue4)->GetPositionY(), instance->GetGameObject(GOAtalaiStatue4)->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
+            go->SummonGameObject(GO_ATALAI_LIGHT2, instance->GetGameObject(GOAtalaiStatue5)->GetPositionX(), instance->GetGameObject(GOAtalaiStatue5)->GetPositionY(), instance->GetGameObject(GOAtalaiStatue5)->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
+            go->SummonGameObject(GO_ATALAI_LIGHT2, instance->GetGameObject(GOAtalaiStatue6)->GetPositionX(), instance->GetGameObject(GOAtalaiStatue6)->GetPositionY(), instance->GetGameObject(GOAtalaiStatue6)->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
+            go->SummonGameObject(148838, -488.997f, 96.61f, -189.019f, -1.52f, 0, 0, 0, 0, 100000);
+            go->SummonCreature(8580, -480.399f, 96.566f, -189.2f, 6.1979f, TEMPSUMMON_DEAD_DESPAWN, 900000);
+        }
+
+
+        void SetData(uint32 type, uint32 data)
+        {
             if (type == EVENT_STATE)
                 State = data;
-         }
+        }
 
-         uint32 GetData(uint32 type)
-         {
+        uint32 GetData(uint32 type) const
+        {
             if (type == EVENT_STATE)
                 return State;
             return 0;
-         }
+        }
     };
 
 };

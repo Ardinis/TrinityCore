@@ -1659,8 +1659,7 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
                 targets.remove_if (LimonTargetSelector(GetCaster()));
 		Unit *target = targets.front();
 		targets.clear();
-		if (target)
-		  targets.push_back(target);
+		targets.push_back(target);
             }
 
             void Register()
@@ -1728,8 +1727,7 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
                 targets.remove_if (LimonTargetSelector(GetCaster()));
 		Unit *target = targets.front();
 		targets.clear();
-		if (target)
-		  targets.push_back(target);
+		targets.push_back(target);
             }
 
             void Register()

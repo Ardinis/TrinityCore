@@ -1657,9 +1657,6 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
             {
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
                 targets.remove_if (LimonTargetSelector(GetCaster()));
-		Unit *target = targets.front();
-		targets.clear();
-		targets.push_back(target);
             }
 
             void Register()
@@ -1725,9 +1722,6 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
             {
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
                 targets.remove_if (LimonTargetSelector(GetCaster()));
-		Unit *target = targets.front();
-		targets.clear();
-		targets.push_back(target);
             }
 
             void Register()

@@ -893,7 +893,8 @@ public:
                         pHarpooner->RemoveAura(SPELL_DRAKE_HATCHLING_SUBDUED);
                         SetFollowComplete();
                         HarpoonerGUID = 0;
-                        me->DisappearAndDie();
+                        me->DespawnOrUnsummon(100);
+                        //                        me->DisappearAndDie();
                     }
                 }
             }
@@ -1650,7 +1651,7 @@ public:
                 {
                     SetFollowComplete();
                     pcaster->KilledMonsterCredit(NPC_CAPTURED_BERLY_SORCERER, 0);
-                    me->DisappearAndDie();
+                    me->DespawnOrUnsummon(100);
                 }
             }
         }

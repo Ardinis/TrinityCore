@@ -5920,7 +5920,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 {
                     if (!victim || !victim->isAlive() || HasAura(73422))  // cant collect shards while under effect of Chaos Bane buff
                         return false;
-                    if (GetTypeId() == TYPEID_PLAYER && InArena())
+                    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->InArena())
                         return false;
                     CastSpell(this, 71905, true, NULL, triggeredByAura);
 

@@ -1660,8 +1660,28 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& targets)
             {
+                if (targets.empty())
+                    if (Unit *caster = GetCaster())
+                        if (InstanceScript *instance = caster->GetInstanceScript())
+                        {
+                            Map::PlayerList const& PlList = instance->instance->GetPlayers();
+                            if (!PlList.isEmpty())
+                                for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                                    if (Player * pl = itr->getSource())
+                                        targets.push_back(pl);
+                        }
+                if (targets.empty())
+                    return;
+                Unit *tar = Trinity::Containers::SelectRandomContainerElement(targets);
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
                 targets.remove_if (LimonTargetSelector(GetCaster()));
+                if (!targets.empty())
+                    tar = Trinity::Containers::SelectRandomContainerElement(targets);
+                if (tar)
+                {
+                    targets.clear();
+                    targets.push_back(tar);
+                }
             }
 
             void Register()

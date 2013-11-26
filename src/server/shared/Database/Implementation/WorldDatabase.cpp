@@ -60,4 +60,6 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(WORLD_UPD_WAYPOINT_SCRIPT_Z, "UPDATE waypoint_scripts SET z = ? WHERE guid = ?", CONNECTION_ASYNC);
     PREPARE_STATEMENT(WORLD_UPD_WAYPOINT_SCRIPT_O, "UPDATE waypoint_scripts SET o = ? WHERE guid = ?", CONNECTION_ASYNC);
     PREPARE_STATEMENT(WORLD_DEL_CREATURE, "DELETE FROM creature WHERE guid = ?", CONNECTION_ASYNC);
+    PREPARE_STATEMENT(WORLD_INS_ARENA_LOG, "INSERT INTO arena_log (endTime, duration, winnerTeam, looserTeam, winnerRating, winnerMMR, looserRating, looserMMR, winpl1, winpl2, winpl3, winpl4, winpl5, loosepl1, loosepl2, loosepl3, loosepl4, loosepl5, windmg, winheal, winkill, loosedmg, looseheal, loosekill, winIP1, winIP2, winIP3, winIP4, winIP5, looseIP1, looseIP2, looseIP3, looseIP4, looseIP5) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
+
 }

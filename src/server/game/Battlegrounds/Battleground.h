@@ -709,5 +709,20 @@ class Battleground
         float m_TeamStartLocZ[BG_TEAMS_COUNT];
         float m_TeamStartLocO[BG_TEAMS_COUNT];
         uint32 ScriptId;
+
+        // ArenaLog
+        std::string winplayername[5];
+        std::string winplayerguildname[5];
+        std::string winIPs[5];
+        uint32 windamage;
+        uint32 winheal;
+        uint32 winkillingBlows;
+
+        std::string losplayername[5];
+        std::string losplayerguildname[5];
+        std::string losIPs[5];
+        uint32 losdamage;
+        uint32 losheal;
+        uint32 loskillingBlows;
 };
 #endif

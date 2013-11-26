@@ -750,10 +750,80 @@ void Battleground::EndBattleground(uint32 winner)
                 SetArenaTeamRatingChangeForTeam(winner, winner_change);
                 SetArenaTeamRatingChangeForTeam(GetOtherTeam(winner), loser_change);
                 sLog->outArena("Arena match Type: %u for Team1Id: %u - Team2Id: %u ended. WinnerTeamId: %u. Winner rating: +%d, Loser rating: %d", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE], winner_arena_team->GetId(), winner_change, loser_change);
-                if (sWorld->getBoolConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
+                //                if (sWorld->getBoolConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
+                {
+                    uint8 wincnt = 0;
+                    uint8 loscnt = 0;
+                    for (uint8 i = 0; i<5; ++i)
+                    {
+                        losplayername[i] = "";
+                        losplayerguildname[i] = "";
+                        losIPs[i] = "";
+                        winplayername[i] = "";
+                        winplayerguildname[i] = "";
+                        winIPs[i] = "";
+                    }
+                    windamage = 0;
+                    winheal = 0;
+                    winkillingBlows = 0;
+                    losdamage = 0;
+                    losheal = 0;
+                    loskillingBlows = 0;
+                    time_t now = time(NULL);
                     for (Battleground::BattlegroundScoreMap::const_iterator itr = GetPlayerScoresBegin(); itr != GetPlayerScoresEnd(); ++itr)
                         if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-                            sLog->outArena("Statistics for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
+                        {
+                            BattlegroundPlayerMap::iterator iter = m_Players.find(itr->first);
+                            if (iter != m_Players.end())
+                            {
+                                if (iter->second.Team == winner)
+                                {
+                                    winplayername[wincnt] = player->GetName();
+                                    winplayerguildname[wincnt] = player->GetGuildName();
+                                    winIPs[wincnt] = player->GetSession()->GetRemoteAddress();
+                                    windamage += itr->second->DamageDone;
+                                    winheal += itr->second->HealingDone;
+                                    winkillingBlows += itr->second->KillingBlows;
+                                    ++wincnt;
+                                }
+                                else
+                                {
+                                    losplayername[loscnt] = player->GetName();
+                                    losplayerguildname[loscnt] = player->GetGuildName();
+                                    losIPs[loscnt] = player->GetSession()->GetRemoteAddress();
+                                    losdamage += itr->second->DamageDone;
+                                    losheal += itr->second->HealingDone;
+                                    loskillingBlows = itr->second->KillingBlows;
+                                    ++loscnt;
+                                }
+                            }
+                        }
+                    uint8 index = 0;
+                    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_ARENA_LOG);
+                    stmt->setUInt32(  index, uint32(now));
+                    stmt->setUInt32(++index, m_StartTime);
+                    stmt->setUInt32(++index, winner_arena_team->GetId());
+                    stmt->setUInt32(++index, loser_arena_team->GetId());
+                    stmt->setUInt32(++index, winner_team_rating);
+                    stmt->setUInt32(++index, winner_matchmaker_rating);
+                    stmt->setUInt32(++index, loser_team_rating);
+                    stmt->setUInt32(++index, loser_matchmaker_rating);
+                    for (uint8 i = 0; i < 5; ++i)
+                        stmt->setString(++index, winplayername[i]);
+                    for (uint8 i = 0; i < 5; ++i)
+                        stmt->setString(++index, losplayername[i]);
+                    stmt->setUInt32(++index, windamage);
+                    stmt->setUInt32(++index, winheal);
+                    stmt->setUInt32(++index, winkillingBlows);
+                    stmt->setUInt32(++index, losdamage);
+                    stmt->setUInt32(++index, losheal);
+                    stmt->setUInt32(++index, loskillingBlows);
+                    for (uint8 i = 0; i < 5; ++i)
+                        stmt->setString(++index, winIPs[i]);
+                    for (uint8 i = 0; i < 5; ++i)
+                        stmt->setString(++index, losIPs[i]);
+                    WorldDatabase.Execute(stmt);
+                }
             }
             // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
             else

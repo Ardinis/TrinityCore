@@ -886,13 +886,14 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
 
             void SelectTarget(std::list<Unit*>& targets)
             {
-                if (targets.empty())
+                //                if (targets.empty())
                 {
-                    FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
-                    GetCaster()->ToCreature()->DespawnOrUnsummon(1);    // despawn next update
-                    return;
+
+                    //                    FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
+                    //                    GetCaster()->ToCreature()->DespawnOrUnsummon(1);    // despawn next update
+                    // return;
                 }
-                if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                /*                if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                 {
                     Unit* target = Trinity::Containers::SelectRandomContainerElement(targets);
                     int cnt = 0;
@@ -908,29 +909,33 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
                         putri->AI()->SetData(42, target->GetGUIDLow());
                         _target = target;
                     }
-                }
+                    }*/
             }
 
             void SetTarget(std::list<Unit*>& targets)
             {
-                targets.clear();
+                /*                targets.clear();
                 if (_target)
-                    targets.push_back(_target);
+                targets.push_back(_target);*/
             }
 
             void StartAttack()
             {
-                GetCaster()->ClearUnitState(UNIT_STATE_CASTING);
-                GetCaster()->DeleteThreatList();
-                GetCaster()->ToCreature()->AI()->AttackStart(GetHitUnit());
-                GetCaster()->AddThreat(GetHitUnit(), 500000000.0f);    // value seen in sniff
+                if (Unit *target = GetHitUnit())
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        GetCaster()->ClearUnitState(UNIT_STATE_CASTING);
+                        GetCaster()->DeleteThreatList();
+                        GetCaster()->ToCreature()->AI()->AttackStart(GetHitUnit());
+                        GetCaster()->AddThreat(GetHitUnit(), 500000000.0f);    // value seen in sniff
+                    }
             }
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                //                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                //                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                //                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
                 AfterHit += SpellHitFn(spell_putricide_ooze_channel_SpellScript::StartAttack);
             }
 
@@ -1720,8 +1725,28 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& targets)
             {
+                if (targets.empty())
+                    if (Unit *caster = GetCaster())
+                        if (InstanceScript *instance = caster->GetInstanceScript())
+                        {
+                            Map::PlayerList const& PlList = instance->instance->GetPlayers();
+                            if (!PlList.isEmpty())
+                                for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
+                                    if (Player * pl = itr->getSource())
+                                        targets.push_back(pl);
+                        }
+                if (targets.empty())
+                    return;
+                Unit *tar = Trinity::Containers::SelectRandomContainerElement(targets);
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
                 targets.remove_if (LimonTargetSelector(GetCaster()));
+                if (!targets.empty())
+                    tar = Trinity::Containers::SelectRandomContainerElement(targets);
+                if (tar)
+                {
+                    targets.clear();
+                    targets.push_back(tar);
+                }
             }
 
             void Register()

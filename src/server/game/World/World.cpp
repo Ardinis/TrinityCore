@@ -3107,6 +3107,7 @@ void World::InitPacketThrottling()
 {
   memset(opcodePerSecond, 400, sizeof(uint32) * NUM_MSG_TYPES);
 
+  opcodePerSecond[CMSG_SET_TAXI_BENCHMARK_MODE] = 1;
   opcodePerSecond[CMSG_WHO] = 1;
   opcodePerSecond[CMSG_INSPECT] = 1;
   opcodePerSecond[CMSG_CHAR_ENUM] = 1;

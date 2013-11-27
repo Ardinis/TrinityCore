@@ -41,6 +41,7 @@
 #include <map>
 #include <limits>
 #include "ConditionMgr.h"
+#include "../../ArenaSeason/ArenaSeason.h"
 #include <functional>
 
 #define MAX_FREE_GUID 1500000
@@ -1223,6 +1224,8 @@ class ObjectMgr
         void LoadFactionChangeItems();
         void LoadFactionChangeSpells();
         void LoadFactionChangeReputations();
+
+        ArenaSeason *_arenaSeasonExtraInfos;
 
     private:
         // first free id for selected id type

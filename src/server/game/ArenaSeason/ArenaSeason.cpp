@@ -53,5 +53,5 @@ void ArenaSeason::updatePlayerScore(uint32 guid, bool win)
             }
         }
     }
-    CharacterDatabase.PExecute("UPDATE arena_extra_season_infos SET wins = %u WHERE guid = %u", arenaSeasonExtraInfos[guid], guid);
+    CharacterDatabase.PExecute("REPLACE INTO arena_extra_season_infos VALUES(%u,  %u)", guid, arenaSeasonExtraInfos[guid]);
 }

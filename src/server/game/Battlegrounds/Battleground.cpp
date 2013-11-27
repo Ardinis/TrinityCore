@@ -779,7 +779,6 @@ void Battleground::EndBattleground(uint32 winner)
                                 if (iter->second.Team == winner)
                                 {
                                     winplayername[wincnt] = player->GetName();
-                                    winplayerguildname[wincnt] = player->GetGuildName();
                                     winIPs[wincnt] = player->GetSession()->GetRemoteAddress();
                                     windamage += itr->second->DamageDone;
                                     winheal += itr->second->HealingDone;
@@ -789,7 +788,6 @@ void Battleground::EndBattleground(uint32 winner)
                                 else
                                 {
                                     losplayername[loscnt] = player->GetName();
-                                    losplayerguildname[loscnt] = player->GetGuildName();
                                     losIPs[loscnt] = player->GetSession()->GetRemoteAddress();
                                     losdamage += itr->second->DamageDone;
                                     losheal += itr->second->HealingDone;

@@ -2206,6 +2206,19 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
         }
     }
 
+    // 24% chance to score a glancing on higher or equel level npcs.
+    if (attType != RANGED_ATTACK &&
+        (GetTypeId() == TYPEID_PLAYER || ToCreature()->isPet()) &&
+        victim->GetTypeId() != TYPEID_PLAYER && !victim->ToCreature()->isPet() &&
+        getLevel() <= victim->getLevel())
+    {
+        if (roll < (sum += 2400))
+        {
+            sLog->outStaticDebug ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-2400, sum);
+            return MELEE_HIT_GLANCING;
+        }
+    }
+
     // Critical chance
     tmp = crit_chance;
 
@@ -2216,26 +2229,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
             sLog->outStaticDebug ("RollMeleeOutcomeAgainst: CRIT DISABLED)");
         else
             return MELEE_HIT_CRIT;
-    }
-
-    // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
-    if (attType != RANGED_ATTACK &&
-        (GetTypeId() == TYPEID_PLAYER || ToCreature()->isPet()) &&
-        victim->GetTypeId() != TYPEID_PLAYER && !victim->ToCreature()->isPet() &&
-        getLevel() < victim->getLevelForTarget(this))
-    {
-        // cap possible value (with bonuses > max skill)
-        int32 skill = attackerWeaponSkill;
-        int32 maxskill = attackerMaxSkillValueForLevel;
-        skill = (skill > maxskill) ? maxskill : skill;
-
-        tmp = (10 + (victimDefenseSkill - skill)) * 100;
-        tmp = tmp > 4000 ? 4000 : tmp;
-        if (roll < (sum += tmp))
-        {
-            sLog->outStaticDebug ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
-            return MELEE_HIT_GLANCING;
-        }
     }
 
     // mobs can score crushing blows if they're 4 or more levels above victim

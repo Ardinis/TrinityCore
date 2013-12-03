@@ -246,6 +246,7 @@ m_HostileRefManager(this)
 
     _focusSpell = NULL;
     _targetLocked = false;
+    _isTrainingDummy = false;
 }
 
 ////////////////////////////////////////////////////////////
@@ -2085,10 +2086,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* victim, WeaponAttackTy
     // Miss chance based on melee
     //float miss_chance = MeleeMissChanceCalc(victim, attType);
     float miss_chance = 0.0f;
+    int32 attackerWeaponSkill = GetWeaponSkillValue(attType, victim);
+    int32 victimDefenseSkill = victim->GetDefenseSkillValue(this);
     if (isPet() && GetOwner())
-        miss_chance = GetOwner()->MeleeSpellMissChance(victim, attType, int32(GetWeaponSkillValue(attType, victim)) - int32(GetMaxSkillValueForLevel(this)), 0);
+        miss_chance = GetOwner()->MeleeSpellMissChance(victim, attType, attackerWeaponSkill - victimDefenseSkill, 0);
     else
-        miss_chance = MeleeSpellMissChance(victim, attType, int32(GetWeaponSkillValue(attType, victim)) - int32(GetMaxSkillValueForLevel(this)), 0);
+        miss_chance = MeleeSpellMissChance(victim, attType, attackerWeaponSkill - victimDefenseSkill, 0);
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, victim);
@@ -2146,16 +2149,15 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
     {
         sLog->outStaticDebug ("RollMeleeOutcomeAgainst: attack came from behind and victim was a player.");
     }
-    else if (!victim->HasUnitState(UNIT_STATE_CONTROLLED))
+    else if (!victim->HasUnitState(UNIT_STATE_CONTROLLED) || victim->isTrainingDummy())
     {
         // Reduce dodge chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             dodge_chance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100);
         else
             dodge_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
-
         // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
-        dodge_chance+= GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
+        dodge_chance += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
         dodge_chance = int32 (float (dodge_chance) * GetTotalAuraMultiplier(SPELL_AURA_MOD_ENEMY_DODGE));
 
         tmp = dodge_chance;
@@ -2173,7 +2175,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
     // check if attack comes from behind, nobody can parry or block if attacker is behind
     if (!victim->HasInArc(M_PI, this) && !victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
         sLog->outStaticDebug ("RollMeleeOutcomeAgainst: attack came from behind.");
-    else  if (!victim->HasUnitState(UNIT_STATE_CONTROLLED))
+    else  if (!victim->HasUnitState(UNIT_STATE_CONTROLLED) || victim->isTrainingDummy())
     {
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
@@ -2750,7 +2752,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 
 float Unit::GetUnitDodgeChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_CONTROLLED))
+    if (!this->isTrainingDummy() && (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_CONTROLLED)))
         return 0.0f;
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -2761,7 +2763,7 @@ float Unit::GetUnitDodgeChance() const
             return 0.0f;
         else
         {
-            float dodge = 5.0f;
+            float dodge = 6.5f;
             dodge += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
             return dodge > 0.0f ? dodge : 0.0f;
         }
@@ -2770,7 +2772,7 @@ float Unit::GetUnitDodgeChance() const
 
 float Unit::GetUnitParryChance() const
 {
-    if (IsNonMeleeSpellCasted(false, false, HasAuraType(SPELL_AURA_MOD_PACIFY)) || HasUnitState(UNIT_STATE_CONTROLLED))
+    if (!this->isTrainingDummy() && (IsNonMeleeSpellCasted(false, false, HasAuraType(SPELL_AURA_MOD_PACIFY)) || HasUnitState(UNIT_STATE_CONTROLLED)))
         return 0.0f;
 
     float chance = 0.0f;
@@ -2789,11 +2791,8 @@ float Unit::GetUnitParryChance() const
     }
     else if (GetTypeId() == TYPEID_UNIT)
     {
-        if (GetCreatureType() == CREATURE_TYPE_HUMANOID)
-        {
-            chance = 5.0f;
-            chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
-        }
+        chance = 14.0f;
+        chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
     }
 
     return chance > 0.0f ? chance : 0.0f;
@@ -2816,7 +2815,7 @@ float Unit::GetUnitMissChance(WeaponAttackType attType) const
 
 float Unit::GetUnitBlockChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_CONTROLLED))
+    if (!isTrainingDummy() && (IsNonMeleeSpellCasted(false) || HasUnitState(UNIT_STATE_CONTROLLED)))
         return 0.0f;
 
     if (Player const* player = ToPlayer())
@@ -18146,6 +18145,7 @@ float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, i
     // bonus from skills is 0.04%
     //miss_chance -= skillDiff * 0.04f;
     int32 diff = -skillDiff;
+
     if (victim->GetTypeId() == TYPEID_PLAYER)
         missChance += diff > 0 ? diff * 0.04f : diff * 0.02f;
     else

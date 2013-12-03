@@ -2285,7 +2285,9 @@ class Unit : public WorldObject
 
         // Movement info
         Movement::MoveSpline * movespline;
-
+        bool isTrainingDummy() const { return _isTrainingDummy; }
+        void setTrainingDummy(bool on) { _isTrainingDummy = on; }
+        bool _isTrainingDummy;
     protected:
         explicit Unit (bool isWorldObject);
 

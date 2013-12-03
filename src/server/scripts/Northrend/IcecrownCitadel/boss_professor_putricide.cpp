@@ -1658,6 +1658,12 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
         {
             PrepareSpellScript(spell_putricide_gaseous_bloat_SpellScript);
 
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                _target = NULL;
+                return true;
+            }
+
             void FilterTargets(std::list<Unit*>& targets)
             {
                 if (targets.empty())
@@ -1673,22 +1679,28 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
                 if (targets.empty())
                     return;
                 Unit *tar = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
                 targets.remove_if (LimonTargetSelector(GetCaster()));
                 if (!targets.empty())
-                    tar = Trinity::Containers::SelectRandomContainerElement(targets);
-                if (tar)
-                {
-                    targets.clear();
+                    Trinity::Containers::RandomResizeList(targets, 1);
+                else
                     targets.push_back(tar);
-                }
             }
+
+            void SetTarget(std::list<Unit*>& targets)
+            {
+                targets.clear();
+                if (_target != NULL)
+                    targets.push_back(_target);
+            }
+
+        private:
+            Unit *_target;
 
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
@@ -1740,6 +1752,7 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
+                _target = NULL;
                 return true;
             }
 
@@ -1758,22 +1771,35 @@ class spell_putricide_adhesive_limon : public SpellScriptLoader
                 if (targets.empty())
                     return;
                 Unit *tar = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
                 targets.remove_if (LimonTargetSelector(GetCaster()));
                 if (!targets.empty())
-                    tar = Trinity::Containers::SelectRandomContainerElement(targets);
-                if (tar)
-                {
-                    targets.clear();
+                    Trinity::Containers::RandomResizeList(targets, 1);
+                else if (tar != NULL)
                     targets.push_back(tar);
-                }
+                if (!targets.empty())
+                    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
+                        if (Unit *vic = *itr)
+                        {
+                            _target = vic;
+                            break;
+                        }
             }
+
+            void SetTarget(std::list<Unit*>& targets)
+            {
+                targets.clear();
+                if (_target != NULL)
+                    targets.push_back(_target);
+            }
+
+        private:
+            Unit *_target;
 
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 

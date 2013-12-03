@@ -5215,66 +5215,66 @@ public:
 
   bool OnGossipHello(Player* player, Creature* me)
   {
-    player->PrepareQuestMenu(me->GetGUID());
-    if (Creature* horseman = me->GetCreature(*me, _headlessHoresemanGUID))
-    {
-      QuestMenu &qm = player->PlayerTalkClass->GetQuestMenu();
-      QuestMenu qm2;
-
-      uint32 quest1 = player->GetTeam() == ALLIANCE ? QUEST_LET_THE_FIRES_COME_A : QUEST_LET_THE_FIRES_COME_H;
-      uint32 quest2 = player->GetTeam() == ALLIANCE ? QUEST_STOP_FIRES_A : QUEST_STOP_FIRES_H;
-
-      // Copy current quest menu ignoring some quests
-      for (uint32 i = 0; i<qm.GetMenuItemCount(); ++i)
+      player->PrepareQuestMenu(me->GetGUID());
+      if (Creature* horseman = me->GetCreature(*me, _headlessHoresemanGUID))
       {
-	if (qm.GetItem(i).QuestId == quest1 || qm.GetItem(i).QuestId == quest2)
-	  continue;
+          QuestMenu &qm = player->PlayerTalkClass->GetQuestMenu();
+          QuestMenu qm2;
 
-	qm2.AddMenuItem(qm.GetItem(i).QuestId, qm.GetItem(i).QuestIcon);
+          uint32 quest1 = player->GetTeam() == ALLIANCE ? QUEST_LET_THE_FIRES_COME_A : QUEST_LET_THE_FIRES_COME_H;
+          uint32 quest2 = player->GetTeam() == ALLIANCE ? QUEST_STOP_FIRES_A : QUEST_STOP_FIRES_H;
+
+          // Copy current quest menu ignoring some quests
+          for (uint32 i = 0; i<qm.GetMenuItemCount(); ++i)
+          {
+              if (qm.GetItem(i).QuestId == quest1 || qm.GetItem(i).QuestId == quest2)
+                  continue;
+
+              qm2.AddMenuItem(qm.GetItem(i).QuestId, qm.GetItem(i).QuestIcon);
+          }
+
+          if (player->GetQuestStatus(quest1) == QUEST_STATUS_NONE)
+          {
+              if (player->GetQuestStatus(quest2) == QUEST_STATUS_NONE)
+                  qm2.AddMenuItem(quest2, 2);
+              else if (player->GetQuestStatus(quest2) != QUEST_STATUS_REWARDED)
+                  qm2.AddMenuItem(quest2, 4);
+          }
+          else
+              if (player->GetQuestStatus(quest1) != QUEST_STATUS_REWARDED)
+                  qm2.AddMenuItem(quest1, 4);
+
+          qm.ClearMenu();
+
+          for (uint32 i = 0; i<qm2.GetMenuItemCount(); ++i)
+              qm.AddMenuItem(qm2.GetItem(i).QuestId, qm2.GetItem(i).QuestIcon);
       }
 
-      if (player->GetQuestStatus(quest1) == QUEST_STATUS_NONE)
-      {
-	if (player->GetQuestStatus(quest2) == QUEST_STATUS_NONE)
-	  qm2.AddMenuItem(quest2, 2);
-	else if (player->GetQuestStatus(quest2) != QUEST_STATUS_REWARDED)
-	  qm2.AddMenuItem(quest2, 4);
-      }
-      else
-	if (player->GetQuestStatus(quest1) != QUEST_STATUS_REWARDED)
-	  qm2.AddMenuItem(quest1, 4);
-
-      qm.ClearMenu();
-
-      for (uint32 i = 0; i<qm2.GetMenuItemCount(); ++i)
-	qm.AddMenuItem(qm2.GetItem(i).QuestId, qm2.GetItem(i).QuestIcon);
-    }
-
-    player->SEND_GOSSIP_MENU(player->GetGossipTextId(me), me->GetGUID());
-    return true;
-  }
-
-  bool OnQuestAccept(Player* player, Creature* me, Quest const* quest)
-  {
-    if (!(me->GetAreaId() == 87 || me->GetAreaId() == 362))
-    {
+      player->SEND_GOSSIP_MENU(player->GetGossipTextId(me), me->GetGUID());
       return true;
-    }
-
-    if (quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_A || quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_H)
-    {
-      Creature* horseman = me->FindNearestCreature(NPC_SHADE_HORSEMAN, 100);
-      //me->GetCreature(*me, _headlessHoresemanGUID);
-
-      if (!horseman)
-      {
-	sLog->outBasic("HEADLESS HORSEMAN BUG TRACKING. SUMMON: GUID Player: %u. Area %u.", player->GetGUID(), player->GetAreaId());
-	if (Creature* newHorseman = player->SummonCreature(NPC_SHADE_HORSEMAN, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 20.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 180000))
-	  _headlessHoresemanGUID = newHorseman->GetGUID();
-      }
-    }
-    return true;
   }
+
+    bool OnQuestAccept(Player* player, Creature* me, Quest const* quest)
+    {
+        if (!(me->GetAreaId() == 87 || me->GetAreaId() == 362))
+        {
+            return true;
+        }
+
+        if (quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_A || quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_H)
+        {
+            Creature* horseman = me->FindNearestCreature(NPC_SHADE_HORSEMAN, 100);
+            //me->GetCreature(*me, _headlessHoresemanGUID);
+
+            if (!horseman)
+            {
+                sLog->outBasic("HEADLESS HORSEMAN BUG TRACKING. SUMMON: GUID Player: %u. Area %u.", player->GetGUID(), player->GetAreaId());
+                if (Creature* newHorseman = player->SummonCreature(NPC_SHADE_HORSEMAN, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 20.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 180000))
+                    _headlessHoresemanGUID = newHorseman->GetGUID();
+            }
+        }
+        return true;
+    }
 };
 
 
@@ -5289,27 +5289,27 @@ public:
 
         void Reset()
         {
-	  if (me->ToTempSummon())
-	    if (me->ToTempSummon()->GetSummoner())
-	    {
-	      int health = me->ToTempSummon()->GetSummoner()->GetMaxHealth() * 60 / 100;
-	      int mana = me->ToTempSummon()->GetSummoner()->GetMaxPower(POWER_MANA) * 20 / 100;
-	      if (mana <= 0)
-		mana = 10000;
-	      me->SetMaxHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
-	      me->SetHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
-	      me->SetMaxPower(POWER_ENERGY, mana);
-	      me->SetPower(POWER_ENERGY, mana);
-	      //	      me->SetEnergy(100);
-	    }
+            if (me->ToTempSummon())
+                if (me->ToTempSummon()->GetSummoner())
+                {
+                    int health = me->ToTempSummon()->GetSummoner()->GetMaxHealth() * 60 / 100;
+                    int mana = me->ToTempSummon()->GetSummoner()->GetMaxPower(POWER_MANA) * 20 / 100;
+                    if (mana <= 0)
+                        mana = 10000;
+                    me->SetMaxHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
+                    me->SetHealth(me->ToTempSummon()->GetSummoner()->GetMaxHealth());
+                    me->SetMaxPower(POWER_ENERGY, mana);
+                    me->SetPower(POWER_ENERGY, mana);
+                    //	      me->SetEnergy(100);
+                }
         }
 
-      void JustDied(Unit* /*who*/)
-      {
-	if (me->ToTempSummon())
-	  if (me->ToTempSummon()->GetSummoner())
-	    me->ToTempSummon()->GetSummoner()->Kill(me->ToTempSummon()->GetSummoner());
-      }
+        void JustDied(Unit* /*who*/)
+        {
+            if (me->ToTempSummon())
+                if (me->ToTempSummon()->GetSummoner())
+                    me->ToTempSummon()->GetSummoner()->Kill(me->ToTempSummon()->GetSummoner());
+        }
 
         void EnterCombat(Unit* /*who*/) {}
 
@@ -5317,9 +5317,9 @@ public:
         {
         }
 
-      void ReceiveEmote(Player* player, uint32 emote)
-      {
-         }
+        void ReceiveEmote(Player* player, uint32 emote)
+        {
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -6235,19 +6235,19 @@ public:
     {
       std::list<uint64>::iterator findIter = std::find(playersGUID.begin(), playersGUID.end(), guid);
       if (findIter == playersGUID.end())
-	playersGUID.push_back(guid);
+          playersGUID.push_back(guid);
       char nbr = '0';
       nbr += (5 - playersGUID.size());
       std::string txt = "il reste ";
       txt += nbr;
       txt += " places pour une session de tortures.";
       if (findIter == playersGUID.end())
-	{
-	  if (playersGUID.size() < 5)
-	    me->MonsterYell(txt.c_str(), LANG_UNIVERSAL, 0);
-	  else
-	    me->MonsterYell("la salle des tortures est pleine, la session va bientot debutter, prochaine session dans 30 minutes.", LANG_UNIVERSAL, 0);
-	}
+      {
+          if (playersGUID.size() < 5)
+              me->MonsterYell(txt.c_str(), LANG_UNIVERSAL, 0);
+          else
+              me->MonsterYell("la salle des tortures est pleine, la session va bientot debutter, prochaine session dans 30 minutes.", LANG_UNIVERSAL, 0);
+      }
     }
 
     void DamageTaken(Unit* doneBy, uint32& damage)
@@ -6261,7 +6261,7 @@ public:
     uint32 GetData(uint32 data)
     {
       if (!playersGUID.empty())
-	return playersGUID.size();
+          return playersGUID.size();
       return 0;
     }
 
@@ -6273,71 +6273,71 @@ public:
     void UpdateAI(uint32 const uiDiff)
     {
       if (mui_timer_event <= uiDiff)
-	{
-	  if (playersGUID.size() >= 5)
-	    {
-	      for (std::list<uint64 >::iterator itr = playersGUID.begin(); itr != playersGUID.end(); itr++)
-		if (Player *player = Unit::GetPlayer(*me, *itr))
-		  player->TeleportTo(1, 7445.27f, -1691.75f, 195.0f, 5.6f);
-	      event_active = true;
-	      phase = 0;
-	      mui_timer_phase_event = 15000;
-	      mui_timer_event = 1800000;
-	    }
-	  else
-	    mui_timer_event = 2000;
-	}
+      {
+          if (playersGUID.size() >= 5)
+          {
+              for (std::list<uint64 >::iterator itr = playersGUID.begin(); itr != playersGUID.end(); itr++)
+                  if (Player *player = Unit::GetPlayer(*me, *itr))
+                      player->TeleportTo(1, 7445.27f, -1691.75f, 195.0f, 5.6f);
+              event_active = true;
+              phase = 0;
+              mui_timer_phase_event = 15000;
+              mui_timer_event = 1800000;
+          }
+          else
+              mui_timer_event = 2000;
+      }
       else
-	mui_timer_event -= uiDiff;
+          mui_timer_event -= uiDiff;
 
       if (event_active)
-	{
-	  if (mui_timer_phase_event <= uiDiff)
-	    {
-	      switch (phase)
-		{
-		case 0 :
-		  for (int cnt = 0; cnt < 6; cnt++)
-		    me->SummonCreature(11262, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  for (int cnt = 0; cnt < 2; cnt++)
-		    me->SummonCreature(12129, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  break;
-		case 1 :
-		  for (int cnt = 0; cnt < 8; cnt++)
-		    me->SummonCreature(33550, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  for (int cnt = 0; cnt < 3; cnt++)
-		    me->SummonCreature(34127, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  break;
-		case 2 :
-		  for (int cnt = 0; cnt < 2; cnt++)
-		    me->SummonCreature(12129, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  for (int cnt = 0; cnt < 10; cnt++)
-		    me->SummonCreature(11262, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  break;
-		case 3 :
-		  for (int cnt = 0; cnt < 1; cnt++)
-		    me->SummonCreature(37023, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  for (int cnt = 0; cnt < 4; cnt++)
-		    me->SummonCreature(33550, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  break;
-		case 4 :
-		  me->SummonCreature(6109, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
-		  break;
-		default :
-		  for (std::list<uint64 >::iterator itr = playersGUID.begin(); itr != playersGUID.end(); itr++)
-		    if (Player *player = Unit::GetPlayer(*me, *itr))
-		      player->TeleportTo(1, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 5.6f);
-		  playersGUID.clear();
-		  event_active = false;
-		  Summons.DespawnAll();
-		  break;
-		}
-	      phase++;
-	      mui_timer_phase_event = 300000;
-	    }
-	  else
-	    mui_timer_phase_event -= uiDiff;
-	}
+      {
+          if (mui_timer_phase_event <= uiDiff)
+          {
+              switch (phase)
+              {
+              case 0 :
+                  for (int cnt = 0; cnt < 6; cnt++)
+                      me->SummonCreature(11262, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  for (int cnt = 0; cnt < 2; cnt++)
+                      me->SummonCreature(12129, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  break;
+              case 1 :
+                  for (int cnt = 0; cnt < 8; cnt++)
+                      me->SummonCreature(33550, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  for (int cnt = 0; cnt < 3; cnt++)
+                      me->SummonCreature(34127, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  break;
+              case 2 :
+                  for (int cnt = 0; cnt < 2; cnt++)
+                      me->SummonCreature(12129, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  for (int cnt = 0; cnt < 10; cnt++)
+                      me->SummonCreature(11262, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  break;
+              case 3 :
+                  for (int cnt = 0; cnt < 1; cnt++)
+                      me->SummonCreature(37023, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  for (int cnt = 0; cnt < 4; cnt++)
+                      me->SummonCreature(33550, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  break;
+              case 4 :
+                  me->SummonCreature(6109, 7445.27f, -1691.75f, 195.0f, 5.6f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 600000);
+                  break;
+              default :
+                  for (std::list<uint64 >::iterator itr = playersGUID.begin(); itr != playersGUID.end(); itr++)
+                      if (Player *player = Unit::GetPlayer(*me, *itr))
+                          player->TeleportTo(1, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 5.6f);
+                  playersGUID.clear();
+                  event_active = false;
+                  Summons.DespawnAll();
+                  break;
+              }
+              phase++;
+              mui_timer_phase_event = 300000;
+          }
+          else
+              mui_timer_phase_event -= uiDiff;
+      }
     }
 
   private:

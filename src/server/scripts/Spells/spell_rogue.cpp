@@ -228,7 +228,7 @@ public:
         {
             Unit* target = GetTarget();
             Unit* victim = target->getVictim();
-            if (victim && (target->GetHealthPct() > victim->GetHealthPct()))
+            if (victim && target && (target->GetHealthPct() > victim->GetHealthPct()))
             {
                 if (!target->HasAura(ROGUE_SPELL_PREY_ON_THE_WEAK))
                 {

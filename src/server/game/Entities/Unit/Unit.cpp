@@ -2151,15 +2151,19 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
     }
     else if (!victim->HasUnitState(UNIT_STATE_CONTROLLED) || victim->isTrainingDummy())
     {
+
         // Reduce dodge chance by attacker expertise rating
+        std::cout << "dodge_chance : " << dodge_chance << std::endl;
         if (GetTypeId() == TYPEID_PLAYER)
             dodge_chance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100);
         else
             dodge_chance -= GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE) * 25;
+        std::cout << dodge_chance << std::endl;
+
         // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
         dodge_chance += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
         dodge_chance = int32 (float (dodge_chance) * GetTotalAuraMultiplier(SPELL_AURA_MOD_ENEMY_DODGE));
-
+        std::cout << dodge_chance << std::endl;
         tmp = dodge_chance;
         if ((tmp > 0)                                        // check if unit _can_ dodge
             && ((tmp -= skillBonus) > 0)
@@ -2524,7 +2528,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (canDodge)
     {
         // Roll dodge
-        int32 dodgeChance = int32(victim->GetUnitDodgeChance() * 100.0f) - skillDiff * 4;
+        int32 dodgeChance = int32(victim->GetUnitDodgeChance() * 100.0f);
         // Reduce enemy dodge chance by SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
         dodgeChance += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE) * 100;
         dodgeChance = int32(float(dodgeChance) * GetTotalAuraMultiplier(SPELL_AURA_MOD_ENEMY_DODGE));
@@ -2543,7 +2547,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (canParry)
     {
         // Roll parry
-        int32 parryChance = int32(victim->GetUnitParryChance() * 100.0f)  - skillDiff * 4;
+        int32 parryChance = int32(victim->GetUnitParryChance() * 100.0f);
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             parryChance -= int32(ToPlayer()->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
@@ -2559,7 +2563,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
 
     if (canBlock)
     {
-        int32 blockChance = int32(victim->GetUnitBlockChance() * 100.0f) - skillDiff * 4;
+        int32 blockChance = int32(victim->GetUnitBlockChance() * 100.0f);
         if (blockChance < 0)
             blockChance = 0;
         tmp += blockChance;

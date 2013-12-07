@@ -2088,6 +2088,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* victim, WeaponAttackTy
     float miss_chance = 0.0f;
     int32 attackerWeaponSkill = GetWeaponSkillValue(attType, victim);
     int32 victimDefenseSkill = victim->GetDefenseSkillValue(this);
+
     if (isPet() && GetOwner())
         miss_chance = GetOwner()->MeleeSpellMissChance(victim, attType, attackerWeaponSkill - victimDefenseSkill, 0);
     else
@@ -2902,7 +2903,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* victi
     return crit;
 }
 
-uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) const
+uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) const
 {
     uint32 value = 0;
     if (Player const* player = ToPlayer())
@@ -2923,10 +2924,14 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         else
             skill = SKILL_UNARMED;
 
+        if (skill == SKILL_NONE)
+            skill = SKILL_UNARMED;
+
         // in PvP use full skill instead current skill value
         value = (target && target->IsControlledByPlayer())
             ? player->GetMaxSkillValue(skill)
             : player->GetSkillValue(skill);
+
         // Modify value from ratings
         value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL));
         switch (attType)
@@ -2934,7 +2939,7 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
             case BASE_ATTACK:   value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL_MAINHAND)); break;
             case OFF_ATTACK:    value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL_OFFHAND));  break;
             case RANGED_ATTACK: value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL_RANGED));   break;
-            default: break;
+            default:   value += uint32(player->GetRatingBonusValue(CR_WEAPON_SKILL_MAINHAND)); break;
         }
     }
     else

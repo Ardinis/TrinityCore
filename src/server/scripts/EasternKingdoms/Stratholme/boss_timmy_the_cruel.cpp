@@ -28,6 +28,16 @@ EndScriptData */
 #define SAY_SPAWN   "TIMMY!"
 
 #define SPELL_RAVENOUSCLAW    17470
+#define SPELL_ENRAGE          8599
+
+enum Summons
+{
+    NPC_SKELETAL_GUARDIAN   = 10390,
+    NPC_SKELETAL_BERSERKER  = 10391,
+    NPC_RAVAGED_CADAVER     = 10381,
+    NPC_MANGLED_CADAVER     = 10382,
+    NPC_BROKEN_CADAVER      = 10383
+};
 
 class boss_timmy_the_cruel : public CreatureScript
 {
@@ -45,11 +55,27 @@ public:
 
         uint32 RavenousClaw_Timer;
         bool HasYelled;
+        bool bEnrage;
 
         void Reset()
         {
             RavenousClaw_Timer = 10000;
             HasYelled = false;
+            bEnrage = false;
+            me->SetVisible(false);
+        }
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!me->FindNearestCreature(NPC_SKELETAL_GUARDIAN, 25.0f, true))
+                if (!me->FindNearestCreature(NPC_SKELETAL_BERSERKER, 25.0f, true))
+                    if (!me->FindNearestCreature(NPC_RAVAGED_CADAVER, 25.0f, true))
+                        if (!me->FindNearestCreature(NPC_MANGLED_CADAVER, 25.0f, true))
+                            if (!me->FindNearestCreature(NPC_BROKEN_CADAVER, 25.0f, true))
+                            {
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                me->SetVisible(true);
+                            }
         }
 
         void EnterCombat(Unit* /*who*/)
@@ -66,6 +92,17 @@ public:
             //Return since we have no target
             if (!UpdateVictim())
                 return;
+
+            //Enrage
+
+            if ((me->GetHealthPct() < 20) && (bEnrage == false))
+            {
+                //cast
+                me->MonsterSay("Yiaaarh!", 0,0);
+                DoCast(me, SPELL_ENRAGE);
+                bEnrage = true;
+            }
+
 
             //RavenousClaw
             if (RavenousClaw_Timer <= diff)

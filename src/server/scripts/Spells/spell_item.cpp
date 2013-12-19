@@ -2025,7 +2025,7 @@ public:
 
         void Register()
         {
-            OnEffectHitTarget = SpellEffectFn(spell_item_titanium_seal_SpellScript::OneffectHitTarget, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_item_titanium_seal_SpellScript::OneffectHitTarget, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 

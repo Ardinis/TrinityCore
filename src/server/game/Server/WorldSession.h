@@ -224,9 +224,9 @@ class PacketThrottler
     time_t time;
     uint32 count;
   };
-  
+
   typedef std::map<uint16, uint32> DiscardMap;
-  
+
   enum { LOG_INTERVAL = 60 };
   Entry *m_opcodes;
   DiscardMap m_discarded;
@@ -312,6 +312,7 @@ class WorldSession
         void SendTrainerList(uint64 guid, const std::string& strTitle);
         void SendListInventory(uint64 guid);
         void SendShowBank(uint64 guid);
+        void SendShowMailBox(uint64 guid);
         void SendTabardVendorActivate(uint64 guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);

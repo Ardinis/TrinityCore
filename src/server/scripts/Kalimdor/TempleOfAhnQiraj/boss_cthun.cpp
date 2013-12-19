@@ -156,13 +156,15 @@ public:
         return new eye_of_cthunAI (creature);
     }
 
-    struct eye_of_cthunAI : public Scripted_NoMovementAI
+    struct eye_of_cthunAI : public ScriptedAI
     {
-        eye_of_cthunAI(Creature* creature) : Scripted_NoMovementAI(creature)
+        eye_of_cthunAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
             if (!instance)
                 sLog->outError("No Instance eye_of_cthunAI");
+
+            SetCombatMovement(false);
         }
 
         InstanceScript* instance;

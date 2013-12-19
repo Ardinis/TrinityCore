@@ -64,6 +64,11 @@ class boss_baron_geddon : public CreatureScript
                 events.ScheduleEvent(EVENT_LIVING_BOMB, 35000);
             }
 
+            void JustDied(Unit* /*killer*/)
+            {
+                _JustDied();
+            }
+
             void UpdateAI(const uint32 diff)
             {
                 if (!UpdateVictim())

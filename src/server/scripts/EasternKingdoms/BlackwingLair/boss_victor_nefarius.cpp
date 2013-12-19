@@ -217,6 +217,7 @@ public:
         uint32 DrakType2;
         uint64 NefarianGUID;
         uint32 NefCheckTime;
+        Position pos;
 
         void Reset()
         {
@@ -231,6 +232,9 @@ public:
             me->SetUInt32Value(UNIT_NPC_FLAGS, 1);
             me->setFaction(35);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetVisible(true);
+            pos = me->GetHomePosition();
+            DoTeleportTo(pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_orientation);
         }
 
         void BeginEvent(Player* target)
@@ -347,14 +351,16 @@ public:
                         DoCast(me, 33356);
 
                         //Make super invis
-                        DoCast(me, 8149);
+                        //                        DoCast(me, 8149);
+                        me->SetVisible(false);
+                        me->GetPosition(&pos);
 
                         //Teleport self to a hiding spot (this causes errors in the Trinity log but no real issues)
                         DoTeleportTo(HIDE_X, HIDE_Y, HIDE_Z);
                         me->AddUnitState(UNIT_STATE_FLEEING);
 
                         //Spawn nef and have him attack a random target
-                        Creature* Nefarian = me->SummonCreature(CREATURE_NEFARIAN, NEF_X, NEF_Y, NEF_Z, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
+                        Creature* Nefarian = me->SummonCreature(CREATURE_NEFARIAN, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000);
                         target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                         if (target && Nefarian)
                         {

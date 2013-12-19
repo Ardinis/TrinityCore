@@ -57,6 +57,11 @@ class boss_garr : public CreatureScript
             {
             }
 
+            void JustDied(Unit* /*killer*/)
+            {
+                _JustDied();
+            }
+
             void EnterCombat(Unit* victim)
             {
                 BossAI::EnterCombat(victim);

@@ -730,18 +730,18 @@ class spell_item_red_rider_air_rifle : public SpellScriptLoader
             void HandleScript(SpellEffIndex effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                Unit* caster = GetCaster();
-                if (Unit* target = GetHitUnit())
-                {
-                    caster->CastSpell(caster, SPELL_AIR_RIFLE_HOLD_VISUAL, true);
-                    // needed because this spell shares GCD with its triggered spells (which must not be cast with triggered flag)
-                    if (Player* player = caster->ToPlayer())
-                        player->GetGlobalCooldownMgr().CancelGlobalCooldown(GetSpellInfo());
-                    if (urand(0, 4))
-                        caster->CastSpell(target, SPELL_AIR_RIFLE_SHOOT, false);
-                    else
-                        caster->CastSpell(caster, SPELL_AIR_RIFLE_SHOOT_SELF, false);
-                }
+                if (Unit* caster = GetCaster())
+                    if (Unit* target = GetHitUnit())
+                    {
+                        caster->CastSpell(caster, SPELL_AIR_RIFLE_HOLD_VISUAL, true);
+                        // needed because this spell shares GCD with its triggered spells (which must not be cast with triggered flag)
+                        if (Player* player = caster->ToPlayer())
+                            player->GetGlobalCooldownMgr().CancelGlobalCooldown(GetSpellInfo());
+                        if (urand(0, 4))
+                            caster->CastSpell(target, SPELL_AIR_RIFLE_SHOOT, false);
+                        else
+                            caster->CastSpell(caster, SPELL_AIR_RIFLE_SHOOT_SELF, false);
+                    }
             }
 
             void Register()
@@ -2000,6 +2000,41 @@ class spell_item_refocus : public SpellScriptLoader
         }
 };
 
+class spell_item_titanium_seal : public SpellScriptLoader
+{
+public:
+    spell_item_titanium_seal() : SpellScriptLoader("spell_item_titanium_seal") { }
+
+    class spell_item_titanium_seal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_titanium_seal_SpellScript);
+
+        void OneffectHitTarget(SpellEffIndex /*effIndex*/)
+        {
+            if (frand(0,1) >= 0.5f)
+            {
+                GetCaster()->ToPlayer()->TextEmote("lance son |cff0070dd|Hitem:44430:0:0:0:0:0:0:0:80|h[Titanium Seal of Dalaran]|h|r d'un air d�contract�.");
+                GetCaster()->ToPlayer()->TextEmote("attrape la pi�ce c�t� face");
+            }
+            else
+            {
+                GetCaster()->ToPlayer()->TextEmote("lance son |cff0070dd|Hitem:44430:0:0:0:0:0:0:0:80|h[Titanium Seal of Dalaran]|h|r d'un air d�contract�.");
+                GetCaster()->ToPlayer()->TextEmote("attrape la pi�ce c�t� pile");
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget = SpellEffectFn(spell_item_titanium_seal_SpellScript::OneffectHitTarget, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_titanium_seal_SpellScript();
+    }
+ };
+
 void AddSC_item_spell_scripts()
 {
     // 23074 Arcanite Dragonling
@@ -2051,4 +2086,5 @@ void AddSC_item_spell_scripts()
     new spell_item_unusual_compass();
     new spell_item_uded();
     new spell_item_chicken_cover();
+    new spell_item_titanium_seal();
 }

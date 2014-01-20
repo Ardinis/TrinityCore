@@ -3571,6 +3571,7 @@ public:
                     pPlayer->AddAura(SPELL_CHECK_TIRED, pPlayer);
                 break;
             case GOSSIP_ACTION_MAIL:
+                pCreature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_MAILBOX);
                 pPlayer->GetSession()->SendShowMailBox(pCreature->GetGUID());
                 //pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 if (!pCreature->HasAura(SPELL_SQUIRE_POSTMAN))

@@ -46,7 +46,10 @@ public:
 
     struct boss_rend_blackhandAI : public BossAI
     {
-        boss_rend_blackhandAI(Creature* creature) : BossAI(creature, DATA_WARCHIEF_REND_BLACKHAND) {}
+        boss_rend_blackhandAI(Creature* creature) : BossAI(creature, DATA_WARCHIEF_REND_BLACKHAND)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
 
         void Reset()
         {
@@ -64,6 +67,13 @@ public:
         void JustDied(Unit* /*who*/)
         {
             _JustDied();
+            if (InstanceScript* instance = me->GetInstanceScript())
+            {
+                if (uint64 door = instance->GetData64(GO_GYTH_EXIT_DOOR))
+                    instance->DoUseDoorOrButton(door);
+                instance->SetData(DATA_GYTH,DONE);
+            }
+            me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 100.0f, true)->setFaction(35);
         }
 
         void UpdateAI(uint32 const diff)

@@ -49,6 +49,15 @@ public:
         uint64 Gyth;
         uint64 TheBeast;
         uint64 GeneralDrakkisath;
+        uint64 solakar;
+        uint64 go_emberseerin;
+        uint64 go_doors;
+        uint64 go_gyth_combat_door;
+        uint64 go_gyth_exit_door;
+        uint64 go_gyth_entry_door;
+        uint64 go_emberseerout;
+        uint64 go_roomrunes[MAX_DRAGONSPIRE_HALL_RUNES];
+        bool go_bool_roomrunes[MAX_DRAGONSPIRE_HALL_RUNES];
 
         void Initialize()
         {
@@ -67,6 +76,20 @@ public:
             Gyth                    = 0;
             TheBeast                = 0;
             GeneralDrakkisath       = 0;
+            solakar                 = 0;
+            go_doors                = 0;
+            go_gyth_combat_door     = 0;
+            go_gyth_entry_door      = 0;
+            go_gyth_exit_door       = 0;
+            go_emberseerin          = 0;
+            go_emberseerout         = 0;
+            go_bool_roomrunes[1]    = false;
+            go_bool_roomrunes[2]    = false;
+            go_bool_roomrunes[3]    = false;
+            go_bool_roomrunes[4]    = false;
+            go_bool_roomrunes[5]    = false;
+            go_bool_roomrunes[6]    = false;
+            go_bool_roomrunes[7]    = false;
         }
 
         bool IsEncounterInProgress() const
@@ -125,6 +148,9 @@ public:
                 case NPC_GENERAL_DRAKKISATH:
                     GeneralDrakkisath = creature->GetGUID();
                     break;
+                case NPC_SOLAKAR:
+                    solakar = creature->GetGUID();
+                    break;
             }
          }
 
@@ -132,9 +158,48 @@ public:
         {
             switch (go->GetEntry())
             {
-                case GO_WHELP_SPAWNER:
-                    go->CastSpell(NULL, SPELL_SUMMON_ROOKERY_WHELP);
-                    break;
+            case GO_WHELP_SPAWNER:
+                go->CastSpell(NULL, SPELL_SUMMON_ROOKERY_WHELP);
+                break;
+            case GO_EMBERSEER_OUT:
+                go_emberseerout = go->GetGUID();
+                break;
+            case GO_EMBERSEER_IN:
+                go_emberseerin = go->GetGUID();
+                break;
+            case GO_DOORS:
+                go_doors = go->GetGUID();
+                break;
+            case GO_GYTH_COMBAT_DOOR:
+                go_gyth_combat_door = go->GetGUID();
+                break;
+            case GO_GYTH_ENTRY_DOOR:
+                go_gyth_entry_door = go->GetGUID();
+                break;
+            case GO_GYTH_EXIT_DOOR:
+                go_gyth_exit_door = go->GetGUID();
+                break;
+            case GO_ROOM_1_RUNE:
+                go_roomrunes[0] = go->GetGUID();
+                break;
+            case GO_ROOM_2_RUNE:
+                go_roomrunes[1] = go->GetGUID();
+                break;
+            case GO_ROOM_3_RUNE:
+                go_roomrunes[2] = go->GetGUID();
+                break;
+            case GO_ROOM_4_RUNE:
+                go_roomrunes[3] = go->GetGUID();
+                break;
+            case GO_ROOM_5_RUNE:
+                go_roomrunes[4] = go->GetGUID();
+                break;
+            case GO_ROOM_6_RUNE:
+                go_roomrunes[5] = go->GetGUID();
+                break;
+            case GO_ROOM_7_RUNE:
+                go_roomrunes[6] = go->GetGUID();
+                break;
             }
         }
 
@@ -165,6 +230,45 @@ public:
             }
 
              return true;
+        }
+
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == DATA_RUNE)
+            {
+                switch (data)
+                {
+                case GO_ROOM_1_RUNE:
+                    go_bool_roomrunes[1] = true;
+                    break;
+                case GO_ROOM_2_RUNE:
+                    go_bool_roomrunes[2] = true;
+                    break;
+                case GO_ROOM_3_RUNE:
+                    go_bool_roomrunes[3] = true;
+                    break;
+                case GO_ROOM_4_RUNE:
+                    go_bool_roomrunes[4] = true;
+                    break;
+                case GO_ROOM_5_RUNE:
+                    go_bool_roomrunes[5] = true;
+                    break;
+                case GO_ROOM_6_RUNE:
+                    go_bool_roomrunes[6] = true;
+                    break;
+                case GO_ROOM_7_RUNE:
+                    go_bool_roomrunes[7] = true;
+                    break;
+                }
+                if ((go_bool_roomrunes[1] == true) && (go_bool_roomrunes[2] == true) && (go_bool_roomrunes[3] == true) &&
+                    (go_bool_roomrunes[4] == true) && (go_bool_roomrunes[5] == true) && (go_bool_roomrunes[6] == true) &&
+                    (go_bool_roomrunes[7] == true))
+                {
+                    DoUseDoorOrButton(go_emberseerin);
+                    DoUseDoorOrButton(go_doors);
+                }
+            }
         }
 
         uint64 GetData64(uint32 type)
@@ -199,6 +303,32 @@ public:
                     return TheBeast;
                 case DATA_GENERAL_DRAKKISATH:
                     return GeneralDrakkisath;
+                case GO_EMBERSEER_IN:
+                    return go_emberseerin;
+                case GO_DOORS:
+                    return go_doors;
+                case GO_GYTH_COMBAT_DOOR:
+                    return go_gyth_combat_door;
+                case GO_GYTH_ENTRY_DOOR:
+                    return go_gyth_entry_door;
+                case GO_GYTH_EXIT_DOOR:
+                    return go_gyth_exit_door;
+                case GO_EMBERSEER_OUT:
+                    return go_emberseerout;
+                case GO_ROOM_1_RUNE:
+                    return go_roomrunes[0];
+                case GO_ROOM_2_RUNE:
+                    return go_roomrunes[1];
+                case GO_ROOM_3_RUNE:
+                    return go_roomrunes[2];
+                case GO_ROOM_4_RUNE:
+                    return go_roomrunes[3];
+                case GO_ROOM_5_RUNE:
+                    return go_roomrunes[4];
+                case GO_ROOM_6_RUNE:
+                    return go_roomrunes[5];
+                case GO_ROOM_7_RUNE:
+                    return go_roomrunes[6];
             }
 
             return 0;

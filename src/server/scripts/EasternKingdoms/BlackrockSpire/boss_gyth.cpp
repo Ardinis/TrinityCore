@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -55,41 +55,38 @@ public:
 
     struct boss_gythAI : public BossAI
     {
-        boss_gythAI(Creature* creature) : BossAI(creature, DATA_GYTH)
-        {
-            DoCast(me, SPELL_SELF_ROOT_FOREVER);
-        }
+        boss_gythAI(Creature* creature) : BossAI(creature, DATA_GYTH) {}
 
         bool SummonedRend;
+        Position pos;
+        Creature* Rend;
 
         void Reset()
         {
             _Reset();
             SummonedRend = false;
             //Invisible for event start
-            me->SetVisible(false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetDisplayId(MODEL_REND_ON_DRAKE);
+            me->setFaction(14);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_SUMMON_DRAGON_PACK, 3 * IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_SUMMON_ORC_PACK, 60 * IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_AGGRO, 60 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_CORROSIVE_ACID, 8 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_FREEZE, 11 * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_FLAME_BREATH, 4 * IN_MILLISECONDS);
         }
 
-        void JustDied(Unit* /*who*/)
+        void JustDied(Unit* /*killer*/)
         {
             _JustDied();
-        }
-
-        void SummonCreatureWithRandomTarget(uint32 creatureId, uint8 count)
-        {
-            for (uint8 n = 0; n < count; n++)
-                if (Unit* Summoned = me->SummonCreature(creatureId, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 240 * IN_MILLISECONDS))
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                        Summoned->AddThreat(target, 250.0f);
+            if (!SummonedRend)
+            {
+                me->GetPosition(&pos);
+                Rend = me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 100.0f, true)->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1800000);
+                Rend->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+            }
         }
 
         void UpdateAI(uint32 const diff)
@@ -99,7 +96,7 @@ public:
 
             if (!SummonedRend && HealthBelowPct(11))
             {
-                events.ScheduleEvent(EVENT_SUMMON_REND, 8 * IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_SUMMON_REND, 50);
                 SummonedRend = true;
             }
 
@@ -112,56 +109,32 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_SUMMON_REND:
-                        // Summon Rend and Change model to normal Gyth
-                        // Interrupt any spell casting
-                        me->InterruptNonMeleeSpells(false);
-                        // Gyth model
-                        me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
-                        me->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 900 * IN_MILLISECONDS);
-                        events.ScheduleEvent(EVENT_CORROSIVE_ACID, 8 * IN_MILLISECONDS);
-                        events.ScheduleEvent(EVENT_FREEZE, 11 * IN_MILLISECONDS);
-                        events.ScheduleEvent(EVENT_FLAME_BREATH, 4 * IN_MILLISECONDS);
-                        events.CancelEvent(EVENT_SUMMON_REND);
-                        break;
-                    case EVENT_AGGRO:
-                        me->SetVisible(true);
-                        me->SetDisplayId(MODEL_REND_ON_DRAKE);
-                        me->setFaction(14);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        events.CancelEvent(EVENT_AGGRO);
-                        break;
-                    // Summon Dragon pack. 2 Dragons and 3 Whelps
-                    case EVENT_SUMMON_DRAGON_PACK:
-                        for (uint8 i = 0; i < urand(0, 3) + 2; ++i)
-                        {
-                            SummonCreatureWithRandomTarget(NPC_RAGE_TALON_FIRE_TONG, 2);
-                            SummonCreatureWithRandomTarget(NPC_CHROMATIC_WHELP, 3);
-                        }
-                        events.CancelEvent(EVENT_SUMMON_DRAGON_PACK);
-                        break;
-                    // Summon Orc pack. 1 Orc Handler 1 Elite Dragonkin and 3 Whelps
-                    case EVENT_SUMMON_ORC_PACK:
-                        for (uint8 i = 0; i < urand (0, 5) + 2; ++i)
-                        {
-                            SummonCreatureWithRandomTarget(NPC_CHROMATIC_DRAGONSPAWN, 1);
-                            SummonCreatureWithRandomTarget(NPC_BLACKHAND_ELITE, 1);
-                            SummonCreatureWithRandomTarget(NPC_CHROMATIC_WHELP, 3);
-                        }
-                        events.CancelEvent(EVENT_SUMMON_ORC_PACK);
-                        break;
-                    case EVENT_CORROSIVE_ACID:
-                        DoCast(me->getVictim(), SPELL_CORROSIVE_ACID);
-                        events.ScheduleEvent(EVENT_CORROSIVE_ACID, 7 * IN_MILLISECONDS);
-                        break;
-                    case EVENT_FREEZE:
-                        DoCast(me->getVictim(), SPELL_FREEZE);
-                        events.ScheduleEvent(EVENT_FREEZE, 16 * IN_MILLISECONDS);
-                        break;
-                    case EVENT_FLAME_BREATH:
-                        DoCast(me->getVictim(), SPELL_FLAMEBREATH);
-                        events.ScheduleEvent(EVENT_FLAME_BREATH, 10500);
-                        break;
+                case EVENT_SUMMON_REND:
+                    // Summon Rend and Change model to normal Gyth
+                    // Interrupt any spell casting
+                    me->InterruptNonMeleeSpells(false);
+                    // Gyth model
+                    me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
+                    me->GetPosition(&pos);
+                    Rend = me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 100.0f, true)->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1800000);
+                    Rend->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                    events.ScheduleEvent(EVENT_CORROSIVE_ACID, 8 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_FREEZE, 11 * IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_FLAME_BREATH, 4 * IN_MILLISECONDS);
+                    events.CancelEvent(EVENT_SUMMON_REND);
+                    break;
+                case EVENT_CORROSIVE_ACID:
+                    DoCast(me->getVictim(), SPELL_CORROSIVE_ACID);
+                    events.ScheduleEvent(EVENT_CORROSIVE_ACID, 7 * IN_MILLISECONDS);
+                    break;
+                case EVENT_FREEZE:
+                    DoCast(me->getVictim(), SPELL_FREEZE);
+                    events.ScheduleEvent(EVENT_FREEZE, 16 * IN_MILLISECONDS);
+                    break;
+                case EVENT_FLAME_BREATH:
+                    DoCast(me->getVictim(), SPELL_FLAMEBREATH);
+                    events.ScheduleEvent(EVENT_FLAME_BREATH, 10500);
+                    break;
                 }
             }
             DoMeleeAttackIfReady();

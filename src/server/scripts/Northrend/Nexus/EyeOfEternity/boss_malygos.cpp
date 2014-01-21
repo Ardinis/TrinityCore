@@ -459,7 +459,7 @@ public:
                         Position pos;
                         pos.m_positionZ = alexstraszaBunny->GetPositionZ();
                         alexstraszaBunny->GetNearPoint2D(pos.m_positionX, pos.m_positionY, 30.0f, alexstraszaBunny->GetAngle(me));
-                        me->GetMotionMaster()->MoveLand(POINT_LAND_P_ONE, pos, 4.0f);
+                        me->GetMotionMaster()->MoveLand(POINT_LAND_P_ONE, pos, 8.0f);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetInCombatWithZone();
@@ -478,12 +478,16 @@ public:
                     if (_phase == PHASE_ONE)
                     {
                         _zToLift.m_positionZ += 20.0f;
-                        me->GetMotionMaster()->MoveTakeoff(POINT_LIFT_IN_AIR_P_ONE, _zToLift, 4.0f);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveIdle();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_LIFT_IN_AIR_P_ONE, _zToLift, 8.0f);
                     }
                     else if (_phase == PHASE_TWO)
                     {
                         _zToLift.m_positionZ = 300.1f;
-                        me->GetMotionMaster()->MoveTakeoff(POINT_PHASE_ONE_TO_TWO_TRANSITION, _zToLift, 4.0f);
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveIdle();
+                        me->GetMotionMaster()->MoveTakeoff(POINT_PHASE_ONE_TO_TWO_TRANSITION, _zToLift, 8.0f);
                     }
                     break;
                 case ACTION_HANDLE_P_THREE_INTRO:
@@ -499,7 +503,9 @@ public:
                     if (me->GetPositionZ() > 300.0f)
                         events.ScheduleEvent(EVENT_DELAY_MOVE_TO_DESTROY_P, 5*IN_MILLISECONDS, 0, PHASE_TWO);
                     else
+                    {
                         me->GetMotionMaster()->MovePoint(POINT_DESTROY_PLATFORM_P_TWO, MalygosPositions[0]);
+                    }
 
                     events.ScheduleEvent(EVENT_LIGHT_DIMENSION_CHANGE, 1*IN_MILLISECONDS, 0, PHASE_TWO);
                     break;
@@ -513,11 +519,14 @@ public:
                     _despawned = false;
                     break;
                 case ACTION_CYCLIC_MOVEMENT:
+                    /*                    me->StopMoving();
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveIdle();
                     Movement::MoveSplineInit init(*me);
-                    FillCirclePath(MalygosPositions[3], 120.0f, 283.2763f, init.Path(), true);
+                    FillCirclePath(MalygosPositions[3], 80.0f, 283.2763f, init.Path(), true);
                     init.SetFly();
                     init.SetCyclic();
-                    init.Launch();
+                    init.Launch();*/
                     break;
             }
         }
@@ -622,7 +631,7 @@ public:
                 if (_phase == PHASE_TWO)
                 {
                     //                    summons.DoAction(ACTION_DELAYED_DESPAWN);
-                    //                    summons.DespawnAll();
+                    summons.DespawnAll();
                 }
                 else if (_phase == PHASE_THREE)
                     summons.DespawnAll();
@@ -774,6 +783,7 @@ public:
             {
                 SetPhase(PHASE_TWO, true);
                 _canAttack = false;
+                me->SetReactState(REACT_PASSIVE);
                 me->AttackStop();
                 Talk(SAY_END_P_ONE);
             }
@@ -854,7 +864,7 @@ public:
                                 Position randomPosOnRadius;
                                 // Hardcodded retail value, reason is Z getters can fail... (TO DO: Change to getter when height calculation works on 100%!)
                                 randomPosOnRadius.m_positionZ = 283.0521f;
-                                alexstraszaBunny->GetNearPoint2D(randomPosOnRadius.m_positionX, randomPosOnRadius.m_positionY, 120.0f, alexstraszaBunny->GetAngle(me));
+                                alexstraszaBunny->GetNearPoint2D(randomPosOnRadius.m_positionX, randomPosOnRadius.m_positionY, 90.0f, alexstraszaBunny->GetAngle(me));
                                 me->GetMotionMaster()->MovePoint(POINT_FLY_OUT_OF_PLATFORM_P_TWO, randomPosOnRadius);
                                 _flyingOutOfPlatform = true;
                             }
@@ -913,7 +923,7 @@ public:
                     case EVENT_SUMMON_ARCANE_BOMB:
                         if (!_performingSurgeOfPower && !_performingDestroyPlatform)
                         {
-                            me->StopMoving();
+                            //                            me->StopMoving();
                             events.ScheduleEvent(EVENT_PATHING_AROUND_PLATFORM, 3*IN_MILLISECONDS, 0, PHASE_TWO);
                         }
 
@@ -952,6 +962,7 @@ public:
                         SendLightOverride(LIGHT_OBSCURE_ARCANE_RUNES, 1*IN_MILLISECONDS);
                         DoCast(me, SPELL_CLEAR_ALL_DEBUFFS);
                         DoCast(me, SPELL_IMMUNE_CURSES);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         _canAttack = true;
                         UpdateVictim();
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -997,7 +1008,7 @@ public:
                 }
             }
 
-            if (_phase != PHASE_THREE)
+            if (_phase == PHASE_ONE)
                 DoMeleeAttackIfReady();
         }
 
@@ -1274,14 +1285,16 @@ public:
 
         void DoAction(int32 const /*action*/)
         {
-            /*            if (Vehicle* vehicleTemp = me->GetVehicleKit())
+            std::cout << "do action again ?" << std::endl;
+            /*
+            if (Vehicle* vehicleTemp = me->GetVehicleKit())
                 if (vehicleTemp->GetPassenger(0) && vehicleTemp->GetPassenger(0)->GetTypeId() == TYPEID_PLAYER)
                 {
                     vehicleTemp->RemoveAllPassengers();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 }
-            std::cout << "do action again ?" << std::endl;
-            me->DespawnOrUnsummon(3*IN_MILLISECONDS);*/
+            me->DespawnOrUnsummon(3*IN_MILLISECONDS);
+            */
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -1356,6 +1369,9 @@ public:
         {
             if (action < ACTION_DELAYED_DESPAWN)
             {
+                me->StopMoving();
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveIdle();
                 Movement::MoveSplineInit init(*me);
                 FillCirclePath(MalygosPositions[3], 35.0f, 282.3402f, init.Path(), true);
                 init.SetFly();
@@ -1565,7 +1581,6 @@ public:
 
         void DoAction(int32 const /*action*/)
         {
-            std::cout << "DoAction ???" << std::endl;
             if (Creature* malygos = me->GetMap()->GetCreature(_instance->GetData64(DATA_MALYGOS)))
             {
                 if (malygos->AI()->GetData(DATA_PHASE) == PHASE_TWO)
@@ -1933,7 +1948,9 @@ class spell_malygos_vortex_visual : public SpellScriptLoader
 
                     if (Creature* malygos = caster->ToCreature())
                     {
-                        malygos->GetMotionMaster()->MoveLand(POINT_LAND_AFTER_VORTEX_P_ONE, MalygosPositions[2], 2.0f);
+                        malygos->GetMotionMaster()->Clear();
+                        malygos->GetMotionMaster()->MoveIdle();
+                        malygos->GetMotionMaster()->MoveLand(POINT_LAND_AFTER_VORTEX_P_ONE, MalygosPositions[2], 8.0f);
                         malygos->RemoveAura(SPELL_VORTEX_1);
                     }
                 }

@@ -110,6 +110,7 @@ public:
                         irisGUID = go->GetGUID();
                         go->GetPosition(&focusingIrisPosition);
                     }
+                    go->EnableCollision(false);
                     break;
                 case GO_FOCUSING_IRIS_25:
                     if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
@@ -117,17 +118,21 @@ public:
                         irisGUID = go->GetGUID();
                         go->GetPosition(&focusingIrisPosition);
                     }
+                    go->EnableCollision(false);
                     break;
                 case GO_EXIT_PORTAL:
                     exitPortalGUID = go->GetGUID();
+                    go->EnableCollision(false);
                     break;
                 case GO_HEART_OF_MAGIC_10:
                     if (instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
                         heartOfMagicGUID = go->GetGUID();
+                    go->EnableCollision(false);
                     break;
                 case GO_HEART_OF_MAGIC_25:
                     if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                         heartOfMagicGUID = go->GetGUID();
+                    go->EnableCollision(false);
                     break;
             }
         }

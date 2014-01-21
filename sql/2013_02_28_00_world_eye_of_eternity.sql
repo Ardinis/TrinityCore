@@ -98,31 +98,31 @@ UPDATE `creature_text` SET `duration`=10000,`sound`=0 WHERE `entry`=30084 AND `g
 
 -- Add conditions
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (56047,58846,61028,56429,56505,59099,61714,61715,57432,57429,61210,56548,56431,56438);
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorType`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
-(13,1,56047,0,0,31,0,3,30118,0,0,0,0,'', 'Random Portal can implicitly hit only Portal (Malygos)'),
-(13,1,56047,0,0,29,0,28859,30,0,1,0,0,'', 'Random Portal can implicitly hit only target that is not in 30 yards near Malygos'),
-(13,1,58846,0,0,32,0,0x0010,0,0,0,0,0,'', 'Summon Red Dragon Buddy force cast can implicitly hit only players'),
-(13,1,61028,0,0,31,0,3,32448,0,0,0,0,'', 'Alexstrasza''s Gift Beam can hit only Alexstrasza''s Gift'),
-(13,1,56429,0,0,31,0,3,31253,0,0,0,0,'', 'Summon Arcane Bomb can hit only Alexstrasza the Life-Binder (bunny)'),
-(13,1,56505,0,0,31,0,3,30334,0,0,0,0,'', 'Surge of Power (phase II) can hit only Surge of Power'),
-(13,1,56548,0,0,31,0,3,30234,0,1,0,0,'', 'Surge of Power triggered damage spell (phase II) can''t hit melee Hover Disk'),
-(13,3,56431,0,0,31,0,3,30234,0,1,0,0,'', 'Arcane Overload damage and knockback spell can''t hit melee Hover Disk'),
-(13,1,56438,0,0,1,0,1,56438,0,1,0,0,'', 'Arcane Overload damage reduce aura can''t apply to target that already is affected by such'),
-(13,6,59099,0,0,32,0,0x0010,0,0,0,0,0,'', 'Destroy Platform Event effect 1 and 2 can hit only players'),
-(13,7,61714,0,0,31,0,3,30245,0,0,0,0,'', 'Berserk (spell 2) can hit Nexus Lord'),
-(13,7,61714,0,1,31,0,3,30249,0,0,0,0,'', 'Berserk (spell 2) can hit Scion of Eternity'),
-(13,7,61715,0,0,31,0,3,30592,0,0,0,0,'', 'Berserk (spell 3) can hit Static Field bunny'),
-(13,1,57432,0,0,31,0,3,30161,0,0,0,0,'', 'Arcane Pulse can hit only drakes'),
-(13,3,57429,0,0,31,0,3,30161,0,0,0,0,'', 'Static Field can hit only drakes'),
-(13,1,61210,0,0,33,1,0,4,0,0,0,0,'', 'Align Disk Aggro can only hit the vehicle of the passenger caster');
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ScriptName`,`Comment`) VALUES
+(13,1,56047,0,0,31,0,3,30118,0,0,'', 'Random Portal can implicitly hit only Portal (Malygos)'),
+(13,1,56047,0,0,29,0,28859,30,1,0,'', 'Random Portal can implicitly hit only target that is not in 30 yards near Malygos'),
+(13,1,58846,0,0,32,0,0x0010,0,0,0,'', 'Summon Red Dragon Buddy force cast can implicitly hit only players'),
+(13,1,61028,0,0,31,0,3,32448,0,0,'', 'Alexstrasza''s Gift Beam can hit only Alexstrasza''s Gift'),
+(13,1,56429,0,0,31,0,3,31253,0,0,'', 'Summon Arcane Bomb can hit only Alexstrasza the Life-Binder (bunny)'),
+(13,1,56505,0,0,31,0,3,30334,0,0,'', 'Surge of Power (phase II) can hit only Surge of Power'),
+(13,1,56548,0,0,31,0,3,30234,0,1,'', 'Surge of Power triggered damage spell (phase II) can''t hit melee Hover Disk'),
+(13,3,56431,0,0,31,0,3,30234,0,1,'', 'Arcane Overload damage and knockback spell can''t hit melee Hover Disk'),
+(13,1,56438,0,0,1,0,1,56438,0,1,'', 'Arcane Overload damage reduce aura can''t apply to target that already is affected by such'),
+(13,6,59099,0,0,32,0,0x0010,0,0,0,'', 'Destroy Platform Event effect 1 and 2 can hit only players'),
+(13,7,61714,0,0,31,0,3,30245,0,0,'', 'Berserk (spell 2) can hit Nexus Lord'),
+(13,7,61714,0,1,31,0,3,30249,0,0,'', 'Berserk (spell 2) can hit Scion of Eternity'),
+(13,7,61715,0,0,31,0,3,30592,0,0,'', 'Berserk (spell 3) can hit Static Field bunny'),
+(13,1,57432,0,0,31,0,3,30161,0,0,'', 'Arcane Pulse can hit only drakes'),
+(13,3,57429,0,0,31,0,3,30161,0,0,'', 'Static Field can hit only drakes'),
+(13,1,61210,0,0,33,1,0,4,0,0,'', 'Align Disk Aggro can only hit the vehicle of the passenger caster');
 
 -- Add missing equipment
 DELETE FROM `creature_equip_template` WHERE `entry` IN (30245,31750,30249,31751);
-INSERT INTO `creature_equip_template` (`entry`,`id`,`itemEntry1`,`itemEntry2`,`itemEntry3`) VALUES
-(30245,1,30714,0,0), -- Nexus Lord
-(31750,1,30714,0,0), -- Nexus Lord (Difficulty)
-(30249,1,29107,0,0), -- Scion of Eternity
-(31751,1,29107,0,0); -- Scion of Eternity (Difficulty)
+INSERT INTO `creature_equip_template` (`entry`,`itemEntry1`,`itemEntry2`,`itemEntry3`) VALUES
+(30245,30714,0,0), -- Nexus Lord
+(31750,30714,0,0), -- Nexus Lord (Difficulty)
+(30249,29107,0,0), -- Scion of Eternity
+(31751,29107,0,0); -- Scion of Eternity (Difficulty)
 
 -- Update accessories of hover disks to die with the vehicle and have lower despawn time. They should fall from hover disks,
 -- and despawn after 5 sec, but for some reason they keep staying standing while dead. This needs to be fixed coreside.

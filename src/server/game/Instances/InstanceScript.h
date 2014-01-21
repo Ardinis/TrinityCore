@@ -126,7 +126,7 @@ class InstanceScript : public ZoneScript
 {
     public:
 
-        explicit InstanceScript(Map* map) : instance(map), completedEncounters(0), IsLFG(false) {}
+        explicit InstanceScript(Map* map) : instance(map), completedEncounters(0), IsLFG(false), _disableFallDamage(false) {}
 
         virtual ~InstanceScript() {}
 
@@ -215,6 +215,10 @@ class InstanceScript : public ZoneScript
 		void SetIsLfg(bool isLFG) { IsLFG = isLFG; }
 		bool IsLfg() const { return IsLFG; }
 
+        bool IsFallDamageDisable() { return _disableFallDamage; }
+
+        void DisableFallDamage(bool state) { _disableFallDamage = state; }
+
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(DoorData const* data);
@@ -234,5 +238,6 @@ class InstanceScript : public ZoneScript
         MinionInfoMap minions;
         uint32 completedEncounters; // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
 		bool IsLFG;
+        bool _disableFallDamage;
 };
 #endif

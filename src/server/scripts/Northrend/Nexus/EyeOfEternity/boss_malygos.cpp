@@ -377,7 +377,10 @@ public:
             SetPhase(PHASE_NOT_STARTED, true);
             me->SetReactState(REACT_PASSIVE);
             if (instance)
+            {
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+                instance->DisableFallDamage(true);
+            }
         }
 
         uint32 GetData(uint32 data)
@@ -1014,6 +1017,7 @@ public:
 
             me->SummonCreature(NPC_ALEXSTRASZA, AlexstraszaSpawnPos, TEMPSUMMON_MANUAL_DESPAWN);
             me->DespawnOrUnsummon(5*IN_MILLISECONDS);
+            instance->DisableFallDamage(false);
         }
 
     private:

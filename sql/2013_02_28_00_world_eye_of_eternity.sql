@@ -215,3 +215,5 @@ UPDATE `creature_template` SET `AIName`='',`ScriptName`='npc_scion_of_eternity' 
 -- since it has the invisible one for triggers first and other as second, this is the only nonhacky way (don't try to change it unless core side != c++ hack in instance script)
 UPDATE `creature_template` SET `flags_extra`=flags_extra &~ 0x00000080 WHERE `entry`=30090;
 UPDATE `creature` SET `modelid`=11686 WHERE `guid` BETWEEN 132304 AND 132308;
+
+delete from event_scripts where id = 20711;

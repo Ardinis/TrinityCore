@@ -380,7 +380,7 @@ public:
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
         }
 
-        uint32 GetData(uint32 data) const
+        uint32 GetData(uint32 data)
         {
             switch (data)
             {
@@ -456,7 +456,7 @@ public:
                         Position pos;
                         pos.m_positionZ = alexstraszaBunny->GetPositionZ();
                         alexstraszaBunny->GetNearPoint2D(pos.m_positionX, pos.m_positionY, 30.0f, alexstraszaBunny->GetAngle(me));
-                        me->GetMotionMaster()->MoveLand(POINT_LAND_P_ONE, pos, 2.0f);
+                        me->GetMotionMaster()->MoveLand(POINT_LAND_P_ONE, pos, 4.0f);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetInCombatWithZone();
@@ -475,12 +475,12 @@ public:
                     if (_phase == PHASE_ONE)
                     {
                         _zToLift.m_positionZ += 20.0f;
-                        me->GetMotionMaster()->MoveTakeoff(POINT_LIFT_IN_AIR_P_ONE, _zToLift, 2.0f);
+                        me->GetMotionMaster()->MoveTakeoff(POINT_LIFT_IN_AIR_P_ONE, _zToLift, 4.0f);
                     }
                     else if (_phase == PHASE_TWO)
                     {
                         _zToLift.m_positionZ = 300.1f;
-                        me->GetMotionMaster()->MoveTakeoff(POINT_PHASE_ONE_TO_TWO_TRANSITION, _zToLift, 2.0f);
+                        me->GetMotionMaster()->MoveTakeoff(POINT_PHASE_ONE_TO_TWO_TRANSITION, _zToLift, 4.0f);
                     }
                     break;
                 case ACTION_HANDLE_P_THREE_INTRO:
@@ -619,7 +619,7 @@ public:
                 if (_phase == PHASE_TWO)
                 {
                     //                    summons.DoAction(ACTION_DELAYED_DESPAWN);
-                    summons.DespawnAll();
+                    //                    summons.DespawnAll();
                 }
                 else if (_phase == PHASE_THREE)
                     summons.DespawnAll();
@@ -662,8 +662,10 @@ public:
             if (spell->Id == SPELL_POWER_SPARK_MALYGOS)
             {
                 if (Creature* creature = caster->ToCreature())
+                {
+                    std::cout << creature->GetEntry() << std::endl;
                     creature->DespawnOrUnsummon();
-
+                }
                 Talk(SAY_BUFF_SPARK);
             }
             else if (spell->Id == SPELL_MALYGOS_BERSERK)
@@ -1268,14 +1270,14 @@ public:
 
         void DoAction(int32 const /*action*/)
         {
-            if (Vehicle* vehicleTemp = me->GetVehicleKit())
+            /*            if (Vehicle* vehicleTemp = me->GetVehicleKit())
                 if (vehicleTemp->GetPassenger(0) && vehicleTemp->GetPassenger(0)->GetTypeId() == TYPEID_PLAYER)
                 {
                     vehicleTemp->RemoveAllPassengers();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 }
-
-                me->DespawnOrUnsummon(3*IN_MILLISECONDS);
+            std::cout << "do action again ?" << std::endl;
+            me->DespawnOrUnsummon(3*IN_MILLISECONDS);*/
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -1358,7 +1360,8 @@ public:
             }
             else
             {
-                me->DespawnOrUnsummon(3*IN_MILLISECONDS);
+                std::cout << "FillCirclePath DoAction" << std::endl;
+                //                me->DespawnOrUnsummon(3*IN_MILLISECONDS);
             }
         }
 
@@ -1558,6 +1561,7 @@ public:
 
         void DoAction(int32 const /*action*/)
         {
+            std::cout << "DoAction ???" << std::endl;
             if (Creature* malygos = me->GetMap()->GetCreature(_instance->GetData64(DATA_MALYGOS)))
             {
                 if (malygos->AI()->GetData(DATA_PHASE) == PHASE_TWO)
@@ -2561,13 +2565,11 @@ void AddSC_boss_malygos()
     new npc_melee_hover_disk();
     new npc_caster_hover_disk();
     new npc_nexus_lord();
-    new npc_scion_of_eternity();
     new npc_arcane_overload();
     new npc_wyrmrest_skytalon();
     new npc_static_field();
     new spell_malygos_portal_beam();
     new spell_malygos_random_portal();
-    new spell_malygos_arcane_storm();
     new spell_malygos_vortex_dummy();
     new spell_malygos_vortex_visual();
     new spell_arcane_overload();

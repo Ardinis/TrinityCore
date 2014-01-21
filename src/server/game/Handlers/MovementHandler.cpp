@@ -337,11 +337,11 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
     }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->isInFlight() && plMover->GetMap() && plMover->GetMap()->IsRaid() && plrMover->GetInstanceScript())
+    if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->isInFlight() && plMover->GetMap() && plMover->GetMap()->IsRaid() && plMover->GetInstanceScript())
     {
-        if (InstanceScript *instance = plrMover->GetInstanceScript())
+        if (InstanceScript *instance = plMover->GetInstanceScript())
             if (!instance->IsFallDamageDisable())
-                plrMover->HandleFall(movementInfo);
+                plMover->HandleFall(movementInfo);
     }
     else if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->isInFlight())
         plMover->HandleFall(movementInfo);

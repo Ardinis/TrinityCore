@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,13 +15,19 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 #include "eye_of_eternity.h"
+#include "Player.h"
+#include "AccountMgr.h"
+
+#define SPELL_PORTAL_VISUAL_CLOSED 55949
 
 class instance_eye_of_eternity : public InstanceMapScript
 {
 public:
-    instance_eye_of_eternity() : InstanceMapScript("instance_eye_of_eternity", 616) {}
+    instance_eye_of_eternity() : InstanceMapScript("instance_eye_of_eternity", 616) { }
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
     {
@@ -38,11 +44,11 @@ public:
             portalTriggers.clear();
 
             malygosGUID = 0;
+            irisGUID = 0;
             lastPortalGUID = 0;
             platformGUID = 0;
             exitPortalGUID = 0;
-
-            checkFallingPlayersTimer = 1500;
+            alexstraszaBunnyGUID = 0;
         };
 
         bool SetBossState(uint32 type, EncounterState state)
@@ -64,40 +70,25 @@ public:
                         }
                     }
 
-                    SpawnGameObject(GO_FOCUSING_IRIS, focusingIrisPosition);
-
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
                         platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                 }
                 else if (state == DONE)
-                {
-                    if (Creature* malygos = instance->GetCreature(malygosGUID))
-                        malygos->SummonCreature(NPC_ALEXSTRASZA, 829.0679f, 1244.77f, 279.7453f, 2.32f);
-                    /*
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
-
-                    // we make the platform appear again because at the moment we don't support looting using a vehicle
-                    if (GameObject* platform = instance->GetGameObject(platformGUID))
-                        platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-
-                    if (GameObject* chest = instance->GetGameObject(chestGUID))
-                        chest->SetRespawnTime(7*DAY);
-                    */
-                }
             }
             return true;
         }
 
-        //TODO: this should be handled in map, maybe add a summon function in map
+        /// @todo this should be handled in map, maybe add a summon function in map
         // There is no other way afaik...
         void SpawnGameObject(uint32 entry, Position& pos)
         {
             GameObject* go = new GameObject;
             if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, instance,
                 PHASEMASK_NORMAL, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(),
-                0, 0, 0, 0, 2, GO_STATE_READY))
+                0, 0, 0, 0, 120, GO_STATE_READY))
             {
                 delete go;
                 return;
@@ -113,17 +104,30 @@ public:
                 case GO_NEXUS_RAID_PLATFORM:
                     platformGUID = go->GetGUID();
                     break;
-                case GO_FOCUSING_IRIS:
-                case GO_FOCUSING_IRIS_2:
-                    go->GetPosition(&focusingIrisPosition);
+                case GO_FOCUSING_IRIS_10:
+                    if (instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+                    {
+                        irisGUID = go->GetGUID();
+                        go->GetPosition(&focusingIrisPosition);
+                    }
+                    break;
+                case GO_FOCUSING_IRIS_25:
+                    if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                    {
+                        irisGUID = go->GetGUID();
+                        go->GetPosition(&focusingIrisPosition);
+                    }
                     break;
                 case GO_EXIT_PORTAL:
                     exitPortalGUID = go->GetGUID();
-                    go->GetPosition(&exitPortalPosition);
                     break;
-                case GO_ALEXSTRASZA_S_GIFT:
-                case GO_ALEXSTRASZA_S_GIFT_2:
-                    chestGUID = go->GetGUID();
+                case GO_HEART_OF_MAGIC_10:
+                    if (instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+                        heartOfMagicGUID = go->GetGUID();
+                    break;
+                case GO_HEART_OF_MAGIC_25:
+                    if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                        heartOfMagicGUID = go->GetGUID();
                     break;
             }
         }
@@ -141,26 +145,43 @@ public:
                 case NPC_PORTAL_TRIGGER:
                     portalTriggers.push_back(creature->GetGUID());
                     break;
+                case NPC_ALEXSTRASZA_BUNNY:
+                    alexstraszaBunnyGUID = creature->GetGUID();
+                    break;
+                case NPC_ALEXSTRASZAS_GIFT:
+                    giftBoxBunnyGUID = creature->GetGUID();
+                    break;
             }
         }
 
-        void ProcessEvent(WorldObject* obj, uint32 eventId)
+        void OnUnitDeath(Unit* unit)
+        {
+            if (unit->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // Player continues to be moving after death no matter if spline will be cleared along with all movements,
+            // so on next world tick was all about delay if box will pop or not (when new movement will be registered)
+            // since in EoE you never stop falling. However root at this precise* moment works,
+            // it will get cleared on release. If by any chance some lag happen "Reload()" and "RepopMe()" works,
+            // last test I made now gave me 50/0 of this bug so I can't do more about it.
+            unit->SetControlled(true, UNIT_STATE_ROOT);
+        }
+
+        void ProcessEvent(WorldObject* /*obj*/, uint32 eventId)
         {
             if (eventId == EVENT_FOCUSING_IRIS)
             {
-                if (Creature* trigger = obj->FindNearestCreature(22517, 20))
-                    trigger->CastSpell(trigger,SPELL_IRIS_OPENED,true);
-                if (GameObject* go = obj->ToGameObject())
-                    go->Delete(); // this is not the best way.
-
-                if (Creature* malygos = instance->GetCreature(malygosGUID))
+                if (Creature* alexstraszaBunny = instance->GetCreature(alexstraszaBunnyGUID))
                 {
-                    malygos->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                    malygos->GetMotionMaster()->MovePoint(4, 770.10f, 1275.33f, 269.23f); // MOVE_INIT_PHASE_ONE
+                    alexstraszaBunny->CastSpell(alexstraszaBunny, SPELL_IRIS_OPENED);
+                    instance->GetGameObject(irisGUID)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
                 }
 
+                if (Creature* malygos = instance->GetCreature(malygosGUID))
+                    malygos->AI()->DoAction(0); // ACTION_LAND_ENCOUNTER_START
+
                 if (GameObject* exitPortal = instance->GetGameObject(exitPortalGUID))
-                    exitPortal->Delete();
+                    exitPortal->SetPhaseMask(2, true);
             }
         }
 
@@ -187,7 +208,7 @@ public:
                             {
                                 Player* player = target->ToPlayer();
 
-                                if (!player || player->isGameMaster() || player->HasAura(SPELL_VORTEX_4))
+                                if (!player || !AccountMgr::IsGMAccount(player->GetSession()->GetSecurity()) || player->HasAura(SPELL_VORTEX_4))
                                     continue;
 
                                 player->CastSpell(trigger, SPELL_VORTEX_4, true);
@@ -201,7 +222,7 @@ public:
 
         void PowerSparksHandling()
         {
-            bool next =  (lastPortalGUID == portalTriggers.back() || !lastPortalGUID ? true : false);
+            bool next = (lastPortalGUID == portalTriggers.back() || !lastPortalGUID ? true : false);
 
             for (std::list<uint64>::const_iterator itr_trigger = portalTriggers.begin(); itr_trigger != portalTriggers.end(); ++itr_trigger)
             {
@@ -230,10 +251,8 @@ public:
                 case DATA_POWER_SPARKS_HANDLING:
                     PowerSparksHandling();
                     break;
-                case DATA_GIFT:                
-                    if (GameObject* chest = instance->GetGameObject(chestGUID))
-                        chest->SetRespawnTime(7*DAY);
-                    SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
+                case DATA_RESPAWN_IRIS:
+                    SpawnGameObject(instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? GO_FOCUSING_IRIS_10 : GO_FOCUSING_IRIS_25, focusingIrisPosition);
                     break;
             }
         }
@@ -248,6 +267,14 @@ public:
                     return malygosGUID;
                 case DATA_PLATFORM:
                     return platformGUID;
+                case DATA_ALEXSTRASZA_BUNNY_GUID:
+                    return alexstraszaBunnyGUID;
+                case DATA_HEART_OF_MAGIC_GUID:
+                    return heartOfMagicGUID;
+                case DATA_FOCUSING_IRIS_GUID:
+                    return irisGUID;
+                case DATA_GIFT_BOX_BUNNY_GUID:
+                    return giftBoxBunnyGUID;
             }
 
             return 0;
@@ -295,53 +322,19 @@ public:
             OUT_LOAD_INST_DATA_COMPLETE;
         }
 
-        void OnPlayerEnter(Player* pPlayer)
-        {
-            if(GetBossState(DATA_MALYGOS_EVENT) == DONE)
-            {
-                if (GameObject* platform = instance->GetGameObject(platformGUID))
-                    if (platform->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
-                        pPlayer->CastSpell(pPlayer, SPELL_SUMMOM_RED_DRAGON, true);
-            }
-        }
-
-        void CheckFallingPlayers()
-        {
-            Map::PlayerList const &PlayerList = instance->GetPlayers();
-        
-            if (PlayerList.isEmpty())
-                return;
-        
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-            {
-                  if (i->getSource()->isAlive() && i->getSource()->GetPositionZ()<=100.0f)
-                  {
-                      i->getSource()->SetMovement(MOVE_ROOT);
-                      i->getSource()->setDeathState(JUST_DIED);
-                  }
-            }
-        }
-
-        void Update(uint32 diff)
-        {
-            if (checkFallingPlayersTimer < diff)
-            {
-                CheckFallingPlayers();
-                checkFallingPlayersTimer = 1000;
-            } else checkFallingPlayersTimer -= diff;
-        }
-
         private:
             std::list<uint64> vortexTriggers;
             std::list<uint64> portalTriggers;
             uint64 malygosGUID;
+            uint64 irisGUID;
             uint64 lastPortalGUID;
             uint64 platformGUID;
             uint64 exitPortalGUID;
-            uint64 chestGUID;
+            uint64 heartOfMagicGUID;
+            uint64 alexstraszaBunnyGUID;
+            uint64 giftBoxBunnyGUID;
             Position focusingIrisPosition;
             Position exitPortalPosition;
-            uint32 checkFallingPlayersTimer;
     };
 };
 

@@ -217,3 +217,6 @@ UPDATE `creature_template` SET `flags_extra`=flags_extra &~ 0x00000080 WHERE `en
 UPDATE `creature` SET `modelid`=11686 WHERE `guid` BETWEEN 132304 AND 132308;
 
 delete from event_scripts where id = 20711;
+
+delete from disables where sourceType = 8 and entry = 616;
+insert into disables values(8, 616, 0, '', '', 'disable malygos height relocation');

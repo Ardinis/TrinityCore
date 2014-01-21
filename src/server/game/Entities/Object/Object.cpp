@@ -47,6 +47,7 @@
 #include "OutdoorPvPMgr.h"
 #include "MovementPacketBuilder.h"
 #include "DynamicTree.h"
+#include "DisableMgr.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -1561,6 +1562,9 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 
 void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 {
+    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_HEIGHT_RELOCATION, GetMapId(), NULL, 0))
+        return;
+
     switch (GetTypeId())
     {
         case TYPEID_UNIT:

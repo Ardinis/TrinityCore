@@ -40,7 +40,7 @@ namespace
 
     DisableMap m_DisableMap;
 
-    uint8 MAX_DISABLE_TYPES = 8;
+    uint8 MAX_DISABLE_TYPES = 9;
 }
 
 void LoadDisables()
@@ -247,10 +247,36 @@ void LoadDisables()
                 }
                 break;
             }
+            case DISABLE_TYPE_HEIGHT_RELOCATION:
+            {
+                MapEntry const* mapEntry = sMapStore.LookupEntry(entry);
+                if (!mapEntry)
+                {
+                    sLog->outError("Map entry %u from `disables` doesn't exist in dbc, skipped.", entry);
+                    continue;
+                }
+                switch (mapEntry->map_type)
+                {
+                case MAP_COMMON:
+                    sLog->outString("Height relocation disabled for world map %u.", entry);
+                    break;
+                case MAP_INSTANCE:
+                case MAP_RAID:
+                    sLog->outString("Height relocation disabled for instance map %u.", entry);
+                    break;
+                case MAP_BATTLEGROUND:
+                    sLog->outString("Height relocation disabled for battleground map %u.", entry);
+                    break;
+                case MAP_ARENA:
+                    sLog->outString("Height relocation disabled for arena map %u.", entry);
+                    break;
+                default:
+                    break;
+                }
+            }
             default:
                 break;
         }
-
         m_DisableMap[type].insert(DisableTypeMap::value_type(entry, data));
         ++total_count;
     }
@@ -366,6 +392,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                     return true;
             }
             return false;
+
         case DISABLE_TYPE_QUEST:
             if (!unit)
                 return true;
@@ -376,6 +403,8 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
         case DISABLE_TYPE_BATTLEGROUND:
         case DISABLE_TYPE_OUTDOORPVP:
         case DISABLE_TYPE_ACHIEVEMENT_CRITERIA:
+            //  case DISABLE_TYPE_MMAP:
+        case DISABLE_TYPE_HEIGHT_RELOCATION:
             return true;
         case DISABLE_TYPE_VMAP:
            return flags & itr->second.flags;

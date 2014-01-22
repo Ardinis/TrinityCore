@@ -23949,7 +23949,7 @@ void Player::UpdateCharmedAI()
         target = charmer->SelectNearestTarget();
         if (!target)
             return;
-
+        std::cout << "player :: MoveChase" << std::endl;
         GetMotionMaster()->MoveChase(target);
         Attack(target, true);
     }

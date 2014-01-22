@@ -479,7 +479,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                             {
                                 m_AttackDistance = 0.0f;
                                 m_AttackAngle = 0.0f;
-
+                                std::cout << "Melee current victim if flag not set MoveChase" << std::endl;
                                 me->GetMotionMaster()->MoveChase(me->getVictim(), m_AttackDistance, m_AttackAngle);
                             }
                         }
@@ -581,7 +581,10 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                         me->SendMeleeAttackStart(victim);
                     }
                     if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
+                    {
+                        std::cout << "ACTION_T_COMBAT_MOVEMENT : MoveChase" << std::endl;
                         me->GetMotionMaster()->MoveChase(victim, m_AttackDistance, m_AttackAngle); // Targeted movement generator will start melee automatically, no need to send it explicitly
+                    }
                 }
             }
             else
@@ -653,6 +656,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             if (m_CombatMovementEnabled)
             {
+                std::cout << "ACTION_T_RANGED_MOVEMENT MoveChase : " << std::endl;
                 me->GetMotionMaster()->MoveChase(me->getVictim(), m_AttackDistance, m_AttackAngle);
             }
             break;
@@ -1007,6 +1011,7 @@ void CreatureEventAI::AttackStart(Unit* who)
     {
         if (m_CombatMovementEnabled)
         {
+            std::cout << "CreatureEventAI::AttackStart : MoveChase" << std::endl;
             me->GetMotionMaster()->MoveChase(who, m_AttackDistance, m_AttackAngle);
         }
         else

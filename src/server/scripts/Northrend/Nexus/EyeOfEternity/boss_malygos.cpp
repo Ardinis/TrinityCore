@@ -378,6 +378,7 @@ public:
 
             SetPhase(PHASE_NOT_STARTED, true);
             me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
             if (instance)
             {
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
@@ -465,9 +466,6 @@ public:
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
                         me->GetMotionMaster()->MoveLand(POINT_LAND_P_ONE, pos, 8.0f);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->SetInCombatWithZone();
                         events.ScheduleEvent(EVENT_LAND_START_ENCOUNTER, 7*IN_MILLISECONDS, 1, PHASE_NOT_STARTED);
                     }
                     break;
@@ -718,6 +716,9 @@ public:
                     break;
                 case POINT_LAND_P_ONE:
                     me->SetDisableGravity(false);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetInCombatWithZone();
                     break;
                 case POINT_VORTEX_P_ONE:
                     me->GetMotionMaster()->MoveIdle();
@@ -2043,9 +2044,10 @@ class spell_nexus_lord_align_disk_aggro : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-                Creature* caster = GetCaster()->ToCreature();
-                if (Creature* target = GetHitCreature())
-                    target->GetMotionMaster()->MoveChase(caster->getVictim());
+                if (Creature* caster = GetCaster()->ToCreature())
+                    if (Unit* tar = caster->GetVehicleBase())
+                        if (Creature *target = tar->ToCreature())
+                            target->GetMotionMaster()->MoveChase(caster->getVictim());
             }
 
             void Register()

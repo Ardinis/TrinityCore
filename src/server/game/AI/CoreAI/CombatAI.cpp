@@ -111,7 +111,7 @@ void CombatAI::UpdateAI(const uint32 diff)
         DoMeleeAttackIfReady();
 }
 
-void CombatAI::SpellInterrupted(uint32 spellId, uint32 msTime) 
+void CombatAI::SpellInterrupted(uint32 spellId, uint32 msTime)
 {
     events.RescheduleEvent(spellId, msTime);
 }
@@ -202,7 +202,7 @@ void ArcherAI::AttackStart(Unit* who)
 {
     if (!who)
         return;
-
+    std::cout << "ArcherAI attackstart : MoveChase" << std::endl;
     if (me->IsWithinCombatRange(who, m_minRange))
     {
         if (me->Attack(who, true) && !who->IsFlying())

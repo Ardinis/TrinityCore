@@ -234,7 +234,8 @@ void MotionMaster::MoveConfused()
 void MotionMaster::MoveChase(Unit* target, float dist, float angle, uint32 spellId)
 {
     // ignore movement request if target not exist
-    std::cout << "MoveChase : " << _owner->GetName() << std::endl;
+    if (_owner->GetEntry() == 28859)
+        std::cout << "MoveChase : " << _owner->GetName() << std::endl;
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 

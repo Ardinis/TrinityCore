@@ -384,7 +384,7 @@ public:
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
                 instance->DisableFallDamage(true);
             }
-            me->GetMotionMaster()->MovePath(MALYGOS_PATH, true);
+            DoAction(ACTION_CYCLIC_MOVEMENT);
         }
 
         uint32 GetData(uint32 data)
@@ -474,6 +474,7 @@ public:
                     DoCast(me, SPELL_VORTEX_2, true);
                     // the vortex execution continues in the dummy effect of this spell (see it's script)
                     DoCast(me, SPELL_VORTEX_3, true);
+                    //
                     break;
                 case ACTION_LIFT_IN_AIR:
                     Position _zToLift;

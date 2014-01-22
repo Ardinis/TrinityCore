@@ -42,10 +42,7 @@ void FollowerAI::AttackStart(Unit* who)
             me->ClearUnitState(UNIT_STATE_FOLLOW);
 
         if (IsCombatMovementAllowed())
-        {
-            std::cout << "FollowerAI::AttackStart : MoveChase" << std::endl;
             me->GetMotionMaster()->MoveChase(who);
-        }
     }
 }
 

@@ -139,10 +139,7 @@ void EffectMovementGenerator::Finalize(Unit &unit)
     if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {
         if (Unit* victim = unit.getVictim())
-        {
-            std::cout << "PointMvmntsGen MoveChase" << std::endl;
             unit.GetMotionMaster()->MoveChase(victim);
-        }
         else
             unit.GetMotionMaster()->Initialize();
     }

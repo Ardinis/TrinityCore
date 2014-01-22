@@ -140,10 +140,7 @@ void ScriptedAI::UpdateAI(uint32 const /*diff*/)
 void ScriptedAI::DoStartMovement(Unit* victim, float distance, float angle)
 {
     if (victim)
-    {
-        std::cout << "DoStartMovement : MoveChase" << std::endl;
         me->GetMotionMaster()->MoveChase(victim, distance, angle);
-    }
 }
 
 void ScriptedAI::DoStartNoMovement(Unit* victim)

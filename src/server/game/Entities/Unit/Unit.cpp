@@ -16932,11 +16932,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
 
     // Apply chance modifer aura
     if (Player* modOwner = GetSpellModOwner())
-    {
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
-    }
-    //    if (spellProto->Id == 71878)
-    //     std::cout << "last chance !! : " << roll_chance_i(chance) << std::endl;
 
     return roll_chance_i(chance);
 }

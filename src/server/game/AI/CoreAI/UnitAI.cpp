@@ -29,28 +29,19 @@
 void UnitAI::AttackStart(Unit* victim)
 {
     if (victim && me->Attack(victim, true))
-    {
-        std::cout << "AttackStart : MoveChase" << std::endl;
         me->GetMotionMaster()->MoveChase(victim);
-    }
 }
 
 void UnitAI::AttackStart(Unit* victim, uint32 spellId)
 {
     if (victim && me->Attack(victim, true))
-    {
-        std::cout << "AttackStart spellid : MoveChase" << std::endl;
         me->GetMotionMaster()->MoveChase(victim);
-    }
 }
 
 void UnitAI::AttackStartCaster(Unit* victim, float dist)
 {
     if (victim && me->Attack(victim, false))
-    {
-        std::cout << "AttackStartCaster : MoveChase" << std::endl;
         me->GetMotionMaster()->MoveChase(victim, dist);
-    }
 }
 
 void UnitAI::DoMeleeAttackIfReady()

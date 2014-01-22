@@ -623,10 +623,7 @@ void SmartAI::AttackStart(Unit* who)
             me->GetMotionMaster()->MovementExpired();
 
         if (mCanCombatMove)
-        {
-            std::cout << "smart AI attackstart : MoveChase" << std::endl;
             me->GetMotionMaster()->MoveChase(who);
-        }
 
         me->GetPosition(&mLastOOCPos);
     }
@@ -806,7 +803,6 @@ void SmartAI::SetCombatMove(bool on)
             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
             {
                 SetRun(mRun);
-                std::cout << "SetCombatMove : MoveChase" << std::endl;
                 me->GetMotionMaster()->MoveChase(me->getVictim());
                 me->CastStop();
             }

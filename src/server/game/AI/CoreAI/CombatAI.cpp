@@ -202,7 +202,6 @@ void ArcherAI::AttackStart(Unit* who)
 {
     if (!who)
         return;
-    std::cout << "ArcherAI attackstart : MoveChase" << std::endl;
     if (me->IsWithinCombatRange(who, m_minRange))
     {
         if (me->Attack(who, true) && !who->IsFlying())

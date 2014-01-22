@@ -47,10 +47,7 @@ void npc_escortAI::AttackStart(Unit* who)
             me->GetMotionMaster()->MovementExpired();
 
         if (IsCombatMovementAllowed())
-        {
-            std::cout << "npc_escortAI::AttackStart : MoveChase" << std::endl;
             me->GetMotionMaster()->MoveChase(who);
-        }
     }
 }
 

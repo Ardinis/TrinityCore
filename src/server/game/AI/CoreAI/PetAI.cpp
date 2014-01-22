@@ -489,7 +489,6 @@ void PetAI::DoAttack(Unit* target, bool chase, uint32 spellId)
         {
            ClearCharmInfoFlags();
            me->GetMotionMaster()->Clear();
-           std::cout << "petai doattack movechase" << std::endl;
            me->GetMotionMaster()->MoveChase(target, 0.0f, 0.0f, spellId);
         }
         else // (Stay && ((Aggressive || Defensive) && In Melee Range)))

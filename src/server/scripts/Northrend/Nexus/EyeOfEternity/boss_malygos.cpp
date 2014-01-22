@@ -1253,6 +1253,11 @@ public:
             _wpCount = 0;
         }
 
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            damage = 0;
+        }
+
         void PassengerBoarded(Unit* unit, int8 /*seat*/, bool apply)
         {
             if (apply)
@@ -1269,7 +1274,6 @@ public:
             {
                 if (unit->GetTypeId() != TYPEID_PLAYER)
                 {
-
                     me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->SetDisableGravity(false);
@@ -1355,6 +1359,11 @@ public:
             VehicleAI::Reset();
         }
 
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            damage = 0;
+        }
+
         void EnterEvadeMode()
         {
         }
@@ -1368,10 +1377,13 @@ public:
             }
             else if (!apply)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->StopMoving();
                 me->SetDisableGravity(false);
                 me->SetFlying(false);
                 me->RemoveAllAuras();
+                me->GetMotionMaster()->MoveFall();
+                me->setFaction(FACTION_FRIENDLY);
             }
         }
 

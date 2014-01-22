@@ -1168,6 +1168,7 @@ public:
     {
         npc_power_sparkAI(Creature* creature) : ScriptedAI(creature)
         {
+            me->CastSpell(me, 55845, true);
             _instance = creature->GetInstanceScript();
             // Talk range was not enough for this encounter
             sCreatureTextMgr->SendChat(me, EMOTE_POWER_SPARK_SUMMONED, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_MAP);
@@ -1177,7 +1178,9 @@ public:
         void MoveToMalygos()
         {
             me->GetMotionMaster()->MoveIdle();
-
+            me->SetSpeed(MOVE_FLIGHT, 0.5f);
+            me->SetSpeed(MOVE_RUN, 0.5f);
+            me->SetSpeed(MOVE_WALK, 0.5f);
             if (_instance)
                 if (Creature* malygos = me->GetMap()->GetCreature(_instance->GetData64(DATA_MALYGOS)))
                     me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
@@ -1844,8 +1847,8 @@ class spell_malygos_arcane_storm : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_ARCANE_STORM_EXTRA_VISUAL))
-                    return false;
+                //                if (!sSpellMgr->GetSpellInfo(SPELL_ARCANE_STORM_EXTRA_VISUAL))
+                //    return false;
 
                 return true;
             }

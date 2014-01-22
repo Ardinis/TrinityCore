@@ -96,15 +96,15 @@ INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`pr
 -- Update wrong sound and add duration for Power Sparks warning
 UPDATE `creature_text` SET `duration`=10000,`sound`=0 WHERE `entry`=30084 AND `groupid`=0 AND`id`=0;
 
--- Add conditions
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (56047,58846,61028,56429,56505,59099,61714,61715,57432,57429,61210,56548,56431,56438);
+-- Add conditions00
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (56047,58846,61028,56429,56505,59099,61714,61715,57432,57429,61210,56548,56431,56438, 55853, 56263, 56152);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ScriptName`,`Comment`) VALUES
-(13,1,56047,0,0,31,0,3,30118,0,0,'', 'Random Portal can implicitly hit only Portal (Malygos)'),
+(13,0,56047,0,0,18,0,1,30118,0,0,'', 'Random Portal can implicitly hit only Portal (Malygos)'),
 (13,1,56047,0,0,29,0,28859,30,1,0,'', 'Random Portal can implicitly hit only target that is not in 30 yards near Malygos'),
 (13,1,58846,0,0,32,0,0x0010,0,0,0,'', 'Summon Red Dragon Buddy force cast can implicitly hit only players'),
-(13,1,61028,0,0,31,0,3,32448,0,0,'', 'Alexstrasza''s Gift Beam can hit only Alexstrasza''s Gift'),
-(13,1,56429,0,0,31,0,3,31253,0,0,'', 'Summon Arcane Bomb can hit only Alexstrasza the Life-Binder (bunny)'),
-(13,1,56505,0,0,31,0,3,30334,0,0,'', 'Surge of Power (phase II) can hit only Surge of Power'),
+(13,0,61028,0,0,18,0,1,32448,0,0,'', 'Alexstrasza''s Gift Beam can hit only Alexstrasza''s Gift'),
+(13,0,56429,0,0,18,0,1,31253,0,0,'', 'Summon Arcane Bomb can hit only Alexstrasza the Life-Binder (bunny)'),
+(13,0,56505,0,0,18,0,1,30334,0,0,'', 'Surge of Power (phase II) can hit only Surge of Power'),
 (13,1,56548,0,0,31,0,3,30234,0,1,'', 'Surge of Power triggered damage spell (phase II) can''t hit melee Hover Disk'),
 (13,3,56431,0,0,31,0,3,30234,0,1,'', 'Arcane Overload damage and knockback spell can''t hit melee Hover Disk'),
 (13,1,56438,0,0,1,0,1,56438,0,1,'', 'Arcane Overload damage reduce aura can''t apply to target that already is affected by such'),
@@ -112,9 +112,13 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,
 (13,7,61714,0,0,31,0,3,30245,0,0,'', 'Berserk (spell 2) can hit Nexus Lord'),
 (13,7,61714,0,1,31,0,3,30249,0,0,'', 'Berserk (spell 2) can hit Scion of Eternity'),
 (13,7,61715,0,0,31,0,3,30592,0,0,'', 'Berserk (spell 3) can hit Static Field bunny'),
-(13,1,57432,0,0,31,0,3,30161,0,0,'', 'Arcane Pulse can hit only drakes'),
-(13,3,57429,0,0,31,0,3,30161,0,0,'', 'Static Field can hit only drakes'),
-(13,1,61210,0,0,33,1,0,4,0,0,'', 'Align Disk Aggro can only hit the vehicle of the passenger caster');
+(13,0,57432,0,0,18,0,1,30161,0,0,'', 'Arcane Pulse can hit only drakes'),
+(13,0,57429,0,0,18,0,1,30161,0,0,'', 'Static Field can hit only drakes');
+-- (13,0,61210,0,0,18,0,1,30234,0,0,'', 'Align Disk Aggro can only hit the vehicle of the passenger caster');
+INSERT INTO `conditions` (SourceTypeOrReferenceId,ConditionTypeOrReference,SourceGroup,SourceEntry,ConditionValue1,ConditionValue2) VALUES
+(13,18,0,55853,1,30090),
+(13,18,0,56263,1,30090),
+(13,18,0,56152,1,28859);
 
 -- Add missing equipment
 DELETE FROM `creature_equip_template` WHERE `entry` IN (30245,31750,30249,31751);
@@ -220,3 +224,16 @@ delete from event_scripts where id = 20711;
 
 delete from disables where sourceType = 8 and entry = 616;
 insert into disables values(8, 616, 0, '', '', 'disable malygos height relocation');
+
+
+delete from waypoint_data where id = 2885900;
+insert into waypoint_data values
+(2885900, 1, 808.0, 1293.0, 297.0, 0, 0, 0, 0, 100, 0),
+(2885900, 2, 758.44, 1247.34, 297.0, 0, 0, 0, 0, 100, 0),
+(2885900, 3, 700.47, 1297.01, 297.0, 0, 0, 0, 0, 100, 0),
+(2885900, 4, 749.18, 1355.24, 297.0, 0, 0, 0, 0, 100, 0),
+(2885900, 5, 800.72, 1330.02, 297.0, 0, 0, 0, 0, 100, 0);
+
+delete from gameobject where id = 193960;
+insert into `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) values
+('193960','616','2','1','754.255','1301.72','266.17','-1.6057','0','0','0','0','604800','0','1');

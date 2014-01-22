@@ -293,6 +293,8 @@ Position const HeartOfMagicSpawnPos = { 755.351f, 1298.31f, 223.909f, 0.0f }; //
 
 #define TEN_MINUTES         (10*MINUTE*IN_MILLISECONDS)
 
+#define MALYGOS_PATH 2885900
+
 enum Achievements
 {
     ACHIEV_TIMED_START_EVENT       = 20387
@@ -381,6 +383,7 @@ public:
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
                 instance->DisableFallDamage(true);
             }
+            me->GetMotionMaster()->MovePath(MALYGOS_PATH, true);
         }
 
         uint32 GetData(uint32 data)
@@ -459,6 +462,8 @@ public:
                         Position pos;
                         pos.m_positionZ = alexstraszaBunny->GetPositionZ();
                         alexstraszaBunny->GetNearPoint2D(pos.m_positionX, pos.m_positionY, 30.0f, alexstraszaBunny->GetAngle(me));
+                        me->GetMotionMaster()->Clear();
+                        me->GetMotionMaster()->MoveIdle();
                         me->GetMotionMaster()->MoveLand(POINT_LAND_P_ONE, pos, 8.0f);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         me->SetReactState(REACT_AGGRESSIVE);
@@ -519,14 +524,15 @@ public:
                     _despawned = false;
                     break;
                 case ACTION_CYCLIC_MOVEMENT:
-                    /*                    me->StopMoving();
+                    //                    me->GetMotionMaster()->MovePath(MALYGOS_PATH, true);
+                    me->StopMoving();
                     me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveIdle();
                     Movement::MoveSplineInit init(*me);
                     FillCirclePath(MalygosPositions[3], 80.0f, 283.2763f, init.Path(), true);
                     init.SetFly();
                     init.SetCyclic();
-                    init.Launch();*/
+                    init.Launch();
                     break;
             }
         }
@@ -698,7 +704,8 @@ public:
         {
             if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
                 return;
-
+            std::cout << type << " : " << id << std::endl;
+            me->GetMotionMaster()->MoveIdle();
             switch (id)
             {
                 case POINT_NEAR_RANDOM_PORTAL_P_NONE:
@@ -730,7 +737,7 @@ public:
                     {
                         _firstCyclicMovementStarted = true;
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        me->SetFacingToObject(me->GetMap()->GetCreature(instance->GetData64(DATA_ALEXSTRASZA_BUNNY_GUID)));
+                        //               me->SetFacingToObject(me->GetMap()->GetCreature(instance->GetData64(DATA_ALEXSTRASZA_BUNNY_GUID)));
                         events.ScheduleEvent(EVENT_SUMMON_ARCANE_BOMB, 1*IN_MILLISECONDS, 0, PHASE_TWO);
                     }
                     _flyingOutOfPlatform = false;
@@ -739,7 +746,7 @@ public:
                     break;
                 case POINT_PHASE_ONE_TO_TWO_TRANSITION:
                     me->SetDisableGravity(true);
-                    me->SetFacingToObject(me->GetMap()->GetCreature(instance->GetData64(DATA_ALEXSTRASZA_BUNNY_GUID)));
+                    //                    me->SetFacingToObject(me->GetMap()->GetCreature(instance->GetData64(DATA_ALEXSTRASZA_BUNNY_GUID)));
                     SendLightOverride(LIGHT_ARCANE_RUNES, 5*IN_MILLISECONDS);
                     events.ScheduleEvent(EVENT_FLY_OUT_OF_PLATFORM, 18*IN_MILLISECONDS, 0, PHASE_TWO);
                     break;
@@ -790,6 +797,7 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
+                std::cout << "DO EVENT ! : " << eventId << std::endl;
                 switch (eventId)
                 {
                     case EVENT_START_FIRST_RANDOM_PORTAL:
@@ -923,13 +931,14 @@ public:
                     case EVENT_SUMMON_ARCANE_BOMB:
                         if (!_performingSurgeOfPower && !_performingDestroyPlatform)
                         {
-                            //                            me->StopMoving();
+                            me->StopMoving();
                             events.ScheduleEvent(EVENT_PATHING_AROUND_PLATFORM, 3*IN_MILLISECONDS, 0, PHASE_TWO);
                         }
 
                         if (!_flyingOutOfPlatform)
                         {
-                            DoCast(me, SPELL_SUMMON_ARCANE_BOMB, true);
+                            if (Creature* lastArcaneOverloadBunny = me->FindNearestCreature(31253, 200, true))
+                                DoCast(lastArcaneOverloadBunny, SPELL_SUMMON_ARCANE_BOMB, true);
                             if (Creature* lastArcaneOverloadBunny = me->GetMap()->GetCreature(_arcaneOverloadGUID))
                                 DoCast(lastArcaneOverloadBunny, SPELL_ARCANE_BOMB_TRIGGER, true);
                         }
@@ -1975,6 +1984,7 @@ class ExactDistanceCheck
 
         bool operator()(Unit* unit)
         {
+            std::cout << "dist = " << _dist << " and exact2d = " << _source->GetExactDist2d(unit) << std::endl;
             return _source->GetExactDist2d(unit) > _dist;
         }
 

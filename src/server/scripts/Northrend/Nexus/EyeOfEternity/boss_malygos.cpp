@@ -190,6 +190,9 @@ enum Actions
     // Caster hover disk despawn action
     ACTION_DELAYED_DESPAWN                     = 8,
 
+    // Stop spark movements.
+    ACTION_START_VORTEX                        = 9,
+
     // Nexus Lord's action used to shedule casting spell that determine disk's target to chase
     ACTION_SET_DISK_VICTIM_CHASE               = 0
 };
@@ -485,6 +488,12 @@ public:
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
                         me->GetMotionMaster()->MoveTakeoff(POINT_LIFT_IN_AIR_P_ONE, _zToLift, 8.0f);
+                        std::list<Creature*> temp;
+                        me->GetCreatureListWithEntryInGrid(temp, NPC_POWER_SPARK, 200.0f);
+                        for (std::list<Creature*>::iterator itr = temp.begin(); itr != temp.end(); ++itr)
+                            if (Creature *spark = *itr)
+                                if (spark->isAlive())
+                                    spark->AI()->DoAction(ACTION_START_VORTEX);
                     }
                     else if (_phase == PHASE_TWO)
                     {
@@ -1172,21 +1181,34 @@ public:
             _instance = creature->GetInstanceScript();
             // Talk range was not enough for this encounter
             sCreatureTextMgr->SendChat(me, EMOTE_POWER_SPARK_SUMMONED, 0, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_MAP);
-            MoveToMalygos();
+            //            me->GetMotionMaster()->MoveFall();
+            restMove = 3000;
         }
 
-        void MoveToMalygos()
+        void MoveToMalygos(Creature *malygos)
         {
             me->GetMotionMaster()->MoveIdle();
             me->SetSpeed(MOVE_FLIGHT, 0.5f);
             me->SetSpeed(MOVE_RUN, 0.5f);
             me->SetSpeed(MOVE_WALK, 0.5f);
-            if (_instance)
-                if (Creature* malygos = me->GetMap()->GetCreature(_instance->GetData64(DATA_MALYGOS)))
-                    me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
+            me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
         }
 
-        void UpdateAI(uint32 /*diff*/)
+        void DoAction(int32 const action)
+        {
+            if (action == ACTION_START_VORTEX)
+            {
+                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+                {
+                    me->StopMoving();
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveIdle();
+                    restMove = 15000;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
         {
             if (!_instance)
                 return;
@@ -1199,22 +1221,17 @@ public:
                     return;
                 }
 
-                if (!_falling)
+                if (!malygos->HasAura(SPELL_VORTEX_1))
                 {
-                    if (malygos->HasAura(SPELL_VORTEX_1))
-                    {
-                        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
-                        {
-                            me->StopMoving();
-                            me->GetMotionMaster()->Clear();
-                            me->GetMotionMaster()->MoveIdle();
-                        }
-
-                        return;
-                    }
-
                     if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
-                        me->GetMotionMaster()->MoveFollow(malygos, 0.0f, 0.0f);
+                    {
+                        if (restMove <= diff)
+                        {
+                            MoveToMalygos(malygos);
+                            restMove = 15000;
+                        }
+                        else restMove -= diff;
+                    }
                 }
             }
         }
@@ -1226,7 +1243,7 @@ public:
 
     private:
         InstanceScript* _instance;
-        bool _falling;
+        uint32 restMove;
     };
 
     CreatureAI* GetAI(Creature* creature) const

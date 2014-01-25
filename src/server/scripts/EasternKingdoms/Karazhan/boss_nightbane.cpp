@@ -73,7 +73,10 @@ public:
         boss_nightbaneAI(Creature* c) : ScriptedAI(c)
         {
             instance = c->GetInstanceScript();
+            me->SetSpeed(MOVE_FLIGHT, 3.0f);
             Intro = true;
+            Flying = false;
+            WaitTimer = 60000;
         }
 
         InstanceScript* instance;
@@ -114,7 +117,7 @@ public:
             SmokingBlastTimer = 20000;
             FireballBarrageTimer = 13000;
             SearingCindersTimer = 14000;
-            WaitTimer = 1000;
+            WaitTimer = 10000;
 
             Phase =1;
             FlyCount = 0;
@@ -128,7 +131,10 @@ public:
             if (instance)
             {
                 if (instance->GetData(TYPE_NIGHTBANE) == DONE || instance->GetData(TYPE_NIGHTBANE) == IN_PROGRESS)
-                    me->DisappearAndDie();
+				{
+                    //me->DisappearAndDie();
+					//me->FindNearestGameObject(194092, 500)->SetGoState(GO_STATE_READY);
+				}
                 else
                     instance->SetData(TYPE_NIGHTBANE, NOT_STARTED);
             }
@@ -194,6 +200,7 @@ public:
                 {
                     Intro = false;
                     me->SetHomePosition(IntroWay[7][0], IntroWay[7][1], IntroWay[7][2], 0);
+					me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_UNK_6);
                     return;
                 }
 
@@ -247,6 +254,7 @@ public:
             Flying = true;
 
             FlyTimer = urand(45000, 60000); //timer wrong between 45 and 60 seconds
+			WaitTimer = FlyTimer;
             ++FlyCount;
 
             RainofBonesTimer = 5000; //timer wrong (maybe)
@@ -256,41 +264,45 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            /* The timer for this was never setup apparently, not sure if the code works properly:
             if (WaitTimer <= diff)
             {
                 if (Intro)
                 {
                     if (MovePhase >= 7)
                     {
+                        me->SetFlying(false);
                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                         me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                         me->GetMotionMaster()->MovePoint(8, IntroWay[7][0], IntroWay[7][1], IntroWay[7][2]);
+                        WaitTimer = 0;
                     }
                     else
                     {
+                        me->SetFlying(true);
                         me->GetMotionMaster()->MovePoint(MovePhase, IntroWay[MovePhase][0], IntroWay[MovePhase][1], IntroWay[MovePhase][2]);
                         ++MovePhase;
+                        WaitTimer = 10000;
                     }
                 }
                 if (Flying)
                 {
                     if (MovePhase >= 7)
                     {
+                        me->SetFlying(false);
                         me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                         me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                         me->GetMotionMaster()->MovePoint(8, IntroWay[7][0], IntroWay[7][1], IntroWay[7][2]);
+                        WaitTimer = 0;
                     }
                     else
                     {
                         me->GetMotionMaster()->MovePoint(MovePhase, IntroWay[MovePhase][0], IntroWay[MovePhase][1], IntroWay[MovePhase][2]);
                         ++MovePhase;
+                        WaitTimer = 1000;
                     }
                 }
 
-                WaitTimer = 0;
             } else WaitTimer -= diff;
-            */
 
             if (!UpdateVictim())
                 return;
@@ -414,6 +426,8 @@ public:
     };
 
 };
+
+
 
 void AddSC_boss_nightbane()
 {

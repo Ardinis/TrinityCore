@@ -2096,6 +2096,92 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     }
 }
 
+void AchievementMgr::FailedAchievement(AchievementEntry const* achievement)
+{
+    // disable for gamemasters with GM-mode enabled
+    if (m_player->isGameMaster())
+        return;
+
+    if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || !HasAchieved(achievement->ID))
+        return;
+
+    //    sLog->outInfo(LOG_FILTER_ACHIEVEMENTSYS, "AchievementMgr::FailedAchievement(%u). Player: %s (%u)",
+    //    achievement->ID, m_player->GetName().c_str(), m_player->GetGUIDLow());
+
+	// send data delete to client and change values
+	CompletedAchievementMap::const_iterator iterEraAchievement;
+	bool MustErase = false;
+	for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    {
+		if (iter->first == achievement->ID)
+		{
+			WorldPacket data(SMSG_ACHIEVEMENT_DELETED, 4);
+			data << uint32(iter->first);
+			m_player->SendDirectMessage(&data);
+			iterEraAchievement = iter;
+			MustErase = true;
+		}
+    }
+	if (MustErase == true)
+		m_completedAchievements.erase(iterEraAchievement);
+	MustErase = false;
+
+	CriteriaProgressMap::const_iterator iterEraCriteria;
+    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+    {
+		if (iter->first == achievement->ID)
+		{
+			MustErase = true;
+			WorldPacket data(SMSG_CRITERIA_DELETED, 4);
+			data << uint32(iter->first);
+			m_player->SendDirectMessage(&data);
+			iterEraCriteria = iter;
+		}
+    }
+	if (MustErase == true)
+		m_criteriaProgress.erase(iterEraCriteria);
+
+	// save delete to DB
+	SQLTransaction trans = CharacterDatabase.BeginTransaction();;
+    std::ostringstream ssdel, sspdel;
+	ssdel << "DELETE FROM character_achievement WHERE guid = " << m_player->GetGUIDLow() << " AND achievement =";
+	ssdel << achievement->ID;
+	ssdel << ';';
+
+    trans->Append(ssdel.str().c_str());
+
+	sspdel << "DELETE FROM character_achievement_progress WHERE guid = " << m_player->GetGUIDLow() << " AND criteria =";
+	sspdel << achievement->ID;
+	sspdel << ';';
+
+    trans->Append(sspdel.str().c_str());
+	CharacterDatabase.CommitTransaction(trans);
+
+    // reward items and titles if any
+    AchievementReward const* reward = sAchievementMgr->GetAchievementReward(achievement);
+
+    // no rewards
+    if (!reward)
+        return;
+
+    // titles
+    if (uint32 titleId = reward->titleId[achievement->ID == 1793 ? GetPlayer()->getGender() : (GetPlayer()->GetTeam() == ALLIANCE ? 0 : 1)])
+        if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(titleId))
+            GetPlayer()->SetTitle(titleEntry, true); //remove title
+
+    // item
+	if (reward->itemId)
+	{
+		GetPlayer()->DestroyItemCount(reward->itemId, 1, true);
+		// learned spell
+		Item* item = reward->itemId ? Item::CreateItem(reward->itemId, 1, GetPlayer()) : NULL;
+		if (item->GetTemplate()->Spells[0].SpellId == 55884) // if item learn something (pet, mount)
+		{
+			GetPlayer()->removeSpell(item->GetTemplate()->Spells[1].SpellId);
+		}
+	}
+}
+
 void AchievementMgr::SendAllAchievementData() const
 {
     WorldPacket data(SMSG_ALL_ACHIEVEMENT_DATA, m_completedAchievements.size()*8+4+m_criteriaProgress.size()*38+4);

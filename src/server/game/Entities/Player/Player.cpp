@@ -24456,6 +24456,11 @@ bool Player::HasAchieved(uint32 entry)
     return false;
 }
 
+void Player::FailedAchievement(AchievementEntry const* entry)
+{
+    GetAchievementMgr().FailedAchievement(entry);
+}
+
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)
 {
     uint32 CurTalentPoints = GetFreeTalentPoints();

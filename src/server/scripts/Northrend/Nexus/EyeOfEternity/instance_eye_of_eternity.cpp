@@ -69,14 +69,19 @@ public:
                             trigger->AI()->Reset();
                         }
                     }
-
+                    if (GameObject* portal = instance->GetGameObject(exitPortalGUID))
+                        portal->Delete();
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
 
                     if (GameObject* platform = instance->GetGameObject(platformGUID))
                         platform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                 }
                 else if (state == DONE)
+                {
+                    if (GameObject* portal = instance->GetGameObject(exitPortalGUID))
+                        portal->Delete();
                     SpawnGameObject(GO_EXIT_PORTAL, exitPortalPosition);
+                }
             }
             return true;
         }
@@ -123,6 +128,7 @@ public:
                 case GO_EXIT_PORTAL:
                     exitPortalGUID = go->GetGUID();
                     go->EnableCollision(false);
+                    go->GetPosition(&exitPortalPosition);
                     break;
                 case GO_HEART_OF_MAGIC_10:
                     if (instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
@@ -257,6 +263,8 @@ public:
                     PowerSparksHandling();
                     break;
                 case DATA_RESPAWN_IRIS:
+                    if (GameObject* iris = instance->GetGameObject(irisGUID))
+                        iris->Delete();
                     SpawnGameObject(instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? GO_FOCUSING_IRIS_10 : GO_FOCUSING_IRIS_25, focusingIrisPosition);
                     break;
             }

@@ -1,3 +1,29 @@
+delete from creature where map = 616;
+insert into `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) values
+('31253','616','3','1','27401','0','754.255','1301.72','266.253','1.23918','3600','5','0','3052','0','1','0','0','0'),
+('30334','616','3','1','11686','0','754.294','1301.19','266.254','4.24115','3600','0','0','12600','0','0','0','0','0'),
+('30090','616','3','1','0','0','754.733','1301.51','283.379','5.58505','3600','0','0','12600','0','0','0','0','0'),
+('30090','616','3','1','0','0','754.521','1301.23','279.524','0.680678','3600','0','0','12600','0','0','0','0','0'),
+('30090','616','3','1','0','0','754.356','1301.48','285.733','5.96903','3600','0','0','12600','0','0','0','0','0'),
+('30090','616','3','1','0','0','754.192','1301.18','281.851','5.75959','3600','0','0','12600','0','0','0','0','0'),
+('30090','616','3','1','0','0','754.688','1301.8','287.295','1.25664','3600','0','0','12600','0','0','0','0','0'),
+('30118','616','3','1','14501','0','652.417','1200.52','295.972','0.785398','3600','0','0','17010','0','0','0','0','0'),
+('30118','616','3','1','14501','0','847.67','1408.05','295.972','3.97935','3600','0','0','17010','0','0','0','0','0'),
+('30118','616','3','1','14501','0','647.675','1403.8','295.972','5.53269','3600','0','0','17010','0','0','0','0','0'),
+('30118','616','3','1','14501','0','843.182','1215.42','295.972','2.35619','3600','0','0','17010','0','0','0','0','0'),
+('28859','616','3','1','26752','0','808.535','1213.55','295.972','3.22503','604800','0','0','6972500','212900','0','0','0','0'),
+('32448','616','3','1','27401','0','754.544','1301.71','220.083','3.9968','3600','5','0','3052','0','1','0','0','0'),
+('22517','616','3','1','16925','0','754.395','1301.27','266.254','1.0821','3600','0','0','4120','0','0','0','0','0');
+
+delete from gameobject where map = 616;
+insert into `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) values
+('193070','616','3','1','754.346','1300.87','256.249','3.14159','0','0','0','1','180','0','1'),
+('193908','616','3','1','724.684','1332.92','267.234','-0.802851','0','0','0','1','180','0','1'),
+('193967','616','2','1','764.56','1284.63','269','1.82','0','0','0','0','-604800','100','1'),
+('193905','616','1','1','764.56','1284.63','269','1.82','0','0','0','0','-604800','100','1'),
+('193958','616','1','1','754.255','1301.72','266.17','-1.6057','0','0','0','0','604800','0','1'),
+('193960','616','2','1','754.255','1301.72','266.17','-1.6057','0','0','0','0','604800','0','1');
+
 DELETE FROM `instance_template` WHERE `map`=616;
 INSERT INTO `instance_template` (map,parent,script) VALUES (616,571,'instance_eye_of_eternity');
 
@@ -16,7 +42,7 @@ INSERT INTO `spell_script_names` VALUES (55873,'spell_malygos_vortex_visual');
 
 
 -- Add spell script names
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (56046,56047,61693,61694,57459,56438,61210,56397,58842,59084,59099,56070,56072,60936,60939,61028,61023);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (56046,56047,61693,61694,57459,56438,61210,56397,58842,59084,59099,56070,56072,60936,60939,61028,61023, 56548);
 INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (56046, 'spell_malygos_portal_beam'),
 (56047, 'spell_malygos_random_portal'),
@@ -34,7 +60,8 @@ INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 (60936, 'spell_malygos_surge_of_power_25'),
 (60939, 'spell_malygos_surge_of_power_warning_selector_25'),
 (61028, 'spell_alexstrasza_gift_beam'),
-(61023, 'spell_alexstrasza_gift_beam_visual');
+(61023, 'spell_alexstrasza_gift_beam_visual'),
+(56548, 'spell_malygos_surge_of_power_P2');
 
 -- Add spell difficulties
 DELETE FROM `spelldifficulty_dbc` WHERE `id` IN (61693,56272,57058);
@@ -158,18 +185,6 @@ SET @NPC_ALEXSTRASZA  := 32295;
 SET @ACTIONLIST       := @NPC_ALEXSTRASZA * 100;
 SET @SPELL_GIFT_BEAM  := 61028;
 
-UPDATE `creature_template` SET `AIName`='SmartAI',`ScriptName`='' WHERE `entry`=@NPC_ALEXSTRASZA;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_ALEXSTRASZA AND `source_type`=0;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ACTIONLIST AND `source_type`=9;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@NPC_ALEXSTRASZA,0,0,0,54,0,100,0,0,0,0,0,69,1,0,0,0,0,0,8,0,0,0,788.07,1276.09,246.9,0,'Alexstrasza - On just summoned - Move to pos'),
-(@NPC_ALEXSTRASZA,0,1,0,34,0,100,0,8,1,0,0,80,@ACTIONLIST,2,0,0,0,0,1,0,0,0,0,0,0,0,'Alexstrasza - On point 1 reached - Start actionlist'),
-(@ACTIONLIST,9,0,0,0,0,100,0,0,0,0,0,11,@SPELL_GIFT_BEAM,0,0,0,0,0,1,0,0,0,0,0,0,0,'Alexstrasza - Action 0 - Cast Gift Beam'),
-(@ACTIONLIST,9,1,0,0,0,100,0,4000,4000,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Alexstrasza - Action 1 - Yell 0'),
-(@ACTIONLIST,9,2,0,0,0,100,0,6000,6000,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Alexstrasza - Action 2 - Yell 1'),
-(@ACTIONLIST,9,3,0,0,0,100,0,5000,5000,0,0,1,2,0,0,0,0,0,1,0,0,0,0,0,0,0,'Alexstrasza - Action 3 - Yell 2'),
-(@ACTIONLIST,9,4,0,0,0,100,0,24000,24000,0,0,1,3,0,0,0,0,0,1,0,0,0,0,0,0,0,'Alexstrasza - Action 4 - Yell 3');
-
 -- Add areatrigger script for the improvised platform that is killing/rooting falling players
 DELETE FROM `areatrigger_scripts` WHERE `entry`=5342;
 INSERT INTO `areatrigger_scripts` (`entry`,`ScriptName`) VALUES
@@ -237,3 +252,31 @@ insert into waypoint_data values
 delete from gameobject where id = 193960;
 insert into `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) values
 ('193960','616','2','1','754.255','1301.72','266.17','-1.6057','0','0','0','0','604800','0','1');
+
+
+-- update creature_template set mechanic_immune_mask = 617299967 where entry in (30084, 32187);
+update creature_template set mechanic_immune_mask = 0 where entry in (30084, 32187);
+
+
+delete from gameobject_loot_template where entry in (26859, 26860, 26094, 26097);
+insert into `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) values
+('26094','1','100','1','0','-34174','2'),
+('26094','43953','1','1','0','1','1'),
+('26094','47241','100','1','0','2','2'),
+('26097','1','100','1','0','-34175','4'),
+('26097','40753','100','1','0','2','2'),
+('26097','43952','1','1','0','1','1'),
+('26097','47241','100','1','0','2','2'),
+('26859','44650','100','1','0','1','1'),
+('26860','44651','100','1','0','1','1');
+
+delete from gameobject_template where entry in (194159, 193967, 194158, 193905, 193958, 193960);
+insert into `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) values
+('194159','3','8555','Heart of Magic','','','0','20','7','44651','0','0','0','0','0','1818','26860','0','0','0','0','0','0','0','0','0','1','0','1','0','1','0','0','0','0','0','0','0','0','','','11159'),
+('193967','3','8513','Alexstrasza\'s Gift','','','0','16','15','0','0','0','0','0','0','1818','26097','0','1','0','0','0','0','0','0','0','1','0','1','0','1','0','0','0','0','0','0','0','0','','','11159'),
+('194158','3','8555','Heart of Magic','','','0','0','7','44650','0','0','0','0','0','1818','26859','0','0','0','0','0','0','0','0','0','1','0','1','0','1','0','0','0','0','0','0','0','0','','','12340'),
+('193905','3','8513','Alexstrasza\'s Gift','','','0','0','15','0','0','0','0','0','0','1818','26094','0','1','0','0','0','0','0','0','0','1','0','1','0','1','0','0','0','0','0','0','0','0','','','12340'),
+('193958','10','7800','The Focusing Iris','','','0','0','5','0','0','0','0','0','0','1817','0','20711','3000','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','','12340'),
+('193960','10','7800','The Focusing Iris','','','0','0','5','0','0','0','0','0','0','1816','0','20711','3000','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','','11159');
+
+update creature_template set flags_extra = 128, modelid2 = 0 where entry = 30090;

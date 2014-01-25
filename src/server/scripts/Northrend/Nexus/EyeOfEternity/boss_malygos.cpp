@@ -78,7 +78,12 @@ enum Events
     EVENT_ARCANE_BARRAGE             = 1,
 
     // ======== WYRMREST SKYTALON ==========
-    EVENT_CAST_RIDE_SPELL            = 1
+    EVENT_CAST_RIDE_SPELL            = 1,
+
+    EVENT_YELL_1 = 1,
+    EVENT_YELL_2 = 2,
+    EVENT_YELL_3 = 3,
+    EVENT_YELL_4 = 4,
 };
 
 enum Phases
@@ -149,7 +154,8 @@ enum Spells
     SPELL_ARCANE_STORM_EXTRA_VISUAL          = 57473,
 
     // Outro
-    SPELL_ALEXSTRASZAS_GIFT_BEAM_VISUAL      = 61023
+    SPELL_ALEXSTRASZAS_GIFT                   = 61028,
+    SPELL_ALEXSTRASZAS_GIFT_BEAM_VISUAL      = 61023,
 };
 
 enum Movements
@@ -164,6 +170,7 @@ enum Movements
     POINT_SURGE_OF_POWER_P_TWO,
     POINT_DESTROY_PLATFORM_P_TWO,
     POINT_IDLE_P_THREE,
+    POINT_ALEXTRAZA_EVENT,
 };
 
 enum Seats
@@ -293,6 +300,7 @@ Position const MalygosPositions[MAX_MALYGOS_POS] =
 
 Position const AlexstraszaSpawnPos  = { 854.551f, 1225.31f, 300.901f, 0.0f }; // Alexstrasza's spawn position
 Position const HeartOfMagicSpawnPos = { 755.351f, 1298.31f, 223.909f, 0.0f }; // Heart of Magic spawn position
+Position const posAlexEvent         = { 788.07,   1276.09,  246.9,    0.0f };
 
 #define TEN_MINUTES         (10*MINUTE*IN_MILLISECONDS)
 
@@ -347,15 +355,17 @@ public:
     {
         boss_malygosAI(Creature* creature) : BossAI(creature, DATA_MALYGOS_EVENT)
         {
-            _despawned = false; // We determine if Malygos will be realocated to spawning position on reset triggered by boss despawn on evade
             _flySpeed = me->GetSpeed(MOVE_FLIGHT); // Get initial fly speed, otherwise on each wipe fly speed would add up if we get it
         }
 
         void Reset()
         {
-            // EnterEvadeMode and Reset() links are cut for the sake of properly functioning despawner.
-            if (!_despawned)
-                _Reset();
+            _Reset();
+
+            events.Reset();
+            summons.DespawnAll();
+            if (instance)
+                instance->SetBossState(DATA_MALYGOS_EVENT, NOT_STARTED);
 
             _summonDeaths = 0;
             _preparingPulsesChecker = 0;
@@ -374,10 +384,7 @@ public:
 
             me->SetDisableGravity(true);
             me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-            // TO DO: find what in core is making boss slower than in retail (when correct speed data) or find missing movement flag update or forced spline change
-            me->SetSpeed(MOVE_FLIGHT, _flySpeed * 0.25f);
-            if (_despawned)
-                DoAction(ACTION_HANDLE_RESPAWN);
+            DoAction(ACTION_HANDLE_RESPAWN);
 
             SetPhase(PHASE_NOT_STARTED, true);
             me->SetReactState(REACT_PASSIVE);
@@ -405,7 +412,7 @@ public:
 
         void SetData(uint32 data, uint32 value)
         {
-            if (data == DATA_SUMMON_DEATHS && _phase == PHASE_TWO && !_despawned)
+            if (data == DATA_SUMMON_DEATHS && _phase == PHASE_TWO)
             {
                 _summonDeaths = value;
 
@@ -516,9 +523,7 @@ public:
                     if (me->GetPositionZ() > 300.0f)
                         events.ScheduleEvent(EVENT_DELAY_MOVE_TO_DESTROY_P, 5*IN_MILLISECONDS, 0, PHASE_TWO);
                     else
-                    {
                         me->GetMotionMaster()->MovePoint(POINT_DESTROY_PLATFORM_P_TWO, MalygosPositions[0]);
-                    }
 
                     events.ScheduleEvent(EVENT_LIGHT_DIMENSION_CHANGE, 1*IN_MILLISECONDS, 0, PHASE_TWO);
                     break;
@@ -529,7 +534,6 @@ public:
                     me->NearTeleportTo(x, y, z, o);
                     // Respawn Iris
                     instance->SetData(DATA_RESPAWN_IRIS, 0);
-                    _despawned = false;
                     break;
                 case ACTION_CYCLIC_MOVEMENT:
                     //                    me->GetMotionMaster()->MovePath(MALYGOS_PATH, true);
@@ -614,42 +618,17 @@ public:
         {
             if (instance)
                 instance->SetBossState(DATA_MALYGOS_EVENT, FAIL);
-
+            BossAI::EnterEvadeMode();
             SendLightOverride(LIGHT_GET_DEFAULT_FOR_MAP, 1*IN_MILLISECONDS);
 
             if (_phase == PHASE_THREE)
                 me->SetControlled(false, UNIT_STATE_ROOT);
 
-            uint32 corpseDelay = me->GetCorpseDelay();
-            uint32 respawnDelay = me->GetRespawnDelay();
-            me->SetCorpseDelay(1);
-            me->SetRespawnDelay(29);
-            me->DespawnOrUnsummon();
-            me->SetCorpseDelay(corpseDelay);
-            me->SetRespawnDelay(respawnDelay);
-
             // Set speed to normal value
-            me->SetSpeed(MOVE_FLIGHT, _flySpeed);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->RemoveAllAuras();
             me->CombatStop(); // Sometimes threat can remain, so it's a safety measure
-
-            if (!_despawned)
-                _despawned = true;
-
-            me->ResetLootMode();
             events.Reset();
-            if (!summons.empty())
-            {
-                if (_phase == PHASE_TWO)
-                {
-                    //                    summons.DoAction(ACTION_DELAYED_DESPAWN);
-                    summons.DespawnAll();
-                }
-                else if (_phase == PHASE_THREE)
-                    summons.DespawnAll();
-            }
+            summons.DespawnAll();
 
             if (instance)
                 instance->SetBossState(DATA_MALYGOS_EVENT, NOT_STARTED);
@@ -689,7 +668,6 @@ public:
             {
                 if (Creature* creature = caster->ToCreature())
                 {
-                    std::cout << creature->GetEntry() << std::endl;
                     creature->DespawnOrUnsummon();
                 }
                 Talk(SAY_BUFF_SPARK);
@@ -712,7 +690,6 @@ public:
         {
             if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
                 return;
-            std::cout << type << " : " << id << std::endl;
             me->GetMotionMaster()->MoveIdle();
             switch (id)
             {
@@ -808,7 +785,6 @@ public:
 
             while (uint32 eventId = events.ExecuteEvent())
             {
-                std::cout << "DO EVENT ! : " << eventId << std::endl;
                 switch (eventId)
                 {
                     case EVENT_START_FIRST_RANDOM_PORTAL:
@@ -1098,7 +1074,6 @@ public:
 
         bool _killSpamFilter; // Prevent text spamming on killed player by helping implement a CD.
         bool _canAttack; // Used to control attacking (Move Chase not being applied after Stop Attack, only few times should act like this).
-        bool _despawned; // Checks if boss pass through evade on reset.
         bool _executingVortex; // Prevents some events being sheduled during Vortex takeoff/land.
         bool _arcaneReinforcements; // Checks if 10 or 25 man arcane trash will be spawned.
         bool _flyingOutOfPlatform; // Used to prevent Malygos casting Arcane Overload shields while leaving platform.
@@ -1320,7 +1295,6 @@ public:
 
         void DoAction(int32 const /*action*/)
         {
-            std::cout << "do action again ?" << std::endl;
             /*
             if (Vehicle* vehicleTemp = me->GetVehicleKit())
                 if (vehicleTemp->GetPassenger(0) && vehicleTemp->GetPassenger(0)->GetTypeId() == TYPEID_PLAYER)
@@ -1423,7 +1397,6 @@ public:
             }
             else
             {
-                std::cout << "FillCirclePath DoAction" << std::endl;
                 //                me->DespawnOrUnsummon(3*IN_MILLISECONDS);
             }
         }
@@ -2018,7 +1991,6 @@ class ExactDistanceCheck
 
         bool operator()(Unit* unit)
         {
-            std::cout << "dist = " << _dist << " and exact2d = " << _source->GetExactDist2d(unit) << std::endl;
             return _source->GetExactDist2d(unit) > _dist;
         }
 
@@ -2520,9 +2492,6 @@ class spell_alexstrasza_gift_beam : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_ALEXSTRASZAS_GIFT_BEAM_VISUAL))
-                    return false;
-
                 return true;
             }
 
@@ -2623,6 +2592,115 @@ class achievement_denyin_the_scion : public AchievementCriteriaScript
         }
 };
 
+// 56548
+class spell_malygos_surge_of_power_P2 : public SpellScriptLoader
+{
+    public:
+        spell_malygos_surge_of_power_P2() : SpellScriptLoader("spell_malygos_surge_of_power_P2") { }
+
+        class OnDiskCheck
+        {
+        public:
+            OnDiskCheck()
+            {
+            }
+
+            bool operator()(Unit* unit) const
+            {
+                return (unit->GetTypeId() == TYPEID_PLAYER && unit->GetVehicle());
+            }
+        };
+
+        class spell_malygos_surge_of_power_P2_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_malygos_surge_of_power_P2_SpellScript)
+
+            bool Load()
+            {
+                return true;
+            }
+
+            void FilterTargets(std::list<Unit*>& targets)
+            {
+                targets.remove_if(OnDiskCheck());
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_malygos_surge_of_power_P2_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_malygos_surge_of_power_P2_SpellScript();
+        }
+};
+
+class npc_alexstrasza_eoe : public CreatureScript
+{
+public:
+    npc_alexstrasza_eoe() : CreatureScript("npc_alexstrasza_eoe") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_alexstrasza_eoeAI (creature);
+    }
+
+    struct npc_alexstrasza_eoeAI : public ScriptedAI
+    {
+        npc_alexstrasza_eoeAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset()
+        {
+            events.Reset();
+            me->GetMotionMaster()->MovePoint(POINT_ALEXTRAZA_EVENT, posAlexEvent);
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE && type != EFFECT_MOTION_TYPE)
+                return;
+            switch (id)
+            {
+                case POINT_ALEXTRAZA_EVENT:
+                    events.ScheduleEvent(EVENT_YELL_1, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 const /*diff*/)
+        {
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_YELL_1:
+                    me->CastSpell(me, SPELL_ALEXSTRASZAS_GIFT, false);
+                    Talk(SAY_ONE);
+                    events.ScheduleEvent(EVENT_YELL_2, 4*IN_MILLISECONDS);
+                    break;
+                case EVENT_YELL_2:
+                    Talk(SAY_TWO);
+                    events.ScheduleEvent(EVENT_YELL_3, 4*IN_MILLISECONDS);
+                    break;
+                case EVENT_YELL_3:
+                    Talk(SAY_THREE);
+                    events.ScheduleEvent(EVENT_YELL_4, 7*IN_MILLISECONDS);
+                    break;
+                case EVENT_YELL_4:
+                    Talk(SAY_FOUR);
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap events;
+    };
+};
+
 void AddSC_boss_malygos()
 {
     new boss_malygos();
@@ -2653,4 +2731,6 @@ void AddSC_boss_malygos()
     new achievement_denyin_the_scion();
     new npc_scion_of_eternity();
     new spell_malygos_arcane_storm();
+    new spell_malygos_surge_of_power_P2();
+    new npc_alexstrasza_eoe();
 }

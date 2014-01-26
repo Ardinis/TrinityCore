@@ -97,7 +97,9 @@ enum ConditionSourceType
     CONDITION_SOURCE_TYPE_QUEST_SHOW_MARK                = 20,
     CONDITION_SOURCE_TYPE_VEHICLE_SPELL                  = 21,
     CONDITION_SOURCE_TYPE_SMART_EVENT                    = 22,
-    CONDITION_SOURCE_TYPE_MAX                            = 23  //MAX
+    CONDITION_SOURCE_TYPE_NPC_VENDOR                     = 23,
+    CONDITION_SOURCE_TYPE_SPELL_PROC                     = 24,
+    CONDITION_SOURCE_TYPE_MAX                            = 25  //MAX
 };
 
 enum ComparisionType
@@ -183,6 +185,7 @@ typedef std::map<uint32, ConditionList> ConditionTypeContainer;
 typedef std::map<ConditionSourceType, ConditionTypeContainer> ConditionContainer;
 typedef std::map<uint32, ConditionTypeContainer> VehicleSpellConditionContainer;
 typedef std::map<std::pair<int32, uint32 /*SAI source_type*/>, ConditionTypeContainer> SmartEventConditionContainer;
+typedef std::map<uint32, ConditionTypeContainer> NpcVendorConditionContainer;
 
 typedef std::map<uint32, ConditionList> ConditionReferenceContainer;//only used for references
 
@@ -205,6 +208,7 @@ class ConditionMgr
         ConditionList GetConditionsForNotGroupedEntry(ConditionSourceType sourceType, uint32 entry);
         ConditionList GetConditionsForSmartEvent(int32 entryOrGuid, uint32 eventId, uint32 sourceType);
         ConditionList GetConditionsForVehicleSpell(uint32 creatureID, uint32 spellID);
+        ConditionList GetConditionsForNpcVendorEvent(uint32 creatureId, uint32 itemId);
 
     private:
         bool isSourceTypeValid(Condition* cond);
@@ -230,7 +234,8 @@ class ConditionMgr
                     sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU ||
                     sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION ||
                     sourceType == CONDITION_SOURCE_TYPE_VEHICLE_SPELL ||
-                    sourceType == CONDITION_SOURCE_TYPE_SMART_EVENT);
+                    sourceType == CONDITION_SOURCE_TYPE_SMART_EVENT ||
+                    sourceType == CONDITION_SOURCE_TYPE_NPC_VENDOR);
         }
 
         void Clean(); // free up resources
@@ -240,6 +245,7 @@ class ConditionMgr
         ConditionReferenceContainer       ConditionReferenceStore;
         VehicleSpellConditionContainer    VehicleSpellConditionStore;
         SmartEventConditionContainer      SmartEventConditionStore;
+        NpcVendorConditionContainer       NpcVendorConditionContainerStore;
 };
 
 template <class T> bool CompareValues(ComparisionType type,  T val1, T val2)

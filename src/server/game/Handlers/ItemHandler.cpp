@@ -780,6 +780,13 @@ void WorldSession::SendListInventory(uint64 vendorGuid)
                 if (!_player->isGameMaster() && !leftInStock)
                     continue;
 
+                ConditionList conditions = sConditionMgr->GetConditionsForNpcVendorEvent(vendor->GetEntry(), item->item);
+                if (!sConditionMgr->IsObjectMeetToConditions(_player, vendor, conditions))
+                {
+                    sLog->outError("SendListInventory: conditions not met for creature entry %u item %u", vendor->GetEntry(), item->item);
+                    continue;
+                }
+
                 ++count;
 
                 // reputation discount

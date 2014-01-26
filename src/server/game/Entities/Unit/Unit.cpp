@@ -15851,6 +15851,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, tempProcEx, attType, isVictim, active, triggerData.spellProcEvent))
             continue;
 
+
+        // do checks using conditions table
+        ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_SPELL_PROC, spellProto->Id);
+        ConditionSourceInfo condInfo = ConditionSourceInfo(eventInfo.GetActor(), eventInfo.GetActionTarget());
+        if (!sConditionMgr->IsObjectMeetToConditions(condInfo, conditions))
+            continue;
+
         // AuraScript Hook
         if (!triggerData.aura->CallScriptCheckProcHandlers(itr->second, eventInfo))
             continue;

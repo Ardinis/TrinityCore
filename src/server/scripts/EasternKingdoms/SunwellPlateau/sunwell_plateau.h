@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -49,13 +49,15 @@ enum Data64
 
     /*** GameObjects ***/
     DATA_GO_FORCEFIELD,
-    DATA_ORB_OF_THE_BLUE_DRAGONFLIGHT_1,
-    DATA_ORB_OF_THE_BLUE_DRAGONFLIGHT_2,
-    DATA_ORB_OF_THE_BLUE_DRAGONFLIGHT_3,
-    DATA_ORB_OF_THE_BLUE_DRAGONFLIGHT_4,
+    DATA_ORB_OF_THE_BLUE_FLIGHT_1,
+    DATA_ORB_OF_THE_BLUE_FLIGHT_2,
+    DATA_ORB_OF_THE_BLUE_FLIGHT_3,
+    DATA_ORB_OF_THE_BLUE_FLIGHT_4,
 
     /*** Misc ***/
     DATA_PLAYER_GUID,
+    DATA_QUELDELAR_INTRODUCER,
+    DATA_MODUS80
 };
 
 enum Creatures
@@ -103,7 +105,11 @@ enum Creatures
 
 enum GameObjects
 {
-    GAMEOBJECT_ORB_OF_THE_BLUE_DRAGONFLIGHT       = 188415,
+    GAMEOBJECT_ORB_OF_THE_BLUE_FLIGHT_1     = 188114,
+    GAMEOBJECT_ORB_OF_THE_BLUE_FLIGHT_2     = 188115,
+    GAMEOBJECT_ORB_OF_THE_BLUE_FLIGHT_3     = 188116,
+    GAMEOBJECT_ORB_OF_THE_BLUE_FLIGHT_4     = 187869,
+    GAMEOBJECT_ORB_OF_THE_BLUE_FLIGHT_5     = 188415
 };
 
 #endif

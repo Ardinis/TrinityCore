@@ -176,6 +176,6 @@ class go_broggok_lever : public GameObjectScript
 
 void AddSC_boss_broggok()
 {
-    new boss_broggok();
-    new go_broggok_lever();
+    //    new boss_broggok();
+    //    new go_broggok_lever();
 }

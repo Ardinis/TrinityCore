@@ -1471,7 +1471,7 @@ void AddSC_boss_algalon()
     new spell_algalon_cosmic_smash();
     new spell_algalon_cosmic_smash_damage();
     new spell_algalon_supermassive_fail();
-    new achievement_he_feeds_on_your_tears();
+    //    new achievement_he_feeds_on_your_tears();
     new mob_collapsing_star();
     new mob_black_hole();
     new spell_trash_dg();

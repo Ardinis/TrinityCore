@@ -355,7 +355,7 @@ class spell_shadow_portal_rooms : public SpellScriptLoader
 
 void AddSC_boss_darkmaster_gandling()
 {
-    new boss_darkmaster_gandling();
+    //    new boss_darkmaster_gandling();
     new spell_shadow_portal();
     new spell_shadow_portal_rooms();
 }

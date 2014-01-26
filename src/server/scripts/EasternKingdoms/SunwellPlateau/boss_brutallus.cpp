@@ -22,7 +22,8 @@ SD%Complete: 80
 SDComment: Find a way to start the intro, best code for the intro
 EndScriptData */
 
-#include "ScriptPCH.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 #include "sunwell_plateau.h"
 
 enum Quotes
@@ -61,10 +62,13 @@ enum Spells
     SPELL_INTRO_FROST_BLAST            =   45203,
     SPELL_INTRO_FROSTBOLT              =   44843,
     SPELL_INTRO_ENCAPSULATE            =   45665,
-    SPELL_INTRO_ENCAPSULATE_CHANELLING =   45661
+    SPELL_INTRO_ENCAPSULATE_CHANELLING =   45661,
+    SPELL_BRUTALLUS_DEATH_CLOUD        =   45212
 };
 
 #define FELMYST 25038
+#define NPC_BRUTALLUS_DEATH_CLOUD 25703
+
 
 class boss_brutallus : public CreatureScript
 {
@@ -78,9 +82,9 @@ public:
 
     struct boss_brutallusAI : public ScriptedAI
     {
-        boss_brutallusAI(Creature* c) : ScriptedAI(c)
+        boss_brutallusAI(Creature* creature) : ScriptedAI(creature)
         {
-            instance = c->GetInstanceScript();
+            instance = creature->GetInstanceScript();
             Intro = true;
         }
 
@@ -132,7 +136,7 @@ public:
             DoScriptText(RAND(YELL_KILL1, YELL_KILL2, YELL_KILL3), me);
         }
 
-        void JustDied(Unit* /*Killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             DoScriptText(YELL_DEATH, me);
 
@@ -140,8 +144,15 @@ public:
             {
                 instance->SetData(DATA_BRUTALLUS_EVENT, DONE);
                 float x, y, z;
-                me->GetPosition(x, y, z);
+                if (Creature* Madrigosa = Unit::GetCreature(*me, instance ? instance->GetData64(DATA_MADRIGOSA) : 0))
+                    Madrigosa->GetPosition(x, y, z);
+                else
+                    me->GetPosition(x, y, z);
                 me->SummonCreature(FELMYST, x, y, z+30, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN, 0);
+                me->GetPosition(x, y, z);
+                if (Creature* summon = me->SummonCreature(NPC_BRUTALLUS_DEATH_CLOUD, x, y, z, me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 80000))
+                    summon->CastSpell(summon, SPELL_BRUTALLUS_DEATH_CLOUD);
+
             }
         }
 
@@ -170,7 +181,7 @@ public:
             else
             {
                 //Madrigosa not found, end intro
-                sLog->outError("Madrigosa was not found");
+                //                sLog->outError(LOG_FILTER_TSCR, "Madrigosa was not found");
                 EndIntro();
             }
         }
@@ -216,7 +227,7 @@ public:
                     break;
                 case 3:
                     DoCast(me, SPELL_INTRO_FROST_BLAST);
-                    Madrigosa->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                    Madrigosa->SetDisableGravity(true);
                     me->AttackStop();
                     Madrigosa->AttackStop();
                     IntroFrostBoltTimer = 3000;
@@ -327,7 +338,8 @@ public:
                 for (std::list<Unit*>::const_iterator i = targets.begin(); i != targets.end(); ++i)
                     if (!(*i)->HasAura(SPELL_BURN))
                     {
-                        (*i)->CastSpell((*i), SPELL_BURN, true);
+                        me->AddAura(SPELL_BURN, (*i));
+                   //     (*i)->CastSpell((*i), SPELL_BURN, true);
                         break;
                     }
                 BurnTimer = urand(60000, 180000);

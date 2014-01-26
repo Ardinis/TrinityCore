@@ -1834,9 +1834,9 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 GBOgrimsHammerGUID;
             bool isPrepared;
 
-	  uint32 tempete;
-	  uint32 _buffSelect;
-	  uint32 mui_rebuffTimer;
+            uint32 tempete;
+            uint32 _buffSelect;
+            uint32 mui_rebuffTimer;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

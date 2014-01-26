@@ -332,6 +332,11 @@ void SpellScript::SetTargetDest(WorldLocation& loc)
     m_spell->m_targets.SetDst(loc);
 }
 
+void SpellScript::SetTargetUnit(Unit *target)
+{
+    m_spell->m_targets.SetUnitTarget(target);
+}
+
 Unit* SpellScript::GetTargetUnit()
 {
     return m_spell->m_targets.GetUnitTarget();
@@ -518,6 +523,11 @@ int32 SpellScript::GetEffectValue()
         return 0;
     }
     return m_spell->damage;
+}
+
+void SpellScript::SetSpellValue(SpellValueMod mod, int32 value)
+{
+    m_spell->SetSpellValue(mod, value);
 }
 
 Item* SpellScript::GetCastItem()

@@ -1352,7 +1352,7 @@ void AddSC_go_scripts()
     new go_soulwell;
     new go_tadpole_cage;
     new go_dragonflayer_cage;
-    new go_black_cage;
+    //    new go_black_cage;
     new go_amberpine_outhouse;
     new go_hive_pod;
     new go_massive_seaforium_charge;

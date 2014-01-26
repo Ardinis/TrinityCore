@@ -915,5 +915,5 @@ void AddSC_grizzly_hills()
     new npc_venture_co_straggler();
     new npc_lake_frog;
     new npc_maiden_of_ashwood_lake;
-    new npc_maiden_of_drak_mar;	
+    //    new npc_maiden_of_drak_mar;
 }

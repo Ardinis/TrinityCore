@@ -294,6 +294,7 @@ class SpellScript : public _SpellScript
         Unit* GetOriginalCaster();
         SpellInfo const* GetSpellInfo();
         SpellValue const* GetSpellValue();
+        void SetSpellValue(SpellValueMod mod, int32 value);
 
         // methods useable after spell targets are set
         // accessors to the "focus" targets of the spell
@@ -302,7 +303,7 @@ class SpellScript : public _SpellScript
         WorldLocation const* GetTargetDest();
 
         void SetTargetDest(WorldLocation& loc);
-
+        void SetTargetUnit(Unit *target);
         // returns: Unit which was selected as a spell target or NULL
         Unit* GetTargetUnit();
 

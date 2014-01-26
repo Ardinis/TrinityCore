@@ -655,7 +655,7 @@ void AddSC_eastern_plaguelands()
     new mobs_ghoul_flayer();
     new npc_augustus_the_touched();
     new npc_darrowshire_spirit();
-    new npc_tirion_fordring();
+    //    new npc_tirion_fordring();
 
     new npc_eris_havenfire();
     new npc_fleeing_peasant();

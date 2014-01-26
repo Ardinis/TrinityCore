@@ -6350,9 +6350,9 @@ public:
 
 void AddSC_npcs_special()
 {
-  new npc_jump_mariage;
-new npc_air_force_bots;
-    new npc_lunaclaw_spirit;
+    //lost+found/  new npc_jump_mariage;
+    new npc_air_force_bots;
+    //    new npc_lunaclaw_spirit;
     new npc_chicken_cluck;
     new npc_dancing_flames;
     new npc_doctor;
@@ -6371,11 +6371,11 @@ new npc_air_force_bots;
 	new npc_brewfest_keg_thrower();
 	new npc_brewfest_keg_receiver();
 	new npc_brewfest_ram_master();
-	new npc_demeza();
+    //	new npc_demeza();
 	new npc_brew();
 	new npc_sum_brew();
 	new npc_brew_attak_trigger();
-	new npc_brew_attak_trigger2();
+    //	new npc_brew_attak_trigger2();
 	new npc_cervoise();
     new npc_snake_trap;
     new npc_mirror_image;
@@ -6412,7 +6412,7 @@ new npc_air_force_bots;
     new npc_foul_purge();
     new npc_mana_bomb();
 
-    new npc_raise_ally();
+    //    new npc_raise_ally();
 
 
     new npc_wild_turkey();
@@ -6423,5 +6423,5 @@ new npc_air_force_bots;
     new npc_grolloc();
     new npc_skori();
 
-    new npc_paragon_5_years_01();
+    //    new npc_paragon_5_years_01();
 }

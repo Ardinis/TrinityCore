@@ -235,8 +235,8 @@ public:
 
         void MovementInform(uint32, uint32, bool /*pointFailed*/)
         {
-            if (phase == PHASE_FLIGHT)
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1);
+            //            if (phase == PHASE_FLIGHT)
+            //    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1);
         }
 
         void DamageTaken(Unit*, uint32 &damage, SpellInfo const* /*spellInfo*/)
@@ -277,133 +277,137 @@ public:
         {
             switch (uiFlightCount)
             {
-            case 0:
-                //me->AttackStop();
-                me->GetMotionMaster()->Clear(false);
-                me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
-                me->StopMoving();
-                DoScriptText(YELL_TAKEOFF, me);
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 2000);
-                break;
-            case 1:
-                me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+1, me->GetPositionY(), me->GetPositionZ()+10);
-                break;
-            case 2:
-            {
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
-                if (!target)
-                    target = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0);
-
-                if (!target)
+                case 0:
+                    //me->AttackStop();
+                    me->GetMotionMaster()->Clear(false);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
+                    me->StopMoving();
+                    DoScriptText(YELL_TAKEOFF, me);
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 2000);
+                    break;
+                case 1:
+                    me->GetMotionMaster()->MovePoint(0, me->GetPositionX()+1, me->GetPositionY(), me->GetPositionZ()+10);
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 2000);
+                    break;
+                case 2:
                 {
-                    EnterEvadeMode();
-                    return;
-                }
+                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
+                    if (!target)
+                        target = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0);
 
-                Creature* Vapor = me->SummonCreature(MOB_VAPOR, target->GetPositionX()-5+rand()%10, target->GetPositionY()-5+rand()%10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
-                if (Vapor)
+                    if (!target)
+                    {
+                        EnterEvadeMode();
+                        return;
+                    }
+
+                    Creature* Vapor = me->SummonCreature(MOB_VAPOR, target->GetPositionX()-5+rand()%10, target->GetPositionY()-5+rand()%10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
+                    if (Vapor)
+                    {
+                        Vapor->AI()->AttackStart(target);
+                        me->InterruptNonMeleeSpells(false);
+                        DoCast(Vapor, SPELL_VAPOR_CHANNEL, false); // core bug
+                        Vapor->CastSpell(Vapor, SPELL_VAPOR_TRIGGER, true);
+                    }
+
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 10000);
+                    break;
+                }
+                case 3:
                 {
-                    Vapor->AI()->AttackStart(target);
-                    me->InterruptNonMeleeSpells(false);
-                    DoCast(Vapor, SPELL_VAPOR_CHANNEL, false); // core bug
-                    Vapor->CastSpell(Vapor, SPELL_VAPOR_TRIGGER, true);
+                    DespawnSummons(MOB_VAPOR_TRAIL);
+                    //DoCast(me, SPELL_VAPOR_SELECT); need core support
+
+                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
+                    if (!target)
+                        target = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0);
+
+                    if (!target)
+                    {
+                        EnterEvadeMode();
+                        return;
+                    }
+
+                    //target->CastSpell(target, SPELL_VAPOR_SUMMON, true); need core support
+                    Creature* pVapor = me->SummonCreature(MOB_VAPOR, target->GetPositionX()-5+rand()%10, target->GetPositionY()-5+rand()%10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
+                    if (pVapor)
+                    {
+                        if (pVapor->AI())
+                            pVapor->AI()->AttackStart(target);
+                        me->InterruptNonMeleeSpells(false);
+                        DoCast(pVapor, SPELL_VAPOR_CHANNEL, false); // core bug
+                        pVapor->CastSpell(pVapor, SPELL_VAPOR_TRIGGER, true);
+                    }
+
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 10000);
+                    break;
                 }
-
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 10000);
-                break;
-            }
-            case 3:
-            {
-                DespawnSummons(MOB_VAPOR_TRAIL);
-                //DoCast(me, SPELL_VAPOR_SELECT); need core support
-
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
-                if (!target)
-                    target = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0);
-
-                if (!target)
+                case 4:
+                    DespawnSummons(MOB_VAPOR_TRAIL);
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1);
+                    break;
+                case 5:
                 {
-                    EnterEvadeMode();
-                    return;
-                }
+                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
+                    if (!target)
+                        target = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0);
 
-                //target->CastSpell(target, SPELL_VAPOR_SUMMON, true); need core support
-                Creature* pVapor = me->SummonCreature(MOB_VAPOR, target->GetPositionX()-5+rand()%10, target->GetPositionY()-5+rand()%10, target->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
-                if (pVapor)
+                    if (!target)
+                    {
+                        EnterEvadeMode();
+                        return;
+                    }
+
+                    breathX = target->GetPositionX();
+                    breathY = target->GetPositionY();
+                    float x, y, z;
+                    target->GetContactPoint(me, x, y, z, 70);
+                    me->GetMotionMaster()->MovePoint(0, x, y, z+10);
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 5000);
+                    break;
+                }
+                case 6:
+                    me->SetOrientation(me->GetAngle(breathX, breathY));
+                    me->StopMoving();
+                    //DoTextEmote("takes a deep breath.", NULL);
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 10000);
+                    break;
+                case 7:
                 {
-                    if (pVapor->AI())
-                        pVapor->AI()->AttackStart(target);
-                    me->InterruptNonMeleeSpells(false);
-                    DoCast(pVapor, SPELL_VAPOR_CHANNEL, false); // core bug
-                    pVapor->CastSpell(pVapor, SPELL_VAPOR_TRIGGER, true);
+                    DoCast(me, SPELL_FOG_BREATH, true);
+                    float x, y, z;
+                    me->GetPosition(x, y, z);
+                    x = 2 * breathX - x;
+                    y = 2 * breathY - y;
+                    me->GetMotionMaster()->MovePoint(0, x, y, z);
+                    events.ScheduleEvent(EVENT_SUMMON_FOG, 1);
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 8000);
+                    break;
                 }
-
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 10000);
-                break;
-            }
-            case 4:
-                DespawnSummons(MOB_VAPOR_TRAIL);
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1);
-                break;
-            case 5:
-            {
-                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true);
-                if (!target)
-                    target = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0);
-
-                if (!target)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-
-                breathX = target->GetPositionX();
-                breathY = target->GetPositionY();
-                float x, y, z;
-                target->GetContactPoint(me, x, y, z, 70);
-                me->GetMotionMaster()->MovePoint(0, x, y, z+10);
-                break;
-            }
-            case 6:
-                me->SetOrientation(me->GetAngle(breathX, breathY));
-                me->StopMoving();
-                //DoTextEmote("takes a deep breath.", NULL);
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 10000);
-                break;
-            case 7:
-            {
-                DoCast(me, SPELL_FOG_BREATH, true);
-                float x, y, z;
-                me->GetPosition(x, y, z);
-                x = 2 * breathX - x;
-                y = 2 * breathY - y;
-                me->GetMotionMaster()->MovePoint(0, x, y, z);
-                events.ScheduleEvent(EVENT_SUMMON_FOG, 1);
-                break;
-            }
-            case 8:
-                me->CastStop(SPELL_FOG_BREATH);
-                me->RemoveAurasDueToSpell(SPELL_FOG_BREATH);
-                ++uiBreathCount;
-                events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1);
-                if (uiBreathCount < 3)
-                    uiFlightCount = 4;
-                break;
-            case 9:
-                if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
-                    DoStartMovement(target);
-                else
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-                break;
-            case 10:
-                me->SetDisableGravity(false);
-                me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
-                EnterPhase(PHASE_GROUND);
-                AttackStart(SelectTarget(SELECT_TARGET_TOPAGGRO));
-                break;
+                case 8:
+                    me->CastStop(SPELL_FOG_BREATH);
+                    me->RemoveAurasDueToSpell(SPELL_FOG_BREATH);
+                    ++uiBreathCount;
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 1);
+                    if (uiBreathCount < 3)
+                        uiFlightCount = 4;
+                    break;
+                case 9:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                        DoStartMovement(target);
+                    else
+                    {
+                        EnterEvadeMode();
+                        return;
+                    }
+                    events.ScheduleEvent(EVENT_FLIGHT_SEQUENCE, 2000);
+                    break;
+                case 10:
+                    me->SetDisableGravity(false);
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
+                    EnterPhase(PHASE_GROUND);
+                    AttackStart(SelectTarget(SELECT_TARGET_TOPAGGRO));
+                    break;
             }
             ++uiFlightCount;
         }

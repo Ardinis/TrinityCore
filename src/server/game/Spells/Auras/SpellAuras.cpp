@@ -939,6 +939,26 @@ bool Aura::CanBeSaved() const
         if (GetSpellInfo()->IsSingleTarget())
             return false;
 
+    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_UNIT && GetOwner()->ToUnit()->isPet())
+    {
+        switch (GetId())
+        {
+            case 73762:
+            case 73824:
+            case 73825:
+            case 73826:
+            case 73827:
+            case 73828:
+            case 73816:
+            case 73818:
+            case 73819:
+            case 73820:
+            case 73821:
+            case 73822:
+                return false;
+        }
+    }
+
     // Can't be saved - aura handler relies on calculated amount and changes it
     if (HasEffectType(SPELL_AURA_CONVERT_RUNE))
         return false;

@@ -535,13 +535,13 @@ public:
     void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
     {
       if (!spellMod)
-	{
-	  spellMod = new SpellModifier(aurEff->GetBase());
-	  spellMod->op = SPELLMOD_DAMAGE;
-	  spellMod->type = SPELLMOD_FLAT;
-	  spellMod->spellId = GetId();
-	  spellMod->mask[1] = 0x200002;
-	}
+      {
+          spellMod = new SpellModifier(aurEff->GetBase());
+          spellMod->op = SPELLMOD_DAMAGE;
+          spellMod->type = SPELLMOD_FLAT;
+          spellMod->spellId = GetId();
+          spellMod->mask[1] = 0x200002;
+      }
 
       spellMod->value = aurEff->GetAmount();
     }

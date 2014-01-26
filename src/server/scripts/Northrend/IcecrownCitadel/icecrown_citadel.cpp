@@ -2469,90 +2469,89 @@ class npc_buff_icc : public CreatureScript
 {
 public:
 
-  npc_buff_icc() : CreatureScript("npc_buff_icc") { }
+    npc_buff_icc() : CreatureScript("npc_buff_icc") { }
 
-  bool OnGossipHello(Player* player, Creature* creature)
-  {
-    if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
-      {
-	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Desole, je ne suis pas le chef de raid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+8);
-	player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
-	return true;
-      }
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 5 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 10 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 15 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 20 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 25 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 30 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "no buff !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
-    player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
-    return true;
-  }
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster())
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Desole, je ne suis pas le chef de raid", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+8);
+            player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
+            return true;
+        }
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 5 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 10 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 15 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 20 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 25 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "buff 30 Pct.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "no buff !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
+        player->SEND_GOSSIP_MENU(10000, creature->GetGUID());
+        return true;
+    }
 
-  bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-  {
-    player->PlayerTalkClass->ClearMenus();
-    player->CLOSE_GOSSIP_MENU();
-    InstanceScript* instanceScript = creature->GetInstanceScript();
-    if (!instanceScript)
-      return true;
-    uint32 spellId =  instanceScript->GetData(DATA_BUFF);
-    switch (action)
-      {
-      case GOSSIP_ACTION_INFO_DEF+1:
-	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+2:
-	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+3:
-	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+4:
-	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+5:
-	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+6:
-	spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+7:
-	spellId = 0;
-	break;
-      case GOSSIP_ACTION_INFO_DEF+8:
-	creature->MonsterSay("OK, je vais attendre le chef de raid", LANG_UNIVERSAL, player->GetGUID());
-	break;
-      default:
-	break;
-      }
-    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
-    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
-    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
-    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
-    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
-    instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
-    if (spellId != 0)
-      instanceScript->DoCastSpellOnPlayers(spellId);
-    instanceScript->SetData(DATA_BUFF, spellId);
-	  /*Map::PlayerList const &players = instanceScript->instance->GetPlayers();
-    for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
-      if (Player* player = it->getSource())
-	if (Pet* pet = player->GetPet())
-	{
-	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
-	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
-	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
-	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
-	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
-	  pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
-	  if (spellId != 0)
-	    pet->CastSpell(pet, spellId, true);
-	    }*/
-    return true;
-  }
-
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        player->CLOSE_GOSSIP_MENU();
+        InstanceScript* instanceScript = creature->GetInstanceScript();
+        if (!instanceScript)
+            return true;
+        uint32 spellId =  instanceScript->GetData(DATA_BUFF);
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF+1:
+                spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+2:
+                spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+3:
+                spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+4:
+                spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+5:
+                spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+6:
+                spellId = instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+7:
+                spellId = 0;
+                break;
+            case GOSSIP_ACTION_INFO_DEF+8:
+                creature->MonsterSay("OK, je vais attendre le chef de raid", LANG_UNIVERSAL, player->GetGUID());
+                break;
+            default:
+                break;
+        }
+        instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
+        instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
+        instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
+        instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
+        instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
+        instanceScript->DoRemoveAurasDueToSpellOnPlayers(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
+        if (spellId != 0)
+            instanceScript->DoCastSpellOnPlayers(spellId);
+        instanceScript->SetData(DATA_BUFF, spellId);
+        Map::PlayerList const &players = instanceScript->instance->GetPlayers();
+        for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
+            if (Player* player = it->getSource())
+                if (Pet* pet = player->GetPet())
+                {
+                    pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73762 : 73816);
+                    pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73824 : 73818);
+                    pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73825 : 73819);
+                    pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73826 : 73820);
+                    pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73827 : 73821);
+                    pet->RemoveAura(instanceScript->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE ? 73828 : 73822);
+                    if (spellId != 0)
+                        pet->AddAura(spellId, pet);
+                }
+        return true;
+    }
 };
 
 #define SPELL_DISJOINTE_ESSENCE_10 71906
@@ -2808,6 +2807,56 @@ public:
   }
 };
 
+class spell_icc_buff : public SpellScriptLoader
+{
+public:
+    spell_icc_buff() : SpellScriptLoader("spell_icc_buff") { }
+
+    class spell_icc_buff_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_icc_buff_AuraScript);
+
+        bool Validate(SpellInfo const* /*SpellEntry*/)
+        {
+            return true;
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* pet = GetTarget())
+                if (pet->GetMapId() != 631)
+                {
+                    pet->RemoveAura(73762);
+                    pet->RemoveAura(73824);
+                    pet->RemoveAura(73825);
+                    pet->RemoveAura(73826);
+                    pet->RemoveAura(73827);
+                    pet->RemoveAura(73828);
+                    pet->RemoveAura(73816);
+                    pet->RemoveAura(73818);
+                    pet->RemoveAura(73819);
+                    pet->RemoveAura(73820);
+                    pet->RemoveAura(73821);
+                    pet->RemoveAura(73822);
+                }
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_icc_buff_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+
+    };
+
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_icc_buff_AuraScript();
+    }
+};
+
+
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -2840,4 +2889,5 @@ void AddSC_icecrown_citadel()
     new npc_ess_disjointe();
     new npc_arthas_teleport_visual();
     new spell_icc_soul_missile();
+    new spell_icc_buff();
 }

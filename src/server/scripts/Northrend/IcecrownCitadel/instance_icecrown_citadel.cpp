@@ -185,9 +185,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                 MuradinBronzebeardNotVisualGUID = 0;
                 GbBattleMageGUID = 0;
                 isPrepared = false;
-		tempete = 0;
-		_buffSelect = 0;
-		mui_rebuffTimer = 1000;
+                tempete = 0;
+                _buffSelect = 0;
+                mui_rebuffTimer = 1000;
             }
 
             void FillInitialWorldStates(WorldPacket& data)
@@ -201,27 +201,27 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             void OnPlayerEnter(Player* player)
             {
-	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
-	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
-	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
-	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
-	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
-	      player->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
-	      if (_buffSelect != 0)
-		player->CastSpell(player, _buffSelect, true);
-	      /*      if (Pet* pet = player->GetPet())
-	      {
-		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
-		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
-		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
-		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
-		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
-		pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
-		if (_buffSelect != 0)
-		  pet->CastSpell(pet, _buffSelect, true);
-		  }*/
-	      if (!TeamInInstance)
-		TeamInInstance = player->GetTeam();
+                player->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
+                player->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
+                player->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
+                player->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
+                player->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
+                player->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
+                if (_buffSelect != 0)
+                    player->CastSpell(player, _buffSelect, true);
+	            if (Pet* pet = player->GetPet())
+                {
+                    pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
+                    pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
+                    pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
+                    pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
+                    pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
+                    pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
+                    if (_buffSelect != 0)
+                        pet->AddAura(_buffSelect, pet);
+                }
+                if (!TeamInInstance)
+                    TeamInInstance = player->GetTeam();
 
                 if (instance->IsHeroic())
                     Events.ScheduleEvent(EVENT_CHECK_HERO_ACHIEVEMENT, 10000);
@@ -1006,8 +1006,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (FrostwyrmCount == 255)
                             return;
 
-			if (instance->IsHeroic() && !HeroicAttempts)
-			  return;
+                        if (instance->IsHeroic() && !HeroicAttempts)
+                            return;
 
                         if (GetBossState(DATA_SINDRAGOSA) == DONE)
                             return;
@@ -1020,9 +1020,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                                     --FrostwyrmCount;
                                     if (!FrostwyrmCount)
                                     {
-				      /*                                        instance->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
-                                        if (Creature* boss = instance->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
-					boss->AI()->DoAction(ACTION_START_FROSTWYRM);*/
+                                        /*                                        instance->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
+                                                                                  if (Creature* boss = instance->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
+                                                                                  boss->AI()->DoAction(ACTION_START_FROSTWYRM);*/
                                     }
                                 }
                                 break;
@@ -1395,31 +1395,34 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             void Update(uint32 diff)
             {
-	      /*	      if (mui_rebuffTimer <= diff)
-	      {
-		Map::PlayerList const &players = instance->GetPlayers();
-		for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
-		  if (Player* player = it->getSource())
-		    if (Pet* pet = player->GetPet())
-		    {
-		      if (!pet->HasAura(73762) && !pet->HasAura(73762) && !pet->HasAura(73816)
-			  && !pet->HasAura(73818) && !pet->HasAura(73825) && !pet->HasAura(73819)
-			  && !pet->HasAura(73826) && !pet->HasAura(73820) && !pet->HasAura(73827)
-			  && !pet->HasAura(73821) && !pet->HasAura(73828) && !pet->HasAura(73822))
-		      {
-			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
-			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
-			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
-			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
-			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
-			pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
-			if (_buffSelect != 0)
-			  pet->CastSpell(pet, _buffSelect, true);
-		      }
-		    }
-		mui_rebuffTimer = 5000;
-	      }
-	      mui_rebuffTimer -= diff;*/
+                if (_buffSelect != 0)
+                {
+                    if (mui_rebuffTimer <= diff)
+                    {
+                        Map::PlayerList const &players = instance->GetPlayers();
+                        for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
+                            if (Player* player = it->getSource())
+                                if (Pet* pet = player->GetPet())
+                                {
+                                    if (!pet->HasAura(73762) && !pet->HasAura(73762) && !pet->HasAura(73816)
+                                        && !pet->HasAura(73818) && !pet->HasAura(73825) && !pet->HasAura(73819)
+                                        && !pet->HasAura(73826) && !pet->HasAura(73820) && !pet->HasAura(73827)
+                                        && !pet->HasAura(73821) && !pet->HasAura(73828) && !pet->HasAura(73822))
+                                    {
+                                        pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73762 : 73816);
+                                        pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73824 : 73818);
+                                        pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73825 : 73819);
+                                        pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73826 : 73820);
+                                        pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73827 : 73821);
+                                        pet->RemoveAura(player->GetTeam() == ALLIANCE ? 73828 : 73822);
+                                        if (_buffSelect != 0)
+                                            pet->AddAura(_buffSelect, pet);
+                                    }
+                                }
+                        mui_rebuffTimer = 5000;
+                    }
+                    mui_rebuffTimer -= diff;
+                }
 
                 if (GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
                 {

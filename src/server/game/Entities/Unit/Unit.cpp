@@ -2464,17 +2464,13 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     // Ranged attacks can only miss, resist and deflect
     if (attType == RANGED_ATTACK)
     {
-      canParry = false;
-      canDodge = false;
+        canParry = false;
+        canDodge = false;
 
-        // only if in front
-        if (victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
-        {
-            int32 deflect_chance = victim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * 100;
-            tmp+=deflect_chance;
-            if (roll < tmp)
-                return SPELL_MISS_DEFLECT;
-        }
+        int32 deflect_chance = victim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * 100;
+        tmp += deflect_chance;
+        if (roll < tmp)
+            return SPELL_MISS_DEFLECT;
         return SPELL_MISS_NONE;
     }
 
@@ -2668,14 +2664,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (rand < tmp)
         return SPELL_MISS_RESIST;
 
-    // cast by caster in front of victim
-      if (victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
-      {
-        int32 deflect_chance = victim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * 100;
-        tmp += deflect_chance;
-        if (rand < tmp)
-            return SPELL_MISS_DEFLECT;
-      }
+    // Small Patch 3.2.0 (04 - Aug - 2009) : This ability now allows the hunter to parry spells and
+    // attacks from behind as well as in front.Now has a new visual spell effect.
+    // Also spell with SPELL_ATTR3_IGNORE_HIT_RESULT CAN be deflected!
+    int32 deflect_chance = victim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * 100;
+    tmp += deflect_chance;
+    if (rand < tmp)
+        return SPELL_MISS_DEFLECT;
 
     return SPELL_MISS_NONE;
 }

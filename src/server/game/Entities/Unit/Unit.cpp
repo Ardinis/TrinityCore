@@ -13933,7 +13933,10 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
             {
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
                 stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
-                non_stack_bonus += GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK) / 100.0f;
+                if (AuraEffect* aurEff = GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_GENERIC, 1797, EFFECT_0)) // Hack for pursuit of justice
+                    non_stack_bonus += std::max(aurEff->GetAmount() / 100.0f, GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK) / 100.0f);
+                else
+                    non_stack_bonus += GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK) / 100.0f;
             }
             else
             {

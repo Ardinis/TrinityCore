@@ -566,16 +566,11 @@ class spell_sha_lava_lash : public SpellScriptLoader
         {
             PrepareSpellScript(spell_sha_lava_lash_SpellScript)
 
-            bool Load()
-            {
-                return GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
-
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 if (Player* caster = GetCaster()->ToPlayer())
                 {
-                    int32 damage = GetEffectValue();
+                    int32 damage = 25;
                     int32 hitDamage = GetHitDamage();
                     if (caster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
                     {
@@ -589,7 +584,7 @@ class spell_sha_lava_lash : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectHitTarget += SpellEffectFn(spell_sha_lava_lash_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_sha_lava_lash_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
             }
 
         };

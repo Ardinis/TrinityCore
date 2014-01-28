@@ -3914,6 +3914,8 @@ void SpellMgr::LoadDbcDataCorrections()
             case 17364: // Stormstrike
             case 50328: // Leeching Poison
             case 40520: // Shade Soul Channel
+            case 58684:
+            case 58683:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             default:

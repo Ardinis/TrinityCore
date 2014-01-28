@@ -3916,6 +3916,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 40520: // Shade Soul Channel
             case 58684:
             case 58683:
+            case 33198:
+            case 33197:
+            case 33196:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             default:

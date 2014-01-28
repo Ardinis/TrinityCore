@@ -191,8 +191,8 @@ class spell_pri_penance : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellEntry)
             {
-	      if (!sSpellMgr)
-		return false;
+                if (!sSpellMgr)
+                    return false;
                 if (!sSpellMgr->GetSpellInfo(PRIEST_SPELL_PENANCE_R1))
                     return false;
                 // can't use other spell than this penance due to spell_ranks dependency
@@ -219,8 +219,8 @@ class spell_pri_penance : public SpellScriptLoader
                // Part Dueld Fix
                if (caster->GetGUID() != unitTarget->GetGUID() && caster->IsFriendlyTo(unitTarget) && (unitTarget->ToPlayer() != NULL && unitTarget->ToPlayer()->duel != NULL))
                    return;
-	       if (!sSpellMgr)
-		 return ;
+               if (!sSpellMgr)
+                   return ;
                 uint8 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
 
                     if (caster->IsFriendlyTo(unitTarget))
@@ -230,10 +230,20 @@ class spell_pri_penance : public SpellScriptLoader
                 }
             }
 
+            SpellCastResult CheckCast()
+            {
+                Player* caster = GetCaster()->ToPlayer();
+                if (Unit* target = GetTargetUnit())
+                    if (!caster->IsFriendlyTo(target) && !caster->IsValidAttackTarget(target))
+                        return SPELL_FAILED_BAD_TARGETS;
+                return SPELL_CAST_OK;
+            }
+
             void Register()
             {
                 // add dummy effect spell handler to Penance
                 OnEffectHitTarget += SpellEffectFn(spell_pri_penance_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnCheckCast += SpellCheckCastFn(spell_pri_penance_SpellScript::CheckCast);
             }
         };
 

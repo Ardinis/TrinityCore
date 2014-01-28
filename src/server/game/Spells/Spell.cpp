@@ -737,7 +737,7 @@ void Spell::SelectExplicitTargets()
         // check for explicit target redirection, for Grounding Totem for example
         if ((m_spellInfo->GetExplicitTargetMask() & TARGET_FLAG_UNIT_ENEMY
             || (m_spellInfo->GetExplicitTargetMask() & TARGET_FLAG_UNIT && !m_spellInfo->IsPositive()))
-			|| m_spellInfo->Id == 527 || m_spellInfo->Id == 988)
+			|| m_spellInfo->Id == 1152 || m_spellInfo->Id == 988)
         {
             Unit* redirect;
             switch (m_spellInfo->DmgClass)
@@ -5016,13 +5016,13 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (reqCombat && m_caster->isInCombat() && !m_spellInfo->CanBeUsedInCombat())
             return SPELL_FAILED_AFFECTING_COMBAT;
 
-	if ((m_spellInfo->Id == 4987 || (m_spellInfo->Category == 12 && m_spellInfo->SpellIconID == 47))
-	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
-	  return SPELL_FAILED_NOTHING_TO_DISPEL;
+        if ((m_spellInfo->Id == 4987 || (m_spellInfo->Category == 12 && m_spellInfo->SpellIconID == 47))
+            && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
+            return SPELL_FAILED_NOTHING_TO_DISPEL;
 
-	if (m_spellInfo->Id == 527
-	    && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
-	  return SPELL_FAILED_NOTHING_TO_DISPEL;
+        if ((m_spellInfo->Id == 1152 || m_spellInfo->Id == 988)
+            && !m_targets.GetUnitTarget()->HasNegativeAuraDispellable(m_caster))
+            return SPELL_FAILED_NOTHING_TO_DISPEL;
 
     }
 

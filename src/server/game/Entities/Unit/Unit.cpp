@@ -7263,12 +7263,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (aur->GetStackAmount() == 5)
                         {
                             if (stacker)
-                            {
-                                aur->RefreshDuration();
-                                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                                    if (aur->HasEffect(i))
-                                        aur->GetEffect(i)->CalculatePeriodic(this, false, false);
-                            }
+                                aur->SoftRefreshTimers();
                             CastSpell(victim, 42463, true);
                             return true;
                         }

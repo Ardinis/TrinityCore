@@ -794,6 +794,18 @@ void Aura::RefreshTimers()
             GetEffect(i)->CalculatePeriodic(caster, false, false);
 }
 
+void Aura::SoftRefreshTimers()
+{
+    m_maxDuration = CalcMaxDuration();
+    Unit* caster = GetCaster();
+    if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellInfo) || m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+        m_maxDuration = int32(m_maxDuration * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+    RefreshDuration();
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (HasEffect(i))
+            GetEffect(i)->CalculatePeriodic(caster, false, false);
+}
+
 void Aura::SetCharges(uint8 charges)
 {
     if (m_procCharges == charges)

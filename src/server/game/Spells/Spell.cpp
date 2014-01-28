@@ -1463,7 +1463,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 
     //    if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit))
-    if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit) && !m_spellInfo->IsPositive())
+    if (missInfo != SPELL_MISS_EVADE && m_caster && !m_caster->IsFriendlyTo(unit) && (!m_spellInfo->IsPositive() || m_spellInfo->HasEffect(SPELL_EFFECT_DISPEL)))
     {
         //CHECK FIXES
         m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR3_NO_INITIAL_AGGRO) && !(m_spellInfo->AttributesEx & SPELL_ATTR1_NO_THREAT));
@@ -1688,6 +1688,9 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         m_spellAura->SetMaxDuration(duration);
                         m_spellAura->SetDuration(duration);
                     }
+
+                    std::cout << " m_spellInfo->Id ? " <<  m_spellInfo->Id << std::endl;
+
                     m_spellAura->_RegisterForTargets();
 
                     if (m_spellInfo->IsChanneled())

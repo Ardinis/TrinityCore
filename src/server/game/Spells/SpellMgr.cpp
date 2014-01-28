@@ -2975,6 +2975,15 @@ void SpellMgr::LoadSpellCustomAttr()
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
                 break;
+            case 8187:
+            case 10579:
+            case 10580:
+            case 10581:
+            case 25550:
+            case 58732:
+            case 58735:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_INITIAL_THREAT;
+                break;
             default:
                 break;
         }
@@ -3906,6 +3915,13 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_9_YARDS;
                 break;
             case 8187:
+            case 10579:
+            case 10580:
+            case 10581:
+            case 25550:
+            case 58732:
+            case 58735:
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                 break;
             case 22959: // Scorch

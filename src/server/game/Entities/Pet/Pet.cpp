@@ -1196,241 +1196,246 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         }
         default:
         {
-	  switch (GetEntry())
-	  {
-	  case 510: // mage Water Elemental
-	  {
-	    //          SetCreateHealth(m_owner->GetMaxHealth() / 2);
-	    //   SetCreateMana(m_owner->GetMaxPower(POWER_MANA)/ 2);
-          SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.4f));
-	    break;
-	  }
-	  case 1964: //force of nature
-	  {
-	    if (!pInfo)
-	      SetCreateHealth(30 + 30*petlevel);
-	    float bonusDmg = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
-	    //SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
-	    //SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
-	    break;
-	  }
-	  case 15352: //earth elemental 36213
-	  {
-	    if (!pInfo)
-	      SetCreateHealth(100 + 120*petlevel);
-	    // SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-	    // SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-	    break;
-	  }
-	  case 15438: //fire elemental
-	  {
-	    if (!pInfo)
-	    {
-	      SetCreateHealth(40*petlevel);
-	      SetCreateMana(28 + 10*petlevel);
-	    }
-	    SetBonusDamage(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.5f);
-	    //                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
-	    //   SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
-	    break;
-	  }
-	  case 19668: // Shadowfiend
-	  {
-          if (!pInfo)
-          {
-              SetCreateMana(28 + 10 * petlevel);
-              SetCreateHealth(28 + 30 * petlevel + m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW) * 0.3);
-          }
-          int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
-          SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
-          SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
-          break;
-	  }
-	  case 19833: //Snake Trap - Venomous Snake
-	  {
-	    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel / 2) - 25));
-	    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel / 2) - 18));
-	    break;
-	  }
-	  case 19921: //Snake Trap - Viper
-	  {
-	    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel / 2 - 10));
-	    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel / 2));
-	    break;
-	  }
-	  case 29264: // Feral Spirit
-	  {
-	    if (!pInfo)
-	      SetCreateHealth(30*petlevel);
+            switch (GetEntry())
+            {
+                case 510: // mage Water Elemental
+                {
+                    //          SetCreateHealth(m_owner->GetMaxHealth() / 2);
+                    //   SetCreateMana(m_owner->GetMaxPower(POWER_MANA)/ 2);
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.4f));
+                    break;
+                }
+                case 1964: //force of nature
+                {
+                    if (!pInfo)
+                        SetCreateHealth(30 + 30*petlevel);
+                    float bonusDmg = m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
+                    //SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
+                    //SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
+                    break;
+                }
+                case 15352: //earth elemental 36213
+                {
+                    if (!pInfo)
+                        SetCreateHealth(100 + 120*petlevel);
+                    // SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                    // SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    break;
+                }
+                case 15438: //fire elemental
+                {
+                    if (!pInfo)
+                    {
+                        SetCreateHealth(40*petlevel);
+                        SetCreateMana(28 + 10*petlevel);
+                    }
+                    SetBonusDamage(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.5f);
+                    //                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
+                    //   SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
+                    break;
+                }
+                case 19668: // Shadowfiend
+                {
+                    if (!pInfo)
+                    {
+                        SetCreateMana(28 + 10 * petlevel);
+                        SetCreateHealth(28 + 30 * petlevel + m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW) * 0.3);
+                    }
+                    int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
+                    break;
+                }
+                case 19833: //Snake Trap - Venomous Snake
+                {
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel / 2) - 25));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel / 2) - 18));
+                    break;
+                }
+                case 19921: //Snake Trap - Viper
+                {
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel / 2 - 10));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel / 2));
+                    break;
+                }
+                case 29264: // Feral Spirit
+                {
+                    if (!pInfo)
+                        SetCreateHealth(30*petlevel);
 
-	    SetAttackTime(BASE_ATTACK, 1500); // 1,5 Sec au lieu de 2!
+                    SetAttackTime(BASE_ATTACK, 1500); // 1,5 Sec au lieu de 2!
 
-	    float dmg_multiplier = 0.3f;
-	    float dmg_glyphe = 1;
-	    if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
-	    {
-	      dmg_multiplier = 0.6f;
-	      dmg_glyphe= 1.96f ;
-	    }
+                    float dmg_multiplier = 0.3f;
+                    float dmg_glyphe = 1;
+                    if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
+                    {
+                        dmg_multiplier = 0.6f;
+                        dmg_glyphe= 1.96f ;
+                    }
 
-	    SetModifierValue(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.139 * dmg_glyphe)  );
-	    // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 1.5
+                    SetModifierValue(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.139 * dmg_glyphe)  );
+                    // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 1.5
 
-	    //SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
-	    //SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
+                    //SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
+                    //SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
 
-	    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f); // Bonus Armor (35% of player armor)
-	    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f); // Bonus Stamina (30% of player stamina)
-	    if (!HasAura(58877))        //prevent apply twice for the 2 wolves
-	      AddAura(58877, this);   //Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
-	    if (!HasAura(61783))        // prevent apply twice for the 2 wolves
-	      AddAura(61783, this);   // Feral Pet Scaling
-	    break;
-	  }
-	  case 31216: // Mirror Image
-	  {
-	    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
-	    SetDisplayId(m_owner->GetDisplayId());
-	    if (!pInfo)
-	    {
-	      SetCreateMana(28 + 30*petlevel);
-	      SetCreateHealth(28 + 10*petlevel);
-	    }
-	    break;
-	  }
-	  case 27829: // Ebon Gargoyle
-	  {
-	    if (!pInfo)
-        {
-            SetMaxHealth(m_owner->GetMaxHealth() * 0.8f);
-            SetHealth(m_owner->GetMaxHealth() * 0.8f);
-            SetCreateMana(28 + 10*petlevel);
-        }
-        SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f));
-        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-        ApplyCastTimePercentMod((1-m_owner->m_modAttackSpeedPct[BASE_ATTACK])*100, true);
-	    RemoveAurasDueToSpell(61697);
-	    CastSpell(this, 61697, true);
-	    RemoveAurasDueToSpell(62137);
-	    CastSpell(this, 62137, true);
-	    break;
-	  }
-	  case 12922: // Imp Minion
-	  case 8996:  // Voidwalker Minion
-	  case 2676:  // Compact Harvest Repair
-	  case 24476: // Minor Voidwalker
-	  {
-	    SetCreateMana(28 + 10 * petlevel);
-	    SetCreateHealth(28 + 30 * petlevel);
-	    break;
-	  }
-	  case 28017: // Bloodworms
-	  {
-	    float minDamage = (petlevel - (petlevel / 4)) * 0.30f;
-	    float maxDamage = (petlevel + (petlevel / 4)) * 0.30f;
-	    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
-	    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-	    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-	    break;
-	  }
-	  case 27893:             // Dancing Rune Weapon
-	  {
-	    SetReducedThreatPercent(100, m_owner->GetGUID());
-	    RemoveAurasDueToSpell(61697);
-	    CastSpell(this, 61697, true);
-	    RemoveAurasDueToSpell(51906);
-	    CastSpell(this, 51906, true);
-	    RemoveAurasDueToSpell(62137);
-	    CastSpell(this, 62137, true);
-	    break;
-	  }
-	  case 26125:             // Risen Ghoul
-	  {
-	    RemoveAurasDueToSpell(61697);
-	    CastSpell(this, 61697, true);
-	    RemoveAurasDueToSpell(54566);
-	    CastSpell(this, 54566, true);
-	    RemoveAurasDueToSpell(51996);
-	    CastSpell(this, 51996, true);
-	    RemoveAurasDueToSpell(62137);
-	    CastSpell(this, 62137, true);
-	    break;
-	  }
-	  case 89:                // Infernal
-	  {
-	    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-	    {
-	      int32 fire  = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
-	      int32 shadow = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-	      int32 maximum  = (fire > shadow) ? fire : shadow;
-	      if (maximum < 0)
-		maximum = 0;
-	      SetBonusDamage(int32(maximum * 0.15f));
-	    }
-	    float mod = 1;
-	    if (petlevel < 60)
-	      mod = 5 + (petlevel-50)/4;
-	    if (petlevel < 70)
-	      mod = 10 + (petlevel-70)/4;
-	    else
-	      mod = 15 + (petlevel-80)/2;
-	    if (mod < 0)
-	      mod = 0;
-	    float minDamage = (petlevel - (petlevel / 4))*mod;
-	    float maxDamage = (petlevel + (petlevel / 4))*mod;
-	    float attackPower = ((minDamage + maxDamage) /4)*7;
-	    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-	    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-	    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, attackPower);
-	    break;
-	  }
-	  case 11859:                 // Doomguard
-	  {
-	    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-	    {
-	      int32 fire  = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
-	      int32 shadow = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-	      int32 maximum  = (fire > shadow) ? fire : shadow;
-	      if (maximum < 0)
-		maximum = 0;
-	      SetBonusDamage(int32(maximum * 0.15f));
-	    }
-	    if (!pInfo)                                      // not exist in DB
-	    {
-	      // remove elite bonuses included in DB values
-	      CreatureTemplate const *cinfo = GetCreatureInfo();
-	      CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
-	      SetCreateHealth(stats->BaseHealth[cinfo->expansion]);
-	      SetCreateMana(stats->BaseMana);
+                    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f); // Bonus Armor (35% of player armor)
+                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f); // Bonus Stamina (30% of player stamina)
+                    if (!HasAura(58877))        //prevent apply twice for the 2 wolves
+                        AddAura(58877, this);   //Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
+                    if (!HasAura(61783))        // prevent apply twice for the 2 wolves
+                        AddAura(61783, this);   // Feral Pet Scaling
+                    break;
+                }
+                case 31216: // Mirror Image
+                {
+                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+                    SetDisplayId(m_owner->GetDisplayId());
+                    if (!pInfo)
+                    {
+                        SetCreateMana(28 + 30*petlevel);
+                        SetCreateHealth(28 + 10*petlevel);
+                    }
+                    break;
+                }
+                case 27829: // Ebon Gargoyle
+                {
+                    if (!pInfo)
+                    {
+                        SetMaxHealth(m_owner->GetMaxHealth() * 0.8f);
+                        SetHealth(m_owner->GetMaxHealth() * 0.8f);
+                        SetCreateMana(28 + 10*petlevel);
+                    }
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.75f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                    ApplyCastTimePercentMod((1-m_owner->m_modAttackSpeedPct[BASE_ATTACK])*100, true);
+                    RemoveAurasDueToSpell(61697);
+                    CastSpell(this, 61697, true);
+                    RemoveAurasDueToSpell(62137);
+                    CastSpell(this, 62137, true);
+                    break;
+                }
+                case 12922: // Imp Minion
+                case 8996:  // Voidwalker Minion
+                case 2676:  // Compact Harvest Repair
+                case 24476: // Minor Voidwalker
+                {
+                    SetCreateMana(28 + 10 * petlevel);
+                    SetCreateHealth(28 + 30 * petlevel);
+                    break;
+                }
+                case 28017: // Bloodworms
+                {
+                    float minDamage = (petlevel - (petlevel / 4)) * 0.30f;
+                    float maxDamage = (petlevel + (petlevel / 4)) * 0.30f;
+                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                    break;
+                }
+                case 27893:             // Dancing Rune Weapon
+                {
+                    SetReducedThreatPercent(100, m_owner->GetGUID());
+                    RemoveAurasDueToSpell(61697);
+                    CastSpell(this, 61697, true);
+                    RemoveAurasDueToSpell(51906);
+                    CastSpell(this, 51906, true);
+                    RemoveAurasDueToSpell(62137);
+                    CastSpell(this, 62137, true);
+                    break;
+                }
+                case 26125:             // Risen Ghoul
+                {
+                    RemoveAurasDueToSpell(61697);
+                    CastSpell(this, 61697, true);
+                    RemoveAurasDueToSpell(54566);
+                    CastSpell(this, 54566, true);
+                    RemoveAurasDueToSpell(51996);
+                    CastSpell(this, 51996, true);
+                    RemoveAurasDueToSpell(62137);
+                    CastSpell(this, 62137, true);
+                    break;
+                }
+                case 89:                // Infernal
+                {
+                    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        int32 fire  = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+                        int32 shadow = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+                        int32 maximum  = (fire > shadow) ? fire : shadow;
+                        if (maximum < 0)
+                            maximum = 0;
+                        SetBonusDamage(int32(maximum * 0.15f));
+                    }
+                    float mod = 1;
+                    if (petlevel < 60)
+                        mod = 5 + (petlevel-50)/4;
+                    if (petlevel < 70)
+                        mod = 10 + (petlevel-70)/4;
+                    else
+                        mod = 15 + (petlevel-80)/2;
+                    if (mod < 0)
+                        mod = 0;
+                    float minDamage = (petlevel - (petlevel / 4))*mod;
+                    float maxDamage = (petlevel + (petlevel / 4))*mod;
+                    float attackPower = ((minDamage + maxDamage) /4)*7;
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, attackPower);
+                    break;
+                }
+                case 11859:                 // Doomguard
+                {
+                    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        int32 fire  = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+                        int32 shadow = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+                        int32 maximum  = (fire > shadow) ? fire : shadow;
+                        if (maximum < 0)
+                            maximum = 0;
+                        SetBonusDamage(int32(maximum * 0.15f));
+                    }
+                    if (!pInfo)                                      // not exist in DB
+                    {
+                        // remove elite bonuses included in DB values
+                        CreatureTemplate const *cinfo = GetCreatureInfo();
+                        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
+                        SetCreateHealth(stats->BaseHealth[cinfo->expansion]);
+                        SetCreateMana(stats->BaseMana);
 
-	      SetStat(STAT_STRENGTH, 22);
-	      SetStat(STAT_AGILITY, 22);
-	      SetStat(STAT_STAMINA, 25);
-	      SetStat(STAT_INTELLECT, 28);
-	      SetStat(STAT_SPIRIT, 27);
-	    }
-	    float mod = 1;
-	    if (petlevel < 70)
-	      mod = 10 + (petlevel-70)/2;
-	    else
-	      mod = 20 + (petlevel-80);
-	    if (mod < 0)
-	      mod = 0;
-	    float minDamage = (petlevel - (petlevel / 4))*mod;
-	    float maxDamage = (petlevel + (petlevel / 4))*mod;
-	    float attackPower = ((minDamage + maxDamage) /4)*7;
-	    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-	    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-	    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, attackPower);
-	    RemoveAurasDueToSpell(32233);
-	    CastSpell(this, 32233, true);
-	    RemoveAurasDueToSpell(35695);
-	    CastSpell(this, 35695, true);
-	    break;
-	  }
-	  }
-	  break;
+                        SetStat(STAT_STRENGTH, 22);
+                        SetStat(STAT_AGILITY, 22);
+                        SetStat(STAT_STAMINA, 25);
+                        SetStat(STAT_INTELLECT, 28);
+                        SetStat(STAT_SPIRIT, 27);
+                    }
+                    float mod = 1;
+                    if (petlevel < 70)
+                        mod = 10 + (petlevel-70)/2;
+                    else
+                        mod = 20 + (petlevel-80);
+                    if (mod < 0)
+                        mod = 0;
+                    float minDamage = (petlevel - (petlevel / 4))*mod;
+                    float maxDamage = (petlevel + (petlevel / 4))*mod;
+                    float attackPower = ((minDamage + maxDamage) /4)*7;
+                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, attackPower);
+                    RemoveAurasDueToSpell(32233);
+                    CastSpell(this, 32233, true);
+                    RemoveAurasDueToSpell(35695);
+                    CastSpell(this, 35695, true);
+                    break;
+                }
+               case 24207:
+                   SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.3f));
+                   SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, GetCreatureInfo()->mindmg);
+                   SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, GetCreatureInfo()->maxdmg);
+                   break;
+            }
+            break;
         }
     }
 

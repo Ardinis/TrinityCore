@@ -34,7 +34,7 @@ endif()
 
 if(_GIT_VERSION_OK)
   execute_process(
-    COMMAND "${_GIT_EXEC}" describe --match v4 --dirty=+ --abbrev=12
+    COMMAND "${_GIT_EXEC}" describe --match v4 --dirty=+ --abbrev=5
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     OUTPUT_VARIABLE rev_info
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -63,6 +63,7 @@ if(NOT rev_info)
   set(rev_info "Archived")
 else()
   # Extract information required to build a proper versionstring
+  string(REGEX REPLACE v4-|[0-9]+-g "" rev_hash ${rev_info})
 endif()
 
 # Its not set during initial run

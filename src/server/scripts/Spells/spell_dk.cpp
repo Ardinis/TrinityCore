@@ -397,13 +397,13 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
-	  float multiplier;
+            float multiplier;
 
-	  bool Load()
-	  {
-	    multiplier = 1.0f;
-	    return true;
-	  }
+            bool Load()
+            {
+                multiplier = 1.0f;
+                return true;
+            }
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
@@ -412,37 +412,134 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                 return true;
             }
 
+            void GetGlyphScourgeStrikeAuraEffects(Unit const * caster, Unit const * target, Unit::AuraEffectList & auras)
+            {
+                Unit::AuraEffectList const & aurasA = target->GetAuraEffectsByType(SPELL_AURA_DUMMY);
+                for (Unit::AuraEffectList::const_iterator itr = aurasA.begin(); itr != aurasA.end(); ++itr)
+                {
+                    if (((*itr)->GetCasterGUID() != caster->GetGUID()) || ((*itr)->GetEffIndex() != EFFECT_0))
+                        continue;
+
+                    SpellInfo const * spellProto = (*itr)->GetSpellInfo();
+                    if ((spellProto->SpellIconID == 23) && (SpellFamilyNames(spellProto->SpellFamilyName) == SPELLFAMILY_GENERIC))
+                        auras.push_back(*itr);
+                }
+            }
+
+            AuraEffect * GetGlyphScourgeStrikeAuraEffect(uint32 diseaseId, Unit::AuraEffectList const & auras)
+            {
+                for (Unit::AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    if (diseaseId == ((*itr)->GetAmount() >> 4))
+                        return (*itr);
+
+                return NULL;
+            }
+
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-	      Unit* caster = GetCaster();
-	      if (Unit* unitTarget = GetHitUnit())
-	      {
-		multiplier = (GetEffectValue() * unitTarget->GetDiseasesByCaster(caster->GetGUID()) / 100.f);
-		// Death Knight T8 Melee 4P Bonus
-		if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DK_ITEM_T8_MELEE_4P_BONUS, EFFECT_0))
-		  AddPct(multiplier, aurEff->GetAmount());
-	      }
+                static const AuraType diseaseAuraTypes[] =
+                    {
+                        SPELL_AURA_PERIODIC_DAMAGE, // Frost Fever and Blood Plague
+                        SPELL_AURA_LINKED,          // Crypt Fever and Ebon Plague
+                        SPELL_AURA_NONE
+                    };
 
-	    }
+                Unit * caster = GetCaster();
+                Unit * target = GetHitUnit();
 
-	  void HandleAfterHit()
-	  {
-	    Unit* caster = GetCaster();
-	    if (Unit* unitTarget = GetHitUnit())
-	    {
-	      int32 bp = GetHitDamage() * multiplier;
+                if (!target)
+                    return;
 
-	      if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
-		AddPct(bp, aurEff->GetAmount());
+                uint32 diseases = 0;
+                int32 extratime, maxtime;
+                AuraEffect const * aurEffA;
 
-	      caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-	    }
-	  }
+                Unit::AuraEffectList aurasA;
+                GetGlyphScourgeStrikeAuraEffects(caster, caster, aurasA);
+
+                bool hasGlyph = bool(aurasA.size());
+
+                if (hasGlyph)
+                {
+                    aurEffA = *aurasA.begin();
+                    extratime = aurEffA->GetAmount();
+                    maxtime = aurEffA->GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
+
+                    aurasA.clear();
+                    GetGlyphScourgeStrikeAuraEffects(caster, target, aurasA);
+                }
+
+
+                for (AuraType const * itrA = &diseaseAuraTypes[0]; itrA && itrA[0] != SPELL_AURA_NONE; ++itrA)
+                {
+                    Unit::AuraEffectList const & aurasB = target->GetAuraEffectsByType(*itrA);
+                    for (Unit::AuraEffectList::const_iterator itrB = aurasB.begin(); itrB != aurasB.end(); ++itrB)
+                        if (((*itrB)->GetSpellInfo()->Dispel == DISPEL_DISEASE) &&
+                            ((*itrB)->GetCasterGUID() == caster->GetGUID()))
+                        {
+                            ++diseases;
+
+                            if (!hasGlyph)
+                                continue;
+
+                            Aura * aura = (*itrB)->GetBase();
+
+                            int32 applytime = int32(aura->GetApplyTime() & 0x7FFFFFFF);
+                            int32 duration = std::min(aura->GetDuration() + (extratime * IN_MILLISECONDS), aura->GetMaxDuration());
+
+                            if (AuraEffect * aurEffB = GetGlyphScourgeStrikeAuraEffect(aura->GetId(), aurasA))
+                            {
+                                aurEffB->GetBase()->SetDuration(duration);
+
+                                if (applytime != aurEffB->GetBase()->GetMaxDuration())
+                                    aurEffB->SetAmount(aurEffB->GetAmount() & ~(0xF));
+
+                                if (maxtime <= (aurEffB->GetAmount() & 0xF))
+                                    continue;
+
+                                aura->SetDuration(duration);
+
+                                aurEffB->GetBase()->SetMaxDuration(applytime);
+                                aurEffB->SetAmount(aurEffB->GetAmount() + extratime);
+
+                                continue;
+                            }
+                            int32 bp0 = (aura->GetId() << 4) + extratime;
+                            caster->CastCustomSpell(target, aurEffA->GetId(), &bp0, NULL, NULL, true);
+
+                            Unit::AuraEffectList tmp;
+                            GetGlyphScourgeStrikeAuraEffects(caster, target, tmp);
+
+                            if (AuraEffect * aurEffB = GetGlyphScourgeStrikeAuraEffect(aura->GetId(), tmp))
+                            {
+                                aura->SetDuration(duration);
+
+                                aurEffB->GetBase()->SetMaxDuration(applytime);
+                                aurEffB->GetBase()->SetDuration(duration);
+                            }
+                        }
+                }
+
+                int32 bp0 = (GetHitDamage() * GetEffectValue() * diseases) / 100;
+                caster->CastCustomSpell(target, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
+            }
+
+
+            void HandleAfterHit()
+            {
+                Unit* caster = GetCaster();
+                if (Unit* unitTarget = GetHitUnit())
+                {
+                    int32 bp = (int32)(GetTrueDamage() * m_multip);
+                    caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
+                }
+            }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
-		AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
+                AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
             }
         };
 

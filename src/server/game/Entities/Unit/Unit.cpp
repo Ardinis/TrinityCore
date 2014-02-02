@@ -11239,32 +11239,32 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
         break;
         case SPELLFAMILY_DEATHKNIGHT:
             // Improved Icy Touch
-	  if (spellProto->SpellFamilyFlags[0] & 0x2)
-	  {
-	    if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2721, 0))
-	      AddPctN(DoneTotalMod, aurEff->GetAmount());
-	    Unit* pPet = NULL;
-	    for (Unit::ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr) //Find Rune Weapon
-	      if ((*itr)->GetEntry() == 27893)
-	      {
-		pPet = (*itr);
-		break;
-	      }
-	    if (pPet && getVictim())
-	    {
-	      pPet->CastSpell(getVictim(),55095,true);
-	      if (Aura *aur = getVictim()->GetAura(55095,pPet->GetGUID()))
-		if (AuraEffect const* epidemic = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
-		{
-		  aur->SetMaxDuration(epidemic->GetAmount()+aur->GetMaxDuration());
-		  aur->SetDuration(aur->GetMaxDuration());
-		}
-	    }
-	  }
+            if (spellProto->SpellFamilyFlags[0] & 0x2)
+            {
+                if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 2721, 0))
+                    AddPctN(DoneTotalMod, aurEff->GetAmount());
+                Unit* pPet = NULL;
+                for (Unit::ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr) //Find Rune Weapon
+                    if ((*itr)->GetEntry() == 27893)
+                    {
+                        pPet = (*itr);
+                        break;
+                    }
+                if (pPet && getVictim())
+                {
+                    pPet->CastSpell(getVictim(),55095,true);
+                    if (Aura *aur = getVictim()->GetAura(55095,pPet->GetGUID()))
+                        if (AuraEffect const* epidemic = GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 234, EFFECT_0))
+                        {
+                            aur->SetMaxDuration(epidemic->GetAmount()+aur->GetMaxDuration());
+                            aur->SetDuration(aur->GetMaxDuration());
+                        }
+                }
+            }
             // Sigil of the Vengeful Heart
             if (spellProto->SpellFamilyFlags[0] & 0x2000)
-	      if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
-		DoneTotal += aurEff->GetAmount();
+                if (AuraEffect* aurEff = GetAuraEffect(64962, EFFECT_1))
+                    DoneTotal += aurEff->GetAmount();
 
             // Glacier Rot
             if (spellProto->SpellFamilyFlags[0] & 0x2 || spellProto->SpellFamilyFlags[1] & 0x6)

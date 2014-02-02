@@ -651,8 +651,6 @@ class spell_dk_will_of_the_necropolis : public SpellScriptLoader
 
             bool Validate(SpellInfo const* spellEntry)
             {
-	      if (!sSpellMgr)
-		return false;
                 // can't use other spell than will of the necropolis due to spell_ranks dependency
                 if (sSpellMgr->GetFirstSpellInChain(DK_SPELL_WILL_OF_THE_NECROPOLIS_AURA_R1) != sSpellMgr->GetFirstSpellInChain(spellEntry->Id))
                     return false;
@@ -680,8 +678,6 @@ class spell_dk_will_of_the_necropolis : public SpellScriptLoader
 
             void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
             {
-	      if (!sSpellMgr)
-		return ;
                 // min pct of hp is stored in effect 0 of talent spell
                 uint32 rank = sSpellMgr->GetSpellRank(GetSpellInfo()->Id);
                 SpellInfo const* talentProto = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellWithRank(DK_SPELL_WILL_OF_THE_NECROPOLIS_TALENT_R1, rank));
@@ -838,8 +834,26 @@ class spell_dk_death_strike : public SpellScriptLoader
                 }
             }
 
+            SpellCastResult CheckCast()
+            {
+                Unit* caster = GetCaster();
+                if (Unit* target = GetTargetUnit())
+                {
+                    if (!caster->IsFriendlyTo(target) && !caster->isInFront(target))
+                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+                    if (target->IsFriendlyTo(caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                return SPELL_CAST_OK;
+            }
+
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_dk_death_coil_SpellScript::CheckCast);
                 OnEffectHitTarget += SpellEffectFn(spell_dk_death_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
             }
 
@@ -855,6 +869,7 @@ enum DeathCoil
 {
     SPELL_DEATH_COIL_DAMAGE     = 47632,
     SPELL_DEATH_COIL_HEAL       = 47633,
+    SPELL_SIGIL_VENGEFUL_HEART  = 64962,
 };
 
 class spell_dk_death_coil : public SpellScriptLoader
@@ -884,7 +899,11 @@ class spell_dk_death_coil : public SpellScriptLoader
                         caster->CastCustomSpell(target, SPELL_DEATH_COIL_HEAL, &bp, NULL, NULL, true);
                     }
                     else
+                    {
+                        if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_SIGIL_VENGEFUL_HEART, EFFECT_1))
+                            damage += auraEffect->GetBaseAmount();
                         caster->CastCustomSpell(target, SPELL_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
+                    }
             }
 
             void Register()

@@ -25449,6 +25449,13 @@ void Player::RemoveAurasOnActivateSpec()
         aurasToRemove.push_back(63622);    // improved unholy presence
         aurasToRemove.push_back(63621);    // improved frost presence
         break;
+    case CLASS_WARLOCK:
+        aurasToRemove.push_back(30143);    // Demoniac Aegis
+        aurasToRemove.push_back(30144);    // Demoniac Aegis
+        aurasToRemove.push_back(30145);    // Demoniac Aegis
+        aurasToRemove.push_back(18767);    // Master Conjuror
+        aurasToRemove.push_back(18768);    // Master Conjuror
+        break;
     default:
         break;
     }

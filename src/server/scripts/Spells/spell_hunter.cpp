@@ -635,12 +635,12 @@ class spell_hun_misdirection : public SpellScriptLoader
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
-                    GetTarget()->SetRedirectThreat(0, 0);
+                    GetTarget()->SetReducedThreatPercent(0, 0);
             }
 
             bool CheckProc(ProcEventInfo& /*eventInfo*/)
             {
-                return GetTarget()->GetRedirectThreatTarget();
+                return GetTarget()->GetMisdirectionTarget();
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
@@ -675,7 +675,7 @@ class spell_hun_misdirection_proc : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                GetTarget()->SetRedirectThreat(0, 0);
+                GetTarget()->SetReducedThreatPercent(0, 0);
             }
 
             void Register()
@@ -1345,10 +1345,10 @@ public:
             if (caster->GetTypeId() != TYPEID_PLAYER)
                 return SPELL_FAILED_DONT_REPORT;
 
-            if (!GetExplTargetUnit())
+            if (!GetTargetUnit())
                 return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
-            if (Creature* target = GetExplTargetUnit()->ToCreature())
+            if (Creature* target = GetTargetUnit()->ToCreature())
             {
                 if (target->getLevel() > caster->getLevel())
                     return SPELL_FAILED_HIGHLEVEL;

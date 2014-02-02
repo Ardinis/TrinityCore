@@ -1435,6 +1435,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             aurEff->SetAmount(CalculatePctU(aurEff->GetAmount(), damageInfo.damage));
         }
         m_damage = damageInfo.damage;
+        m_true_damage = damageInfo.damage;
         caster->DealSpellDamage(&damageInfo, true);
 
        // Cobra Strikes (can't find any other way that may work)

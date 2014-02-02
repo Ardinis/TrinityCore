@@ -865,27 +865,32 @@ class spell_dk_death_coil : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*SpellEntry*/)
             {
-                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(SPELL_DEATH_COIL_DAMAGE) || !sSpellMgr->GetSpellInfo(SPELL_DEATH_COIL_HEAL))
-                    return false;
                 return true;
             }
 
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
-                int32 damage = GetEffectValue();
                 Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+                Player *player = caster->ToPlayer();
+                if (!player)
+                    return;
                 if (Unit* target = GetHitUnit())
+                {
                     if (caster->IsFriendlyTo(target))
                     {
-                        int32 bp = int32(damage * 1.5f);
+                        int32 bp = 900 + 3 * player->GetTotalAttackPowerValue(BASE_ATTACK);
                         caster->CastCustomSpell(target, SPELL_DEATH_COIL_HEAL, &bp, NULL, NULL, true);
                     }
                     else
                     {
+                        int32 bp = 664.5f + 3 * player->GetTotalAttackPowerValue(BASE_ATTACK);
                         if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_SIGIL_VENGEFUL_HEART, EFFECT_1))
-                            damage += auraEffect->GetBaseAmount();
-                        caster->CastCustomSpell(target, SPELL_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
+                            bp += auraEffect->GetBaseAmount();
+                        caster->CastCustomSpell(target, SPELL_DEATH_COIL_DAMAGE, &bp, NULL, NULL, true);
                     }
+                }
             }
 
             SpellCastResult CheckCast()

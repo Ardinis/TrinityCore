@@ -6999,22 +6999,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
             switch (dummySpell->Id)
             {
-                case 34477: // Misdirection
-                {
-                    if (!GetMisdirectionTarget())
-                        return false;
-
-                    triggered_spell_id = 35079; // 4 sec buff on self
-                    target = this;
-		    break;
-                }
                 case 57870: // Glyph of Mend Pet
                 {
                     victim->CastSpell(victim, 57894, true, NULL, NULL, GetGUID());
                     return true;
                 }
-
-
             }
             break;
         }

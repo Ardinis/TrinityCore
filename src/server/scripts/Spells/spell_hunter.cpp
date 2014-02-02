@@ -44,7 +44,8 @@ enum HunterSpells
     HUNTER_SPELL_KILL_COMMAND_CRIT_20            = 60113,
     HUNTER_SPELL_FOCUSED_FIRE_1                  = 35029,
     HUNTER_SPELL_FOCUSED_FIRE_2                  = 35030,
-    HUNTER_SPELL_ANIMAL_HANDLER                  = 34453
+    HUNTER_SPELL_ANIMAL_HANDLER                  = 34453,
+    SPELL_HUNTER_MISDIRECTION_PROC                  = 35079,
 };
 
 // 13161 Aspect of the Beast
@@ -315,26 +316,38 @@ class spell_hun_masters_call : public SpellScriptLoader
                 return true;
             }
 
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* ally = GetHitUnit())
+                    if (Player* caster = GetCaster()->ToPlayer())
+                        if (Pet* target = caster->GetPet())
+                        {
+                            TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
+                            target->CastSpell(ally, GetEffectValue(), castMask);
+                            target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
+                        }
+            }
+
             void HandleScriptEffect(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* target = GetHitUnit())
                 {
-		  if (target->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
-		    return ;
-		  // Cannot be processed while pet is dead
-		  TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
-		  target->CastSpell(target, GetEffectValue(), castMask);
-		  target->CastSpell(target, HUNTER_SPELL_MASTERS_CALL_TRIGGERED, castMask);
-		  // there is a possibility that this effect should access effect 0 (dummy) target, but i dubt that
-		  // it's more likely that on on retail it's possible to call target selector based on dbc values
-		  // anyways, we're using GetTargetUnit() here and it's ok
-		  if (Unit* ally = GetTargetUnit())
-		  {
-		    if (ally->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
-		      return ;
-		    target->CastSpell(ally, GetEffectValue(), castMask);
-		    target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
-		  }
+                    if (target->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
+                        return ;
+                    // Cannot be processed while pet is dead
+                    TriggerCastFlags castMask = TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_IGNORE_CASTER_AURASTATE);
+                    target->CastSpell(target, GetEffectValue(), castMask);
+                    target->CastSpell(target, HUNTER_SPELL_MASTERS_CALL_TRIGGERED, castMask);
+                    // there is a possibility that this effect should access effect 0 (dummy) target, but i dubt that
+                    // it's more likely that on on retail it's possible to call target selector based on dbc values
+                    // anyways, we're using GetTargetUnit() here and it's ok
+                    if (Unit* ally = GetTargetUnit())
+                    {
+                        if (ally->HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED | UNIT_STATE_FLEEING))
+                            return ;
+                        target->CastSpell(ally, GetEffectValue(), castMask);
+                        target->CastSpell(ally, GetSpellInfo()->Effects[EFFECT_0].CalcValue(), castMask);
+                    }
                 }
             }
 
@@ -380,7 +393,7 @@ class spell_hun_readiness : public SpellScriptLoader
                         spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
                         spellInfo->Id != HUNTER_SPELL_READINESS &&
                         spellInfo->Id != HUNTER_SPELL_BESTIAL_WRATH &&
-			spellInfo->Id != DRAENEI_SPELL_GIFT_OF_THE_NAARU &&
+                        spellInfo->Id != DRAENEI_SPELL_GIFT_OF_THE_NAARU &&
                         spellInfo->GetRecoveryTime() > 0)
                         caster->RemoveSpellCooldown((itr++)->first, true);
                     else
@@ -621,14 +634,26 @@ class spell_hun_misdirection : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (Unit* caster = GetCaster())
-		  if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
-                        caster->SetReducedThreatPercent(0, 0);
+                if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
+                    GetTarget()->SetRedirectThreat(0, 0);
+            }
+
+            bool CheckProc(ProcEventInfo& /*eventInfo*/)
+            {
+                return GetTarget()->GetRedirectThreatTarget();
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                GetTarget()->CastSpell(GetTarget(), SPELL_HUNTER_MISDIRECTION_PROC, true, NULL, aurEff);
             }
 
             void Register()
             {
                 AfterEffectRemove += AuraEffectRemoveFn(spell_hun_misdirection_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                DoCheckProc += AuraCheckProcFn(spell_hun_misdirection_AuraScript::CheckProc);
+                OnEffectProc += AuraEffectProcFn(spell_hun_misdirection_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
             }
         };
 
@@ -650,8 +675,7 @@ class spell_hun_misdirection_proc : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (GetCaster())
-                    GetCaster()->SetReducedThreatPercent(0, 0);
+                GetTarget()->SetRedirectThreat(0, 0);
             }
 
             void Register()
@@ -1276,6 +1300,87 @@ public:
     }
 };
 
+class spell_hun_disengage : public SpellScriptLoader
+{
+public:
+    spell_hun_disengage() : SpellScriptLoader("spell_hun_disengage") { }
+
+    class spell_hun_disengage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_disengage_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (caster->GetTypeId() == TYPEID_PLAYER && !caster->isInCombat())
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_hun_disengage_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_disengage_SpellScript();
+    }
+};
+
+class spell_hun_tame_beast : public SpellScriptLoader
+{
+public:
+    spell_hun_tame_beast() : SpellScriptLoader("spell_hun_tame_beast") { }
+
+    class spell_hun_tame_beast_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_tame_beast_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (caster->GetTypeId() != TYPEID_PLAYER)
+                return SPELL_FAILED_DONT_REPORT;
+
+            if (!GetExplTargetUnit())
+                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+            if (Creature* target = GetExplTargetUnit()->ToCreature())
+            {
+                if (target->getLevel() > caster->getLevel())
+                    return SPELL_FAILED_HIGHLEVEL;
+
+                // use SMSG_PET_TAME_FAILURE?
+                if (!target->GetCreatureTemplate()->isTameable(caster->ToPlayer()->CanTameExoticPets()))
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                if (caster->GetPetGUID())
+                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
+                if (caster->GetCharmGUID())
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+            }
+            else
+                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_hun_tame_beast_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_tame_beast_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1298,4 +1403,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_pet_passive_damage_done();
     new spell_hun_animal_handler();
     new spell_hun_kill_command();
+    new spell_hun_disengage();
+    new spell_hun_tame_beast();
 }

@@ -4691,6 +4691,9 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
+    if (Pet* pet = GetPet())
+        pet->RemoveAllAurasOnDeath();
+
     RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
 
     for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
@@ -4730,6 +4733,10 @@ bool Player::resetTalents(bool no_cost)
                 plrTalent->second->state = PLAYERSPELL_REMOVED;
         }
     }
+
+    RemoveAurasOnActivateSpec();
+    if (getClass() == CLASS_MAGE) // focus magic exploit fix
+        RemoveOwnedAuraOnTarget(54646);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     _SaveTalents(trans);
@@ -25279,7 +25286,10 @@ void Player::ActivateSpec(uint8 spec)
 
     // TO-DO: We need more research to know what happens with warlock's reagent
     if (Pet* pet = GetPet())
+    {
+        pet->RemoveAllAurasOnDeath();
         RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
+    }
 
     ClearComboPointHolders();
     ClearAllReactives();
@@ -25288,6 +25298,12 @@ void Player::ActivateSpec(uint8 spec)
     /*RemoveAllAurasOnDeath();
     if (GetPet())
         GetPet()->RemoveAllAurasOnDeath();*/
+
+    // Hack: Remove DK Presences, to avoid some exploits
+    RemoveAurasOnActivateSpec();
+
+    if (getClass() == CLASS_MAGE) // focus magic exploit fix
+        RemoveOwnedAuraOnTarget(54646);
 
     //RemoveAllAuras(GetGUID(), NULL, false, true); // removes too many auras
     //ExitVehicle(); // should be impossible to switch specs from inside a vehicle..
@@ -25402,6 +25418,60 @@ void Player::ActivateSpec(uint8 spec)
         SetPower(POWER_MANA, 0); // Mana must be 0 even if it isn't the active power type.
 
     SetPower(pw, 0);
+}
+
+void Player::RemoveAurasOnActivateSpec()
+{
+    std::list<uint32> aurasToRemove;
+    switch (getClass())
+    {
+    case CLASS_ROGUE:
+        aurasToRemove.push_back(51708);    // Slaughter from the shadows
+        aurasToRemove.push_back(51709);    // Slaughter from the shadows
+        aurasToRemove.push_back(51710);    // Slaughter from the shadows
+        aurasToRemove.push_back(51711);    // Slaughter from the shadows
+        aurasToRemove.push_back(51712);    // Slaughter from the shadows
+        aurasToRemove.push_back(31221);    // Master of Subtlety
+        aurasToRemove.push_back(31222);    // Master of Subtlety
+        aurasToRemove.push_back(31223);    // Master of Subtlety
+        aurasToRemove.push_back(14082);    // Dirty Deeds
+        aurasToRemove.push_back(14083);    // Dirty Deeds
+        break;
+    case CLASS_DRUID:
+        aurasToRemove.push_back(48517);    // Eclipse (Solar)
+        aurasToRemove.push_back(48518);    // Eclipse (Lunar)
+        break;
+    case CLASS_DEATH_KNIGHT:
+        aurasToRemove.push_back(48266);    // frost presence
+        aurasToRemove.push_back(48263);    // blood presence
+        aurasToRemove.push_back(48265);    // unholy presence
+        aurasToRemove.push_back(63611);    // improved blood presence
+        aurasToRemove.push_back(63622);    // improved unholy presence
+        aurasToRemove.push_back(63621);    // improved frost presence
+        break;
+    default:
+        break;
+    }
+    for (std::list<uint32>::const_iterator itr = aurasToRemove.begin(); itr != aurasToRemove.end(); ++itr)
+        RemoveAurasDueToSpell(*itr);
+}
+
+void Player::RemoveOwnedAuraOnTarget(uint32 spell)
+{
+    AuraList& scAuras = GetSingleCastAuras();
+    for (AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
+    {
+        if (Aura* aura = (*itr))
+        {
+            if (aura->GetId() == spell)
+            {
+                aura->Remove();
+                itr = scAuras.begin();
+            }
+            else
+                ++itr;
+        }
+    }
 }
 
 void Player::ResetTimeSync()

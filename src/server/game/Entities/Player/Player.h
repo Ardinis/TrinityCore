@@ -1714,6 +1714,8 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint8 count) { m_specsCount = count; }
         void ActivateSpec(uint8 spec);
+        void RemoveAurasOnActivateSpec();
+        void RemoveOwnedAuraOnTarget(uint32 spell);
 
         void InitGlyphsForLevel();
         void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot, slottype); }

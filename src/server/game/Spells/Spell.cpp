@@ -1690,8 +1690,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         m_spellAura->SetDuration(duration);
                     }
 
-                    std::cout << " m_spellInfo->Id ? " <<  m_spellInfo->Id << std::endl;
-
                     m_spellAura->_RegisterForTargets();
 
                     if (m_spellInfo->IsChanneled())

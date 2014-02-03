@@ -6348,6 +6348,84 @@ public:
   };
 };
 
+enum eArmyDeadGhoul
+{
+    SPELL_TAUNT             = 43263,
+    SPELL_CLAW              = 47468,
+    SPELL_LEAP              = 47482,
+    SPELL_AOE_AVOIDANCE     = 62137
+};
+
+class npc_army_dead_ghoul : public CreatureScript
+{
+public:
+    npc_army_dead_ghoul() : CreatureScript("npc_army_dead_ghoul") { }
+
+    struct npc_army_dead_ghoulAI : public ScriptedAI
+    {
+        npc_army_dead_ghoulAI(Creature* creature) : ScriptedAI(creature)
+        {
+            DoCast(me, SPELL_AOE_AVOIDANCE, true);
+        }
+
+        void Reset()
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->setPowerType(POWER_ENERGY);
+            me->SetMaxPower(POWER_ENERGY, 100);
+            ClawTimer = 2000;
+            TauntTimer = 2500;
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            if (me->GetDistance2d(who) > 5.0f)
+                DoCast(who, SPELL_LEAP, true);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me->GetPower(POWER_ENERGY) >= 40)
+            {
+                if (ClawTimer < diff)
+                {
+                    DoCastVictim(SPELL_CLAW, true);
+                    me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) - 40);
+                    ClawTimer = urand(3000, 5000);
+                } else ClawTimer -= diff;
+            }
+
+            if (TauntTimer < diff)
+            {
+                if (Unit* target = me->getVictim())
+                {
+                    if (target->GetTypeId() == TYPEID_UNIT)
+                    {
+                        if (!target->ToCreature()->isWorldBoss())
+                            DoCastVictim(SPELL_TAUNT, true);
+                    } else DoCastVictim(SPELL_TAUNT, true);
+                }
+                TauntTimer = urand(1000, 2000);
+            } else TauntTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        uint32 ClawTimer;
+        uint32 TauntTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_army_dead_ghoulAI(creature);
+    }
+};
+
+
 void AddSC_npcs_special()
 {
     //lost+found/  new npc_jump_mariage;
@@ -6424,4 +6502,6 @@ void AddSC_npcs_special()
     new npc_skori();
 
     //    new npc_paragon_5_years_01();
+
+    new npc_army_dead_ghoul();
 }

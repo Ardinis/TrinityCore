@@ -397,18 +397,9 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
-            float multiplier;
-
-            bool Load()
-            {
-                multiplier = 1.0f;
-                return true;
-            }
 
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellMgr || !sSpellMgr->GetSpellInfo(DK_SPELL_SCOURGE_STRIKE_TRIGGERED))
-                    return false;
                 return true;
             }
 
@@ -525,21 +516,9 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                 caster->CastCustomSpell(target, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
             }
 
-
-            void HandleAfterHit()
-            {
-                Unit* caster = GetCaster();
-                if (Unit* unitTarget = GetHitUnit())
-                {
-                    int32 bp = (int32)(GetTrueDamage() * multiplier);
-                    caster->CastCustomSpell(unitTarget, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp, NULL, NULL, true);
-                }
-            }
-
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
-                AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
             }
         };
 
@@ -898,7 +877,7 @@ class spell_dk_death_coil : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 if (Unit* target = GetTargetUnit())
                 {
-                    if (!caster->IsFriendlyTo(target) && !caster->isInFront(target, M_PI))
+                    if (!caster->IsFriendlyTo(target) && !caster->isInFront(target, 50, M_PI))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
 
                     if (target->IsFriendlyTo(caster) && target->GetCreatureType() != CREATURE_TYPE_UNDEAD)

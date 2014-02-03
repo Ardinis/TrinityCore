@@ -3937,6 +3937,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 33196:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
+            case 59309:
+                spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+                break;
             default:
                 break;
         }

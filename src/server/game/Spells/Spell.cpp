@@ -2036,6 +2036,7 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, SpellNo
             break;
     }
 
+
     Trinity::SpellNotifierCreatureAndPlayer notifier(m_caster, TagUnitMap, radius, type, TargetType, pos, entry, m_spellInfo);
     if ((m_spellInfo->AttributesEx3 & SPELL_ATTR3_ONLY_TARGET_PLAYERS) || (TargetType == SPELL_TARGETS_ENTRY && !entry))
         m_caster->GetMap()->VisitWorld(pos->m_positionX, pos->m_positionY, radius, notifier);
@@ -2682,6 +2683,13 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                 radius = m_spellInfo->Effects[i].CalcRadius();
                 targetType = SPELL_TARGETS_NONE;
                 break;
+        }
+
+        if (m_spellInfo->Id == 50842 && m_caster)
+        {
+            pushType = PUSH_DST_CENTER;
+            if (m_caster->HasAura(59309))
+                radius += 5.0f;
         }
 
         if (modOwner)

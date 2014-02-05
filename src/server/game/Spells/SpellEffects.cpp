@@ -1587,7 +1587,12 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
 void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT && effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+    if (!GetSpellInfo()->HasEffect(SPELL_EFFECT_CHARGE))
+    {
+        if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT && effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+            return;
+    }
+    else if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT && effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
@@ -1602,7 +1607,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
     // todo: move those to spell scripts
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TRIGGER_SPELL
-        && effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
+        && (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET || effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET))
     {
         // special cases
         switch (triggered_spell_id)
@@ -1629,13 +1634,13 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
                 // See if we already are stealthed. If so, we're done.
                 if (unitTarget->HasAura(1784) || unitTarget->HasAura(51713))
-		  return;
+                    return;
 
                 // Reset cooldown on stealth if needed
-		if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
-		  unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
+                if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
+                    unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
-		unitTarget->CastSpell(unitTarget, 1784, true);
+                unitTarget->CastWithDelay(1500, unitTarget, 1784, true);
                 return;
             }
             // Demonic Empowerment -- succubus
@@ -2632,7 +2637,12 @@ void Spell::EffectCreateRandomItem(SpellEffIndex /*effIndex*/)
 
 void Spell::EffectPersistentAA(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+    if (m_spellInfo->Id == 1543)
+    {
+        if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+            return;
+    }
+    else if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
     if (!m_spellAura)

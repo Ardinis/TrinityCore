@@ -618,7 +618,7 @@ public:
         {
             if (instance)
                 instance->SetBossState(DATA_MALYGOS_EVENT, FAIL);
-            BossAI::EnterEvadeMode();
+
             SendLightOverride(LIGHT_GET_DEFAULT_FOR_MAP, 1*IN_MILLISECONDS);
 
             if (_phase == PHASE_THREE)
@@ -632,6 +632,8 @@ public:
 
             if (instance)
                 instance->SetBossState(DATA_MALYGOS_EVENT, NOT_STARTED);
+
+            BossAI::EnterEvadeMode();
         }
 
         void KilledUnit(Unit* victim)

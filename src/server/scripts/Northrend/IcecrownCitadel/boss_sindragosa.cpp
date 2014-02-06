@@ -1712,6 +1712,53 @@ class achievement_all_you_can_eat : public AchievementCriteriaScript
         }
 };
 
+class spell_sindragose_tail_slash : public SpellScriptLoader
+{
+public :
+    spell_sindragose_tail_slash() : SpellScriptLoader("spell_sindragose_tail_slash") {}
+
+    class spell_sindragose_tail_slash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sindragose_tail_slash_SpellScript);
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+            Map *map = caster->GetMap();
+            if (!map)
+                return;
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player *player = i->getSource())
+                    if (player->isAlive())
+                            if (caster->isInBackInMap(player, 15.0f, static_cast<float>(M_PI / 6)))
+                                unitList.push_back(player);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragose_tail_slash_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragose_tail_slash_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sindragose_tail_slash_SpellScript();
+    }
+};
+
+
 void AddSC_boss_sindragosa()
 {
     new boss_sindragosa();
@@ -1733,4 +1780,5 @@ void AddSC_boss_sindragosa()
     new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb_dummy", SPELL_FROST_BEACON);
     new at_sindragosa_lair();
     new achievement_all_you_can_eat();
+    new spell_sindragose_tail_slash();
 }

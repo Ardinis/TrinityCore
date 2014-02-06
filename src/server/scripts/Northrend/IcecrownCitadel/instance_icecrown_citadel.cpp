@@ -479,9 +479,9 @@ class instance_icecrown_citadel : public InstanceMapScript
 						   break;
 				    case 201868:
 						   if (!SaurfangAllianceTent1GUID)
-								   SaurfangAllianceTent1GUID = go->GetGUID();
+                               SaurfangAllianceTent1GUID = go->GetGUID();
 						   else
-								   SaurfangAllianceTent2GUID = go->GetGUID();
+                               SaurfangAllianceTent2GUID = go->GetGUID();
 						  break;
 				    case 201887:
 						   SaurfangHordeTent1GUID = go->GetGUID();
@@ -629,7 +629,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DREAMWALKER_CACHE_10_H:
                     case GO_DREAMWALKER_CACHE_25_H:
                         uiDreamwalkerCache = go->GetGUID();
-			go->EnableCollision(false);
+                        go->EnableCollision(false);
                         break;
                     default:
                         break;

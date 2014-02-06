@@ -468,7 +468,16 @@ void GameObject::Update(uint32 diff)
 
                         // some traps do not have spell but should be triggered
                         if (goInfo->trap.spellId)
-                            CastSpell(ok, goInfo->trap.spellId);
+                        {
+                            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(goInfo->trap.spellId);
+                            if (owner && !owner->_IsValidAttackTarget(ok, spellInfo, this))
+                                break;
+                            else
+                                CastSpell(ok, goInfo->trap.spellId);
+                        }
+
+                        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                            owner->CombatStart(ok, true);
 
                         // allow go to use wg script
                         if (ok->GetTypeId() == TYPEID_PLAYER)
@@ -1112,6 +1121,19 @@ void GameObject::Use(Unit* user)
             player->SendPreparedGossip(this);
             return;
         }
+        case GAMEOBJECT_TYPE_TRAP:                          //6
+        {
+            GameObjectTemplate const* goInfo = GetGOInfo();
+            if (goInfo->trap.spellId)
+                CastSpell(user, goInfo->trap.spellId);
+
+            m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
+
+            if (goInfo->trap.type == 1)         // Deactivate after trigger
+                SetLootState(GO_JUST_DEACTIVATED);
+
+            return;
+        }
         //Sitting: Wooden bench, chairs enzz
         case GAMEOBJECT_TYPE_CHAIR:                         //7
         {
@@ -1680,8 +1702,14 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
     if (!trigger)
         return;
 
+    trigger->SetGoType(GetGoType());
+
     if (Unit* owner = GetOwner())
     {
+        if (owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+            trigger->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+        if (owner->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP)
+            trigger->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
         trigger->setFaction(owner->getFaction());
         // needed for GO casts for proper target validation checks
         trigger->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());

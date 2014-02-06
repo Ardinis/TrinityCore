@@ -1974,7 +1974,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
 // use this function to avoid having hostile creatures attack
 // friendlies and other mobs they shouldn't attack
-bool Creature::_IsTargetAcceptable(const Unit* target) const
+bool Creature::_IsTargetAcceptable(const Unit* target, const bool aggro /*= false*/) const
 {
     ASSERT(target);
 
@@ -1997,7 +1997,7 @@ bool Creature::_IsTargetAcceptable(const Unit* target) const
     const Unit* targetVictim = target->getAttackerForHelper();
 
     // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
-    if (myVictim == target || targetVictim == this || IsHostileTo(target))
+    if (myVictim == target || targetVictim == this || (aggro ? !IsFriendlyTo(target) : IsHostileTo(target)))
         return true;
 
     // if the target's victim is friendly, and the target is neutral, the target is acceptable

@@ -644,7 +644,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
-        bool _IsTargetAcceptable(const Unit* target) const;
+        bool _IsTargetAcceptable(const Unit* target, const bool aggro = false) const;
 
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
         void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }

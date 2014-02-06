@@ -2124,6 +2124,13 @@ void SpellMgr::LoadSpellPetAuras()
 
 bool SpellMgr::IsCCSpell(SpellInfo const *spellProto, uint8 EffMask)
 {
+        if (spellProto->Id == 26888 ||
+            spellProto->Id == 1784)
+            return true;
+        if (spellProto->Id == 18461 ||
+            spellProto->Id == 26889)
+            return false;
+
        if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER ||
                spellProto->SpellFamilyName == SPELLFAMILY_GENERIC)
                return false;
@@ -2133,18 +2140,21 @@ bool SpellMgr::IsCCSpell(SpellInfo const *spellProto, uint8 EffMask)
                if (EffMask && !(EffMask & (1<<effIndex)))
 				   continue;
 
-               switch(spellProto->Effects[effIndex].ApplyAuraName)
+               switch (spellProto->Effects[effIndex].ApplyAuraName)
                {
-				case SPELL_AURA_MOD_CONFUSE:
-				case SPELL_AURA_MOD_FEAR:
-				case SPELL_AURA_MOD_STUN:
-				case SPELL_AURA_MOD_ROOT:
-				case SPELL_AURA_TRANSFORM:
-					if (!spellProto->IsPositiveEffect(effIndex))
-						return true;
-					break;
-				default:
-					break;
+                   case SPELL_AURA_MOD_POSSESS:
+                   case SPELL_AURA_MOD_CONFUSE:
+                   case SPELL_AURA_MOD_CHARM:
+                   case SPELL_AURA_AOE_CHARM:
+                   case SPELL_AURA_MOD_FEAR:
+                   case SPELL_AURA_MOD_STUN:
+                   case SPELL_AURA_MOD_ROOT:
+                   case SPELL_AURA_TRANSFORM:
+                       if (!spellProto->IsPositiveEffect(effIndex))
+                           return true;
+                       break;
+                   default:
+                       break;
                }
        }
 

@@ -1627,7 +1627,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 unitTarget->RemoveMovementImpairingAuras();
                 unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
                 unitTarget->CombatStop();
-
+                unitTarget->getHostileRefManager().deleteReferences();
                 // If this spell is given to an NPC, it must handle the rest using its own AI
                 if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                     return;
@@ -1640,7 +1640,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                     unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
-                unitTarget->CastWithDelay(1500, unitTarget, 1784, true);
+                unitTarget->CastSpell(unitTarget, 1784, false);
                 return;
             }
             // Demonic Empowerment -- succubus
@@ -2639,7 +2639,7 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
 {
     if (m_spellInfo->Id == 1543)
     {
-        if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+        if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
             return;
     }
     else if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
@@ -6338,7 +6338,7 @@ void Spell::EffectLeap(SpellEffIndex /*effIndex*/)
 
     Position pos;
     m_targets.GetDst()->GetPosition(&pos);
-    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 2.0f), 0.0f);
+    //    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 2.0f), 0.0f);
     unitTarget->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), unitTarget == m_caster);
 }
 

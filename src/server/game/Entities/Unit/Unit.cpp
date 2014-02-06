@@ -150,7 +150,7 @@ m_movedPlayer(NULL), m_lastSanctuaryTime(0), IsAIEnabled(false), NeedChangeAI(fa
 m_ControlledByPlayer(false), movespline(new Movement::MoveSpline()), i_AI(NULL),
 i_disabledAI(NULL), m_procDeep(0), m_removedAurasCount(0), i_motionMaster(this),
 m_ThreatManager(this), m_vehicle(NULL), m_vehicleKit(NULL), m_unitTypeMask(UNIT_MASK_NONE),
-m_HostileRefManager(this)
+                                m_HostileRefManager(this), m_gameObjectType(MAX_GAMEOBJECT_TYPE)
 {
 #ifdef _MSC_VER
 #pragma warning(default:4355)
@@ -2086,7 +2086,7 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
         SendAttackStateUpdate(&damageInfo);
 
         //TriggerAurasProcOnEvent(damageInfo);
-        ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
+        ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.absorb, damageInfo.attackType);
 
         DealMeleeDamage(&damageInfo, true);
 
@@ -4429,6 +4429,8 @@ Aura* Unit::GetAuraOfRankedSpell(uint32 spellId, uint64 casterGUID, uint64 itemC
 
 void Unit::GetDispellableAuraList(Unit* caster, uint32 dispelMask, DispelChargesList& dispelList)
 {
+    if (!caster)
+        return;
     // we should not be able to dispel diseases if the target is affected by unholy blight
     if (dispelMask & (1 << DISPEL_DISEASE) && HasAura(50536))
         dispelMask &= ~(1 << DISPEL_DISEASE);
@@ -5119,15 +5121,15 @@ void Unit::SendSpellNonMeleeDamageLog(Unit* target, uint32 SpellID, uint32 Damag
     SendSpellNonMeleeDamageLog(&log);
 }
 
-void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellInfo const* procSpell, SpellInfo const* procAura)
+void Unit::ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, uint32 absorbed, WeaponAttackType attType, SpellInfo const* procSpell, SpellInfo const* procAura)
 {
      // Not much to do if no flags are set.
     if (procAttacker)
-        ProcDamageAndSpellFor(false, victim, procAttacker, procExtra, attType, procSpell, amount, procAura);
+        ProcDamageAndSpellFor(false, victim, procAttacker, procExtra, attType, procSpell, amount, absorbed, procAura);
     // Now go on with a victim's events'n'auras
     // Not much to do if no flags are set or there is no victim
     if (victim && victim->isAlive() && procVictim)
-        victim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, procAura);
+        victim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, absorbed, procAura);
 }
 
 void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
@@ -8036,7 +8038,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // Send log damage message to client
                     pPet->DealDamageMods(petVic, damageInfo.damage,&damageInfo.absorb);
                     pPet->SendAttackStateUpdate(&damageInfo);
-                    pPet->ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
+                    pPet->ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.absorb, damageInfo.attackType);
                     pPet->DealMeleeDamage(&damageInfo,true);
 		  }
 		  else
@@ -13462,6 +13464,9 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
                 target->ToCreature()->AI()->AttackStart(this);
         }
 
+        if (target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->isPet())
+            target->AddThreat(this, 0.0f);
+
         SetInCombatWith(target);
         target->SetInCombatWith(this);
     }
@@ -13605,7 +13610,11 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
             return false;
 
     // can't attack invisible (ignore stealth for aoe spells)
-    if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && (obj ? !obj->canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()) : !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea())))
+    if ((!bySpell || !(bySpell->AttributesEx6 & SPELL_ATTR6_CAN_TARGET_INVISIBLE))
+        && (obj ? (!obj->canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea()
+                                        && (obj->GetTypeId() != TYPEID_GAMEOBJECT || obj->ToGameObject()->GetGoType() != GAMEOBJECT_TYPE_TRAP)))
+            : !canSeeOrDetect(target, bySpell && bySpell->IsAffectingArea())
+            && GetGoType() != GAMEOBJECT_TYPE_TRAP))
         return false;
 
     // can't attack dead
@@ -14437,11 +14446,15 @@ Unit* Creature::SelectVictim()
             target = getVictim();
     }
 
+    bool isInThreatList = false;
     if (CanHaveThreatList())
     {
         if (!target && !m_ThreatManager.isThreatListEmpty())
+        {
             // No taunt aura or taunt aura caster is dead standard target selection
             target = m_ThreatManager.getHostilTarget();
+            isInThreatList = true;
+        }
     }
     else if (!HasReactState(REACT_PASSIVE))
     {
@@ -14471,7 +14484,7 @@ Unit* Creature::SelectVictim()
     else
         return NULL;
 
-    if (target && _IsTargetAcceptable(target))
+    if (target && _IsTargetAcceptable(target, isInThreatList))
     {
         SetInFront(target);
         return target;
@@ -14497,7 +14510,7 @@ Unit* Creature::SelectVictim()
     {
         target = SelectNearestTargetInAttackDistance(m_CombatDistance ? m_CombatDistance : ATTACK_DISTANCE);
 
-        if (target && _IsTargetAcceptable(target))
+        if (target && _IsTargetAcceptable(target, isInThreatList))
             return target;
     }
 
@@ -15736,7 +15749,7 @@ uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missC
     return procEx;
 }
 
-void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, SpellInfo const* procAura)
+void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, uint32 absorbed, SpellInfo const* procAura)
 {
     // Player is loaded now - do not allow passive spell casts to proc
     if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->GetSession()->PlayerLoading())
@@ -15848,6 +15861,9 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (procExtra & PROC_EX_ABSORB && isVictim)
             if (damage || spellProto->Effects[EFFECT_0].TriggerSpell || spellProto->Effects[EFFECT_1].TriggerSpell || spellProto->Effects[EFFECT_2].TriggerSpell)
                 active = true;
+
+        if (spellProto->HasAura(SPELL_AURA_MOD_STEALTH))
+            active = true;
 
         // Some procflags that should be triggered when damage is absorbed
         if (procExtra & PROC_EX_ABSORB && !isVictim && spellProto->ProcFlags & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG))
@@ -15968,6 +15984,63 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
 
                 switch (triggeredByAura->GetAuraType())
                 {
+                    case SPELL_AURA_MOD_STEALTH:
+                    {
+                        //                        if (onCast)
+                        //     break;
+
+
+                        std::cout << "break stealth ? 1" << std::endl;
+                        if (!procSpell || damage)
+                        {
+                            takeCharges = true;
+                            break;
+                        }
+                        std::cout << "break stealth ? 2" << std::endl;
+                        if (procExtra & PROC_EX_REFLECT)
+                            break;
+                        std::cout << "break stealth ? 3" << std::endl;
+                        // Friendly casts won't break stealth
+                        if (IsFriendlyTo(target))
+                            break;
+                        std::cout << "break stealth ? 4" << std::endl;
+                        bool hasAbsorb = false;
+                        if (triggeredByAura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_DAMAGE_REDUCED_SHIELD)
+                        {
+                            // Check if we have an aura that prevents stealth from breaking
+                            for (AuraApplicationMap::iterator itr = m_appliedAuras.begin(); itr != m_appliedAuras.end(); itr++)
+                            {
+                                SpellInfo const* spell = itr->second->GetBase()->GetSpellInfo();
+                                if (spell->AttributesEx2 & SPELL_ATTR2_DAMAGE_REDUCED_SHIELD && spell->Id != triggeredByAura->GetId())
+                                {
+                                    hasAbsorb = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Absorb auras prevent stealth breaking from periodic damage
+                        if (hasAbsorb && procFlag & PROC_FLAG_TAKEN_PERIODIC)
+                            break;
+                        std::cout << "break stealth ? 5" << std::endl;
+                        // Experimental - not sure if correct
+                        if (!(procSpell->AttributesEx6 & SPELL_ATTR6_IGNORE_CASTER_AURAS) && !(procSpell->Attributes & SPELL_ATTR0_HIDDEN_CLIENTSIDE)
+                            && !(procSpell->AttributesEx & SPELL_ATTR1_NOT_BREAK_STEALTH) && !(procSpell->AttributesEx2 & SPELL_ATTR2_UNK28))
+                            takeCharges = true;
+
+                        // Non damaging Aoes don't remove stealth
+                        if (procSpell->IsTargetingArea() && !absorbed)
+                            takeCharges = false;
+
+                        // Any kind of CC breakes stealth
+                        if (procSpell->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
+                            takeCharges = true;
+
+                        // diminushing return and immune shouldn't break stealth
+                        if (procExtra & PROC_EX_IMMUNE || IsImmunedToDamage(procSpell) || IsImmunedToSpell(procSpell))
+                            takeCharges = false;
+                        break;
+                     }
                     case SPELL_AURA_PROC_TRIGGER_SPELL:
                     {
                         sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "ProcDamageAndSpell: casting spell %u (triggered by %s aura of spell %u)", spellInfo->Id, (isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
@@ -17135,13 +17208,13 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     // Do KILL and KILLED procs. KILL proc is called only for the unit who landed the killing blow (and its owner - for pets and totems) regardless of who tapped the victim
     if (isPet() || isTotem())
         if (Unit* owner = GetOwner())
-            owner->ProcDamageAndSpell(victim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0);
+            owner->ProcDamageAndSpell(victim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0, 0);
 
     if (victim->GetCreatureType() != CREATURE_TYPE_CRITTER)
-        ProcDamageAndSpell(victim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
+        ProcDamageAndSpell(victim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0, 0);
 
     // Proc auras on death - must be before aura/combat remove
-    victim->ProcDamageAndSpell(NULL, PROC_FLAG_DEATH, PROC_FLAG_NONE, PROC_EX_NONE, 0, BASE_ATTACK, 0);
+    victim->ProcDamageAndSpell(NULL, PROC_FLAG_DEATH, PROC_FLAG_NONE, PROC_EX_NONE, 0, 0, BASE_ATTACK, 0);
 
     // update get killing blow achievements, must be done before setDeathState to be able to require auras on target
     // and before Spirit of Redemption as it also removes auras

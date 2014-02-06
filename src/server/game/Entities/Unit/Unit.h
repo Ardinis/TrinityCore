@@ -1451,8 +1451,8 @@ class Unit : public WorldObject
         void Kill(Unit* pVictim, bool durabilityLoss = true);
         int32 DealHeal(Unit* pVictim, uint32 addhealth);
 
-        void ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = BASE_ATTACK, SpellInfo const* procSpell = NULL, SpellInfo const* procAura = NULL);
-        void ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, SpellInfo const* procAura = NULL);
+        void ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, uint32 absorbed, WeaponAttackType attType = BASE_ATTACK, SpellInfo const* procSpell = NULL, SpellInfo const* procAura = NULL);
+        void ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, uint32 absorbed, SpellInfo const* procAura = NULL);
 
         void GetProcAurasTriggeredOnEvent(std::list<AuraApplication*>& aurasTriggeringProc, std::list<AuraApplication*>* procAuras, ProcEventInfo eventInfo);
         void TriggerAurasProcOnEvent(CalcDamageInfo& damageInfo);
@@ -2253,6 +2253,9 @@ class Unit : public WorldObject
         TempSummon* ToTempSummon() { if (isSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
         const TempSummon* ToTempSummon() const { if (isSummon()) return reinterpret_cast<const TempSummon*>(this); else return NULL; }
 
+        uint32 GetGoType() const { return m_gameObjectType; }
+        void SetGoType(uint32 goType) { m_gameObjectType = goType; }
+
         void SetTarget(uint64 guid)
         {
             if (!_targetLocked)
@@ -2409,6 +2412,8 @@ class Unit : public WorldObject
 
         Spell const* _focusSpell;
         bool _targetLocked; // locks the target during spell cast for proper facing
+
+        uint32 m_gameObjectType;
 };
 
 namespace Trinity

@@ -2799,12 +2799,12 @@ void WorldObject::MoveBlink(Position &pos, float dist, float angle)
 
     if (!Trinity::IsValidMapCoord(destx, desty)) // Prevent invalid coordinates here, position is unchanged
     {
-        sLog->outCrash("WorldObject::MoveBlink invalid coordinates X: %f and Y: %f were passed!", destx, desty);
+        //        sLog->outFatal(LOG_FILTER_GENERAL, "WorldObject::MoveBlink invalid coordinates X: %f and Y: %f were passed!", destx, desty);
         return;
     }
 
     ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
-    floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+    floor = std::max<float>(GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true), GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true, 5.0f));
     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
     float colx = destx;
     float coly = desty;
@@ -2822,12 +2822,13 @@ void WorldObject::MoveBlink(Position &pos, float dist, float angle)
         destx = savex + cnt * cos(angle);
         desty = savey + cnt * sin(angle);
         ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
-        floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
+        floor = std::max<float>(GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true), GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true, 5.0f));
         destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
         float realDestz = destz;
         destz += 2.0f; // for 2 yard x, y check 2 yard z limitation to allow or not blink to check next step
         bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f,
                                                                                 destx, desty, destz, colx, coly, colz, -0.5f);
+
         if (!col)
             col = GetMap()->getObjectHitPos(GetPhaseMask(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz, colx, coly, colz, -0.5f);
 
@@ -2841,7 +2842,20 @@ void WorldObject::MoveBlink(Position &pos, float dist, float angle)
             break;
         }
 
-        UpdateAllowedPositionZ(destx, desty, destz);
+        // for server controlled moves playr work same as creature (but it can always swim)
+        if (!ToPlayer()->canFly())
+        {
+            ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
+            floor = std::max<float>(GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true), GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true, 5.0f));
+            destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
+        }
+        else
+        {
+            float ground_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), destx, desty, destz, true), GetBaseMap()->GetHeight(GetPhaseMask(), destx, desty, destz, true, 5.0f));
+            if (destz < ground_z)
+                destz = ground_z;
+        }
+
         if (fabs(destz - pos.m_positionZ) > 2.0f) // possible destz position under map or map object revolved by UpdateAllowedPositionZ but core didn't supposed to allow blink in this case
             break;
         newDist = sqrt((destx - savex) * (destx - savex) + (desty - savey) * (desty - savey) + (realDestz - savez) * (realDestz - savez));

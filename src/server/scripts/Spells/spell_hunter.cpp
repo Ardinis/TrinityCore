@@ -1371,6 +1371,39 @@ public:
     }
 };
 
+class spell_hun_filter_master : public SpellScriptLoader
+{
+public:
+    spell_hun_filter_master() : SpellScriptLoader("spell_hun_filter_master") { }
+
+    class spell_hun_filter_master_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_filter_master_SpellScript);
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            if (GetCaster())
+                if (Pet *pet = GetCaster()->ToPet())
+                    if (Player *owner = pet->GetOwner())
+                        unitList.push_back(owner);
+        }
+
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_hun_filter_master_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_hun_filter_master_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_PARTY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hun_filter_master_SpellScript();
+    }
+};
+
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -1395,4 +1428,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_kill_command();
     new spell_hun_disengage();
     new spell_hun_tame_beast();
+    new spell_hun_filter_master();
 }

@@ -1640,7 +1640,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 if (unitTarget->ToPlayer()->HasSpellCooldown(1784))
                     unitTarget->ToPlayer()->RemoveSpellCooldown(1784);
 
-                unitTarget->CastWithDelay(1500, unitTarget, 1784, true);
+                unitTarget->CastWithDelay(1500, unitTarget, 1784, true, false);
                 return;
             }
             // Demonic Empowerment -- succubus

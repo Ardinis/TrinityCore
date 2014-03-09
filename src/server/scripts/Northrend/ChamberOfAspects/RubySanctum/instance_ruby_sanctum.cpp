@@ -87,9 +87,9 @@ class instance_ruby_sanctum : public InstanceMapScript
                         break;
                     case NPC_ORB_CARRIER:
                         OrbCarrierGUID[OrbCnt] = creature->GetGUID();
-			OrbCnt++;
-			if (OrbCnt >= 2)
-			  OrbCnt = 0;
+                        OrbCnt++;
+                        if (OrbCnt >= 2)
+                            OrbCnt = 0;
                         break;
                     case NPC_ORB_ROTATION_FOCUS:
                         OrbRotationFocusGUID = creature->GetGUID();

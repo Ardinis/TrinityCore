@@ -1182,17 +1182,36 @@ public:
                         destz = posEnd.GetPositionZ();
                         for (int cnt = 0; cnt < 80; cnt += 3)
                             createDamegeOrb(pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle));
-                        //                            me->SummonCreature(8852000, pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 100);
-                        //                        orbDamage->SetFlying(false);
-                        //  orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
-                    }
-                    //                    if (Creature* orbDamage = me->SummonCreature(8852000, posEnd.GetPositionX(), posEnd.GetPositionY(), posEnd.GetPositionZ() + 5, posEnd.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
-                    {
-                        //                        orbDamage->SetFlying(false);
-                        //  orbDamage->GetMotionMaster()->MoveTakeoff(1,  posMid, 30);
                     }
                 }
             }
+            /*            if (IsHeroic() && Is25ManRaid())
+            {
+                northOrb = vehicle->GetPassenger(SEAT_EAST);
+                southOrb = vehicle->GetPassenger(SEAT_WEST);
+                if (southOrb && northOrb)
+                {
+                    northOrb->GetPosition(&pos);
+                    southOrb->GetPosition(&posEnd);
+                    me->GetPosition(&posMid);
+                    if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
+                        return;
+                    if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
+                        southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
+                    {
+                        if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250))
+                        {
+                            float angle = orbDamage->GetOrientation() - M_PI / 2;
+                            float destx, desty, destz;
+                            destx = posEnd.GetPositionX();
+                            desty = posEnd.GetPositionY();
+                            destz = posEnd.GetPositionZ();
+                            for (int cnt = 0; cnt < 80; cnt += 3)
+                                createDamegeOrb(pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle));
+                        }
+                    }
+                }
+                }*/
         }
 
         void DoAction(int32 const action)
@@ -1427,7 +1446,7 @@ class npc_meteor_strike : public CreatureScript
                         {
                             sp++;
                             if (sp < 3)
-                                me->SummonCreature(NPC_LIVING_EMBER, pos, TEMPSUMMON_TIMED_DESPAWN, 25000);
+                                me->SummonCreature(NPC_LIVING_EMBER, pos);
                         }
                         ++_spawnCount;
                     }
@@ -1496,7 +1515,7 @@ class npc_combustion_consumption : public CreatureScript
                 if (type != DATA_STACKS_DISPELLED || !_damageSpell || !_explosionSpell || !summoner)
                     return;
 
-                me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, value, me);
+                me->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, value * 2, me);
                 DoCast(me, _damageSpell);
 
                 int32 damage = 1200 + (value * 1290); // Needs moar research.
@@ -1520,6 +1539,7 @@ class npc_combustion_consumption : public CreatureScript
 };
 
 #define SPELL_DAMAGE_BUFF 64036
+#define SPELL_AWAKEN_FLAMES 75888
 
 class npc_living_inferno : public CreatureScript
 {
@@ -1533,9 +1553,7 @@ class npc_living_inferno : public CreatureScript
 
             void Reset()
             {
-                CheckInterval = 10000;
                 instance = me->GetInstanceScript();
-                cnt = 0;
             }
 
             void JustSummoned(Creature* /*summoner*/)
@@ -1543,33 +1561,40 @@ class npc_living_inferno : public CreatureScript
                 if (!Is25ManRaid())
                     me->DespawnOrUnsummon();
                 me->SetInCombatWithZone();
-                DoCast(me, SPELL_BLAZING_AURA);
+                me->CastSpell(me, SPELL_BLAZING_AURA, true);
+                emberCheck = 2000;
             }
 
             void UpdateAI(uint32 const diff)
             {
                 if (instance && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
                     me->DespawnOrUnsummon();
-                if (cnt > 30)
-                    return;
-                if (CheckInterval <= diff)
+
+                if (emberCheck <= diff)
                 {
-                    if (Creature *c = me->FindNearestCreature(40683, 10, true))
+                    std::list<Creature*> embers;
+                    me->GetCreatureListWithEntryInGrid(embers, NPC_LIVING_EMBER, 200.0f);
+                    for (std::list<Creature*>::iterator itr = embers.begin(); itr != embers.end(); ++itr)
                     {
-                        me->CastSpell(me, 75888, true);
-                        //                        if (me->GetAura(75886))
-                        //    me->SetAuraStack(SPELL_DAMAGE_BUFF, me,  me->GetAura(75886)->GetStackAmount());
-                        cnt++;
+                        Position pos;
+                        me->GetPosition(&pos);
+                        if ((*itr)->GetExactDist(&pos) < 15.0f)
+                        {
+                            if (!(*itr)->HasAura(SPELL_AWAKEN_FLAMES))
+                                (*itr)->AddAura(SPELL_AWAKEN_FLAMES, (*itr));
+                        } else if ((*itr)->HasAura(SPELL_AWAKEN_FLAMES))
+                            (*itr)->RemoveAura(SPELL_AWAKEN_FLAMES);
                     }
-                    CheckInterval = 2000;
+                    emberCheck = 1000;
                 }
-                else CheckInterval -= diff;
+                else emberCheck -= diff;
+
+                DoMeleeAttackIfReady();
             }
 
         private:
-            uint32 CheckInterval;
+            uint32 CheckInterval, emberCheck;
             InstanceScript* instance;
-            int cnt;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1590,11 +1615,12 @@ class npc_living_ember : public CreatureScript
 
             void Reset()
             {
-	      if (!Is25ManRaid() && !IsHeroic())
-		  me->DespawnOrUnsummon();
+                if (!Is25ManRaid() && !IsHeroic())
+                    me->DespawnOrUnsummon();
                 _hasEnraged = false;
-		CheckInterval = 2000;
-		DoZoneInCombat();
+                CheckInterval = 2000;
+                instance = me->GetInstanceScript();
+                DoZoneInCombat();
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -1605,6 +1631,9 @@ class npc_living_ember : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                if (instance && instance->GetBossState(DATA_HALION) != IN_PROGRESS)
+                    me->DespawnOrUnsummon();
+
                 if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -1612,16 +1641,9 @@ class npc_living_ember : public CreatureScript
                 {
                     _hasEnraged = true;
                     DoCast(me, SPELL_BERSERK);
-		    _enrageTimer = 20000;
+                    _enrageTimer = 20000;
                 }
                 else _enrageTimer -= diff;
-
-		if (CheckInterval <= diff)
-		  {
-		    me->RemoveAura(75888);
-		    CheckInterval = 2000;
-		  }
-		else CheckInterval -= diff;
 
                 DoMeleeAttackIfReady();
             }
@@ -1629,7 +1651,8 @@ class npc_living_ember : public CreatureScript
         private:
             uint32 _enrageTimer;
             bool _hasEnraged;
-	  uint32 CheckInterval;
+            uint32 CheckInterval;
+            InstanceScript *instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -2035,29 +2058,29 @@ public:
 
     void HandleTriggerSpell(AuraEffect const* /*aurEff*/)
     {
-      PreventDefaultAction();
+        PreventDefaultAction();
 
-      Unit* target = GetTarget();
-      Unit* caster = GetCaster();
-      if (!target || !caster)
-	return;
+        Unit* target = GetTarget();
+        Unit* caster = GetCaster();
+        if (!target || !caster)
+            return;
 
-      InstanceScript* instance = GetCaster()->GetInstanceScript();
-      Map::PlayerList const &players = instance->instance->GetPlayers();
-      for(Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-	{
-	  if(Player* player = i->getSource())
-	    {
-	      if (!player) continue;
-	      if (player->isAlive())
-		{
-		  float AB = caster->GetDistance2d(target)+1;
-		  float BC = caster->GetDistance2d(player)+1;
-		  float AC = target->GetDistance2d(player)+1;
-		  float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
-		}
-	    }
-	}
+        InstanceScript* instance = GetCaster()->GetInstanceScript();
+        Map::PlayerList const &players = instance->instance->GetPlayers();
+        for(Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+        {
+            if(Player* player = i->getSource())
+            {
+                if (!player) continue;
+                if (player->isAlive())
+                {
+                    float AB = caster->GetDistance2d(target)+1;
+                    float BC = caster->GetDistance2d(player)+1;
+                    float AC = target->GetDistance2d(player)+1;
+                    float dd = sqrt(AB*AB) - (sqrt(BC*BC) + sqrt(AC*AC));
+                }
+            }
+        }
     }
 
     void Register()
@@ -2136,6 +2159,198 @@ class spell_halion_summon_exit_portals : public SpellScriptLoader
         }
 };
 
+class spell_halion_cs : public SpellScriptLoader
+{
+    public:
+        spell_halion_cs() : SpellScriptLoader("spell_halion_cs") { }
+
+        class spell_halion_cs_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_halion_cs_SpellScript);
+
+            bool Validate(SpellInfo const* /*spell*/)
+            {
+                return true;
+            }
+
+            void HandleScript(SpellEffIndex effIndex)
+            {
+                if (Unit *caster = GetCaster())
+                {
+                    Position pos;
+                    caster->GetPosition(&pos);
+                    if (Unit *unitTarget = GetHitUnit())
+                        unitTarget->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 150, 150);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_halion_cs_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_halion_cs_SpellScript();
+        }
+};
+
+class spell_hallion_tail_slash : public SpellScriptLoader
+{
+public :
+    spell_hallion_tail_slash() : SpellScriptLoader("spell_hallion_tail_slash") {}
+
+    class spell_hallion_tail_slash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hallion_tail_slash_SpellScript);
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+            Map *map = caster->GetMap();
+            if (!map)
+                return;
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player *player = i->getSource())
+                    if (player->isAlive())
+                        if (caster->isInBackInMap(player, 15.0f, static_cast<float>(M_PI / 6)))
+                            unitList.push_back(player);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_hallion_tail_slash_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_24);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_hallion_tail_slash_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_CONE_ENEMY_24);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hallion_tail_slash_SpellScript();
+    }
+};
+
+class spell_cs_cb_damage : public SpellScriptLoader
+{
+public :
+    spell_cs_cb_damage() : SpellScriptLoader("spell_cs_cb_damage") {}
+
+    class spell_cs_cb_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_cs_cb_damage_SpellScript);
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+
+            Map *map = caster->GetMap();
+            if (!map)
+                return;
+
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+            float dist = 6.0f;
+            if (caster->HasAura(SPELL_SCALE_AURA))
+            {
+                if (Aura * aur = caster->GetAura(SPELL_SCALE_AURA))
+                    dist = aur->GetStackAmount() * 6;
+            }
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player *player = i->getSource())
+                    if (player->isAlive())
+                        if (player->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) <= dist)
+                            unitList.push_back(player);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_cs_cb_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            //            OnUnitTargetSelect += SpellUnitTargetFn(spell_cs_cb_damage_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_cs_cb_damage_SpellScript();
+    }
+};
+
+class spell_cs_cb_hm_damage : public SpellScriptLoader
+{
+public :
+    spell_cs_cb_hm_damage() : SpellScriptLoader("spell_cs_cb_hm_damage") {}
+
+    class spell_cs_cb_hm_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_cs_cb_hm_damage_SpellScript);
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+
+            Map *map = caster->GetMap();
+            if (!map)
+                return;
+
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+            float dist = 6.0f;
+            if (caster->HasAura(SPELL_SCALE_AURA))
+            {
+                if (Aura * aur = caster->GetAura(SPELL_SCALE_AURA))
+                    dist = aur->GetStackAmount() * 6;
+            }
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player *player = i->getSource())
+                    if (player->isAlive())
+                        if (player->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) <= dist)
+                            unitList.push_back(player);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_cs_cb_hm_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_cs_cb_hm_damage_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_cs_cb_hm_damage_SpellScript();
+    }
+};
+
+
 void AddSC_boss_halion()
 {
     new boss_halion();
@@ -2168,4 +2383,8 @@ void AddSC_boss_halion()
     new spell_twilight_cutter();
 
     new spell_halion_clear_debuffs();
+    new spell_halion_cs();
+    new spell_hallion_tail_slash();
+    new spell_cs_cb_damage();
+    new spell_cs_cb_hm_damage();
 }

@@ -1384,9 +1384,17 @@ public:
         {
             unitList.clear();
             if (GetCaster())
-                if (Pet *pet = GetCaster()->ToPet())
+            {
+                if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (Pet *pet = GetCaster()->ToPlayer()->GetPet())
+                        unitList.push_back(pet);
+                }
+                else if (Pet *pet = GetCaster()->ToPet())
                     if (Player *owner = pet->GetOwner())
                         unitList.push_back(owner);
+                unitList.push_back(GetCaster());
+            }
         }
 
 

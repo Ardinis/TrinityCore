@@ -6649,10 +6649,11 @@ void Spell::EffectPullTowards(SpellEffIndex effIndex)
 
     if (!unitTarget)
         return;
-
+    std::cout << "EffectPullTowards" << std::endl;
     float speedZ = (float)(m_spellInfo->Effects[effIndex].CalcValue() / 10);
     float speedXY = (float)(m_spellInfo->Effects[effIndex].MiscValue/10);
     Position pos;
+    std::cout << "EffectPullTowards : " << speedZ << " : " << speedXY << std::endl;
     if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_PULL_TOWARDS_DEST)
     {
         if (m_targets.HasDst())

@@ -22,7 +22,11 @@
 #include "PassiveAI.h"
 #include "GameObjectAI.h"
 #include "MapManager.h"
+#ifdef WIN32
+#include <C:\Paragon Core\paragon-v3\src\server\game\Movement\Spline\MoveSplineInit.h>
+#else
 #include "../src/server/game/Movement/Spline/MoveSplineInit.h"
+#endif
 #include "ulduar.h"
 #include "Player.h"
 

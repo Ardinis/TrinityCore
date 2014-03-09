@@ -2,7 +2,7 @@
 #include "blackrock_spire.h"
 #include "Player.h"
 
-#define NEFA_WAVE_1"Excellent... Il semble que ces pitoyables petits insectes soient arrivés en temps et en heure pour nourrir ma légion. Bienvenue, mortels!"
+#define NEFA_WAVE_1     "Excellent... Il semble que ces pitoyables petits insectes soient arrivés en temps et en heure pour nourrir ma légion. Bienvenue, mortels!"
 #define NEFA_WAVE_1_B   "Qu'il ne reste pas une seule goutte de leur sang sur le sable de l'arčne, mes enfants. Faites festin de leur âme."
 #define NEFA_WAVE_3     "Inconcevable !"
 #define NEFA_WAVE_4     "Utilisez le souffle glaciale, imbéciles !"
@@ -10,12 +10,12 @@
 #define NEFA_WAVE_6     "Imbécccccciles, tuez celui en robe!"
 #define NEFA_WAVE_7     "Ne me forcez pas la main, enfants! J'utiliserai vos peaux pour doubler mes bottes."
 #define NEFA_WAVE_8     "CELA NE PEUT ETRE! Rend, Occupez vous de ces insectes!"
-#define NEFA_WAVE_8_B"Le chef ne fera de vous qu'une bouchée, mortels! Préparez-vous!"
-#define NEFA_WAVE_8_C"Vous allez connaitre ma puissance!"
-#define NEFA_DEAD_1"Les mortels sont tombés! Le nouvel âge de la Légion Rochenoire pointe ŕ l'horizon..."
+#define NEFA_WAVE_8_B   "Le chef ne fera de vous qu'une bouchée, mortels! Préparez-vous!"
+#define NEFA_WAVE_8_C   "Vous allez connaitre ma puissance!"
+#define NEFA_DEAD_1     "Les mortels sont tombés! Le nouvel âge de la Légion Rochenoire pointe a l'horizon..."
 
-#define REND_WAVE_5     "Je vous arracherai les membres et vous battrai avec jusqu'ŕ ce que vous rampiez ŕ mes pieds."
-#define REND_WAVE_8"Avec plaisir..."
+#define REND_WAVE_5     "Je vous arracherai les membres et vous battrai avec jusqu'a ce que vous rampiez a mes pieds."
+#define REND_WAVE_8     "Avec plaisir..."
 
 #define POPX      208.04f
 #define POPY      -421.08f

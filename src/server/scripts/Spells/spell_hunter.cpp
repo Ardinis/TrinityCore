@@ -1008,7 +1008,7 @@ class spell_hun_pet_scaling_04 : public SpellScriptLoader
                     // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
                     HitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
                     // Increase hit melee from meele hit ratings
-                    HitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+                    HitMelee += std::max(owner->GetRatingBonusValue(CR_HIT_MELEE), owner->GetRatingBonusValue(CR_HIT_RANGED));
 
                     amount += int32(HitMelee);
                 }

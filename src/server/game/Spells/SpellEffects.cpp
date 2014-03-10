@@ -1226,7 +1226,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 55004:                                 // Nitro Boosts
                     if (!m_CastItem)
                         return;
-                    if (roll_chance_i(95))                  // Nitro Boosts - success
+                    if (roll_chance_i(99))                  // Nitro Boosts - success
                         m_caster->CastSpell(m_caster, 54861, true, m_CastItem);
                     else                                    // Knocked Up   - backfire 5%
                         m_caster->CastSpell(m_caster, 46014, true, m_CastItem);

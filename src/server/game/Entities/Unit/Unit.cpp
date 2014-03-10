@@ -2159,6 +2159,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
 
     tmp = miss_chance;
 
+    if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+        dodge_chance = miss_chance;
+
     if (tmp > 0 && roll < (sum += tmp))
     {
         sLog->outStaticDebug ("RollMeleeOutcomeAgainst: MISS");

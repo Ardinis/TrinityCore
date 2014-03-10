@@ -614,27 +614,7 @@ class WorldObject : public Object, public WorldLocation
             MovePosition(pos, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
         }
 
-        bool GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const
-        {
-            float angle = 0.0f;            // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, x, y, z, obj->GetObjectSize(), distance2d, GetAngle(obj)); // angle to face `obj` to `this` using distance includes size of `obj`
-            if (!IsWithinLOS(x, y, z)) // if position isn't IsWithinLOS check all postion around the target at CONTACT_DISTANCE, appear only in some case (pillar angle for example)
-            {
-                while (angle < 2 * M_PI)
-                {
-                    GetNearPoint2D(x, y, distance2d + obj->GetObjectSize(), GetAngle(obj) + angle);
-                    z = GetPositionZ();
-                    UpdateGroundPositionZ(x, y, z);
-
-                    if (IsWithinLOS(x, y, z))
-                        return true;
-                    angle += 0.1f;
-                }
-            }
-            else
-                return true;
-            return false;
-        }
+        bool GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const;
 
         float GetObjectSize() const
         {

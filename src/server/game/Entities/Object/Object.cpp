@@ -2699,6 +2699,81 @@ void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float 
     */
 }
 
+bool WorldObject::GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d) const
+{
+    float savex, savey, savez;
+    bool isPet = obj->ToUnit() && obj->ToUnit()->isPet();
+    float angle = isPet ? -M_PI : 0;
+
+    GetNearPoint(obj, x, y, z, obj->GetObjectSize(), distance2d, GetAngle(obj)); // angle to face `obj` to `this` using distance includes size of `obj`
+    // !HasInArc(2 * M_PI - arc, target); == isInBack(target, arc);
+    bool isPointInBack = false;
+    if (isPet)
+    {
+        float arc = M_PI;
+        arc = MapManager::NormalizeOrientation(arc);
+        float angle = GetAngle(x, y);
+        angle -= GetOrientation();
+        angle = MapManager::NormalizeOrientation(angle);
+        if (angle > M_PI)
+            angle -= 2.0f*M_PI;
+        float lborder =  -1 * (arc / 2.0f);                        // in range -pi..0
+        float rborder = (arc / 2.0f);                             // in range 0..p
+        isPointInBack = !((angle >= lborder) && (angle <= rborder));
+    }
+
+    if (!IsWithinLOS(x, y, z) || (isPet && !isPointInBack)) // if position isn't IsWithinLOS check all postion around the target at CONTACT_DISTANCE, appear only in some case (pillar angle for example)
+    {
+        while (angle < (isPet ? M_PI : 2 * M_PI))
+        {
+            GetNearPoint2D(x, y, distance2d + obj->GetObjectSize(), GetAngle(obj) + angle);
+            z = GetPositionZ();
+            UpdateGroundPositionZ(x, y, z);
+
+            bool losFree = IsWithinLOS(x, y, z);
+
+            if (isPet)
+            {
+                float arc = M_PI;
+                arc = MapManager::NormalizeOrientation(arc);
+                float angle2 = GetAngle(x, y);
+                angle2 -= GetOrientation();
+                angle2 = MapManager::NormalizeOrientation(angle);
+                if (angle2 > M_PI)
+                    angle2 -= 2.0f*M_PI;
+                float lborder = -1 * (arc / 2.0f);                        // in range -pi..0
+                float rborder = (arc / 2.0f);                             // in range 0..pi
+                isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+
+                if (isPointInBack && losFree)
+                    return true;
+            }
+
+            if (!isPet && losFree)
+                return true;
+
+            if (losFree)
+            {
+                savex = x;
+                savey = y;
+                savez = z;
+            }
+
+            angle += 0.1f;
+        }
+        if (isPet && IsWithinLOS(savex, savey, savez))
+        {
+            x = savex;
+            y = savey;
+            z = savez;
+            return true;
+        }
+    }
+    else
+        return true;
+    return false;
+}
+
 void WorldObject::MovePosition(Position &pos, float dist, float angle)
 {
     angle += m_orientation;

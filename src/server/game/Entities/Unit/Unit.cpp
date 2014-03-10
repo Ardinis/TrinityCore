@@ -2566,6 +2566,9 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
         if (dodgeChance < 0)
             dodgeChance = 0;
 
+        if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+           dodgeChance = missChance;
+
         if (roll < (tmp += dodgeChance))
             return SPELL_MISS_DODGE;
     }

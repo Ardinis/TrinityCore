@@ -3672,7 +3672,10 @@ Aura* Unit::GetOwnedAura(uint32 spellId, uint64 casterGUID, uint64 itemCasterGUI
 {
     for (AuraMap::const_iterator itr = m_ownedAuras.lower_bound(spellId); itr != m_ownedAuras.upper_bound(spellId); ++itr)
     {
-        if ((((itr->second->GetEffectMask() & reqEffMask) == reqEffMask) && (!casterGUID || itr->second->GetCasterGUID() == casterGUID) && (!itemCasterGUID || itr->second->GetCastItemGUID() == itemCasterGUID) && (!except || except != itr->second)))
+        if ((((itr->second->GetEffectMask() & reqEffMask) == reqEffMask)
+             && (!casterGUID || itr->second->GetCasterGUID() == casterGUID)
+             && (!itemCasterGUID || itr->second->GetCastItemGUID() == itemCasterGUID)
+             && (!except || except != itr->second)))
             return itr->second;
         else
         {
@@ -15995,21 +15998,19 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                         //                        if (onCast)
                         //     break;
 
-
-                        std::cout << "break stealth ? 1" << std::endl;
                         if (!procSpell || damage)
                         {
                             takeCharges = true;
                             break;
                         }
-                        std::cout << "break stealth ? 2" << std::endl;
+
                         if (procExtra & PROC_EX_REFLECT)
                             break;
-                        std::cout << "break stealth ? 3" << std::endl;
+
                         // Friendly casts won't break stealth
                         if (IsFriendlyTo(target))
                             break;
-                        std::cout << "break stealth ? 4" << std::endl;
+
                         bool hasAbsorb = false;
                         if (triggeredByAura->GetSpellInfo()->AttributesEx2 & SPELL_ATTR2_DAMAGE_REDUCED_SHIELD)
                         {
@@ -16028,7 +16029,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                         // Absorb auras prevent stealth breaking from periodic damage
                         if (hasAbsorb && procFlag & PROC_FLAG_TAKEN_PERIODIC)
                             break;
-                        std::cout << "break stealth ? 5" << std::endl;
+
                         // Experimental - not sure if correct
                         if (!(procSpell->AttributesEx6 & SPELL_ATTR6_IGNORE_CASTER_AURAS) && !(procSpell->Attributes & SPELL_ATTR0_HIDDEN_CLIENTSIDE)
                             && !(procSpell->AttributesEx & SPELL_ATTR1_NOT_BREAK_STEALTH) && !(procSpell->AttributesEx2 & SPELL_ATTR2_UNK28))
@@ -16130,7 +16131,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
                     {
                         sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "ProcDamageAndSpell: casting spell %u (triggered with value by %s aura of spell %u)", spellInfo->Id, (isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-
                         if (HandleProcTriggerSpell(target, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
                             takeCharges = true;
                         break;

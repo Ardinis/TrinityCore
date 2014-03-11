@@ -2994,6 +2994,9 @@ void SpellMgr::LoadSpellCustomAttr()
             case 58735:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_INITIAL_THREAT;
                 break;
+            case 59620:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_ENCHANT_PROC;
+                break;
             default:
                 break;
         }
@@ -3945,6 +3948,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 33198:
             case 33197:
             case 33196:
+            case 59620:
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
             case 59309:

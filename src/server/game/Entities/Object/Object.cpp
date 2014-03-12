@@ -2706,6 +2706,9 @@ bool WorldObject::GetContactPoint(const WorldObject* obj, float &x, float &y, fl
     float angle = isPet ? -M_PI : 0;
 
     GetNearPoint(obj, x, y, z, obj->GetObjectSize(), distance2d, GetAngle(obj)); // angle to face `obj` to `this` using distance includes size of `obj`
+    savex = x;
+    savey = y;
+    savez = z;
     // !HasInArc(2 * M_PI - arc, target); == isInBack(target, arc);
     bool isPointInBack = false;
     if (isPet)

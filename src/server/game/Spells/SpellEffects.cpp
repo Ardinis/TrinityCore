@@ -1985,6 +1985,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     m_targets.SetDst(1174.85f, -763.24f, 48.72f, 6.26f, 628);
             }
             break;
+        case 36563:
         case 57840:
         {
             if (Unit *spellTarget = m_targets.GetUnitTarget())
@@ -2071,10 +2072,9 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
         mapid = unitTarget->GetMapId();
     float x, y, z, orientation;
     m_targets.GetDst()->GetPosition(x, y, z, orientation);
-    std::cout << "target->GetAngle(unitTarget) ? " << orientation << std::endl;
     if (!orientation && m_targets.GetUnitTarget())
         orientation = m_targets.GetUnitTarget()->GetOrientation();
-    std::cout << orientation << std::endl;
+
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::EffectTeleportUnits - teleport unit to %u %f %f %f %f\n", mapid, x, y, z, orientation);
 
     if (mapid == unitTarget->GetMapId())

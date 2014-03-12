@@ -1385,6 +1385,7 @@ public:
             unitList.clear();
             if (GetCaster())
             {
+                unitList.push_back(GetCaster());
                 if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
                 {
                     if (Pet *pet = GetCaster()->ToPlayer()->GetPet())
@@ -1393,7 +1394,6 @@ public:
                 else if (Pet *pet = GetCaster()->ToPet())
                     if (Player *owner = pet->GetOwner())
                         unitList.push_back(owner);
-                unitList.push_back(GetCaster());
             }
         }
 

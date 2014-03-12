@@ -295,79 +295,83 @@ bool ChatHandler::HandleRecupCommand(const char* /*args*/)
 
   QueryResult result = WebDatabase.PQuery("SELECT * FROM recups WHERE account=%u AND perso=%u", acctid, charguid);
   if(result)
-    {
+  {
       Field *fields = result->Fetch();
       int32 r_guid = fields[0].GetInt32();
       int32 r_status = fields[10].GetInt32();
 
       if (r_status == (int32)0 || r_status == (int32)1 || r_status == (int32)2)
-	{
-	  PSendSysMessage(LANG_RECUP_WAITING);
-	  return true;
-	}
+      {
+          PSendSysMessage(LANG_RECUP_WAITING);
+          return true;
+      }
       if (r_status == (int32)4)
-	{
-	  PSendSysMessage(LANG_RECUP_ALREADY_DONE);
-	  return true;
-	}
+      {
+          PSendSysMessage(LANG_RECUP_ALREADY_DONE);
+          return true;
+      }
       if (r_status < (int32)0)
-	{
-	  PSendSysMessage(LANG_RECUP_REFUSED);
-	  return true;
-	}
+      {
+          PSendSysMessage(LANG_RECUP_REFUSED);
+          return true;
+      }
 
       const char *r_skills = fields[6].GetString().c_str();
 
       if (r_skills){
 
-	char **t_skills = my_explode((char*)r_skills, ';');
-	char **my_skill;
-	for (int i = 0; t_skills[i]; i++)
-	  {
-	    my_skill = my_explode(t_skills[i], ' ');
-	    if (my_skill[0] && my_skill[1]){
-	      uint16 skill_id = static_cast<uint16>(atoi(my_skill[0]));
-	      uint16 skill_level = static_cast<uint16>(atoi(my_skill[1]));
-	      uint16 skill_max = perso->GetMaxSkillValueForLevel();
-	      uint16 skill_step = perso->GetSkillStep(skill_id);
+          char **t_skills = my_explode((char*)r_skills, ';');
+          char **my_skill;
+          for (int i = 0; t_skills[i]; i++)
+          {
+              my_skill = my_explode(t_skills[i], ' ');
+              if (my_skill[0] && my_skill[1]){
+                  uint16 skill_id = static_cast<uint16>(atoi(my_skill[0]));
+                  uint16 skill_level = static_cast<uint16>(atoi(my_skill[1]));
+                  uint16 skill_max = perso->GetMaxSkillValueForLevel();
+                  uint16 skill_step = perso->GetSkillStep(skill_id);
+                  uint16 currValue = perso->GetPureSkillValue(skill_id);
+                  bool can_learn_primary_prof = perso->GetFreePrimaryProfessionPoints() > 0;
+                  if (!currValue && !can_learn_primary_prof && (skill_id == 171 || skill_id == 164 || skill_id == 333 || skill_id == 202 || skill_id == 182 || skill_id == 773 || skill_id == 755 || skill_id == 165 || skill_id == 186 || skill_id == 393 || skill_id == 197))
+                      continue;
 
-	      QueryResult r_prof = WebDatabase.PQuery("SELECT spell FROM profession_spell WHERE skill = %u", skill_id);
-	      if (r_prof)
-	      {
-		Field *prof_fields = r_prof->Fetch();
-		if (uint32 spell_id = prof_fields[0].GetUInt32())
-		  perso->learnSpell(spell_id, false);
-	      }
-	      perso->SetSkill(skill_id, skill_step, skill_level, skill_max);
-	    }
-	  }
+                  QueryResult r_prof = WebDatabase.PQuery("SELECT spell FROM profession_spell WHERE skill = %u", skill_id);
+                  if (r_prof)
+                  {
+                      Field *prof_fields = r_prof->Fetch();
+                      if (uint32 spell_id = prof_fields[0].GetUInt32())
+                          perso->learnSpell(spell_id, false);
+                  }
+                  perso->SetSkill(skill_id, skill_step, skill_level, skill_max);
+              }
+          }
       }
       const char *r_reputs = fields[7].GetString().c_str();
       if(r_reputs){
-	char **t_reputs = my_explode((char*)r_reputs, ';');
-	char **my_reput;
-	const FactionEntry *factionEntry;
-	for (int i = 0; t_reputs[i]; i++)
-	  {
-	    my_reput = my_explode(t_reputs[i], ' ');
-	    if(my_reput[0] && my_reput[1]){
-	      factionEntry = sFactionStore.LookupEntry((uint32)atoi(my_reput[0]));
-	      if(!factionEntry){
-		PSendSysMessage("Reputation inexistante. Passee.");
-	      }
-	      else{
-		perso->GetReputationMgr().SetReputation(factionEntry, (int32)atoi(my_reput[1]));
-	      }
-	    }
-	  }
+          char **t_reputs = my_explode((char*)r_reputs, ';');
+          char **my_reput;
+          const FactionEntry *factionEntry;
+          for (int i = 0; t_reputs[i]; i++)
+          {
+              my_reput = my_explode(t_reputs[i], ' ');
+              if(my_reput[0] && my_reput[1]){
+                  factionEntry = sFactionStore.LookupEntry((uint32)atoi(my_reput[0]));
+                  if(!factionEntry){
+                      PSendSysMessage("Reputation inexistante. Passee.");
+                  }
+                  else{
+                      perso->GetReputationMgr().SetReputation(factionEntry, (int32)atoi(my_reput[1]));
+                  }
+              }
+          }
       }
 
       WebDatabase.PExecute("UPDATE recups SET status=4 WHERE id=%u", r_guid);
       perso->SaveToDB();
       PSendSysMessage(LANG_RECUP_DONE);
-    }
+  }
   else
-    PSendSysMessage(LANG_RECUP_NOT_EXISTS);
+      PSendSysMessage(LANG_RECUP_NOT_EXISTS);
 
   return true;
 }

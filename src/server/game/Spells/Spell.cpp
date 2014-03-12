@@ -2388,6 +2388,7 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                 case TARGET_DEST_CASTER_FRONT_LEAP:
                     m_caster->MoveBlink(pos, dist, angle);
                     break;
+
                 case TARGET_DEST_CASTER_FRONT_LEFT:
                 case TARGET_DEST_CASTER_BACK_LEFT:
                 case TARGET_DEST_CASTER_BACK_RIGHT:

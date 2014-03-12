@@ -1957,13 +1957,13 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
             {
                 unitTarget->AddAura(60444, unitTarget); //Apply Lost! Aura
 
-		// ALLIANCE from 60323 to 60330 - HORDE from 60328 to 60335
-		uint32 spellId = 60323;
-		if (m_caster->ToPlayer()->GetTeam() == HORDE)
-		  spellId += 5;
+                // ALLIANCE from 60323 to 60330 - HORDE from 60328 to 60335
+                uint32 spellId = 60323;
+                if (m_caster->ToPlayer()->GetTeam() == HORDE)
+                    spellId += 5;
 
-		spellId += urand(0, 7);
-		m_caster->CastSpell(m_caster, spellId, true);
+                spellId += urand(0, 7);
+                m_caster->CastSpell(m_caster, spellId, true);
                 return;
             }
             break;
@@ -1985,6 +1985,78 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     m_targets.SetDst(1174.85f, -763.24f, 48.72f, 6.26f, 628);
             }
             break;
+        case 36563:
+        case 57840:
+        {
+            if (Unit *spellTarget = m_targets.GetUnitTarget())
+                if (Unit *target = unitTarget)
+                {
+                    float x;// = spellTarget->GetPositionX();
+                    float y;// = spellTarget->GetPositionY();
+                    float z;// = spellTarget->GetPositionZ();
+
+                    float savex = spellTarget->GetPositionX();
+                    float savey = spellTarget->GetPositionY();
+                    float savez = spellTarget->GetPositionZ();
+                    float angle = -M_PI;
+                    float distance2d = CONTACT_DISTANCE;
+                    spellTarget->GetNearPoint(target, x, y, z, target->GetObjectSize(), distance2d, spellTarget->GetAngle(target)); // angle to face `target` to `this` using distance includes size of `target`
+                    bool isPointInBack = false;
+                    float arc = M_PI;
+                    arc = MapManager::NormalizeOrientation(arc);
+                    float angle2 = spellTarget->GetAngle(x, y);
+                    angle2 -= spellTarget->GetOrientation();
+                    angle2 = MapManager::NormalizeOrientation(angle2);
+                    if (angle2 > M_PI)
+                        angle2 -= 2.0f*M_PI;
+                    float lborder =  -1 * (arc / 2.0f);                        // in range -pi..0
+                    float rborder = (arc / 2.0f);                             // in range 0..p
+                    isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+
+                    if (!spellTarget->IsWithinLOS(x, y, z) || !isPointInBack)
+                    {
+                        bool losFree = false;
+                        while (angle < 2 * M_PI)
+                        {
+                            spellTarget->GetNearPoint2D(x, y, distance2d + target->GetObjectSize(), spellTarget->GetAngle(target) + angle);
+                            z = spellTarget->GetPositionZ();
+                            spellTarget->UpdateGroundPositionZ(x, y, z);
+
+                            losFree = spellTarget->IsWithinLOS(x, y, z);
+
+                            arc = M_PI;
+                            arc = MapManager::NormalizeOrientation(arc);
+                            angle2 = spellTarget->GetAngle(x, y);
+                            angle2 -= spellTarget->GetOrientation();
+                            angle2 = MapManager::NormalizeOrientation(angle);
+                            if (angle2 > M_PI)
+                                angle2 -= 2.0f*M_PI;
+                            lborder = -1 * (arc / 2.0f);                        // in range -pi..0
+                            rborder = (arc / 2.0f);                             // in range 0..pi
+                            isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+                            if (isPointInBack && losFree)
+                                break;
+                            else if (losFree)
+                            {
+                                savex = x;
+                                savey = y;
+                                savez = z;
+                            }
+                            angle += 0.1f;
+                        }
+                        if (!(isPointInBack && losFree) && spellTarget->IsWithinLOS(savex, savey, savez))
+                        {
+                            x = savex;
+                            y = savey;
+                            z = savez;
+                        }
+                    }
+                    float irenatation = spellTarget->GetAngle(x, y) + M_PI;
+                    MapManager::NormalizeOrientation(irenatation);
+                    m_targets.SetDst(x, y, z, irenatation, target->GetMapId());
+                }
+            break;
+        }
     }
 
     // If not exist data for dest location - return
@@ -2002,6 +2074,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     m_targets.GetDst()->GetPosition(x, y, z, orientation);
     if (!orientation && m_targets.GetUnitTarget())
         orientation = m_targets.GetUnitTarget()->GetOrientation();
+
     sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::EffectTeleportUnits - teleport unit to %u %f %f %f %f\n", mapid, x, y, z, orientation);
 
     if (mapid == unitTarget->GetMapId())

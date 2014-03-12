@@ -5862,9 +5862,11 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
             {
                 // Master of Subtlety
                 case 31666:
+                {
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
                         target->RemoveAurasDueToSpell(31665);
                     break;
+                }
                 // Killing Spree
                 case 51690:
                 {
@@ -5891,16 +5893,84 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         return;
 
                     Unit* spellTarget = SelectRandomContainerElement(targets);
+                    /*                    float x;// = spellTarget->GetPositionX();
+                    float y;// = spellTarget->GetPositionY();
+                    float z;// = spellTarget->GetPositionZ();
 
+                    float savex = spellTarget->GetPositionX();
+                    float savey = spellTarget->GetPositionY();
+                    float savez = spellTarget->GetPositionZ();
+                    float angle = -M_PI;
+                    float distance2d = CONTACT_DISTANCE;
+                    spellTarget->GetNearPoint(target, x, y, z, target->GetObjectSize(), distance2d, spellTarget->GetAngle(target)); // angle to face `target` to `this` using distance includes size of `target`
+                    bool isPointInBack = false;
+                    float arc = M_PI;
+                    arc = MapManager::NormalizeOrientation(arc);
+                    float angle2 = spellTarget->GetAngle(x, y);
+                    angle2 -= spellTarget->GetOrientation();
+                    angle2 = MapManager::NormalizeOrientation(angle2);
+                    if (angle2 > M_PI)
+                        angle2 -= 2.0f*M_PI;
+                    float lborder =  -1 * (arc / 2.0f);                        // in range -pi..0
+                    float rborder = (arc / 2.0f);                             // in range 0..p
+                    isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+
+                    if (!spellTarget->IsWithinLOS(x, y, z) || !isPointInBack)
+                    {
+                        std::cout << "not in loss" << std::endl;
+                        bool losFree = false;
+                        while (angle < 2 * M_PI)
+                        {
+                            spellTarget->GetNearPoint2D(x, y, distance2d + target->GetObjectSize(), spellTarget->GetAngle(target) + angle);
+                            z = spellTarget->GetPositionZ();
+                            spellTarget->UpdateGroundPositionZ(x, y, z);
+
+                            losFree = spellTarget->IsWithinLOS(x, y, z);
+
+                            arc = M_PI;
+                            arc = MapManager::NormalizeOrientation(arc);
+                            angle2 = spellTarget->GetAngle(x, y);
+                            angle2 -= spellTarget->GetOrientation();
+                            angle2 = MapManager::NormalizeOrientation(angle);
+                            if (angle2 > M_PI)
+                                angle2 -= 2.0f*M_PI;
+                            lborder = -1 * (arc / 2.0f);                        // in range -pi..0
+                            rborder = (arc / 2.0f);                             // in range 0..pi
+                            isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+                            std::cout << "not in loss ? : " << (int)isPointInBack << " : " << (int)losFree << std::endl;
+                            std::cout << x << " : " << y << " : " << z << std::endl;
+                            if (isPointInBack && losFree)
+                                break;
+                            else if (losFree)
+                            {
+                                savex = x;
+                                savey = y;
+                                savez = z;
+                            }
+                            angle += 0.1f;
+                        }
+                        if (!(isPointInBack && losFree) && spellTarget->IsWithinLOS(savex, savey, savez))
+                        {
+                            x = savex;
+                            y = savey;
+                            z = savez;
+                        }
+                    }*/
+                    //                    std::cout << "last : " << x << " : " << y << " : " << z << std::endl;
+                    //                    target->UpdateAllowedPositionZ(x, y, z);
+                    //                  target->CastSpell(x, y, z + 0.5f, 57840, true);
+                    //                    target->UpdatePosition(x, y, z + 0.5f, target->GetAngle(spellTarget));
                     target->CastSpell(spellTarget, 57840, true);
                     target->CastSpell(spellTarget, 57841, true);
                     break;
                 }
                 // Overkill
                 case 58428:
+                {
                     if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
                         target->RemoveAurasDueToSpell(58427);
                     break;
+                }
             }
             break;
         }

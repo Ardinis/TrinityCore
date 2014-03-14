@@ -2000,55 +2000,64 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     float savez = spellTarget->GetPositionZ();
                     float angle = -M_PI;
                     float distance2d = CONTACT_DISTANCE;
-                    spellTarget->GetNearPoint(target, x, y, z, target->GetObjectSize(), distance2d, spellTarget->GetAngle(target)); // angle to face `target` to `this` using distance includes size of `target`
-                    bool isPointInBack = false;
-                    float arc = M_PI;
-                    arc = MapManager::NormalizeOrientation(arc);
-                    float angle2 = spellTarget->GetAngle(x, y);
-                    angle2 -= spellTarget->GetOrientation();
-                    angle2 = MapManager::NormalizeOrientation(angle2);
-                    if (angle2 > M_PI)
-                        angle2 -= 2.0f*M_PI;
-                    float lborder =  -1 * (arc / 2.0f);                        // in range -pi..0
-                    float rborder = (arc / 2.0f);                             // in range 0..p
-                    isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
-
-                    if (!spellTarget->IsWithinLOS(x, y, z) || !isPointInBack)
+                    if (spellTarget->isInBackInMap(target, CONTACT_DISTANCE, M_PI))
                     {
-                        bool losFree = false;
-                        while (angle < 2 * M_PI)
+                        x = target->GetPositionX();
+                        y = target->GetPositionY();
+                        z = target->GetPositionZ();
+                    }
+                    else
+                    {
+                        spellTarget->GetNearPoint(target, x, y, z, target->GetObjectSize(), distance2d, spellTarget->GetAngle(target)); // angle to face `target` to `this` using distance includes size of `target`
+                        bool isPointInBack = false;
+                        float arc = M_PI;
+                        arc = MapManager::NormalizeOrientation(arc);
+                        float angle2 = spellTarget->GetAngle(x, y);
+                        angle2 -= spellTarget->GetOrientation();
+                        angle2 = MapManager::NormalizeOrientation(angle2);
+                        if (angle2 > M_PI)
+                            angle2 -= 2.0f*M_PI;
+                        float lborder =  -1 * (arc / 2.0f);                        // in range -pi..0
+                        float rborder = (arc / 2.0f);                             // in range 0..p
+                        isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+
+                        if (!spellTarget->IsWithinLOS(x, y, z) || !isPointInBack)
                         {
-                            spellTarget->GetNearPoint2D(x, y, distance2d + target->GetObjectSize(), spellTarget->GetAngle(target) + angle);
-                            z = spellTarget->GetPositionZ();
-                            spellTarget->UpdateGroundPositionZ(x, y, z);
-
-                            losFree = spellTarget->IsWithinLOS(x, y, z);
-
-                            arc = M_PI;
-                            arc = MapManager::NormalizeOrientation(arc);
-                            angle2 = spellTarget->GetAngle(x, y);
-                            angle2 -= spellTarget->GetOrientation();
-                            angle2 = MapManager::NormalizeOrientation(angle);
-                            if (angle2 > M_PI)
-                                angle2 -= 2.0f*M_PI;
-                            lborder = -1 * (arc / 2.0f);                        // in range -pi..0
-                            rborder = (arc / 2.0f);                             // in range 0..pi
-                            isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
-                            if (isPointInBack && losFree)
-                                break;
-                            else if (losFree)
+                            bool losFree = false;
+                            while (angle < 2 * M_PI)
                             {
-                                savex = x;
-                                savey = y;
-                                savez = z;
+                                spellTarget->GetNearPoint2D(x, y, distance2d + target->GetObjectSize(), spellTarget->GetAngle(target) + angle);
+                                z = spellTarget->GetPositionZ();
+                                spellTarget->UpdateGroundPositionZ(x, y, z);
+
+                                losFree = spellTarget->IsWithinLOS(x, y, z);
+
+                                arc = M_PI;
+                                arc = MapManager::NormalizeOrientation(arc);
+                                angle2 = spellTarget->GetAngle(x, y);
+                                angle2 -= spellTarget->GetOrientation();
+                                angle2 = MapManager::NormalizeOrientation(angle);
+                                if (angle2 > M_PI)
+                                    angle2 -= 2.0f*M_PI;
+                                lborder = -1 * (arc / 2.0f);                        // in range -pi..0
+                                rborder = (arc / 2.0f);                             // in range 0..pi
+                                isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+                                if (isPointInBack && losFree)
+                                    break;
+                                else if (losFree)
+                                {
+                                    savex = x;
+                                    savey = y;
+                                    savez = z;
+                                }
+                                angle += 0.1f;
                             }
-                            angle += 0.1f;
-                        }
-                        if (!(isPointInBack && losFree) && spellTarget->IsWithinLOS(savex, savey, savez))
-                        {
-                            x = savex;
-                            y = savey;
-                            z = savez;
+                            if (!(isPointInBack && losFree) && spellTarget->IsWithinLOS(savex, savey, savez))
+                            {
+                                x = savex;
+                                y = savey;
+                                z = savez;
+                            }
                         }
                     }
                     float irenatation = spellTarget->GetAngle(x, y) + M_PI;

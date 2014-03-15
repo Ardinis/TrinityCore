@@ -345,6 +345,35 @@ public:
     }
 };
 
+class spell_mage_firestarter_proc : public SpellScriptLoader
+{
+public:
+    spell_mage_firestarter_proc() : SpellScriptLoader("spell_mage_firestarter_proc") { }
+
+    class spell_mage_firestarter_proc_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_firestarter_proc_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (DamageInfo *damageInfo = eventInfo.GetDamageInfo())
+                if (damageInfo->GetDamage() > 0)
+                    return true;
+            return false;
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_mage_firestarter_proc_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_mage_firestarter_proc_AuraScript();
+    }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -354,4 +383,5 @@ void AddSC_mage_spell_scripts()
     new spell_mage_incanters_absorbtion_manashield();
     new spell_mage_polymorph_cast_visual();
     new spell_mage_summon_water_elemental();
+    new spell_mage_firestarter_proc();
 }

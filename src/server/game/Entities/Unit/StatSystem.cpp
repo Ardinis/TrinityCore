@@ -1259,7 +1259,6 @@ void Guardian::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
     float stamina = GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA);
-
     float multiplicator;
     switch (GetEntry())
     {
@@ -1269,6 +1268,7 @@ void Guardian::UpdateMaxHealth()
         case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
         case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
         case ENTRY_BLOODWORM:   multiplicator = 1.0f;   break;
+        case 510:               multiplicator = 7.5;    break;
         default:                multiplicator = 10.0f;  break;
     }
 
@@ -1299,6 +1299,7 @@ void Guardian::UpdateMaxPower(Powers power)
         case ENTRY_SUCCUBUS:
         case ENTRY_FELHUNTER:
         case ENTRY_FELGUARD:    multiplicator = 11.5f;  break;
+        case 510: multiplicator = 4.95f; break;
         default:                multiplicator = 15.0f;  break;
     }
 

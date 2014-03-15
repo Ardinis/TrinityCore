@@ -3955,6 +3955,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
                 break;
+                /*            case 47632:
+                m_spellInfo->FacingCasterFlags &= ~SPELL_FACING_FLAG_INFRONT;
+                break;*/
             default:
                 break;
         }

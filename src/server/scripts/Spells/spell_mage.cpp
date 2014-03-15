@@ -190,9 +190,17 @@ class spell_mage_summon_water_elemental : public SpellScriptLoader
                 return true;
             }
 
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
+                if (Player* player = caster->ToPlayer())
+                    if (Guardian* elemental = player->GetGuardianPet())
+                        // Check if the pet we are going to unsummon is the mage's water elemental
+                        if (elemental->GetEntry() == uint32(sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_TEMPORARY)->Effects[EFFECT_0].MiscValue) ||
+                            elemental->GetEntry() == uint32(sSpellMgr->GetSpellInfo(SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT)->Effects[EFFECT_0].MiscValue))
+                            elemental->UnSummon();
+
                 // Glyph of Eternal Water
                 if (caster->HasAura(SPELL_MAGE_GLYPH_OF_ETERNAL_WATER))
                     caster->CastSpell(caster, SPELL_MAGE_SUMMON_WATER_ELEMENTAL_PERMANENT, true);

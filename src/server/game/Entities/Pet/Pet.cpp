@@ -1164,21 +1164,6 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetBonusDamage(0);
     switch (petType)
     {
-        case SUMMON_PET:
-        {
-	  /*float mod = 1;
-            if (petlevel < 60)
-                mod = 1;
-            else if (petlevel < 70)
-                mod = 2 + (petlevel-70)/10;
-            else
-                mod = 5 + (petlevel-80)/4;
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel - (petlevel / 4))*mod));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel + (petlevel / 4))*mod));
-
-            //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));*/
-            break;
-        }
         case HUNTER_PET:
         {
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
@@ -1200,8 +1185,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             {
                 case 510: // mage Water Elemental
                 {
-                    //          SetCreateHealth(m_owner->GetMaxHealth() / 2);
-                    //   SetCreateMana(m_owner->GetMaxPower(POWER_MANA)/ 2);
+                    float healt = 6676 + 118 * 7.5f;
+                    float mana = 1082 + 4.95 * (0.3 * m_owner->GetStat(STAT_INTELLECT));
+                    SetCreateHealth(healt);
+                    SetCreateMana(mana);
+                    SetCreateStat(STAT_STAMINA, 118);
+                    SetStat(STAT_STAMINA, 118 + 118 + 0.3 * m_owner->GetStat(STAT_STAMINA));
+                    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f); // Bonus Armor (35% of player armor)
                     SetBonusDamage(int32(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FROST) * 0.4f));
                     break;
                 }

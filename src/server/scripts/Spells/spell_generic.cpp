@@ -2861,19 +2861,19 @@ public:
 
     void HandleScript(SpellEffIndex /*effIndex*/)
     {
+        std::cout << " void HandleScript(SpellEffIndex /*effIndex*/)" << std::endl;
         // Here the target is the water spout and determines the position where the player is knocked from
         if (Unit* target = GetHitUnit())
         {
-            if (Unit* player = GetCaster())
+        std::cout << " void HandleScript(SpellEffIndex /*effIndex*/) 2" << std::endl;
+            if (Player* player = GetCaster()->ToPlayer())
             {
-                if (player->GetTypeId() == TYPEID_PLAYER || player->isPet())
-                {
-                    float horizontalSpeed = 20.0f + (40.0f - GetCaster()->GetDistance(target));
-                    float verticalSpeed = 8.0f;
-                    // This method relies on the Dalaran Sewer map disposition and Water Spout position
-                    // What we do is knock the player from a position exactly behind him and at the end of the pipe
-                    player->KnockbackFrom(target->GetPositionX(), player->GetPositionY(), horizontalSpeed, verticalSpeed);
-                }
+        std::cout << " void HandleScript(SpellEffIndex /*effIndex*/) 3" << std::endl;
+                float horizontalSpeed = 20.0f + (40.0f - GetCaster()->GetDistance(target));
+                float verticalSpeed = 8.0f;
+                // This method relies on the Dalaran Sewer map disposition and Water Spout position
+                // What we do is knock the player from a position exactly behind him and at the end of the pipe
+                player->KnockbackFrom(target->GetPositionX(), player->GetPositionY(), horizontalSpeed, verticalSpeed);
             }
         }
     }

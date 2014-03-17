@@ -250,7 +250,8 @@ class boss_professor_putricide : public CreatureScript
                 if (!(events.GetPhaseMask() & PHASE_MASK_NOT_SELF))
                     instance->SetBossState(DATA_PROFESSOR_PUTRICIDE, NOT_STARTED);
                 instance->SetData(DATA_NAUSEA_ACHIEVEMENT, uint32(true));
-
+                me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_TEAR_GAS_CREATURE, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 71615, true);
                 events.Reset();
                 summons.DespawnAll();
                 SetPhase(PHASE_COMBAT_1);
@@ -863,6 +864,26 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
     public:
         spell_putricide_ooze_channel() : SpellScriptLoader("spell_putricide_ooze_channel") { }
 
+    class LimonTargetSelector
+    {
+    public:
+        LimonTargetSelector() { }
+
+        bool operator()(Unit* unit)
+        {
+            if (Creature *c = unit->FindNearestCreature(36678, 1000))
+            {
+                uint64 tankGUID = 0;
+                if (Unit *tank = c->getVictim())
+                    tankGUID = tank->GetGUID();
+                uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_GASEOUS_BLOAT_PROTECTION, c);
+                uint32 gaseousBloatId2 = sSpellMgr->GetSpellIdForDifficulty(SPELL_VOLATILE_OOZE_PROTECTION, c);
+                return unit->HasAura(gaseousBloatId) || unit->HasAura(gaseousBloatId2) || unit->GetVehicle() != NULL || unit->GetGUID() == tankGUID;
+            }
+            return false;
+        }
+    };
+
         class spell_putricide_ooze_channel_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_putricide_ooze_channel_SpellScript);
@@ -886,37 +907,33 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
 
             void SelectTarget(std::list<Unit*>& targets)
             {
-                //                if (targets.empty())
+                if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                 {
-
-                    //                    FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
-                    //                    GetCaster()->ToCreature()->DespawnOrUnsummon(1);    // despawn next update
-                    // return;
+                    targets.remove_if(Trinity::ObjectGUIDCheck(instance->GetData64(DATA_ADD_TARGET)));
                 }
-                /*                if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+
+                targets.remove_if(LimonTargetSelector());
+
+                if (targets.empty())
                 {
-                    Unit* target = Trinity::Containers::SelectRandomContainerElement(targets);
-                    int cnt = 0;
-                    if (Creature *putri = instance->instance->GetCreature(instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                    {
-                        while (putri->AI()->GetData(target->GetGUIDLow()) == 0 && cnt < 25)
-                        {
-                            target = Trinity::Containers::SelectRandomContainerElement(targets);
-                            cnt++;
-                        }
-                        targets.clear();
-                        targets.push_back(target);
-                        putri->AI()->SetData(42, target->GetGUIDLow());
-                        _target = target;
-                    }
-                    }*/
+                    FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
+                    GetCaster()->ToCreature()->DespawnOrUnsummon(1);    // despawn next update
+                    return;
+                }
+
+                Unit* target = Trinity::Containers::SelectRandomContainerElement(targets);
+                if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                    instance->SetData64(DATA_ADD_TARGET, target->GetGUID());
+                targets.clear();
+                targets.push_back(target);
+                _target = target;
             }
 
             void SetTarget(std::list<Unit*>& targets)
             {
-                /*                targets.clear();
+                targets.clear();
                 if (_target)
-                targets.push_back(_target);*/
+                    targets.push_back(_target);
             }
 
             void StartAttack()
@@ -933,9 +950,9 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
 
             void Register()
             {
-                //                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                //                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                //                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_ooze_channel_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
                 AfterHit += SpellHitFn(spell_putricide_ooze_channel_SpellScript::StartAttack);
             }
 
@@ -1627,82 +1644,10 @@ public:
         Unit* _caster;
 };
 
-
-class LimonTargetSelector
-{
-public:
-    LimonTargetSelector(Unit *caster) : _caster(caster) { }
-
-    bool operator()(Unit* unit)
-    {
-        Creature *c = _caster->FindNearestCreature(36678, 1000);
-        if (!c)
-            return true;
-        Unit *tank = c->getVictim();
-        if (!tank)
-            return true;
-        uint32 gaseousBloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_GASEOUS_BLOAT_PROTECTION, _caster);
-        uint32 gaseousBloatId2 = sSpellMgr->GetSpellIdForDifficulty(SPELL_VOLATILE_OOZE_PROTECTION, _caster);
-        return unit->HasAura(gaseousBloatId) || unit->HasAura(gaseousBloatId2) || unit->GetVehicle() != NULL || unit->GetGUID() == tank->GetGUID();
-    }
-private:
-    Unit *_caster;
-};
-
 class spell_putricide_gaseous_bloat : public SpellScriptLoader
 {
     public:
         spell_putricide_gaseous_bloat() : SpellScriptLoader("spell_putricide_gaseous_bloat") { }
-
-        class spell_putricide_gaseous_bloat_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_putricide_gaseous_bloat_SpellScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                _target = NULL;
-                return true;
-            }
-
-            void FilterTargets(std::list<Unit*>& targets)
-            {
-                if (targets.empty())
-                    if (Unit *caster = GetCaster())
-                        if (InstanceScript *instance = caster->GetInstanceScript())
-                        {
-                            Map::PlayerList const& PlList = instance->instance->GetPlayers();
-                            if (!PlList.isEmpty())
-                                for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
-                                    if (Player * pl = itr->getSource())
-                                        targets.push_back(pl);
-                        }
-                if (targets.empty())
-                    return;
-                Unit *tar = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.remove_if (LimonTargetSelector(GetCaster()));
-                if (!targets.empty())
-                    Trinity::Containers::RandomResizeList(targets, 1);
-                else
-                    targets.push_back(tar);
-            }
-
-            void SetTarget(std::list<Unit*>& targets)
-            {
-                targets.clear();
-                if (_target != NULL)
-                    targets.push_back(_target);
-            }
-
-        private:
-            Unit *_target;
-
-            void Register()
-            {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_gaseous_bloat_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
-            }
-        };
 
         class spell_putricide_gaseous_bloat_AuraScript : public AuraScript
         {
@@ -1733,80 +1678,6 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
         {
             return new spell_putricide_gaseous_bloat_AuraScript();
         }
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_putricide_gaseous_bloat_SpellScript();
-        }
-};
-
-class spell_putricide_adhesive_limon : public SpellScriptLoader
-{
-
-    public:
-        spell_putricide_adhesive_limon() : SpellScriptLoader("spell_putricide_adhesive_limon") { }
-
-        class spell_putricide_adhesive_limon_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_putricide_adhesive_limon_SpellScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                _target = NULL;
-                return true;
-            }
-
-            void FilterTargets(std::list<Unit*>& targets)
-            {
-                if (targets.empty())
-                    if (Unit *caster = GetCaster())
-                        if (InstanceScript *instance = caster->GetInstanceScript())
-                        {
-                            Map::PlayerList const& PlList = instance->instance->GetPlayers();
-                            if (!PlList.isEmpty())
-                                for (Map::PlayerList::const_iterator itr = PlList.begin(); itr != PlList.end(); ++itr)
-                                    if (Player * pl = itr->getSource())
-                                        targets.push_back(pl);
-                        }
-                if (targets.empty())
-                    return;
-                Unit *tar = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.remove_if (LimonTargetSelector(GetCaster()));
-                if (!targets.empty())
-                    Trinity::Containers::RandomResizeList(targets, 1);
-                else if (tar != NULL)
-                    targets.push_back(tar);
-                if (!targets.empty())
-                    for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
-                        if (Unit *vic = *itr)
-                        {
-                            _target = vic;
-                            break;
-                        }
-            }
-
-            void SetTarget(std::list<Unit*>& targets)
-            {
-                targets.clear();
-                if (_target != NULL)
-                    targets.push_back(_target);
-            }
-
-        private:
-            Unit *_target;
-
-            void Register()
-            {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::SetTarget, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_putricide_adhesive_limon_SpellScript::SetTarget, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_putricide_adhesive_limon_SpellScript();
-        }
 };
 
 void AddSC_boss_professor_putricide()
@@ -1831,5 +1702,4 @@ void AddSC_boss_professor_putricide()
     new spell_putricide_regurgitated_ooze();
     new spell_putricide_clear_aura_effect_value();
     new spell_stinky_precious_decimate();
-    new spell_putricide_adhesive_limon();
 }

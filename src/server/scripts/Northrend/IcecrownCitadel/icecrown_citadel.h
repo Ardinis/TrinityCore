@@ -141,6 +141,7 @@ enum DataTypes
     GUID_PLAYER_LOCATION                    = 112,
 
     DATA_BUFF,
+    DATA_ADD_TARGET,
 };
 
 enum CreaturesIds

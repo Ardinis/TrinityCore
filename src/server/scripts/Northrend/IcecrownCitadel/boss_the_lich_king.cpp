@@ -483,6 +483,32 @@ class VileSpiritActivateEvent : public BasicEvent
         Creature* _owner;
 };
 
+class TriggerWickedSpirit : public BasicEvent
+{
+public:
+    explicit TriggerWickedSpirit(Creature* owner)
+        : _owner(owner), _counter(13)
+    {
+    }
+
+    bool Execute(uint64 /*time*/, uint32 /*diff*/)
+    {
+        _owner->CastCustomSpell(SPELL_TRIGGER_VILE_SPIRIT_HEROIC, SPELLVALUE_MAX_TARGETS, 1, NULL, true);
+
+        if (--_counter)
+        {
+            _owner->m_Events.AddEvent(this, _owner->m_Events.CalculateTime(3000));
+            return false;
+        }
+
+        return true;
+    }
+
+private:
+    Creature* _owner;
+    uint32 _counter;
+};
+
 class boss_the_lich_king : public CreatureScript
 {
     public:
@@ -508,6 +534,7 @@ class boss_the_lich_king : public CreatureScript
                 mui_sumVile = 10000;
                 _harvestGUID.clear();
                 special = false;
+                isFirstActivation = true;
             }
 
             void JustDied(Unit* /*killer*/)
@@ -614,8 +641,6 @@ class boss_the_lich_king : public CreatureScript
                         summons.DoAction(NPC_STRANGULATE_VEHICLE, ACTION_TELEPORT_BACK);
                         if (!IsHeroic())
                             Talk(SAY_LK_FROSTMOURNE_ESCAPE);
-                        else
-                            DoCastAOE(SPELL_TRIGGER_VILE_SPIRIT_HEROIC);
                         break;
                     default:
                         break;
@@ -750,11 +775,20 @@ class boss_the_lich_king : public CreatureScript
                             if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
                             {
                                 summon->DespawnOrUnsummon();
-                                //                            TeleportSpirit(summon);
+                                //                                TeleportSpirit(summon);
                                 return;
                             }
 
+                        summon->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DISARM, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                        summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                         summon->SetReactState(REACT_PASSIVE);
+                        summon->StopMoving();
                         summon->SetSpeed(MOVE_FLIGHT, 0.5f);
                         summon->GetMotionMaster()->MoveRandom(10.0f);
                         summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(15000));
@@ -1109,6 +1143,10 @@ class boss_the_lich_king : public CreatureScript
                                     if (Is25ManRaid())
                                         spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
+
+                                    Creature* spawnerBack = triggers.back();
+                                    spawnerBack->m_Events.AddEvent(new TriggerWickedSpirit(spawnerBack), spawnerBack->m_Events.CalculateTime(isFirstActivation ? 5000 : 3000));
+                                    isFirstActivation = false;
                                 }
                                 //				DoCastAOE(SPELL_VILE_SPIRITS);
                                 events.ScheduleEvent(EVENT_WICKED_SPIRITS, urand(35000, 40000), 0, PHASE_FROSTMOURNE);
@@ -1275,6 +1313,7 @@ class boss_the_lich_king : public CreatureScript
             uint32 mui_sumVile;
             std::list<uint64 >  _harvestGUID;
             bool special;
+            bool isFirstActivation;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1514,8 +1553,8 @@ class npc_shambling_horror_icc : public CreatureScript
             npc_shambling_horror_iccAI(Creature* creature) : ScriptedAI(creature)
             {
                 _frenzied = false;
-	      me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-	      me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -2071,6 +2110,7 @@ class npc_terenas_menethil : public CreatureScript
                         _events.ScheduleEvent(EVENT_TELEPORT_BACK, 1000);
                         if (Creature* warden = me->FindNearestCreature(NPC_SPIRIT_WARDEN, 20.0f))
                         {
+
                             warden->CastSpell((Unit*)NULL, SPELL_DESTROY_SOUL, TRIGGERED_NONE);
                             warden->DespawnOrUnsummon(2000);
                         }

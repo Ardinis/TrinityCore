@@ -188,6 +188,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 tempete = 0;
                 _buffSelect = 0;
                 mui_rebuffTimer = 1000;
+                addtargetGUID = 0;
             }
 
             void FillInitialWorldStates(WorldPacket& data)
@@ -798,6 +799,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return MuradinBronzebeardNotVisualGUID;
                     case DATA_GB_BATTLE_MAGE:
                         return GbBattleMageGUID;
+                    case DATA_ADD_TARGET:
+                        return addtargetGUID;
                     default:
                         break;
                 }
@@ -974,13 +977,11 @@ class instance_icecrown_citadel : public InstanceMapScript
                  return true;
             }
 
-            /*            void SetData64(uint32 type, uint64 data) //putr target system only
+            void SetData64(uint32 type, uint64 data) //putr target system only
             {
-                if (type == 42)
-                    _oozeTargets.clear();
-                else
-                    _oozeTargets.push_back(data);
-                    }*/
+                if (data == DATA_ADD_TARGET)
+                    addtargetGUID = data;
+            }
 
             void SetData(uint32 type, uint32 data)
             {
@@ -1837,6 +1838,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint32 tempete;
             uint32 _buffSelect;
             uint32 mui_rebuffTimer;
+
+            uint64 addtargetGUID;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

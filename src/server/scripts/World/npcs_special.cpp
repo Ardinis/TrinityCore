@@ -2121,18 +2121,20 @@ public:
             Unit* owner = me->GetOwner();
             if (!owner)
                 return;
+            me->SetMaxHealth(4400);
+            me->SetHealth(4400);
             // Inherit Master's Threat List (not yet implemented)
             owner->CastSpell((Unit*)NULL, 58838, true);
             // here mirror image casts on summoner spell (not present in client dbc) 49866
             // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
             // Clone Me!
             owner->CastSpell(me, 45204, false);
-
-            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
-                me->AI()->AttackStart(owner->ToPlayer()->GetSelectedUnit());
+            me->SetReactState(REACT_AGGRESSIVE);
+            //            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
+            //    me->AI()->AttackStart(owner->ToPlayer()->GetSelectedUnit());
         }
 
-        void EnterCombat(Unit *who)
+        /*        void EnterCombat(Unit *who)
         {
             if (spells.empty())
                 return;
@@ -2147,10 +2149,10 @@ public:
                     events.ScheduleEvent(*itr, cooldown);
                 }
             }
-        }
+            }*/
 
 
-        void UpdateAI(const uint32 diff)
+        /*        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -2158,8 +2160,10 @@ public:
             events.Update(diff);
 
             bool hasCC = false;
-            if (me->GetCharmerOrOwnerGUID() && me->getVictim())
-                hasCC = me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE);
+            if (me->getVictim())
+                if (Unit *owner =  me->GetOwner())
+                    if (me->getVictim()->HasBreakableByDamageCrowdControlAura(me) || me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE) || me->getVictim() != owner->getVictim())
+                        hasCC = true;
 
             if (hasCC)
             {
@@ -2184,7 +2188,7 @@ public:
                 events.ScheduleEvent(spellId, (casttime ? casttime : 500) + GetAISpellInfo(spellId)->realCooldown);
             }
 
-        }
+            }*/
 
         // Do not reload Creature templates on evade mode enter - prevent visual lost
         void EnterEvadeMode()

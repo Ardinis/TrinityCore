@@ -2274,7 +2274,7 @@ public :
             if (caster->HasAura(SPELL_SCALE_AURA))
             {
                 if (Aura * aur = caster->GetAura(SPELL_SCALE_AURA))
-                    dist = aur->GetStackAmount() * 6;
+                    dist = std::max(6, (int)aur->GetStackAmount());
             }
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())
@@ -2328,7 +2328,7 @@ public :
             if (caster->HasAura(SPELL_SCALE_AURA))
             {
                 if (Aura * aur = caster->GetAura(SPELL_SCALE_AURA))
-                    dist = aur->GetStackAmount() * 6;
+                    dist = std::max(6, (int)aur->GetStackAmount());
             }
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())

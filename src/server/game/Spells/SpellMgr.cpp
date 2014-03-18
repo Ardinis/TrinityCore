@@ -3955,6 +3955,19 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
                 break;
+            case 74630:
+            case 75882:
+            case 74802:
+            case 75874:
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
+                break;
+            case 75883:
+            case 75884:
+            case 75875:
+            case 75876:
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
+                break;
                 /*            case 47632:
                 m_spellInfo->FacingCasterFlags &= ~SPELL_FACING_FLAG_INFRONT;
                 break;*/

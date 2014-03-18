@@ -2129,12 +2129,12 @@ public:
             // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
             // Clone Me!
             owner->CastSpell(me, 45204, false);
-            me->SetReactState(REACT_AGGRESSIVE);
-            //            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
-            //    me->AI()->AttackStart(owner->ToPlayer()->GetSelectedUnit());
+            // me->SetReactState(REACT_AGGRESSIVE);
+            if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
+                me->AI()->AttackStart(owner->ToPlayer()->GetSelectedUnit());
         }
 
-        /*        void EnterCombat(Unit *who)
+        void EnterCombat(Unit *who)
         {
             if (spells.empty())
                 return;
@@ -2149,10 +2149,10 @@ public:
                     events.ScheduleEvent(*itr, cooldown);
                 }
             }
-            }*/
+        }
 
 
-        /*        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -2162,7 +2162,7 @@ public:
             bool hasCC = false;
             if (me->getVictim())
                 if (Unit *owner =  me->GetOwner())
-                    if (me->getVictim()->HasBreakableByDamageCrowdControlAura(me) || me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE) || me->getVictim() != owner->getVictim())
+                    if (me->getVictim()->HasBreakableByDamageCrowdControlAura(me) || me->getVictim()->HasAuraType(SPELL_AURA_MOD_CONFUSE))
                         hasCC = true;
 
             if (hasCC)
@@ -2188,7 +2188,7 @@ public:
                 events.ScheduleEvent(spellId, (casttime ? casttime : 500) + GetAISpellInfo(spellId)->realCooldown);
             }
 
-            }*/
+        }
 
         // Do not reload Creature templates on evade mode enter - prevent visual lost
         void EnterEvadeMode()

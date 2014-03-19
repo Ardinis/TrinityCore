@@ -6429,6 +6429,80 @@ public:
     }
 };
 
+#define CUSTOM_PACK_SPELL 2000000
+#define CUSTOM_PACK_VISUAL_SPELL 46350
+#define CUSTOM_PACK_SPELL_MAILBOX 2000001
+#define CUSTOM_PACK_SPELL_SUMMON_RAID 2000002
+#define CUSTOM_PACK_SPELL_REZ_RAID 2000003
+#define CUSTOM_PACK_SPELL_SUMMON_GUILD_BANK 2000005
+
+#define NPC_CUSTOM_PACK_ENTRY 421808
+
+class custom_pack_item : public ItemScript
+{
+public:
+    custom_pack_item() : ItemScript("item_custom_mini_moi") { }
+
+    bool OnUse(Player* player, Item* pItem, SpellCastTargets const& /*targets*/)
+    {
+        if (!player || !player->IsInWorld() || !player->isAlive()) // LOL ?
+            return true;
+
+        Unit* pet = ObjectAccessor::GetCreatureOrPetOrVehicle(*player, player->GetCritterGUID());
+        if (pet && pet->GetEntry() == NPC_CUSTOM_PACK_ENTRY)
+        {
+            if (pet->GetTypeId() == TYPEID_UNIT && pet->ToCreature()->isSummon())
+                pet->ToTempSummon()->UnSummon();
+
+            return true;
+        }
+
+        if (player->InArena())
+        {
+            player->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
+            return true;
+        }
+
+        if (player->HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK))
+        {
+            player->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW, pItem, NULL);
+            return true;
+        }
+
+        player->CastSpell(player, CUSTOM_PACK_SPELL, true);
+        return false;
+    }
+};
+
+class npc_custom_pack : public CreatureScript
+{
+public:
+    npc_custom_pack() : CreatureScript("npc_custom_mini_moi") { }
+
+    struct npc_custom_packAI : public ScriptedAI
+    {
+        npc_custom_packAI(Creature* c) : ScriptedAI(c) {}
+
+        void Reset()
+        {
+            if (me->isSummon())
+                if (Player *owner = me->ToTempSummon()->GetSummoner()->ToPlayer())
+                {
+                    if (Unit *victim = owner->GetSelectedUnit())
+                        victim->CastSpell(me, 45204, true);
+                    else
+                        owner->CastSpell(me, 45204, true);
+                    me->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.5);
+                }
+
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_custom_packAI(creature);
+    }
+};
 
 void AddSC_npcs_special()
 {
@@ -6508,4 +6582,7 @@ void AddSC_npcs_special()
     //    new npc_paragon_5_years_01();
 
     new npc_army_dead_ghoul();
+
+    new custom_pack_item();
+    new npc_custom_pack();
 }

@@ -6052,7 +6052,7 @@ float Player::GetMeleeCritFromAgility()
     return crit*100.0f;
 }
 
-float Player::GetDodgeFromAgility()
+float Player::GetDodgeFromAgility(float &diminishing, float &nondiminishing)
 {
     // Table for base dodge values
     float dodge_base[MAX_CLASSES] = {
@@ -6093,7 +6093,10 @@ float Player::GetDodgeFromAgility()
     GtChanceToMeleeCritEntry  const *dodgeRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
     if (dodgeRatio == NULL || pclass > MAX_CLASSES)
         return 0.0f;
-
+    float base_agility = GetCreateStat(STAT_AGILITY) * m_auraModifiersGroup[UNIT_MOD_STAT_START + STAT_AGILITY][BASE_PCT];
+    float bonus_agility = GetStat(STAT_AGILITY) - base_agility;
+    diminishing = 100.0f * bonus_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1];
+    nondiminishing = 100.0f * (dodge_base[pclass-1] + base_agility * dodgeRatio->ratio * crit_to_dodge[pclass-1]);
     float dodge=dodge_base[pclass-1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass-1];
     return dodge*100.0f;
 }

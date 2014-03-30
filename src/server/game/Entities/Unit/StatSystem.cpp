@@ -682,17 +682,21 @@ void Player::UpdateParryPercentage()
     uint32 pclass = getClass()-1;
     if (CanParry() && parry_cap[pclass] > 0.0f)
     {
-        // Base parry
-        value  = 5.0f;
-        // Modify value from defense skill
-        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
-        // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
-        value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+        float nondiminishing  = 5.0f;
         // Parry from rating
-        value += GetRatingBonusValue(CR_PARRY);
-        value = value < 0.0f ? 0.0f : value;
+        float diminishing = GetRatingBonusValue(CR_PARRY);
+        // Modify value from defense skill (only bonus from defense rating diminishes)
+        nondiminishing += (GetSkillValue(SKILL_DEFENSE) - GetMaxSkillValueForLevel()) * 0.04f;
+        diminishing += (int32(GetRatingBonusValue(CR_DEFENSE_SKILL))) * 0.04f;
+        // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
+        nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+        // apply diminishing formula to diminishing parry chance
+        value = nondiminishing + diminishing * parry_cap[pclass] / (diminishing + parry_cap[pclass] * m_diminishing_k[pclass]);
+
         if (value > parry_cap[pclass])
             value = parry_cap[pclass];
+
+        value = value < 0.0f ? 0.0f : value;
     }
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
@@ -714,18 +718,23 @@ void Player::UpdateDodgePercentage()
         116.890707f     // Druid
     };
 
-    uint32 pclass = getClass()-1;
-    // Dodge from agility
-    float value = GetDodgeFromAgility();
-    // Modify value from defense skill
-    value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    float diminishing = 0.0f, nondiminishing = 0.0f;
+    GetDodgeFromAgility(diminishing, nondiminishing);
+    // Modify value from defense skill (only bonus from defense rating diminishes)
+    nondiminishing += (GetSkillValue(SKILL_DEFENSE) - GetMaxSkillValueForLevel()) * 0.04f;
+    diminishing += (int32(GetRatingBonusValue(CR_DEFENSE_SKILL))) * 0.04f;
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
-    value += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
+    nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
     // Dodge from rating
-    value += GetRatingBonusValue(CR_DODGE);
-    value = value < 0.0f ? 0.0f : value;
+    diminishing += GetRatingBonusValue(CR_DODGE);
+    // apply diminishing formula to diminishing dodge chance
+    uint32 pclass = getClass()-1;
+    float value = nondiminishing + (diminishing * dodge_cap[pclass] / (diminishing + dodge_cap[pclass] * m_diminishing_k[pclass]));
+
     if (value > dodge_cap[pclass])
         value = dodge_cap[pclass];
+
+    value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
 }
 

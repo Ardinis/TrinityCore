@@ -169,6 +169,7 @@ class boss_rotface : public CreatureScript
 
             void EnterEvadeMode()
             {
+                me->CombatStop(); // Sometimes threat can remain, so it's a safety measure
                 ScriptedAI::EnterEvadeMode();
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->EnterEvadeMode();

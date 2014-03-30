@@ -149,6 +149,7 @@ class boss_festergut : public CreatureScript
 
             void EnterEvadeMode()
             {
+                me->CombatStop(); // Sometimes threat can remain, so it's a safety measure
                 ScriptedAI::EnterEvadeMode();
                 if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->EnterEvadeMode();

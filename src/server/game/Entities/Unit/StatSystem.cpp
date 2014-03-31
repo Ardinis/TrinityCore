@@ -686,7 +686,7 @@ void Player::UpdateParryPercentage()
     uint32 pclass = getClass()-1;
     if (CanParry() && parry_cap[pclass] > 0.0f)
     {
-        // Base parr
+        /*        // Base parr
         value  = 5.0f;
         // Modifica calculo de skill defensa
         value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
@@ -694,7 +694,18 @@ void Player::UpdateParryPercentage()
 
         value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         // Parry atravez de ratin
-        value += GetRatingBonusValue(CR_PARRY);
+        value += GetRatingBonusValue(CR_PARRY);*/
+        float nondiminishing  = 5.0f;
+        // Modify value from defense skill (only bonus from defense rating diminishes)
+        nondiminishing += (GetSkillValue(SKILL_DEFENSE) - GetMaxSkillValueForLevel()) * 0.04f;
+        // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
+        nondiminishing += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+        // Parry from rating
+        float diminishing = (int32(GetRatingBonusValue(CR_DEFENSE_SKILL))) * 0.04f;
+        diminishing += GetRatingBonusValue(CR_PARRY);
+        // apply diminishing formula to diminishing parry chance
+        value = nondiminishing + diminishing * parry_cap[pclass] / (diminishing + parry_cap[pclass] * m_diminishing_k[pclass]);
+
         if (value > parry_cap[pclass])
             value = parry_cap[pclass];
         value = value < 0.0f ? 0.0f : value;

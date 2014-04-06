@@ -152,6 +152,7 @@ class boss_devourer_of_souls : public CreatureScript
 
                 instance->SetData(DATA_DEVOURER_EVENT, NOT_STARTED);
 		canDoIt = false;
+		targetGUID = 0;
             }
 
             void EnterCombat(Unit* /*who*/)
@@ -266,11 +267,12 @@ class boss_devourer_of_souls : public CreatureScript
 
 	  void MovementInform(uint32 uiType, uint32 uiId)
 	  {
-	    if (canDoIt)
-	    {
-	      DoCast(targets, SPELL_WELL_OF_SOULS);
-	      canDoIt = false;
-	    }
+	      if (canDoIt)
+	      {
+		  if (Unit *target = Unit::GetUnit(*me, targetGUID))
+		    DoCast(target, SPELL_WELL_OF_SOULS);
+		  canDoIt = false;
+	      }
 	  }
 
             void UpdateAI(const uint32 diff)
@@ -302,9 +304,10 @@ class boss_devourer_of_souls : public CreatureScript
                             events.ScheduleEvent(EVENT_MIRRORED_SOUL, urand(15000, 30000));
                             break;
                         case EVENT_WELL_OF_SOULS:
-                            if (targets = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0))
 			    {
-			      me->GetMotionMaster()->MoveJump(targets->GetPositionX(), targets->GetPositionY(), targets->GetPositionZ(), 20.0f, 20.0f);
+			      targetGUID = target->GetGUID();
+			      me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 20.0f, 20.0f);
 			      canDoIt = true;
 			      //			      DoCast(target, SPELL_WELL_OF_SOULS);
 			    }
@@ -385,16 +388,16 @@ class boss_devourer_of_souls : public CreatureScript
             }
 
         private:
-            bool threeFaced;
+	  bool threeFaced;
 
-            // wailing soul event
-            float beamAngle;
-            float beamAngleDiff;
-            int8 wailingSoulTick;
+	  // wailing soul event
+	  float beamAngle;
+	  float beamAngleDiff;
+	  int8 wailingSoulTick;
 
-            uint64 mirroredSoulTarget;
+	  uint64 mirroredSoulTarget;
 
-	  Unit *targets;
+	  uint64 targetGUID;
 	  bool canDoIt;
         };
 

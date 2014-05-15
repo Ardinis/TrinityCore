@@ -2302,6 +2302,19 @@ void Pet::CastPetAuras(bool current)
         RemoveAurasDueToSpell(62137);
         CastSpell(this, 62137, true);
     }
+
+    if (isHunterPet())
+    {
+        RemoveAurasDueToSpell(65220);
+        CastSpell(this, 65220, true);
+    }
+
+    if (isGuardian())
+    {
+        RemoveAurasDueToSpell(32233);
+        if (!HasAura(62137))
+            CastSpell(this, 32233, true);
+    }
 }
 
 void Pet::CastPetAura(PetAura const* aura)

@@ -112,7 +112,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 	    return;
 	  break;
 	default:
-	  sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid language/message type combination", 
+	  sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid language/message type combination",
 			 GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
 
 	  recv_data.rfinish();
@@ -214,30 +214,38 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
     if (!ignoreChecks)
     {
+        std::cout << "!!ignore check !" << std::endl;
         if (msg.empty())
             return;
-
+        std::cout << "!empty" << std::endl;
         if (ChatHandler(this).ParseCommands(msg.c_str()))
             return;
-
-	if (lang != LANG_ADDON)
-	  {
+        std::cout << "!parsecommand" << std::endl;
+        if (lang != LANG_ADDON)
+        {
             // Strip invisible characters for non-addon messages
             if (sWorld->getBoolConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
-	      stripLineInvisibleChars(msg);
-	    
+                stripLineInvisibleChars(msg);
+
             if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && !ChatHandler(this).isValidChatMessage(msg.c_str()))
-	      {
+            {
+                std::cout << "ignore check wtf ?" << std::endl;
                 sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
-			       GetPlayer()->GetGUIDLow(), msg.c_str());
-		
+                               GetPlayer()->GetGUIDLow(), msg.c_str());
+
                 if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
-		  KickPlayer();
-		
+                    KickPlayer();
+
                 return;
-	      }
-	  }
+            }
+            else
+                std::cout << "ignore check nooooooo" << std::endl;
+        }
+        else
+            std::cout << "lang addon ??? !" << std::endl;
     }
+    else
+        std::cout << "ignore check !" << std::endl;
 
     switch (type)
     {

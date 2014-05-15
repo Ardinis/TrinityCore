@@ -616,7 +616,7 @@ bool LinkExtractor::IsValidMessage()
             sLog->outDebug(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): got escaped pipe in sequence", _iss.str().c_str());
             return false;
         }
-
+        std::cout << "commandChar = " << (char)commandChar << std::endl;
         switch (commandChar)
         {
             case 'c':

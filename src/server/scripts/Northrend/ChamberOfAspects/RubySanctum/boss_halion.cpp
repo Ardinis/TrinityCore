@@ -75,7 +75,7 @@ enum Spells
 
     // Twilight Halion
     //    SPELL_DUSK_SHROUD = 75483,
-    SPELL_DUSK_SHROUD = 75476,
+    SPELL_DUSK_SHROUD                   = 75476,
 
     SPELL_DARK_BREATH                   = 74806,
 

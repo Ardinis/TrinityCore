@@ -2438,6 +2438,7 @@ public:
 ######*/
 #define GLYPH_OF_SHADOWFIEND_MANA         58227
 #define GLYPH_OF_SHADOWFIEND              58228
+#define SHADOWFIEND_AOE_AVOIDANCE         63623
 
 class npc_shadowfiend : public CreatureScript
 {
@@ -2446,7 +2447,10 @@ public:
 
     struct npc_shadowfiendAI : public ScriptedAI
     {
-        npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_shadowfiendAI(Creature* creature) : ScriptedAI(creature)
+        {
+            DoCast(me, SHADOWFIEND_AOE_AVOIDANCE, true);
+        }
 
         void JustDied(Unit* killer)
         {

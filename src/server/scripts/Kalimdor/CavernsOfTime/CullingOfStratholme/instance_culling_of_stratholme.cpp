@@ -63,9 +63,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 _genericBunnyGUID = 0;
                 memset(&_encounterState[0], 0, sizeof(uint32) * MAX_ENCOUNTER);
                 _crateCount = 0;
-		uiCountdownTimer = 0;
-		uiCountdownMinute = 26;
-
+                uiCountdownTimer = 0;
+                uiCountdownMinute = 26;
             }
 
             bool IsEncounterInProgress() const

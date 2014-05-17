@@ -6503,22 +6503,17 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
     if (damage)
         procVictim |= PROC_FLAG_TAKEN_DAMAGE;
-       if (damage > 0)
-      {
-	//	if (m_spellInfo->isArea())
-	  {
-	    if (target->HasAura(65220) || target->HasAura(32233) || target->HasAura(63623) || target->HasAura(62137))
-	      {
-		if (GetCaster()->GetTypeId() == TYPEID_UNIT)
-		  {
-		    damage = int32(float(damage) / 100 * 10);
-		  }
-		resist -= damage;
-	      }
-	    if (target->HasAura(48659))
-	      damage = int32(float(damage) / 2);
-	  }
-      }
+    if (target && damage > 0)
+    {
+        if (GetSpellInfo()->IsAffectingArea())
+        {
+            resist += damage;
+            damage = int32(float(damage) * target->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, GetSpellInfo()->SchoolMask));
+            if (GetCaster() && GetCaster()->GetTypeId() == TYPEID_UNIT)
+                damage = int32(float(damage) * target->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, GetSpellInfo()->SchoolMask));
+            resist -= damage;
+        }
+    }
 
     int32 overkill = damage - target->GetHealth();
     if (overkill < 0)

@@ -3971,6 +3971,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 /*            case 47632:
                 m_spellInfo->FacingCasterFlags &= ~SPELL_FACING_FLAG_INFRONT;
                 break;*/
+            case 62137:
+                spellInfo->EffectBasePoints[0] = -90;
+                break;
             default:
                 break;
         }

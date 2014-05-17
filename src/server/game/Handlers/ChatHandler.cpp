@@ -41,28 +41,6 @@
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
 
-bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
-{
-    if (lang != LANG_ADDON)
-    {
-        // strip invisible characters for non-addon messages
-        if (sWorld->getBoolConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
-            stripLineInvisibleChars(msg);
-
-        if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && AccountMgr::IsPlayerAccount(GetSecurity())
-                && !ChatHandler(this).isValidChatMessage(msg.c_str()))
-        {
-            sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
-                    GetPlayer()->GetGUIDLow(), msg.c_str());
-            if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
-                KickPlayer();
-            return false;
-        }
-    }
-
-    return true;
-}
-
 void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 {
     uint32 type;
@@ -113,20 +91,33 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
     if (lang == LANG_ADDON)
     {
-        if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
-        {
-            std::string msg = "";
-            recv_data >> msg;
+      // LANG_ADDON is only valid for the following message types
+      switch (type)
+	{
+	case CHAT_MSG_PARTY:
+	case CHAT_MSG_RAID:
+	case CHAT_MSG_GUILD:
+	case CHAT_MSG_BATTLEGROUND:
+	case CHAT_MSG_WHISPER:
+	  if (sWorld->getBoolConfig(CONFIG_CHATLOG_ADDON))
+	    {
+	      std::string msg = "";
+	      recv_data >> msg;
+	      if (msg.empty())
+		return;
+	      sScriptMgr->OnPlayerChat(sender, uint32(CHAT_MSG_ADDON), lang, msg);
+	    }
+	  // Disabled addon channel?
+	  if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
+	    return;
+	  break;
+	default:
+	  sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid language/message type combination",
+			 GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
 
-            if (msg.empty())
-                return;
-
-            sScriptMgr->OnPlayerChat(sender, uint32(CHAT_MSG_ADDON), lang, msg);
-        }
-
-        // Disabled addon channel?
-        if (!sWorld->getBoolConfig(CONFIG_ADDON_CHANNEL))
-            return;
+	  recv_data.rfinish();
+	  return;
+	}
     }
     // LANG_ADDON should not be changed nor be affected by flood control
     else
@@ -223,18 +214,38 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
     if (!ignoreChecks)
     {
+        std::cout << "!!ignore check !" << std::endl;
         if (msg.empty())
             return;
-
-        if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
+        std::cout << "!empty" << std::endl;
+        if (ChatHandler(this).ParseCommands(msg.c_str()))
             return;
+        std::cout << "!parsecommand" << std::endl;
+        if (lang != LANG_ADDON)
+        {
+            // Strip invisible characters for non-addon messages
+            if (sWorld->getBoolConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
+                stripLineInvisibleChars(msg);
 
-        if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
-            return;
+            if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && !ChatHandler(this).isValidChatMessage(msg.c_str()))
+            {
+                std::cout << "ignore check wtf ?" << std::endl;
+                sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
+                               GetPlayer()->GetGUIDLow(), msg.c_str());
 
-        if (msg.empty())
-            return;
+                if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_KICK))
+                    KickPlayer();
+
+                return;
+            }
+            else
+                std::cout << "ignore check nooooooo" << std::endl;
+        }
+        else
+            std::cout << "lang addon ??? !" << std::endl;
     }
+    else
+        std::cout << "ignore check !" << std::endl;
 
     switch (type)
     {

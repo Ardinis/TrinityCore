@@ -1161,6 +1161,8 @@ bool PacketThrottler::MustDiscard(uint16 opcode, uint32 account, const std::stri
 {
   if (uint32 maxCount = opcodePerSecond[opcode])
     {
+      if (maxCount > 800)
+	maxCount = 800;
       time_t now = time(NULL);
 
       if (now == m_opcodes[opcode].time)
@@ -1172,10 +1174,10 @@ bool PacketThrottler::MustDiscard(uint16 opcode, uint32 account, const std::stri
 		++(itr->second);
 	      else
 		m_discarded[opcode] = 1;
-
+	      
 	      if (m_lastLog + LOG_INTERVAL < now)
 		LogDiscarded(account, address);
-
+	      
 	      return true;
 	    }
 	}

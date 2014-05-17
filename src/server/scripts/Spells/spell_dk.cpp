@@ -1283,7 +1283,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_strike();
     new spell_dk_death_coil();
     new spell_dk_death_grip();
-    new spell_dk_avoidance_passive();
+    //    new spell_dk_avoidance_passive();
     new spell_dk_pet_scaling_01();
     new spell_dk_pet_scaling_02();
     new spell_dk_pet_scaling_03();

@@ -84,10 +84,10 @@ public:
             {
                 me->GetPosition(&pos);
                 if (Creature *Rend = me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 100.0f, true))
-		{
-		    Rend->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1800000);
-		    Rend->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
-		}
+                {
+                    Rend->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1800000);
+                    Rend->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                }
             }
         }
 
@@ -112,34 +112,32 @@ public:
                 switch (eventId)
                 {
                     case EVENT_SUMMON_REND:
-		      // Summon Rend and Change model to normal Gyth
-		      // Interrupt any spell casting
-		      me->InterruptNonMeleeSpells(false);
-		      // Gyth model
-		      me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
-		      me->GetPosition(&pos);
-		      if (Creature *Rend = me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 100.0f, true))
-		      {
-			  Rend->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1800000);
-			  Rend->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
-		      }
-		      events.ScheduleEvent(EVENT_CORROSIVE_ACID, 8 * IN_MILLISECONDS);
-		      events.ScheduleEvent(EVENT_FREEZE, 11 * IN_MILLISECONDS);
-		      events.ScheduleEvent(EVENT_FLAME_BREATH, 4 * IN_MILLISECONDS);
-		      events.CancelEvent(EVENT_SUMMON_REND);
-		      break;
+                        // Summon Rend and Change model to normal Gyth
+                        // Interrupt any spell casting
+                        me->InterruptNonMeleeSpells(false);
+                        // Gyth model
+                        me->SetDisplayId(me->GetCreatureInfo()->Modelid1);
+                        me->GetPosition(&pos);
+                        if (Creature *nefarius = me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 100.0f, true))
+                            if (Creature *Rend = nefarius->SummonCreature(NPC_WARCHIEF_REND_BLACKHAND, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1800000))
+                                Rend->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                        events.ScheduleEvent(EVENT_CORROSIVE_ACID, 8 * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_FREEZE, 11 * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_FLAME_BREATH, 4 * IN_MILLISECONDS);
+                        events.CancelEvent(EVENT_SUMMON_REND);
+                        break;
                     case EVENT_CORROSIVE_ACID:
-		      DoCast(me->getVictim(), SPELL_CORROSIVE_ACID);
-		      events.ScheduleEvent(EVENT_CORROSIVE_ACID, 7 * IN_MILLISECONDS);
-		      break;
+                        DoCast(me->getVictim(), SPELL_CORROSIVE_ACID);
+                        events.ScheduleEvent(EVENT_CORROSIVE_ACID, 7 * IN_MILLISECONDS);
+                        break;
                    case EVENT_FREEZE:
-		     DoCast(me->getVictim(), SPELL_FREEZE);
-		     events.ScheduleEvent(EVENT_FREEZE, 16 * IN_MILLISECONDS);
-		     break;
+                       DoCast(me->getVictim(), SPELL_FREEZE);
+                       events.ScheduleEvent(EVENT_FREEZE, 16 * IN_MILLISECONDS);
+                       break;
                    case EVENT_FLAME_BREATH:
-		     DoCast(me->getVictim(), SPELL_FLAMEBREATH);
-		     events.ScheduleEvent(EVENT_FLAME_BREATH, 10500);
-		     break;
+                       DoCast(me->getVictim(), SPELL_FLAMEBREATH);
+                       events.ScheduleEvent(EVENT_FLAME_BREATH, 10500);
+                       break;
                 }
             }
             DoMeleeAttackIfReady();

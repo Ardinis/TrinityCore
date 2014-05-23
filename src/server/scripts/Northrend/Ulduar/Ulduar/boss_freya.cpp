@@ -1649,7 +1649,7 @@ class npc_ancient_conservator : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_NATURES_FURY))
                                 DoCast(target, SPELL_NATURES_FURY);
                             me->AddAura(SPELL_CONSERVATOR_GRIP, me);
-                            events.ScheduleEvent(EVENT_NATURES_FURY, 5000);
+                            events.ScheduleEvent(EVENT_NATURES_FURY, 11000);
                             break;
                     }
                 }

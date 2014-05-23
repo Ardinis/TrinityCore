@@ -3974,6 +3974,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 62137:
                 spellInfo->EffectBasePoints[0] = -90;
                 break;
+            case 65074:
+            case 65296:
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
+                break;
             default:
                 break;
         }

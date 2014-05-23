@@ -1170,13 +1170,13 @@ class Player : public Unit, public GridObject<Player>
         bool Has310Flyer(bool checkAllSpells, uint32 excludeSpellId = 0);
         void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
- bool HaveSpectators();
- void SendSpectatorAddonMsgToBG(SpectatorAddonMsg msg);
- bool isSpectateCanceled() { return spectateCanceled; }
- void CancelSpectate() { spectateCanceled = true; }
- Unit* getSpectateFrom() { return spectateFrom; }
- bool isSpectator() const { return spectatorFlag; }
- void SetSpectate(bool on);
+        bool HaveSpectators();
+        void SendSpectatorAddonMsgToBG(SpectatorAddonMsg msg);
+        bool isSpectateCanceled() { return spectateCanceled; }
+        void CancelSpectate() { spectateCanceled = true; }
+        Unit* getSpectateFrom() { return spectateFrom; }
+        bool isSpectator() const { return spectatorFlag; }
+        void SetSpectate(bool on);
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);
@@ -1359,12 +1359,12 @@ class Player : public Unit, public GridObject<Player>
             return mainItem && mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON && !CanTitanGrip();
         }
 
-	bool HasTwoHandWeaponInOneHand() const
-	{
-	  Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-	  Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-	  return offItem && ((mainItem && mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON) || offItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON);
-	}
+        bool HasTwoHandWeaponInOneHand() const
+        {
+            Item* offItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            return offItem && ((mainItem && mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON) || offItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON);
+        }
         void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
         bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
         bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore);

@@ -366,6 +366,7 @@ class boss_steelbreaker : public CreatureScript
                 DoScriptText(SAY_STEELBREAKER_AGGRO, me);
                 DoZoneInCombat();
                 DoCast(me, SPELL_HIGH_VOLTAGE);
+                events.Reset();
                 events.ScheduleEvent(EVENT_ENRAGE, 900000);
                 events.ScheduleEvent(EVENT_FUSION_PUNCH, 15000);
                 events.ScheduleEvent(EVENT_OVERWHELMING_POWER,  urand(2000, 5000));
@@ -463,8 +464,7 @@ class boss_steelbreaker : public CreatureScript
                 {
                 case SPELL_SUPERCHARGE:
                     me->SetHealth(me->GetMaxHealth());
-                    events.CancelEvent(EVENT_FUSION_PUNCH);
-                    events.ScheduleEvent(EVENT_FUSION_PUNCH, 15000);
+                    events.RescheduleEvent(EVENT_FUSION_PUNCH, 15000);
                     superChargedCnt++;
                     DoAction(ACTION_UPDATEPHASE);
                     // Crazy hack, but since - whyever - stacking does not work automatically when the casts are fired from different NPCs...
@@ -1296,8 +1296,8 @@ class boss_stormcaller_brundir : public CreatureScript
                 //if (me->GetPositionZ()>FLOOR_Z && !me->HasAura(SPELL_LIGHTNING_TENDRILS_VISUAL)) // in that case, we should not be above the floor
                 //    me->GetMotionMaster()->MoveFall();
 
-                if (!me->HasAura(SPELL_LIGHTNING_TENDRILS))
-                    DoMeleeAttackIfReady();
+                //                if (!me->HasAura(SPELL_LIGHTNING_TENDRILS))
+                //    DoMeleeAttackIfReady();
             }
 
         private:

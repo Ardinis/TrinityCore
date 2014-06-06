@@ -453,7 +453,7 @@ class boss_xt002 : public CreatureScript
                 uint8 _heartExposed;
                 uint32 _transferHealth;
 
-            uint32 _hfSpeedKill;
+                uint32 _hfSpeedKill;
         };
 };
 

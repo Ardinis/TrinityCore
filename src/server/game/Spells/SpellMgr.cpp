@@ -2976,6 +2976,10 @@ void SpellMgr::LoadSpellCustomAttr()
             case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
             case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
             case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 69409:
+            case 73797:
+            case 73798:
+            case 73799:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)

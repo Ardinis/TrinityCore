@@ -1033,23 +1033,23 @@ class spell_dk_pet_scaling_01 : public SpellScriptLoader
                     if (aurEff)
                         mod += CalculatePctN(1.0f, aurEff->GetAmount());                                                    // Glyph of the Ghoul adds a flat value to the scale mod
                     float ownerBonus = float(owner->GetStat(STAT_STAMINA));
-		    ownerBonus *= mod;
+                    ownerBonus *= mod;
                     amount += ownerBonus;
                 }
             }
 
-	  void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-	  {
-            if (Unit* pet = GetUnitOwner())
-	      if (_tempHealth)
-		pet->SetHealth(_tempHealth);
-	  }
+            void ApplyEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                    if (_tempHealth)
+                        pet->SetHealth(_tempHealth);
+            }
 
-	  void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
-	  {
-            if (Unit* pet = GetUnitOwner())
-	      _tempHealth = pet->GetHealth();
-	  }
+            void RemoveEffect(AuraEffect const* /* aurEff */, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* pet = GetUnitOwner())
+                    _tempHealth = pet->GetHealth();
+            }
 
             void CalculateStrengthAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {

@@ -27,7 +27,8 @@ public:
     {
         static ChatCommand commandTable[] =
         {
-            { "dev",            SEC_ADMINISTRATOR,  false,  &HandleDevCommand,          "", NULL }, 
+            { "dev",            SEC_ADMINISTRATOR,  false,  &HandleDevCommand,          "", NULL },
+            { "wintrade",           SEC_ADMINISTRATOR,      false, &HandleWintradeCommand,               "", NULL },
             { NULL,             0,                  false,  NULL,                       "", NULL }
         };
         return commandTable;
@@ -63,6 +64,55 @@ public:
         handler->SendSysMessage(LANG_USE_BOL);
         handler->SetSentErrorMessage(true);
         return false;
+    }
+
+    static bool HandleWintradeCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        uint32 minDmg = atoi((char*)args);
+        std::map<std::string, uint32 > wintrade;
+
+        QueryResult result;
+        for (int cnt = 0; cnt < 4; cnt++)
+        {
+            switch (cnt)
+            {
+                case 0:
+                    result = WorldDatabase.PQuery("SELECT winpl1,   COUNT(winpl1) from arena_log where windmg <= %u or loosedmg <= %u Group By winpl1", minDmg, minDmg);
+                    break;
+                case 1:
+                    result = WorldDatabase.PQuery("SELECT winpl2,   COUNT(winpl2) from arena_log where windmg <= %u or loosedmg <= %u Group By winpl2", minDmg, minDmg);
+                    break;
+                case 2:
+                    result = WorldDatabase.PQuery("SELECT loosepl1,   COUNT(loosepl1) from arena_log where windmg <= %u or loosedmg <= %u Group By loosepl1 ", minDmg, minDmg);
+                    break;
+                case 3:
+                    result = WorldDatabase.PQuery("SELECT loosepl2,   COUNT(loosepl2) from arena_log where windmg <= %u or loosedmg <= %u Group By loosepl2", minDmg, minDmg);
+                    break;
+                default:
+                    return false;
+            }
+            if (!result)
+                return false;
+            do
+            {
+                if (Field* fields = result->Fetch())
+                {
+                    std::string name = fields[0].GetString();
+                    uint32 wintradeCount = fields[1].GetUInt32();
+                    wintrade[fields[0].GetString()] += fields[1].GetUInt32();
+                }
+            } while (result->NextRow());
+        }
+        for (std::map<std::string, uint32 >::iterator it = wintrade.begin(); it != wintrade.end(); ++it)
+        {
+            std::string name = it->first;
+            uint32 wintradeCount = it->second;
+            WorldDatabase.DirectPExecute("REPLACE INTO arena_filter VALUES('%s', %u)", name.c_str(), wintradeCount);
+        }
+        return true;
     }
 };
 

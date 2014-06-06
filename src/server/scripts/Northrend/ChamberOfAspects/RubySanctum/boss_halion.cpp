@@ -2279,8 +2279,9 @@ public :
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())
                     if (player->isAlive())
-                        if (player->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) <= dist)
-                            unitList.push_back(player);
+                        if (player->InSamePhase(caster))
+                            if (player->GetDistance2d(caster->GetPositionX(), caster->GetPositionY()) <= dist)
+                                unitList.push_back(player);
         }
 
         void Register()

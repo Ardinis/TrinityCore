@@ -40,66 +40,66 @@
 
 enum Yells
 {
-  SAY_AGGRO           = -1649040,
-  SAY_DEATH           = -1649041,
-  SAY_BERSERK         = -1649042,
-  EMOTE_SHIELD        = -1649043,
-  SAY_SHIELD          = -1649044,
-  SAY_KILL1           = -1649045,
-  SAY_KILL2           = -1649046,
-  EMOTE_LIGHT_VORTEX  = -1649047,
-  SAY_LIGHT_VORTEX    = -1649048,
-  EMOTE_DARK_VORTEX   = -1649049,
-  SAY_DARK_VORTEX     = -1649050,
+    SAY_AGGRO           = -1649040,
+    SAY_DEATH           = -1649041,
+    SAY_BERSERK         = -1649042,
+    EMOTE_SHIELD        = -1649043,
+    SAY_SHIELD          = -1649044,
+    SAY_KILL1           = -1649045,
+    SAY_KILL2           = -1649046,
+    EMOTE_LIGHT_VORTEX  = -1649047,
+    SAY_LIGHT_VORTEX    = -1649048,
+    EMOTE_DARK_VORTEX   = -1649049,
+    SAY_DARK_VORTEX     = -1649050,
 };
 
-    enum Equipment
-    {
-      EQUIP_MAIN_1         = 9423,
-      EQUIP_MAIN_2         = 37377,
-    };
+enum Equipment
+{
+    EQUIP_MAIN_1         = 9423,
+    EQUIP_MAIN_2         = 37377,
+};
 
-    enum Summons
-    {
-      NPC_DARK_ESSENCE     = 34567,
-      NPC_LIGHT_ESSENCE    = 34568,
+enum Summons
+{
+    NPC_DARK_ESSENCE     = 34567,
+    NPC_LIGHT_ESSENCE    = 34568,
 
-      NPC_BULLET_CONTROLLER        = 34743,
+    NPC_BULLET_CONTROLLER        = 34743,
 
-      NPC_BULLET_DARK              = 34628,
-      NPC_BULLET_LIGHT             = 34630,
-    };
+    NPC_BULLET_DARK              = 34628,
+    NPC_BULLET_LIGHT             = 34630,
+};
 
-    enum BossSpells
-    {
-      SPELL_LIGHT_TWIN_SPIKE      = 66075,
-      SPELL_LIGHT_SURGE           = 65766,
-      SPELL_LIGHT_SHIELD          = 65858,
-      SPELL_LIGHT_TWIN_PACT       = 65876,
-      SPELL_LIGHT_VORTEX          = 66046,
-      SPELL_LIGHT_TOUCH           = 67297,
-      SPELL_LIGHT_ESSENCE         = 65686,
-      SPELL_EMPOWERED_LIGHT       = 65748,
-      SPELL_TWIN_EMPATHY_LIGHT    = 66133,
-      SPELL_UNLEASHED_LIGHT       = 65795,
+enum BossSpells
+{
+    SPELL_LIGHT_TWIN_SPIKE      = 66075,
+    SPELL_LIGHT_SURGE           = 65766,
+    SPELL_LIGHT_SHIELD          = 65858,
+    SPELL_LIGHT_TWIN_PACT       = 65876,
+    SPELL_LIGHT_VORTEX          = 66046,
+    SPELL_LIGHT_TOUCH           = 67297,
+    SPELL_LIGHT_ESSENCE         = 65686,
+    SPELL_EMPOWERED_LIGHT       = 65748,
+    SPELL_TWIN_EMPATHY_LIGHT    = 66133,
+    SPELL_UNLEASHED_LIGHT       = 65795,
 
-      SPELL_DARK_TWIN_SPIKE       = 66069,
-      SPELL_DARK_SURGE            = 65768,
-      SPELL_DARK_SHIELD           = 65874,
-      SPELL_DARK_TWIN_PACT        = 65875,
-      SPELL_DARK_VORTEX           = 66058,
-      SPELL_DARK_TOUCH            = 67282,
-      SPELL_DARK_ESSENCE          = 65684,
-      SPELL_EMPOWERED_DARK        = 65724,
-      SPELL_TWIN_EMPATHY_DARK     = 66132,
-      SPELL_UNLEASHED_DARK        = 65808,
+    SPELL_DARK_TWIN_SPIKE       = 66069,
+    SPELL_DARK_SURGE            = 65768,
+    SPELL_DARK_SHIELD           = 65874,
+    SPELL_DARK_TWIN_PACT        = 65875,
+    SPELL_DARK_VORTEX           = 66058,
+    SPELL_DARK_TOUCH            = 67282,
+    SPELL_DARK_ESSENCE          = 65684,
+    SPELL_EMPOWERED_DARK        = 65724,
+    SPELL_TWIN_EMPATHY_DARK     = 66132,
+    SPELL_UNLEASHED_DARK        = 65808,
 
-      SPELL_CONTROLLER_PERIODIC    = 66149,
-      SPELL_POWER_TWINS           = 65879,
-      SPELL_BERSERK               = 64238,
-      SPELL_POWERING_UP           = 67590,
-      SPELL_SURGE_OF_SPEED        = 65828,
-    };
+    SPELL_CONTROLLER_PERIODIC    = 66149,
+    SPELL_POWER_TWINS           = 65879,
+    SPELL_BERSERK               = 64238,
+    SPELL_POWERING_UP           = 67590,
+    SPELL_SURGE_OF_SPEED        = 65828,
+};
 
 bool LightSpecial;  // added
 bool DarkSpecial;   // added
@@ -113,39 +113,39 @@ bool DARK_VORTEX, LIGHT_VORTEX, DARK_SHIELD, LIGHT_SHIELD;  // added
 #define SPELL_UNLEASHED_DARK_HELPER RAID_MODE<uint32>(65808, 67172, 67173, 67174)
 #define SPELL_UNLEASHED_LIGHT_HELPER RAID_MODE<uint32>(65795, 67238, 67239, 67240)
 
-/*######
-    ## boss_twin_base
-    ######*/
+/* ######
+   ## boss_twin_base
+   ###### */
 
 class OrbsDespawner : public BasicEvent
 {
 public:
-  explicit OrbsDespawner(Creature* creature) : _creature(creature)
-  {
-  }
-
-  bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
-  {
-    Trinity::CreatureWorker<OrbsDespawner> worker(_creature, *this);
-    _creature->VisitNearbyGridObject(5000.0f, worker);
-    return true;
-  }
-
-  void operator()(Creature* creature) const
-  {
-    switch (creature->GetEntry())
+    explicit OrbsDespawner(Creature* creature) : _creature(creature)
     {
-    case NPC_BULLET_DARK:
-    case NPC_BULLET_LIGHT:
-      creature->DespawnOrUnsummon();
-      return;
-    default:
-      return;
     }
-  }
+
+    bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+    {
+        Trinity::CreatureWorker<OrbsDespawner> worker(_creature, *this);
+        _creature->VisitNearbyGridObject(5000.0f, worker);
+        return true;
+    }
+
+    void operator()(Creature* creature) const
+    {
+        switch (creature->GetEntry())
+        {
+            case NPC_BULLET_DARK:
+            case NPC_BULLET_LIGHT:
+                creature->DespawnOrUnsummon();
+                return;
+            default:
+                return;
+        }
+    }
 
 private:
-  Creature* _creature;
+    Creature* _creature;
 };
 
 struct boss_twin_baseAI : public ScriptedAI

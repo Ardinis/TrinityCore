@@ -47,9 +47,7 @@ public:
     struct boss_rend_blackhandAI : public BossAI
     {
         boss_rend_blackhandAI(Creature* creature) : BossAI(creature, DATA_WARCHIEF_REND_BLACKHAND)
-        {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
-        }
+        {}
 
         void Reset()
         {

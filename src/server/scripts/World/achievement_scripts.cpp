@@ -343,6 +343,22 @@ public:
   }
 };
 
+#define DALARAN_ZONE_ID 4395
+
+class achievement_torch_juggler : public AchievementCriteriaScript
+{
+    public:
+        achievement_torch_juggler() : AchievementCriteriaScript("achievement_torch_juggler") { }
+
+        bool OnCheck(Player* source, Unit* /*target*/)
+        {
+            if (!source || source->GetZoneId() != DALARAN_ZONE_ID)
+                return false;
+
+            return true;
+        }
+};
+
 void AddSC_achievement_scripts()
 {
     new achievement_resilient_victory();
@@ -362,4 +378,5 @@ void AddSC_achievement_scripts()
     new achievement_bg_sa_defense_of_ancients();
     new achievement_tilted();
     new achievement_terokkar_turkey_time();
+	new achievement_torch_juggler();
 }

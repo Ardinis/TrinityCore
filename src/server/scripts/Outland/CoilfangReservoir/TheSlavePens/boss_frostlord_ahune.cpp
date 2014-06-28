@@ -152,12 +152,17 @@ class npc_frostlord_ahune : public CreatureScript
                 me->SummonGameObject(GO_ICE_CHEST, -97.095f, -203.866f, -1.191f, 1.5f, 0, 0, 0, 0, 0);
                 _summons.DespawnAll();
 
+                // lfg reward as there is no ahune entry in dbcs dungeonencounters
+                // TODO: unhack
                 Map* map = me->GetMap();
                 if (map && map->IsDungeon())
                 {
                     Map::PlayerList const& players = map->GetPlayers();
                     if (!players.isEmpty())
-                        sLFGMgr->FinishDungeon(players.begin()->getSource()->GetGroup()->GetGUID(), 286);
+                        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                            if (Player* player = i->getSource())
+                                if (player->GetDistance(me) < 120.0f)
+                                    sLFGMgr->RewardDungeonDoneFor(286, player);
                 }
             }
 

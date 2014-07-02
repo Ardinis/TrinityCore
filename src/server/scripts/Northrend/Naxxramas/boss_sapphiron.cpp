@@ -153,7 +153,7 @@ public:
             CheckPlayersFrostResist();
             if (CanTheHundredClub)
             {
-	      AchievementEntry const* AchievTheHundredClub = sAchievementStore.LookupEntry(ACHIEVEMENT_THE_HUNDRED_CLUB);
+                AchievementEntry const* AchievTheHundredClub = sAchievementStore.LookupEntry(ACHIEVEMENT_THE_HUNDRED_CLUB);
                 if (AchievTheHundredClub)
                 {
                     if (map && map->IsDungeon())
@@ -264,10 +264,11 @@ public:
                             return;
                         case EVENT_BLIZZARD:
                         {
-                            //DoCastAOE(SPELL_SUMMON_BLIZZARD);
-                            if (Creature* summon = DoSummon(MOB_BLIZZARD, me, 0.0f, urand(25000, 30000), TEMPSUMMON_TIMED_DESPAWN))
-                                summon->GetMotionMaster()->MoveRandom(40);
-                            events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(20000, 7000), 0, PHASE_GROUND);
+                            DoCastAOE(SPELL_SUMMON_BLIZZARD);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                if (Creature* summon = DoSummon(MOB_BLIZZARD, target, 0.0f, 20000, TEMPSUMMON_TIMED_DESPAWN))
+                                    summon->GetMotionMaster()->MoveRandom(40);
+                            events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(20000, 10000), 0, PHASE_GROUND);
                             break;
                         }
                         case EVENT_FLIGHT:
@@ -298,7 +299,7 @@ public:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             me->SendMovementFlagUpdate();
-                            events.ScheduleEvent(EVENT_ICEBOLT, 1500);
+                            events.ScheduleEvent(EVENT_ICEBOLT, 6000);
                             iceboltCount = RAID_MODE(2, 3);
                             return;
                         case EVENT_ICEBOLT:
@@ -334,10 +335,18 @@ public:
                             return;
                         }
                         case EVENT_EXPLOSION:
+                        {
+                            events.CancelEvent(EVENT_BLIZZARD);
+                            std::list<Creature *> _blizzards;
+                            me->GetCreatureListWithEntryInGrid(_blizzards, MOB_BLIZZARD, 100.0f);
+                            for (std::list<Creature *>::iterator itr = _blizzards.begin(); itr != _blizzards.end(); itr++)
+                                if (Creature *blizzard = *itr)
+                                    blizzard->DespawnOrUnsummon();
                             CastExplosion();
                             ClearIceBlock();
                             events.ScheduleEvent(EVENT_LAND, 3000);
                             return;
+                        }
                         case EVENT_LAND:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
                             me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);

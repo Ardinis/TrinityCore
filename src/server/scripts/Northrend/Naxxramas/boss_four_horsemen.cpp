@@ -303,14 +303,7 @@ public:
                 instance->SetData(DATA_HORSEMEN0 + id, DONE);
 
             if (instance && DoEncounterAction(NULL, false, false, true))
-            {
-                instance->SetBossState(BOSS_HORSEMEN, DONE);
-                instance->SaveToDB();
-
-                // Achievements related to the 4-horsemen are given through spell 59450 which does not exist.
-                // There is thus no way it can be given by casting the spell on the players.
-                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 59450);
-            }
+                _JustDied();
 
             DoScriptText(SAY_DEATH[id], me);
         }
@@ -325,7 +318,7 @@ public:
                 DoScriptText(SAY_AGGRO[id], me);
 
             events.ScheduleEvent(EVENT_MARK, 15000);
-            events.ScheduleEvent(EVENT_CAST, 20000+rand()%5000);
+            events.ScheduleEvent(EVENT_CAST, 20000 + rand() % 5000);
             events.ScheduleEvent(EVENT_BERSERK, 15*100*1000);
         }
 

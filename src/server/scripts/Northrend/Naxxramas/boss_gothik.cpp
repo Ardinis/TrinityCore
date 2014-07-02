@@ -204,6 +204,7 @@ class boss_gothik : public CreatureScript
                 DoScriptText(SAY_SPEECH, me);
                 if (instance)
                     instance->SetData(DATA_GOTHIK_GATE, GO_STATE_READY);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             }
 
             void JustSummoned(Creature* summon)
@@ -447,6 +448,7 @@ class boss_gothik : public CreatureScript
                                 DoScriptText(SAY_TELEPORT, me);
                                 DoTeleportTo(PosGroundLiveSide);
                                 me->SetReactState(REACT_AGGRESSIVE);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                                 summons.DoAction(0, 0);
                                 summons.DoZoneInCombat();
                                 events.ScheduleEvent(EVENT_BOLT, 1000);

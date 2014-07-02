@@ -353,6 +353,16 @@ public:
             chained.clear();
         }
 
+        void JustSummoned(Creature *summon)
+        {
+            switch (summon->GetEntry())
+            {
+                case 16129:
+                    summon->CastWithDelay(5000, me, SPELL_VOID_BLAST, true, false);
+                    break;
+            }
+        }
+
         void EnterCombat(Unit* /*who*/)
         {
             me->setFaction(uiFaction);

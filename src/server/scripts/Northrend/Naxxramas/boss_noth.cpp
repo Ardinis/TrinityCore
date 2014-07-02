@@ -169,9 +169,10 @@ public:
                     case EVENT_BALCONY:
                         me->SetReactState(REACT_PASSIVE);
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->NearTeleportTo(TELE_X, TELE_Y, TELE_Z, TELE_O);
+                        me->UpdatePosition(TELE_X, TELE_Y, TELE_Z, TELE_O);
                         me->AttackStop();
                         me->RemoveAllAuras();
-                        me->NearTeleportTo(TELE_X, TELE_Y, TELE_Z, TELE_O);
                         events.Reset();
                         events.ScheduleEvent(EVENT_WAVE, urand(2000, 5000));
                         waveCount = 0;

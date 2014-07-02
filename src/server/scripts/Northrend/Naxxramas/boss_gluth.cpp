@@ -83,7 +83,7 @@ public:
             _EnterCombat();
             events.ScheduleEvent(EVENT_WOUND, 10000);
             events.ScheduleEvent(EVENT_ENRAGE, 15000);
-            events.ScheduleEvent(EVENT_DECIMATE, 105000);
+            events.ScheduleEvent(EVENT_DECIMATE, 110000);
             events.ScheduleEvent(EVENT_BERSERK, 8*60000);
             events.ScheduleEvent(EVENT_SUMMON, 15000);
         }
@@ -93,7 +93,7 @@ public:
             if (summon->GetEntry() == MOB_ZOMBIE)
             {
                 summon->AddAura(SPELL_INFECTED_WOUND_AURA, summon);
-                summon->AI()->AttackStart(me);
+                summon->GetMotionMaster()->MoveChase(me, 0.0f);
             }
             summons.Summon(summon);
         }
@@ -119,10 +119,25 @@ public:
                         events.ScheduleEvent(EVENT_ENRAGE, 15000);
                         break;
                     case EVENT_DECIMATE:
+                    {
                         // TODO : Add missing text
                         DoCastAOE(SPELL_DECIMATE);
+                        Map::PlayerList const &players = instance->instance->GetPlayers();
+                        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                            if (Player* player = i->getSource())
+                                if (player->isAlive())
+                                {
+                                    uint32 health = uint32((float)player->GetMaxHealth() * 5.0f / 100.0f);
+                                    std::cout << health << " : " << player->CountPctFromMaxHealth(5) << std::endl;
+                                    if (player->GetHealth() > player->CountPctFromMaxHealth(5))
+                                    {
+                                        player->SetHealth(health);
+                                        player->SetHealth(player->CountPctFromMaxHealth(5));
+                                    }
+                                }
                         events.ScheduleEvent(EVENT_DECIMATE, 105000);
                         break;
+                    }
                     case EVENT_BERSERK:
                         DoCast(me, SPELL_BERSERK);
                         events.ScheduleEvent(EVENT_BERSERK, 5*60000);
@@ -135,16 +150,7 @@ public:
                 }
             }
 
-            if (me->getVictim() && me->getVictim()->GetEntry() == MOB_ZOMBIE)
-            {
-                if (me->IsWithinMeleeRange(me->getVictim()))
-                {
-                    me->Kill(me->getVictim());
-                    me->ModifyHealth(int32(me->CountPctFromMaxHealth(5)));
-                }
-            }
-            else
-                DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
     };
 

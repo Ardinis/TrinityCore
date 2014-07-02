@@ -77,6 +77,11 @@ class boss_loatheb : public CreatureScript
                 events.ScheduleEvent(EVENT_INEVITABLE_DOOM, 120000);
             }
 
+            void JustDied(Unit* /*Killer*/)
+            {
+                _JustDied();
+            }
+
             void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/)
             {
                 _sporeLoserData = false;

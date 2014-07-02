@@ -20,31 +20,31 @@
 
 const DoorData doorData[] =
 {
-    {181126,    BOSS_ANUBREKHAN, DOOR_TYPE_ROOM,     BOUNDARY_S},
-    {181195,    BOSS_ANUBREKHAN, DOOR_TYPE_PASSAGE,  0},
-    {194022,    BOSS_FAERLINA,  DOOR_TYPE_PASSAGE,  0},
-    {181209,    BOSS_FAERLINA,  DOOR_TYPE_PASSAGE,  0},
-    {181209,    BOSS_MAEXXNA,   DOOR_TYPE_ROOM,     BOUNDARY_SW},
-    {181200,    BOSS_NOTH,      DOOR_TYPE_ROOM,     BOUNDARY_N},
-    {181201,    BOSS_NOTH,      DOOR_TYPE_PASSAGE,  BOUNDARY_E},
-    {181202,    BOSS_NOTH,      DOOR_TYPE_PASSAGE,  0},
-    {181202,    BOSS_HEIGAN,    DOOR_TYPE_ROOM,     BOUNDARY_N},
-    {181203,    BOSS_HEIGAN,    DOOR_TYPE_PASSAGE,  BOUNDARY_E},
-    {181241,    BOSS_HEIGAN,    DOOR_TYPE_PASSAGE,  0},
-    {181241,    BOSS_LOATHEB,   DOOR_TYPE_ROOM,     BOUNDARY_W},
-    {181123,    BOSS_PATCHWERK, DOOR_TYPE_PASSAGE,  0},
-    {181123,    BOSS_GROBBULUS, DOOR_TYPE_ROOM,     0},
-    {181120,    BOSS_GLUTH,     DOOR_TYPE_PASSAGE,  BOUNDARY_NW},
-    {181121,    BOSS_GLUTH,     DOOR_TYPE_PASSAGE,  0},
-    {181121,    BOSS_THADDIUS,  DOOR_TYPE_ROOM,     0},
-    {181124,    BOSS_RAZUVIOUS, DOOR_TYPE_PASSAGE,  0},
-    {181124,    BOSS_GOTHIK,    DOOR_TYPE_ROOM,     BOUNDARY_N},
-    {181125,    BOSS_GOTHIK,    DOOR_TYPE_PASSAGE,  BOUNDARY_S},
-    {181119,    BOSS_GOTHIK,    DOOR_TYPE_PASSAGE,  0},
-    {181119,    BOSS_HORSEMEN,  DOOR_TYPE_ROOM,     BOUNDARY_NE},
-    {181225,    BOSS_SAPPHIRON, DOOR_TYPE_PASSAGE,  BOUNDARY_W},
-    {181228,    BOSS_KELTHUZAD, DOOR_TYPE_ROOM,     BOUNDARY_S},
-    {0,         0,              DOOR_TYPE_ROOM,     0}, // EOF
+    {181126,    BOSS_ANUBREKHAN, DOOR_TYPE_ROOM,      BOUNDARY_S},
+    {181195,    BOSS_ANUBREKHAN, DOOR_TYPE_PASSAGE,   0},
+    {194022,    BOSS_FAERLINA,   DOOR_TYPE_PASSAGE,   0},
+    {181209,    BOSS_FAERLINA,   DOOR_TYPE_PASSAGE,   0},
+    {181209,    BOSS_MAEXXNA,    DOOR_TYPE_ROOM,      BOUNDARY_SW},
+    {181200,    BOSS_NOTH,       DOOR_TYPE_ROOM,      BOUNDARY_N},
+    {181201,    BOSS_NOTH,       DOOR_TYPE_PASSAGE,   BOUNDARY_E},
+    {181202,    BOSS_NOTH,       DOOR_TYPE_PASSAGE,   0},
+    {181202,    BOSS_HEIGAN,     DOOR_TYPE_ROOM,      BOUNDARY_N},
+    {181203,    BOSS_HEIGAN,     DOOR_TYPE_PASSAGE,   BOUNDARY_E},
+    {181241,    BOSS_HEIGAN,     DOOR_TYPE_PASSAGE,   0},
+    {181241,    BOSS_LOATHEB,    DOOR_TYPE_ROOM,      BOUNDARY_W},
+    {181123,    BOSS_PATCHWERK,  DOOR_TYPE_PASSAGE,   0},
+    {181123,    BOSS_GROBBULUS,  DOOR_TYPE_ROOM,      0},
+    {181120,    BOSS_GLUTH,      DOOR_TYPE_PASSAGE,   BOUNDARY_NW},
+    {181121,    BOSS_GLUTH,      DOOR_TYPE_PASSAGE,   0},
+    {181121,    BOSS_THADDIUS,   DOOR_TYPE_ROOM,      0},
+    {181124,    BOSS_RAZUVIOUS,  DOOR_TYPE_PASSAGE,   0},
+    {181124,    BOSS_GOTHIK,     DOOR_TYPE_ROOM,      BOUNDARY_N},
+    {181125,    BOSS_GOTHIK,     DOOR_TYPE_PASSAGE,   BOUNDARY_S},
+    {181119,    BOSS_GOTHIK,     DOOR_TYPE_PASSAGE,   0},
+    {181119,    BOSS_HORSEMEN,   DOOR_TYPE_ROOM,      BOUNDARY_NE},
+    {181225,    BOSS_SAPPHIRON,  DOOR_TYPE_PASSAGE,   BOUNDARY_W},
+    {181228,    BOSS_KELTHUZAD,  DOOR_TYPE_ROOM,      BOUNDARY_S},
+    {0,         0,               DOOR_TYPE_ROOM,      0}, // EOF
 };
 
 const MinionData minionData[] =
@@ -69,8 +69,14 @@ enum eEnums
     GO_KELTHUZAD_PORTAL03   = 181404,
     GO_KELTHUZAD_PORTAL04   = 181405,
     GO_KELTHUZAD_TRIGGER    = 181444,
+    GO_THADDIUS_TESLA05     = 181477,
+    GO_THADDIUS_TESLA06     = 181478,
 
-    SPELL_ERUPTION          = 29371
+    SPELL_ERUPTION          = 29371,
+
+    ACHIEVEMENT_UNDYING_10  = 2187,
+    ACHIEVEMENT_IMMORTAL_25 = 2186,
+
 };
 
 const float HeiganPos[2] = {2796, -3707};
@@ -149,6 +155,9 @@ public:
 
         uint32 playerDied;
 
+        uint64 tesla05Guid;
+        uint64 tesla06Guid;
+
         void Initialize()
         {
             gothikGateGUID            = 0;
@@ -168,6 +177,9 @@ public:
 
             playerDied                = 0;
             gothikDoorState           = GO_STATE_ACTIVE;
+
+            tesla05Guid = 0;
+            tesla06Guid = 0;
 
             memset(portalsGUID, 0, sizeof(portalsGUID));
         }
@@ -233,6 +245,14 @@ public:
                     break;
                 case GO_KELTHUZAD_TRIGGER:
                     kelthuzadTriggerGUID = go->GetGUID();
+                    break;
+                case GO_THADDIUS_TESLA05:
+                    tesla05Guid = go->GetGUID();
+                    go->ResetDoorOrButton();
+                    break;
+                case GO_THADDIUS_TESLA06:
+                    tesla06Guid = go->GetGUID();
+                    go->ResetDoorOrButton();
                     break;
                 default:
                     break;
@@ -331,49 +351,57 @@ public:
         {
             switch (id)
             {
-            case DATA_FAERLINA:
-                return faerlinaGUID;
-            case DATA_THANE:
-                return thaneGUID;
-            case DATA_LADY:
-                return ladyGUID;
-            case DATA_BARON:
-                return baronGUID;
-            case DATA_SIR:
-                return sirGUID;
-            case DATA_THADDIUS:
-                return thaddiusGUID;
-            case DATA_HEIGAN:
-                return heiganGUID;
-            case DATA_FEUGEN:
-                return feugenGUID;
-            case DATA_STALAGG:
-                return stalaggGUID;
-            case DATA_KELTHUZAD:
-                return kelthuzadGUID;
-            case DATA_KELTHUZAD_PORTAL01:
-                return portalsGUID[0];
-            case DATA_KELTHUZAD_PORTAL02:
-                return portalsGUID[1];
-            case DATA_KELTHUZAD_PORTAL03:
-                return portalsGUID[2];
-            case DATA_KELTHUZAD_PORTAL04:
-                return portalsGUID[3];
-            case DATA_KELTHUZAD_TRIGGER:
-                return kelthuzadTriggerGUID;
+                case DATA_FAERLINA:
+                    return faerlinaGUID;
+                case DATA_THANE:
+                    return thaneGUID;
+                case DATA_LADY:
+                    return ladyGUID;
+                case DATA_BARON:
+                    return baronGUID;
+                case DATA_SIR:
+                    return sirGUID;
+                case DATA_THADDIUS:
+                    return thaddiusGUID;
+                case DATA_HEIGAN:
+                    return heiganGUID;
+                case DATA_FEUGEN:
+                    return feugenGUID;
+                case DATA_STALAGG:
+                    return stalaggGUID;
+                case DATA_KELTHUZAD:
+                    return kelthuzadGUID;
+                case DATA_KELTHUZAD_PORTAL01:
+                    return portalsGUID[0];
+                case DATA_KELTHUZAD_PORTAL02:
+                    return portalsGUID[1];
+                case DATA_KELTHUZAD_PORTAL03:
+                    return portalsGUID[2];
+                case DATA_KELTHUZAD_PORTAL04:
+                    return portalsGUID[3];
+                case DATA_KELTHUZAD_TRIGGER:
+                    return kelthuzadTriggerGUID;
+                case DATA_THADDIUS_TESLA05:
+                    return tesla05Guid;
+                case DATA_THADDIUS_TESLA06:
+                    return tesla06Guid;
+
             }
             return 0;
         }
 
         bool SetBossState(uint32 id, EncounterState state)
         {
+            std::cout << "SetBossState : " << (int)id << " : " << (int)state << std::endl;
             if (!InstanceScript::SetBossState(id, state))
                 return false;
+            std::cout << "2 - SetBossState : " << (int)id << " : " << (int)state << std::endl;
 
             if (id == BOSS_HORSEMEN && state == DONE)
             {
                 if (GameObject* pHorsemenChest = instance->GetGameObject(horsemenChestGUID))
                     pHorsemenChest->SetRespawnTime(pHorsemenChest->GetRespawnDelay());
+                DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 59450);
             }
 
             return true;
@@ -465,7 +493,6 @@ public:
             playerDied = buff2;
         }
     };
-
 };
 
 void AddSC_instance_naxxramas()

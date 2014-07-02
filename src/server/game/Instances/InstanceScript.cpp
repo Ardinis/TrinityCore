@@ -119,7 +119,7 @@ void InstanceScript::UpdateDoorState(GameObject* door)
                 open = (itr->second.bossInfo->state != IN_PROGRESS);
                 break;
             case DOOR_TYPE_PASSAGE:
-                open = (itr->second.bossInfo->state == DONE);
+                open = (itr->second.bossInfo->state == DONE || itr->second.bossInfo->state == DONE_HM || itr->second.bossInfo->state == DONE_OLD_SCHOOL);
                 break;
             case DOOR_TYPE_SPAWN_HOLE:
                 open = (itr->second.bossInfo->state == IN_PROGRESS);
@@ -205,7 +205,7 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
             if (bossInfo->state == state)
                 return false;
 
-            if (state == DONE)
+            if (state == DONE || state == DONE_HM || state == DONE_OLD_SCHOOL)
                 for (MinionSet::iterator i = bossInfo->minion.begin(); i != bossInfo->minion.end(); ++i)
                     if ((*i)->isWorldBoss() && (*i)->isAlive())
                         return false;
@@ -462,4 +462,18 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
             return;
         }
     }
+}
+
+bool InstanceScript::IsRaidOldSchoolIlevelAvailable()
+{
+    uint32 maxIlevel = GetOldSchoolILevel();
+    if (!maxIlevel)
+        return false;
+    Map::PlayerList const& lPlayers = instance->GetPlayers();
+    if (!lPlayers.isEmpty())
+        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            if (Player* player = itr->getSource())
+                if (player->GetAverageItemLevel() <= maxIlevel)
+                    return false;
+    return true;
 }

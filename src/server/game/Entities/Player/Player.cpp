@@ -25750,20 +25750,30 @@ float Player::GetAverageItemLevel()
 {
     float sum = 0;
     uint32 count = 0;
-
+    bool _2hands = false;
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
         // don't check tabard, ranged, offhand or shirt
-        if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_RANGED || i == EQUIPMENT_SLOT_OFFHAND || i == EQUIPMENT_SLOT_BODY)
+        if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_BODY)
+            continue;
+
+        if (i == EQUIPMENT_SLOT_OFFHAND && _2hands)
             continue;
 
         if (m_items[i] && m_items[i]->GetTemplate())
+        {
             sum += m_items[i]->GetTemplate()->GetItemLevelIncludingQuality();
-
+            if (m_items[i]->GetTemplate()->InventoryType == INVTYPE_2HWEAPON && i == EQUIPMENT_SLOT_MAINHAND && m_items[EQUIPMENT_SLOT_OFFHAND] == NULL)
+            {
+                _2hands = true;
+                sum += m_items[i]->GetTemplate()->GetItemLevelIncludingQuality();
+                ++count;
+            }
+        }
         ++count;
     }
 
-    return ((float)sum) / count;
+    return (std::floor((float)sum / count));
 }
 
 void Player::_LoadInstanceTimeRestrictions(PreparedQueryResult result)

@@ -48,12 +48,14 @@ enum EncounterFrameType
 
 enum EncounterState
 {
-    NOT_STARTED   = 0,
-    IN_PROGRESS   = 1,
-    FAIL          = 2,
-    DONE          = 3,
-    SPECIAL       = 4,
-    TO_BE_DECIDED = 5,
+    NOT_STARTED     = 0,
+    IN_PROGRESS     = 1,
+    FAIL            = 2,
+    DONE            = 3,
+    DONE_HM         = 4,
+    DONE_OLD_SCHOOL = 5,
+    SPECIAL         = 6,
+    TO_BE_DECIDED   = 7,
 };
 
 enum DoorType
@@ -126,7 +128,7 @@ class InstanceScript : public ZoneScript
 {
     public:
 
-        explicit InstanceScript(Map* map) : instance(map), completedEncounters(0), IsLFG(false), _disableFallDamage(false) {}
+        explicit InstanceScript(Map* map) : instance(map), completedEncounters(0), IsLFG(false), _disableFallDamage(false), _maxILevel(0), _oldSchool(false) {}
 
         virtual ~InstanceScript() {}
 
@@ -189,7 +191,8 @@ class InstanceScript : public ZoneScript
         bool ServerAllowsTwoSideGroups() { return sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP); }
 
         virtual bool SetBossState(uint32 id, EncounterState state);
-        EncounterState GetBossState(uint32 id) const { return id < bosses.size() ? bosses[id].state : TO_BE_DECIDED; }
+        EncounterState GetBossState(uint32 id) const { return id < bosses.size() ? ((bosses[id].state == DONE_HM || bosses[id].state == DONE_OLD_SCHOOL) ? DONE : bosses[id].state) : TO_BE_DECIDED; }
+
         BossBoundaryMap const* GetBossBoundary(uint32 id) const { return id < bosses.size() ? &bosses[id].boundary : NULL; }
 
         // Achievement criteria additional requirements check
@@ -219,6 +222,13 @@ class InstanceScript : public ZoneScript
 
         void DisableFallDamage(bool state) { _disableFallDamage = state; }
 
+        uint32 GetOldSchoolILevel() { return _maxILevel; }
+        void SetOldSchoolILevel(uint32 val) { _maxILevel = val; }
+        bool IsRaidOldSchoolIlevelAvailable();
+        bool IsDoneInOldSchoolMode(uint32 id) { return id < bosses.size() ? ((bosses[id].state == DONE_HM || bosses[id].state == DONE || bosses[id].state == DONE_OLD_SCHOOL) ? true : false) : false; }
+        bool IsOldSchoolModeActivated() { return _oldSchool; }
+        void activateOldSchoolMode(bool val) { _oldSchool = val; }
+
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(DoorData const* data);
@@ -239,5 +249,7 @@ class InstanceScript : public ZoneScript
         uint32 completedEncounters; // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
 		bool IsLFG;
         bool _disableFallDamage;
+        bool _oldSchool;
+        uint32 _maxILevel;
 };
 #endif

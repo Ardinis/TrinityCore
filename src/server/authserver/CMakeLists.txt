@@ -84,6 +84,7 @@ endif()
 
 set_target_properties(authserver PROPERTIES LINK_FLAGS "${authserver_LINK_FLAGS}")
 
+if( WIN32 )
 target_link_libraries(authserver
   shared
   ${MYSQL_LIBRARY}
@@ -91,6 +92,17 @@ target_link_libraries(authserver
   ${OPENSSL_EXTRA_LIBRARIES}
   ${OSX_LIBS}
 )
+else()
+target_link_libraries(authserver
+  shared
+  ${MYSQL_LIBRARY}
+  ${OPENSSL_LIBRARIES}
+  ${OPENSSL_EXTRA_LIBRARIES}
+  ${OSX_LIBS}
+  ${CMAKE_THREAD_LIBS_INIT}
+  ${ACE_LIBRARY}
+)
+endif()
 
 if( WIN32 )
   add_custom_command(TARGET authserver
@@ -115,4 +127,3 @@ if( USE_COREPCH )
     add_native_precompiled_header(authserver ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/authPCH)
   endif()
 endif()
-

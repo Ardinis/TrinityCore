@@ -2351,6 +2351,50 @@ public :
     }
 };
 
+class spell_hallion_breath : public SpellScriptLoader
+{
+public :
+    spell_hallion_breath() : SpellScriptLoader("spell_hallion_breath") {}
+
+    class spell_hallion_breath_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hallion_breath_SpellScript);
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+            Map *map = caster->GetMap();
+            if (!map)
+                return;
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player *player = i->getSource())
+                    if (player->isAlive())
+                        if (caster->isInFrontInMap(player, 15.0f, static_cast<float>(M_PI / 6)))
+                            unitList.push_back(player);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_hallion_breath_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_24);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_hallion_breath_SpellScript();
+    }
+};
 
 void AddSC_boss_halion()
 {
@@ -2388,4 +2432,5 @@ void AddSC_boss_halion()
     new spell_hallion_tail_slash();
     new spell_cs_cb_damage();
     new spell_cs_cb_hm_damage();
+    new spell_hallion_breath();
 }

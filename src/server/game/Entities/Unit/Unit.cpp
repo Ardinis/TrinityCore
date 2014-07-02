@@ -15463,7 +15463,7 @@ void CharmInfo::InitPossessCreateSpells()
     }
 }
 
-void CharmInfo::InitCharmCreateSpells()
+void CharmInfo::InitCharmCreateSpells(bool petSpells)
 {
     if (m_unit->GetTypeId() == TYPEID_PLAYER)                // charmed players don't have spells
     {
@@ -15471,7 +15471,8 @@ void CharmInfo::InitCharmCreateSpells()
         return;
     }
 
-    InitPetActionBar();
+    if (petSpells)
+        InitPetActionBar();
 
     for (uint32 x = 0; x < MAX_SPELL_CHARM; ++x)
     {

@@ -160,9 +160,14 @@ class npc_frostlord_ahune : public CreatureScript
                     Map::PlayerList const& players = map->GetPlayers();
                     if (!players.isEmpty())
                         for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
-                            if (Player* player = i->getSource())
+                            if (Player* player = i->getSource()) {
                                 if (player->GetDistance(me) < 120.0f)
                                     sLFGMgr->RewardDungeonDoneFor(286, player);
+								AchievementEntry const* pAE = sAchievementStore.LookupEntry(263);
+								if (!pAE)
+									return;
+								player->CompletedAchievement(pAE);
+							}
                 }
             }
 

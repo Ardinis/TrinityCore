@@ -11,7 +11,7 @@ UPDATE `creature` SET `position_x`=-131.929, `position_y`=-135.194, `position_z`
 -- Spawn Ahune + Bunnies
 DELETE FROM `creature` WHERE `id` IN (25740,26190);
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@GUID,'25740','547','1','1','0','0','-97.407','-238.3','-1.26481','1.43332','10','0','0','539000','0','0','0','0','0'),
+(@GUID,'25740','547','1','1','0','0','-97.407','-238.3','-1.26481','1.43332','560000','0','0','539000','0','0','0','0','0'),
 (@GUID+1,'26190','547','1','1','0','0','-85.6774','-197.35','25.3171','4.4867','30','0','0','57','0','0','0','33554432','0'),
 (@GUID+2,'26190','547','1','1','0','0','-121.318','-199.329','26.6837','5.17001','30','0','0','57','0','0','0','33554432','0'),
 (@GUID+3,'26190','547','1','1','0','0','-105.895','-194.285','26.6837','4.98152','30','0','0','57','0','0','0','33554432','0'),
@@ -116,3 +116,12 @@ INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES
 
 -- root Frozen Core
 UPDATE `creature_template` SET `unit_flags`=`unit_flags`|4 WHERE `entry`=25865;
+
+
+-- corrections
+DELETE FROM creature_involvedrelation WHERE id = 25697;
+INSERT INTO `creature_involvedrelation` VALUES (25697, 11696);
+DELETE FROM gameobject WHERE id = 187882;
+DELETE FROM creature_loot_template WHERE entry = 25740;
+DELETE FROM creature WHERE id = 26215;
+INSERT INTO `creature` VALUES ('', 26215, 1, 1, 1, 0, 3001, -6420.46, 206.284, 3.66969, 3.33544, 300, 0, 0, 2488, 5598, 0, 0, 0, 0);

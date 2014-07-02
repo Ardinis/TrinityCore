@@ -43,10 +43,14 @@
           return new chess_npcAI(creature);
         }
      
-        struct chess_npcAI : public Scripted_NoMovementAI
+        struct chess_npcAI : public PassiveAI
         {
-          chess_npcAI(Creature* c) : Scripted_NoMovementAI(c) {
+          chess_npcAI(Creature* c) : PassiveAI(c) {
             pInstance = ((InstanceScript*)me->GetInstanceScript());
+
+            //No_movement
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
 
             const SpellInfo *TempSpell = sSpellMgr->GetSpellInfo(SPELL_POSSES_CHESSPIECE);
 
@@ -305,7 +309,7 @@
             InGame = true;
             CanMove = false;
             me->setActive(true);
-
+            printf("initialisation faite ");
             SetSpellsAndCooldowns();
 
             MedivhGUID = pInstance->GetData64(DATA_CHESS_ECHO_OF_MEDIVH);
@@ -332,13 +336,13 @@
 
         void JustRespawned()
           {
-             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+             //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+             //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
           }
 
         void OnCharmed(bool apply)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+            //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             // set proper faction after charm
             if (pInstance->GetData(CHESS_EVENT_TEAM) == ALLIANCE)
                 me->setFaction(A_FACTION);
@@ -358,9 +362,9 @@
             me->Kill(me);
             if (spell->Id == SPELL_MOVE_MARKER)
             {
-                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                //me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 ((Creature*)me)->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
 
@@ -478,12 +482,12 @@
                 if (ab1)
                 {
                     if (IsNullTargetSpell(ability1ID))
-                        DoCastSpell(NULL, sSpellMgr->GetSpellInfo(ability1ID));
+                        me->CastSpell(NULL, sSpellMgr->GetSpellInfo(ability1ID));
                     else
                     {
                         Unit * victim = me->GetUnit((*me), ab1);
                         if (victim)
-                            DoCastSpell(victim, sSpellMgr->GetSpellInfo(ability1ID));
+                            me->CastSpell(victim, sSpellMgr->GetSpellInfo(ability1ID));
                     }
 
                     ability1Timer = ability1Cooldown;
@@ -492,12 +496,12 @@
                 else if (ab2)
                 {
                     if (IsNullTargetSpell(ability2ID))
-                        DoCastSpell(NULL, sSpellMgr->GetSpellInfo(ability2ID));
+                        me->CastSpell(NULL, sSpellMgr->GetSpellInfo(ability2ID));
                     else
                     {
                         Unit * victim = me->GetUnit((*me), ab2);
                         if (victim)
-                            DoCastSpell(victim, sSpellMgr->GetSpellInfo(ability2ID));
+                            me->CastSpell(victim, sSpellMgr->GetSpellInfo(ability2ID));
                     }
 
                     ability2Timer = ability1Cooldown;
@@ -541,22 +545,22 @@
       bool OnGossipHello(Player* player, Creature* _Creature)
       {
           InstanceScript* pInstance = ((InstanceScript*)_Creature->GetInstanceScript());
-		  _Creature->MonsterSay("Salut",0,0);
+
         if (!pInstance)
             return false;
-		_Creature->MonsterSay("Salut 2",0,0);
+
         if (pInstance->GetData(CHESS_EVENT_TEAM) == ALLIANCE && _Creature->getFaction() != A_FACTION)
             return false;
-        _Creature->MonsterSay("Salut 3",0,0);
+        
         if (pInstance->GetData(CHESS_EVENT_TEAM) == HORDE && _Creature->getFaction() != H_FACTION)
             return false;
-		_Creature->MonsterSay("Salut 4",0,0);
+
         if (player->HasAura(SPELL_RECENTLY_IN_GAME, 0) || _Creature->HasAura(SPELL_RECENTLY_IN_GAME, 0))
         {
             player->SEND_GOSSIP_MENU(10505, _Creature->GetGUID());
             return true;
         }
-		_Creature->MonsterSay("Salut 5",0,0);
+
         if (!(_Creature->isPossessedByPlayer()))
         {
             switch (_Creature->GetEntry())
@@ -618,6 +622,7 @@
       bool OnGossipSelect(Player* player, Creature* _Creature, uint32 sender, uint32 action)
       {
           InstanceScript* pInstance = ((InstanceScript*)_Creature->GetInstanceScript());
+
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
             if (_Creature->GetEntry() == NPC_KING_A || _Creature->GetEntry() == NPC_KING_H)
@@ -626,7 +631,7 @@
                 ((npc_echo_of_medivhAI*)(_Creature->GetCreature((*_Creature), pInstance->GetData64(DATA_CHESS_ECHO_OF_MEDIVH))->AI()))->StartEvent();
             }
 
-            //player->TeleportTo(_Creature->GetMapId(), -11108.2f, -1841.56f, 229.625f, 5.39745f);
+            player->TeleportTo(_Creature->GetMapId(), -11108.2f, -1841.56f, 229.625f, 5.39745f);
             player->CastSpell(_Creature, SPELL_POSSES_CHESSPIECE, true);
         }
 
@@ -650,7 +655,7 @@
         bool OnGossipHello(Player* player, Creature* _Creature)
         {
             InstanceScript* pInstance = ((InstanceScript*)_Creature->GetInstanceScript());
-            printf("test");
+
             if (pInstance->GetData(DATA_CHESS_EVENT) == IN_PROGRESS)
                 return false;
 
@@ -708,41 +713,6 @@
 
       };
     };
-
-		class spell_dummy_change_facing : public SpellScriptLoader
-{
-    public:
-        spell_dummy_change_facing() : SpellScriptLoader("spell_dummy_change_facing") { }
-
-        class spell_dummy_change_facing_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dummy_change_facing_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                //if (Unit* unit = GetHitUnit()) {
-					if (WorldLocation *offset = GetHitDest()) {
-						Position destpos, castpos;
-						offset->GetPosition(&destpos);
-						GetCaster()->GetPosition(&castpos);
-						GetCaster()->SetFacingTo(destpos.GetRelativeAngle(&castpos) + 3.1416f);
-					//if (unit->ToCreature()->GetEntry() == 22519)
-						//GetCaster()->SetFacingToObject(unit);
-					}
-				//}
-			}
-
-			void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_dummy_change_facing_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dummy_change_facing_SpellScript();
-        }
-};
      
     void AddSC_chess_event()
       {

@@ -19,6 +19,9 @@
 #ifndef DEF_KARAZHAN_H
 #define DEF_KARAZHAN_H
 
+#define MAX_ENCOUNTER      15
+
+
 enum eEnums
 {
     TYPE_ATTUMEN                    = 1,
@@ -49,11 +52,16 @@ enum eEnums
     DATA_GO_GAME_DOOR               = 24,
     DATA_GO_GAME_EXIT_DOOR          = 25,
 
-    DATA_IMAGE_OF_MEDIVH            = 26,
+    DATA_IMAGE_OF_MEDIVH            = 26, // not used in chess but in an other boss
     DATA_MASTERS_TERRACE_DOOR_1     = 27,
     DATA_MASTERS_TERRACE_DOOR_2     = 28,
     DATA_GO_SIDE_ENTRANCE_DOOR      = 29,
-    DATA_CHESS_EVENT,
+
+    DATA_CHESS_EVENT                = 30,
+	DATA_CHESS_ECHO_OF_MEDIVH       = 31,
+    CHESS_EVENT_TEAM                = 32,
+    DATA_CHESS_DAMAGE               = 33,
+    DATA_DUST_COVERED_CHEST         = 34
 };
 
 enum OperaEvents
@@ -62,6 +70,58 @@ enum OperaEvents
     EVENT_HOOD                      = 2,
     EVENT_RAJ                       = 3
 };
+
+
+
+    struct instance_karazhan_InstanceMapScript : public InstanceScript
+    {
+        instance_karazhan_InstanceMapScript(Map* map);
+
+        uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string strSaveData;
+
+        uint32 m_uiOperaEvent;
+        uint32 m_uiOzDeathCount;
+
+        uint64 m_uiCurtainGUID;
+        uint64 m_uiStageDoorLeftGUID;
+        uint64 m_uiStageDoorRightGUID;
+        uint64 m_uiKilrekGUID;
+        uint64 m_uiTerestianGUID;
+        uint64 m_uiMoroesGUID;
+        uint64 m_uiLibraryDoor;                                     // Door at Shade of Aran
+        uint64 m_uiMassiveDoor;                                     // Door at Netherspite
+        uint64 m_uiSideEntranceDoor;                                // Side Entrance
+        uint64 m_uiGamesmansDoor;                                   // Door before Chess
+        uint64 m_uiGamesmansExitDoor;                               // Door after Chess
+        uint64 m_uiNetherspaceDoor;                                // Door at Malchezaar
+        uint64 MastersTerraceDoor[2];
+        uint64 ImageGUID;
+        uint64 DustCoveredChest;
+        uint64 endChess;
+
+        void Initialize();
+
+        bool IsEncounterInProgress() const;
+
+        void OnCreatureCreate(Creature* creature);
+
+        void SetData(uint32 type, uint32 uiData);
+
+         void SetData64(uint32 identifier, uint64 data);
+
+        void OnGameObjectCreate(GameObject* go);
+
+        std::string GetSaveData();
+
+        uint32 GetData(uint32 uiData);
+
+        uint64 GetData64(uint32 uiData);
+
+        void Load(const char* chrIn);
+
+};
+
 
 #define ERROR_INST_DATA(a)          sLog->outError("TSCR: Instance Data for Karazhan not set properly. Encounter for Creature Entry %u may not work properly.", a->GetEntry());
 #endif

@@ -26,7 +26,6 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "karazhan.h"
 
-#define MAX_ENCOUNTER      12
 
 /*
 0  - Attumen + Midnight (optional)
@@ -41,6 +40,10 @@ EndScriptData */
 9  - Chess Event
 10 - Prince Malchezzar
 11 - Nightbane
+12 - Dust Covered Chest
+
+13 - Chess Event Team
+14 - Chess Event damage done
 */
 
 class instance_karazhan : public InstanceMapScript
@@ -77,8 +80,8 @@ public:
         uint64 m_uiNetherspaceDoor;                                // Door at Malchezaar
         uint64 MastersTerraceDoor[2];
         uint64 ImageGUID;
+        uint64 m_uiMedivhGUID;
         uint64 DustCoveredChest;
-      uint64 endChess;
         void Initialize()
         {
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
@@ -94,6 +97,7 @@ public:
             m_uiKilrekGUID      = 0;
             m_uiTerestianGUID   = 0;
             m_uiMoroesGUID      = 0;
+            m_uiMedivhGUID      = 0;
 
             m_uiLibraryDoor         = 0;
             m_uiMassiveDoor         = 0;
@@ -105,7 +109,6 @@ public:
             MastersTerraceDoor[1]= 0;
             ImageGUID = 0;
             DustCoveredChest    = 0;
-	    endChess = NOT_STARTED;
         }
 
         bool IsEncounterInProgress() const
@@ -124,6 +127,7 @@ public:
                 case 17229:   m_uiKilrekGUID = creature->GetGUID();      break;
                 case 15688:   m_uiTerestianGUID = creature->GetGUID();   break;
                 case 15687:   m_uiMoroesGUID = creature->GetGUID();      break;
+                case 16816:   m_uiMedivhGUID = creature->GetGUID();      break;
             }
         }
 
@@ -131,7 +135,6 @@ public:
         {
             switch (type)
             {
-	    case DATA_CHESS_EVENT: endChess = uiData; break;
                 case TYPE_ATTUMEN:              m_auiEncounter[0] = uiData; break;
                 case TYPE_MOROES:
                     if (m_auiEncounter[1] == DONE)
@@ -149,10 +152,20 @@ public:
                 case TYPE_ARAN:                 m_auiEncounter[6] = uiData; break;
                 case TYPE_TERESTIAN:            m_auiEncounter[7] = uiData; break;
                 case TYPE_NETHERSPITE:          m_auiEncounter[8] = uiData; break;
-                case TYPE_CHESS:
-                    if (uiData == DONE)
-                        DoRespawnGameObject(DustCoveredChest, DAY);
-                    m_auiEncounter[9]  = uiData;
+                case DATA_CHESS_EVENT:
+                    printf("\n\nDATA_CHESS changé en ", uiData, "\n\n");
+                    if(uiData == DONE)
+                    {
+                        if (GetData(DATA_DUST_COVERED_CHEST) != SPECIAL)
+                            SetData(DATA_DUST_COVERED_CHEST, DONE);
+                    }
+                    else
+                    {
+                        if (uiData == FAIL)
+                            SetData(DATA_DUST_COVERED_CHEST, SPECIAL);
+                    }
+                    printf("\n\nDATA_CHESS changé en ", uiData, "\n\n");
+                    m_auiEncounter[9] = uiData;
                     break;
                 case TYPE_MALCHEZZAR:           m_auiEncounter[10] = uiData; break;
                 case TYPE_NIGHTBANE:
@@ -165,6 +178,20 @@ public:
                     else if (uiData == IN_PROGRESS)
                         m_uiOzDeathCount = 0;
                     break;
+                 case DATA_DUST_COVERED_CHEST:
+                    if (m_auiEncounter[12] != DONE)
+                        m_auiEncounter[12] = uiData;
+
+                    if (uiData == DONE)
+                        HandleGameObject(m_uiGamesmansExitDoor, true);
+                    break;
+                case CHESS_EVENT_TEAM:
+                    m_auiEncounter[13] = uiData;
+                break;
+                case DATA_CHESS_DAMAGE:
+                    m_auiEncounter[14] = uiData;
+                    break;
+              
             }
 
             if (uiData == DONE)
@@ -174,7 +201,7 @@ public:
                 std::ostringstream saveStream;
                 saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' '
                     << m_auiEncounter[3] << ' ' << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' ' << m_auiEncounter[6] << ' '
-                    << m_auiEncounter[7] << ' ' << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11];
+                    << m_auiEncounter[7] << ' ' << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << m_auiEncounter[12];
 
                 strSaveData = saveStream.str();
 
@@ -255,12 +282,14 @@ public:
                 case TYPE_ARAN:                 return m_auiEncounter[6];
                 case TYPE_TERESTIAN:            return m_auiEncounter[7];
                 case TYPE_NETHERSPITE:          return m_auiEncounter[8];
-                case TYPE_CHESS:                return m_auiEncounter[9];
+                case DATA_CHESS_EVENT:          return m_auiEncounter[9];
                 case TYPE_MALCHEZZAR:           return m_auiEncounter[10];
                 case TYPE_NIGHTBANE:            return m_auiEncounter[11];
+                case DATA_DUST_COVERED_CHEST:   return m_auiEncounter[12];
+                case CHESS_EVENT_TEAM:          return m_auiEncounter[13];
+                case DATA_CHESS_DAMAGE:         return m_auiEncounter[14];
                 case DATA_OPERA_PERFORMANCE:    return m_uiOperaEvent;
                 case DATA_OPERA_OZ_DEATHCOUNT:  return m_uiOzDeathCount;
-	    case DATA_CHESS_EVENT: return endChess;
 
             }
 
@@ -286,6 +315,7 @@ public:
                 case DATA_MASTERS_TERRACE_DOOR_1:   return MastersTerraceDoor[0];
                 case DATA_MASTERS_TERRACE_DOOR_2:   return MastersTerraceDoor[1];
                 case DATA_IMAGE_OF_MEDIVH:          return ImageGUID;
+                case DATA_CHESS_ECHO_OF_MEDIVH:     return m_uiMedivhGUID;
             }
 
             return 0;
@@ -304,7 +334,7 @@ public:
 
             loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                 >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
+                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >> m_auiEncounter[12];
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;

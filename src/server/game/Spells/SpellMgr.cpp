@@ -2980,6 +2980,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 73797:
             case 73798:
             case 73799:
+            case 28375:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)

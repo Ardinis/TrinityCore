@@ -125,6 +125,7 @@ public:
             SetBossNumber(MAX_BOSS_NUMBER);
             LoadDoorData(doorData);
             LoadMinionData(minionData);
+            SetOldSchoolILevel(217);
         }
 
         std::set<uint64> heiganEruptionGUID[4];

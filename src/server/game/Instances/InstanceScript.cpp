@@ -25,6 +25,7 @@
 #include "CreatureAI.h"
 #include "Log.h"
 #include "LFGMgr.h"
+#include "Chat.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -194,6 +195,20 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
     if (id < bosses.size())
     {
         BossInfo* bossInfo = &bosses[id];
+
+        if (IsRaidOldSchoolIlevelAvailable())
+        {
+            if (state == IN_PROGRESS)
+            {
+                DoCastSpellOnPlayers(SPELL_EFFECT_WHITE);
+                DoSendSysMessageToInstance("Le mode old school est désormais activé pour ce combat !");
+            }
+            else
+                DoRemoveAurasDueToSpellOnPlayers(SPELL_EFFECT_WHITE);
+            if (state == DONE)
+                DoSendSysMessageToInstance("Félicitation, vous venez de terminer ce boss en mode old school !");
+        }
+
         if (bossInfo->state == TO_BE_DECIDED) // loading
         {
             bossInfo->state = state;
@@ -467,13 +482,26 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
 bool InstanceScript::IsRaidOldSchoolIlevelAvailable()
 {
     uint32 maxIlevel = GetOldSchoolILevel();
+
     if (!maxIlevel)
         return false;
     Map::PlayerList const& lPlayers = instance->GetPlayers();
     if (!lPlayers.isEmpty())
         for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
             if (Player* player = itr->getSource())
-                if (player->GetAverageItemLevel() <= maxIlevel)
+                if (player->GetAverageItemLevel() > maxIlevel)
                     return false;
     return true;
+}
+
+void InstanceScript::DoSendSysMessageToInstance(std::string mess)
+{
+    InstanceMap::PlayerList const& players = instance->GetPlayers();
+
+    if (!players.isEmpty())
+    {
+        for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+            if (Player* player = i->getSource())
+                ChatHandler(player).SendSysMessage(mess.c_str());
+    }
 }

@@ -124,6 +124,13 @@ struct MinionInfo
 typedef std::multimap<uint32 /*entry*/, DoorInfo> DoorInfoMap;
 typedef std::map<uint32 /*entry*/, MinionInfo> MinionInfoMap;
 
+enum oldSchoolScreenEffSpells
+{
+    SPELL_EFFECT_GREEN = 50010,
+    SPELL_EFFECT_BLACK = 50153,
+    SPELL_EFFECT_WHITE = 50203,
+};
+
 class InstanceScript : public ZoneScript
 {
     public:
@@ -228,6 +235,7 @@ class InstanceScript : public ZoneScript
         bool IsDoneInOldSchoolMode(uint32 id) { return id < bosses.size() ? ((bosses[id].state == DONE_HM || bosses[id].state == DONE || bosses[id].state == DONE_OLD_SCHOOL) ? true : false) : false; }
         bool IsOldSchoolModeActivated() { return _oldSchool; }
         void activateOldSchoolMode(bool val) { _oldSchool = val; }
+        void DoSendSysMessageToInstance(std::string );
 
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }

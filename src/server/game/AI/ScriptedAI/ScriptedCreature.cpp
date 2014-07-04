@@ -487,10 +487,8 @@ void BossAI::_Reset()
     events.Reset();
     summons.DespawnAll();
     if (instance)
-    {
         instance->SetBossState(_bossId, NOT_STARTED);
-        instance->activateOldSchoolMode(false);
-    }
+
     inFightAggroCheck_Timer = MAX_AGGRO_PULSE_TIMER;
 }
 
@@ -512,7 +510,7 @@ void BossAI::_JustDied()
     summons.DespawnAll();
     if (instance)
     {
-        if (instance->IsOldSchoolModeActivated())
+        if (instance->IsRaidOldSchoolIlevelAvailable())
             instance->SetBossState(_bossId, DONE_OLD_SCHOOL);
         else
             instance->SetBossState(_bossId, DONE);
@@ -533,10 +531,6 @@ void BossAI::_EnterCombat()
             return;
         }
         instance->SetBossState(_bossId, IN_PROGRESS);
-        if (instance->IsRaidOldSchoolIlevelAvailable())
-            instance->activateOldSchoolMode(true);
-        else
-            instance->activateOldSchoolMode(false);
     }
 }
 

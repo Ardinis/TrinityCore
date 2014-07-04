@@ -129,3 +129,5 @@ INSERT INTO `creature` VALUES ('', 26123, 0, 1, 1, 16541, 0, -4707.91, -1226.09,
 INSERT INTO `creature` VALUES ('', 26123, 1, 1, 1, 16541, 0, 8701.66, 962.326, 12.8069, 3.19395, 300, 0, 0, 3052, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES ('', 26123, 530, 1, 1, 0, 0, -3792.68, -11515.7, -134.693, 0, 120, 0, 0, 1, 0, 0, 0, 0, 0);
 INSERT INTO `creature` VALUES ('', 26123, 0, 1, 1, 0, 0, -8829.66, 872.541, 98.6527, 5.00647, 300, 0, 0, 3728, 0, 0, 0, 0, 0);
+DELETE FROM creature_involvedrelation WHERE quest = 11972;
+INSERT INTO `creature_involvedrelation` VALUES (25697, 11972);

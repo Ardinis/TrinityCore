@@ -1051,6 +1051,11 @@ void AddOutlandScripts()
     AddSC_instance_steam_vault();
     AddSC_boss_hungarfen();                 //CR Underbog
     AddSC_boss_the_black_stalker();
+    AddSC_boss_mennu_the_betrayer();        // the slave pens
+    AddSC_boss_quagmirran();
+    AddSC_boss_rokmar_the_crackler();
+    AddSC_instance_the_slave_pens();
+    AddSC_boss_frostlord_ahune();
     AddSC_boss_gruul();                     //Gruul's Lair
     AddSC_boss_high_king_maulgar();
     AddSC_instance_gruuls_lair();

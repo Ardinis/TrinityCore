@@ -214,13 +214,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
     if (!ignoreChecks)
     {
-        std::cout << "!!ignore check !" << std::endl;
         if (msg.empty())
             return;
-        std::cout << "!empty" << std::endl;
         if (ChatHandler(this).ParseCommands(msg.c_str()))
             return;
-        std::cout << "!parsecommand" << std::endl;
         if (lang != LANG_ADDON)
         {
             // Strip invisible characters for non-addon messages
@@ -229,7 +226,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
             if (sWorld->getIntConfig(CONFIG_CHAT_STRICT_LINK_CHECKING_SEVERITY) && !ChatHandler(this).isValidChatMessage(msg.c_str()))
             {
-                std::cout << "ignore check wtf ?" << std::endl;
                 sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid link: %s", GetPlayer()->GetName(),
                                GetPlayer()->GetGUIDLow(), msg.c_str());
 
@@ -238,14 +234,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
                 return;
             }
-            else
-                std::cout << "ignore check nooooooo" << std::endl;
         }
-        else
-            std::cout << "lang addon ??? !" << std::endl;
     }
-    else
-        std::cout << "ignore check !" << std::endl;
 
     switch (type)
     {

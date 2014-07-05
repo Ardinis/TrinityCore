@@ -1193,6 +1193,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_GENERIC:
                 switch (GetId())
                 {
+                    case 30019:
+                        target->InitCharmInfo();
+                        target->GetCharmInfo()->InitCharmCreateSpells(false);
+                        target->SetCharmedBy(caster,CHARM_TYPE_CHARM);
                     case 32474: // Buffeting Winds of Susurrus
                         if (target->GetTypeId() == TYPEID_PLAYER)
                             target->ToPlayer()->ActivateTaxiPathTo(506, GetId());
@@ -1402,6 +1406,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_GENERIC:
                 switch (GetId())
                 {
+                    case 30019:// Control Piece - Chess Event
+                    {
+                        //target->RemoveAllAuras();
+                        target->RemoveCharmedBy(caster);
+                        //target->RemoveBindSightAuras();
+                        //target->RemoveCharmAuras();
+                        target->AttackStop();
+                        Unit *charm = caster->GetCharm();
+                        if(charm)
+                            charm->RemoveAurasDueToSpell(30019,0);  // Also remove aura from charmed creature, not only from us :]
+                    }
                     case 61987: // Avenging Wrath
                         // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
                         if (target->HasAura(61988) && !target->HasAura(25771))

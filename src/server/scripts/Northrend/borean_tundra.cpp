@@ -883,6 +883,11 @@ public:
             if (!HarpoonerGUID)
                 return;
 
+			me->SetSpeed(MOVE_WALK,4.8,true);
+			me->SetSpeed(MOVE_RUN,4.8,true);
+			me->SetSpeed(MOVE_SWIM,4.8,true);
+			me->SetSpeed(MOVE_FLIGHT,4.8,true);
+
             if (me->HasAura(SPELL_SUBDUED) && who->GetEntry() == NPC_RAELORASZ)
             {
                 if (me->IsWithinDistInMap(who, INTERACTION_DISTANCE))
@@ -930,7 +935,6 @@ public:
         return new npc_nexus_drake_hatchlingAI(creature);
     }
 };
-
 /*######
 ## npc_thassarian
 ######*/

@@ -2691,10 +2691,11 @@ class spell_gen_chaos_blast : public SpellScriptLoader
             }
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
-                int32 basepoints0 = 100;
+				// L'aura est déjà posée avec le spell, sans le dummy. Le code qui suit pose le stack en double
+                /*int32 basepoints0 = 100; 
                 Unit* caster = GetCaster();
                 if (Unit* target = GetHitUnit())
-                    caster->CastCustomSpell(target, SPELL_CHAOS_BLAST, &basepoints0, NULL, NULL, true);
+                   caster->CastCustomSpell(target, SPELL_CHAOS_BLAST, &basepoints0, NULL, NULL, true);*/
             }
 
             void Register()

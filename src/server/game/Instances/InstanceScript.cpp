@@ -200,11 +200,15 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
         {
             if (state == IN_PROGRESS)
             {
+                activateOldSchoolMode(true);
                 DoCastSpellOnPlayers(SPELL_EFFECT_WHITE);
                 DoSendSysMessageToInstance("Le mode old school est désormais activé pour ce combat !");
             }
             else
+            {
+                activateOldSchoolMode(false);
                 DoRemoveAurasDueToSpellOnPlayers(SPELL_EFFECT_WHITE);
+            }
             if (state == DONE)
                 DoSendSysMessageToInstance("Félicitation, vous venez de terminer ce boss en mode old school !");
         }

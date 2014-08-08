@@ -199,6 +199,7 @@ class InstanceScript : public ZoneScript
 
         virtual bool SetBossState(uint32 id, EncounterState state);
         EncounterState GetBossState(uint32 id) const { return id < bosses.size() ? ((bosses[id].state == DONE_HM || bosses[id].state == DONE_OLD_SCHOOL) ? DONE : bosses[id].state) : TO_BE_DECIDED; }
+        bool IsDone(uint32 id) const { return id < bosses.size() ? (bosses[id].state == DONE_HM || bosses[id].state == DONE_OLD_SCHOOL || bosses[id].state == DONE) : false; }
 
         BossBoundaryMap const* GetBossBoundary(uint32 id) const { return id < bosses.size() ? &bosses[id].boundary : NULL; }
 
@@ -232,7 +233,7 @@ class InstanceScript : public ZoneScript
         uint32 GetOldSchoolILevel() { return _maxILevel; }
         void SetOldSchoolILevel(uint32 val) { _maxILevel = val; }
         bool IsRaidOldSchoolIlevelAvailable();
-        bool IsDoneInOldSchoolMode(uint32 id) { return id < bosses.size() ? ((bosses[id].state == DONE_HM || bosses[id].state == DONE || bosses[id].state == DONE_OLD_SCHOOL) ? true : false) : false; }
+        bool IsDoneInOldSchoolMode(uint32 id) { return id < bosses.size() ? bosses[id].state == DONE_OLD_SCHOOL : false; }
         bool IsOldSchoolModeActivated() { return _oldSchool; }
         void activateOldSchoolMode(bool val) { _oldSchool = val; }
         void DoSendSysMessageToInstance(std::string );

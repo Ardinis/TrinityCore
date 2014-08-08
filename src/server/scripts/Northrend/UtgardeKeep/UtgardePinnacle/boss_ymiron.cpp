@@ -187,8 +187,11 @@ public:
         {
             DoScriptText(SAY_AGGRO, me);
 
-            if (instance)
+            if (instance) {
+				if (instance->GetData(DATA_SKADI_THE_RUTHLESS_EVENT) != DONE)
+					me->AI()->EnterEvadeMode();
                 instance->SetData(DATA_KING_YMIRON_EVENT, IN_PROGRESS);
+			}
         }
 
         void SpellHitTarget(Unit* who, SpellInfo const* spell)

@@ -894,7 +894,6 @@ public:
                         SetFollowComplete();
                         HarpoonerGUID = 0;
                         me->DespawnOrUnsummon(100);
-                        //                        me->DisappearAndDie();
                     }
                 }
             }
@@ -908,6 +907,9 @@ public:
                 {
                     EnterEvadeMode();
                     HarpoonerGUID = pHarpooner->GetGUID();
+                    me->SetSpeed(MOVE_WALK,4.8,true);
+        			me->SetSpeed(MOVE_RUN,4.8,true);
+        			me->SetSpeed(MOVE_FLIGHT,4.8,true);
                     StartFollow(pHarpooner, 35, NULL);
 
                     DoCast(me, SPELL_SUBDUED, true);
@@ -930,7 +932,6 @@ public:
         return new npc_nexus_drake_hatchlingAI(creature);
     }
 };
-
 /*######
 ## npc_thassarian
 ######*/

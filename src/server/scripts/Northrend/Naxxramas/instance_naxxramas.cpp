@@ -72,6 +72,18 @@ enum eEnums
     GO_THADDIUS_TESLA05     = 181477,
     GO_THADDIUS_TESLA06     = 181478,
 
+    // Portals
+    GO_ARAC_PORTAL          = 181575,
+    GO_PLAG_PORTAL          = 181577,
+    GO_MILI_PORTAL          = 181578,
+    GO_CONS_PORTAL          = 181576,
+
+    // Portal Visuals
+    GO_ARAC_PORTAL_VIS      = 181233,
+    GO_PLAG_PORTAL_VIS      = 181231,
+    GO_MILI_PORTAL_VIS      = 181230,
+    GO_CONS_PORTAL_VIS      = 181232,
+
     SPELL_ERUPTION          = 29371,
 
     ACHIEVEMENT_UNDYING_10  = 2187,
@@ -125,7 +137,8 @@ public:
             SetBossNumber(MAX_BOSS_NUMBER);
             LoadDoorData(doorData);
             LoadMinionData(minionData);
-            SetOldSchoolILevel(217);
+            if (map->Is25ManRaid())
+                SetOldSchoolILevel(217);
         }
 
         std::set<uint64> heiganEruptionGUID[4];
@@ -147,6 +160,16 @@ public:
         uint64 kelthuzadTriggerGUID;
         uint64 portalsGUID[4];
 
+        uint64 m_uiAracPortalGUID;
+        uint64 m_uiPlagPortalGUID;
+        uint64 m_uiMiliPortalGUID;
+        uint64 m_uiConsPortalGUID;
+
+        uint64 m_uiAracPortalVisGUID;
+        uint64 m_uiPlagPortalVisGUID;
+        uint64 m_uiMiliPortalVisGUID;
+        uint64 m_uiConsPortalVisGUID;
+
         uint32 AbominationCount;
 
         GOState gothikDoorState;
@@ -158,6 +181,8 @@ public:
 
         uint64 tesla05Guid;
         uint64 tesla06Guid;
+
+        uint32 mui_rebuffTimer;
 
         void Initialize()
         {
@@ -181,6 +206,17 @@ public:
 
             tesla05Guid = 0;
             tesla06Guid = 0;
+
+            m_uiAracPortalGUID = 0;
+            m_uiPlagPortalGUID = 0;
+            m_uiMiliPortalGUID = 0;
+            m_uiConsPortalGUID = 0;
+            m_uiAracPortalVisGUID = 0;
+            m_uiPlagPortalVisGUID = 0;
+            m_uiMiliPortalVisGUID = 0;
+            m_uiConsPortalVisGUID = 0;
+            mui_rebuffTimer = 1000;
+
 
             memset(portalsGUID, 0, sizeof(portalsGUID));
         }
@@ -254,6 +290,46 @@ public:
                 case GO_THADDIUS_TESLA06:
                     tesla06Guid = go->GetGUID();
                     go->ResetDoorOrButton();
+                    break;
+                case GO_ARAC_PORTAL:
+                    m_uiAracPortalGUID = go->GetGUID();
+                    if (IsDone(BOSS_MAEXXNA))
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    break;
+                case GO_PLAG_PORTAL:
+                    m_uiPlagPortalGUID = go->GetGUID();
+                    if (IsDone(BOSS_LOATHEB))
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    break;
+                case GO_MILI_PORTAL:
+                    m_uiMiliPortalGUID = go->GetGUID();
+                    if (IsDone(BOSS_HORSEMEN))
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    break;
+                case GO_CONS_PORTAL:
+                    m_uiConsPortalGUID = go->GetGUID();
+                    if (IsDone(BOSS_THADDIUS))
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                    break;
+                case GO_ARAC_PORTAL_VIS:
+                    m_uiAracPortalVisGUID = go->GetGUID();
+                    if (IsDone(BOSS_MAEXXNA))
+                        go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_PLAG_PORTAL_VIS:
+                    m_uiPlagPortalVisGUID = go->GetGUID();
+                    if (IsDone(BOSS_LOATHEB))
+                        go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_CONS_PORTAL_VIS:
+                    m_uiConsPortalVisGUID = go->GetGUID();
+                    if (IsDone(BOSS_THADDIUS))
+                        go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_MILI_PORTAL_VIS:
+                    m_uiMiliPortalVisGUID = go->GetGUID();
+                    if (IsDone(BOSS_HORSEMEN))
+                        go->SetGoState(GO_STATE_ACTIVE);
                     break;
                 default:
                     break;
@@ -393,18 +469,51 @@ public:
 
         bool SetBossState(uint32 id, EncounterState state)
         {
-            std::cout << "SetBossState : " << (int)id << " : " << (int)state << std::endl;
             if (!InstanceScript::SetBossState(id, state))
                 return false;
-            std::cout << "2 - SetBossState : " << (int)id << " : " << (int)state << std::endl;
 
-            if (id == BOSS_HORSEMEN && state == DONE)
+            if (id == BOSS_HORSEMEN && (state == DONE || state == DONE_OLD_SCHOOL))
             {
                 if (GameObject* pHorsemenChest = instance->GetGameObject(horsemenChestGUID))
+                {
                     pHorsemenChest->SetRespawnTime(pHorsemenChest->GetRespawnDelay());
+                    pHorsemenChest->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                }
                 DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 59450);
             }
 
+            if (state == DONE || state == DONE_OLD_SCHOOL)
+            {
+                switch (id)
+                {
+                    case BOSS_MAEXXNA:
+                        if (GameObject* pPortal = instance->GetGameObject(m_uiAracPortalGUID))
+                            pPortal->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        if (GameObject* pPortalVis = instance->GetGameObject(m_uiAracPortalVisGUID))
+                            pPortalVis->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                    case BOSS_HORSEMEN:
+                        if (GameObject* pPortal = instance->GetGameObject(m_uiMiliPortalGUID))
+                            pPortal->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        if (GameObject* pPortalVis = instance->GetGameObject(m_uiMiliPortalVisGUID))
+                            pPortalVis->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                    case BOSS_THADDIUS:
+                        if (GameObject* pPortal = instance->GetGameObject(m_uiConsPortalGUID))
+                            pPortal->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        if (GameObject* pPortalVis = instance->GetGameObject(m_uiConsPortalVisGUID))
+                            pPortalVis->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                    case BOSS_LOATHEB:
+                        if (GameObject* pPortal = instance->GetGameObject(m_uiPlagPortalGUID))
+                            pPortal->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        if (GameObject* pPortalVis = instance->GetGameObject(m_uiPlagPortalVisGUID))
+                            pPortalVis->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                    default:
+                        break;
+                }
+            }
             return true;
         }
 
@@ -493,6 +602,24 @@ public:
             loadStream >> buff2;
             playerDied = buff2;
         }
+
+        void Update(uint32 diff)
+        {
+            if (mui_rebuffTimer <= diff)
+            {
+                if (IsEncounterInProgress() && IsOldSchoolModeActivated() && !IsRaidOldSchoolIlevelAvailable())
+                {
+                    activateOldSchoolMode(false);
+                    DoRemoveAurasDueToSpellOnPlayers(SPELL_EFFECT_WHITE);
+                    DoSendSysMessageToInstance("Old School mode desactivate");
+                }
+
+                mui_rebuffTimer = 1000;
+            }
+            else
+                mui_rebuffTimer -= diff;
+        }
+
     };
 };
 

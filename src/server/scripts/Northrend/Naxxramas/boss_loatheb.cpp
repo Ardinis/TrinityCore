@@ -82,8 +82,9 @@ class boss_loatheb : public CreatureScript
                 _JustDied();
             }
 
-            void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/)
+            void SummonedCreatureDies(Creature* summon, Unit* killer)
             {
+                summon->CastSpell(summon, 29232, true);
                 _sporeLoserData = false;
             }
 

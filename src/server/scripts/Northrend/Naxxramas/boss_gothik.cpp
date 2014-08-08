@@ -173,6 +173,7 @@ class boss_gothik : public CreatureScript
                 DeadTriggerGUID.clear();
 
                 me->SetReactState(REACT_PASSIVE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 if (instance)
                     instance->SetData(DATA_GOTHIK_GATE, GO_STATE_ACTIVE);
                 _Reset();

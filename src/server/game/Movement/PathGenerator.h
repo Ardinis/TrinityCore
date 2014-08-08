@@ -22,7 +22,7 @@
 #include "SharedDefines.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
-#include "Spline/MoveSplineInitArgs.h"
+#include "../Spline/MoveSplineInitArgs.h"
 
 using Movement::Vector3;
 using Movement::PointsArray;
@@ -60,7 +60,7 @@ class PathGenerator
 
         // Calculate the path from owner to given destination
         // return: true if new path was calculated, false otherwise (no change needed)
-        bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false);
+        bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false, bool straightLine = false);
 
         // option setters - use optional
         void SetUseStraightPath(bool useStraightPath) { _useStraightPath = useStraightPath; };
@@ -71,8 +71,25 @@ class PathGenerator
         Vector3 const& GetEndPosition()        const { return _endPosition; }
         Vector3 const& GetActualEndPosition()  const { return _actualEndPosition; }
 
+        float GetPathLength()
+        {
+            float len = 0.0f;
+            for (uint32 idx = 1; idx < _pathPoints.size(); ++idx)
+            {
+                Vector3 const& node = _pathPoints[idx];
+                Vector3 const& prev = _pathPoints[idx-1];
+                float xd = node.x - prev.x;
+                float yd = node.y - prev.y;
+                float zd = node.z - prev.z;
+                len += sqrtf(xd*xd + yd*yd + zd*zd);
+            }
+            return len;
+        }
+
         PointsArray& GetPath() { return _pathPoints; }
         PathType GetPathType() const { return _type; }
+
+        void ReducePathLenghtByDist(float dist); // path must be already built
 
     private:
 
@@ -85,6 +102,7 @@ class PathGenerator
         bool           _useStraightPath;  // type of path will be generated
         bool           _forceDestination; // when set, we will always arrive at given point
         uint32         _pointPathLimit;   // limit point path size; min(this, MAX_POINT_PATH_LENGTH)
+        bool _straightLine;     // use raycast if true for a straight line path
 
         Vector3        _startPosition;    // {x, y, z} of current location
         Vector3        _endPosition;      // {x, y, z} of the destination

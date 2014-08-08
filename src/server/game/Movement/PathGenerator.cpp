@@ -72,7 +72,10 @@ bool PathGenerator::CalculatePath(float destX, float destY, float destZ, bool fo
 
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
-    if (!_navMesh || !_navMeshQuery || (_sourceUnit->ToCreature() && !_sourceUnit->ToCreature()->isPet()) ||
+    bool isInstanceMap = _sourceUnit->GetMap() ? _sourceUnit->GetMap()->IsRaid() : false;
+    if (!_navMesh || !_navMeshQuery || (isInstanceMap && _sourceUnit->ToCreature() &&
+                                        !(_sourceUnit->ToCreature()->isPet() || _sourceUnit->ToCreature()->isGuardian() ||
+                                          _sourceUnit->ToCreature()->isHunterPet())) ||
         !HaveTile(start) || !HaveTile(dest) || _sourceUnit->HasUnitState(UNIT_STATE_EVADE) || _sourceUnit->GetTransport())
     {
         BuildShortcut();

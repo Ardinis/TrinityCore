@@ -73,7 +73,7 @@ namespace MMAP
 
         delete [] fileName;
 
-        sLog->outString("MMAP:loadMapData: Loaded %03i.mmap", mapId);
+        //        sLog->outString("MMAP:loadMapData: Loaded %03i.mmap", mapId);
 
         // store inside our map list
         MMapData* mmap_data = new MMapData(mesh);

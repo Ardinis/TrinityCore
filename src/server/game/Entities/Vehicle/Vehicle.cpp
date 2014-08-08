@@ -500,19 +500,19 @@ void Vehicle::RelocatePassengers(float x, float y, float z, float ang)
             float py = y + passenger->m_movementInfo.t_pos.m_positionY;
             float pz = z + passenger->m_movementInfo.t_pos.m_positionZ;
             float po = ang + passenger->m_movementInfo.t_pos.m_orientation;
-	    if (ang != 0)
-	      {
-		float nang = (ang  * 360) / 6.3;
-		nang = nang * (3.14 / 180);
-		float s = sin(nang);
-		float c = cos(nang);
-		px -= x;
-		py -= y;
-		float xnew = px * c - py * s;
-		float ynew = px * s + py * c;
-		px = xnew + x;
-		py = ynew + y;
-	      }
+            if (ang != 0)
+            {
+                float nang = (ang  * 360) / 6.3;
+                nang = nang * (3.14 / 180);
+                float s = sin(nang);
+                float c = cos(nang);
+                px -= x;
+                py -= y;
+                float xnew = px * c - py * s;
+                float ynew = px * s + py * c;
+                px = xnew + x;
+                py = ynew + y;
+            }
             passenger->UpdatePosition(px, py, pz, po);
         }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -103,7 +103,7 @@ namespace VMAP
             bool getAreaInfo(unsigned int pMapId, float x, float y, float& z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const;
             bool GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 reqLiquidType, float& level, float& floor, uint32& type) const;
 
-            WorldModel* acquireModelInstance(const std::string& basepath, const std::string& filename, uint32 flags = 0);
+            WorldModel* acquireModelInstance(const std::string& basepath, const std::string& filename);
             void releaseModelInstance(const std::string& filename);
 
             // what's the use of this? o.O
@@ -112,6 +112,8 @@ namespace VMAP
                 return getMapFileName(mapId);
             }
             virtual bool existsMap(const char* basePath, unsigned int mapId, int x, int y);
+        public:
+            void getInstanceMapTree(InstanceTreeMap &instanceMapTree);
     };
 }
 

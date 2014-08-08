@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -24,12 +24,13 @@
 #include "MapTree.h"
 #include "ModelInstance.h"
 #include "WorldModel.h"
-#include "VMapDefinitions.h"
-#include "Log.h"
 #include <G3D/Vector3.h>
 #include <ace/Null_Mutex.h>
 #include <ace/Singleton.h>
 #include "DisableMgr.h"
+#include "DBCStores.h"
+#include "Log.h"
+#include "VMapDefinitions.h"
 
 using G3D::Vector3;
 
@@ -95,7 +96,10 @@ namespace VMAP
             std::string mapFileName = getMapFileName(mapId);
             StaticMapTree* newTree = new StaticMapTree(mapId, basePath);
             if (!newTree->InitMap(mapFileName, this))
+            {
+                delete newTree;
                 return false;
+            }
             instanceTree = iInstanceMapTrees.insert(InstanceTreeMap::value_type(mapId, newTree)).first;
         }
 
@@ -233,7 +237,7 @@ namespace VMAP
                 {
                     floor = info.ground_Z;
                     ASSERT(floor < std::numeric_limits<float>::max());
-                    type = info.hitModel->GetLiquidType();
+                    type = info.hitModel->GetLiquidType();  // entry from LiquidType.dbc
                     if (reqLiquidType && !(type & reqLiquidType))
                         return false;
                     if (info.hitInstance->GetLiquidLevel(pos, info, level))
@@ -245,7 +249,7 @@ namespace VMAP
         return false;
     }
 
-    WorldModel* VMapManager2::acquireModelInstance(const std::string& basepath, const std::string& filename, uint32 flags/* Only used when creating the model */)
+    WorldModel* VMapManager2::acquireModelInstance(const std::string& basepath, const std::string& filename)
     {
         //! Critical section, thread safe access to iLoadedModelFiles
         TRINITY_GUARD(ACE_Thread_Mutex, LoadedModelFilesLock);
@@ -261,7 +265,6 @@ namespace VMAP
                 return NULL;
             }
             sLog->outDebug(LOG_FILTER_MAPS, "VMapManager2: loading file '%s%s'", basepath.c_str(), filename.c_str());
-            worldmodel->Flags = flags;
             model = iLoadedModelFiles.insert(std::pair<std::string, ManagedModel>(filename, ManagedModel())).first;
             model->second.setModel(worldmodel);
         }

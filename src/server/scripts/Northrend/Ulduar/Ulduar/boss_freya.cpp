@@ -642,21 +642,6 @@ class boss_freya : public CreatureScript
                                 Elemental[k][i] = ObjectAccessor::GetCreature(*me, ElementalGUID[k][i]);
                             if (!trioDefeated[i]) // Do *NOT* merge this bool with bool few lines below!
                             {
-                                if (Elemental[0][i])
-                                    std::cout << "a" << std::endl;
-                                else
-                                    std::cout << "a1" << std::endl;
-
-                                if (Elemental[1][i])
-                                    std::cout << "b" << std::endl;
-                                else
-                                    std::cout << "a2" << std::endl;
-
-                                if (Elemental[2][i])
-                                    std::cout << "c" << std::endl;
-                                else
-                                    std::cout << "a3" << std::endl;
-
                                 if (Elemental[0][i] && Elemental[1][i] && Elemental[2][i])
                                 {
                                     for (uint8 n = 0; n < 3; ++n)

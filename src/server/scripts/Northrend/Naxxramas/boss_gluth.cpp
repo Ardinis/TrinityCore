@@ -128,7 +128,6 @@ public:
                                 if (player->isAlive())
                                 {
                                     uint32 health = uint32((float)player->GetMaxHealth() * 5.0f / 100.0f);
-                                    std::cout << health << " : " << player->CountPctFromMaxHealth(5) << std::endl;
                                     if (player->GetHealth() > player->CountPctFromMaxHealth(5))
                                     {
                                         player->SetHealth(health);

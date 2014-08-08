@@ -1082,25 +1082,25 @@ class spell_hun_pet_passive_crit : public SpellScriptLoader
             {
                 if (!GetCaster() || !GetCaster()->GetOwner())
                     return;
-		return ;
+                return ; // why ???
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
                     // For others recalculate it from:
                     float CritMelee = 0.0f;
-		    if (GetCaster()->HasAura(53205))
-		    {
-		      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53205); // Then get the SpellProto and add the dummy effect values
-		      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
-		    }
-		    else if (GetCaster()->HasAura(53204))
+                    if (GetCaster()->HasAura(53205))
                     {
-                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53204); // Then get the SpellProto and add the dummy effect values
-                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53205); // Then get the SpellProto and add the dummy effect values
+                        CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
                     }
-		    else if (GetCaster()->HasAura(53203))
+                    else if (GetCaster()->HasAura(53204))
                     {
-                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53203); // Then get the SpellProto and add the dummy effect values
-                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53204); // Then get the SpellProto and add the dummy effect values
+                        CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                    }
+                    else if (GetCaster()->HasAura(53203))
+                    {
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53203); // Then get the SpellProto and add the dummy effect values
+                        CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
                     }
 
                     amount += CritMelee;
@@ -1111,26 +1111,25 @@ class spell_hun_pet_passive_crit : public SpellScriptLoader
             {
                 if (!GetCaster() || !GetCaster()->GetOwner())
                     return;
-		return ;
+                return ; // why ???
                 if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
                 {
                     // For others recalculate it from:
                     float CritMelee = 0.0f;
-		    if (GetCaster()->HasAura(53205))
-		    {
-		      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53205); // Then get the SpellProto and add the dummy effect values
-		      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
-		      std::cout << "MELEE CRIT END " << CritMelee << std::endl;
-		    }
-		    else if (GetCaster()->HasAura(53204))
+                    if (GetCaster()->HasAura(53205))
                     {
-                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53204); // Then get the SpellProto and add the dummy effect values
-                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53205); // Then get the SpellProto and add the dummy effect values
+                        CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
                     }
-		    else if (GetCaster()->HasAura(53203))
+                    else if (GetCaster()->HasAura(53204))
                     {
-                      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53203); // Then get the SpellProto and add the dummy effect values
-                      CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53204); // Then get the SpellProto and add the dummy effect values
+                        CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
+                    }
+                    else if (GetCaster()->HasAura(53203))
+                    {
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(53203); // Then get the SpellProto and add the dummy effect values
+                        CritMelee += (float)((float)(spellInfo->Effects[EFFECT_0].CalcValue()) / 100.0f);
                     }
                     amount += CritMelee;
                 }

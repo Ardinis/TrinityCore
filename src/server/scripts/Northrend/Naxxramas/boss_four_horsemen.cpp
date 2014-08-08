@@ -143,7 +143,6 @@ public:
 
             if (Thane && Lady && Baron && Sir)
             {
-                std::cout << "DoEncounterAction Thane && Lady && Baron && Sir" << std::endl;
                 if (attack && who)
                 {
                     CAST_AI(boss_four_horsemen::boss_four_horsemenAI, Thane->AI())->encounterActionAttack = true;
@@ -186,18 +185,7 @@ public:
                 }
 
                 if (checkAllDead)
-                {
-                    std::cout << "check isalive four hoursem" << std::endl;
-                    if (Thane->isAlive())
-                        std::cout << "1 isalive" << std::endl;
-                    if (Lady->isAlive())
-                        std::cout << "1 isalive" << std::endl;
-                    if (Baron->isAlive())
-                        std::cout << "1 isalive" << std::endl;
-                    if (Sir->isAlive())
-                        std::cout << "1 isalive" << std::endl;
                     return !Thane->isAlive() && !Lady->isAlive() && !Baron->isAlive() && !Sir->isAlive();
-                }
             }
             return false;
         }

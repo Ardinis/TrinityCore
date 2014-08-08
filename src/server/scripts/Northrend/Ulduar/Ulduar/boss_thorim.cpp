@@ -507,12 +507,9 @@ class boss_thorim : public CreatureScript
 
                 if (Creature* runic = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_RUNIC_COLOSSUS)))
                 {
-                    std::cout << "runic smash start !!" << std::endl;
                     runic->setActive(true);
                     runic->AI()->DoAction(ACTION_DOSCHEDULE_RUNIC_SMASH);  // Signals runic smash rotation
                 }
-                else
-                    std::cout << "runic smash can't start !!" << std::endl;
 
                 if (GameObject* go = me->FindNearestGameObject(GO_LEVER, 500.0f))
                     go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
@@ -1638,24 +1635,12 @@ class spell_stormhammer_targeting : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& unitList)
             {
-	      std::cout << "FilterTargets start" << std::endl;
-                if (unitList.empty())
-		  {
-		    std::cout << "FilterTargets begin empty wtf" << std::endl;
-		  }
                 _target = NULL;
-                unitList.remove_if(ArenaAreaCheck(false));
-
                 if (unitList.empty())
-		  {
-		    std::cout << "FilterTargets empty wtf" << std::endl;
                     return;
-		  }
+
+                unitList.remove_if(ArenaAreaCheck(false));
                 _target = SelectRandomContainerElement(unitList);
-		if (_target->GetTypeId() == TYPEID_PLAYER)
-		  std::cout << "__target id player " << std::endl;
-		else
-		  std::cout << "__target emtry : " << _target->GetEntry() << "isn't player" << std::endl;
                 SetTarget(unitList);
             }
 

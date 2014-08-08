@@ -555,7 +555,7 @@ public:
     {
         npc_captive_protodrakeAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
-        void PassengerBoarded(Unit* pWho, int8 /*seatId*/, bool apply) 
+        void PassengerBoarded(Unit* pWho, int8 /*seatId*/, bool apply)
         {
             if (pWho && apply)
             {
@@ -934,7 +934,6 @@ public:
 
     void Reset()
     {
-      //      std::cout << "reset" << std::endl;
       me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
@@ -946,18 +945,17 @@ public:
 
     void MoveInLineOfSight(Unit* unit)
     {
-      //      std::cout << "check passenger" << std::endl;
-      Player *billi = unit->ToPlayer();
-      if (!billi)
-	return;
-      if (billi && billi->isAlive() && billi->GetDistance(me) < 30.0f && !billi->isInCombat())
-	{
-	  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-	  if (billi->IsMounted())
-	    billi->Dismount();
-	  //	  billi->CastSpell(me, 49460, true);
-	  billi->EnterVehicle(me, 1);
-	}
+        Player *billi = unit->ToPlayer();
+        if (!billi)
+            return;
+        if (billi && billi->isAlive() && billi->GetDistance(me) < 30.0f && !billi->isInCombat())
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            if (billi->IsMounted())
+                billi->Dismount();
+            //	  billi->CastSpell(me, 49460, true);
+            billi->EnterVehicle(me, 1);
+        }
     }
 
     void UpdateAI(uint32 const diff)

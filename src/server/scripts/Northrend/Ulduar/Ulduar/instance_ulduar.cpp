@@ -807,11 +807,6 @@ class instance_ulduar : public InstanceMapScript
                     case GO_DOODAD_UL_SIGILDOOR_01:
                         AlgalonSigilDoorGUID[0] = gameObject->GetGUID();
                         HandleGameObject(0, false, gameObject);
-                        if (_algalonSummoned)
-                        {
-                            std::cout << "_algalonSummoned" << std::endl;
-                            //                            gameObject->SetGoState(GO_STATE_ACTIVE);
-                        }
                         break;
                     case GO_DOODAD_UL_SIGILDOOR_02:
                         AlgalonSigilDoorGUID[1] = gameObject->GetGUID();

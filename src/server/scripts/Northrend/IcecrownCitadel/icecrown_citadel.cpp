@@ -2572,7 +2572,7 @@ class npc_val_icc : public CreatureScript
 
             void Reset()
             {
-	      mui_cast = 3000;
+                mui_cast = 3000;
             }
 
             void UpdateAI(uint32 const diff)
@@ -2583,31 +2583,29 @@ class npc_val_icc : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-		if (mui_cast <= diff)
-		  {
-		    //std::cout << "sum ???????????" << std::endl;
-		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-		      {
-			Position pos;
-			target->GetPosition(&pos);
-			if (Creature *c = me->SummonCreature(8000100, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
-			  {
-			    //std::cout << "sum !!!!!!!!!!!!!" << std::endl;
-			    c->AI()->DoAction(target->getClass());
-			    //			    c->CastSpell(c, SPELL_PLAGUE_AVOIDANCE, true);
-			    c->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL, true);
-			    target->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
-			  }
-		      }
-		    mui_cast = 15000;
-		  }
-		else
-		  mui_cast -= diff;
+                if (mui_cast <= diff)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                    {
+                        Position pos;
+                        target->GetPosition(&pos);
+                        if (Creature *c = me->SummonCreature(8000100, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
+                        {
+                            c->AI()->DoAction(target->getClass());
+                            //			    c->CastSpell(c, SPELL_PLAGUE_AVOIDANCE, true);
+                            c->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL, true);
+                            target->CastSpell(c, SPELL_RAGING_SPIRIT_VISUAL_CLONE, true);
+                        }
+                    }
+                    mui_cast = 15000;
+                }
+                else
+                    mui_cast -= diff;
                 DoMeleeAttackIfReady();
             }
 
-	private:
-	  uint32 mui_cast;
+        private:
+            uint32 mui_cast;
         };
 
         CreatureAI* GetAI(Creature* creature) const

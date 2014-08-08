@@ -769,22 +769,16 @@ void OutdoorPvPWG::OnCreatureCreate(Creature *creature)
     {
         case CREATURE_SIEGE_VEHICLE:
         {
-  //std::cout << "OnCreatureCreate CREATURE_SIEGE_VEHICLE" << std::endl;
             if (!creature->isSummon())
-	      {
-		//std::cout << "!creature->isSummon()" << std::endl;
                 return;
-	      }
             TeamId team;
             if (creature->getFaction() == WintergraspFaction[TEAM_ALLIANCE])
                 team = TEAM_ALLIANCE;
             else if (creature->getFaction() == WintergraspFaction[TEAM_HORDE])
                 team = TEAM_HORDE;
             else
-	      {
-		//std::cout << "return faction" << std::endl;
                 return;
-	      }
+
             if (uint32 engLowguid = GUID_LOPART(((TempSummon*)creature)->GetSummonerGUID()))
             {
                 if (OPvPCapturePointWG *workshop = GetWorkshopByEngGuid(engLowguid))
@@ -1158,7 +1152,7 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
                             creature->SetPhaseMask(1, true);
                             creature->SetVisible(true);
                         }
-                        else 
+                        else
                         {
                             creature->SetPhaseMask(2, true);
                             creature->SetVisible(false);
@@ -1173,7 +1167,7 @@ bool OutdoorPvPWG::UpdateCreatureInfo(Creature *creature)
                             creature->SetPhaseMask(2, true);
                             creature->SetVisible(false);
                         }
-                        else 
+                        else
                         {
                             creature->SetPhaseMask(1, true);
                             creature->SetVisible(true);
@@ -1886,30 +1880,15 @@ void OutdoorPvPWG::EndBattle()
         uint32 marks = 0;
         uint32 playersWithRankNum = 0;
         uint32 honor = 0;
-	bool cplteachievement = false;
-	/*	//std::cout << "damagedNum : " << damagedNum << std::endl;
-	//std::cout << "intactNum : " << intactNum << std::endl;
-	//std::cout << "m_towerDamagedCount : " << m_towerDamagedCount[OTHER_TEAM(team)] << std::endl;
-	//std::cout << "m_towerDestroyedCount : " << m_towerDestroyedCount[OTHER_TEAM(team)] << std::endl;*/
-	//        if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_CUSTOM_HONOR))
-        {
-            // Calculate Level 70+ with Corporal or Lieutenant rank
-            //for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
-	  //   if ((*itr)->getLevel() > 74 && ((*itr)->HasAura(SPELL_LIEUTENANT) || (*itr)->HasAura(SPELL_CORPORAL)))
-	  //         ++playersWithRankNum;
-            baseHonor = team == getDefenderTeam() ? 3000 : 1250;
-            baseHonor += 750 * m_towerDamagedCount[OTHER_TEAM(team)];
-            baseHonor += 750 * m_towerDestroyedCount[OTHER_TEAM(team)];
-            baseHonor += 1500 * intactNum;
-            baseHonor += 750 * damagedNum;
+        bool cplteachievement = false;
+        baseHonor = team == getDefenderTeam() ? 3000 : 1250;
+        baseHonor += 750 * m_towerDamagedCount[OTHER_TEAM(team)];
+        baseHonor += 750 * m_towerDestroyedCount[OTHER_TEAM(team)];
+        baseHonor += 1500 * intactNum;
+        baseHonor += 750 * damagedNum;
 	    if (m_towerDestroyedCount[OTHER_TEAM(team)] > 0)
-	      cplteachievement = true;
-            //if (playersWithRankNum)
-	    //  baseHonor /= playersWithRankNum;
-	    // 1727
-        }
-	AchievementEntry const* pAE = sAchievementStore.LookupEntry(1727);
-
+            cplteachievement = true;
+        AchievementEntry const* pAE = sAchievementStore.LookupEntry(1727);
         for (PlayerSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
         {
             if ((*itr)->getLevel() < 75)

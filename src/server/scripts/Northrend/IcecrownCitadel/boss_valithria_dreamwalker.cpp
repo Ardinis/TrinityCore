@@ -365,12 +365,11 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage)
             {
-	      if (attacker->GetEntry() == 38421)
-		{
-		  damage = 0;
-		  return ;
-		}
-	      //	      std::cout << attacker->GetEntry() << std::endl;
+                if (attacker->GetEntry() == 38421)
+                {
+                    damage = 0;
+                    return ;
+                }
                 if (me->HealthBelowPctDamaged(25, damage))
                 {
                     if (!_under25PercentTalkDone)

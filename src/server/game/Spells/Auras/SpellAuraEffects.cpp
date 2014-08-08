@@ -5917,7 +5917,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 
                     if (!spellTarget->IsWithinLOS(x, y, z) || !isPointInBack)
                     {
-                        std::cout << "not in loss" << std::endl;
                         bool losFree = false;
                         while (angle < 2 * M_PI)
                         {
@@ -5937,8 +5936,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                             lborder = -1 * (arc / 2.0f);                        // in range -pi..0
                             rborder = (arc / 2.0f);                             // in range 0..pi
                             isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
-                            std::cout << "not in loss ? : " << (int)isPointInBack << " : " << (int)losFree << std::endl;
-                            std::cout << x << " : " << y << " : " << z << std::endl;
                             if (isPointInBack && losFree)
                                 break;
                             else if (losFree)
@@ -5956,7 +5953,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                             z = savez;
                         }
                     }*/
-                    //                    std::cout << "last : " << x << " : " << y << " : " << z << std::endl;
                     //                    target->UpdateAllowedPositionZ(x, y, z);
                     //                  target->CastSpell(x, y, z + 0.5f, 57840, true);
                     //                    target->UpdatePosition(x, y, z + 0.5f, target->GetAngle(spellTarget));

@@ -236,13 +236,9 @@ class spell_warr_charge : public SpellScriptLoader
                 int32 chargeBasePoints0 = GetEffectValue();
                 Unit* caster = GetCaster();
                 caster->CastCustomSpell(caster, SPELL_CHARGE, &chargeBasePoints0, NULL, NULL, true);
-                std::cout << "HandleDummy" << std::endl;
                 //Juggernaut crit bonus
                 if (caster->HasAura(SPELL_JUGGERNAUT_CRIT_BONUS_TALENT))
-                {
-                    std::cout << "HandleDummy 2" << std::endl;
                     caster->CastSpell(caster, SPELL_JUGGERNAUT_CRIT_BONUS_BUFF, true);
-                }
             }
 
             void Register()

@@ -111,21 +111,20 @@ class boss_rotface : public CreatureScript
                 infectionCooldown = 14000;
             }
 
-	  void DoAction(const int32 action)
-          {
-            if (action == 42)
-              {
-		std::cout << "do act 42 !!!" << std::endl;
-		std::list<Unit*> targets;
-                uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
-                SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
-                float minDist = 0.0f;
-                if (targets.size() >= minTargets)
-                  minDist = -5.0f;
-		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
-                  DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
-	      }
-          }
+            void DoAction(const int32 action)
+            {
+                if (action == 42)
+                {
+                    std::list<Unit*> targets;
+                    uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
+                    SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
+                    float minDist = 0.0f;
+                    if (targets.size() >= minTargets)
+                        minDist = -5.0f;
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
+                        DoCast(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
+                }
+            }
 
 
             void EnterCombat(Unit* who)

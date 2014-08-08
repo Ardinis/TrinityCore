@@ -628,11 +628,13 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
                 {
                     // converts each extra point of energy into ($f1+$AP/410) additional damage
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    float multiple = ap / 410 + m_spellInfo->Effects[effIndex].DamageMultiplier;
-                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -30));
-                    damage += int32(energy * multiple);
-                    damage += int32(CalculatePctN(m_caster->ToPlayer()->GetComboPoints() * ap, 7));
+                    if (uint32 combo = m_caster->ToPlayer()->GetComboPoints())
+                    {
+                        float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                        damage += int32(ap * combo * 0.109f);
+                    }
+                    int32 energy = -(m_caster->ModifyPower(POWER_ENERGY, -35));
+                    AddPct(damage, energy * (100.0f / 35.0f));
                 }
                 // Wrath
                 else if (m_spellInfo->SpellFamilyFlags[0] & 0x00000001)

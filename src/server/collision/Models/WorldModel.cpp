@@ -393,7 +393,7 @@ namespace VMAP
     {
         // convert to type mask, matching MAP_LIQUID_TYPE_* defines in Map.h
         if (iLiquid)
-            return (1 << iLiquid->GetType());
+            return iLiquid->GetType();
         return 0;
     }
 

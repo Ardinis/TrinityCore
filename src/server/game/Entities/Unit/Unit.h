@@ -1631,6 +1631,7 @@ class Unit : public WorldObject
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
         virtual bool UpdatePosition(float x, float y, float z, float ang, bool teleport = false);
+        virtual void UpdateUnderwaterState(Map* m, float x, float y, float z);
         // returns true if unit's position really changed
         bool UpdatePosition(const Position &pos, bool teleport = false) { return UpdatePosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teleport); }
 
@@ -2360,6 +2361,7 @@ class Unit : public WorldObject
         Vehicle* m_vehicleKit;
 
         uint32 m_unitTypeMask;
+        LiquidTypeEntry const* _lastLiquid;
 
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;
         bool IsAlwaysDetectableFor(WorldObject const* seer) const;

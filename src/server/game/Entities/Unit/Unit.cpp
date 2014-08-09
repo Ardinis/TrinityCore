@@ -245,6 +245,7 @@ m_ThreatManager(this), m_vehicle(NULL), m_vehicleKit(NULL), m_unitTypeMask(UNIT_
     m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GHOST, GHOST_VISIBILITY_ALIVE);
 
     _focusSpell = NULL;
+    _lastLiquid = NULL;
     _targetLocked = false;
     _isTrainingDummy = false;
 }
@@ -19009,7 +19010,55 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
       GetVehicleKit()->RelocatePassengers(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
     //      GetVehicleKit()->RelocatePassengers(x, y, z, orientation);
 
+    // code block for underwater state update
+    UpdateUnderwaterState(GetMap(), x, y, z);
+
     return (relocated || turn);
+}
+
+void Unit::UpdateUnderwaterState(Map* m, float x, float y, float z)
+{
+    if (!isPet() && !IsVehicle())
+        return;
+
+    LiquidData liquid_status;
+    ZLiquidStatus res = m->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
+    if (!res)
+    {
+        if (_lastLiquid && _lastLiquid->SpellId)
+            RemoveAurasDueToSpell(_lastLiquid->SpellId);
+
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+        _lastLiquid = NULL;
+        return;
+    }
+
+    if (uint32 liqEntry = liquid_status.entry)
+    {
+        LiquidTypeEntry const* liquid = sLiquidTypeStore.LookupEntry(liqEntry);
+        if (_lastLiquid && _lastLiquid->SpellId && _lastLiquid->Id != liqEntry)
+            RemoveAurasDueToSpell(_lastLiquid->SpellId);
+
+        if (liquid && liquid->SpellId)
+        {
+            if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
+            {
+                if (!HasAura(liquid->SpellId))
+                    CastSpell(this, liquid->SpellId, true);
+            }
+            else
+                RemoveAurasDueToSpell(liquid->SpellId);
+        }
+
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_ABOVEWATER);
+        _lastLiquid = liquid;
+    }
+    else if (_lastLiquid && _lastLiquid->SpellId)
+    {
+        RemoveAurasDueToSpell(_lastLiquid->SpellId);
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+        _lastLiquid = NULL;
+    }
 }
 
 //! Only server-side orientation update, does not broadcast to client

@@ -642,8 +642,7 @@ NavTerrain PathGenerator::GetNavTerrain(float x, float y, float z)
     LiquidData data;
     ZLiquidStatus res = _sourceUnit->GetBaseMap()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &data);
 
-    return res ? NAV_WATER : NAV_GROUND;
-    /*    switch (data.type_flags)
+    switch (data.type_flags)
     {
         case MAP_LIQUID_TYPE_WATER:
         case MAP_LIQUID_TYPE_OCEAN:
@@ -654,7 +653,7 @@ NavTerrain PathGenerator::GetNavTerrain(float x, float y, float z)
             return NAV_SLIME;
         default:
             return NAV_GROUND;
-            }*/
+    }
 }
 
 bool PathGenerator::HaveTile(const G3D::Vector3& p) const

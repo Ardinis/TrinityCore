@@ -2201,7 +2201,30 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                     float x, y, z, angle;
                     angle = (float)rand_norm() * static_cast<float>(M_PI * 35.0f / 180.0f) - static_cast<float>(M_PI * 17.5f / 180.0f);
                     m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, dis, angle);
-                    m_targets.SetDst(x, y, z, m_caster->GetOrientation());
+
+                    float ground = m_caster->GetMap()->GetHeight(m_caster->GetPhaseMask(), x, y, z, true, 50.0f);
+                    float liquidLevel = VMAP_INVALID_HEIGHT_VALUE;
+                    LiquidData liquidData;
+                    if (m_caster->GetMap()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquidData))
+                        liquidLevel = liquidData.level;
+
+                    if (liquidLevel <= ground) // When there is no liquid Map::GetWaterOrGroundLevel returns ground level
+                    {
+                        SendCastResult(SPELL_FAILED_NOT_HERE);
+                        SendChannelUpdate(0);
+                        finish(false);
+                        break;
+                    }
+
+                    if (ground + 0.75 > liquidLevel)
+                    {
+                        SendCastResult(SPELL_FAILED_TOO_SHALLOW);
+                        SendChannelUpdate(0);
+                        finish(false);
+                        break;
+                    }
+
+                    m_targets.SetDst(x, y, liquidLevel, m_caster->GetOrientation());
                     break;
                 }
                 case TARGET_UNIT_MASTER:

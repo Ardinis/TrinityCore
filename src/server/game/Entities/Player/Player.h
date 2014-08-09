@@ -2578,20 +2578,22 @@ class Player : public Unit, public GridObject<Player>
             //! TODO: Need a proper calculation for collision height when mounted
         }
 
-	/*********************************************************/
+        /*********************************************************/
         /***              CUSTOM TRANSMO SYSTEM                ***/
         /*********************************************************/
 
-	bool CanTransmo(Item *oldItem, Item *newItem);
-	bool AddTransmo(uint32 guidlow, uint32 itemId);
-	void RemoveTransmo(uint32 guidlow);
-	void RemoveAllTransmo();
-	bool HaveTransmoByItem(uint32 guidlow);
-	bool HaveCustomTransmo() { return !m_CustomTransmo.empty(); };
-	uint32 GetTransmoByItem(uint32 guidlow) { return m_CustomTransmo.find(guidlow)->second; }
+        bool CanTransmo(Item *oldItem, Item *newItem);
+        bool AddTransmo(uint32 guidlow, uint32 itemId);
+        void RemoveTransmo(uint32 guidlow);
+        void RemoveAllTransmo();
+        bool HaveTransmoByItem(uint32 guidlow);
+        bool HaveCustomTransmo() { return !m_CustomTransmo.empty(); };
+        uint32 GetTransmoByItem(uint32 guidlow) { return m_CustomTransmo.find(guidlow)->second; }
 
-	// End of transmo system
+        // End of transmo system
 
+        uint8 GetXPRate() { return m_XPRate; }
+        void SetXPRate(uint8 rate) { m_XPRate = rate; }
 
     protected:
         // Gamemaster whisper whitelist
@@ -2934,13 +2936,15 @@ class Player : public Unit, public GridObject<Player>
         uint32 _pendingBindTimer;
 
 
-	// spectator system
-	bool spectatorFlag;
-	bool spectateCanceled;
-	Unit *spectateFrom;
+        // spectator system
+        bool spectatorFlag;
+        bool spectateCanceled;
+        Unit *spectateFrom;
 
-	// custom transmo
-	std::map<uint32, uint32> m_CustomTransmo;
+        // custom transmo
+        std::map<uint32, uint32> m_CustomTransmo;
+
+        uint8 m_XPRate;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

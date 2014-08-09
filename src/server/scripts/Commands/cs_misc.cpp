@@ -27,9 +27,10 @@ public:
     {
         static ChatCommand commandTable[] =
         {
-            { "dev",            SEC_ADMINISTRATOR,  false,  &HandleDevCommand,          "", NULL },
-            { "wintrade",           SEC_ADMINISTRATOR,      false, &HandleWintradeCommand,               "", NULL },
-            { NULL,             0,                  false,  NULL,                       "", NULL }
+            { "dev",                SEC_ADMINISTRATOR,      false,  &HandleDevCommand,          "", NULL },
+            { "wintrade",           SEC_ADMINISTRATOR,      false,  &HandleWintradeCommand,     "", NULL },
+            { "xp",                 SEC_PLAYER,             false,  &HandleXPRateCommand,       "", NULL },
+            { NULL,                 0,                      false,  NULL,                       "", NULL }
         };
         return commandTable;
     }
@@ -114,6 +115,25 @@ public:
         }
         return true;
     }
+
+    static bool HandleXPRateCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        uint32 rate = atoi((char*)args);
+        int realRate = rate > 3 ? 3 : rate;
+        if (realRate < 1)
+            realRate = 1;
+        handler->GetSession()->GetPlayer()->SetXPRate(realRate);
+        std::string mess = "Votre xp sera desormais en rate X ";
+        std::stringstream ss;
+        ss << realRate;
+        mess += ss.str();
+        handler->PSendSysMessage(mess.c_str());
+        return true;
+    }
+
 };
 
 void AddSC_misc_commandscript()

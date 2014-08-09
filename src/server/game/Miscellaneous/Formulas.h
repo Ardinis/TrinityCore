@@ -178,7 +178,7 @@ namespace Trinity
                         gain *= 2;
                 }
 
-                gain = uint32(gain * sWorld->getRate(RATE_XP_KILL));
+                gain = uint32(gain * player->GetXPRate());
             }
 
             sScriptMgr->OnGainCalculation(gain, player, u);

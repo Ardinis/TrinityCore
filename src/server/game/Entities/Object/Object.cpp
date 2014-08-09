@@ -1565,6 +1565,9 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_HEIGHT_RELOCATION, GetMapId(), NULL, 0))
         return;
 
+    if (GetTransport())
+        return;
+
     switch (GetTypeId())
     {
         case TYPEID_UNIT:

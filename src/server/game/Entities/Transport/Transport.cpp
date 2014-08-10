@@ -554,7 +554,7 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
 {
     Map const* oldMap = GetMap();
     Relocate(x, y, z);
-    //    UpdateModelPosition();
+    UpdateModelPosition();
     if (oldMap->GetId() == newMapid)
         return false;
 
@@ -1005,7 +1005,7 @@ void Transport::UpdatePosition(float x, float y, float z, float o)
     if (!MapManager::IsValidMapCoord(GetMapId(), x, y, z))
         return;
     Relocate(x, y, z, o);
-    //    UpdateModelPosition();
+    UpdateModelPosition();
     UpdatePassengersPositions();
 }
 

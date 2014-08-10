@@ -2032,3 +2032,16 @@ void GameObject::UpdateModel()
     if (m_model)
         GetMap()->Insert(*m_model);
 }
+
+void GameObject::UpdateModelPosition()
+{
+    if (!m_model)
+        return;
+
+    if (GetMap()->ContainsGameObjectModel(*m_model))
+    {
+        GetMap()->RemoveGameObjectModel(*m_model);
+        m_model->Relocate(*this);
+        GetMap()->InsertGameObjectModel(*m_model);
+    }
+}

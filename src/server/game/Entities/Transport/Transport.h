@@ -177,6 +177,7 @@ class Transport : public GameObject
 
         WayPointMap m_WayPoints;
         uint32 m_nextNodeTime;
+        void EnableMovement(bool val) { _pendingStop = !val; }
 
     private:
         bool TeleportTransport(uint32 newMapid, float x, float y, float z, float orientation);

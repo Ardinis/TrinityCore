@@ -893,21 +893,20 @@ void Transport::DoEventIfAny(KeyFrame const& node, bool departure)
 
 void Transport::BuildStartMovePacket(Map const* targetMap)
 {
-    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    //    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     SetGoState(GO_STATE_ACTIVE);
     UpdateForMap(targetMap);
 }
 
 void Transport::BuildWaitMovePacket(Map const* targetMap)
 {
-    m_WayPoints.clear();
     SetGoState(GO_STATE_READY);
     UpdateForMap(targetMap);
 }
 
 void Transport::BuildStopMovePacket(Map const* targetMap)
 {
-    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    //    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     SetGoState(GO_STATE_READY);
     UpdateForMap(targetMap);
 }
@@ -1156,7 +1155,8 @@ Transport* MapManager::LoadTransportInMap(Map* instance, uint32 goEntry, uint32 
     m_TransportsByInstanceIdMap[instance->GetInstanceId()].insert(t);
     t->SetMap(instance);
     t->AddToWorld();
-
+    t->SetGoState(GO_STATE_READY);
+    t->EnableMovement(false);
     t->BuildWaitMovePacket(instance);
     return t;
 }
@@ -1285,6 +1285,7 @@ Creature* Transport::AddNPCPassengerInInstance(uint32 entry, float x, float y, f
 
 
     creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
+    creature->SetTransportHomePosition(creature->m_movementInfo.t_pos);creature->SetTransportHomePosition(creature->m_movementInfo.t_pos);
 
     if (!creature->IsPositionValid())
     {
@@ -1297,6 +1298,15 @@ Creature* Transport::AddNPCPassengerInInstance(uint32 entry, float x, float y, f
     m_NPCPassengerSet.insert(creature);
 
     creature->setActive(true);
+    /*    if (tguid == 0)
+    {
+        ++currenttguid;
+        tguid = currenttguid;
+    }
+    else
+    currenttguid = std::max(tguid, currenttguid);*/
+
+    //    creature->SetGUIDTransport(tguid);
     sScriptMgr->OnAddCreaturePassenger(this, creature);
     return creature;
 }

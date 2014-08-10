@@ -393,11 +393,11 @@ void StartFlyShip(Transport* t)
     t->SetUInt32Value(GAMEOBJECT_DYNAMIC, 0x10830010); // Seen in sniffs
     t->SetFloatValue(GAMEOBJECT_PARENTROTATION + 3, 1.0f);
 
-    std::set<uint32> mapsUsed;
-    GameObjectTemplate const* goinfo = t->GetGOInfo();
+    //    std::set<uint32> mapsUsed;
+    //    GameObjectTemplate const* goinfo = t->GetGOInfo();
 
-    t->GenerateWaypoints(goinfo, mapsUsed);
-
+    //    t->GenerateWaypoints(goinfo, mapsUsed);
+    t->EnableMovement(true);
     UpdateTransportMotionInMap(t);
 }
 
@@ -441,13 +441,13 @@ void RelocateTransport(Transport* t)
 //Function stop motion of the ship
 void StopFlyShip(Transport* t)
 {
-    t->m_WayPoints.clear();
+    //    t->m_WayPoints.clear();
     RelocateTransport(t);
     t->BuildStopMovePacket(t->GetMap());
-
     UpdateTransportMotionInMap(t);
     // Actualizando sus estados antes de bajarse.
     t->UpdatePassengersPositions();
+    t->EnableMovement(false);
 }
 
 //Find Unfriendy transport

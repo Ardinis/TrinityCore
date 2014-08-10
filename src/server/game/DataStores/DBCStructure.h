@@ -28,6 +28,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <G3D/Quat.h>
 
 // Structures using to access raw DBC data and required packing to portability
 
@@ -1309,6 +1310,44 @@ struct MapEntry
         return MapID == 0 || MapID == 1 || MapID == 530 || MapID == 571;
     }
 };
+
+struct TransportAnimationEntry
+{
+    //uint32 Id;
+    uint32 TransportEntry;
+    uint32 TimeSeg;
+    float X;
+    float Y;
+    float Z;
+    //uint32 unk;
+};
+
+struct TransportRotationEntry
+{
+    //uint32 Id;
+    uint32 TransportEntry;
+    uint32 TimeSeg;
+    float X;
+    float Y;
+    float Z;
+    float W;
+};
+
+typedef std::map<uint32, TransportAnimationEntry const*> TransportPathContainer;
+typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationContainer;
+
+struct TransportAnimation
+{
+    TransportPathContainer Path;
+    TransportPathRotationContainer Rotations;
+    uint32 TotalTime;
+
+    TransportAnimationEntry const* GetAnimNode(uint32 time) const;
+    G3D::Quat GetAnimRotation(uint32 time) const;
+    static TransportAnimation const* GetTransportAnimation(uint32 TransportEntry);
+};
+
+typedef std::map<uint32, TransportAnimation> TransportAnimationContainer;
 
 struct MapDifficultyEntry
 {

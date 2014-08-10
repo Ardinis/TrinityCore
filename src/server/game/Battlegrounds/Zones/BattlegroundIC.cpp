@@ -267,7 +267,7 @@ void BattlegroundIC::StartingEventOpenDoors()
   DoorOpen(BG_IC_GO_DOODAD_HU_PORTCULLIS01_2);
   DoorOpen(BG_IC_GO_DOODAD_VR_PORTCULLIS01_1);
   DoorOpen(BG_IC_GO_DOODAD_VR_PORTCULLIS01_2);
-  
+
     for (uint8 i = 0; i < MAX_FORTRESS_TELEPORTERS_SPAWNS; i++)
     {
         if (!AddObject(BG_IC_Teleporters[i].type, BG_IC_Teleporters[i].entry,
@@ -948,7 +948,7 @@ Transport* BattlegroundIC::CreateTransport(uint32 goEntry, uint32 period)
 
     std::set<uint32> mapsUsed;
 
-    if (!t->GenerateWaypoints(goinfo->moTransport.taxiPathId, mapsUsed))
+    if (!t->GenerateWaypoints(goinfo, mapsUsed))
         // skip transports with empty waypoints list
     {
         sLog->outErrorDb("Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO data0 field.", goinfo->moTransport.taxiPathId);

@@ -121,6 +121,7 @@ class Transport : public GameObject
         uint32 GetScriptId() const { return ScriptId; }
         void BuildPassengersBlockForPlayer(Player *player, UpdateData *data);
         void UpdateVisibilityOf(std::set<Unit*>& i_visibleNow, Player::ClientGUIDs &vis_guids, UpdateData &i_data, Player &i_player);
+        bool HasPlayerPassengers(bool aliveOnly);
 
     private:
         struct WayPoint

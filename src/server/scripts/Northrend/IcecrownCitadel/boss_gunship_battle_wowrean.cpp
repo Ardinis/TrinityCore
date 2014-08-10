@@ -448,7 +448,6 @@ void StopFlyShip(Transport* t)
     UpdateTransportMotionInMap(t);
     // Actualizando sus estados antes de bajarse.
     t->UpdatePassengersPositions();
-    //    t->UpdatePlayerPositions();
 }
 
 //Find Unfriendy transport
@@ -502,15 +501,7 @@ void DoShipExplosion(Transport* t)
 //Wipe check
 bool DoWipeCheck(Transport* t)
 {
-    /*    for (Transport::PlayerSet::const_iterator itr = t->GetPassengers().begin(); itr != t->GetPassengers().end();)
-    {
-        Player* plr = *itr;
-        ++itr;
-
-        if (plr && plr->isAlive())
-            return true;
-            }*/
-    return false;
+    return t->HasPlayerPassengers(true);
 }
 
 // ****OJO**** Aqui se puede hacer cosillas adicionales para npcs en algun caso

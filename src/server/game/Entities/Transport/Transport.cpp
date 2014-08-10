@@ -1341,3 +1341,13 @@ void Transport::UpdateVisibilityOf(std::set<Unit*>& i_visibleNow, Player::Client
             }
     }
 }
+
+bool Transport::HasPlayerPassengers(bool aliveOnly)
+{
+    TRINITY_GUARD(ACE_Thread_Mutex, Lock);
+    for (std::map<uint64, WorldObject *>::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
+        if (WorldObject *passenger = ObjectAccessor::GetWorldObject(*this, itr->first))
+            if (Player *player = passenger->ToPlayer())
+                return (!aliveOnly || player->isAlive());
+    return false;
+}

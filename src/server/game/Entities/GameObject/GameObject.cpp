@@ -2024,13 +2024,17 @@ void GameObject::UpdateModel()
 {
     if (!IsInWorld())
         return;
-    if (m_model)
-        if (GetMap()->Contains(*m_model))
-            GetMap()->Remove(*m_model);
-    delete m_model;
-    m_model = GameObjectModel::Create(*this);
-    if (m_model)
+
+    if (!m_model)
+        return;
+
+    if (GetMap()->Contains(*m_model))
+    {
+        GetMap()->Remove(*m_model);
+        delete m_model;
+        m_model = GameObjectModel::Create(*this);
         GetMap()->Insert(*m_model);
+    }
 }
 
 void GameObject::UpdateModelPosition()
@@ -2038,10 +2042,10 @@ void GameObject::UpdateModelPosition()
     if (!m_model)
         return;
 
-    if (GetMap()->ContainsGameObjectModel(*m_model))
+    if (GetMap()->Contains(*m_model))
     {
-        GetMap()->RemoveGameObjectModel(*m_model);
+        GetMap()->Remove(*m_model);
         m_model->Relocate(*this);
-        GetMap()->InsertGameObjectModel(*m_model);
+        GetMap()->Insert(*m_model);
     }
 }

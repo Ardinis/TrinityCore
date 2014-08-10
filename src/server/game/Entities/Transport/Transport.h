@@ -87,7 +87,7 @@ class Transport : public GameObject
 
         bool Create(uint32 guidlow, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
         bool GenerateWaypoints(const GameObjectTemplate* goInfo, std::set<uint32> &mapids);
-        void CleanupsBeforeDelete(bool finalCleanup = true) override;
+        void CleanupsBeforeDelete(bool finalCleanup = true);
         void Update(uint32 p_time);
 
         // non static passenger part

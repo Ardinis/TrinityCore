@@ -925,6 +925,7 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     }
 
     creature->SetTransport(this);
+    creature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     creature->m_movementInfo.t_guid = GetGUID();
     creature->m_movementInfo.t_pos.Relocate(x, y, z, o);
 
@@ -1272,6 +1273,7 @@ Creature* Transport::AddNPCPassengerInInstance(uint32 entry, float x, float y, f
     }
 
     creature->SetTransport(this);
+    creature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
     creature->m_movementInfo.guid = GetGUID();
     creature->m_movementInfo.t_pos.Relocate(x, y, z, o);
 

@@ -114,7 +114,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature &creature)
     creature.AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
     Movement::MoveSplineInit init(creature);
-    init.MoveTo(node->x, node->y, node->z);
+    init.MoveTo(node->x, node->y, node->z, false);
 
     if (node->orientation != 100 && node->delay != 0)
         init.SetFacing(node->orientation);
@@ -646,4 +646,3 @@ int GetFCost(int to, int num, int parentNum, float *gcost)
     return (int)(gc + hc);
 }
 #endif                                                      //__PATHFINDING__
-

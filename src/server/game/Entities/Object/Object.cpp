@@ -1565,13 +1565,15 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_HEIGHT_RELOCATION, GetMapId(), NULL, 0))
         return;
 
-    if (GetTransport() || GetMapId() == 649 || GetMapId() == 650)
+    if (GetTransport() || GetMapId() == 649 || GetMapId() == 650 || GetMapId() == 616 || GetMapId() == 668 || GetMapId() == 631)
         return;
 
     switch (GetTypeId())
     {
         case TYPEID_UNIT:
         {
+	  if (GetEntry() == 37126)
+	    return;
             // non fly unit don't must be in air
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
             if (!ToCreature()->canFly())

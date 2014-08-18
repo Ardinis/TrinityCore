@@ -122,6 +122,8 @@ class player_event : public PlayerScript
             // glad titré
             case 542102:
             case 574602:
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(128))
+                    player->SetTitle(titleInfo);
                 // glad simple
             case 102703:
             case 446405:

@@ -317,15 +317,14 @@ public:
                                                       "where type = 2 "
                                                       "order by rating desc "
                                                       "limit %u", V2_CHALLANGER_CUTOFF);
-
         if (result)
         {
             uint32 count = 0;
             uint32 skipcount = 0;
             uint32 rank = 0;
+
             do
             {
-                ++rank;
                 Field* fields = result->Fetch();
 
                 std::string teamname = fields[0].GetString();
@@ -333,6 +332,7 @@ public:
                 uint32 teamid = fields[1].GetUInt32();
                 uint32 teamrating = fields[2].GetUInt32();
 
+                ++rank;
                 uint32 titleid = 0;
                 uint32 questitem = 0;
                 if (rank <= V2_GLADIATOR_CUTOFF)
@@ -394,6 +394,35 @@ public:
                         Field* fld2 = res2->Fetch();
                         uint32 playerid = fld2[0].GetUInt32();
                         uint32 playerrating = fld2[1].GetUInt32();
+                        std::string bannedby = "unknown";
+                        std::string banreason = "";
+                        int64 banTime = -1;
+                        std::string playerName;
+                        uint64 accountGUID = 0;
+
+                        if (QueryResult charresult = CharacterDatabase.PQuery("SELECT name, account FROM characters WHERE guid = %u", playerid))
+                        {
+                            Field* charfields = charresult->Fetch();
+                            playerName = charfields[0].GetString();
+                            CharacterDatabase.EscapeString(playerName);
+                            accountGUID = charfields[1].GetUInt64();
+                        }
+
+                        if (QueryResult banresult = LoginDatabase.PQuery("SELECT unbandate, bandate = unbandate, bannedby, banreason FROM account_banned "
+                                                                         "WHERE id = '%u' AND active ORDER BY bandate ASC LIMIT 1", accountGUID))
+                        {
+                            Field* banfields = banresult->Fetch();
+                            banTime = banfields[1].GetBool() ? 0 : fields[0].GetUInt64();
+                            bannedby = banfields[2].GetString();
+                            banreason = banfields[3].GetString();
+                        }
+
+                        if (banTime >= 0)
+                        {
+                            fprintf(file, "\n WARNING !!!!!! team '%s' as to be removed from rank %u due to character '%s' who was banned for reason '%s'", teamname.c_str(), rank, playerName.c_str(), banreason.c_str());
+                            rank--;
+                            break;
+                        }
 
                         if (playerrating + MAX_RATING_DIFFERENCE < teamrating)
                         {
@@ -401,12 +430,16 @@ public:
                             fflush(file);
                             ++skipcount;
                             continue;
-                        } else
+                        }
+                        else
                         {
                             fprintf(file, "\n    Player (guid: %u) (personal rating: %u) Title: %u Mount: %u", playerid, playerrating, titleid, questitem);
                             fflush(file);
 
-                            fprintf(file, "\n.send mail %u 'Felicitations !' 'Vous avez ete selectionnez pour la remise des recompenses de saison d'arenes en V2. Vous devrez neanmoin etre present ou vous faire remplacer le X a X h. Merci et bon jeu sur Paragon !", playerid);
+                            if (rank == 1)
+                                fprintf(file, "\n.send mail '%s' 'Felicitations !' 'Vous avez ete selectionnez pour la remise des recompenses de saison d'arenes en V2. Vous pouvez des a present ouvrir une requete en nous iniquant le titre que vous souhaitez recevoir. Merci et bon jeu sur Paragon !", playerName.c_str());
+                            else
+                                fprintf(file, "\n.send mail '%s' 'Felicitations !' 'Vous avez ete selectionnez pour la remise des recompenses de saison d'arenes en V2. Vous pouvez des a present ouvrir une requete afin de recevoir votre récompense !", playerName.c_str());
                             fflush(file);
 
                             ++count;
@@ -521,6 +554,35 @@ public:
                         Field* fld2 = res2->Fetch();
                         uint32 playerid = fld2[0].GetUInt32();
                         uint32 playerrating = fld2[1].GetUInt32();
+                        std::string bannedby = "unknown";
+                        std::string banreason = "";
+                        int64 banTime = -1;
+                        std::string playerName;
+                        uint64 accountGUID = 0;
+
+                        if (QueryResult charresult = CharacterDatabase.PQuery("SELECT name, account FROM characters WHERE guid = %u", playerid))
+                        {
+                            Field* charfields = charresult->Fetch();
+                            playerName = charfields[0].GetString();
+                            CharacterDatabase.EscapeString(playerName);
+                            accountGUID = charfields[1].GetUInt64();
+                        }
+
+                        if (QueryResult banresult = LoginDatabase.PQuery("SELECT unbandate, bandate = unbandate, bannedby, banreason FROM account_banned "
+                                                                         "WHERE id = '%u' AND active ORDER BY bandate ASC LIMIT 1", accountGUID))
+                        {
+                            Field* banfields = banresult->Fetch();
+                            banTime = banfields[1].GetBool() ? 0 : fields[0].GetUInt64();
+                            bannedby = banfields[2].GetString();
+                            banreason = banfields[3].GetString();
+                        }
+
+                        if (banTime >= 0)
+                        {
+                            fprintf(file, "\n WARNING !!!!!! team '%s' as to be removed from rank %u due to character '%s' who was banned for reason '%s'", teamname.c_str(), rank, playerName.c_str(), banreason.c_str());
+                            rank--;
+                            break;
+                        }
 
                         if (playerrating + MAX_RATING_DIFFERENCE < teamrating)
                         {
@@ -528,12 +590,16 @@ public:
                             fflush(file);
                             ++skipcount;
                             continue;
-                        } else
+                        }
+                        else
                         {
                             fprintf(file, "\n    Player (guid: %u) (personal rating: %u) Title: %u Mount %u", playerid, playerrating, titleid, questitem);
                             fflush(file);
 
-                            fprintf(file, "\n.send mail %u 'Felicitations !' 'Vous avez ete selectionnez pour la remise des recompenses de saison d'arenes en V3. Vous devrez neanmoin etre present ou vous faire remplacer le X a X h. Merci et bon jeu sur Paragon !", playerid);
+                            if (rank == 1)
+                                fprintf(file, "\n.send mail '%s' 'Felicitations !' 'Vous avez ete selectionnez pour la remise des recompenses de saison d'arenes en V3.  Vous pouvez des a present ouvrir une requete en nous iniquant le titre que vous souhaitez recevoir. Merci et bon jeu sur Paragon !", playerName.c_str());
+                            else
+                                fprintf(file, "\n.send mail '%s' 'Felicitations !' 'Vous avez ete selectionnez pour la remise des recompenses de saison d'arenes en V2. Vous pouvez des a present ouvrir une requete afin de recevoir votre récompense !", playerName.c_str());
                             fflush(file);
                             ++count;
                         }

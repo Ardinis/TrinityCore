@@ -342,19 +342,19 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         }
         else
         {
-        Field* fields = result->Fetch();
-        total_player_time = fields[0].GetUInt32();
-        level = fields[1].GetUInt32();
-        money = fields[2].GetUInt32();
-        accId = fields[3].GetUInt32();
-        race = fields[4].GetUInt8();
-        Class = fields[5].GetUInt8();
-        mapId = fields[6].GetUInt16();
-        areaId = fields[7].GetUInt16();
+            Field* fields = result->Fetch();
+            total_player_time = fields[0].GetUInt32();
+            level = fields[1].GetUInt32();
+            money = fields[2].GetUInt32();
+            accId = fields[3].GetUInt32();
+            race = fields[4].GetUInt8();
+            Class = fields[5].GetUInt8();
+            mapId = fields[6].GetUInt16();
+            areaId = fields[7].GetUInt16();
         }
 
         QueryResult row = CharacterDatabase.PQuery("SELECT * FROM `jail` WHERE `guid`='%u' LIMIT 1", GUID_LOPART(target_guid));
-	    
+
         if (!row)
         {
              p_jail_isjailed = false;
@@ -385,10 +385,10 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     std::string last_login = GetTrinityString(LANG_ERROR);
 
     QueryResult result = LoginDatabase.PQuery("SELECT a.username, aa.gmlevel, a.email, a.last_ip, a.last_login, a.mutetime "
-                                                "FROM account a "
-                                                "LEFT JOIN account_access aa "
-                                                "ON (a.id = aa.id AND (aa.RealmID = -1 OR aa.RealmID = %u)) "
-                                                "WHERE a.id = '%u'", realmID, accId);
+                                              "FROM account a "
+                                              "LEFT JOIN account_access aa "
+                                              "ON (a.id = aa.id AND (aa.RealmID = -1 OR aa.RealmID = %u)) "
+                                              "WHERE a.id = '%u'", realmID, accId);
     if (result)
     {
         Field* fields = result->Fetch();
@@ -535,7 +535,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
             PSendSysMessage(LANG_JAIL_GM_NOINFO, gmname.c_str());
             return true;
         }
-        
+
     return true;
 }
 

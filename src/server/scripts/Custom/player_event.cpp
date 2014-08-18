@@ -22,62 +22,62 @@ class player_event : public PlayerScript
     {
       if (msg.find("goule") != std::string::npos)
       {
-	uint16 display_id = 414;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 414;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("sorciere") != std::string::npos)
       {
-	uint16 display_id = 984;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 984;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("fantome") != std::string::npos)
       {
-	uint16 display_id = 146;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 146;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("citrouille") != std::string::npos)
       {
-	uint16 display_id = 21822;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 21822;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("vampire") != std::string::npos)
       {
-	uint16 display_id = 25338;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 25338;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("zombie") != std::string::npos)
       {
-	uint16 display_id = 10256;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 10256;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("chauve souris") != std::string::npos)
       {
-	uint16 display_id = 11071;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 11071;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("squelette") != std::string::npos)
       {
-	uint16 display_id = 11403;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 11403;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("garou") != std::string::npos)
       {
-	uint16 display_id = 26787;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 26787;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("araigne") != std::string::npos)
       {
-	uint16 display_id = 1087;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 1087;
+          player->SetDisplayId(display_id);
       }
       if (msg.find("liche") != std::string::npos)
       {
-	uint16 display_id = 7919;
-	player->SetDisplayId(display_id);
+          uint16 display_id = 7919;
+          player->SetDisplayId(display_id);
       }
 
       if (msg.find("demorph") != std::string::npos)
-	player->SetDisplayId(player->GetNativeDisplayId());
+          player->SetDisplayId(player->GetNativeDisplayId());
     }
   }
 
@@ -105,6 +105,147 @@ class player_event : public PlayerScript
   {
     Transmform(msg, player);
   }
+
+    void OnLogin(Player* player)
+    {
+        uint32 gladAchievement = 2091;
+        uint32 duelAchievement = 2092;
+        uint32 rivalAchievement = 2093;
+        uint32 compAchievement = 2094;
+        uint32 gladTitle = 42;
+        uint32 duellisteTitle = 43;
+        uint32 rivalTitle = 44;
+        uint32 compTitle = 45;
+
+        switch (player->GetGUID())
+        {
+            // glad titré
+            case 542102:
+            case 574602:
+                // glad simple
+            case 102703:
+            case 446405:
+            case 61050:
+            case 199034:
+            case 85975:
+            case 93405:
+            case 145880:
+            case 541401:
+            {
+                for (int i = 0; i < 4; i++)
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                        player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 1; i < 4; i++)
+                    if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                        player->SetTitle(titleInfo, true);
+                break;
+            }
+            case 96038:
+            {
+                for (int i = 0; i < 4; i++)
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                        player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 0; i < 4; i++)
+                    if (gladTitle+i != gladTitle && gladTitle+i != duellisteTitle)
+                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                            player->SetTitle(titleInfo, true);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
+                    player->SetTitle(titleInfo);
+                break;
+            }
+            // duelliste1
+            case 95057:
+            case 437264:
+            case 57687:
+            case 69420:
+            case 80853:
+            {
+                for (int i = 1; i < 4; i++)
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                        player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 0; i < 4; i++)
+                    if (i != 1)
+                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                            player->SetTitle(titleInfo, true);
+                break;
+            }
+            // rival
+            case 49021:
+            case 58488:
+            {
+                for (int i = 0; i < 4; i++)
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                        player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
+                    player->SetTitle(titleInfo);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(rivalTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 1; i < 4; i++)
+                    if (gladTitle+i != rivalTitle && gladTitle+i != rivalTitle)
+                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                            player->SetTitle(titleInfo, true);
+                break;
+            }
+            case 101344:
+            case 176353:
+            {
+                for (int i = 2; i < 4; i++)
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                        player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(rivalTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 0; i < 4; i++)
+                    if (i != 2)
+                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                            player->SetTitle(titleInfo, true);
+                break;
+            }
+            // competiteur
+            case 88424:
+            case 448355:
+            {
+                for (int i = 1; i < 4; i++)
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                        player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
+                    player->SetTitle(titleInfo);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(compTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 0; i < 4; i++)
+                    if (gladTitle+i != duellisteTitle && gladTitle+i != compTitle)
+                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                            player->SetTitle(titleInfo, true);
+                break;
+            }
+            case 111064:
+            case 44899:
+            case 439653:
+            {
+                if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement))
+                    player->CompletedAchievement(achievementEntry);
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(compTitle))
+                    player->SetTitle(titleInfo);
+                for (int i = 0; i < 4; i++)
+                    if (i != 3)
+                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
+                            player->SetTitle(titleInfo, true);
+                break;
+            }
+            default:
+            {
+                for (int i = 0; i < 4; i++)
+                    if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+1))
+                        player->SetTitle(titleInfo, true);
+                break;
+            }
+        }
+    }
 };
 
 #define NPC_CUSTOM_PACK_ENTRY 10000000

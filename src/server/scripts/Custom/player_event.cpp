@@ -111,7 +111,7 @@ class player_event : public PlayerScript
         uint32 gladAchievement = 2091;
         uint32 duelAchievement = 2092;
         uint32 rivalAchievement = 2093;
-        uint32 compAchievement = 2094;
+        uint32 compAchievement = 2090;
         uint32 gladTitle = 42;
         uint32 duellisteTitle = 43;
         uint32 rivalTitle = 44;
@@ -127,7 +127,6 @@ class player_event : public PlayerScript
             case 446405:
             case 61050:
             case 199034:
-            case 85975:
             case 93405:
             case 145880:
             case 541401:
@@ -240,7 +239,7 @@ class player_event : public PlayerScript
             default:
             {
                 for (int i = 0; i < 4; i++)
-                    if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+1))
+                    if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
                         player->SetTitle(titleInfo, true);
                 break;
             }

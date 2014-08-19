@@ -642,15 +642,15 @@ void RestartEvent(Transport* t1, Transport* t2, Map* instance, uint64 TeamInInst
 
                         if (instance->ToInstanceMap()->GetMaxPlayers() == 10)
                         {
-                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -5.15231f, -22.9462f, 21.659f, 4.72416f);
-                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -28.0876f, -22.9462f, 21.659f, 4.72416f);
+                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -5.15231f, -22.9462f, 21.659f, 1.72416f);
+                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -28.0876f, -22.9462f, 21.659f, 1.72416f);
                         }
                         else
                         {
-                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -5.15231f, -22.9462f, 21.659f, 4.72416f);
-                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -14.9806f, -22.9462f, 21.659f, 4.72416f);
-                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -21.7406f, -22.9462f, 21.659f, 4.72416f);
-                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -28.0876f, -22.9462f, 21.659f, 4.72416f);
+                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -5.15231f, -22.9462f, 21.659f, 1.72416f);
+                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -14.9806f, -22.9462f, 21.659f, 1.72416f);
+                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -21.7406f, -22.9462f, 21.659f, 1.72416f);
+                            t->AddNPCPassengerInInstance(NPC_GB_ALLIANCE_CANON, -28.0876f, -22.9462f, 21.659f, 1.72416f);
                         }
                     }
                 }
@@ -731,15 +731,15 @@ void RestartEvent(Transport* t1, Transport* t2, Map* instance, uint64 TeamInInst
 
                         if(instance->ToInstanceMap()->GetMaxPlayers() == 10)
                         {
-                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, 22.6225f, 28.9309f, 36.3929f, 1.53591f);
-                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, -21.7509f, 29.4207f, 34.2588f, 1.53591f);
+                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, 22.6225f, 28.9309f, 36.3929f, 4.53591f);
+                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, -21.7509f, 29.4207f, 34.2588f, 4.53591f);
                         }
                         else
                         {
-                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, 22.6225f, 28.9309f, 36.3929f, 1.53591f);
-                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, 9.87745f, 30.5047f, 35.7147f, 1.53591f);
-                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, -7.09684f, 30.582f, 34.5013f, 1.53591f);
-                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, -21.7509f, 29.4207f, 34.2588f, 1.53591f);
+                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, 22.6225f, 28.9309f, 36.3929f, 4.53591f);
+                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, 9.87745f, 30.5047f, 35.7147f, 4.53591f);
+                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, -7.09684f, 30.582f, 34.5013f, 4.53591f);
+                            th->AddNPCPassengerInInstance(NPC_GB_HORDE_CANON, -21.7509f, 29.4207f, 34.2588f, 4.53591f);
                         }
                     }
                 }
@@ -846,6 +846,8 @@ class npc_muradin_gunship : public CreatureScript
 
             void Reset()
             {
+                DoCast(me, SPELL_BATTLE_FURY, true);
+
                 if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
                     return;
 
@@ -869,7 +871,6 @@ class npc_muradin_gunship : public CreatureScript
                 EventScheduled = false;
 				Fin = true;
 				SpellTastBlood = false;
-                DoCast(me, SPELL_BATTLE_FURY, true);
 
             }
 
@@ -1155,14 +1156,9 @@ class npc_muradin_gunship : public CreatureScript
 							}
 							break;
 						case EVENT_RENDING_THROW:
-							if (UpdateVictim())
-								if (me->getVictim()->IsWithinDistInMap(me, 50.0f, false)) // Todo: Fix the distance
-								{
-									DoCastVictim(SPELL_RENDING_THROW);
-									EventScheduled = false;
-								}
-								else
-									events.CancelEvent(EVENT_RENDING_THROW);
+							if (me->getVictim())
+                                DoCastVictim(SPELL_CLEAVE);
+                            events.ScheduleEvent(EVENT_CLEAVE, urand(2000, 10000));
 							break;
 						case EVENT_TASTE_OF_BLOOD:
 							DoCast(me, SPELL_TASTE_OF_BLOOD);
@@ -1300,10 +1296,16 @@ class npc_muradin_gunship : public CreatureScript
 						}
 				}
 
-                if (!me->GetCurrentSpell(CURRENT_MELEE_SPELL))
-                    DoCastVictim(SPELL_CLEAVE);
-
-                DoMeleeAttackIfReady();
+                if (me->getVictim())
+                {
+                    if (me->IsWithinMeleeRange(me->getVictim()))
+                        DoMeleeAttackIfReady();
+                    else if (me->isAttackReady())
+                    {
+                        DoCastVictim(SPELL_RENDING_THROW);
+                        me->resetAttackTimer();
+                    }
+                }
             }
 
             private:
@@ -1381,6 +1383,8 @@ class npc_saurfang_gunship : public CreatureScript
 
             void Reset()
             {
+                DoCast(me, SPELL_BATTLE_FURY, true);
+
                 if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
                     return;
 
@@ -1403,7 +1407,6 @@ class npc_saurfang_gunship : public CreatureScript
                 EventScheduled = false;
 				Fin = true;
 				SpellTastBlood = false;
-                DoCast(me, SPELL_BATTLE_FURY, true);
             }
 
             void SendMusicToPlayers(uint32 musicId) const

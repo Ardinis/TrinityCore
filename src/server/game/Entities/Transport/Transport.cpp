@@ -893,21 +893,24 @@ void Transport::DoEventIfAny(KeyFrame const& node, bool departure)
 
 void Transport::BuildStartMovePacket(Map const* targetMap)
 {
-    //    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     SetGoState(GO_STATE_ACTIVE);
+    EnableMovement(true);
     UpdateForMap(targetMap);
 }
 
 void Transport::BuildWaitMovePacket(Map const* targetMap)
 {
     SetGoState(GO_STATE_READY);
+    EnableMovement(false);
     UpdateForMap(targetMap);
 }
 
 void Transport::BuildStopMovePacket(Map const* targetMap)
 {
-    //    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     SetGoState(GO_STATE_READY);
+    EnableMovement(false);
     UpdateForMap(targetMap);
 }
 
@@ -1155,8 +1158,6 @@ Transport* MapManager::LoadTransportInMap(Map* instance, uint32 goEntry, uint32 
     m_TransportsByInstanceIdMap[instance->GetInstanceId()].insert(t);
     t->SetMap(instance);
     t->AddToWorld();
-    t->SetGoState(GO_STATE_READY);
-    t->EnableMovement(false);
     t->BuildWaitMovePacket(instance);
     return t;
 }

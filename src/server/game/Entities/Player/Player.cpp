@@ -17290,6 +17290,24 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
         else
         {
+            // m_TransportsByInstanceIdMap
+
+            Map const* map = GetMap();
+            if (map && map->IsRaid())
+            {
+                for (MapManager::TransportSet::iterator iter = sMapMgr->m_TransportsByInstanceIdMap[GetInstanceId()].begin();
+                     iter != sMapMgr->m_TransportsByInstanceIdMap[GetInstanceId()].end(); ++iter)
+                {
+                    if (m_transport = *iter)
+                        if (m_transport->GetGUIDLow() == transGUID)
+                        {
+                            m_transport->AddPassenger(this);
+                            mapId = (m_transport->GetMapId());
+                            break;
+                        }
+                }
+            }
+
             for (MapManager::TransportSet::iterator iter = sMapMgr->m_Transports.begin(); iter != sMapMgr->m_Transports.end(); ++iter)
             {
                 if ((*iter)->GetGUIDLow() == transGUID)

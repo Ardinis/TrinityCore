@@ -403,6 +403,17 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
         Movement::Location loc = movespline->ComputePosition();
+        if (movespline->onTransport)
+        {
+            Position& pos = m_movementInfo.t_pos;
+            pos.m_positionX = loc.x;
+            pos.m_positionY = loc.y;
+            pos.m_positionZ = loc.z;
+            pos.m_orientation = loc.orientation;
+
+            if (Transport* transport = GetTransport())
+                transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
+        }
 
         if (GetTypeId() == TYPEID_PLAYER)
             ((Player*)this)->UpdatePosition(loc.x,loc.y,loc.z,loc.orientation);
@@ -19292,13 +19303,17 @@ bool CharmInfo::IsCommandAttack()
 
 void CharmInfo::SaveStayPosition()
 {
-      m_unit->GetPosition(m_stayX, m_stayY, m_stayZ);
-  //! At this point a new spline destination is enabled because of Unit::StopMoving()
-
-  /*  G3D::Vector3 const stayPos = m_unit->movespline->FinalDestination();
+    m_unit->GetPosition(m_stayX, m_stayY, m_stayZ);
+    G3D::Vector3 stayPos = m_unit->movespline->FinalDestination();
+    if (m_unit->movespline->onTransport)
+        if (Transport* transport = m_unit->GetTransport())
+        {
+            float ori = 0.0f;
+            transport->CalculatePassengerPosition(stayPos.x, stayPos.y, stayPos.z, ori);
+        }
     m_stayX = stayPos.x;
     m_stayY = stayPos.y;
-    m_stayZ = stayPos.z;*/
+    m_stayZ = stayPos.z;
 }
 
 void CharmInfo::GetStayPosition(float &x, float &y, float &z)
@@ -19358,6 +19373,8 @@ void Unit::SetFacingTo(float ori)
 {
     Movement::MoveSplineInit init(*this);
     init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
+    if (HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && GetTransGUID())
+        init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
     init.SetFacing(ori);
     init.Launch();
 }

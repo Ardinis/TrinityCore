@@ -132,7 +132,7 @@ void GameObject::AddToWorld()
 
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-        bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false);
+        bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false || IsTransport());
         if (m_model)
             GetMap()->Insert(*m_model);
         if ((startOpen && !toggledState) || (!startOpen && toggledState))
@@ -2024,11 +2024,28 @@ void GameObject::UpdateModel()
 {
     if (!IsInWorld())
         return;
-    if (m_model)
-        if (GetMap()->Contains(*m_model))
-            GetMap()->Remove(*m_model);
-    delete m_model;
-    m_model = GameObjectModel::Create(*this);
-    if (m_model)
+
+    if (!m_model)
+        return;
+
+    if (GetMap()->Contains(*m_model))
+    {
+        GetMap()->Remove(*m_model);
+        delete m_model;
+        m_model = GameObjectModel::Create(*this);
         GetMap()->Insert(*m_model);
+    }
+}
+
+void GameObject::UpdateModelPosition()
+{
+    if (!m_model)
+        return;
+
+    if (GetMap()->Contains(*m_model))
+    {
+        GetMap()->Remove(*m_model);
+        m_model->Relocate(*this);
+        GetMap()->Insert(*m_model);
+    }
 }

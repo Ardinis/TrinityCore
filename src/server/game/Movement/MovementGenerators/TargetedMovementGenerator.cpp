@@ -172,6 +172,12 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T &owner, const uint32 & time
         //More distance let have better performance, less distance let have more sensitive reaction at target move.
         float allowed_dist =  i_target->GetObjectSize() + owner.GetObjectSize() + MELEE_RANGE - 0.5f;
         G3D::Vector3 dest = owner.movespline->FinalDestination();
+        if (owner.movespline->onTransport)
+            if (Transport* transport = owner.GetTransport())
+            {
+                float ori = 0.0f;
+                transport->CalculatePassengerPosition(dest.x, dest.y, dest.z, ori);
+            }
 
         if (owner.GetTypeId() == TYPEID_UNIT && owner.ToCreature()->canFly())
             targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowed_dist);

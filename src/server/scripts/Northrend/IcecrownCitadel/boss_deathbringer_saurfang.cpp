@@ -1130,7 +1130,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     Transport *t = new Transport(154573, goInfo->ScriptId);
 
                     std::set<uint32> mapsUsed;
-                    if (!t->GenerateWaypoints(goInfo->moTransport.taxiPathId, mapsUsed))
+                    if (!t->GenerateWaypoints(goInfo, mapsUsed))
                     {
                             delete t;
                             return NULL;

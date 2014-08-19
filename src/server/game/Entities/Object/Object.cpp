@@ -331,19 +331,36 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     {
         if (flags & UPDATEFLAG_POSITION)
         {
-            *data << uint8(0);                              // unk PGUID!
+            Transport* transport = ((WorldObject*)this)->GetTransport();
+
+            if (transport)
+                data->append(transport->GetPackGUID());
+            else
+                *data << uint8(0);
+
             *data << ((WorldObject*)this)->GetPositionX();
             *data << ((WorldObject*)this)->GetPositionY();
             if (isType(TYPEMASK_UNIT))
                 *data << ((Unit*)this)->GetPositionZMinusOffset();
             else
                 *data << ((WorldObject*)this)->GetPositionZ();
-            *data << ((WorldObject*)this)->GetPositionX();
-            *data << ((WorldObject*)this)->GetPositionY();
-            if (isType(TYPEMASK_UNIT))
-                *data << ((Unit*)this)->GetPositionZMinusOffset();
+
+            if (transport)
+            {
+                *data << ((WorldObject*)this)->GetTransOffsetX();
+                *data << ((WorldObject*)this)->GetTransOffsetY();
+                *data << ((WorldObject*)this)->GetTransOffsetZ();
+            }
             else
-                *data << ((WorldObject*)this)->GetPositionZ();
+            {
+                *data << ((WorldObject*)this)->GetPositionX();
+                *data << ((WorldObject*)this)->GetPositionY();
+                if (isType(TYPEMASK_UNIT))
+                    *data << ((Unit*)this)->GetPositionZMinusOffset();
+                else
+                    *data << ((WorldObject*)this)->GetPositionZ();
+            }
+
             *data << ((WorldObject*)this)->GetOrientation();
 
             if (GetTypeId() == TYPEID_CORPSE)
@@ -357,23 +374,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
             if (flags & UPDATEFLAG_HAS_POSITION)
             {
                 // 0x02
-                if (flags & UPDATEFLAG_TRANSPORT && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
-                {
-                    *data << (float)0;
-                    *data << (float)0;
-                    *data << (float)0;
-                    *data << ((WorldObject*)this)->GetOrientation();
-                }
-                else
-                {
-                    *data << ((WorldObject*)this)->GetPositionX();
-                    *data << ((WorldObject*)this)->GetPositionY();
-                    if (isType(TYPEMASK_UNIT))
-                        *data << ((Unit*)this)->GetPositionZMinusOffset();
-                    else
-                        *data << ((WorldObject*)this)->GetPositionZ();
-                    *data << ((WorldObject*)this)->GetOrientation();
-                }
+                *data << ((WorldObject*)this)->GetStationaryX();
+                *data << ((WorldObject*)this)->GetStationaryY();
+                *data << ((WorldObject*)this)->GetStationaryZ();
+                *data << ((WorldObject*)this)->GetStationaryO();
             }
         }
     }
@@ -425,7 +429,11 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags) const
     // 0x2
     if (flags & UPDATEFLAG_TRANSPORT)
     {
-        *data << uint32(getMSTime());                       // ms time
+        GameObject const* go = ToGameObject();
+        if (go && go->IsTransport())
+            *data << uint32(go->GetGOValue()->Transport.PathProgress);
+        else
+            *data << uint32(getMSTime());
     }
 
     // 0x80
@@ -689,6 +697,10 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                                 else
                                     *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
                                 *data << uint16(-1);
+                                break;
+                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                                *data << uint16(0);
+                                *data << int16(float(ToGameObject()->GetGOValue()->Transport.PathProgress) / float(GetUInt32Value(GAMEOBJECT_LEVEL)) * 65535.0f);
                                 break;
                             default:
                                 // unknown, not happen.

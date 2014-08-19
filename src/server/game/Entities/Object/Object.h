@@ -833,16 +833,21 @@ class WorldObject : public Object, public WorldLocation
 
         // Transports
         Transport* GetTransport() const { return m_transport; }
-        virtual float GetTransOffsetX() const { return 0; }
-        virtual float GetTransOffsetY() const { return 0; }
-        virtual float GetTransOffsetZ() const { return 0; }
-        virtual float GetTransOffsetO() const { return 0; }
-        virtual uint32 GetTransTime()   const { return 0; }
-        virtual int8 GetTransSeat()     const { return -1; }
+        float GetTransOffsetX() const { return m_movementInfo.t_pos.GetPositionX(); }
+        float GetTransOffsetY() const { return m_movementInfo.t_pos.GetPositionY(); }
+        float GetTransOffsetZ() const { return m_movementInfo.t_pos.GetPositionZ(); }
+        float GetTransOffsetO() const { return m_movementInfo.t_pos.GetOrientation(); }
+        uint32 GetTransTime()   const { return m_movementInfo.t_time; }
+        int8 GetTransSeat()     const { return m_movementInfo.t_seat; }
         virtual uint64 GetTransGUID()   const;
         void SetTransport(Transport* t) { m_transport = t; }
 
         MovementInfo m_movementInfo;
+
+        virtual float GetStationaryX() const { return GetPositionX(); }
+        virtual float GetStationaryY() const { return GetPositionY(); }
+        virtual float GetStationaryZ() const { return GetPositionZ(); }
+        virtual float GetStationaryO() const { return GetOrientation(); }
     protected:
         std::string m_name;
         bool m_isActive;

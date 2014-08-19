@@ -118,7 +118,7 @@ namespace Movement
         const Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last()) : Vector3();}
         const Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx+1) : Vector3();}
         int32 currentPathIdx() const;
-
+        bool onTransport;
         std::string ToString() const;
     };
 }

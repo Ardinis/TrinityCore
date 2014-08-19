@@ -2029,24 +2029,14 @@ void Map::SendInitSelf(Player* player)
 
     // attach to player data current transport data
     if (Transport* transport = player->GetTransport())
-    {
         transport->BuildCreateUpdateBlockForPlayer(&data, player);
-    }
 
     // build data for self presence in world at own client (one time for map)
     player->BuildCreateUpdateBlockForPlayer(&data, player);
 
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (Transport* transport = player->GetTransport())
-    {
-        for (Transport::PlayerSet::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
-        {
-            if (player != (*itr) && player->HaveAtClient(*itr))
-            {
-                (*itr)->BuildCreateUpdateBlockForPlayer(&data, player);
-            }
-        }
-    }
+        transport->BuildPassengersBlockForPlayer(player, &data);
 
     WorldPacket packet;
     data.BuildPacket(&packet);

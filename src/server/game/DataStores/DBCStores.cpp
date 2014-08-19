@@ -202,6 +202,10 @@ DBCStorage <WorldMapAreaEntry> sWorldMapAreaStore(WorldMapAreaEntryfmt);
 DBCStorage <WorldMapOverlayEntry> sWorldMapOverlayStore(WorldMapOverlayEntryfmt);
 DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
 
+DBCStorage <TransportAnimationEntry> sTransportAnimationStore(TransportAnimationEntryfmt);
+DBCStorage <TransportRotationEntry> sTransportRotationStore(TransportRotationEntryfmt);
+TransportAnimationContainer sTransportAnimationContainer;
+
 typedef std::list<std::string> StoreProblemList;
 
 uint32 DBCFileCount = 0;
@@ -404,6 +408,30 @@ void LoadDBCStores(const std::string& dataPath)
         SpellEntry const* spell = sSpellStore.LookupEntry(i);
         if (spell && spell->Category)
             sSpellCategoryStore[spell->Category].insert(i);
+    }
+
+    LoadDBC(availableDbcLocales, bad_dbc_files, sTransportAnimationStore,     dbcPath, "TransportAnimation.dbc");
+    for (uint32 i = 0; i < sTransportAnimationStore.GetNumRows(); ++i)
+    {
+        TransportAnimationEntry const* anim = sTransportAnimationStore.LookupEntry(i);
+        if (!anim)
+            continue;
+
+        TransportAnimation& animNode = sTransportAnimationContainer[anim->TransportEntry];
+        if (animNode.TotalTime < anim->TimeSeg)
+            animNode.TotalTime = anim->TimeSeg;
+
+        animNode.Path[anim->TimeSeg] = anim;
+    }
+
+    LoadDBC(availableDbcLocales, bad_dbc_files, sTransportRotationStore,      dbcPath, "TransportRotation.dbc");
+    for (uint32 i = 0; i < sTransportRotationStore.GetNumRows(); ++i)
+    {
+        TransportRotationEntry const* rot = sTransportRotationStore.LookupEntry(i);
+        if (!rot)
+            continue;
+
+        sTransportAnimationContainer[rot->TransportEntry].Rotations[rot->TimeSeg] = rot;
     }
 
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
@@ -663,6 +691,45 @@ char* GetPetName(uint32 petfamily, uint32 dbclang)
     if (!pet_family)
         return NULL;
     return pet_family->Name[dbclang]?pet_family->Name[dbclang]:NULL;
+}
+
+TransportAnimation const* TransportAnimation::GetTransportAnimation(uint32 TransportEntry)
+{
+    TransportAnimationContainer::const_iterator itr = sTransportAnimationContainer.find(TransportEntry);
+    if (itr != sTransportAnimationContainer.end())
+        return &itr->second;
+
+    return NULL;
+}
+
+G3D::Quat TransportAnimation::GetAnimRotation(uint32 time) const
+{
+    if (Rotations.empty())
+        return G3D::Quat(0.0f, 0.0f, 0.0f, 1.0f);
+
+    TransportRotationEntry const* rot = Rotations.begin()->second;
+    for (TransportPathRotationContainer::const_reverse_iterator itr2 = Rotations.rbegin(); itr2 != Rotations.rend(); ++itr2)
+    {
+        if (time >= itr2->first)
+        {
+            rot = itr2->second;
+            break;
+        }
+    }
+
+    return G3D::Quat(rot->X, rot->Y, rot->Z, rot->W);
+}
+
+TransportAnimationEntry const* TransportAnimation::GetAnimNode(uint32 time) const
+{
+    if (Path.empty())
+        return NULL;
+
+    for (TransportPathContainer::const_reverse_iterator itr = Path.rbegin(); itr != Path.rend(); ++itr)
+        if (time >= itr->first)
+            return itr->second;
+
+    return Path.begin()->second;
 }
 
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId)

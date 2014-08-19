@@ -180,6 +180,8 @@ class player_event : public PlayerScript
             case 49021:
             case 58488:
             {
+                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(128))
+                    player->SetTitle(titleInfo);
                 for (int i = 0; i < 4; i++)
                     if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
                         player->CompletedAchievement(achievementEntry);

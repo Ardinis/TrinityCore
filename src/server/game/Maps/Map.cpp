@@ -1951,7 +1951,7 @@ bool Map::getObjectHitPos(uint32 phasemask, float x1, float y1, float z1, float 
 
 float Map::GetHeight(uint32 phasemask, float x, float y, float z, bool vmap/*=true*/, float maxSearchDist/*=DEFAULT_HEIGHT_SEARCH*/) const
 {
-    return std::max<float>(GetHeight(x, y, z, vmap, maxSearchDist), _dynamicTree.getHeight(x, y, z, maxSearchDist, phasemask));
+    return std::max<float>(GetHeight(x, y, z + 0.5f, vmap, maxSearchDist), _dynamicTree.getHeight(x, y, z + 0.5f, maxSearchDist, phasemask));
 }
 
 bool Map::IsInWater(float x, float y, float pZ, LiquidData* data) const

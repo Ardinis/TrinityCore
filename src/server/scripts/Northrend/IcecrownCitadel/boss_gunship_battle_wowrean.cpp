@@ -871,7 +871,7 @@ class npc_muradin_gunship : public CreatureScript
                 EventScheduled = false;
 				Fin = true;
 				SpellTastBlood = false;
-
+                mui_threat = 1000;
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -894,6 +894,39 @@ class npc_muradin_gunship : public CreatureScript
             bool CanAIAttack(Unit const* target) const
             {
                 return ((target->GetTypeId() == TYPEID_PLAYER && target->HasAura(SPELL_ON_SKYBREAKER_DECK)) || target->GetEntry() == NPC_GB_KORKRON_SERGANTE || target->GetEntry() == NPC_GB_KORKRON_REAVERS);
+            }
+
+            void UpdateThreat()
+            {
+                if (_instance->GetData(DATA_TEAM_IN_INSTANCE) != HORDE)
+                    return;
+                bool astarget = false;
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player *unit = i->getSource())
+                    {
+                        bool asToBeRemoved = true;
+                        if (unit->GetTransport())
+                            switch (unit->GetTransport()->GetEntry())
+                            {
+                                case GO_THE_SKYBREAKER_HORDE_ICC:
+                                case GO_THE_SKYBREAKER_ALLIANCE_ICC:
+                                    asToBeRemoved = false;
+                                    astarget = true;
+                                    if (!me->isInCombat())
+                                        me->AI()->AttackStart(unit);
+                                    if (!me->getThreatManager().getThreat(unit))
+                                        me->AddThreat(unit, 10000.0f);
+                                    break;
+                            }
+                        if (asToBeRemoved && me->getThreatManager().getThreat(unit))
+                            me->getThreatManager().modifyThreatPercent(unit, -100);
+                    }
+                if (!astarget)
+                {
+                    me->AttackStop();
+                    me->AI()->EnterEvadeMode();
+                }
             }
 
             void DoAction(int32 const action)
@@ -1066,6 +1099,14 @@ class npc_muradin_gunship : public CreatureScript
 					me->setFaction(35);
                     else*/
                 //                me->setFaction(1802);
+
+                if (mui_threat <= diff)
+                {
+                    UpdateThreat();
+                    mui_threat = 500;
+                }
+                else
+                    mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -1322,6 +1363,7 @@ class npc_muradin_gunship : public CreatureScript
                 bool EventScheduled;
 				bool Fin;
 				bool SpellTastBlood;
+                uint32 mui_threat;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const
@@ -1407,6 +1449,7 @@ class npc_saurfang_gunship : public CreatureScript
                 EventScheduled = false;
 				Fin = true;
 				SpellTastBlood = false;
+                mui_threat = 1000;
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -1429,6 +1472,40 @@ class npc_saurfang_gunship : public CreatureScript
             bool CanAIAttack(Unit const* target) const
             {
                 return ((target->GetTypeId() == TYPEID_PLAYER && target->HasAura(SPELL_ON_ORGRIMS_HAMMER_DECK)) || target->GetEntry() == NPC_GB_SKYBREAKER_SERGANTE || target->GetEntry() == NPC_GB_SKYBREAKER_MARINE);
+            }
+
+            void UpdateThreat()
+            {
+                if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
+                    return;
+
+                bool astarget = false;
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player *unit = i->getSource())
+                    {
+                        bool asToBeRemoved = true;
+                        if (unit->GetTransport())
+                            switch (unit->GetTransport()->GetEntry())
+                            {
+                                case GO_ORGRIM_S_HAMMER_HORDE_ICC:
+                                case GO_ORGRIM_S_HAMMER_ALLIANCE_ICC:
+                                    asToBeRemoved = false;
+                                    astarget = true;
+                                    if (!me->isInCombat())
+                                        me->AI()->AttackStart(unit);
+                                    if (!me->getThreatManager().getThreat(unit))
+                                        me->AddThreat(unit, 10000.0f);
+                                    break;
+                            }
+                        if (asToBeRemoved && me->getThreatManager().getThreat(unit))
+                            me->getThreatManager().modifyThreatPercent(unit, -100);
+                    }
+                if (!astarget)
+                {
+                    me->AttackStop();
+                    me->AI()->EnterEvadeMode();
+                }
             }
 
             void DoAction(int32 const action)
@@ -1600,6 +1677,14 @@ class npc_saurfang_gunship : public CreatureScript
 					me->setFaction(35);
                     else*/
                 //                me->setFaction(1801);
+
+                if (mui_threat <= diff)
+                {
+                    UpdateThreat();
+                    mui_threat = 500;
+                }
+                else
+                    mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -1846,6 +1931,7 @@ class npc_saurfang_gunship : public CreatureScript
                 bool EventScheduled;
 				bool Fin;
 				bool SpellTastBlood;
+                uint32 mui_threat;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const
@@ -2159,6 +2245,7 @@ class npc_sergeant : public CreatureScript
                 events.ScheduleEvent(EVENT_BURNING_PITCH, urand(40000, 42000));// ~41 sec
                 if(me->GetMap()->ToInstanceMap()->GetMaxPlayers() == 25 && me->GetMap()->IsHeroic())
                     events.ScheduleEvent(EVENT_ELITE, urand(59000, 61000));       // ~60 sec
+                mui_threat = 1000;
            }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -2177,6 +2264,52 @@ class npc_sergeant : public CreatureScript
                 return target->GetTypeId() == TYPEID_PLAYER ? target->HasAura(_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE ? SPELL_ON_ORGRIMS_HAMMER_DECK : SPELL_ON_SKYBREAKER_DECK) : true;
             }
 
+            void UpdateThreat()
+            {
+                bool astarget = false;
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player *unit = i->getSource())
+                    {
+                        bool asToBeRemoved = true;
+                        if (unit->GetTransport())
+                            switch (unit->GetTransport()->GetEntry())
+                            {
+                                case GO_THE_SKYBREAKER_HORDE_ICC:
+                                case GO_THE_SKYBREAKER_ALLIANCE_ICC:
+                                    if (_instance->GetData(DATA_TEAM_IN_INSTANCE) != HORDE)
+                                    {
+                                        asToBeRemoved = false;
+                                        astarget = true;
+                                        if (!me->isInCombat())
+                                            me->AI()->AttackStart(unit);
+                                        if (!me->getThreatManager().getThreat(unit))
+                                            me->AddThreat(unit, 10000.0f);
+                                    }
+                                    break;
+                                case GO_ORGRIM_S_HAMMER_HORDE_ICC:
+                                case GO_ORGRIM_S_HAMMER_ALLIANCE_ICC:
+                                    if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
+                                    {
+                                        asToBeRemoved = false;
+                                        astarget = true;
+                                        if (!me->isInCombat())
+                                            me->AI()->AttackStart(unit);
+                                        if (!me->getThreatManager().getThreat(unit))
+                                            me->AddThreat(unit, 10000.0f);
+                                    }
+                                    break;
+                            }
+                        if (asToBeRemoved && me->getThreatManager().getThreat(unit))
+                            me->getThreatManager().modifyThreatPercent(unit, -100);
+                    }
+                if (!astarget)
+                {
+                    me->AttackStop();
+                    me->AI()->EnterEvadeMode();
+                }
+            }
+
             void JustDied(Unit* killer)
             {
                 //me->RemoveFromWorld();
@@ -2186,6 +2319,14 @@ class npc_sergeant : public CreatureScript
             {
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                     return;
+
+                if (mui_threat <= diff)
+                {
+                    UpdateThreat();
+                    mui_threat = 500;
+                }
+                else
+                    mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -2256,7 +2397,7 @@ class npc_sergeant : public CreatureScript
             }
                 uint32 DesperateResolve;
                 bool desperated;
-
+                uint32 mui_threat;
             private:
                 EventMap events;
                 InstanceScript* _instance;
@@ -2297,6 +2438,7 @@ class npc_marine_or_reaver : public CreatureScript
                 events.ScheduleEvent(EVENT_EXPERIENCED, urand(19000, 21000));  // ~20 sec
                 events.ScheduleEvent(EVENT_VETERAN, urand(39000, 41000));      // ~40 sec
                 events.ScheduleEvent(EVENT_BURNING_PITCH, urand(40000, 42000));// ~41 sec
+                mui_threat = 1000;
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
@@ -2315,6 +2457,52 @@ class npc_marine_or_reaver : public CreatureScript
                 return target->GetTypeId() == TYPEID_PLAYER ? target->HasAura(_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE ? SPELL_ON_ORGRIMS_HAMMER_DECK : SPELL_ON_SKYBREAKER_DECK) : true;
             }
 
+            void UpdateThreat()
+            {
+                bool astarget = false;
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player *unit = i->getSource())
+                    {
+                        bool asToBeRemoved = true;
+                        if (unit->GetTransport())
+                            switch (unit->GetTransport()->GetEntry())
+                            {
+                                case GO_THE_SKYBREAKER_HORDE_ICC:
+                                case GO_THE_SKYBREAKER_ALLIANCE_ICC:
+                                    if (_instance->GetData(DATA_TEAM_IN_INSTANCE) != HORDE)
+                                    {
+                                        asToBeRemoved = false;
+                                        astarget = true;
+                                        if (!me->isInCombat())
+                                            me->AI()->AttackStart(unit);
+                                        if (!me->getThreatManager().getThreat(unit))
+                                            me->AddThreat(unit, 10000.0f);
+                                    }
+                                    break;
+                                case GO_ORGRIM_S_HAMMER_HORDE_ICC:
+                                case GO_ORGRIM_S_HAMMER_ALLIANCE_ICC:
+                                    if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
+                                    {
+                                        asToBeRemoved = false;
+                                        astarget = true;
+                                        if (!me->isInCombat())
+                                            me->AI()->AttackStart(unit);
+                                        if (!me->getThreatManager().getThreat(unit))
+                                            me->AddThreat(unit, 10000.0f);
+                                    }
+                                    break;
+                            }
+                        if (asToBeRemoved && me->getThreatManager().getThreat(unit))
+                            me->getThreatManager().modifyThreatPercent(unit, -100);
+                    }
+                if (!astarget)
+                {
+                    me->AttackStop();
+                    me->AI()->EnterEvadeMode();
+                }
+            }
+
             void JustDied(Unit* killer)
             {
                 //me->RemoveFromWorld();
@@ -2324,6 +2512,14 @@ class npc_marine_or_reaver : public CreatureScript
             {
                 if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                     return;
+
+                if (mui_threat <= diff)
+                {
+                    UpdateThreat();
+                    mui_threat = 500;
+                }
+                else
+                    mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -2377,9 +2573,10 @@ class npc_marine_or_reaver : public CreatureScript
 
                 DoMeleeAttackIfReady();
             }
+
                 uint32 DesperateResolve;
                 bool desperated;
-
+                uint32 mui_threat;
             private:
                 EventMap events;
                 InstanceScript* _instance;

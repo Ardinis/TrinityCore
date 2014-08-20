@@ -1567,7 +1567,7 @@ void WorldObject::GetRandomPoint(const Position &pos, float distance, float &ran
 
 void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 {
-    float new_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+    float new_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true, 5.0f));
     if (new_z > INVALID_HEIGHT)
         z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
 }
@@ -1577,7 +1577,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     if (DisableMgr::IsDisabledFor(DISABLE_TYPE_HEIGHT_RELOCATION, GetMapId(), NULL, 0))
         return;
 
-    if (GetTransport() || GetMapId() == 649 || GetMapId() == 650 || GetMapId() == 616 || GetMapId() == 668 || GetMapId() == 631)
+    if (GetTransport())
         return;
 
     switch (GetTypeId())
@@ -1588,44 +1588,32 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 	    return;
             // non fly unit don't must be in air
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
+            const Map *map = GetBaseMap();
+            float groundzcheck = z;
             if (!ToCreature()->canFly())
             {
-                Map *map = GetMap();
                 bool canSwim = ToCreature()->canSwim();
                 float ground_z = z;
                 float max_z = canSwim
-                    ? GetBaseMap()->GetWaterOrGroundLevel(x, y, z, &ground_z, !ToUnit()->HasAuraType(SPELL_AURA_WATER_WALK))
-                    : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true)));
+                    ? map->GetWaterOrGroundLevel(x, y, groundzcheck, &ground_z, !ToUnit()->HasAuraType(SPELL_AURA_WATER_WALK))
+                    : ((ground_z = std::max<float>(map->GetHeight(GetPhaseMask(), x, y, groundzcheck, true),
+                                                   map->GetHeight(GetPhaseMask(), x, y, groundzcheck, true, 5.0f))));
                 if (max_z > INVALID_HEIGHT)
                 {
                     if (z > max_z)
                         z = max_z;
-                    else //if (z < ground_z)
-                        if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
-                            z = ground_z;
-                }
-                else if (!map->IsDungeon() && !map->IsRaid())
-                {
-                    ground_z = z;
-                    max_z = canSwim
-                        ? GetBaseMap()->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, &ground_z, !ToUnit()->HasAuraType(SPELL_AURA_WATER_WALK))
-                        : ((ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, MAX_HEIGHT, true)));
-                    if (max_z > INVALID_HEIGHT)
-                    {
-                        if (z > max_z)
-                            z = max_z;
-                        else //if (z < ground_z)
-                            if ((ToCreature()->IsInWater() && z < ground_z) || !ToCreature()->IsInWater())
-                                z = ground_z;
-                    }
+                    else if (z < ground_z)
+                        z = ground_z;
                 }
             }
             else
             {
-                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                float ground_z = std::max<float>(map->GetHeight(GetPhaseMask(), x, y, groundzcheck, true),
+                                                 map->GetHeight(GetPhaseMask(), x, y, groundzcheck, true, 5.0f));
                 if (z < ground_z)
                     z = ground_z;
             }
+
             if (ToCreature()->HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
                 z += ToCreature()->GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
             break;
@@ -1647,7 +1635,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
             }
             else
             {
-                float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
+                float ground_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true, 5.0f));
                 if (z < ground_z)
                     z = ground_z;
             }
@@ -1655,8 +1643,8 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
         }
         default:
         {
-            float ground_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
-            if(ground_z > INVALID_HEIGHT)
+            float ground_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true, 5.0f));
+            if (ground_z > INVALID_HEIGHT)
                 z = ground_z;
             break;
         }

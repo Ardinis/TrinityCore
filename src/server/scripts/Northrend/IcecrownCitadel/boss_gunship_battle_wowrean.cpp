@@ -871,7 +871,7 @@ class npc_muradin_gunship : public CreatureScript
                 EventScheduled = false;
 				Fin = true;
 				SpellTastBlood = false;
-
+                mui_threat = 1000;
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -894,6 +894,26 @@ class npc_muradin_gunship : public CreatureScript
             bool CanAIAttack(Unit const* target) const
             {
                 return ((target->GetTypeId() == TYPEID_PLAYER && target->HasAura(SPELL_ON_SKYBREAKER_DECK)) || target->GetEntry() == NPC_GB_KORKRON_SERGANTE || target->GetEntry() == NPC_GB_KORKRON_REAVERS);
+            }
+
+            void UpdateThreat()
+            {
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player *unit = i->getSource())
+                    {
+                        if (unit->GetTransport())
+                            switch (unit->GetTransport()->GetEntry())
+                            {
+                                case GO_THE_SKYBREAKER_HORDE_ICC:
+                                case GO_THE_SKYBREAKER_ALLIANCE_ICC:
+                                    if (!me->getThreatManager().getThreat(unit))
+                                        me->AddThreat(unit, 10000.0f);
+                                    return;
+                            }
+                        if (me->getThreatManager().getThreat(unit))
+                            me->getThreatManager().modifyThreatPercent(unit, -100);
+                    }
             }
 
             void DoAction(int32 const action)
@@ -1066,6 +1086,14 @@ class npc_muradin_gunship : public CreatureScript
 					me->setFaction(35);
                     else*/
                 //                me->setFaction(1802);
+
+                if (mui_threat <= diff)
+                {
+                    UpdateThreat();
+                    mui_threat = 1000;
+                }
+                else
+                    mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -1322,6 +1350,7 @@ class npc_muradin_gunship : public CreatureScript
                 bool EventScheduled;
 				bool Fin;
 				bool SpellTastBlood;
+                uint32 mui_threat;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const
@@ -1407,6 +1436,7 @@ class npc_saurfang_gunship : public CreatureScript
                 EventScheduled = false;
 				Fin = true;
 				SpellTastBlood = false;
+                mui_threat = 1000;
             }
 
             void SendMusicToPlayers(uint32 musicId) const
@@ -1429,6 +1459,26 @@ class npc_saurfang_gunship : public CreatureScript
             bool CanAIAttack(Unit const* target) const
             {
                 return ((target->GetTypeId() == TYPEID_PLAYER && target->HasAura(SPELL_ON_ORGRIMS_HAMMER_DECK)) || target->GetEntry() == NPC_GB_SKYBREAKER_SERGANTE || target->GetEntry() == NPC_GB_SKYBREAKER_MARINE);
+            }
+
+            void UpdateThreat()
+            {
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                    if (Player *unit = i->getSource())
+                    {
+                        if (unit->GetTransport())
+                            switch (unit->GetTransport()->GetEntry())
+                            {
+                                case GO_ORGRIM_S_HAMMER_HORDE_ICC:
+                                case GO_ORGRIM_S_HAMMER_ALLIANCE_ICC:
+                                    if (!me->getThreatManager().getThreat(unit))
+                                        me->AddThreat(unit, 10000.0f);
+                                    return;
+                            }
+                        if (me->getThreatManager().getThreat(unit))
+                            me->getThreatManager().modifyThreatPercent(unit, -100);
+                    }
             }
 
             void DoAction(int32 const action)
@@ -1600,6 +1650,14 @@ class npc_saurfang_gunship : public CreatureScript
 					me->setFaction(35);
                     else*/
                 //                me->setFaction(1801);
+
+                if (mui_threat <= diff)
+                {
+                    UpdateThreat();
+                    mui_threat = 1000;
+                }
+                else
+                    mui_threat -= diff;
 
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
@@ -1846,6 +1904,7 @@ class npc_saurfang_gunship : public CreatureScript
                 bool EventScheduled;
 				bool Fin;
 				bool SpellTastBlood;
+                uint32 mui_threat;
         };
 
         CreatureAI* GetAI(Creature* pCreature) const

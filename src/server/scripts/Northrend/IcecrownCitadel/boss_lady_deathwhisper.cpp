@@ -499,7 +499,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             bool found = false;
                             while (!found && cnt < 10)
                             {
-                                if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 {
                                     if (me->GetDistance(shadeTarget) >= 20.0f)
                                     {
@@ -513,7 +513,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             }
                             if (!found)
                             {
-                                if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                                if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 {
                                     _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
                                     DoCast(shadeTarget, SPELL_SUMMON_SHADE);

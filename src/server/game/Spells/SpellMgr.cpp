@@ -3986,10 +3986,13 @@ void SpellMgr::LoadDbcDataCorrections()
             case 65296:
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
                 break;
-	    case 30019:
+	        case 30019:
                 spellInfo->Effect[EFFECT_2] = SPELL_AURA_MOD_POSSESS;
-		spellInfo->EffectBasePoints[EFFECT_2] = 99;
-		spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_200_YARDS;
+                spellInfo->EffectBasePoints[EFFECT_2] = 99;
+                spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_200_YARDS;
+                break;
+            case 46980: // hunt exotic panthere
+                spellInfo->EffectMiscValue[EFFECT_0] = 2000002;
                 break;
             default:
                 break;

@@ -1112,6 +1112,7 @@ public:
 
             if (mui_relocate <= diff)
             {
+                std::cout << "ORIENTATION ==== " << me->GetOrientation() << std::endl;
                 me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                 mui_relocate = 500;
             }
@@ -1172,46 +1173,12 @@ public:
                 if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
                     southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
                 {
-                    if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250))
-                    {
-                        //                        orbDamage->SetFacingToObject(me);
-                        float angle = orbDamage->GetOrientation() - M_PI / 2;
-                        float destx, desty, destz;
-                        destx = posEnd.GetPositionX();
-                        desty = posEnd.GetPositionY();
-                        destz = posEnd.GetPositionZ();
-                        for (int cnt = 0; cnt < 80; cnt += 3)
-                            createDamegeOrb(pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle));
-                    }
+                    float angle = me->GetOrientation() - M_PI / 2.0f;
+                    me->GetNearPosition(pos, 40.0f, M_PI / 2.0f);
+                    for (int cnt = 0; cnt < 80; cnt += 3)
+                        createDamegeOrb(pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle));
                 }
             }
-            /*            if (IsHeroic() && Is25ManRaid())
-            {
-                northOrb = vehicle->GetPassenger(SEAT_EAST);
-                southOrb = vehicle->GetPassenger(SEAT_WEST);
-                if (southOrb && northOrb)
-                {
-                    northOrb->GetPosition(&pos);
-                    southOrb->GetPosition(&posEnd);
-                    me->GetPosition(&posMid);
-                    if (northOrb->GetTypeId() != TYPEID_UNIT || southOrb->GetTypeId() != TYPEID_UNIT)
-                        return;
-                    if (northOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC) ||
-                        southOrb->HasAura(SPELL_TWILIGHT_PULSE_PERIODIC))
-                    {
-                        if (Creature* orbDamage = me->SummonCreature(8852000, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 5, pos.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 250))
-                        {
-                            float angle = orbDamage->GetOrientation() - M_PI / 2;
-                            float destx, desty, destz;
-                            destx = posEnd.GetPositionX();
-                            desty = posEnd.GetPositionY();
-                            destz = posEnd.GetPositionZ();
-                            for (int cnt = 0; cnt < 80; cnt += 3)
-                                createDamegeOrb(pos.GetPositionX() + cnt * cos(angle), pos.GetPositionY() + cnt * sin(angle));
-                        }
-                    }
-                }
-                }*/
         }
 
         void DoAction(int32 const action)

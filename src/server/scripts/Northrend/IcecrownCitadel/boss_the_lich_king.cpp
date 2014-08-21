@@ -778,7 +778,7 @@ class boss_the_lich_king : public CreatureScript
                                 //                                TeleportSpirit(summon);
                                 return;
                             }
-
+                        summon->NearTeleportTo(summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ(), summon->GetOrientation());
                         summon->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
                         summon->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CHARM, true);
                         summon->ApplySpellImmune(0, IMMUNITY_ID, SPELL_DEATH_GRIP, true);

@@ -1326,6 +1326,29 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     if (!IsInMap(obj))
         return false;
 
+
+    if (obj->GetTypeId() == TYPEID_UNIT)
+    {
+
+        switch (obj->GetEntry())
+        {
+            case 36980:
+            case 38320:
+            case 38321:
+            case 38322:
+                return true;
+        }
+
+        switch (GetEntry())
+        {
+            case 36980:
+            case 38320:
+            case 38321:
+            case 38322:
+                return true;
+        }
+    }
+
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
     //    return (IsWithinLOS(ox, oy, oz) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));

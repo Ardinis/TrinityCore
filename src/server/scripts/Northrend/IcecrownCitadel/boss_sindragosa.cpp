@@ -1328,10 +1328,10 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                         go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
                         if (Creature *sindragose = GetCaster()->FindNearestCreature(NPC_SINDRAGOSA, 500, true))
                         {
-                            if (sindragose->HealthAbovePct(35))
+                            /*                            if (sindragose->HealthAbovePct(35))
                                 go->EnableCollision(false);
-                            else
-                                go->EnableCollision(true);
+                                else*/
+                            go->EnableCollision(true);
                         }
                         summon->AddGameObject(go);
                     }

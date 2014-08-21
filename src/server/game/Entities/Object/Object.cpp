@@ -1584,6 +1584,8 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
     {
         case TYPEID_UNIT:
         {
+	  if (GetEntry() == 37126)
+	    return;
             // non fly unit don't must be in air
             // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
             const Map *map = GetBaseMap();

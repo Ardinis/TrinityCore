@@ -134,7 +134,7 @@ class player_event : public PlayerScript
             case 541401:
             {
                 for (int i = 0; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
                         player->CompletedAchievement(achievementEntry);
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
                     player->SetTitle(titleInfo);
@@ -146,7 +146,7 @@ class player_event : public PlayerScript
             case 96038:
             {
                 for (int i = 0; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
                         player->CompletedAchievement(achievementEntry);
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
                     player->SetTitle(titleInfo);
@@ -166,7 +166,7 @@ class player_event : public PlayerScript
             case 80853:
             {
                 for (int i = 1; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
                         player->CompletedAchievement(achievementEntry);
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
                     player->SetTitle(titleInfo);
@@ -183,7 +183,7 @@ class player_event : public PlayerScript
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(128))
                     player->SetTitle(titleInfo);
                 for (int i = 0; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
                         player->CompletedAchievement(achievementEntry);
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
                     player->SetTitle(titleInfo);
@@ -199,7 +199,7 @@ class player_event : public PlayerScript
             case 176353:
             {
                 for (int i = 2; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
                         player->CompletedAchievement(achievementEntry);
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(rivalTitle))
                     player->SetTitle(titleInfo);
@@ -214,7 +214,7 @@ class player_event : public PlayerScript
             case 448355:
             {
                 for (int i = 1; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(gladAchievement+i))
+                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
                         player->CompletedAchievement(achievementEntry);
                 if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
                     player->SetTitle(titleInfo);

@@ -103,7 +103,8 @@ class boss_koralon : public CreatureScript
                             events.ScheduleEvent(EVENT_METEOR_FISTS_A, 45000);
                             break;
                         case EVENT_FLAME_CINDER_A:
-                            DoCast(me, SPELL_FLAME_CINDER_A);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                                DoCast(target, SPELL_FLAME_CINDER_A);
                             events.ScheduleEvent(EVENT_FLAME_CINDER_A, 30000);
                             break;
                         default:

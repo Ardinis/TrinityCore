@@ -1112,7 +1112,6 @@ public:
 
             if (mui_relocate <= diff)
             {
-                std::cout << "ORIENTATION ==== " << me->GetOrientation() << std::endl;
                 me->GetVehicleKit()->RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
                 mui_relocate = 500;
             }

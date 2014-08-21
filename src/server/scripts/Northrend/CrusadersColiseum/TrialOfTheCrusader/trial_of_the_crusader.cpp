@@ -88,7 +88,8 @@ static _Messages _GossipMessage[]=
     {MSG_CRUSADERS, GOSSIP_ACTION_INFO_DEF+3, false, TYPE_CRUSADERS},
     {MSG_VALKIRIES, GOSSIP_ACTION_INFO_DEF+4, false, TYPE_VALKIRIES},
     {MSG_LICH_KING, GOSSIP_ACTION_INFO_DEF+5, false, TYPE_ANUBARAK},
-    {MSG_ANUBARAK, GOSSIP_ACTION_INFO_DEF+6, true, TYPE_ANUBARAK}
+    {MSG_ANUBARAK, GOSSIP_ACTION_INFO_DEF+6, true, TYPE_ANUBARAK},
+    {MSG_ACHIEVEMENT_MISSING, GOSSIP_ACTION_INFO_DEF+7, true, TYPE_CRUSADERS},
 };
 
 enum
@@ -131,10 +132,18 @@ class npc_announcer_toc10 : public CreatureScript
 
             char const* _message = "We are ready!";
 
-	    //	    if (player->isInCombat())// || /*instanceScript->IsEncounterInProgress() ||*/ instanceScript->GetData(TYPE_EVENT))
-		      // return true;
-	    if (player->isInCombat() || (instanceScript->GetData(DATA_PAUSE) != NOT_STARTED))
-	      return true;
+            //	    if (player->isInCombat())// || /*instanceScript->IsEncounterInProgress() ||*/ instanceScript->GetData(TYPE_EVENT))
+            // return true;
+            if (player->isInCombat() || (instanceScript->GetData(DATA_PAUSE) != NOT_STARTED))
+                return true;
+
+            if (player->GetMap()->IsHeroic() && (player->GetMap()->Is25ManRaid() && !player->HasAchieved(3916)) ||
+                (!player->GetMap()->Is25ManRaid() && !player->HasAchieved(3917)))
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Je n'ai pas réussi l'épreuve du croisé.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
+                    return true;
+                }
+
             uint8 i = 0;
             for (; i < NUM_MESSAGES; ++i)
             {
@@ -205,7 +214,7 @@ class npc_announcer_toc10 : public CreatureScript
                         return true;
 
                     if (GameObject* floor = GameObject::GetGameObject(*player, instanceScript->GetData64(GO_ARGENT_COLISEUM_FLOOR)))
-		      floor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
+                        floor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
 
                     creature->CastSpell(creature, 69016, false);
 

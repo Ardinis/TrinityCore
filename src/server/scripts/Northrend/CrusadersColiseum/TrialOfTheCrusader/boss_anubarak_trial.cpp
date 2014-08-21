@@ -564,8 +564,8 @@ public:
         void Reset()
         {
             me->SetCorpseDelay(0);
-            DoCast(me, SPELL_EXPOSE_WEAKNESS);
-            DoCast(me, SPELL_SPIDER_FRENZY);
+            DoCast(me, SPELL_EXPOSE_WEAKNESS, true);
+            DoCast(me, SPELL_SPIDER_FRENZY, true);
             me->SetInCombatWithZone();
             if (!me->isInCombat())
                 me->DisappearAndDie();
@@ -573,50 +573,50 @@ public:
 
         void UpdateAI(const uint32 uiDiff)
         {
-	    if (!UpdateVictim() && !me->HasAura(SPELL_SUBMERGE_EFFECT))
-	      return;
+            if (!UpdateVictim() && !me->HasAura(SPELL_SUBMERGE_EFFECT))
+                return;
 
             events.Update(uiDiff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
-	      return;
+                return;
 
             while (uint32 event = events.ExecuteEvent())
-	      {
+            {
                 switch (event)
-		  {
-		  case EVENT_SUBMERGE:
-		    if (me->HasAura(SPELL_SUBMERGE_EFFECT))
-		      {
-			me->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
-			DoCast(me, SPELL_EMERGE_EFFECT);
-			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
-			me->CombatStart(me->SelectNearestTarget());
-			if (IsHeroic())
-			  events.ScheduleEvent(EVENT_SHADOW_STRIKE, 20*IN_MILLISECONDS, 0, PHASE_GROUND);
-			phase = PHASE_GROUND;
-		      }
-		    else
-		      {
-			if (!me->HasAura(SPELL_PERMAFROST_HELPER))
-			  {
-			    DoCast(me, SPELL_SUBMERGE_EFFECT);
-			    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
-			    me->CombatStop();
-			    phase = PHASE_SUBMERGED;
-			  }
-		      }
-		    events.ScheduleEvent(EVENT_SUBMERGE, 20*IN_MILLISECONDS);
-		    return;
-		  case EVENT_SHADOW_STRIKE:
-		    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-		      DoCast(target, SPELL_SHADOW_STRIKE);
-		    events.ScheduleEvent(EVENT_SHADOW_STRIKE, 20*IN_MILLISECONDS, 0, PHASE_GROUND);
-		    return;
-		  default:
-		    break;
-		  }
-	      }
+                {
+                    case EVENT_SUBMERGE:
+                        if (me->HasAura(SPELL_SUBMERGE_EFFECT))
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
+                            DoCast(me, SPELL_EMERGE_EFFECT);
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                            me->CombatStart(me->SelectNearestTarget());
+                            if (IsHeroic())
+                                events.ScheduleEvent(EVENT_SHADOW_STRIKE, 20*IN_MILLISECONDS, 0, PHASE_GROUND);
+                            phase = PHASE_GROUND;
+                        }
+                        else
+                        {
+                            if (!me->HasAura(SPELL_PERMAFROST_HELPER))
+                            {
+                                DoCast(me, SPELL_SUBMERGE_EFFECT);
+                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                                me->CombatStop();
+                                phase = PHASE_SUBMERGED;
+                            }
+                        }
+                        events.ScheduleEvent(EVENT_SUBMERGE, 20*IN_MILLISECONDS);
+                        return;
+                    case EVENT_SHADOW_STRIKE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_SHADOW_STRIKE);
+                        events.ScheduleEvent(EVENT_SHADOW_STRIKE, 20*IN_MILLISECONDS, 0, PHASE_GROUND);
+                        return;
+                    default:
+                        break;
+                }
+            }
 
             DoMeleeAttackIfReady();
         }

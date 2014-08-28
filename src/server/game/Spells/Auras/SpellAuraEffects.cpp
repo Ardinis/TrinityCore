@@ -5373,6 +5373,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         {
             //if (!(mode & AURA_EFFECT_HANDLE_REAL))
             //    break;
+            if (!(mode & AURA_EFFECT_HANDLE_REAL))
+                break;
+
+            switch (GetId())
+            {
+                // Glyph of Raise Dead
+                case 58686:
+                    target->RecalculatePetsScalingStats(STAT_STRENGTH);
+                    target->RecalculatePetsScalingStats(STAT_STAMINA);
+                    break;
+            }
             break;
         }
     }

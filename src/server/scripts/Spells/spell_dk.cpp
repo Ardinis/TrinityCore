@@ -851,6 +851,7 @@ class spell_dk_death_coil : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
+                int32 damage = GetEffectValue();
                 Unit* caster = GetCaster();
                 if (!caster)
                     return;
@@ -861,15 +862,14 @@ class spell_dk_death_coil : public SpellScriptLoader
                 {
                     if (caster->IsFriendlyTo(target))
                     {
-                        int32 bp = 900;
+                        int32 bp = int32(damage * 1.5f);
                         caster->CastCustomSpell(target, SPELL_DEATH_COIL_HEAL, &bp, NULL, NULL, true);
                     }
                     else
                     {
-                        int32 bp = 600;
                         if (AuraEffect const* auraEffect = caster->GetAuraEffect(SPELL_SIGIL_VENGEFUL_HEART, EFFECT_1))
-                            bp += auraEffect->GetBaseAmount();
-                        caster->CastCustomSpell(target, SPELL_DEATH_COIL_DAMAGE, &bp, NULL, NULL, true);
+                            damage += auraEffect->GetBaseAmount();
+                        caster->CastCustomSpell(target, SPELL_DEATH_COIL_DAMAGE, &damage, NULL, NULL, true);
                     }
                 }
             }

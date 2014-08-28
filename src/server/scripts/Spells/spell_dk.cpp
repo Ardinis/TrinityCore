@@ -513,6 +513,8 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                 }
 
                 int32 bp0 = (GetHitDamage() * GetEffectValue() * diseases) / 100;
+                if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
+                    AddPctN(bp0, aurEff->GetAmount());
                 caster->CastCustomSpell(target, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
             }
 
@@ -1131,9 +1133,24 @@ class spell_dk_pet_scaling_02 : public SpellScriptLoader
                 }
             }
 
+            void CalculateBonusDamagePct(AuraEffect const* /* aurEff */, int32& amount, bool& /*canBeRecalculated*/)
+            {
+                if (!GetCaster() || !GetCaster()->GetOwner())
+                    return;
+
+                if (Player* owner = GetCaster()->GetOwner()->ToPlayer())
+                {
+                    Unit::AuraEffectList const& auraDamagePctList = owner->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                    for (Unit::AuraEffectList::const_iterator itr = auraDamagePctList.begin(); itr != auraDamagePctList.end(); ++itr)
+                        if ((*itr)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
+                            amount += (*itr)->GetAmount();
+                }
+            }
+
             void Register()
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_02_AuraScript::CalculateAmountMeleeHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_pet_scaling_02_AuraScript::CalculateBonusDamagePct, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
             }
         };
 

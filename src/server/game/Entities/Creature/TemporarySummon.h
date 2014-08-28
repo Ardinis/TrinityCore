@@ -92,6 +92,7 @@ class Guardian : public Minion
         void RecalculatePetScalingStats(Stats stat);
         void RecalculatePetScalingAttackPower();
         void RecalculatePetScalingDamageDone();
+        void RecalculatePetScalingDamageDonePct();
         void RecalculatePetScalingAttackSpeed(WeaponAttackType att);
         void RecalculatePetScalingHitRating();
         void RecalculatePetScalingCritRating();
@@ -127,4 +128,3 @@ private:
     TempSummon& m_owner;
 };
 #endif
-

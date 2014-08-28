@@ -8105,6 +8105,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             if (dummySpell->SpellIconID == 2709)
             {
                 basepoints0 = CalculatePctN(int32(damage), triggerAmount);
+                if (AuraEffect* aurEff = GetAuraEffectOfRankedSpell(49140, EFFECT_0))
+                    AddPctN(basepoints0, aurEff->GetAmount());
                 triggered_spell_id = 51460;
                 break;
             }
@@ -10590,6 +10592,13 @@ void Unit::RecalculatePetsScalingDamageDone()
         if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
             ((Guardian*)unit)->RecalculatePetScalingDamageDone();
     }
+}
+
+void Unit::RecalculatePetsScalingDamageDonePct()
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); itr++)
+        if ((*itr)->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)(*itr))->RecalculatePetScalingDamageDonePct();
 }
 
 void Unit::GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry)

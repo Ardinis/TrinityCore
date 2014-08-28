@@ -4619,6 +4619,8 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
         for (int i = 0; i < MAX_ATTACK; ++i)
             if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
                 target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
+
+        target->RecalculatePetsScalingDamageDonePct();
     }
 
     if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))

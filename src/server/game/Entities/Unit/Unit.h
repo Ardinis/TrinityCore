@@ -1733,6 +1733,7 @@ class Unit : public WorldObject
         void RecalculatePetsScalingStats(Stats stats);
         void RecalculatePetsScalingAttackPower();
         void RecalculatePetsScalingDamageDone();
+        void RecalculatePetsScalingDamageDonePct();
         void RecalculatePetsScalingAttackSpeed(WeaponAttackType att);
         void RecalculatePetsScalingHitRating();
         void RecalculatePetsScalingCritRating();

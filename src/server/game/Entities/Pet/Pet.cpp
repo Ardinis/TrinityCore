@@ -965,6 +965,24 @@ void Guardian::RecalculatePetScalingDamageDone()
         aurEffect->RecalculateAmount();
 }
 
+void Guardian::RecalculatePetScalingDamageDonePct()
+{
+    uint32 auraId = 0;
+    uint8 effIndex = EFFECT_0;
+
+    if (IsPetGhoul())
+    {
+        auraId = 51996;
+        effIndex = EFFECT_0;
+    }
+
+    if (!auraId)
+        return;
+
+    if (AuraEffect* aurEffect = GetAuraEffect(auraId, effIndex))
+        aurEffect->RecalculateAmount();
+}
+
 void Guardian::RecalculatePetScalingAttackSpeed(WeaponAttackType att)
 {
     uint32 auraId = 0;

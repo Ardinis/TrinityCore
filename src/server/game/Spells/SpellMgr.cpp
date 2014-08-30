@@ -3947,7 +3947,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                 break;
             case 22959: // Scorch
-            case 58567: // sunder armor
+                //            case 58567: // sunder armor
             case 12579: // Winterchill
             case 17364: // Stormstrike
             case 50328: // Leeching Poison

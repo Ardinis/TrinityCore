@@ -611,7 +611,8 @@ m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharme
     m_canReflect = (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC || m_spellInfo->Id == 49560) && !(m_spellInfo->Attributes & SPELL_ATTR0_ABILITY)
         && !(m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REFLECTED) && !(m_spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
         && !m_spellInfo->IsPassive() && !m_spellInfo->IsPositive()  && !m_spellInfo->IsAffectingArea();
-
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellIconID == 225 && m_spellInfo->SpellFamilyFlags[0] == 0x200000)
+        m_canReflect = true;
     CleanupTargetList();
     CleanupEffectExecuteData();
 
@@ -1307,9 +1308,17 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 spellHitTarget = m_caster;
 
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-            m_caster->ProcDamageAndSpell(spellHitTarget ? spellHitTarget : unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, m_spellInfo);
+            if (m_spellInfo->Id == 49560 || m_spellInfo->Id == 49575 || m_spellInfo->Id == 49576)
+                m_caster->ProcDamageAndSpell(spellHitTarget ? spellHitTarget : unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, m_spellInfo);
+            else
+                m_caster->ProcDamageAndSpell(unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, m_spellInfo);
+
             if (m_caster->GetTypeId() == TYPEID_UNIT)
                 m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
+
+            if (m_spellInfo->Id == 49560)
+                if (unit->HasAuraType(SPELL_AURA_REFLECT_SPELLS))
+                    unit->RemoveAurasByType(SPELL_AURA_REFLECT_SPELLS);
         }
         else if (target->reflectResult == SPELL_MISS_PARRY)
             return;

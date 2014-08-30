@@ -1305,11 +1305,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             // Seduction & Pestilence should not affect caster when reflected.
             if (m_spellInfo->CheckTargetCreatureType(m_caster))
                 spellHitTarget = m_caster;
+
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-            m_caster->ProcDamageAndSpell(unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, m_spellInfo);
+            m_caster->ProcDamageAndSpell(spellHitTarget ? spellHitTarget : unit, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, 0, BASE_ATTACK, m_spellInfo);
             if (m_caster->GetTypeId() == TYPEID_UNIT)
                 m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
         }
+        else if (target->reflectResult == SPELL_MISS_PARRY)
+            return;
     }
 
     if (spellHitTarget)
@@ -1414,6 +1417,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
 
         // Send log damage message to client
+        if (missInfo == SPELL_MISS_REFLECT)
+            damageInfo.attacker = unit;
         caster->SendSpellNonMeleeDamageLog(&damageInfo);
 
         procEx |= createProcExtendMask(&damageInfo, missInfo);

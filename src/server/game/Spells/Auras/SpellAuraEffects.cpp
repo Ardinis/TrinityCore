@@ -3562,6 +3562,9 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const* aurApp, uint
 
     Unit* target = aurApp->GetTarget();
 
+    if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PALADIN && GetSpellInfo()->SpellIconID == 303 && target->HasAura(46924))
+        target->RemoveAurasDueToSpell(46924);
+
     target->ApplySpellImmune(GetId(), IMMUNITY_SCHOOL, GetMiscValue(), (apply));
 
     if (GetSpellInfo()->Mechanic == MECHANIC_BANISH)

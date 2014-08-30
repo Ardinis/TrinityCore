@@ -897,10 +897,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     //T9 2p
     if (m_spellInfo->Id != 67210 && m_spellInfo->Id != 67209  && m_spellInfo->Id != 57965)
       if (Player* player = m_caster->ToPlayer())
-	if (player->HasAura(67210))
-	{
-	  player->RemoveAura(67210);
-	}
+          if (player->HasAura(67210))
+          {
+              player->RemoveAura(67210);
+          }
 
 
     switch (m_spellInfo->SpellFamilyName)
@@ -1519,10 +1519,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     // Do we have talent Master of Ghouls?
                     if (m_caster->HasAura(52143))
                         // summon as pet
-		      bp = m_spellInfo->Effects[EFFECT_2].CalcValue();
+                        bp = m_spellInfo->Effects[EFFECT_2].CalcValue();
                     else
                         // or guardian
-		      bp = m_spellInfo->Effects[EFFECT_1].CalcValue();
+                        bp = m_spellInfo->Effects[EFFECT_1].CalcValue();
 
                     if (m_targets.HasDst())
                         targets.SetDst(*m_targets.GetDst());
@@ -1543,6 +1543,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                     spell_id = CalculateDamage(0, NULL);
                     break;
+
             }
             break;
     }

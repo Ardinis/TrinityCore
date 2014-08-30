@@ -7077,24 +7077,24 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 basepoints0 = (int32)GetAttackTime(BASE_ATTACK) * int32(ap * 0.022f + 0.044f * holy) / 1000;
                 break;
             }
+
             // Light's Beacon - Beacon of Light
-	    if (dummySpell->Id == 53651)
-	    {
-            if (!victim)
-                return false;
-            triggered_spell_id = 0;
-            Unit* beaconTarget = NULL;
-            if (GetTypeId() != TYPEID_PLAYER)
+            if (dummySpell->Id == 53651)
             {
-                beaconTarget = triggeredByAura->GetBase()->GetCaster();
-                if (!beaconTarget || beaconTarget == this || !(beaconTarget->GetAura(53563, victim->GetGUID())))
+                if (!victim)
                     return false;
-                basepoints0 = int32(damage);
-                triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
-            }
-            else
-            {    // Check Party/Raid Group
-                if (Group* group = ToPlayer()->GetGroup())
+
+                Unit* target = this;
+                triggered_spell_id = 0;
+                Unit* beaconTarget = NULL;
+                if (GetTypeId() != TYPEID_PLAYER)
+                {
+                    target = GetOwner();
+                    if (!target || target->GetTypeId() != TYPEID_PLAYER)
+                        return false;
+                }
+
+                if (Group* group = target->ToPlayer()->GetGroup())
                 {
                     for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
                     {
@@ -7110,19 +7110,33 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                                 beaconTarget = member;
                                 basepoints0 = int32(damage);
                                 triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+                                if (beaconTarget && !beaconTarget->IsWithinLOSInMap(victim))
+                                    return false;
                                 break;
                             }
+                            else if (Pet* pet = member->GetPet())
+                                if (pet->GetAura(53563, victim->GetGUID()))
+                                {
+                                    if (pet == this)
+                                        return false;
+
+                                    beaconTarget = pet;
+                                    basepoints0 = int32(damage);
+                                    triggered_spell_id = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(635)) ? 53652 : 53654;
+                                    if (beaconTarget && !beaconTarget->IsWithinLOSInMap(victim))
+                                        return false;
+                                    break;
+                                }
                         }
                     }
                 }
-            }
 
-            if (triggered_spell_id && beaconTarget)
-            {
-                if (victim)
-                    victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true);
-                return true;
-            }
+                if (triggered_spell_id && beaconTarget)
+                {
+                    if (victim)
+                        victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true);
+                    return true;
+                }
 
             return false;
 	    }

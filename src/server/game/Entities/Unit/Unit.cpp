@@ -12912,6 +12912,10 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
     if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
         return true;
 
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (HasAura(46924) && IsImmunedToSpellEffect(spellInfo, i))
+            return true;
+
     if (spellInfo->Id != 42292 && spellInfo->Id !=59752)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
@@ -12955,6 +12959,20 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
         SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
         for (SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
             if (itr->type == mechanic)
+                return true;
+
+        if (HasAura(46924)) // bladestorm
+            if (mechanic == MECHANIC_BANISH
+                || mechanic == MECHANIC_SNARE
+                || mechanic == MECHANIC_FEAR
+                || mechanic == MECHANIC_STUN
+                || mechanic == MECHANIC_SLEEP
+                || mechanic == MECHANIC_SAPPED
+                || mechanic == MECHANIC_HORROR
+                || mechanic == MECHANIC_POLYMORPH
+                || mechanic == MECHANIC_DISORIENTED
+                || mechanic == MECHANIC_FREEZE
+                || mechanic == MECHANIC_TURN)
                 return true;
     }
 

@@ -316,6 +316,15 @@ class spell_hun_masters_call : public SpellScriptLoader
                 return true;
             }
 
+            SpellCastResult CheckCast()
+            {
+                Player* caster = GetCaster()->ToPlayer();
+                if (caster && caster->GetPet() && (caster->GetPet()->HasUnitState(UNIT_STATE_CONTROLLED) || !caster->GetPet()->isAlive()))
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+                return SPELL_CAST_OK;
+            }
+
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* ally = GetHitUnit())

@@ -3250,6 +3250,10 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
       break;
     }
 
+    if (m_spellInfo->Id == 57879)
+        if (AuraEffect *aurEff = m_originalCaster->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_HUNTER, 69, EFFECT_2))
+            numSummons += aurEff->GetAmount();
+
     //    m_caster->GetMap()->SummonCreature(28017, pos, properties, duration);
 
 

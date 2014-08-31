@@ -476,23 +476,27 @@ class spell_hun_sniper_training : public SpellScriptLoader
                 return true;
             }
 
+            bool Load()
+            {
+                _canCast = false;
+                _inCD = false;
+            }
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
-		if (!sSpellMgr)
-		  return;
-                if (aurEff->GetAmount() <= 0)
-                {
-                    Unit* caster = GetCaster();
-                    uint32 spellId = SPELL_SNIPER_TRAINING_BUFF_R1 + GetId() - SPELL_SNIPER_TRAINING_R1;
-                    if (Unit* target = GetTarget())
-                        if (!target->HasAura(spellId))
-                        {
-                            SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
-                            Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
-                            triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
-                        }
-                }
+
+                Unit* caster = GetCaster();
+                uint32 spellId = SPELL_SNIPER_TRAINING_BUFF_R1 + GetId() - SPELL_SNIPER_TRAINING_R1;
+                if (Unit* target = GetTarget())
+                    if (_canCast)
+                    {
+                        SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
+                        Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
+                        triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
+                        _inCD = false;
+                        _canCast = false;
+                    }
             }
 
             void HandleUpdatePeriodic(AuraEffect* aurEff)
@@ -500,12 +504,29 @@ class spell_hun_sniper_training : public SpellScriptLoader
                 if (Player* playerTarget = GetUnitOwner()->ToPlayer())
                 {
                     int32 baseAmount = aurEff->GetBaseAmount();
-                    int32 amount = playerTarget->isMoving() ?
-                    playerTarget->CalculateSpellDamage(playerTarget, GetSpellInfo(), aurEff->GetEffIndex(), &baseAmount) :
-                    aurEff->GetAmount() - 1;
+                    int32 amount = playerTarget->CalculateSpellDamage(playerTarget, GetSpellInfo(), aurEff->GetEffIndex(), &baseAmount);
                     aurEff->SetAmount(amount);
+
+                    if (playerTarget->isMoving() || playerTarget->IsFalling())
+                    {
+                        _inCD = false;
+                        _canCast = false;
+                        return;
+                    }
+
+                    if (!_inCD)
+                    {
+                        _inCD = true;
+                        startCD = time(NULL);
+                    }
+                    if (!_canCast && _inCD && ((time(NULL) - startCD) >= 6))
+                        _canCast = true;
                 }
             }
+
+            bool _canCast;
+            bool _inCD;
+            time_t startCD;
 
             void Register()
             {

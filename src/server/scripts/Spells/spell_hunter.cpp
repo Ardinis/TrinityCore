@@ -321,7 +321,10 @@ class spell_hun_masters_call : public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
                 if (caster && caster->GetPet() && (caster->GetPet()->HasUnitState(UNIT_STATE_CONTROLLED) || !caster->GetPet()->isAlive()))
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-
+                if (caster && caster->GetPet() && !caster->GetPet()->IsWithinLOSInMap(caster))
+                    return SPELL_FAILED_LINE_OF_SIGHT;
+                if (caster && caster->GetPet() && caster->GetDistance2d(caster->GetPet()->GetPositionX(), caster->GetPet()->GetPositionY()) > 25)
+                    return SPELL_FAILED_OUT_OF_RANGE;
                 return SPELL_CAST_OK;
             }
 
@@ -351,6 +354,7 @@ class spell_hun_masters_call : public SpellScriptLoader
 
             void Register()
             {
+                OnCheckCast += SpellCheckCastFn(spell_hun_masters_call_SpellScript::CheckCast);
                 OnEffectHitTarget += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
                 OnEffectHitTarget += SpellEffectFn(spell_hun_masters_call_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
             }

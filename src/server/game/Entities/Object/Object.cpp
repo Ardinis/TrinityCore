@@ -1729,59 +1729,70 @@ bool WorldObject::canSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
   bool corpseVisibility = false;
   if (distanceCheck)
   {
-    bool corpseCheck = false;
-    if (Player const* thisPlayer = ToPlayer())
-    {
-      if (thisPlayer->isDead() && thisPlayer->GetHealth() > 0 && // Cheap way to check for ghost state
-	  !(obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GHOST) & m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GHOST) & GHOST_VISIBILITY_GHOST))
+      bool corpseCheck = false;
+      if (Player const* thisPlayer = ToPlayer())
       {
-	if (Corpse* corpse = thisPlayer->GetCorpse())
-	{
-	  corpseCheck = true;
-	  if (corpse->IsWithinDist(thisPlayer, GetSightRange(obj), false))
-	    if (corpse->IsWithinDist(obj, GetSightRange(obj), false))
-	      corpseVisibility = true;
-	}
+          if (thisPlayer->isDead() && thisPlayer->GetHealth() > 0 && // Cheap way to check for ghost state
+              !(obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GHOST) & m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GHOST) & GHOST_VISIBILITY_GHOST))
+          {
+              if (Corpse* corpse = thisPlayer->GetCorpse())
+              {
+                  corpseCheck = true;
+                  if (corpse->IsWithinDist(thisPlayer, GetSightRange(obj), false))
+                      if (corpse->IsWithinDist(obj, GetSightRange(obj), false))
+                          corpseVisibility = true;
+              }
+          }
       }
-    }
 
-    WorldObject const* viewpoint = this;
-    if (Player const* player = this->ToPlayer())
-      viewpoint = player->GetViewpoint();
+      WorldObject const* viewpoint = this;
+      if (Player const* player = this->ToPlayer())
+          viewpoint = player->GetViewpoint();
 
-    if (!viewpoint)
-      viewpoint = this;
+      if (!viewpoint)
+          viewpoint = this;
 
-    if (!corpseCheck && !viewpoint->IsWithinDist(obj, GetSightRange(obj), false))
-      return false;
+      // Traps can only be detected within melee distance
+      if (const GameObject *thisGO = obj->ToGameObject())
+      {
+          if (thisGO->GetGoType() == GAMEOBJECT_TYPE_TRAP && ToPlayer())
+          {
+              if (ToPlayer() && ToPlayer()->HasAura(2836))
+                  if (obj->IsWithinDist(this, 20.0f, false)) // Detect Traps increases chance to detect traps
+                      return true;
+          }
+      }
+
+      if (!corpseCheck && !viewpoint->IsWithinDist(obj, GetSightRange(obj), false))
+          return false;
   }
 
   // GM visibility off or hidden NPC
   if (!obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM))
   {
-    // Stop checking other things for GMs
-    if (m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM))
-      return true;
+      // Stop checking other things for GMs
+      if (m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM))
+          return true;
   }
   else
-    return m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM) >= obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM);
+      return m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM) >= obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM);
 
   // Ghost players, Spirit Healers, and some other NPCs
   if (!corpseVisibility && !(obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GHOST) & m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GHOST)))
   {
-    // Alive players can see dead players in some cases, but other objects can't do that
-    if (Player const* thisPlayer = ToPlayer())
-    {
-      if (Player const* objPlayer = obj->ToPlayer())
+      // Alive players can see dead players in some cases, but other objects can't do that
+      if (Player const* thisPlayer = ToPlayer())
       {
-	if (thisPlayer->GetTeam() != objPlayer->GetTeam() || !thisPlayer->IsGroupVisibleFor(objPlayer))
-	  return false;
+          if (Player const* objPlayer = obj->ToPlayer())
+          {
+              if (thisPlayer->GetTeam() != objPlayer->GetTeam() || !thisPlayer->IsGroupVisibleFor(objPlayer))
+                  return false;
+          }
+          else
+              return false;
       }
       else
-	return false;
-    }
-    else
-      return false;
+          return false;
   }
 
   if (obj->IsInvisibleDueToDespawn())

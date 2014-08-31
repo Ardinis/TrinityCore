@@ -1754,7 +1754,12 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
 void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET
+    if (m_spellInfo->Id == 60192)
+    {
+        if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+            return;
+    }
+    else if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET
         && effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
@@ -1769,7 +1774,7 @@ void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
     }
 
     SpellCastTargets targets;
-    if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
+    if ((m_spellInfo->Id == 60192 && effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH) || effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
     {
         if (!spellInfo->NeedsToBeTriggeredByCaster())
             return;
@@ -4625,7 +4630,12 @@ void Spell::EffectInterruptCast(SpellEffIndex effIndex)
 
 void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
 {
-    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+    if (m_spellInfo->Id == 60202)
+    {
+        if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+            return;
+    }
+    else if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
     uint32 gameobject_id = m_spellInfo->Effects[effIndex].MiscValue;

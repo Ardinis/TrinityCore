@@ -1657,7 +1657,7 @@ void Pet::_LoadAuras(uint32 timediff)
 
             if (Aura* aura = Aura::TryCreate(spellInfo, effmask, this, NULL, &baseDamage[0], NULL, caster_guid))
             {
-                if (!aura->CanBeSaved())
+                if (!aura->CanBeSaved() || (spellInfo->Id == 61669 && (!GetOwner() || (GetOwner() &&  !GetOwner()->HasAura(13161)))))
                 {
                     aura->Remove();
                     continue;

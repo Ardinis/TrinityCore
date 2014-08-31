@@ -841,7 +841,7 @@ void Spell::SelectSpellTargets()
         }
     }
 
-    if (m_targets.HasDst() && !sSpellMgr->IsCCSpell(m_spellInfo))
+    if (m_targets.HasDst()  && (!(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC) || IsTriggered())/* && !sSpellMgr->IsCCSpell(m_spellInfo)*/)
     {
         if (m_targets.HasTraj())
         {
@@ -1084,7 +1084,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
 
     // Spell have speed - need calculate incoming time
     // Incoming time is zero for self casts. At least I think so.
-    if (m_spellInfo->Speed > 0.0f && m_caster != target && m_spellInfo->Speed != 12345)
+    if (m_spellInfo->Speed > 0.0f && m_caster != target/* && m_spellInfo->Speed != 12345*/)
     {
         // calculate spell incoming interval
         // TODO: this is a hack
@@ -1098,12 +1098,17 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay)
             m_delayMoment = targetInfo.timeDelay;
     }
+    else if (!IsTriggered() && m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
+    {
+        targetInfo.timeDelay = 100;
+        m_delayMoment = 100;
+    }
 	 // Apply delay for CC spells here, can be easily tweaked.
-	else if (m_spellInfo->Speed == 12345)
+    /*	else if (m_spellInfo->Speed == 12345)
 	{
 		targetInfo.timeDelay = 100LL;
 		m_delayMoment = 100LL;
-	}
+        }*/
     else
         targetInfo.timeDelay = 0LL;
 
@@ -1526,7 +1531,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         return SPELL_MISS_EVADE;
 
     // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-    if (m_spellInfo->Speed && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)))
+    if ((m_spellInfo->Speed || m_delayMoment) && (unit->IsImmunedToDamage(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)))
         return SPELL_MISS_IMMUNE;
 
     // disable effects to which unit is immune
@@ -1574,7 +1579,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     if (m_caster != unit)
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
-        if (m_spellInfo->Speed > 0.0f && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && unit->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
+        if ((m_spellInfo->Speed || m_delayMoment) && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && unit->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
             return SPELL_MISS_EVADE;
 
         if (m_caster->_IsValidAttackTarget(unit, m_spellInfo))
@@ -1585,7 +1590,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
             // TODO: this cause soul transfer bugged
-            if (m_spellInfo->Speed > 0.0f && unit->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->IsPositive())
+            if ((m_spellInfo->Speed || m_delayMoment) && unit->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->IsPositive())
                 return SPELL_MISS_EVADE;
 
             // assisting case, healing and resurrection
@@ -3461,7 +3466,7 @@ void Spell::cast(bool skipCheck)
             m_caster->ModifyAuraState(aState, false);
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if ((m_spellInfo->Speed > 0.0f && !m_spellInfo->IsChanneled()) || m_spellInfo->Id == 14157 || m_spellInfo->Id == 70802)
+    if (((m_spellInfo->Speed || m_delayMoment) && !m_spellInfo->IsChanneled()) || m_spellInfo->Id == 14157 || m_spellInfo->Id == 70802)
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start
@@ -3511,7 +3516,7 @@ void Spell::cast(bool skipCheck)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         // Remove spell mods after cast
-        if (m_spellInfo->Speed && !m_spellInfo->IsChanneled())
+        if ((m_spellInfo->Speed || m_delayMoment) && !m_spellInfo->IsChanneled())
             m_caster->ToPlayer()->RemoveSpellMods(this);
 
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);

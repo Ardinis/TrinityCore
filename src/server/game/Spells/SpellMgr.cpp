@@ -3008,8 +3008,8 @@ void SpellMgr::LoadSpellCustomAttr()
         }
 
 		// Speed needs to be set for some reason, else delay won't apply
-		 if (IsCCSpell(spellInfo) && !spellInfo->Speed)
-			spellInfo->Speed = 12345.0f;
+        //		 if (IsCCSpell(spellInfo) && !spellInfo->Speed)
+        //		spellInfo->Speed = 12345.0f;
 
         switch (spellInfo->SpellFamilyName)
         {

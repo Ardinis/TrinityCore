@@ -60,7 +60,7 @@ namespace Movement
         Location real_position(unit.GetPositionX(),unit.GetPositionY(),unit.GetPositionZ(),unit.GetOrientation());
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-		std::cout << (int)transport << std::endl;
+
         if (!move_spline.Finalized() && move_spline.onTransport == transport) {
             real_position = move_spline.ComputePosition();
 		}

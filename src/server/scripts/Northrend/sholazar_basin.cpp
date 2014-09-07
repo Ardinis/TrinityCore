@@ -65,9 +65,11 @@ public:
             // if we will have other way to assign this to only one npc remove this part
             if (GUID_LOPART(me->GetGUID()) != 101030)
             {
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                //me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                //me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
+			me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+			me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
 
         void WaypointReached(uint32 i)
@@ -761,7 +763,7 @@ public:
 
 void AddSC_sholazar_basin()
 {
-    //    new npc_injured_rainspeaker_oracle();
+    new npc_injured_rainspeaker_oracle();
     new npc_vekjik();
     new npc_avatar_of_freya();
     new npc_bushwhacker();

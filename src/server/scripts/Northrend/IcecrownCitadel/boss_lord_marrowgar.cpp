@@ -679,9 +679,12 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
             {
                 if (Unit* caster = GetCaster())
                 {
-                    const float distance = GetHitUnit()->GetExactDist2d(caster);
+                    float distance = GetHitUnit()->GetDistance2d(caster);
+                    if (distance > 25.0f)
+                        distance = 25.0f;
                     const int32 damage   = GetHitDamage();
-                    SetHitDamage((int32(damage - (damage * distance / (distance + caster->GetObjectSize() / 2))) + 1500));
+                    int32 newDamage = int32(damage - damage * (distance * 1 / 30));
+                    SetHitDamage(newDamage);
                 }
             }
 

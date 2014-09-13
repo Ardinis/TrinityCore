@@ -6410,8 +6410,9 @@ public:
                 {
                     if (target->GetTypeId() == TYPEID_UNIT)
                     {
-                        if (!target->ToCreature()->isWorldBoss())
-                            DoCastVictim(SPELL_TAUNT, true);
+                        if (Map *map = me->GetMap())
+                            if (!map->IsDungeon())
+                                DoCastVictim(SPELL_TAUNT, true);
                     } else DoCastVictim(SPELL_TAUNT, true);
                 }
                 TauntTimer = urand(1000, 2000);

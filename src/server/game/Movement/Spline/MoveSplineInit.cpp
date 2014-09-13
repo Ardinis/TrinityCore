@@ -53,25 +53,28 @@ namespace Movement
 
     void MoveSplineInit::Launch()
     {
+
         MoveSpline& move_spline = *unit.movespline;
 
         bool transport = unit.HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && unit.GetTransport();
         Location real_position(unit.GetPositionX(),unit.GetPositionY(),unit.GetPositionZ(),unit.GetOrientation());
         // there is a big chane that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-        if (!move_spline.Finalized() && move_spline.onTransport == transport)
+
+        if (!move_spline.Finalized() && move_spline.onTransport == transport) {
             real_position = move_spline.ComputePosition();
+		}
         else
         {
-            Position * pos;
+            Position pos;
             if (transport)
-                pos = &unit.m_movementInfo.t_pos;
+                pos = unit.m_movementInfo.t_pos;
             else
-                unit.GetPosition(pos);
+                unit.GetPosition(&pos);
 
-            real_position.x = pos->GetPositionX();
-            real_position.y = pos->GetPositionY();
-            real_position.z = pos->GetPositionZ();
+            real_position.x = pos.GetPositionX();
+            real_position.y = pos.GetPositionY();
+            real_position.z = pos.GetPositionZ();
             real_position.orientation = unit.GetOrientation();
         }
         if (args.path.empty())
@@ -109,13 +112,13 @@ namespace Movement
         data.append(unit.GetPackGUID());
         if (transport)
         {
-            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+			data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
             data.appendPackGUID(unit.GetTransGUID());
             data << int8(unit.GetTransSeat());
         }
-
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit.SendMessageToSet(&data,true);
+
     }
 
 

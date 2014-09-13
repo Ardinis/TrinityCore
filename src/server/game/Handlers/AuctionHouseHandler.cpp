@@ -218,7 +218,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
         {
             if (itemGUIDs[i] == itemGUIDs[j])
             {
-                SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+                SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
                 return;
             }
         }

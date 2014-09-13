@@ -1474,7 +1474,7 @@ class boss_vx_001 : public CreatureScript
                     case DO_START_VX001:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_IMMUNE_TO_PC);
                         me->SetReactState(REACT_AGGRESSIVE);
-			me->SetVisible(true);
+                        me->SetVisible(true);
                         phase = PHASE_VX001_SOLO__GLOBAL_2;
                         events.SetPhase(phase);
                         DoZoneInCombat();

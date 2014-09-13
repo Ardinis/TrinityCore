@@ -1368,7 +1368,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
 									float x, y, z;
 									deathbringer->GetClosePoint(x, y, z, deathbringer->GetObjectSize());
 									_HighLordSaurfang->GetMotionMaster()->MovePoint(POINT_CORPSE_1, x, y, z);
-																_HighLordSaurfang->AI()->Talk(SAY_OUTRO_ALLIANCE_12);
+                                    _HighLordSaurfang->AI()->Talk(SAY_OUTRO_ALLIANCE_12);
 								}
                                 break;
                         case EVENT_OUTRO_ALLIANCE_13:

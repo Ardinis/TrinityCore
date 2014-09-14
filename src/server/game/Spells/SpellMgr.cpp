@@ -3988,13 +3988,34 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
                 break;
 	        case 30019:
-                spellInfo->Effect[EFFECT_2] = SPELL_AURA_MOD_POSSESS;
-                spellInfo->EffectBasePoints[EFFECT_2] = 99;
-                spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_200_YARDS;
+                spellInfo->Effect[EFFECT_2] = SPELL_AURA_MOD_CHARM;
+				spellInfo->EffectBasePoints[EFFECT_2] = 99;
+				spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_200_YARDS;
                 break;
             case 46980: // hunt exotic panthere
                 spellInfo->EffectMiscValue[EFFECT_0] = 2000002;
                 break;
+			case 30284: // spells Chess karazhan
+				spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_50000_YARDS;
+				spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_50000_YARDS;
+				break;
+			case 30012:// spells Chess karazhan
+			case 37144:
+			case 37146:
+			case 37148:
+			case 37151:
+			case 37152:
+			case 37153:
+				spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_50000_YARDS;
+				break;
+			case 37471:// spells Chess karazhan
+			case 37472:
+				spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_500_YARDS;
+				break;
+			case 37502:// spells Chess karazhan
+			case 37498:
+				spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_500_YARDS;
+				break;
             default:
                 break;
         }

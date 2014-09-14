@@ -37,18 +37,19 @@ EndScriptData */
 
 #define GOSSIP_POSSES "Prendre la piece" //need correction 
 #define EVENT_START "Placer l'echiquier"
+#define EVENT_REDO_CHESS "Replacer l'echiquier pour une partie amicale"
 #define NPC_ATTACK_RADIUS 7
 #define SAY_AT_EVENT_START "Tres bien. Que la partie commence!"
 #define SOUND_START 10338
 #define SAY_LOSE_KNIGHT_P "Oui...tout se deroule comme prevu."
 #define SOUND_KNIGHT_LOSE_P 10349
-#define SAY_LOSE_KNIGHT_M "Oui... Naturellement."
+#define SAY_LOSE_KNIGHT_M "Oui... Bien sur."
 #define SOUND_KNIGHT_LOSE_M 10350
-#define SAY_LOSE_PAWN_P_1 "Un stratageme transparent."
+#define SAY_LOSE_PAWN_P_1 "Un stratageme limpide."
 #define SOUND_LOSE_PAWN_P_1 10339
 #define SAY_LOSE_PAWN_P_2 "Reflechissons..."
 #define SOUND_LOSE_PAWN_P_2 10340
-#define SAY_LOSE_PAWN_P_3 "Ah, les roues ont commence a tourner."
+#define SAY_LOSE_PAWN_P_3 "Voyons donc..."
 #define SOUND_LOSE_PAWN_P_3 10341
 #define SAY_LOSE_PAWN_M_1 "Hmm."
 #define SOUND_LOSE_PAWN_M_1 10342
@@ -60,13 +61,13 @@ EndScriptData */
 #define SOUND_LOSE_QUEEN_P 10351
 #define SAY_LOSE_QUEEN_M "Ahh, j'aurai du le savoir."
 #define SOUND_LOSE_QUEEN_M 10352
-#define SAY_LOSE_BISHOP_P "Tout ce qu'il faut, c'est ne pas perdre sa concentration."
+#define SAY_LOSE_BISHOP_P "Il suffit juste de ne pas perdre sa concentration."
 #define SOUND_LOSE_BISHOP_P 10347
 #define SAY_LOSE_BISHOP_M "Un sacrifice necessaire."
 #define SOUND_LOSE_BISHOP_M 10348
-#define SAY_LOSE_ROOK_P "Stupide ! Tres stupide !"
+#define SAY_LOSE_ROOK_P "Imprudent ! Tres imprudent !"
 #define SOUND_LOSE_ROOK_P 10345
-#define SAY_LOSE_ROOK_M "Une preoccupation mineure."
+#define SAY_LOSE_ROOK_M "Un ennui minime."
 #define SOUND_LOSE_ROOK_M 10346
 
 #define SAY_PLAYER_CHECK "Et donc la fin approche."
@@ -74,21 +75,21 @@ EndScriptData */
 #define SAY_MEDIVH_CHECK "Comme cela devrait etre."
 #define SOUND_MEDIVH_CHECK 10354
 
-#define SAY_PLAYER_WIN "Et donc la fin approche."
+#define SAY_PLAYER_WIN "Et c'est terminé."
 #define SOUND_PLAYER_WIN 10355
-#define SAY_MEDIVH_WIN "Rien ne pourra se faire sans la perfection."
+#define SAY_MEDIVH_WIN "Je ne demande rien de mieux que la perfection."
 #define SOUND_MEDIVH_WIN 10356
 
-#define SAY_MEDIVH_CHEAT_1 "Peut-etre qu'un changement est bon."
+#define SAY_MEDIVH_CHEAT_1 "Un petit changement s'impose peut-être..."
 #define SOUND_MEDIVH_CHEAT_1 10357
-#define SAY_MEDIVH_CHEAT_2 "Il est temps pour un scenario alternatif."
+#define SAY_MEDIVH_CHEAT_2 "Passons au scenario alternatif."
 #define SOUND_MEDIVH_CHEAT_2 10358
 #define SAY_MEDIVH_CHEAT_3 "Il ne faut pas devenir trop confiant."
 #define SOUND_MEDIVH_CHEAT_3 10359
 
-    #define TRIGGER_ID 22519
+#define TRIGGER_ID 22519
      
-    #define SEARCH_RANGE 5
+#define SEARCH_RANGE 5
 
                                 //x, y, z
 #define SPAWN_POS               wLoc.m_positionX, wLoc.m_positionY, wLoc.m_positionZ
@@ -336,6 +337,12 @@ enum ChessOrientation
     CHESS_ORI_CHOOSE = 4    //simple use script to choose orientation
 };
 
+enum TriggerAction
+{
+    ACTION_CHANGE_FACING         = 1,
+	ACTION_MOVEMENT              = 2,
+};
+
 struct ChessTile
 {
     WorldLocation position;
@@ -509,7 +516,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                     {
                         chessBoard[i][j].position.m_positionX = -11077.66 + 3.48 * j - 4.32 * i ;
                         chessBoard[i][j].position.m_positionY = -1849.02 - 4.365 * j - 3.41 * i;
-                        chessBoard[i][j].position.m_positionZ = 221.1f;
+                        chessBoard[i][j].position.m_positionZ = 220.667f;
                         chessBoard[i][j].position.m_mapId = me->GetMapId();
                     }
                 }
@@ -943,9 +950,10 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                 3 + 2               - return 6
                 4 + 1 + 2 + 3       - return 20
                 5 + 4 + 1 + 2 + 3   - return 25
+				2 + 6               - return 1
 
-                 5 4 4 4 4 4 5
-                 4 4 4 4 4 4 4
+                 5 4 4 6 4 4 5
+                 4 4 4 6 4 4 4
                  4 4 3 2 3 4 4
                  4 4 1 0 1 4 4
                  4 4 1 1 1 4 4
@@ -959,7 +967,9 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                 {
                     case SPELL_KING_H_1:
                     case SPELL_KING_A_1:
-                        return 6;
+					case SPELL_ROOK_A_1:
+					case SPELL_ROOK_H_1:
+                        return 0;
 
                     case SPELL_QUEEN_H_1:
                     case SPELL_QUEEN_A_1:
@@ -976,6 +986,14 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                     case SPELL_KNIGHT_H_1:
                     case SPELL_KNIGHT_A_1:
                         return 5;
+
+					case SPELL_KNIGHT_H_2:
+					case SPELL_KNIGHT_A_2:
+						return 6;
+
+					case SPELL_BISHOP_A_2:
+					case SPELL_BISHOP_H_2:
+						return 1;
 
                     default:
                         return 0;
@@ -1028,7 +1046,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                 {
                     Creature * uCaster = me->GetCreature(*me, caster);
                     if (uCaster)
-                        uCaster->MonsterSay("GetSpellTarget(..) : Nie znaleziono mnie na planszy !!", LANG_UNIVERSAL, 0);
+                        uCaster->MonsterSay("GetSpellTarget(..) : Introuvable sur la carte !!", LANG_UNIVERSAL, 0);
                     return 0;
                 }
 
@@ -1055,7 +1073,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && IsMedivhsPiece(tmpGUID) && Heal(spell, tmpGUID))
+                                    if (tmpGUID && IsFriendPiece(caster, tmpGUID) && Heal(spell, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1070,7 +1088,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && IsMedivhsPiece(tmpGUID) && Heal(spell, tmpGUID))
+                                    if (tmpGUID && IsFriendPiece(caster, tmpGUID) && Heal(spell, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1085,7 +1103,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && IsMedivhsPiece(tmpGUID) && Heal(spell, tmpGUID))
+                                    if (tmpGUID && IsFriendPiece(caster, tmpGUID) && Heal(spell, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1100,7 +1118,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && IsMedivhsPiece(tmpGUID) && Heal(spell, tmpGUID))
+                                    if (tmpGUID && IsFriendPiece(caster, tmpGUID) && Heal(spell, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1191,6 +1209,57 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                     break;
                             }
                             break;
+						case 1: // 3 target in line in front
+                            switch (chessBoard[tmpI][tmpJ].ori)
+							{
+								case CHESS_ORI_E:
+									if (tmpJ + 1 <= 7)
+										if (!Enemy(caster, chessBoard[tmpI][tmpJ + 1].piece))
+											return caster;
+									if (tmpJ + 2 <= 7)
+										if (!Enemy(caster, chessBoard[tmpI][tmpJ + 2].piece))
+											return caster;
+									if (tmpJ + 3 <= 7)
+										if (!Enemy(caster, chessBoard[tmpI][tmpJ + 3].piece))
+											return caster;
+									break;
+								case CHESS_ORI_N:
+									if (tmpI - 1 >= 0)
+										if (!Enemy(caster, chessBoard[tmpI - 1][tmpJ].piece))
+											return caster;
+									if (tmpI - 2 >= 0)
+										if (!Enemy(caster, chessBoard[tmpI - 2][tmpJ].piece))
+											return caster;
+									if (tmpI - 3 >= 0)
+										if (!Enemy(caster, chessBoard[tmpI - 3][tmpJ].piece))
+											return caster;
+									break;
+								case CHESS_ORI_S:
+									if (tmpI + 1 <= 7)
+										if (!Enemy(caster, chessBoard[tmpI + 1][tmpJ].piece))
+											return caster;
+									if (tmpI + 2 <= 7)
+										if (!Enemy(caster, chessBoard[tmpI + 2][tmpJ].piece))
+											return caster;
+									if (tmpI + 3 <= 7)
+										if (!Enemy(caster, chessBoard[tmpI + 3][tmpJ].piece))
+											return caster;
+									break;
+								case CHESS_ORI_W:
+									if (tmpJ - 1 >= 0)
+										if (!Enemy(caster, chessBoard[tmpI][tmpJ - 1].piece))
+											return caster;
+									if (tmpJ - 2 >= 0)
+										if (!Enemy(caster, chessBoard[tmpI][tmpJ - 2].piece))
+											return caster;
+									if (tmpJ - 3 >= 0)
+										if (!Enemy(caster, chessBoard[tmpI][tmpJ - 3].piece))
+											return caster;
+									break;
+								default:
+									break;
+							}
+                            break;
                         case 0: // check if is any piece in melee
                             for (i = 0; i < OFFSET8COUNT; i++)
                             {
@@ -1202,7 +1271,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && IsMedivhsPiece(tmpGUID))
+                                    if (tmpGUID && IsFriendPiece(caster, tmpGUID))
                                         return caster;
                                 }
                             }
@@ -1293,7 +1362,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && !IsMedivhsPiece(tmpGUID))
+                                    if (tmpGUID && !IsFriendPiece(caster, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1308,7 +1377,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && !IsMedivhsPiece(tmpGUID))
+                                    if (tmpGUID && !IsFriendPiece(caster, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1323,7 +1392,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && !IsMedivhsPiece(tmpGUID))
+                                    if (tmpGUID && !IsFriendPiece(caster, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1338,7 +1407,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && !IsMedivhsPiece(tmpGUID))
+                                    if (tmpGUID && !IsFriendPiece(caster, tmpGUID))
                                         tmpPossibleTargetsList.push_back(tmpGUID);
                                 }
                             }
@@ -1406,7 +1475,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             switch (chessBoard[tmpI][tmpJ].ori)
                             {
                                 case CHESS_ORI_E:
-                                    if (tmpJ + 1 >= 0)
+                                    if (tmpJ + 1 < 8)
                                         if (Enemy(caster, chessBoard[tmpI][tmpJ + 1].piece))
                                             return chessBoard[tmpI][tmpJ + 1].piece;
                                     break;
@@ -1416,7 +1485,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                             return chessBoard[tmpI - 1][tmpJ].piece;
                                     break;
                                 case CHESS_ORI_S:
-                                    if (tmpI + 1 >= 0)
+                                    if (tmpI + 1 < 8)
                                         if (Enemy(caster, chessBoard[tmpI + 1][tmpJ].piece))
                                             return chessBoard[tmpI + 1][tmpJ].piece;
                                     break;
@@ -1429,6 +1498,57 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                     break;
                             }
                             break;
+						case 1: // 3 target in line in front
+                            switch (chessBoard[tmpI][tmpJ].ori)
+							{
+								case CHESS_ORI_E:
+									if (tmpJ + 1 <= 7)
+										if (Enemy(caster, chessBoard[tmpI][tmpJ + 1].piece))
+											return caster;
+									if (tmpJ + 2 <= 7)
+										if (Enemy(caster, chessBoard[tmpI][tmpJ + 2].piece))
+											return caster;
+									if (tmpJ + 3 <= 7)
+										if (Enemy(caster, chessBoard[tmpI][tmpJ + 3].piece))
+											return caster;
+									break;
+								case CHESS_ORI_N:
+									if (tmpI - 1 >= 0)
+										if (Enemy(caster, chessBoard[tmpI - 1][tmpJ].piece))
+											return caster;
+									if (tmpI - 2 >= 0)
+										if (Enemy(caster, chessBoard[tmpI - 2][tmpJ].piece))
+											return caster;
+									if (tmpI - 3 >= 0)
+										if (Enemy(caster, chessBoard[tmpI - 3][tmpJ].piece))
+											return caster;
+									break;
+								case CHESS_ORI_S:
+									if (tmpI + 1 <= 7)
+										if (Enemy(caster, chessBoard[tmpI + 1][tmpJ].piece))
+											return caster;
+									if (tmpI + 2 <= 7)
+										if (Enemy(caster, chessBoard[tmpI + 2][tmpJ].piece))
+											return caster;
+									if (tmpI + 3 <= 7)
+										if (Enemy(caster, chessBoard[tmpI + 3][tmpJ].piece))
+											return caster;
+									break;
+								case CHESS_ORI_W:
+									if (tmpJ - 1 >= 0)
+										if (Enemy(caster, chessBoard[tmpI][tmpJ - 1].piece))
+											return caster;
+									if (tmpJ - 2 >= 0)
+										if (Enemy(caster, chessBoard[tmpI][tmpJ - 2].piece))
+											return caster;
+									if (tmpJ - 3 >= 0)
+										if (Enemy(caster, chessBoard[tmpI][tmpJ - 3].piece))
+											return caster;
+									break;
+								default:
+									break;
+							}
+                            break;
                         case 0: // check if is any piece in melee
                             for (i = 0; i < OFFSET8COUNT; i++)
                             {
@@ -1440,7 +1560,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                 {
                                     tmpGUID = chessBoard[tmpOffsetI][tmpOffsetJ].piece;
 
-                                    if (tmpGUID && !IsMedivhsPiece(tmpGUID))
+                                    if (tmpGUID && !IsFriendPiece(caster, tmpGUID))
                                         return caster;
                                 }
                             }
@@ -1531,13 +1651,13 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             //front
                             if (Enemy(piece, chessBoard[tmpi - 1][tmpj].piece))
                                 return chessBoard[tmpi - 1][tmpj].piece;
-
+							/*
                             //strafe
                             if (tmpj < 7 && Enemy(piece, chessBoard[tmpi - 1][tmpj + 1].piece))
                                 return chessBoard[tmpi - 1][tmpj + 1].piece;
 
                             if (tmpj > 0 && Enemy(piece, chessBoard[tmpi - 1][tmpj - 1].piece))
-                                return chessBoard[tmpi - 1][tmpj - 1].piece;
+                                return chessBoard[tmpi - 1][tmpj - 1].piece;*/
                         }
                         break;
                     case CHESS_ORI_E:
@@ -1546,13 +1666,13 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             //front
                             if (Enemy(piece, chessBoard[tmpi][tmpj + 1].piece))
                                 return chessBoard[tmpi][tmpj + 1].piece;
-
+							/*
                             //strafe
                             if (tmpi < 7 && Enemy(piece, chessBoard[tmpi + 1][tmpj + 1].piece))
                                 return chessBoard[tmpi + 1][tmpj + 1].piece;
 
                             if (tmpi > 0 && Enemy(piece, chessBoard[tmpi - 1][tmpj + 1].piece))
-                                return chessBoard[tmpi - 1][tmpj + 1].piece;
+                                return chessBoard[tmpi - 1][tmpj + 1].piece;*/
                         }
                         break;
                     case CHESS_ORI_S:
@@ -1561,13 +1681,13 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             //front
                             if (Enemy(piece, chessBoard[tmpi + 1][tmpj].piece))
                                 return chessBoard[tmpi + 1][tmpj].piece;
-
+							/*
                             //strafe
                             if (tmpj < 7 && Enemy(piece, chessBoard[tmpi + 1][tmpj + 1].piece))
                                 return chessBoard[tmpi + 1][tmpj + 1].piece;
 
                             if (tmpj > 0 && Enemy(piece, chessBoard[tmpi + 1][tmpj - 1].piece))
-                                return chessBoard[tmpi + 1][tmpj - 1].piece;
+                                return chessBoard[tmpi + 1][tmpj - 1].piece;*/
                         }
                         break;
                     case CHESS_ORI_W:
@@ -1576,13 +1696,13 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             //front
                             if (Enemy(piece, chessBoard[tmpi][tmpj - 1].piece))
                                 return chessBoard[tmpi][tmpj - 1].piece;
-
+							/*
                             //strafe
                             if (tmpi < 7 && Enemy(piece, chessBoard[tmpi + 1][tmpj - 1].piece))
                                 return chessBoard[tmpi + 1][tmpj - 1].piece;
 
                             if (tmpi > 0 && Enemy(piece, chessBoard[tmpi - 1][tmpj - 1].piece))
-                                return chessBoard[tmpi - 1][tmpj - 1].piece;
+                                return chessBoard[tmpi - 1][tmpj - 1].piece;*/
                         }
                         break;
                     default:
@@ -1680,6 +1800,32 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                 return false;
             }
 
+			bool isHorde(uint32 entry)
+			{
+				if (entry == 21752 || entry == 21750 || entry==21747 || entry==21748 || entry==21726 || entry==17469)
+					return true;
+				return false;
+			}
+
+			bool isAlliance(uint32 entry)
+			{
+				if (entry == 21682 || entry == 21683 || entry==21684 || entry==21664 || entry==21160 || entry==17211)
+					return true;
+				return false;
+			}
+
+			bool IsFriendPiece(uint64 u1, uint64 u2) {
+				uint32 entryU1, entryU2;
+				bool U1Alli, U2Alli;
+				entryU1 = me->GetCreature(*me, u1)->GetEntry();
+				entryU2 = me->GetCreature(*me, u2)->GetEntry();
+				if (isAlliance(entryU1) && isAlliance(entryU2))
+					return true;
+				if (isHorde(entryU1) && isHorde(entryU2))
+					return true;
+				return false;
+			}
+
             bool IsMedivhsPiece(Unit * unit)
             {
             #ifdef CHESS_DEBUG_INFO
@@ -1756,9 +1902,9 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                 {
                     Creature * uFrom = me->GetCreature(*me, from);
                     if (uFrom)
-                        uFrom->MonsterSay("GetSpellTarget(..) : Nie znaleziono mnie na planszy !!", LANG_UNIVERSAL, 0);
+                        uFrom->MonsterSay("GetSpellTarget(..) : Je suis introuvable sur la carte !!", LANG_UNIVERSAL, 0);
                     else
-                        me->MonsterSay("GetSpellTarget(..) : uFrom sie zapodzial", LANG_UNIVERSAL, 0);
+                        me->MonsterSay("GetSpellTarget(..) : uFrom perdu", LANG_UNIVERSAL, 0);
                     return false;
                 }
 
@@ -1858,51 +2004,80 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                     {
                         case NPC_ROOK_H:
                             me->MonsterSay(SAY_LOSE_ROOK_P,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_LOSE_ROOK_P);
                             break;
                         case NPC_ROOK_A:
                             me->MonsterSay(SAY_LOSE_ROOK_M,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_LOSE_ROOK_M);
                             break;
                         case NPC_QUEEN_H:
                             me->MonsterSay(SAY_LOSE_QUEEN_P,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_LOSE_QUEEN_P);
                             break;
                         case NPC_QUEEN_A:
                             me->MonsterSay(SAY_LOSE_QUEEN_M,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_LOSE_QUEEN_M);
                             break;
                         case NPC_BISHOP_H:
                             me->MonsterSay(SAY_LOSE_BISHOP_P,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_LOSE_BISHOP_P);
                             break;
                         case NPC_BISHOP_A:
                             me->MonsterSay(SAY_LOSE_BISHOP_M,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_LOSE_BISHOP_M);
                             break;
                         case NPC_KNIGHT_H:
                             me->MonsterSay(SAY_LOSE_KNIGHT_P,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_KNIGHT_LOSE_P);
                             break;
                         case NPC_KNIGHT_A:
                             me->MonsterSay(SAY_LOSE_KNIGHT_M,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_KNIGHT_LOSE_M);
                             break;
                         case NPC_PAWN_H:
 
                             switch(rand()%3)
                               {
-                              case 0:me->MonsterSay(SAY_LOSE_PAWN_P_1,LANG_UNIVERSAL,NULL);break;
-                              case 1:me->MonsterSay(SAY_LOSE_PAWN_P_2,LANG_UNIVERSAL,NULL);break;
-                              case 2:me->MonsterSay(SAY_LOSE_PAWN_P_3,LANG_UNIVERSAL,NULL);break;
+                              case 0:
+								  me->MonsterSay(SAY_LOSE_PAWN_P_1,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_P_1);
+								  break;
+                              case 1:
+								  me->MonsterSay(SAY_LOSE_PAWN_P_2,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_P_2);
+								  break;
+                              case 2:
+								  me->MonsterSay(SAY_LOSE_PAWN_P_3,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_P_2);
+								  break;
                               }
                             break;
 
                         case NPC_PAWN_A:
 
-                            switch(rand()%2)
+                            switch(rand()%3)
                               {
-                              case 0:me->MonsterSay(SAY_LOSE_PAWN_M_1,LANG_UNIVERSAL,NULL);break;
-                              case 1:me->MonsterSay(SAY_LOSE_PAWN_M_2,LANG_UNIVERSAL,NULL);break;
+                              case 0:
+								  me->MonsterSay(SAY_LOSE_PAWN_M_1,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_M_1);
+								  break;
+                              case 1:
+								  me->MonsterSay(SAY_LOSE_PAWN_M_2,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_M_2);
+								  break;
+								case 2:
+								  me->MonsterSay(SAY_LOSE_PAWN_M_3,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_M_3);
+								  break;
                               }
                             break;
 
                         case NPC_KING_H:
 
                             me->MonsterSay(SAY_MEDIVH_WIN,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_MEDIVH_WIN);
                             pInstance->SetData(DATA_CHESS_EVENT, FAIL);
+							pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
                             endGameEventState = GAMEEND_MEDIVH_WIN;
                             endEventTimer = 2500;
                             endEventCount = 0;
@@ -1915,6 +2090,8 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             //    me->Say("Teraz powinna sie skrzynka pojawic", LANG_UNIVERSAL, NULL); // temporary
 
                             me->MonsterSay(SAY_PLAYER_WIN,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_PLAYER_WIN);
+							pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
                             pInstance->SetData(DATA_CHESS_EVENT, DONE);
                             endGameEventState = GAMEEND_MEDIVH_LOSE;
                             endEventTimer = 2500;
@@ -1957,24 +2134,45 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 
                             switch(rand()%3)
                               {
-                              case 0:me->MonsterSay(SAY_LOSE_PAWN_P_1,LANG_UNIVERSAL,NULL);break;
-                              case 1:me->MonsterSay(SAY_LOSE_PAWN_P_2,LANG_UNIVERSAL,NULL);break;
-                              case 2:me->MonsterSay(SAY_LOSE_PAWN_P_3,LANG_UNIVERSAL,NULL);break;
+                              case 0:
+								  me->MonsterSay(SAY_LOSE_PAWN_P_1,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_P_1);
+								  break;
+                              case 1:
+								  me->MonsterSay(SAY_LOSE_PAWN_P_2,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_P_2);
+								  break;
+                              case 2:
+								  me->MonsterSay(SAY_LOSE_PAWN_P_3,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_P_3);
+								  break;
                               }
                             break;
 
                         case NPC_PAWN_H:
 
-                            switch(rand()%2)
+                            switch(rand()%3)
                               {
-                              case 0:me->MonsterSay(SAY_LOSE_PAWN_M_1,LANG_UNIVERSAL,NULL);break;
-                              case 1:me->MonsterSay(SAY_LOSE_PAWN_M_2,LANG_UNIVERSAL,NULL);break;
+                              case 0:
+								  me->MonsterSay(SAY_LOSE_PAWN_M_1,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_M_1);
+								  break;
+                              case 1:
+								  me->MonsterSay(SAY_LOSE_PAWN_M_2,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_M_2);
+								  break;
+							case 2:
+								  me->MonsterSay(SAY_LOSE_PAWN_M_3,LANG_UNIVERSAL,NULL);
+								  me->PlayDirectSound(SOUND_LOSE_PAWN_M_3);
+								  break;
                               }
                             break;
 
                         case NPC_KING_A:
 
                             me->MonsterSay(SAY_MEDIVH_WIN,LANG_UNIVERSAL,NULL);
+							me->PlayDirectSound(SOUND_MEDIVH_WIN);
+							pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
                             pInstance->SetData(DATA_CHESS_EVENT, FAIL);
                             endGameEventState = GAMEEND_MEDIVH_WIN;
                             endEventTimer = 2500;
@@ -1988,6 +2186,8 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             //    me->Say("Teraz powinna sie skrzynka pojawic", LANG_UNIVERSAL, NULL); // temporary
 
                             me->MonsterSay(SAY_PLAYER_WIN,LANG_UNIVERSAL,NULL);
+							pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
+							me->PlayDirectSound(SOUND_PLAYER_WIN);
                             pInstance->SetData(DATA_CHESS_EVENT, DONE);
                             endGameEventState = GAMEEND_MEDIVH_LOSE;
                             endEventTimer = 2500;
@@ -2044,6 +2244,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                     tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+					tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 }
 
                 int tmpI = -1, tmpJ = -1;
@@ -2478,6 +2679,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                         if (tmpC = me->GetCreature(*me, chessBoard[i][j].piece))
                         {
                             tmpC->SetVisible(false);
+							tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             tmpC->DestroyForNearbyPlayers();
                             tmpC->Kill(tmpC, false);
                             tmpC->RemoveCorpse();
@@ -2545,16 +2747,17 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                 secondCheatDamageReq = urand(SECOND_CHEAT_HP_MIN*1000, SECOND_CHEAT_HP_MAX*1000)/1000.0;
                 thirdCheatDamagereq = urand(THIRD_CHEAT_HP_MIN*1000, THIRD_CHEAT_HP_MAX*1000)/1000.0;
                 pInstance->SetData(DATA_CHESS_DAMAGE, 0);
+				std::cout << firstCheatDamageReq << std::endl;
             }
 
             void StartMiniEvent()
             {
                 ClearBoard();
 
-                if (chestGUID)
-                    return;
-
                 miniEventState = MINI_EVENT_KING;
+
+				if (chestGUID)
+                    return;
 
                 pInstance->SetData(DATA_DUST_COVERED_CHEST, IN_PROGRESS);
             }
@@ -2584,6 +2787,12 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 
             void UpdateAI(const uint32 diff)
             {
+				if (!pInstance)
+					return;
+
+				if (pInstance->GetData(DATA_CHESS_EVENT) == IN_PROGRESS)
+					pInstance->DoCastSpellOnPlayers(SPELL_GAME_IN_SESSION);
+
                 if (miniEventState)
                 {
                     if (miniEventTimer < diff)
@@ -2631,7 +2840,10 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                                         if (tmpC = me->GetCreature(*me, chessBoard[i][j].piece))
                                         {
                                             tmpC->CastSpell(tmpC, SPELL_MOVE_MARKER, false);
-                                            //tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+											tmpC->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+											tmpC->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+											tmpC->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
+                                            tmpC->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
                                         }
                                     }
                                 }
@@ -2693,18 +2905,18 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                     else
                         endEventTimer -= diff;
 
-                    /*if (endEventLightningTimer < diff)
+                    if (endEventLightningTimer < diff)
                     {
                         Creature * tmpC;
                         int count = rand()%5;
 
                         for (int i = 0; i < count; ++i)
-                            if (tmpC = me->GetCreature(chessBoard[rand()%8][rand()%8].trigger))
-                                me->CastSpell(tmpC, SPELL_GAME_OVER, true);
+                            if (tmpC = me->GetCreature(*me, chessBoard[rand()%8][rand()%8].trigger))
+                                tmpC->CastSpell(tmpC, SPELL_GAME_OVER, true);
                         endEventLightningTimer = urand(100, 1000);
                     }
                     else
-                        endEventLightningTimer -= diff;*/
+                        endEventLightningTimer -= diff;
 
                     return;
                 }
@@ -2737,6 +2949,9 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                         if (tmpList.size() < 3)
                             tmp = tmpList.size();
 
+						me->MonsterSay(SAY_MEDIVH_CHEAT_1,LANG_UNIVERSAL,NULL);
+						me->PlayDirectSound(SOUND_MEDIVH_CHEAT_1);
+
                         for (int i = 0; i < tmp; ++i)
                         {
                             std::list<ChessTile>::iterator itr = tmpList.begin();
@@ -2744,8 +2959,6 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 
                             if (Creature * tmpC = me->GetCreature(*me, (*itr).trigger))
                                 tmpC->CastSpell(tmpC, SPELL_FURY_OF_MEDIVH, false);
-
-                            me->MonsterSay(SAY_MEDIVH_CHEAT_1,LANG_UNIVERSAL,NULL);
 
                             tmpList.erase(itr);
                         }
@@ -2773,15 +2986,16 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                         if (tmpList.size() < 3)
                             tmp = tmpList.size();
 
+						me->MonsterSay(SAY_MEDIVH_CHEAT_2, LANG_UNIVERSAL, NULL);
+						me->PlayDirectSound(SOUND_MEDIVH_CHEAT_2);
+
                         for (int i = 0; i < tmp; ++i)
                         {
                             std::list<ChessTile>::iterator itr = tmpList.begin();
                             advance(itr, urand(0, tmpList.size()-1));
 
-                            if (Creature * tmpC = me->GetCreature(*me, (*itr).trigger))
+                            if (Creature * tmpC = me->GetCreature(*me, (*itr).piece))
                                 tmpC->CastSpell(tmpC, SPELL_HAND_OF_MEDIVH, false);
-
-                            me->MonsterSay(SAY_MEDIVH_CHEAT_2, LANG_UNIVERSAL, NULL);
 
                             tmpList.erase(itr);
                         }
@@ -2802,7 +3016,8 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
                             if (Creature * tmpC = me->GetCreature(*me, *itr))
                                 tmpC->SetHealth(tmpC->GetMaxHealth());
 
-                        me->MonsterSay(SAY_MEDIVH_CHEAT_3, LANG_UNIVERSAL, NULL);
+						me->MonsterSay(SAY_MEDIVH_CHEAT_3, LANG_UNIVERSAL, NULL);
+						me->PlayDirectSound(SOUND_MEDIVH_CHEAT_3);
 
                         thirdCheatTimer = urand(THIRD_CHEAT_TIMER_MIN, THIRD_CHEAT_TIMER_MAX)/2;
                     }
@@ -3848,6 +4063,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 		WorldLocation wLoc;
 
 		uint64 MedivhGUID;
+		uint64 CasterGUID;
 
 		int32 moveTimer;
 		uint64 unitToMove;
@@ -3855,7 +4071,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
      
         void Reset()
         {
-			moveTimer   = 3000;
+			moveTimer   = 1000;
 			pieceStance = PIECE_NONE;
 			unitToMove = 0;
 			MedivhGUID = pInstance->GetData64(DATA_CHESS_ECHO_OF_MEDIVH);
@@ -3865,7 +4081,6 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
      
 		void UpdateAI(const uint32 diff)
         {
-			me->MonsterSay("actualisation",0,0);
           if (pInstance->GetData(DATA_CHESS_EVENT) != IN_PROGRESS)
 				return;
       
@@ -3877,11 +4092,83 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 					moveTimer -= diff;
 			}
         }
+
+		void SetGUID(uint64 uiGuid, int32 /*iId*/) {
+			CasterGUID = uiGuid;
+		}
+
+		void DoAction(const int32 action) {
+			if (!MedivhGUID)
+				MedivhGUID = pInstance->GetData64(DATA_CHESS_ECHO_OF_MEDIVH);
+
+			if (pieceStance != PIECE_NONE || !MedivhGUID)
+				return;
+
+            npc_echo_of_medivhAI* medivh = (npc_echo_of_medivhAI*)(me->GetCreature((*me), MedivhGUID)->AI());
+
+			switch (action)
+            {
+				//touché par un spell de changement de direction
+				case ACTION_CHANGE_FACING: 
+					
+					if (medivh)
+					{
+						if (CasterGUID)
+						{
+							// test enlevé pour pouvoir se diriger vers des pièces alliées
+							//if (medivh->CanMoveTo(me->GetGUID(), CasterGUID))
+							//{
+								medivh->AddTriggerToMove(me->GetGUID(), CasterGUID, me->GetCreature((*me), CasterGUID)->GetCharmerOrOwnerPlayerOrPlayerItself() ? true : false);
+
+								me->CastSpell(me, SPELL_MOVE_PREVISUAL, false);
+
+								unitToMove = CasterGUID;
+
+								pieceStance = PIECE_CHANGE_FACING;
+							//}
+							//else
+								//me->MonsterSay("Vous ne pouvez pas aller ici", LANG_UNIVERSAL, CasterGUID);
+						}
+						else
+							me->MonsterSay("Caster indéfini!", LANG_UNIVERSAL, 0);
+					}
+					else
+						me->MonsterSay("Medivh introuvable, vous ne pouvez bouger!", LANG_UNIVERSAL, 0);
+
+					break;
+				case ACTION_MOVEMENT: 
+
+					if (medivh)
+					{
+						if (CasterGUID)
+						{
+							if (medivh->CanMoveTo(me->GetGUID(), CasterGUID))
+							{
+								medivh->AddTriggerToMove(me->GetGUID(), CasterGUID, me->GetCreature((*me), CasterGUID)->GetCharmerOrOwnerPlayerOrPlayerItself() ? true : false);
+
+								me->CastSpell(me, SPELL_MOVE_PREVISUAL, false);
+
+								unitToMove = CasterGUID;
+
+								pieceStance = PIECE_MOVE;
+							}
+							else {
+								me->MonsterSay("Vous ne pouvez pas aller ici", LANG_UNIVERSAL, CasterGUID);
+							}
+						}
+						else
+							me->MonsterSay("Caster indéfini!", LANG_UNIVERSAL, 0);
+					}
+					else
+						me->MonsterSay("Medivh introuvable, vous ne pouvez bouger!", LANG_UNIVERSAL, 0);
+					break;
+			}
+		}
      
         void SpellHit(Unit *caster,const SpellInfo *spell)
         {
-            me->MonsterSay("touché",0,0);
-			if (!MedivhGUID)
+            //me->MonsterSay("touché",0,0);
+			/*if (!MedivhGUID)
 				MedivhGUID = pInstance->GetData64(DATA_CHESS_ECHO_OF_MEDIVH);
 
 			if (pieceStance != PIECE_NONE || !MedivhGUID)
@@ -3925,14 +4212,18 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 				}
 				default:
 					break;
-			}
+			}*/
+		}
+
+		void DamageTaken(Unit* attacker, uint32& damage) {
+			damage = 0;
 		}
 
 		void MakeMove()
 		{
 			ChessPiecesStances tmpStance = pieceStance;
 
-			moveTimer = 3000;
+			moveTimer = 1000;
 			pieceStance = PIECE_NONE;
 			Creature * temp = me->GetCreature((*me), unitToMove);
 			Creature * temp2 = me->GetCreature((*me), MedivhGUID);
@@ -3975,7 +4266,7 @@ const int offsetTab25[4][2] = {{-3, -3}, {3, -3}, {3, 3}, {-3, 3}};
 				{
 					pieceStance = PIECE_NONE;
 					unitToMove = 0;
-					moveTimer = 3000;
+					moveTimer = 1000;
 				}
 			}
 

@@ -153,7 +153,6 @@ public:
                 case TYPE_TERESTIAN:            m_auiEncounter[7] = uiData; break;
                 case TYPE_NETHERSPITE:          m_auiEncounter[8] = uiData; break;
                 case DATA_CHESS_EVENT:
-                    printf("\n\nDATA_CHESS changé en ", uiData, "\n\n");
                     if(uiData == DONE)
                     {
                         if (GetData(DATA_DUST_COVERED_CHEST) != SPECIAL)
@@ -164,7 +163,6 @@ public:
                         if (uiData == FAIL)
                             SetData(DATA_DUST_COVERED_CHEST, SPECIAL);
                     }
-                    printf("\n\nDATA_CHESS changé en ", uiData, "\n\n");
                     m_auiEncounter[9] = uiData;
                     break;
                 case TYPE_MALCHEZZAR:           m_auiEncounter[10] = uiData; break;

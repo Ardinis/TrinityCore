@@ -184,7 +184,7 @@ public:
 
   bool OnGossipHello(Player* player, GameObject* gameObject)
   {
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Toutes nos felicitations aux lorem ipsum pour le first down roi liche en 25HM !", GOSSIP_SENDER_MAIN, 42);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Toutes nos felicitations aux Faravisa pour le first down LK 25 hm 0% ainsi qu'aux lorem ipsum pour le first down roi liche en 25HM 30% !", GOSSIP_SENDER_MAIN, 42);
     player->SEND_GOSSIP_MENU(gameObject->GetGOInfo()->GetGossipMenuId(), gameObject->GetGUID());
     return true;
   }

@@ -553,6 +553,10 @@ void Transport::MoveToNextWaypoint()
 bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, float orientation)
 {
     Map const* oldMap = GetMap();
+
+    if (!oldMap)
+      return false;
+
     Relocate(x, y, z);
     UpdateModelPosition();
     if (oldMap->GetId() == newMapid)

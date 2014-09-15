@@ -57,6 +57,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
         npc_echo_of_medivhAI(Creature *c) : ScriptedAI(c) {
             pInstance = ((instance_karazhan_InstanceMapScript*)me->GetInstanceScript());
             me->GetPosition(&wLoc);
+			endEventLightningTimer = 500;
             tpLoc.m_positionX = -11108.2f;
             tpLoc.m_positionY = -1841.56f;
             tpLoc.m_positionZ = 229.625f;
@@ -1567,6 +1568,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
             eventStarted = false;
             miniEventState = MINI_EVENT_NONE;
             miniEventTimer = 5000;
+			endEventLightningTimer = 500;
             endGameEventState = GAMEEND_NONE;
             endEventTimer = 2500;
             hordePieces = 16;
@@ -2338,7 +2340,6 @@ struct npc_echo_of_medivhAI : public ScriptedAI
             secondCheatDamageReq = urand(SECOND_CHEAT_HP_MIN*1000, SECOND_CHEAT_HP_MAX*1000)/1000.0;
             thirdCheatDamagereq = urand(THIRD_CHEAT_HP_MIN*1000, THIRD_CHEAT_HP_MAX*1000)/1000.0;
             pInstance->SetData(DATA_CHESS_DAMAGE, 0);
-			std::cout << firstCheatDamageReq << std::endl;
         }
 
         void StartMiniEvent()
@@ -4107,6 +4108,11 @@ class chess_npc : public CreatureScript
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
+	void IsSummonedBy(Unit* /*summoner*/) {
+		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+	}
+
     void OnCharmed(bool apply)
     {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
@@ -4164,8 +4170,8 @@ class chess_npc : public CreatureScript
 				if (tmpP->HasAura(SPELL_POSSES_CHESSPIECE))
 					tmpP->RemoveAura(SPELL_POSSES_CHESSPIECE);
 				me->RemoveCharmedBy(tmpP);
-				me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 			}
+			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		}
 	}
      

@@ -2554,7 +2554,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
                         tmpList.erase(itr);
                     }
 
-                    firstCheatTimer = urand(FIRST_CHEAT_TIMER_MIN, FIRST_CHEAT_TIMER_MAX)/2;
+                    firstCheatTimer = urand(FIRST_CHEAT_TIMER_MIN, FIRST_CHEAT_TIMER_MAX);
                 }
                 else
                     firstCheatTimer = 5000; // next check in 5 seconds
@@ -2591,7 +2591,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
                         tmpList.erase(itr);
                     }
 
-                    secondCheatTimer = urand(SECOND_CHEAT_TIMER_MIN, SECOND_CHEAT_TIMER_MAX)/2;
+                    secondCheatTimer = urand(SECOND_CHEAT_TIMER_MIN, SECOND_CHEAT_TIMER_MAX);
                 }
                 else
                     secondCheatTimer = 5000; // next check in 5 seconds
@@ -2610,7 +2610,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
 					me->MonsterSay(SAY_MEDIVH_CHEAT_3, LANG_UNIVERSAL, NULL);
 					me->PlayDirectSound(SOUND_MEDIVH_CHEAT_3);
 
-                    thirdCheatTimer = urand(THIRD_CHEAT_TIMER_MIN, THIRD_CHEAT_TIMER_MAX)/2;
+                    thirdCheatTimer = urand(THIRD_CHEAT_TIMER_MIN, THIRD_CHEAT_TIMER_MAX);
                 }
                 else
                     thirdCheatTimer = 5000; // next check in 5 seconds
@@ -4786,6 +4786,7 @@ class spell_hellfire_geyser : public SpellScriptLoader
 
 			void FilterTargets(std::list<Unit*>& targetList)
             {
+				targetList.clear();
 				InstanceScript* pInstance = ((InstanceScript*)GetCaster()->GetInstanceScript());
 				if (!pInstance)
 					return;

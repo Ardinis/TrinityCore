@@ -35,6 +35,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
         int32 miniEventTimer;
         uint32 endEventTimer;
         uint32 endEventLightningTimer;
+		uint32 spellEndGame;
 
         uint32 firstCheatTimer;
         uint32 secondCheatTimer;
@@ -1672,6 +1673,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
                         pInstance->SetData(DATA_CHESS_EVENT, FAIL);
 						pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
                         endGameEventState = GAMEEND_MEDIVH_WIN;
+						spellEndGame = SPELL_GAME_OVER;
                         endEventTimer = 2500;
                         endEventCount = 0;
                         break;
@@ -1687,6 +1689,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
 						pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
                         pInstance->SetData(DATA_CHESS_EVENT, DONE);
                         endGameEventState = GAMEEND_MEDIVH_LOSE;
+						spellEndGame = SPELL_WIN;
                         endEventTimer = 2500;
                         endEventCount = 0;
                         break;
@@ -1768,6 +1771,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
 						pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GAME_IN_SESSION);
                         pInstance->SetData(DATA_CHESS_EVENT, FAIL);
                         endGameEventState = GAMEEND_MEDIVH_WIN;
+						spellEndGame = SPELL_GAME_OVER;
                         endEventTimer = 2500;
                         endEventCount = 0;
                         break;
@@ -1783,6 +1787,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
 						me->PlayDirectSound(SOUND_PLAYER_WIN);
                         pInstance->SetData(DATA_CHESS_EVENT, DONE);
                         endGameEventState = GAMEEND_MEDIVH_LOSE;
+						spellEndGame = SPELL_WIN;
                         endEventTimer = 2500;
                         endEventCount = 0;
                         break;
@@ -2457,6 +2462,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
                     switch (endGameEventState)
                     {
                         case GAMEEND_MEDIVH_WIN:
+							spellEndGame = SPELL_GAME_OVER;
                             for (std::list<uint64>::iterator itr = unusedMedivhPieces.begin(); itr != unusedMedivhPieces.end(); ++itr)
                                 if (tmpC = me->GetCreature(*me, *itr))
                                     tmpC->HandleEmoteCommand(RAND(EMOTE_ONESHOT_CHEER, EMOTE_ONESHOT_APPLAUD));
@@ -2469,6 +2475,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
                                 endGameEventState = GAMEEND_CLEAR_BOARD;
                             break;
                         case GAMEEND_MEDIVH_LOSE:
+							spellEndGame = SPELL_WIN;
                             for (std::list<uint64>::iterator itr = unusedPlayerPieces.begin(); itr != unusedPlayerPieces.end(); ++itr)
                                 if (tmpC = me->GetCreature(*me, *itr))
                                     tmpC->HandleEmoteCommand(RAND(EMOTE_ONESHOT_CHEER, EMOTE_ONESHOT_APPLAUD));
@@ -2490,6 +2497,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
                         case GAMEEND_DESPAWN_CHEST:
                             DeleteChest();
                             EnterEvadeMode();
+							endGameEventState = GAMEEND_NONE;
                             return;
                     }
                     endEventCount++;
@@ -2504,7 +2512,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
 
                     for (int i = 0; i < count; ++i)
                         if (tmpC = me->GetCreature(*me, chessBoard[rand()%8][rand()%8].trigger))
-                            tmpC->CastSpell(tmpC, SPELL_GAME_OVER, true);
+                            tmpC->CastSpell(tmpC, spellEndGame, true);
                     endEventLightningTimer = urand(100, 1000);
                 }
                 else

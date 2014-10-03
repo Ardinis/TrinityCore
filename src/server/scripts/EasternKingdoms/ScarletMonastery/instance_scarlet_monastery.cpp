@@ -96,6 +96,9 @@ public:
                 case 3976: MograineGUID = creature->GetGUID(); break;
                 case 3977: WhitemaneGUID = creature->GetGUID(); break;
                 case 3981: VorrelGUID = creature->GetGUID(); break;
+                case 23904:
+                    creature->SetVisible(false);
+                    break;
             }
         }
 

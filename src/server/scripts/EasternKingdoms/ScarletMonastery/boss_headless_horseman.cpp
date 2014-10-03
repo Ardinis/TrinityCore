@@ -181,6 +181,8 @@ class boss_headless_horseman : public CreatureScript
                                 if (player->GetDistance(me) < 120.0f)
                                     sLFGMgr->RewardDungeonDoneFor(285, player);
                 }
+                if (Creature *billi = me->FindNearestCreature(23904, 100.0f))
+                    billi->SetVisible(true);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32 &damage)

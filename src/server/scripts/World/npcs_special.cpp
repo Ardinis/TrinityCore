@@ -4623,37 +4623,37 @@ public:
     bool Validate(SpellInfo const* /*spellEntry*/)
     {
       if (!sSpellMgr->GetSpellInfo(SPELL_PIRATE_COSTUME_MALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_PIRATE_COSTUME_FEMALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_NINJA_COSTUME_MALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_NINJA_COSTUME_FEMALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_LEPER_GNOME_COSTUME_MALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_LEPER_GNOME_COSTUME_FEMALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_GHOST_COSTUME_MALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_GHOST_COSTUME_FEMALE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_PIRATE))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_NINJA))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_LEPER_GNOME))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_RANDOM))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_SKELETON))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_WISP))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_GHOST))
-	return false;
+          return false;
       if (!sSpellMgr->GetSpellInfo(SPELL_HALLOWEEN_WAND_BAT))
-	return false;
+          return false;
       return true;
     }
 
@@ -4962,219 +4962,219 @@ alreade setted on fire or nor.
 class npc_shade_horseman : public CreatureScript
 {
 public:
-  npc_shade_horseman() : CreatureScript("npc_shade_horseman") { }
+    npc_shade_horseman() : CreatureScript("npc_shade_horseman") { }
 
 
   struct npc_shade_horsemanAI : public ScriptedAI
   {
-    npc_shade_horsemanAI(Creature* c) : ScriptedAI(c), fires(c) {}
+      npc_shade_horsemanAI(Creature* c) : ScriptedAI(c), fires(c) {}
 
-    SummonList fires;
-    EventMap events;
-    bool moving;
-    bool pointReached;
-    bool allFiresSet;
-    bool firesOut;
-    uint32 wpCount;
-    std::list<uint64> _playerList;
+      SummonList fires;
+      EventMap events;
+      bool moving;
+      bool pointReached;
+      bool allFiresSet;
+      bool firesOut;
+      uint32 wpCount;
+      std::list<uint64> _playerList;
 
-    void Reset()
-    {
-      moving = true;
-      pointReached = true;
-      allFiresSet = false;
-      firesOut = false;
-      wpCount = 0;
-      _playerList.clear();
-      events.Reset();
-
-      me->Mount(25159);
-      me->SetReactState(REACT_PASSIVE);
-      me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-      me->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
-
-      events.ScheduleEvent(EVENT_HORSEMAN_LAUGHS, urand(5000, 10000));
-      events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(7000, 14000));
-      events.ScheduleEvent(EVENT_FIRE_FAIL, 600000);
-    }
-
-    void JustSummoned(Creature* summon)
-    {
-      if (!summon)
-	return;
-
-      summon->SetCreatorGUID(me->GetGUID());
-      fires.Summon(summon);
-    }
-
-    void SummonedCreatureDespawn(Creature* summon)
-    {
-      if (!summon)
-	return;
-
-      fires.Despawn(summon);
-    }
-
-    void JustDied(Unit* killer)
-    {
-      if (killer && killer->GetAreaId() == me->GetAreaId())
-	killer->SummonGameObject(GO_LARGE_JACK_O_LANTERN, me->GetPositionX(), me->GetPositionY(), killer->GetPositionZ()+1.0f, me->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 180000);
-    }
-    void MovementInform(uint32 type, uint32 id)
-    {
-      if (type != POINT_MOTION_TYPE)
-	return;
-
-      if (moving && id < FIRE_NODES_PER_AREA)
+      void Reset()
       {
-	if (id == 0 && !allFiresSet)
-	{
-	  sLog->outBasic("HEADLESS HORSEMAN BUG TRACKING Area %u.", me->GetAreaId());
-	  Talk(SAY_HORSEMAN_SPAWN);
-	}
+          moving = true;
+          pointReached = true;
+          allFiresSet = false;
+          firesOut = false;
+          wpCount = 0;
+          _playerList.clear();
+          events.Reset();
 
-	if (!allFiresSet)
-	{
-	  const Position pos = GetPositionsForArea()[wpCount];
-	  if (pos.IsPositionValid())
-	    me->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_FIRE_CREATE_NODE, true);
-	}
+          me->Mount(25159);
+          me->SetReactState(REACT_PASSIVE);
+          me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+          me->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
 
-	if (id+1 == FIRE_NODES_PER_AREA)
-	{
-	  allFiresSet = true;
-	  wpCount = 0;
-	}
-	else
-	  ++wpCount;
-
-	pointReached = true;
+          events.ScheduleEvent(EVENT_HORSEMAN_LAUGHS, urand(5000, 10000));
+          events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(7000, 14000));
+          events.ScheduleEvent(EVENT_FIRE_FAIL, 600000);
       }
-      else if (id == FIRE_NODES_PER_AREA && firesOut)
+
+      void JustSummoned(Creature* summon)
       {
-	me->ExitVehicle();
-	me->SetReactState(REACT_AGGRESSIVE);
-	me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-	me->RemoveUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
-	events.ScheduleEvent(EVENT_HORSEMAN_CLEAVE, urand(5000, 10000));
+          if (!summon)
+              return;
+
+          summon->SetCreatorGUID(me->GetGUID());
+          fires.Summon(summon);
       }
-    }
 
-    void UpdateAI(const uint32 diff)
-    {
-      events.Update(diff);
-
-
-      if (!firesOut)
+      void SummonedCreatureDespawn(Creature* summon)
       {
-	const Position pos = GetPositionsForArea()[wpCount];
+          if (!summon)
+              return;
 
-	if (!pos.IsPositionValid())
-	  return;
-
-	if (pointReached)
-	{
-	  pointReached = false;
-	  me->GetMotionMaster()->MovePoint(wpCount, pos.GetPositionX(), pos.GetPositionY(), GetZForArea());
-	}
-
-	if (allFiresSet && fires.size() <= (uint32)(FIRE_NODES_PER_AREA*0.3f) && wpCount != FIRE_NODES_PER_AREA+1)
-	{
-	  Talk(SAY_HORSEMAN_FIRES_OUT);
-	  wpCount = FIRE_NODES_PER_AREA;
-	  me->GetMotionMaster()->MoveIdle();
-	  me->GetMotionMaster()->MovePoint(FIRE_NODES_PER_AREA, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
-	  fires.DespawnAll();
-	  firesOut = true;
-	  // Credit quest to players
-	  if (!_playerList.empty())
-	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
-	      if (Player* player = me->GetPlayer(*me, *i))
-		player->CastSpell(player, SPELL_QUESTS_CREDITS, true);
-	  me->DespawnOrUnsummon(10000);
-	  return;
-	}
-
-	switch(events.ExecuteEvent())
-	{
-	case EVENT_FIRE_FAIL:
-	  fires.DespawnAll();
-	  Talk(SAY_HORSEMAN_FIRES_FAIL);
-	  wpCount = FIRE_NODES_PER_AREA+1;
-	  me->GetMotionMaster()->MovePoint(wpCount, pos.GetPositionX(), pos.GetPositionY(), GetZForArea());
-	  if (!_playerList.empty())
-	  {
-	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
-	    {
-	      Player* player = me->GetPlayer(*me, *i);
-	      if (player)
-	      {
-		uint32 questId = player->GetTeam() == ALLIANCE ? QUEST_LET_THE_FIRES_COME_A : QUEST_LET_THE_FIRES_COME_H;
-		if (player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
-		  player->FailQuest(questId);
-	      }
-	    }
-	  }
-	  me->DespawnOrUnsummon(10000);
-	  break;
-	case EVENT_HORSEMAN_CONFLAGRATION:
-	  if (!_playerList.empty())
-	  {
-	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
-	    {
-	      Player* player = me->GetPlayer(*me, *i);
-	      if (player && player->GetDistance(me) <= 30.0f)
-	      {
-		me->CastSpell(player, RAND(SPELL_HORSEMAN_CONFLAGRATION_1, SPELL_HORSEMAN_CONFLAGRATION_2, SPELL_HORSEMAN_JACK_O_LANTERN), true);
-		break;
-	      }
-	    }
-	  }
-	  events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(5000, 10000));
-	  break;
-	case EVENT_HORSEMAN_LAUGHS:
-	  Talk(SAY_HORSEMAN_LAUGHS);
-	  events.ScheduleEvent(EVENT_HORSEMAN_LAUGHS, urand(10000, 25000));
-	  break;
-	}
-      } else {
-	switch(events.ExecuteEvent())
-	{
-	case EVENT_HORSEMAN_CLEAVE:
-	  if (Unit* victim = me->getVictim())
-	    me->CastSpell(victim, SPELL_HORSEMAN_CLEAVE, true);
-	  events.ScheduleEvent(EVENT_HORSEMAN_CLEAVE, urand(5000, 10000));
-	  return;
-	case EVENT_HORSEMAN_CONFLAGRATION:
-	  if (!_playerList.empty())
-	  {
-	    for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
-	    {
-	      Player* player = me->GetPlayer(*me, *i);
-	      if (player && player->GetAreaId() == me->GetAreaId() && player->GetDistance(me) <= 30.0f)
-	      {
-		me->CastSpell(player, RAND(SPELL_HORSEMAN_CONFLAGRATION_1, SPELL_HORSEMAN_CONFLAGRATION_2, SPELL_HORSEMAN_JACK_O_LANTERN), true);
-		break;
-	      }
-	    }
-	  }
-	  events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(5000, 10000));
-	  break;
-	}
-	DoMeleeAttackIfReady();
+          fires.Despawn(summon);
       }
-    }
+
+      void JustDied(Unit* killer)
+      {
+          if (killer && killer->GetAreaId() == me->GetAreaId())
+              killer->SummonGameObject(GO_LARGE_JACK_O_LANTERN, me->GetPositionX(), me->GetPositionY(), killer->GetPositionZ()+1.0f, me->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 180000);
+      }
+      void MovementInform(uint32 type, uint32 id)
+      {
+          if (type != POINT_MOTION_TYPE)
+              return;
+
+          if (moving && id < FIRE_NODES_PER_AREA)
+          {
+              if (id == 0 && !allFiresSet)
+              {
+                  sLog->outBasic("HEADLESS HORSEMAN BUG TRACKING Area %u.", me->GetAreaId());
+                  Talk(SAY_HORSEMAN_SPAWN);
+              }
+
+              if (!allFiresSet)
+              {
+                  const Position pos = GetPositionsForArea()[wpCount];
+                  if (pos.IsPositionValid())
+                      me->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_FIRE_CREATE_NODE, true);
+              }
+
+              if (id+1 == FIRE_NODES_PER_AREA)
+              {
+                  allFiresSet = true;
+                  wpCount = 0;
+              }
+              else
+                  ++wpCount;
+
+              pointReached = true;
+          }
+          else if (id == FIRE_NODES_PER_AREA && firesOut)
+          {
+              me->ExitVehicle();
+              me->SetReactState(REACT_AGGRESSIVE);
+              me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+              me->RemoveUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT | MOVEMENTFLAG_LEVITATING);
+              events.ScheduleEvent(EVENT_HORSEMAN_CLEAVE, urand(5000, 10000));
+          }
+      }
+
+      void UpdateAI(const uint32 diff)
+      {
+          events.Update(diff);
+
+
+          if (!firesOut)
+          {
+              const Position pos = GetPositionsForArea()[wpCount];
+
+              if (!pos.IsPositionValid())
+                  return;
+
+              if (pointReached)
+              {
+                  pointReached = false;
+                  me->GetMotionMaster()->MovePoint(wpCount, pos.GetPositionX(), pos.GetPositionY(), GetZForArea());
+              }
+
+              if (allFiresSet && fires.size() <= (uint32)(FIRE_NODES_PER_AREA*0.3f) && wpCount != FIRE_NODES_PER_AREA+1)
+              {
+                  Talk(SAY_HORSEMAN_FIRES_OUT);
+                  wpCount = FIRE_NODES_PER_AREA;
+                  me->GetMotionMaster()->MoveIdle();
+                  me->GetMotionMaster()->MovePoint(FIRE_NODES_PER_AREA, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+                  fires.DespawnAll();
+                  firesOut = true;
+                  // Credit quest to players
+                  if (!_playerList.empty())
+                      for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+                          if (Player* player = me->GetPlayer(*me, *i))
+                              player->CastSpell(player, SPELL_QUESTS_CREDITS, true);
+                  me->DespawnOrUnsummon(10000);
+                  return;
+              }
+
+              switch(events.ExecuteEvent())
+              {
+              case EVENT_FIRE_FAIL:
+                  fires.DespawnAll();
+                  Talk(SAY_HORSEMAN_FIRES_FAIL);
+                  wpCount = FIRE_NODES_PER_AREA+1;
+                  me->GetMotionMaster()->MovePoint(wpCount, pos.GetPositionX(), pos.GetPositionY(), GetZForArea());
+                  if (!_playerList.empty())
+                  {
+                      for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+                      {
+                          Player* player = me->GetPlayer(*me, *i);
+                          if (player)
+                          {
+                              uint32 questId = player->GetTeam() == ALLIANCE ? QUEST_LET_THE_FIRES_COME_A : QUEST_LET_THE_FIRES_COME_H;
+                              if (player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+                                  player->FailQuest(questId);
+                          }
+                      }
+                  }
+                  me->DespawnOrUnsummon(10000);
+                  break;
+              case EVENT_HORSEMAN_CONFLAGRATION:
+                  if (!_playerList.empty())
+                  {
+                      for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+                      {
+                          Player* player = me->GetPlayer(*me, *i);
+                          if (player && player->GetDistance(me) <= 30.0f)
+                          {
+                              me->CastSpell(player, RAND(SPELL_HORSEMAN_CONFLAGRATION_1, SPELL_HORSEMAN_CONFLAGRATION_2, SPELL_HORSEMAN_JACK_O_LANTERN), true);
+                              break;
+                          }
+                      }
+                  }
+                  events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(5000, 10000));
+                  break;
+              case EVENT_HORSEMAN_LAUGHS:
+                  Talk(SAY_HORSEMAN_LAUGHS);
+                  events.ScheduleEvent(EVENT_HORSEMAN_LAUGHS, urand(10000, 25000));
+                  break;
+              }
+          } else {
+              switch(events.ExecuteEvent())
+              {
+              case EVENT_HORSEMAN_CLEAVE:
+                  if (Unit* victim = me->getVictim())
+                      me->CastSpell(victim, SPELL_HORSEMAN_CLEAVE, true);
+                  events.ScheduleEvent(EVENT_HORSEMAN_CLEAVE, urand(5000, 10000));
+                  return;
+              case EVENT_HORSEMAN_CONFLAGRATION:
+                  if (!_playerList.empty())
+                  {
+                      for (std::list<uint64>::const_iterator i = _playerList.begin();i != _playerList.end(); ++i)
+                      {
+                          Player* player = me->GetPlayer(*me, *i);
+                          if (player && player->GetAreaId() == me->GetAreaId() && player->GetDistance(me) <= 30.0f)
+                          {
+                              me->CastSpell(player, RAND(SPELL_HORSEMAN_CONFLAGRATION_1, SPELL_HORSEMAN_CONFLAGRATION_2, SPELL_HORSEMAN_JACK_O_LANTERN), true);
+                              break;
+                          }
+                      }
+                  }
+                  events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, urand(5000, 10000));
+                  break;
+              }
+              DoMeleeAttackIfReady();
+          }
+      }
 
     const Position* GetPositionsForArea()
     {
       switch (me->GetAreaId())
       {
       case 87: //GoldShire
-	return FireNodesGoldShire;
+          return FireNodesGoldShire;
       case 362: // Razor Hill
       case 2337:
       case 14:
-	return FireNodesRazorHill;
+          return FireNodesRazorHill;
       }
       return NULL;
     }
@@ -5184,11 +5184,11 @@ public:
       switch (me->GetAreaId())
       {
       case 87: //GoldShire
-	return 77.6f;
+          return 77.6f;
       case 362: // Razor Hill
       case 2337:
       case 14:
-	return 40.0f;
+          return 40.0f;
       }
       return 0.0f;
     }
@@ -5197,8 +5197,8 @@ public:
     {
       if (id == EVENT_FIRE_HIT_BY_BUCKET)
       {
-	_playerList.push_back(guid);
-	_playerList.unique();
+          _playerList.push_back(guid);
+          _playerList.unique();
       }
 
     }
@@ -5261,9 +5261,7 @@ public:
     bool OnQuestAccept(Player* player, Creature* me, Quest const* quest)
     {
         if (!(me->GetAreaId() == 87 || me->GetAreaId() == 362))
-        {
             return true;
-        }
 
         if (quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_A || quest->GetQuestId() == QUEST_LET_THE_FIRES_COME_H)
         {

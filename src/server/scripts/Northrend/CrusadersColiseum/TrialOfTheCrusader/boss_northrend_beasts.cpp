@@ -279,11 +279,11 @@ public:
     {
 
       enum MyEvents
-	{
-	  EVENT_FIRE_BOMB = 1,
-	  EVENT_BATTER,
-	  EVENT_HEAD_CRACK,
-	};
+      {
+          EVENT_FIRE_BOMB = 1,
+          EVENT_BATTER,
+          EVENT_HEAD_CRACK,
+      };
 
         mob_snobold_vassalAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
@@ -311,9 +311,9 @@ public:
             if (m_pInstance)
                 m_uiBossGUID = m_pInstance->GetData64(NPC_GORMOK);
             //Workaround for Snobold
-	    //            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
-	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-	    mui_checkEnd = 1000;
+            //            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            mui_checkEnd = 1000;
         }
 
         void EnterCombat(Unit *pWho)
@@ -352,53 +352,53 @@ public:
 
       void DoAction(int32 const action)
       {
-	switch (action)
-	  {
-	  case ACTION_ENABLE_FIRE_BOMB:
-	    events.CancelEvent(EVENT_FIRE_BOMB);
-	    events.CancelEvent(EVENT_BATTER);
-            events.CancelEvent(EVENT_HEAD_CRACK);
-	    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-	    break;
-	  case ACTION_DISABLE_FIRE_BOMB:
-	    events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
-	    events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_HEAD_CRACK, 1*IN_MILLISECONDS);
-	    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-	    break;
-	  }
+          switch (action)
+          {
+              case ACTION_ENABLE_FIRE_BOMB:
+                  events.CancelEvent(EVENT_FIRE_BOMB);
+                  events.CancelEvent(EVENT_BATTER);
+                  events.CancelEvent(EVENT_HEAD_CRACK);
+                  me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                  break;
+              case ACTION_DISABLE_FIRE_BOMB:
+                  events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                  events.ScheduleEvent(EVENT_BATTER, 5*IN_MILLISECONDS);
+                  events.ScheduleEvent(EVENT_HEAD_CRACK, 1*IN_MILLISECONDS);
+                  me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                  break;
+          }
       }
 
       void BackToGornock()
       {
-	if (m_pInstance)
-	  {
-	    Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
-	    if (gormok && gormok->isAlive())
-	      {
-		SetCombatMovement(false);
-		m_bTargetDied = true;
+          if (m_pInstance)
+          {
+              Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
+              if (gormok && gormok->isAlive())
+              {
+                  SetCombatMovement(false);
+                  m_bTargetDied = true;
 
-		for (uint8 i = 0; i < 4; i++)
-		  {
-		    if (!gormok->GetVehicleKit()->GetPassenger(i))
-		      {
-			me->EnterVehicle(gormok, i);
-			m_uiTargetGUID = 0;
-			DoAction(ACTION_ENABLE_FIRE_BOMB);
-			break;
-		      }
-		  }
-	      }
-	  }
+                  for (uint8 i = 0; i < 4; i++)
+                  {
+                      if (!gormok->GetVehicleKit()->GetPassenger(i))
+                      {
+                          me->EnterVehicle(gormok, i);
+                          m_uiTargetGUID = 0;
+                          DoAction(ACTION_ENABLE_FIRE_BOMB);
+                          break;
+                      }
+                  }
+              }
+          }
       }
 
       bool CheckEnd()
       {
-	Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
-	if (gormok && !gormok->isAlive())
-	  return true;
-	return false;
+          Unit* gormok = ObjectAccessor::GetCreature(*me, m_pInstance->GetData64(NPC_GORMOK));
+          if (gormok && !gormok->isAlive())
+              return true;
+          return false;
       }
 
       void UpdateAI(uint32 const diff)
@@ -438,37 +438,37 @@ public:
 		events.ScheduleEvent(EVENT_FIRE_BOMB, 20*IN_MILLISECONDS);
 		return;
 	      case EVENT_HEAD_CRACK:
-		events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
-		if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-		  {
-		    if (Player *player = target->ToPlayer())
-		      {
-			if (target->GetVehicleKit())
-			  if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
-			    {
+              events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
+              if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+              {
+                  if (Player *player = target->ToPlayer())
+                  {
+                      if (target->GetVehicleKit())
+                          if (Unit* pSnobold = target->GetVehicleKit()->GetPassenger(0))
+                          {
 
-			      events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
-			      return;
-			    }
-			DoScriptText(SAY_SNOBOLLED, me, player);
-			m_uiTargetGUID = player->GetGUID();
-			player->CreateVehicleKit(444, 0);
-			me->EnterVehicle(player, 0);
-			//			if (me->GetExactDist2d(player) <= 1)
-			me->AddAura(66406, player);
-			//			me->MonsterYell("i am billi bob and i try to reach youre head !", LANG_UNIVERSAL, 0);
-			me->ClearUnitState(UNIT_STATE_ONVEHICLE);
-			if (player->GetVehicleKit())
-			  {
-			    player->GetVehicleKit()->RelocatePassengers(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
-			    me->SendMovementFlagUpdate();
-			  }
-			//35
-			//			me->HandleEmoteCommand(35);
-			events.CancelEvent(EVENT_HEAD_CRACK);
-		      }
-		  }
-		return;
+                              events.ScheduleEvent(EVENT_HEAD_CRACK, 2*IN_MILLISECONDS);
+                              return;
+                          }
+                      DoScriptText(SAY_SNOBOLLED, me, player);
+                      m_uiTargetGUID = player->GetGUID();
+                      player->CreateVehicleKit(444, 0);
+                      me->EnterVehicle(player, 0);
+                      //			if (me->GetExactDist2d(player) <= 1)
+                      me->AddAura(66406, player);
+                      //			me->MonsterYell("i am billi bob and i try to reach youre head !", LANG_UNIVERSAL, 0);
+                      me->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                      if (player->GetVehicleKit())
+                      {
+                          player->GetVehicleKit()->RelocatePassengers(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+                          me->SendMovementFlagUpdate();
+                      }
+                      //35
+                      //			me->HandleEmoteCommand(35);
+                      events.CancelEvent(EVENT_HEAD_CRACK);
+                  }
+              }
+              return;
 	      case EVENT_BATTER:
 		//		if (Player* target = me->FindNearestPlayer(3))
 		if (Unit *target = Unit::GetPlayer(*me, m_uiTargetGUID))

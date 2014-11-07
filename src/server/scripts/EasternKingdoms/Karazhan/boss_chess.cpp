@@ -4426,6 +4426,11 @@ class chess_npc : public CreatureScript
 
     if (action == GOSSIP_ACTION_INFO_DEF + 1)
     {
+		if (Pet *pet = player->GetPet()) {
+			player->RemovePet(pet, PET_SAVE_AS_CURRENT);
+		}
+		player->UnsummonPetTemporaryIfAny();
+
         if (_Creature->GetEntry() == NPC_KING_A || _Creature->GetEntry() == NPC_KING_H)
         {
 			if (pInstance->GetData(DATA_CHESS_EVENT) != IN_PROGRESS) {

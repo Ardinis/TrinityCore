@@ -41,50 +41,50 @@ EndScriptData */
 #define NPC_ATTACK_RADIUS 7
 #define SAY_AT_EVENT_START "Tres bien. Que la partie commence!"
 #define SOUND_START 10338
-#define SAY_LOSE_KNIGHT_P "Oui...tout se deroule comme prevu."
+#define SAY_LOSE_KNIGHT_P "Oui...Exactement comme prevu."
 #define SOUND_KNIGHT_LOSE_P 10349
 #define SAY_LOSE_KNIGHT_M "Oui... Bien sur."
 #define SOUND_KNIGHT_LOSE_M 10350
 #define SAY_LOSE_PAWN_P_1 "Un stratageme limpide."
 #define SOUND_LOSE_PAWN_P_1 10339
-#define SAY_LOSE_PAWN_P_2 "Reflechissons..."
+#define SAY_LOSE_PAWN_P_2 "Voyons donc..."
 #define SOUND_LOSE_PAWN_P_2 10340
-#define SAY_LOSE_PAWN_P_3 "Voyons donc..."
+#define SAY_LOSE_PAWN_P_3 "Ah ! La roue commence à tourner."
 #define SOUND_LOSE_PAWN_P_3 10341
-#define SAY_LOSE_PAWN_M_1 "Hmm."
+#define SAY_LOSE_PAWN_M_1 "Hmm..."
 #define SOUND_LOSE_PAWN_M_1 10342
-#define SAY_LOSE_PAWN_M_2 "Peu importe !"
+#define SAY_LOSE_PAWN_M_2 "Interessant..."
 #define SOUND_LOSE_PAWN_M_2 10344
-#define SAY_LOSE_PAWN_M_3 "Interessant."
+#define SAY_LOSE_PAWN_M_3 "Peu importe."
 #define SOUND_LOSE_PAWN_M_3 10343
-#define SAY_LOSE_QUEEN_P "Maintenant ça devient interessant."
+#define SAY_LOSE_QUEEN_P "Maintenant, ca devient interessant."
 #define SOUND_LOSE_QUEEN_P 10351
-#define SAY_LOSE_QUEEN_M "Ahh, j'aurai du le savoir."
+#define SAY_LOSE_QUEEN_M "Aaahh, j'aurais du le savoir."
 #define SOUND_LOSE_QUEEN_M 10352
-#define SAY_LOSE_BISHOP_P "Il suffit juste de ne pas perdre sa concentration."
+#define SAY_LOSE_BISHOP_P "Il suffit d'une legere baisse de concentration."
 #define SOUND_LOSE_BISHOP_P 10347
 #define SAY_LOSE_BISHOP_M "Un sacrifice necessaire."
 #define SOUND_LOSE_BISHOP_M 10348
 #define SAY_LOSE_ROOK_P "Imprudent ! Tres imprudent !"
 #define SOUND_LOSE_ROOK_P 10345
-#define SAY_LOSE_ROOK_M "Un ennui minime."
+#define SAY_LOSE_ROOK_M "Un ennui minime..."
 #define SOUND_LOSE_ROOK_M 10346
-
-#define SAY_PLAYER_CHECK "Et donc la fin approche."
+     
+#define SAY_PLAYER_CHECK "C'est dans l'ordre des choses."
 #define SOUND_PLAYER_CHECK 10353
-#define SAY_MEDIVH_CHECK "Comme cela devrait etre."
+#define SAY_MEDIVH_CHECK "Et voila la fin qui approche..."
 #define SOUND_MEDIVH_CHECK 10354
-
-#define SAY_PLAYER_WIN "Et c'est terminé."
+     
+#define SAY_PLAYER_WIN "Je ne mets rien de moins que la perfection."
 #define SOUND_PLAYER_WIN 10355
-#define SAY_MEDIVH_WIN "Je ne demande rien de mieux que la perfection."
+#define SAY_MEDIVH_WIN "Et c'est terminé."
 #define SOUND_MEDIVH_WIN 10356
-
-#define SAY_MEDIVH_CHEAT_1 "Un petit changement s'impose peut-être..."
+     
+#define SAY_MEDIVH_CHEAT_1 "Un petit changement s'impose peut-etre..."
 #define SOUND_MEDIVH_CHEAT_1 10357
 #define SAY_MEDIVH_CHEAT_2 "Passons au scenario alternatif."
 #define SOUND_MEDIVH_CHEAT_2 10358
-#define SAY_MEDIVH_CHEAT_3 "Il ne faut pas devenir trop confiant."
+#define SAY_MEDIVH_CHEAT_3 "Il ne faut jamais sombrer dans la suffisance."
 #define SOUND_MEDIVH_CHEAT_3 10359
 
 #define TRIGGER_ID 22519

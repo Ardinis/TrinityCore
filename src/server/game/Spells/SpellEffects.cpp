@@ -5592,15 +5592,15 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
 		  }
                 case 62482: // Grab Crate
                 {
-		  if (unitTarget)
+                    if (unitTarget)
                     {
-		      if (Unit* seat = m_caster->GetVehicleBase())
+                        if (Unit* seat = m_caster->GetVehicleBase())
                         {
-			  if (Unit* parent = seat->GetVehicleBase())
+                            if (Unit* parent = seat->GetVehicleBase())
                             {
-			      // TODO: a hack, range = 11, should after some time cast, otherwise too far
-			      m_caster->CastSpell(parent, 62496, true);
-			      unitTarget->CastSpell(parent, m_spellInfo->Effects[EFFECT_0].CalcValue());
+                                // TODO: a hack, range = 11, should after some time cast, otherwise too far
+                                m_caster->CastSpell(parent, 62496, true);
+                                unitTarget->CastCustomSpell(m_spellInfo->Effects[EFFECT_0].CalcValue(), SPELLVALUE_BASE_POINT0, 3, parent, true);
                             }
                         }
                     }

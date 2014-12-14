@@ -593,24 +593,9 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         }
 
         // delete them from the DB, even if not loaded
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INSTANCE_BY_MAP_DIFF);
-        stmt->setUInt16(0, uint16(mapid));
-        stmt->setUInt8(1, uint8(difficulty));
-        trans->Append(stmt);
-
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_INSTANCE_BY_MAP_DIFF);
-        stmt->setUInt16(0, uint16(mapid));
-        stmt->setUInt8(1, uint8(difficulty));
-        trans->Append(stmt);
-
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_INSTANCE_BY_MAP_DIFF);
-        stmt->setUInt16(0, uint16(mapid));
-        stmt->setUInt8(1, uint8(difficulty));
-        trans->Append(stmt);
-
-        CharacterDatabase.CommitTransaction(trans);
+	CharacterDatabase.DirectPExecute("DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE map = %u and difficulty = %u", uint16(mapid), uint8(difficulty));
+	CharacterDatabase.DirectPExecute("DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = id WHERE map = %u and difficulty = %u", uint16(mapid), uint8(difficulty));
+	CharacterDatabase.DirectPExecute("DELETE FROM instance WHERE map = %u and difficulty = %u", uint16(mapid), uint8(difficulty));
 
         // calculate the next reset time
         uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
@@ -625,7 +610,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         ScheduleReset(true, time_t(next_reset-3600), InstResetEvent(1, mapid, difficulty, 0));
 
         // Update it in the DB
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GLOBAL_INSTANCE_RESETTIME);
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GLOBAL_INSTANCE_RESETTIME);
 
         stmt->setUInt32(0, next_reset);
         stmt->setUInt16(1, uint16(mapid));

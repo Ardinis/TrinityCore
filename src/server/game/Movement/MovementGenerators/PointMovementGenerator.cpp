@@ -134,7 +134,7 @@ void EffectMovementGenerator::Finalize(Unit &unit)
         return;
 
     if (((Creature&)unit).AI() && unit.movespline->Finalized())
-        ((Creature&)unit).AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
+        ((Creature&)unit).AI()->MovementInform(POINT_MOTION_TYPE, m_Id);
     // Need restore previous movement since we have no proper states system
     if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {

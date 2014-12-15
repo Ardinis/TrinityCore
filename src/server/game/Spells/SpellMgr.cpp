@@ -3525,22 +3525,53 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // ULDUAR SPELLS
             //
-            case 62374: // Pursued (Flame Leviathan)
-                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
+            case 64206: // XT-002 - Consumption
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
                 break;
+            case 62016: // Thorim - Charge Orb
+                spellInfo->MaxAffectedTargets = 1;
+                spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+                break;
+            case 64482: // Flame Leviathan - Tower of Life
+            case 65075: // Flame Leviathan - Tower of Flames
+            case 65076: // Flame Leviathan - Tower of Storms
+                spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+                break;
+            case 65077: // Flame Leviathan - Tower of Frost
+                spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+                break;
+            //case 62374: // Pursued (Flame Leviathan)
+                //spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
+                //break;
+            case 62017: // Thorim - Lightning Shock
+            case 62042: // Thorim - Stormhammer
+			case 58875 : // Spirit walk
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                break;
+            case 62039: // Hodir - Biting Cold - Remove on Move
+                spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_MOVE;
+                break;
+            case 62488: // Ignis Activate Construct (only visually)
+            case 65301: // Sara Psychosis
+            case 63830: // Sara Malady of the Mind
+            case 64465: // Yogg Saron Shadow Beacon
             case 63342: // Focused Eyebeam Summon Trigger (Kologarn)
                 spellInfo->MaxAffectedTargets = 1;
+                break;
+            case 63802: // Sara Brain Link
+                spellInfo->MaxAffectedTargets = 2;
                 break;
             case 62716: // Growth of Nature (Freya)
             case 65584: // Growth of Nature (Freya)
             case 64381: // Strength of the Pack (Auriaya)
+            case 62505: // Harpoon Shot
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
                 break;
-            case 63018: // Searing Light (XT-002)
-            case 65121: // Searing Light (25m) (XT-002)
-            case 63024: // Gravity Bomb (XT-002)
-            case 64234: // Gravity Bomb (25m) (XT-002)
-                spellInfo->MaxAffectedTargets = 1;
+            case 62968: // Brightleaf's Essence
+            case 65761: // Brightleaf's Essence
+                spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+                spellInfo->EffectImplicitTargetB[1] = 0;
                 break;
             case 62834: // Boom (XT-002)
             // This hack is here because we suspect our implementation of spell effect execution on targets
@@ -3549,6 +3580,27 @@ void SpellMgr::LoadDbcDataCorrections()
             // The above situation causes the visual for this spell to be bugged, so we remove the instakill
             // effect and implement a script hack for that.
                 spellInfo->Effect[EFFECT_1] = 0;
+                break;
+            case 62899: // Razorscale - Summon Mole Machine
+            case 64600: // Freya - Nature Bomb (GO Visual)
+                spellInfo->DurationIndex = 38; // 11 seconds
+                break;
+            case 62056: // Kologarn - some Stone Grip related Spells that have SPELL_ATTR1_IGNORE_IMMUNITY (NYI?)
+            case 63985:
+            case 64224:
+            case 64225:
+                spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                break;
+            case 63716: // Kologarn - Stone Shout
+            case 64005:
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+                break;
+            case 62711: // Ignis - Grab
+                spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+                break;
+            case 62470: // Deafening Thunder - Spell::DoSpellHitOnUnit sends EVADE if speed > 0
+                spellInfo->speed = 0;
                 break;
             case 64386: // Terrifying Screech (Auriaya)
             case 64389: // Sentinel Blast (Auriaya)
@@ -3561,25 +3613,27 @@ void SpellMgr::LoadDbcDataCorrections()
                 // that will be clear if we get more spells with problem like this
                 spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
                 break;
-            case 62584: // Lifebinder's Gift
-            case 64185: // Lifebinder's Gift
-                spellInfo->EffectImplicitTargetB[1] = TARGET_DEST_CASTER;
-                spellInfo->EffectBasePoints[1] = 0;
+            case 62311: // Algalon - Cosmic Smash
+            case 64596: // Algalon - Cosmic Smash
+                spellInfo->rangeIndex = 13;
                 break;
-            case 62301: // Cosmic Smash (Algalon the Observer)
-                spellInfo->MaxAffectedTargets = 1;
+            case 62168: // Algalon - Black Hole
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
                 break;
-            case 64598: // Cosmic Smash (Algalon the Observer)
-                spellInfo->MaxAffectedTargets = 3;
+            case 64444: // Mimiron - Magnetic Core
+                spellInfo->rangeIndex = 6; // 100yd
                 break;
-            case 62293: // Cosmic Smash (Algalon the Observer)
-                spellInfo->EffectImplicitTargetB[0] = TARGET_DEST_CASTER;
+            case 63414: // Mimiron - Spinning Up
+            case 63274: // Mimiron - Laser Barrage
+                // temporary remove channeled flag due to facing issues when casting on self
+                spellInfo->AttributesEx &= ~SPELL_ATTR1_CHANNELED_1;
                 break;
-            case 62311: // Cosmic Smash (Algalon the Observer)
-            case 64596: // Cosmic Smash (Algalon the Observer)
-                spellInfo->rangeIndex = 6;  // 100yd
+            case 63241: // Mangrove Ent 10 - Tranquility
+            case 63554: // Mangrove Ent 25 - Tranquility
+                spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
+                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_SRC_AREA_ALLY;
                 break;
-            // ENDOF ULDUAR SPELLS
+
             //
             // TRIAL OF THE CRUSADER SPELLS
             //

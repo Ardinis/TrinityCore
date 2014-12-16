@@ -153,7 +153,7 @@ class boss_general_vezax : public CreatureScript
                 {
                     case ENTRY_SARONIT_VAPOR:
                         _vaporList.push_back(summoned->GetGUID());
-                        if (!_vaporKilled && _vaporList.size() > 5)
+                        if (!_vaporKilled && _vaporList.size() > 7)
                             if (Creature* animus = DoSummon(ENTRY_SARONIT_ANIMUS, me->GetHomePosition(), 30000, TEMPSUMMON_MANUAL_DESPAWN))
                                 animus->AI()->AttackStart(me->getVictim());
                         break;

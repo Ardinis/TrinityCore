@@ -365,13 +365,16 @@ class mob_saronit_vapor : public CreatureScript
                 {
                     damage = me->GetHealth() - 1;
                     me->GetMotionMaster()->Clear();
+                    me->SetDefaultMovementType(IDLE_MOTION_TYPE);
                     me->GetMotionMaster()->MoveIdle();
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
+                    me->StopMoving();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_DISABLE_MOVE);
                     me->SetStandState(UNIT_STAND_STATE_DEAD);
                     me->SetHealth(me->GetMaxHealth());
                     me->RemoveAllAuras();
                     me->DespawnOrUnsummon(30000);
                     me->CastSpell(me, SPELL_SARONIT_VAPOR, true);
+                    _randomMoveTimer = 999999;
 
                     if (_instance)
                         if (Creature* vezax = Creature::GetCreature(*me, _instance->GetData64(TYPE_VEZAX)))

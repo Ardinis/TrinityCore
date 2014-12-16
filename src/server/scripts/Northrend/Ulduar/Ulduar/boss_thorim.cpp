@@ -771,6 +771,7 @@ class npc_thorim_arena_phase : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 if (_id == DARK_RUNE_WARBRINGER)
                     DoCast(me, SPELL_AURA_OF_CELERITY);
             }
@@ -938,6 +939,7 @@ class npc_runic_colossus : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 RunicSmashPhase = 0;
                 me->InterruptNonMeleeSpells(true);
             }
@@ -1101,6 +1103,7 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->MonsterTextEmote(EMOTE_MIGHT, 0, true);
             DoCast(me, SPELL_RUNIC_FORTIFICATION, true);
         }

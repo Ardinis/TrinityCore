@@ -2664,8 +2664,10 @@ void Player::Regenerate(Powers power)
                                                                                             HasAura(31786)));
 
     // TODO: possible use of miscvalueb instead of amount
+    /*
     if (HasAuraTypeWithValue(SPELL_AURA_PREVENT_REGENERATE_POWER, power))
         return;
+    */
 
     float addvalue = 0.0f;
 

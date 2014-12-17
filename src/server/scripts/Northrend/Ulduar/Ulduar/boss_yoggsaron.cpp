@@ -646,7 +646,7 @@ public:
             me->SetHealth(me->GetMaxHealth());
             // Remove Not Attackable Flags
             //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
             // Reset Phase
             m_Phase = PHASE_NONE;
@@ -1017,7 +1017,7 @@ public:
                 //pSummoned->SetVisible(false);
                 pSummoned->SetStandState(UNIT_STAND_STATE_SUBMERGED);
                 pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 pSummoned->SetFloatValue(UNIT_FIELD_COMBATREACH, 20.0f);
                 pSummoned->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 20.0f);
                 return; // Do Not Save Yoggy in Summons because he shouldnt despawnt on Encount Finished
@@ -1026,7 +1026,7 @@ public:
                 pSummoned->setActive(true);
                 pSummoned->SetFloatValue(UNIT_FIELD_COMBATREACH, 25.0f);
                 pSummoned->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 25.0f);
-                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 break;
             case ENTRY_RUBY_CONSORT:
             case ENTRY_OBSIDIAN_CONSORT:
@@ -1046,7 +1046,7 @@ public:
             case ENTRY_LAUGHING_SKULL:
                 pSummoned->setFaction(14);
                 pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 break;
             }
 
@@ -1314,7 +1314,7 @@ public:
 
             if(Creature* yoggbrain = me->GetCreature(*me,guidYoggBrain))
             {
-                yoggbrain->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                yoggbrain->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 yoggbrain->CastSpell(yoggbrain,SPELL_INDUCE_MADNESS,false);
             }
 
@@ -1437,14 +1437,14 @@ public:
                                     yogg->CastSpell(yogg,SPELL_SHADOWY_BARRIER,false);
                                     yogg->SetStandState(UNIT_STAND_STATE_STAND);
                                     yogg->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                    yogg->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                    yogg->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                     DoScriptText(SAY_PHASE2_5,yogg);
 
                                     yogg->CastSpell(yogg,SPELL_SUMMON_CURRUPTOR_TENTACLE,true);
                                 }
                                 me->setFaction(14);
                                 //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                //me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 uiSpeaking_Timer = 5000;
                                 IsSpeaking = false;
                                 break;
@@ -1572,7 +1572,7 @@ public:
                                     me->AddAura(SPELL_SHATTERED_ILLUSIONS,me);
 
                                     if(Creature* yoggbrain = me->GetCreature(*me,guidYoggBrain))
-                                        yoggbrain->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                        yoggbrain->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
                                     for(std::list<uint64>::iterator itr = Summons.begin(); itr != Summons.end(); ++itr)
                                     {
@@ -1725,7 +1725,7 @@ public:
             DoCast(me,SPELL_OMINOUS_CLOUD_EFFECT,true);
             me->RemoveAurasDueToSpell(SPELL_SUMMON_GUARDIAN);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             //me->SetReactState(REACT_PASSIVE); //Prevent MoveInLineOfSight
 
             me->GetMotionMaster()->MoveRandom(25.0f);
@@ -2109,7 +2109,7 @@ public:
                 if(!me->HasAura(SPELL_BRAIN_HURT_VISUAL))
                     DoCast(me,SPELL_BRAIN_HURT_VISUAL,true);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
         }
     };
@@ -2682,7 +2682,7 @@ public:
         {
             m_pInstance = c->GetInstanceScript();
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         }
 
         SummonList Summons;
@@ -2722,7 +2722,7 @@ public:
                 pSummoned->setFaction(14);
                 pSummoned->CastSpell(pSummoned,SPELL_DEATH_RAY_WARNING_VISUAL,true,0,0,me->GetGUID());
                 pSummoned->SetReactState(REACT_PASSIVE);
-                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 break;
             }
 

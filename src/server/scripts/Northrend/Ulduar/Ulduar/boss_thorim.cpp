@@ -321,7 +321,7 @@ public:
             _Reset();
 
             me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_IMMUNE_TO_PC);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
 
             phase = PHASE_NULL;
 			toucheParCharge = false;
@@ -568,7 +568,7 @@ public:
             if (PreAddsCount >= 6 && !Wipe)
             {
                 // Event starts
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 events.Reset();
                 DoZoneInCombat();
             }
@@ -1025,7 +1025,7 @@ class npc_runic_smash : public CreatureScript
             {
                 me->SetReactState(REACT_PASSIVE);
                 me->SetDisplayId(16925);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 ExplodeTimer = 10000;
             }
 
@@ -1154,7 +1154,7 @@ public:
     {
         npc_sifAI(Creature* creature) : ScriptedAI(creature)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
         }
 
         uint32 FrostTimer;

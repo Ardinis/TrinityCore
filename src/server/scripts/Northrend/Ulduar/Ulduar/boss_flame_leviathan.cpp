@@ -220,7 +220,7 @@ class boss_flame_leviathan : public CreatureScript
 
                 DoCast(SPELL_INVIS_AND_STEALTH_DETECT);
 
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                 me->SetReactState(REACT_PASSIVE);
 
                 if (instance->GetData(TYPE_COLOSSUS) == 2)
@@ -534,7 +534,7 @@ class boss_flame_leviathan : public CreatureScript
                         me->SetHomePosition(Center->GetPositionX(), Center->GetPositionY(), Center->GetPositionZ(), 0);
                         me->GetMotionMaster()->MoveCharge(Center->GetPositionX(), Center->GetPositionY(), Center->GetPositionZ());
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                         return;
                     }
                 }
@@ -990,7 +990,7 @@ class npc_thorims_hammer : public CreatureScript
             {
                 me->setActive(true);
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -1052,7 +1052,7 @@ class npc_mimirons_inferno : public CreatureScript
             {
                 me->setActive(true);
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->AddAura(SPELL_RED_SKYBEAM, me);
                 me->SetReactState(REACT_PASSIVE);
             }
@@ -1119,7 +1119,7 @@ class npc_hodirs_fury : public CreatureScript
             {
                 me->setActive(true);
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetReactState(REACT_PASSIVE);
                 me->AddAura(SPELL_BLUE_SKYBEAM, me);
             }
@@ -1202,7 +1202,7 @@ class npc_freyas_ward : public CreatureScript
             {
                 me->setActive(true);
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->AddAura(SPELL_GREEN_SKYBEAM, me);
                 me->SetReactState(REACT_PASSIVE);
             }

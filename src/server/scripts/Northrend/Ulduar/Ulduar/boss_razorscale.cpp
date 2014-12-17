@@ -636,7 +636,7 @@ class boss_razorscale : public CreatureScript
                 switch (action)
                 {
                     case ACTION_EVENT_START:
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         me->SetReactState(REACT_AGGRESSIVE);
                         DoZoneInCombat(me, 150.0f);
                         break;
@@ -835,7 +835,7 @@ class npc_mole_machine_trigger : public CreatureScript
         {
             npc_mole_machine_triggerAI(Creature* creature) : Scripted_NoMovementAI(creature), summons(me)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                 me->SetVisible(false);
             }           
 
@@ -915,7 +915,7 @@ class npc_devouring_flame : public CreatureScript
         {
             npc_devouring_flameAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                 me->SetDisplayId(me->GetCreatureInfo()->Modelid2);
             }
 

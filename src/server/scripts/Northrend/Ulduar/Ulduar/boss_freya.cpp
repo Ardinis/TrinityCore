@@ -1312,7 +1312,7 @@ class mob_healthy_spore : public CreatureScript
 
             void Reset()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->setFaction(35);
                 DoCast(me, SPELL_HEALTHY_SPORE_VISUAL, true);
                 DoCast(me, SPELL_GROW, true);
@@ -1477,7 +1477,7 @@ public:
         void Reset()
         {
             me->CastSpell(me, SPELL_UNSTABLE_SUN_BEAM_PERIODIC, true);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC );
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE );
             me->SetDisplayId(MODEL_INVISIBLE);
 
             Unstable_Energy_Timer = urand(30000, 45000);
@@ -1788,7 +1788,7 @@ class mob_freya_sunbeam : public CreatureScript
             {
                 _unstableEnergyTimer = 1000;
                 me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 me->SetDisplayId(MODEL_INVISIBLE);
                 me->setFaction(16);
                 me->ForcedDespawn(12000);

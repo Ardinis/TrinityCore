@@ -682,7 +682,7 @@ class mob_rune_of_power : public CreatureScript
             {
                 me->SetInCombatWithZone();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->setFaction(16); // Same faction as bosses
                 DoCast(SPELL_RUNE_OF_POWER);
                 me->DespawnOrUnsummon(60000);

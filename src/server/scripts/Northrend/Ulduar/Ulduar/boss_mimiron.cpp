@@ -1029,7 +1029,7 @@ public:
     {
         npc_proximity_mineAI(Creature* creature) : Scripted_NoMovementAI(creature)
         {
-           me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+           me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
            uiBoomTimer = 35000;
            Boom = false;
         }
@@ -1652,7 +1652,7 @@ class npc_magnetic_core : public CreatureScript
             npc_magnetic_coreAI(Creature* creature) : Scripted_NoMovementAI(creature)
             {
                 DoCast(SPELL_MAGNETIC_CORE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 me->ForcedDespawn(21000);
                 if (Creature* AerialUnit = me->FindNearestCreature(NPC_AERIAL_COMMAND_UNIT, 100.0f, true))
                 {

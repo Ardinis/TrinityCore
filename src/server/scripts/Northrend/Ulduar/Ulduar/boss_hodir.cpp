@@ -372,7 +372,7 @@ public:
     {
         npc_icicleAI(Creature *pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
             me->SetReactState(REACT_PASSIVE);
             me->SetDisplayId(28470);
         }
@@ -424,7 +424,7 @@ public:
     {
         npc_icicle_snowdriftAI(Creature *pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
             me->SetReactState(REACT_PASSIVE);
             me->SetDisplayId(28470);
         }
@@ -463,7 +463,7 @@ public:
     {
         npc_snowpacked_icicleAI(Creature *pCreature) : Scripted_NoMovementAI(pCreature)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
             me->SetReactState(REACT_PASSIVE);
             me->SetDisplayId(15880);
         }

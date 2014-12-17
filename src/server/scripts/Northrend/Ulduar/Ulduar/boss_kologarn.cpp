@@ -302,7 +302,7 @@ class boss_kologarn : public CreatureScript
                 summon->CastSpell(summon, SPELL_FOCUSED_EYEBEAM_PERIODIC, true);
                 summon->CastSpell(summon, SPELL_FOCUSED_EYEBEAM_VISUAL, true);
                 summon->SetReactState(REACT_PASSIVE);
-                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
+                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                 // One of the above spells is a channeled spell, we need to clear this unit state for MoveChase to work
                 // En fait pas besoin, vu que j'ai mis le sort en SPELL_ATTR0_CU_MOVE_WHILE_CHANNEL (zangdar)
                 summon->ClearUnitState(UNIT_STATE_CASTING);

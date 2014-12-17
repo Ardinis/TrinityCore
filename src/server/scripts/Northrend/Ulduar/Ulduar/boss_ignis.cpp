@@ -250,7 +250,7 @@ class boss_ignis : public CreatureScript
                                 {
                                     construct->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
                                     construct->SetReactState(REACT_AGGRESSIVE);
-                                    construct->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
+                                    construct->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
                                     construct->AI()->AttackStart(me->getVictim());
                                     construct->AI()->DoZoneInCombat();
                                     DoCast(me, SPELL_STRENGTH, true);
@@ -329,7 +329,7 @@ class npc_iron_construct : public CreatureScript
             {
                 _instance = creature->GetInstanceScript();
                 creature->setActive(true);
-                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
                 DoCast(me, SPELL_FREEZE_ANIM, true);
             }
 
@@ -341,7 +341,7 @@ class npc_iron_construct : public CreatureScript
 
             void JustReachedHome()
             {
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
                 DoCast(me, SPELL_FREEZE_ANIM, true);
             }
 

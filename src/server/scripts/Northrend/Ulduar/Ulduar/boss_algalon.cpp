@@ -256,7 +256,7 @@ class boss_algalon : public CreatureScript
             {
                 if (Phase == PHASE_INTRO && instance->GetBossState(TYPE_ALGALON) == NOT_STARTED)
                 {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                     uiStep = 0;
                     fightintro = true;
                     return;
@@ -349,11 +349,11 @@ class boss_algalon : public CreatureScript
                 switch(Summon->GetEntry())
                 {
                 case CREATURE_AZEROTH_MODEL:
-                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                     break;
                 case CREATURE_BLACK_HOLE:
                     --staramount;
-                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                    Summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                     //Summon->AddAura(SPELL_BLACK_HOLE_TRIGGER, Summon); Too buggy.
                     Summon->AddAura(SPELL_VISUAL_VOID_ZONE, Summon);
                     //Summon->AddAura(SPELL_BLACK_HOLE_COSMETIC, Summon);
@@ -557,7 +557,7 @@ class boss_algalon : public CreatureScript
                     case 0:
                         me->AddAura(SPELL_HOVER_FALL, me);
                         me->SetVisible(true);
-                        me->SetFlag(UNIT_FIELD_FLAGS,  UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                        me->SetFlag(UNIT_FIELD_FLAGS,  UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                         float x,y;
                         me->GetPosition(x,y);
                         me->GetMotionMaster()->MoveCharge(x,y,GroundZ,me->GetSpeed(MOVE_FLIGHT), 0);
@@ -591,7 +591,7 @@ class boss_algalon : public CreatureScript
                     case 5:
                         if (Creature* Brann = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_BRANN_ALGALON)))
                             Brann->AI()->DoAction(ACTION_BRANN_LEAVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS,  UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS,  UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                         intro = false;
                         break;
                     }
@@ -631,7 +631,7 @@ class boss_algalon : public CreatureScript
                         JumpToNextStep(11000);
                         break;
                     case 3:
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED );
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED );
                         Phase = PHASE_1;
                         fightintro = false;
                         me->SetInCombatWithZone();
@@ -652,7 +652,7 @@ class boss_algalon : public CreatureScript
                         JumpToNextStep(6000);
                         break;
                     case 13:
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_PACIFIED);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                         Phase = PHASE_1;
                         fightintro = false;
                         me->setFaction(FACTION_HOSTILE);
@@ -747,7 +747,7 @@ class boss_algalon : public CreatureScript
                         me->ResetPlayerDamageReq();
                         me->GetMotionMaster()->Clear();
                         me->GetMotionMaster()->MoveIdle();
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                         JumpToNextStep(1000);
                         break;
                     case 1:
@@ -1069,7 +1069,7 @@ class mob_living_constellation : public CreatureScript
             void InitializeAI()
             {
                 active = false;
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                 me->SetFlying(true);
                 me->SendMovementFlagUpdate();
                 me->SetReactState(REACT_PASSIVE);
@@ -1092,7 +1092,7 @@ class mob_living_constellation : public CreatureScript
                 case ACTION_ACTIVATE_CONSTELLATION:
                     active = true;
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE |  UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE |  UNIT_FLAG_IMMUNE_TO_NPC);
                     DoZoneInCombat();
                     if (Unit* Target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         AttackStart(Target);
@@ -1550,7 +1550,7 @@ class spell_algalon_summon_asteroid_stalkers : public SpellScriptLoader
                     return;
 
                 summon->SetDisplayId(summon->GetCreatureInfo()->Modelid2);
-                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
                 summon->SetReactState(REACT_PASSIVE);
                 if (entry == CREATURE_ALGALON_ASTEROID_2)
                 {

@@ -498,6 +498,18 @@ REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGrou
 DELETE FROM spell_script_names WHERE spell_id='65761';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_elder_brightleafs_essence_targeting', '65761');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62304';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Cosmic Smash Missle', '62304', '13', '0', '', '18', '1', '0', '33104', '0', '0');
+
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64597';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_cosmic_smash_missile_target', '64597');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64597';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Cosmic Smash Missle', '64597', '13', '0', '', '18', '1', '0', '33104', '0', '0');
+
 set @GUID_START := (select greatest((select guid from creature order by guid desc limit 1),  (select guid from gameobject order by guid desc limit 1) ) + 1);
 -- Dump creature entry, difficulty: 0
 DELETE FROM creature_template WHERE entry='21252';
@@ -6171,6 +6183,15 @@ REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseat
 DELETE FROM creature_template WHERE entry='34153';
 REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '16', '33554432', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Nature Bomb (1)', '586.0', '0', '642', '15.0', '169', '23258', '0', '0', '0', '', '422.0', '0', '', '1.0', '25815', '0', '8', '80', '0', '0', '0', '0', '-1.0', '0', '0', '0', '10', '0', '1.0', '12340', '0', '0', '', '0', '0', '0', '509.0', '0', '345.0', '0', '0', '0', '0', '1.0', '2.0', '80', '0', '1.0', '103', '0', '0', '34153', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', '0', '16');
 
+-- Dump creature entry, difficulty: 0
+DELETE FROM creature_template WHERE entry='33104';
+REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '4', '0', '2000', '0', '14', '6', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Algalon Stalker Asteroid Target 01', '2.0', '0', '24', '7.5', '169', '11686', '0', '0', '0', 'SmartAI', '2.0', '0', '', '1.0', '25815', '0', '8', '83', '0', '0', '0', '1', '-1.0', '0', '130', '0', '10', '0', '1.0', '12340', '0', '0', 'mob_algalon_asteroid_trigger', '0', '0', '0', '1.0', '0', '1.0', '0', '0', '0', '0', '1.0', '1.0', '83', '0', '1.0', '0', '0', '0', '33104', '0', '0', '0', '0', '0', '0', '0', '1', '', '0', '0', '14');
+
+-- Dump SmartScripts for creature entry, difficulty: 0
+DELETE FROM smart_scripts WHERE entryorguid='33104';
+REPLACE INTO smart_scripts (comment, event_type, event_param3, target_param2, id, target_param1, action_param1, action_param3, action_param2, action_param5, action_param4, action_param6, target_param3, target_o, target_z, source_type, target_x, event_phase_mask, link, target_y, event_param4, event_param2, target_type, event_param1, entryorguid, action_type, event_chance, event_flags) VALUES('Algalon Asteroid - Cast Cosmic Smash 10N', '1', '0', '0', '0', '0', '62304', '0', '2', '0', '0', '0', '0', '0.0', '0.0', '0', '0.0', '0', '0', '0.0', '0', '4000', '1', '4000', '33104', '11', '100', '3');
+REPLACE INTO smart_scripts (comment, event_type, event_param3, target_param2, id, target_param1, action_param1, action_param3, action_param2, action_param5, action_param4, action_param6, target_param3, target_o, target_z, source_type, target_x, event_phase_mask, link, target_y, event_param4, event_param2, target_type, event_param1, entryorguid, action_type, event_chance, event_flags) VALUES('Algalon Asteroid - Cast Cosmic Smash 25N', '1', '0', '0', '1', '0', '64597', '0', '2', '0', '0', '0', '0', '0.0', '0.0', '0', '0.0', '0', '0', '0.0', '0', '4000', '1', '4000', '33104', '11', '100', '5');
+
 set @GUID_START := (select greatest((select guid from creature order by guid desc limit 1),  (select guid from gameobject order by guid desc limit 1) ) + 1);
 -- Dump gameobject template
 DELETE FROM gameobject_template WHERE entry='189973';
@@ -6992,3 +7013,4 @@ REPLACE INTO gameobject_template (IconName, AIName, castBarCaption, data15, data
 DELETE FROM gameobject_template WHERE entry='194902';
 REPLACE INTO gameobject_template (IconName, AIName, castBarCaption, data15, data20, data21, data22, data23, size, data10, data9, data8, data5, data4, data7, data6, data1, data0, data3, data2, faction, WDBVerified, questItem3, questItem2, questItem1, data19, questItem6, questItem5, questItem4, displayId, data14, data17, data16, data11, unk1, data13, data12, name, type, ScriptName, flags, entry, data18) VALUES('', '', '', '0', '0', '0', '0', '0', '1.0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '3000', '0', '0', '12340', '0', '0', '0', '0', '0', '0', '0', '391', '0', '0', '0', '0', '', '0', '0', 'Nature Bomb', '10', '', '0', '194902', '0');
 
+update creature_template set speed_fly=speed_run where speed_fly = -1;

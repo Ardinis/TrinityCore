@@ -34,12 +34,12 @@ class GuidTranslator:
     result = "@GUID_START + " + str(self.guid_offset_next) 
     self.guid_allocated[guid] = result
     self.guid_offset_next = self.guid_offset_next + 1
+    #print >> sys.stderr, ("Translation automatique de GUID: " + str(guid) + " vers " + result)
     return result
   def guid_match(self, g):
     if type(g) is not int:
       return False
     if g in self.guid_set:
-      print >> sys.stderr, ("Translation automatique de GUID: " + str(g))
       return True
   def get(self, guid):
     if guid > 0:
@@ -99,7 +99,8 @@ def extract(comment, table, query,  idx=None , guid_columns=set()):
 def ninja_gameobject(gob_id):
   if gob_id <= 0:
     return
-  extract("Dump gameobject template", "gameobject_template", "SELECT * from gameobject_template WHERE entry=" + str(gob_id), "entry")
+  template = extract("Dump gameobject template", "gameobject_template", "SELECT * from gameobject_template WHERE entry=" + str(gob_id), "entry")
+  print >> sys.stderr, ("Traitement gameobject: " + template[0]["name"])
   extract("Dump gameobject spawns", "gameobject", "SELECT * from gameobject WHERE  guid IN (SELECT guid FROM gameobject WHERE map=" + MAP + " and id=" + str(gob_id) + ")" , "guid", set(["guid"]))
   extract("Dump SmartScripts for gob entry", "smart_scripts", "SELECT * from smart_scripts WHERE source_type=1 AND entryorguid=" + str(gob_id), "entryorguid" )
   extract("Dump SmartScripts for gob guid", "smart_scripts", "SELECT * from smart_scripts WHERE source_type=1 AND entryorguid IN (SELECT -guid FROM gameobject WHERE map=" + MAP + " and id=" + str(gob_id) + ")" , "entryorguid", set(["entryguid"]))
@@ -127,6 +128,7 @@ def ninja_creature(creature_id):
   res = ninja_creature_single(creature_id, 0)
   if res is None:
     raise ValueError, ("Unknown creature ID: " + str(creature_id))
+  print >> sys.stderr, ("Traitement creature: " + res[0]["name"])
   #extract for all difficulties
   for diff in range(1,4):
     ninja_creature_single(res[0]["difficulty_entry_" + str(diff)], diff)

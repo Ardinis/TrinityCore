@@ -227,8 +227,15 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (me->getVictim() && !me->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                me->Kill(me->getVictim());
+            if (me->getVictim() && !me->getVictim()->GetCharmerOrOwnerPlayerOrPlayerItself()) {
+                // Apparemment il arrive que Hodir tue des adds alors que le combat n'a pas commence, donc je rajoute cette verif (qui ne devrait pas etre necessaire en principe, mais bon.) 
+                // --zangdar
+                if (me->GetInstanceScript() && (me->GetInstanceScript()->GetBossState(TYPE_HODIR) == IN_PROGRESS)) {
+                    me->Kill(me->getVictim());
+                } else {
+                    // TODO: Logguer une erreur avec des infos sur la creature ciblee pour comprendre ce qui se passe
+                }
+            }
 
             events.Update(diff);
             _DoAggroPulse(diff);

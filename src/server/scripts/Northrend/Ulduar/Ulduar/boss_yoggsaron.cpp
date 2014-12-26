@@ -2194,7 +2194,7 @@ public:
                                     if(!plr->HasAura(SPELL_SANITY) && !plr->HasAura(SPELL_INSANE))
                                     {
                                         // Dont make GMs Insane
-                                        if(plr->GetSession()->GetSecurity() > SEC_PLAYER)
+                                        if(plr->isGameMaster())
                                             continue;
 
                                         // Say Sara we used Mindcontrol - for Archievment ... we need only one mindecontrolled Player to cancel Achievment

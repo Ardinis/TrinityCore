@@ -58,7 +58,7 @@ EndScriptData */
 
 #define NPC_RUBBLE_STALKER          33809
 
-#define EMOTE_EYEBEAM           "Kologarn fokussiert seinen Blick auf Euch!"
+#define EMOTE_EYEBEAM           "Kologarn concentre son regard sur vous!"
 #define EMOTE_LEFT              "The Left Arm has regrown!"
 #define EMOTE_RIGHT             "The Right Arm has regrown!"
 #define EMOTE_STONE             "Kologarn casts Stone Grip!"

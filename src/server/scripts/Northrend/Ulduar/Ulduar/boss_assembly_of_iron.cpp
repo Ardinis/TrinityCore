@@ -748,6 +748,9 @@ class mob_rune_of_summoning : public CreatureScript
                 _summonCount = 0;
                 _summonTimer = 5000;
                 _instance = c->GetInstanceScript();
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->AddAura(SPELL_RUNE_OF_SUMMONING_VIS, me);
             }
 

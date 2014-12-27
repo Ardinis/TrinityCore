@@ -2440,7 +2440,13 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                     m_caster->GetFirstCollisionPosition(pos, dist, angle);
                     break;
                 default:
-                    m_caster->GetNearPosition(pos, dist, angle);
+                    if (GetSpellInfo()->HasEffect(SPELL_EFFECT_SUMMON)) {
+                        // Evite les invocations sous-map, dans les murs, etc.
+                        // On le fait que pour les sorts de summon vu que MoveBlink() est quand meme une fonction assez couteuse... 
+                        m_caster->MoveBlink(pos, dist, angle);
+                    } else {
+                        m_caster->GetNearPosition(pos, dist, angle);
+                    }
                     break;
             }
 
@@ -2490,7 +2496,12 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
             }
 
             Position pos;
-            target->GetNearPosition(pos, dist, angle);
+            if (GetSpellInfo()->HasEffect(SPELL_EFFECT_SUMMON)) {
+                // Evite les invocations sous-map, dans les murs, etc.
+                target->MoveBlink(pos, dist, angle);
+            } else {
+                target->GetNearPosition(pos, dist, angle);
+            }
             m_targets.SetDst(*target);
             m_targets.ModDst(pos);
             break;
@@ -2532,7 +2543,11 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
 
             // must has dst, no need to set flag
             Position pos = *m_targets.GetDst();
-            m_caster->MovePosition(pos, dist, angle);
+            if (GetSpellInfo()->HasEffect(SPELL_EFFECT_SUMMON)) {
+                m_caster->MoveBlink(pos, dist, angle, true);
+            } else {
+                m_caster->MovePosition(pos, dist, angle);
+            }
             m_targets.ModDst(pos);
             break;
         }

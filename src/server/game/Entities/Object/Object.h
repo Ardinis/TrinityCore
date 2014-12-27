@@ -595,7 +595,7 @@ class WorldObject : public Object, public WorldLocation
             // angle calculated from current orientation
             GetNearPoint(NULL, x, y, z, size, distance2d, GetOrientation() + angle);
         }
-        void MoveBlink(Position &pos, float dist, float angle);
+        void MoveBlink(Position &pos, float dist, float angle, bool relative = false);
         void MovePosition(Position &pos, float dist, float angle);
         void GetNearPosition(Position &pos, float dist, float angle)
         {

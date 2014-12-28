@@ -230,6 +230,20 @@ void ObjectGridCleaner::Visit(GridRefManager<T> &m)
         iter->getSource()->CleanupsBeforeDelete();
 }
 
+template<class T>  
+void ObjectGridObliviator::Visit(GridRefManager<T> &m)
+{
+    for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter) {
+        if (iter->getSource()->ToCorpse()) {
+            if (iter->getSource()->ToCorpse()->GetType() != CORPSE_BONES) {
+                sObjectAccessor->UnlinkCorpse(iter->getSource()->ToCorpse());
+            }
+        }
+        sObjectAccessor->RemoveObject(iter->getSource());
+        sObjectAccessor->RemoveUpdateObject(iter->getSource());
+    }
+}
+
 template void ObjectGridUnloader::Visit(CreatureMapType &);
 template void ObjectGridUnloader::Visit(GameObjectMapType &);
 template void ObjectGridUnloader::Visit(DynamicObjectMapType &);
@@ -238,3 +252,8 @@ template void ObjectGridCleaner::Visit(CreatureMapType &);
 template void ObjectGridCleaner::Visit<GameObject>(GameObjectMapType &);
 template void ObjectGridCleaner::Visit<DynamicObject>(DynamicObjectMapType &);
 template void ObjectGridCleaner::Visit<Corpse>(CorpseMapType &);
+template void ObjectGridObliviator::Visit(CreatureMapType &);   
+template void ObjectGridObliviator::Visit(GameObjectMapType &);
+template void ObjectGridObliviator::Visit(DynamicObjectMapType &);
+template void ObjectGridObliviator::Visit(CorpseMapType &);
+template void ObjectGridObliviator::Visit(PlayerMapType &);  

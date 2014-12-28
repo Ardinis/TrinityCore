@@ -28,6 +28,17 @@
 #include "LFGMgr.h"
 #include "InstanceScript.h"
 
+#ifndef _WIN32
+#include <setjmp.h>
+
+extern __thread sigjmp_buf *crash_recovery;
+extern __thread uint32 currently_updated;
+extern __thread bool in_handler;
+#endif
+
+void generate_coredump();
+
+
 MapInstanced::MapInstanced(uint32 id, time_t expiry) : Map(id, expiry, 0, DUNGEON_DIFFICULTY_NORMAL)
 {
     // initialize instanced maps list
@@ -57,7 +68,82 @@ void MapInstanced::Update(const uint32 t)
 
     while (i != m_InstancedMaps.end())
     {
-        if (i->second->CanUnload(t))
+		bool crash = false;
+		bool killed = false;
+
+		#ifndef _WIN32
+			crash = i->second->ToInstanceMap() && i->second->ToInstanceMap()->HasCrashed();
+			killed = i->second->ToInstanceMap() && i->second->ToInstanceMap()->HasBeenKilled();
+		#endif
+
+		if (crash) {
+			/* kick players */ 
+			Map::PlayerList const pList = i->second->GetPlayers();
+			for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+			{
+				Player* player = itr->getSource();
+				if (!player || !player->GetSession())
+					continue;
+					// NOT THREAD-SAFE
+					player->SaveToDB();
+					player->CleanupChannels();
+					player->UninviteFromGroup();
+					player->GetSession()->KickPlayer();
+					sWorld->ForceKillSession(player->GetSession());
+					player->SetDoNotSave(true);
+			}
+
+			
+			/* Forget map grid objcets */ 
+			i->second->ObliviateGridObjects();
+			i->second->ObliviateWorldObjects();
+
+			std::ostringstream tmpstr;
+			std::string buf = "";
+			tmpstr << i->second->GetInstanceId();
+			buf = "Système Anti-Crash: " + std::string(i->second->GetMapName()) + ", ID " + tmpstr.str() + ": Plantage du script d'instance, Crash évité. Le petit coup de lag est du à l'écriture des informations de debug.";
+			sWorld->SendWorldText(LANG_SYSTEMMESSAGE, buf.c_str());
+
+			m_InstancedMaps.erase(i++);
+    
+			
+			
+		} else if (killed) {
+#ifndef _WIN32
+                sigjmp_buf env;
+                crash_recovery = &env;
+                currently_updated = i->second->ToInstanceMap()->GetId();
+                InstanceMap *mymap = i->second->ToInstanceMap();
+                generate_coredump();
+                if (sigsetjmp(env,1)) {
+                    crash_recovery = NULL;
+                    i->second->ToInstanceMap()->SetHasCrashed(true);
+                    in_handler = false;
+                    continue; // proceed to next instancemap, current map will be Oblivated at next MapInstanced::Update() 
+                }
+#endif
+
+                        //teleport players to graveyard
+			Map::PlayerList const pList = i->second->GetPlayers();
+			for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+			{
+			        // NOT THREAD-SAFE
+				Player* player = itr->getSource();
+				if (!player || !player->GetSession())
+					continue;
+                                player->GetSession()->KickPlayer();
+                                player->GetSession()->LogoutPlayer(true);
+			}
+			
+                if (!i->second->HavePlayers())
+                    DestroyInstance(i);
+                
+
+#ifndef _WIN32
+                crash_recovery = NULL;
+#endif
+
+        } else if (i->second->CanUnload(t))
         {
             if (!DestroyInstance(i))                             // iterator incremented
             {

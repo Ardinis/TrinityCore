@@ -1590,7 +1590,13 @@ void WorldObject::GetRandomPoint(const Position &pos, float distance, float &ran
 
 void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 {
-    float new_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z + 5.0f, true));
+    float new_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true, 5.0f));
+    float z_above = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z + 5.0f, true);
+    
+    // On prends le Z le plus proche (entre celui trouvé en dessous du z actuel, et celui trouvé en dessus du z actuel)
+    if (fabs(z_above - z) < fabs(new_z - z))
+      new_z = z_above;
+      
     if (new_z > INVALID_HEIGHT)
         z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
 }

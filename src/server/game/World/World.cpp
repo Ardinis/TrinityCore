@@ -2334,6 +2334,18 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession* self, uint
     SendZoneMessage(zone, &data, self, team);
 }
 
+//Remove player from session list
+void World::ForceKillSession(WorldSession *victim) {
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); itr++) {
+        WorldSession *current = itr->second;
+        if (current == victim) {
+            DecreasePlayerCount();
+            m_sessions.erase(itr);
+            return; 
+        }
+    } 
+}
+
 /// Kick (and save) all players
 void World::KickAll()
 {

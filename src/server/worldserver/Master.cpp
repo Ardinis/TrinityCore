@@ -49,12 +49,90 @@
 extern int m_ServiceStatus;
 #endif
 
+#define CRASH_MAX 3
+#define CRASH_RECOVERY_INTERVAL 300000
+#define ANTICRASH_LOGFILE "/home/crashlog/anticrash.log" 
+#define ANTICRASH_HANDLER "/home/crashlog/bin/handler.sh"
+#define COREDUMP_HANDLER "/home/crashlog/bin/gencore.sh"
+  
+/*
+ * Thread-local variables to store anticrash-related info. TODO move to something like sAntiCrashMgr  
+ */
+#ifndef _WIN32
+#include <setjmp.h>
+#include <signal.h>
+__thread bool in_handler = false;
+__thread uint32 lastSigTime = 0;
+__thread uint32 crash_num = 0;
+__thread sigjmp_buf *crash_recovery = NULL;
+__thread uint32 currently_updated = 0;
+
+ACE_Thread_Mutex crash_mutex;
+
+/* This unblocks, unignore and raises SIGABRT to quit quickly, with coredump */
+static void crash_now() {
+  sigset_t sigset;
+  signal(SIGABRT, SIG_DFL);
+  sigemptyset(&sigset);
+  sigaddset(&sigset, SIGABRT);
+  sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+  raise(SIGABRT);
+}
+
+#endif
+
+void generate_coredump() {
+#ifndef _WIN32
+    sigset_t sigset, oldsigset;
+    sigfillset(&sigset);
+    sigprocmask(SIG_BLOCK, &sigset, &oldsigset);
+    int r = fork();
+    if (r == -1)
+        return;
+
+    if (r == 0) {
+                                signal(SIGSEGV, SIG_DFL);
+                                signal(SIGILL, SIG_DFL);
+                                signal(SIGABRT, SIG_DFL);
+                                signal(SIGBUS, SIG_DFL);
+                                signal(SIGFPE, SIG_DFL);
+                                sigemptyset(&sigset);
+                                sigaddset(&sigset, SIGSEGV);
+                                sigaddset(&sigset, SIGILL);
+                                sigaddset(&sigset, SIGABRT);
+                                sigaddset(&sigset, SIGBUS);
+                                sigaddset(&sigset, SIGFPE);
+                                sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
+                                /* Launch the anti-crash shellscript handler. It will sort/record the stack trace in the anti-crash history, and possibly dump the 
+                                 * core of the child process. Argument1 is PID of child process (for coredump generating), argument2 is current Map-ID
+                                 * (the Map-ID corresponding to the InstanceMap::Update() in which the signal was received */
+                                char tmp[256];
+                                tmp[255] = 0;
+                                snprintf(tmp, 254, "%s %u", COREDUMP_HANDLER, getpid());
+                                system(tmp);
+                                raise(SIGKILL);
+    } else {
+                                /* Parent process : Restore signals blocked before fork(), and "recover" from the crash by jumpng to the point before the InstanceMap::Update()
+                                 * The code before InstanceMap::Update() will detect the crash recovery, and flag the instance map for cleanup. 
+                                 */
+                                sigprocmask(SIG_SETMASK, &oldsigset, NULL);
+    }
+#endif
+    return;
+}
+
+
 /// Handle worldservers's termination signals
 class WorldServerSignalHandler : public Trinity::SignalHandler
 {
     public:
         virtual void HandleSignal(int SigNum)
         {
+#ifndef _WIN32
+	sigset_t sigset, oldsigset;
+	bool too_many_crash = false;
+#endif
             switch (SigNum)
             {
                 case SIGINT:
@@ -67,6 +145,96 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                 #endif /* _WIN32 */
                     World::StopNow(SHUTDOWN_EXIT_CODE);
                     break;
+                case SIGSEGV:
+                case SIGILL: 
+                case SIGABRT:
+                case SIGBUS:
+                case SIGFPE:
+                    /* do not permit re-entry into crash handler */
+                    if (in_handler)
+                    	crash_now();
+                    in_handler = true;
+
+                    /* we want any crash in the handler to be handled as an unrecoverable error */
+                    sigemptyset(&sigset);
+                    sigaddset(&sigset, SIGSEGV);
+                    sigaddset(&sigset, SIGILL); 
+                    sigaddset(&sigset, SIGABRT);
+                    sigaddset(&sigset, SIGBUS);
+                    sigaddset(&sigset, SIGFPE);
+                    sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
+                    /* Do not allow more than CRASH_MAX successive crashes with less than CRASH_RECOVERY_INTERVAL time between crashes */
+                    if ((getMSTime() - lastSigTime) < CRASH_RECOVERY_INTERVAL) {
+                        crash_num++;
+                    } else {
+                        crash_num = 0;
+                    }
+                    lastSigTime = getMSTime();
+                    too_many_crash = (crash_num >= CRASH_MAX);
+
+                    /* crash_recovery is set if signal was received while doing InstanceMap::Update(). We do not handle other cases yet. 
+                     * Crash recovery can be disabled globally by setting env var. ANTICRASH_DISABLE. 
+                     */ 
+                    if (crash_recovery && !too_many_crash && !getenv("ANTICRASH_DISABLE")) {
+                        ACE_Stack_Trace st;
+                        sLog->outError("SIGSEGV received during InstanceMap::Update(). Crash avoided.\n");
+
+                        /* The stack trace file will be used by the shellscript anti-crash handler */
+                        FILE *f = fopen(ANTICRASH_LOGFILE, "w");
+                        if (f) {
+                                fprintf(f, "%s\n", st.c_str());
+                                fclose(f);
+                        }
+
+
+                        /* We fork() to enable the core-dumping of the child process without freezing the main worldserver process *
+                         * We block all signals before the fork() so we are sure nothing but our code will be executed in the child process
+                         * (extra paranoia, but justified, since any code using the DB in the child process can lead to DB corruption) */
+                         
+                        sigfillset(&sigset);
+                        sigprocmask(SIG_BLOCK, &sigset, &oldsigset);
+                        int r = fork();
+                        if (r == -1) {
+                                crash_now();
+                        }
+
+                        if (r == 0) {
+                                /* Child process : Receiving any of these signals while blocked, will lead to undetermined behavior, so we must unblock them and 
+                                 * make sure that the child process will crash immediately if they are received */
+                                signal(SIGSEGV, SIG_DFL);
+                                signal(SIGILL, SIG_DFL); 
+                                signal(SIGABRT, SIG_DFL);
+                                signal(SIGBUS, SIG_DFL);
+                                signal(SIGFPE, SIG_DFL);
+                                sigemptyset(&sigset);
+                                sigaddset(&sigset, SIGSEGV);
+                                sigaddset(&sigset, SIGILL); 
+                                sigaddset(&sigset, SIGABRT);
+                                sigaddset(&sigset, SIGBUS);
+                                sigaddset(&sigset, SIGFPE);
+                                sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+                                
+                                /* Launch the anti-crash shellscript handler. It will sort/record the stack trace in the anti-crash history, and possibly dump the 
+                                 * core of the child process. Argument1 is PID of child process (for coredump generating), argument2 is current Map-ID
+                                 * (the Map-ID corresponding to the InstanceMap::Update() in which the signal was received */
+                                char tmp[256];
+                                tmp[255] = 0;
+                                snprintf(tmp, 254, "%s %u %u", ANTICRASH_HANDLER, getpid(), currently_updated);
+                                system(tmp);   
+                                raise(SIGKILL);
+                        } else {
+                                /* Parent process : Restore signals blocked before fork(), and "recover" from the crash by jumpng to the point before the InstanceMap::Update()
+                                 * The code before InstanceMap::Update() will detect the crash recovery, and flag the instance map for cleanup. 
+                                 */
+                                sigprocmask(SIG_SETMASK, &oldsigset, NULL);
+                                siglongjmp(*crash_recovery, 1);
+                        }
+                        /* never reached */
+                    }
+                    crash_now();
+                    break;
+
             }
         }
 };

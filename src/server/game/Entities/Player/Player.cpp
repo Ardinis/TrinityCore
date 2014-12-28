@@ -662,6 +662,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_jail_duration = 0;
 	// Jail end
 
+    m_doNotSave = false;
     m_speakTime = 0;
     m_speakCount = 0;
 
@@ -19035,7 +19036,7 @@ void Player::_SaveJail(void)
 void Player::SaveToDB(bool create /*=false*/)
 {
     // Jail: Prevent saving of jailed players
-    if (m_jail_isjailed) return;
+    if (m_jail_isjailed || m_doNotSave) return;
 
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);

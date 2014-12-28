@@ -35,6 +35,14 @@
 #include "Vehicle.h"
 #include "MMapFactory.h"
 
+#ifndef _WIN32
+#include <setjmp.h>
+
+extern __thread sigjmp_buf *crash_recovery;
+extern __thread uint32 currently_updated;
+extern __thread bool in_handler;
+#endif
+
 union u_map_magic
 {
     char asChar[4];
@@ -2522,10 +2530,26 @@ bool InstanceMap::AddPlayerToMap(Player* player)
 
 void InstanceMap::Update(const uint32 t_diff)
 {
+#ifndef _WIN32
+    sigjmp_buf env;
+    crash_recovery = &env;
+    currently_updated = GetId();
+    if (sigsetjmp(env,1)) {
+        crash_recovery = NULL;
+        _has_crashed = true;
+        in_handler = false;
+        return;
+    }
+#endif
+    
     Map::Update(t_diff);
 
-    if (i_data)
+    if (i_data)   
         i_data->Update(t_diff);
+    
+#ifndef _WIN32
+    crash_recovery = NULL;
+#endif   
 }
 
 void InstanceMap::RemovePlayerFromMap(Player* player, bool remove)
@@ -2958,3 +2982,29 @@ bool DynamicLOSObject::HasHeightInfo()
 {
     return (_z != 0 || _height != 0);
 }
+
+void Map::ObliviateWorldObjects() {
+    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
+    {
+        NGridType &grid(*i->getSource());
+        ++i;
+        ObjectGridObliviator worker;
+        TypeContainerVisitor<ObjectGridObliviator, WorldTypeMapContainer> visitor(worker);
+        grid.VisitAllGrids(visitor);
+    }
+
+}
+ 
+ 
+void Map::ObliviateGridObjects() {
+    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
+    {
+        NGridType &grid(*i->getSource());
+        ++i;
+        ObjectGridObliviator worker;
+        TypeContainerVisitor<ObjectGridObliviator, GridTypeMapContainer> visitor(worker);
+        grid.VisitAllGrids(visitor);
+    }
+}
+ 
+

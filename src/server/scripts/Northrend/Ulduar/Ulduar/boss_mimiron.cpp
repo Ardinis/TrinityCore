@@ -1280,6 +1280,7 @@ public:
                             direction = urand(0, 1);
                             spinning = true;
                             DoCast(SPELL_SPINNING_UP);
+                            sCreatureTextMgr->SendChatString(me, "Barrage laser dans 4 secondes !", CHAT_MSG_MONSTER_YELL, LANG_COMMON);
                             events.DelayEvents(14500);
                             events.RescheduleEvent(EVENT_LASER_BARRAGE, 60000);
                             events.RescheduleEvent(EVENT_LASER_BARRAGE_END, 14000);

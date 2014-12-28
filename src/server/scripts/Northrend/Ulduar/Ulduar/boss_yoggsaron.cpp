@@ -991,7 +991,7 @@ public:
         {
             if(m_Phase == PHASE_NONE)
             {
-                if(target && me->GetDistance2d(target) <= 100 && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && me->IsWithinLOSInMap(target))
+                if(target && me->GetDistance2d(target) <= 25 && target->ToPlayer() && !target->ToPlayer()->isGameMaster() && me->IsWithinLOSInMap(target))
                 {
                     if(m_pInstance && m_pInstance->GetBossState(TYPE_VEZAX) == DONE)
                     {

@@ -6,8 +6,16 @@ DELETE FROM spell_script_names WHERE spell_id='61879';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_achievement_stunned_ulduar', '61879');
 
 -- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='61889';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_meltdown', '61889');
+
+-- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='61900';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_steelbreaker_electrical_charge', '61900');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='61901';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61901', '13', '0', '', '18', '1', '0', '32867', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='61911';
@@ -16,6 +24,12 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_steelbreake
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='61915';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_achievement_stunned_ulduar', '61915');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='61920';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61920', '13', '0', '', '18', '1', '0', '32857', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61920', '13', '0', '', '18', '1', '0', '32867', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61920', '13', '0', '', '18', '1', '0', '32927', '0', '0');
 
 -- Dump spell targetting conditions, rank: 1
 DELETE FROM conditions WHERE SourceEntry='62016';
@@ -77,6 +91,10 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_sum
 DELETE FROM spell_script_names WHERE spell_id='62301';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_cosmic_smash_initial', '62301');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62304';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Cosmic Smash Missle', '62304', '13', '0', '', '18', '1', '0', '33104', '0', '0');
+
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='62311';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_cosmic_smash_damage', '62311');
@@ -89,9 +107,21 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_throw_passe
 DELETE FROM spell_script_names WHERE spell_id='62359';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_anti_air_rocket', '62359');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62363';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62363', '13', '0', '', '18', '1', '0', '33214', '0', '0');
+
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='62374';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_pursued', '62374');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62399';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62399', '13', '0', '', '18', '1', '0', '33139', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62466';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62466', '13', '0', '', '18', '1', '0', '32780', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='62475';
@@ -161,6 +191,18 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_general_vez
 DELETE FROM spell_script_names WHERE spell_id='62702';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_keeper_support_aura_targeting', '62702');
 
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='62705';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_auto_repair', '62705');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62705';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Auto-repair to Salvaged Siege Engine', '62705', '13', '1', '', '18', '1', '0', '33060', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Auto-repair to Salvaged Siege Turret', '62705', '13', '2', '', '18', '1', '0', '33067', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Auto-repair to Salvaged Chopper', '62705', '13', '3', '', '18', '1', '0', '33062', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Auto-repair to Salvaged Demolisher', '62705', '13', '4', '', '18', '1', '0', '33109', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Auto-repair to Salvaged Demolisher Mechanic Seat', '62705', '13', '5', '', '18', '1', '0', '33167', '0', '0');
+
 -- Dump spell targetting conditions, rank: 1
 DELETE FROM conditions WHERE SourceEntry='62711';
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Ingis - Grab', '62711', '13', '0', '', '18', '1', '0', '33118', '0', '0');
@@ -198,9 +240,20 @@ REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGrou
 DELETE FROM conditions WHERE SourceEntry='62911';
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Thorim\'s Hammer', '62911', '13', '0', '', '18', '1', '0', '33364', '0', '0');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62942';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62942', '13', '0', '', '18', '1', '0', '32872', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62942', '13', '0', '', '18', '1', '0', '32874', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62942', '13', '0', '', '18', '1', '0', '32875', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62942', '13', '0', '', '18', '1', '0', '33110', '0', '0');
+
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='62968';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_elder_brightleafs_essence_targeting', '62968');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='62976';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '62976', '13', '0', '', '18', '1', '0', '34055', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63006';
@@ -213,6 +266,19 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_xt002_seari
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63024';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_xt002_gravity_bomb_targeting', '63024');
+
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='63027';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_ulduar_proximity_mines', '63027');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63041';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '63041', '13', '0', '', '18', '1', '0', '0', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '63041', '13', '0', '', '18', '1', '0', '33836', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '63041', '13', '0', '', '18', '1', '0', '33855', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '63041', '13', '0', '', '18', '1', '0', '34057', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '63041', '13', '0', '', '18', '1', '0', '34147', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '63041', '13', '0', '', '18', '1', '0', '34362', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63120';
@@ -287,9 +353,41 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_shield_of_r
 DELETE FROM spell_script_names WHERE spell_id='63495';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_steelbreaker_static_disruption', '63495');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63524';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Harpoon Shot - Razorscale', '63524', '13', '0', '', '18', '1', '0', '33233', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63629';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Arm Dead Damage Kologarn (10m) Target', '63629', '13', '0', '', '18', '1', '0', '32930', '0', '0');
+
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63633';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_ulduar_rubble_summon', '63633');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63657';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Harpoon Shot - Razorscale', '63657', '13', '0', '', '18', '1', '0', '33233', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63658';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Harpoon Shot - Razorscale', '63658', '13', '0', '', '18', '1', '0', '33233', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63659';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Harpoon Shot - Razorscale', '63659', '13', '0', '', '18', '1', '0', '33233', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63676';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Focused Eyebeam Visual (Left) Target', '63676', '13', '0', '', '18', '1', '0', '32930', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63702';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Focused Eyebeam Visual (Right) Target', '63702', '13', '0', '', '18', '1', '0', '32930', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63766';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Arm Sweep (10N) Target', '63766', '13', '0', '', '18', '1', '0', '32933', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63802';
@@ -298,6 +396,10 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_brain_link_
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63847';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_flame_leviathan_flame_vents', '63847');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63882';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Effekt on Death Orb', '63882', '13', '0', '', '18', '1', '0', '33882', '0', '0');
 
 -- Dump spell targetting conditions, rank: 1
 DELETE FROM conditions WHERE SourceEntry='63886';
@@ -311,9 +413,17 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_achievement
 DELETE FROM spell_script_names WHERE spell_id='63977';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_achievement_kologarn_eyebeam', '63977');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63979';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Arm Dead Damage Kologarn (25m) Target', '63979', '13', '0', '', '18', '1', '0', '32930', '0', '0');
+
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63981';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_ulduar_stone_grip_cast_target', '63981');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='63983';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Arm Sweep (25N) Target', '63983', '13', '0', '', '18', '1', '0', '32933', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='63985';
@@ -330,6 +440,10 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_razorscale_
 -- Dump spell targetting conditions, rank: 1
 DELETE FROM conditions WHERE SourceEntry='64021';
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Flame Breath - Players', '64021', '13', '0', '', '18', '1', '0', '0', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64059';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Induce Madness - on Players', '64059', '13', '0', '', '18', '1', '0', '0', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64133';
@@ -362,6 +476,10 @@ REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGrou
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64174';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_hodir_protective_gaze', '64174');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64184';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Effekt on YoggSaron', '64184', '13', '0', '', '18', '1', '0', '33288', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64224';
@@ -400,9 +518,25 @@ REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_load_into_c
 DELETE FROM conditions WHERE SourceEntry='64414';
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64414', '13', '0', '', '18', '1', '0', '33109', '0', '0');
 
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64417';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_phased', '64417');
+
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64443';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_big_bang', '64443');
+
 -- Dump spell targetting conditions, rank: 1
 DELETE FROM conditions WHERE SourceEntry='64444';
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64444', '13', '0', '', '18', '1', '0', '33670', '0', '0');
+
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64445';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_remove_player_from_phase', '64445');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64449';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Auriaya Feral Defender Stalker spell script target', '64449', '13', '0', '', '18', '1', '0', '34096', '0', '0');
 
 -- Dump spell targetting conditions, rank: 1
 DELETE FROM conditions WHERE SourceEntry='64465';
@@ -413,12 +547,43 @@ DELETE FROM spell_script_names WHERE spell_id='64466';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_empowering_shadows', '64466');
 
 -- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64487';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_ascend_to_the_heavens', '64487');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64570';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64570', '13', '0', '', '18', '1', '0', '34121', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64570', '13', '0', '', '18', '1', '0', '34363', '0', '0');
+
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64584';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_big_bang', '64584');
+
+-- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64596';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_cosmic_smash_damage', '64596');
 
 -- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64597';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_cosmic_smash_missile_target', '64597');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64597';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Cosmic Smash Missle', '64597', '13', '0', '', '18', '1', '0', '33104', '0', '0');
+
+-- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64598';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_algalon_cosmic_smash_initial', '64598');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64619';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64619', '13', '0', '', '18', '1', '0', '34121', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64619', '13', '0', '', '18', '1', '0', '34363', '0', '0');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64626';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64626', '13', '0', '', '18', '1', '0', '34121', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '64626', '13', '0', '', '18', '1', '0', '34363', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64648';
@@ -433,8 +598,33 @@ DELETE FROM spell_script_names WHERE spell_id='64702';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_ulduar_squeezed_lifeless', '64702');
 
 -- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64899';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_gen_dungeon_credit', '64899');
+
+-- Dump Spell DBC, rank: 1
+REPLACE INTO spell_dbc (EffectBasePoints2, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBasePoints3, EffectBasePoints1, Stances, StackAmount, MaxTargetLevel, SpellFamilyName, PreventionType, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectMiscValueB1, EffectMiscValue3, EffectMiscValueB3, EffectMiscValue1, CastingTimeIndex, Attributes, MaxLevel, AuraInterruptFlags, Effect2, Effect3, Effect1, AttributesEx, SpellFamilyFlags1, SpellFamilyFlags2, SpellFamilyFlags3, AttributesEx3, AttributesEx2, AttributesEx5, AttributesEx4, AttributesEx7, AttributesEx6, ProcFlags, EquippedItemSubClassMask, BaseLevel, EffectMechanic1, EffectMechanic2, EffectMechanic3, RangeIndex, Mechanic, Comment, AreaGroupId, EffectDieSides1, EffectDieSides2, EquippedItemClass, ProcChance, EquippedItemInventoryTypeMask, EffectImplicitTargetB1, EffectImplicitTargetB3, EffectImplicitTargetB2, StancesNot, EffectDieSides3, MaxAffectedTargets, EffectSpellClassMaskC2, EffectSpellClassMaskC3, EffectSpellClassMaskC1, Dispel, EffectAmplitude2, EffectAmplitude3, EffectAmplitude1, Targets, EffectMiscValue2, DmgClass, ProcCharges, EffectMiscValueB2, EffectRadiusIndex3, EffectRadiusIndex2, EffectRadiusIndex1, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, SchoolMask, EffectSpellClassMaskB1, EffectSpellClassMaskB3, EffectSpellClassMaskB2, SpellLevel, EffectApplyAuraName3, EffectApplyAuraName2, EffectApplyAuraName1, EffectMultipleValue2, EffectMultipleValue3, EffectMultipleValue1, DmgMultiplier1, DmgMultiplier3, DmgMultiplier2, EffectSpellClassMaskA1, EffectSpellClassMaskA2, EffectSpellClassMaskA3, DurationIndex, Id) VALUES('0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '536870912', '0', '0', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', 'Hodir credit marker', '0', '0', '0', '-1', '101', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '28', '18', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '64899');
+
+-- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='64979';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_anti_air_rocket', '64979');
+
+-- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='64985';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_gen_dungeon_credit', '64985');
+
+-- Dump Spell DBC, rank: 1
+REPLACE INTO spell_dbc (EffectBasePoints2, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBasePoints3, EffectBasePoints1, Stances, StackAmount, MaxTargetLevel, SpellFamilyName, PreventionType, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectMiscValueB1, EffectMiscValue3, EffectMiscValueB3, EffectMiscValue1, CastingTimeIndex, Attributes, MaxLevel, AuraInterruptFlags, Effect2, Effect3, Effect1, AttributesEx, SpellFamilyFlags1, SpellFamilyFlags2, SpellFamilyFlags3, AttributesEx3, AttributesEx2, AttributesEx5, AttributesEx4, AttributesEx7, AttributesEx6, ProcFlags, EquippedItemSubClassMask, BaseLevel, EffectMechanic1, EffectMechanic2, EffectMechanic3, RangeIndex, Mechanic, Comment, AreaGroupId, EffectDieSides1, EffectDieSides2, EquippedItemClass, ProcChance, EquippedItemInventoryTypeMask, EffectImplicitTargetB1, EffectImplicitTargetB3, EffectImplicitTargetB2, StancesNot, EffectDieSides3, MaxAffectedTargets, EffectSpellClassMaskC2, EffectSpellClassMaskC3, EffectSpellClassMaskC1, Dispel, EffectAmplitude2, EffectAmplitude3, EffectAmplitude1, Targets, EffectMiscValue2, DmgClass, ProcCharges, EffectMiscValueB2, EffectRadiusIndex3, EffectRadiusIndex2, EffectRadiusIndex1, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, SchoolMask, EffectSpellClassMaskB1, EffectSpellClassMaskB3, EffectSpellClassMaskB2, SpellLevel, EffectApplyAuraName3, EffectApplyAuraName2, EffectApplyAuraName1, EffectMultipleValue2, EffectMultipleValue3, EffectMultipleValue1, DmgMultiplier1, DmgMultiplier3, DmgMultiplier2, EffectSpellClassMaskA1, EffectSpellClassMaskA2, EffectSpellClassMaskA3, DurationIndex, Id) VALUES('0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '536870912', '0', '0', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', 'Thorim credit marker', '0', '0', '0', '-1', '101', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '28', '18', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '64985');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='64996';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Reorigination', '64996', '13', '0', '', '18', '1', '0', '34246', '0', '0');
+
+-- Dump Spell DBC, rank: 1
+REPLACE INTO spell_dbc (EffectBasePoints2, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBasePoints3, EffectBasePoints1, Stances, StackAmount, MaxTargetLevel, SpellFamilyName, PreventionType, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectMiscValueB1, EffectMiscValue3, EffectMiscValueB3, EffectMiscValue1, CastingTimeIndex, Attributes, MaxLevel, AuraInterruptFlags, Effect2, Effect3, Effect1, AttributesEx, SpellFamilyFlags1, SpellFamilyFlags2, SpellFamilyFlags3, AttributesEx3, AttributesEx2, AttributesEx5, AttributesEx4, AttributesEx7, AttributesEx6, ProcFlags, EquippedItemSubClassMask, BaseLevel, EffectMechanic1, EffectMechanic2, EffectMechanic3, RangeIndex, Mechanic, Comment, AreaGroupId, EffectDieSides1, EffectDieSides2, EquippedItemClass, ProcChance, EquippedItemInventoryTypeMask, EffectImplicitTargetB1, EffectImplicitTargetB3, EffectImplicitTargetB2, StancesNot, EffectDieSides3, MaxAffectedTargets, EffectSpellClassMaskC2, EffectSpellClassMaskC3, EffectSpellClassMaskC1, Dispel, EffectAmplitude2, EffectAmplitude3, EffectAmplitude1, Targets, EffectMiscValue2, DmgClass, ProcCharges, EffectMiscValueB2, EffectRadiusIndex3, EffectRadiusIndex2, EffectRadiusIndex1, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, SchoolMask, EffectSpellClassMaskB1, EffectSpellClassMaskB3, EffectSpellClassMaskB2, SpellLevel, EffectApplyAuraName3, EffectApplyAuraName2, EffectApplyAuraName1, EffectMultipleValue2, EffectMultipleValue3, EffectMultipleValue1, DmgMultiplier1, DmgMultiplier3, DmgMultiplier2, EffectSpellClassMaskA1, EffectSpellClassMaskA2, EffectSpellClassMaskA3, DurationIndex, Id) VALUES('0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', 'Nerf the Scrapbots Achievement Criteria Marker', '0', '0', '0', '-1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '65037');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='65040';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '65040', '13', '0', '', '18', '1', '0', '0', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='65044';
@@ -473,8 +663,20 @@ REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGrou
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Flames to Salvaged Salvaged Siege Engine', '65045', '13', '11', '', '18', '1', '0', '33060', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
+DELETE FROM spell_script_names WHERE spell_id='65074';
+REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_gen_dungeon_credit', '65074');
+
+-- Dump Spell DBC, rank: 1
+REPLACE INTO spell_dbc (EffectBasePoints2, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBasePoints3, EffectBasePoints1, Stances, StackAmount, MaxTargetLevel, SpellFamilyName, PreventionType, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectMiscValueB1, EffectMiscValue3, EffectMiscValueB3, EffectMiscValue1, CastingTimeIndex, Attributes, MaxLevel, AuraInterruptFlags, Effect2, Effect3, Effect1, AttributesEx, SpellFamilyFlags1, SpellFamilyFlags2, SpellFamilyFlags3, AttributesEx3, AttributesEx2, AttributesEx5, AttributesEx4, AttributesEx7, AttributesEx6, ProcFlags, EquippedItemSubClassMask, BaseLevel, EffectMechanic1, EffectMechanic2, EffectMechanic3, RangeIndex, Mechanic, Comment, AreaGroupId, EffectDieSides1, EffectDieSides2, EquippedItemClass, ProcChance, EquippedItemInventoryTypeMask, EffectImplicitTargetB1, EffectImplicitTargetB3, EffectImplicitTargetB2, StancesNot, EffectDieSides3, MaxAffectedTargets, EffectSpellClassMaskC2, EffectSpellClassMaskC3, EffectSpellClassMaskC1, Dispel, EffectAmplitude2, EffectAmplitude3, EffectAmplitude1, Targets, EffectMiscValue2, DmgClass, ProcCharges, EffectMiscValueB2, EffectRadiusIndex3, EffectRadiusIndex2, EffectRadiusIndex1, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, SchoolMask, EffectSpellClassMaskB1, EffectSpellClassMaskB3, EffectSpellClassMaskB2, SpellLevel, EffectApplyAuraName3, EffectApplyAuraName2, EffectApplyAuraName1, EffectMultipleValue2, EffectMultipleValue3, EffectMultipleValue1, DmgMultiplier1, DmgMultiplier3, DmgMultiplier2, EffectSpellClassMaskA1, EffectSpellClassMaskA2, EffectSpellClassMaskA3, DurationIndex, Id) VALUES('0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', 'Knock on Wood Achievements - Criteria Marker', '0', '0', '0', '-1', '0', '0', '30', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '28', '22', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0.0', '0.0', '0.0', '0.0', '0.0', '0.0', '0', '0', '0', '0', '65074');
+
+-- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='65121';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_xt002_searing_light_targeting', '65121');
+
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='65192';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '65192', '13', '0', '', '18', '1', '0', '34121', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '65192', '13', '0', '', '18', '1', '0', '34363', '0', '0');
 
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='65195';
@@ -488,6 +690,11 @@ DELETE FROM conditions WHERE SourceEntry='65209';
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Effekt only for Sara', '65209', '13', '0', '', '18', '1', '0', '33134', '0', '0');
 REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Effekt only for Guardian of YoggSaron', '65209', '13', '0', '', '18', '1', '0', '33136', '0', '0');
 
+-- Dump spell targetting conditions, rank: 1
+DELETE FROM conditions WHERE SourceEntry='65333';
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '65333', '13', '0', '', '18', '1', '0', '34121', '0', '0');
+REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '65333', '13', '0', '', '18', '1', '0', '34363', '0', '0');
+
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='65594';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_ulduar_cancel_stone_grip', '65594');
@@ -499,24 +706,6 @@ REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGrou
 -- Dump spell C++ script association, rank: 1
 DELETE FROM spell_script_names WHERE spell_id='65761';
 REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_elder_brightleafs_essence_targeting', '65761');
-
--- Dump spell targetting conditions, rank: 1
-DELETE FROM conditions WHERE SourceEntry='62304';
-REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Cosmic Smash Missle', '62304', '13', '0', '', '18', '1', '0', '33104', '0', '0');
-
--- Dump spell C++ script association, rank: 1
-DELETE FROM spell_script_names WHERE spell_id='64597';
-REPLACE INTO spell_script_names (ScriptName, spell_id) VALUES('spell_cosmic_smash_missile_target', '64597');
-
--- Dump spell targetting conditions, rank: 1
-DELETE FROM conditions WHERE SourceEntry='64597';
-REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES('Algalon Cosmic Smash Missle', '64597', '13', '0', '', '18', '1', '0', '33104', '0', '0');
-
--- Dump spell targetting conditions, rank: 1
-DELETE FROM conditions WHERE SourceEntry='61920';
-REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61920', '13', '0', '', '18', '1', '0', '32857', '0', '0');
-REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61920', '13', '0', '', '18', '1', '0', '32867', '0', '0');
-REPLACE INTO conditions (Comment, SourceEntry, SourceTypeOrReferenceId, ElseGroup, ScriptName, ConditionTypeOrReference, ConditionValue1, ConditionValue3, ConditionValue2, ErrorTextId, SourceGroup) VALUES(NULL, '61920', '13', '0', '', '18', '1', '0', '32927', '0', '0');
 
 set @GUID_START := (select greatest((select guid from creature order by guid desc limit 1),  (select guid from gameobject order by guid desc limit 1) ) + 1);
 -- Dump gameobject template
@@ -1626,7 +1815,7 @@ REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseat
 
 -- Dump creature entry, difficulty: 0
 DELETE FROM creature_template WHERE entry='32872';
-REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '14', '256', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Runic Colossus', '642.0', '0', '782', '20.0', '26965', '0', '0', '0', '0', 'EventAI', '488.0', '0', '', '1.0', '25815', '0', '8', '82', '8', '0', '0', '1', '-1.0', '0', '1', '0', '9', '0', '1.0', '12340', '0', '0', 'npc_runic_colossus', '650854239', '0', '0', '521.0', '0', '363.0', '0', '0', '0', '0', '1.0', '10.0', '82', '0', '1.0', '121', '0', '0', '32872', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', '33149', '14');
+REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '14', '2', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Runic Colossus', '642.0', '0', '782', '20.0', '26965', '0', '0', '0', '0', 'EventAI', '488.0', '0', '', '1.0', '25815', '0', '8', '82', '8', '0', '0', '1', '-1.0', '0', '1', '0', '9', '0', '1.0', '12340', '0', '0', 'npc_runic_colossus', '650854239', '0', '0', '521.0', '0', '363.0', '0', '0', '0', '0', '1.0', '10.0', '82', '0', '1.0', '121', '0', '0', '32872', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', '33149', '14');
 
 -- Dump creature spawns, difficulty: 0
 REPLACE INTO creature (map, MovementType, npcflag, orientation, currentwaypoint, curmana, dynamicflags, equipment_id, curhealth, spawnMask, spawntimesecs, position_z, position_x, position_y, phaseMask, unit_flags, guid, spawndist, id, modelid) VALUES('603', '0', '0', '1.79769', '0', '0', '0', '0', '134810', '3', '604800', '412.176', '2227.5', '-396.179', '1', '0', @GUID_START + 86, '0.0', '32872', '26965');
@@ -1647,7 +1836,7 @@ REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseat
 
 -- Dump creature entry, difficulty: 0
 DELETE FROM creature_template WHERE entry='32873';
-REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '14', '256', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Ancient Rune Giant', '642.0', '0', '782', '20.0', '28349', '0', '0', '0', '0', 'EventAI', '488.0', '0', '', '1.0', '25815', '0', '8', '82', '8', '0', '0', '1', '-1.0', '0', '1', '0', '7', '150000', '1.0', '12340', '0', '0', 'npc_ancient_rune_giant', '650854239', '0', '0', '521.0', '0', '363.0', '0', '0', '0', '0', '0.888888', '15.0', '82', '100000', '1.0', '121', '0', '0', '32873', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', '33148', '14');
+REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '14', '2', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Ancient Rune Giant', '642.0', '0', '782', '20.0', '28349', '0', '0', '0', '0', 'EventAI', '488.0', '0', '', '1.0', '25815', '0', '8', '82', '8', '0', '0', '1', '-1.0', '0', '1', '0', '7', '150000', '1.0', '12340', '0', '0', 'npc_ancient_rune_giant', '650854239', '0', '0', '521.0', '0', '363.0', '0', '0', '0', '0', '0.888888', '15.0', '82', '100000', '1.0', '121', '0', '0', '32873', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', '33148', '14');
 
 -- Dump creature spawns, difficulty: 0
 REPLACE INTO creature (map, MovementType, npcflag, orientation, currentwaypoint, curmana, dynamicflags, equipment_id, curhealth, spawnMask, spawntimesecs, position_z, position_x, position_y, phaseMask, unit_flags, guid, spawndist, id, modelid) VALUES('603', '0', '0', '0.226893', '0', '0', '0', '0', '202215', '3', '604800', '438.331', '2134.57', '-440.318', '1', '0', @GUID_START + 87, '0.0', '32873', '28349');
@@ -1668,7 +1857,7 @@ REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseat
 
 -- Dump creature entry, difficulty: 0
 DELETE FROM creature_template WHERE entry='32874';
-REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '16', '256', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Iron Ring Guard', '604.0', '0', '708', '7.5', '26065', '0', '0', '0', '0', 'EventAI', '464.0', '0', '', '1.0', '25815', '0', '8', '81', '0', '0', '0', '1', '-1.0', '0', '0', '0', '7', '0', '1.0', '12340', '0', '0', 'npc_thorim_arena_phase', '0', '0', '0', '512.0', '0', '353.0', '626', '0', '0', '0', '1.0', '2.0', '81', '0', '1.0', '112', '0', '0', '32874', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', @GUID_START + 88, '16');
+REPLACE INTO creature_template (trainer_race, InhabitType, trainer_class, baseattacktime, family, faction_H, unit_flags, speed_run, rangeattacktime, unit_class, dmgschool, spell8, difficulty_entry_3, difficulty_entry_2, spell4, spell5, spell6, spell7, spell1, spell2, spell3, name, maxdmg, movementId, attackpower, dmg_multiplier, modelid1, modelid2, modelid3, modelid4, questItem6, AIName, mindmg, pickpocketloot, IconName, scale, KillCredit2, KillCredit1, dynamicflags, maxlevel, type_flags, RacialLeader, trainer_type, rank, speed_fly, lootid, flags_extra, skinloot, type, maxgold, Armor_mod, WDBVerified, questItem3, questItem2, ScriptName, mechanic_immune_mask, questItem5, questItem4, maxrangedmg, MovementType, minrangedmg, equipment_id, resistance3, gossip_menu_id, npcflag, speed_walk, Health_mod, minlevel, mingold, Mana_mod, rangedattackpower, VehicleId, PetSpellDataId, entry, trainer_spell, resistance6, resistance4, resistance5, resistance2, questItem1, resistance1, RegenHealth, subname, exp, difficulty_entry_1, faction_A) VALUES('0', '3', '0', '2000', '0', '16', '2', '1.14286', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'Iron Ring Guard', '604.0', '0', '708', '7.5', '26065', '0', '0', '0', '0', 'EventAI', '464.0', '0', '', '1.0', '25815', '0', '8', '81', '0', '0', '0', '1', '-1.0', '0', '0', '0', '7', '0', '1.0', '12340', '0', '0', 'npc_thorim_arena_phase', '0', '0', '0', '512.0', '0', '353.0', '626', '0', '0', '0', '1.0', '2.0', '81', '0', '1.0', '112', '0', '0', '32874', '0', '0', '0', '0', '0', '0', '0', '1', '', '2', @GUID_START + 88, '16');
 
 -- Dump old-style SQL scripts for creature entry
 DELETE FROM creature_ai_scripts WHERE creature_id='32874';

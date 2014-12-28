@@ -156,16 +156,6 @@ public:
             me->SetReactState(REACT_PASSIVE);
 
             // Spawn NPC Helpers
-            for (uint8 i = 0; i < RAID_MODE<uint8>(NORMAL_COUNT, RAID_COUNT); ++i)
-            {
-                if (Creature* helper = me->SummonCreature(addLocations[i].entry, addLocations[i].x, addLocations[i].y, addLocations[i].z, addLocations[i].o))
-                    if (Creature* iceBlock = helper->SummonCreature(ENTRY_NPC_FLASH_FREEZE_PRE, addLocations[i].x, addLocations[i].y, addLocations[i].z, addLocations[i].o))
-                    {
-                        helper->AddThreat(me, 5000000.0f);
-                        me->ApplySpellImmune(0, IMMUNITY_ID, RAID_MODE<uint32>(64392, 64679), true);
-                        me->ApplySpellImmune(0, IMMUNITY_ID, RAID_MODE<uint32>(63525, 63526), true);
-                    }
-            }
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -205,6 +195,16 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            for (uint8 i = 0; i < RAID_MODE<uint8>(NORMAL_COUNT, RAID_COUNT); ++i)
+            {
+                if (Creature* helper = me->SummonCreature(addLocations[i].entry, addLocations[i].x, addLocations[i].y, addLocations[i].z, addLocations[i].o))
+                    if (Creature* iceBlock = helper->SummonCreature(ENTRY_NPC_FLASH_FREEZE_PRE, addLocations[i].x, addLocations[i].y, addLocations[i].z, addLocations[i].o))
+                    {
+                        helper->AddThreat(me, 5000000.0f);
+                        me->ApplySpellImmune(0, IMMUNITY_ID, RAID_MODE<uint32>(64392, 64679), true);
+                        me->ApplySpellImmune(0, IMMUNITY_ID, RAID_MODE<uint32>(63525, 63526), true);
+                    }
+            }
             _EnterCombat();
             DoScriptText(SAY_AGGRO, me);
             me->SetReactState(REACT_AGGRESSIVE);
@@ -328,10 +328,8 @@ public:
             {
                 if (Unit *pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
                 {
-                    if(!pTarget->ToPlayer())
-                        continue;
 
-                    if (pTarget->HasAura(SPELL_BLOCK_OF_ICE))
+                    if (pTarget->ToPlayer() && pTarget->HasAura(SPELL_BLOCK_OF_ICE))
                     {
                         DoCast(pTarget, SPELL_FROZEN_KILL);
                         continue;
@@ -341,7 +339,7 @@ public:
                         if (GetClosestCreatureWithEntry(pTarget, ENTRY_NPC_ICICLE_TARGET, 5.0f))
                             continue;
 
-                        else if (Creature *pIceBlock = pTarget->SummonCreature(ENTRY_NPC_FLASH_FREEZE,pTarget->GetPositionX(),pTarget->GetPositionY(),pTarget->GetPositionZ(),0,TEMPSUMMON_TIMED_DESPAWN,105000))
+                        else if (Creature *pIceBlock = pTarget->SummonCreature(pTarget->ToPlayer() ? ENTRY_NPC_FLASH_FREEZE : ENTRY_NPC_FLASH_FREEZE_PRE ,pTarget->GetPositionX(),pTarget->GetPositionY(),pTarget->GetPositionZ(),0,TEMPSUMMON_TIMED_DESPAWN,105000))
                         {
                             if (pTarget->GetTypeId() == TYPEID_PLAYER)
                                 CheeseTheFreeze = false;

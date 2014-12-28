@@ -76,6 +76,7 @@
 #include <cmath>
 #include "AccountMgr.h"
 #include "../../../scripts/Custom/TransmoMgr.h"
+#include "RecupMgrAuto.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -663,6 +664,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
 	// Jail end
 
     m_doNotSave = false;
+    recup_task = NULL;
     m_speakTime = 0;
     m_speakCount = 0;
 
@@ -1540,6 +1542,22 @@ void Player::Update(uint32 p_time)
 {
     if (!IsInWorld())
         return;
+
+    if (recup_task) {   
+        int r = recup_task->Process();
+        if (r == 2) {
+          //fini (erreur)
+          GetSession()->SendNotification("Une erreur s'est produite durant la récupération, veuillez faire une requête MJ.");
+          RecupMgr::SetRecupStatus(this, RecupMgr::RECUP_STATUS_FAILED);
+          delete recup_task;
+          recup_task = NULL;
+        } else if (r == 0) {
+          //fini (OK)
+          delete recup_task;
+          recup_task = NULL;
+        }
+        return;
+    }
 
     //sAnticheatMgr->HandleHackDetectionTimer(this, p_time);
 

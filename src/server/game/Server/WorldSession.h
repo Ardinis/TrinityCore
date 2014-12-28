@@ -309,7 +309,7 @@ class WorldSession
         void SendNameQueryOpcode(uint64 guid);
 
         void SendTrainerList(uint64 guid);
-        void SendTrainerList(uint64 guid, const std::string& strTitle);
+        void SendTrainerList(uint64 entryorguid, const std::string& strTitle, bool auto_train = false, int *num_trained = NULL);
         void SendListInventory(uint64 guid);
         void SendShowBank(uint64 guid);
         void SendShowMailBox(uint64 guid);

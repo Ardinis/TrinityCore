@@ -246,6 +246,8 @@ class WorldPacket;
 class AchievementMgr
 {
     public:
+        friend class RecupMgr;
+        friend class RecupMgrAuto;
         AchievementMgr(Player* player);
         ~AchievementMgr();
 

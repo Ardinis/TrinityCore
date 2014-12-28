@@ -123,47 +123,59 @@ void WorldSession::SendTrainerList(uint64 guid)
     SendTrainerList(guid, str);
 }
 
-void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
+void WorldSession::SendTrainerList(uint64 entryorguid, const std::string& strTitle, bool auto_train, int *num_trained)
 {
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: SendTrainerList");
 
-    Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
-    if (!unit)
-    {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: SendTrainerList - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(guid)));
-        return;
-    }
 
+    Creature* unit = NULL;
+    if (!auto_train) {
+        unit = GetPlayer()->GetNPCIfCanInteractWith(entryorguid, UNIT_NPC_FLAG_TRAINER);
+        if (!unit)
+        {
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: SendTrainerList - Unit (GUID: %u) not found or you can not interact with him.", uint32(GUID_LOPART(entryorguid)));
+            return;
+        }
+    }
+    
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     // trainer list loaded at check;
-    if (!unit->isCanTrainingOf(_player, true))
+    if (!auto_train && !unit->isCanTrainingOf(_player, true))
         return;
 
     CreatureTemplate const* ci = unit->GetCreatureInfo();
 
-    if (!ci)
-    {
-        sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: SendTrainerList - (GUID: %u) NO CREATUREINFO!", GUID_LOPART(guid));
-        return;
+    if (!auto_train) {
+        ci = unit->GetCreatureInfo();
+
+        if (!ci)
+        {
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: SendTrainerList - (GUID: %u) NO CREATUREINFO!", GUID_LOPART(entryorguid));
+            return;  
+        }
     }
 
-    TrainerSpellData const* trainer_spells = unit->GetTrainerSpells();
+
+    TrainerSpellData const* trainer_spells = auto_train ? sObjectMgr->GetNpcTrainerSpells(entryorguid) : unit->GetTrainerSpells();
     if (!trainer_spells)
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: SendTrainerList - Training spells not found for creature (GUID: %u Entry: %u)",
-            GUID_LOPART(guid), unit->GetEntry());
+            GUID_LOPART(entryorguid), unit->GetEntry());
         return;
     }
 
     WorldPacket data(SMSG_TRAINER_LIST, 8+4+4+trainer_spells->spellList.size()*38 + strTitle.size()+1);
-    data << guid;
-    data << uint32(trainer_spells->trainerType);
+    size_t count_pos = 0;
+    if (!auto_train) {
+	    data << entryorguid;
+	    data << uint32(trainer_spells->trainerType);
 
-    size_t count_pos = data.wpos();
-    data << uint32(trainer_spells->spellList.size());
+	    size_t count_pos = data.wpos();
+	    data << uint32(trainer_spells->spellList.size());
+    }
 
     // reputation discount
     float fDiscountMod = _player->GetReputationPriceDiscount(unit);

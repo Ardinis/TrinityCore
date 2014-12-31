@@ -6906,8 +6906,14 @@ void Spell::UpdatePointers()
             m_originalCaster = NULL;
     }
 
-    if (m_castItemGUID && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_castItemGUID && m_caster->GetTypeId() == TYPEID_PLAYER) {
         m_CastItem = m_caster->ToPlayer()->GetItemByGuid(m_castItemGUID);
+        if (m_CastItem == NULL) {
+            sLog->outError("Spell::UpdatePointers(): CastItem vanished during spellcast! Player=%s PlayerGUIDLow=%u SpellID=%u CastItemGUID=" UI64FMTD, 
+                m_caster->GetName(), m_caster->GetGUIDLow(), m_spellInfo->Id, m_castItemGUID);
+            cancel(); // Since it's probably a cheat attempt, we cancel the spell
+        }
+    }
 
     m_targets.Update(m_caster);
 

@@ -70,10 +70,10 @@ enum Spells
     //------------------BOOMBOT-----------------------
     SPELL_AURA_BOOMBOT                          = 65032,
 	SPELL_BOOM                                  = 62834,
-    
+
 	// Achievement-related spells
     SPELL_ACHIEVEMENT_CREDIT_NERF_SCRAPBOTS     = 65037,
-    SPELL_EXPLOSION_VISUAL                      = 62987, 
+    SPELL_EXPLOSION_VISUAL                      = 62987,
 
     //-----------------SCRAPBOT-----------------------
     SPELL_HEAL_XT002                            = 62832
@@ -227,6 +227,7 @@ public:
             me->SetStandState(UNIT_STAND_STATE_STAND);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_SELECTABLE);
             me->ResetLootMode();
+            me->SetReactState(REACT_AGGRESSIVE);
 
             //Makes XT-002 to cast a light bomb 10 seconds after aggro.
             uiSearingLightTimer = TIMER_SEARING_LIGHT/2;
@@ -277,6 +278,7 @@ public:
             switch (action)
             {
                 case ACTION_ENTER_HARD_MODE:
+                {
                     if (!hardMode)
                     {
                         hardMode = true;
@@ -289,6 +291,7 @@ public:
                         me->CastSpell(me, RAID_MODE(SPELL_HEARTBREAK_10, SPELL_HEARTBREAK_25), true);
                     }
                     break;
+                }
                 case ACTION_XT002_REACHED:
                     nerfEngineering = false;
                     break;
@@ -364,7 +367,7 @@ public:
                 sLog->outError("xt002: hack de merde (2)"); // Virer quand on sera sur que ca vient pas d'ici
                 me->Kill(me);
             }
-            
+
             if (!UpdateVictim())
                 return;
 
@@ -515,7 +518,9 @@ public:
         // NOT BLIZZLIKE ... Heart is Spawned the whole Encounter ... VX - 002 is a vehicle
         void exposeHeart()
         {
-            me->GetMotionMaster()->MoveIdle();
+            me->AttackStop();
+            me->SetReactState(REACT_PASSIVE);
+
             me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
 
             // Remove if it is still active?
@@ -550,7 +555,7 @@ public:
         void SetPhaseOne()
         {
             me->SetStandState(UNIT_STAND_STATE_STAND);
-            me->GetMotionMaster()->MoveChase(me->getVictim());
+            me->SetReactState(REACT_AGGRESSIVE);
 
             uiSearingLightTimer = TIMER_SEARING_LIGHT / 2;
             uiGravityBombTimer = TIMER_GRAVITY_BOMB;
@@ -596,10 +601,10 @@ class mob_xt002_heart : public CreatureScript
             void JustDied(Unit* /*victim*/)
             {
                 if (_instance)
-                    if (Creature* XT002 = me->GetCreature(*me, _instance->GetData64(TYPE_XT002)))
+                    // me->GetCreature(*me, _instance->GetData64(TYPE_XT002))) fix me !!! why the fuck is this not working ?
+                    if (Creature* XT002 = me->FindNearestCreature(NPC_XT002, 100.0f))
                         if (XT002->AI())
                             XT002->AI()->DoAction(ACTION_ENTER_HARD_MODE);
-
                 //removes the aura
                 me->RemoveAurasDueToSpell(SPELL_EXPOSED_HEART);
             }
@@ -822,7 +827,7 @@ public:
 
         void UpdateAI(const uint32 /*diff*/) { }
 
-	private: 
+	private:
 		 InstanceScript* _instance;
 		 bool boomed;
     };

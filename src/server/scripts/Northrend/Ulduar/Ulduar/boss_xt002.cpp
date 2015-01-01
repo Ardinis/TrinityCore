@@ -601,8 +601,7 @@ class mob_xt002_heart : public CreatureScript
             void JustDied(Unit* /*victim*/)
             {
                 if (_instance)
-                    // me->GetCreature(*me, _instance->GetData64(TYPE_XT002))) fix me !!! why the fuck is this not working ?
-                    if (Creature* XT002 = me->FindNearestCreature(NPC_XT002, 100.0f))
+                    if (Creature* XT002 = me->GetCreature(*me, _instance->GetData64(TYPE_XT002)))
                         if (XT002->AI())
                             XT002->AI()->DoAction(ACTION_ENTER_HARD_MODE);
                 //removes the aura

@@ -242,8 +242,6 @@ db = MySQLdb.connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, charset="utf8
 CURSOR = db.cursor()
 guid_translator = GuidTranslator()
 print ("set @GUID_START := (select greatest((select guid from creature order by guid desc limit 1),  (select guid from gameobject order by guid desc limit 1) ) + 1);")
-print ("DELETE from gameobject where map = 603;")
-print ("DELETE from creature where map = 603;")
 
 if sys.argv[1] == "creature":
   func = ninja_creature

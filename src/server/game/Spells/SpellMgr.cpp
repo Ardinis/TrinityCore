@@ -4072,6 +4072,10 @@ void SpellMgr::LoadDbcDataCorrections()
 			case 37498:
 				spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_500_YARDS;
 				break;
+			case 37465:
+				spellInfo->AttributesEx4 = SPELL_ATTR4_UNK5;
+				spellInfo->EffectRadiusIndex[EFFECT_0] = 3;
+				break;
             default:
                 break;
         }

@@ -4520,7 +4520,7 @@ public:
      
     struct npc_chess_statusAI : public ScriptedAI
     {
-    npc_chess_statusAI(Creature* c) : ScriptedAI(c)
+		npc_chess_statusAI(Creature* c) : ScriptedAI(c)
     {
     }
      
@@ -4532,6 +4532,101 @@ public:
     }
 
     };
+};
+
+class npc_chess_rain_of_fire : public CreatureScript
+{
+public:
+    npc_chess_rain_of_fire() : CreatureScript("npc_chess_rain_of_fire") { }
+     
+    CreatureAI* GetAI(Creature* creature) const
+    {
+		return new npc_chess_rain_of_fireAI(creature);
+    }
+     
+    struct npc_chess_rain_of_fireAI : public ScriptedAI
+    {
+		uint32 timerDamage;
+
+		npc_chess_rain_of_fireAI(Creature* c) : ScriptedAI(c)
+		{
+			timerDamage = 5000;
+		}
+     
+		void Reset()
+		{
+			timerDamage = 5000;
+		}
+
+		void UpdateAI(uint32 const diff) {
+			if (timerDamage <= diff) {
+				std::list<Creature*> creatures;
+				std::list<Creature*> creaturesList;
+				me->GetCreatureListWithEntryInGrid(creatures, NPC_PAWN_H, 0.5f);
+				for(std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+					creaturesList.push_back((*iter));
+				creatures.clear();
+				me->GetCreatureListWithEntryInGrid(creatures, NPC_KNIGHT_H, 0.5f);
+				for(std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+					creaturesList.push_back((*iter));
+				creatures.clear();
+				me->GetCreatureListWithEntryInGrid(creatures, NPC_QUEEN_H, 0.5f);
+				for(std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+					creaturesList.push_back((*iter));
+				creatures.clear();
+				me->GetCreatureListWithEntryInGrid(creatures, NPC_BISHOP_H, 0.5f);
+				for(std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+					creaturesList.push_back((*iter));
+				creatures.clear();
+				me->GetCreatureListWithEntryInGrid(creatures, NPC_ROOK_H, 0.5f);
+				for(std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+					creaturesList.push_back((*iter));
+				creatures.clear();
+				me->GetCreatureListWithEntryInGrid(creatures, NPC_KING_H, 0.5f);
+				for(std::list<Creature*>::iterator iter = creatures.begin(); iter != creatures.end(); ++iter)
+					creaturesList.push_back((*iter));
+				for(std::list<Creature*>::iterator iter = creaturesList.begin(); iter != creaturesList.end(); ++iter)
+					me->DealDamage((*iter), 5000, 0, SPELL_DIRECT_DAMAGE);
+				timerDamage = 5000;
+			} else
+				timerDamage-=diff;
+		}
+
+    };
+};
+
+class spell_chess_rain_fire : public SpellScriptLoader
+{
+    public:
+        spell_chess_rain_fire() : SpellScriptLoader("spell_chess_rain_fire") { }
+
+        class spell_chess_rain_fire_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_chess_rain_fire_SpellScript);
+
+            void HandleSummon(SpellEffIndex effIndex)
+            {
+				PreventHitDefaultEffect(effIndex);
+                Unit* caster = GetCaster();
+                uint32 entry = uint32(GetSpellInfo()->Effects[effIndex].MiscValue);
+                WorldLocation const* summonLocation = GetTargetDest();
+                if (!caster || !summonLocation)
+                    return;
+
+                if (Creature* creature = caster->SummonCreature(entry, summonLocation->GetPositionX(), summonLocation->GetPositionY(), summonLocation->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000)) 
+					creature->CastSpell(creature, 37465, true);
+            }
+
+			void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_chess_rain_fire_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_chess_rain_fire_SpellScript();
+        }
 };
 
 
@@ -5166,6 +5261,8 @@ class spell_fury_of_medivh : public SpellScriptLoader
         new npc_echo_of_medivh();
         new chess_move_trigger();
         new npc_chess_status();
+		new npc_chess_rain_of_fire();
+		new spell_chess_rain_fire();
 		new spell_dummy_change_facing();
 		new spell_dummy_movement();
 		new spell_vicious_strike();

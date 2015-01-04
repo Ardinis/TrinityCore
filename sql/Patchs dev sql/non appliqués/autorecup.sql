@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS recup_list;
+drop table if exists recup_pack_guilde;
 drop table if exists link_recup;
 drop table if exists recup_log;
 drop table if exists recup_guilde;
@@ -6,8 +7,8 @@ drop table if exists recup_rules;
 drop table if exists recup_server;
 drop table if exists recup_stuff_remplace;
 drop table if exists recup_groupe_guilde;
-create table link_recup (guid int not null, type int not null, subtype int not null, numparam int not null, txtparam varchar(64) not null default "", PRIMARY KEY (guid,type,subtype));
-create table recup_log (guid INT not null, server_id INT not null, dest_guid INT not null, primary key (guid,server_id));
+create table link_recup (guid int not null, type int not null, subtype int not null, numparam bigint not null, txtparam varchar(64) not null default "", PRIMARY KEY (guid,type,subtype));
+create table recup_log (guid INT not null, server_id INT not null, dest_guid INT not null, pseudo_orig VARCHAR(64) DEFAULT NULL, primary key (guid,server_id));
 create table recup_guilde (dest_guid INT not null, server_id INT not null, status INT not null, guild_name VARCHAR(256) not null, guildrecup_id INT not null, primary key (dest_guid));
 create table recup_rules (guild INT not null, type INT not null, value INT not null, primary key (guild, type));
 create table recup_server (id INT not null, name VARCHAR(256), realmlist VARCHAR(256) not null, realm VARCHAR(256) not null, seuil_pc INT not null, seuil_pc_guilde INT not null, taux_pc INT not null, ilevel INT not null, primary key (id));

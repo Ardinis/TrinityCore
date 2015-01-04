@@ -145,6 +145,11 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                 #endif /* _WIN32 */
                     World::StopNow(SHUTDOWN_EXIT_CODE);
                     break;
+                case SIGCHLD:
+                        while (waitpid(-1, NULL, WNOHANG) > 0) { 
+                                sLog->outError("A child process has terminated.");
+                        }
+                        break;
                 case SIGSEGV:
                 case SIGILL: 
                 case SIGABRT:

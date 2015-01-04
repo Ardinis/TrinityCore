@@ -22,6 +22,7 @@
 #include "SpellAuras.h"
 #include "SpellAuraEffects.h"
 #include "AchievementMgr.h"
+#include "Chat.h"
 
 /*
         perso:
@@ -57,9 +58,6 @@ bool RecupMgrAuto::GiveSkillById(Player *player, int id_metier, int level) {
 		                player->SetSkill(ability->skillId, 0, level, ((level < 75) ? 75 : level));
 		}
 	}
-	if (!found)
-//	    sLog->outUnified(LOG_ERROR, player->GetSession()->GetRemoteAddress().c_str(), "recupauto", "competence", player->GetGUID(), id_metier, 0, "Impossible de trouver la competence: %d", id_metier);
-//        	sLog->outVisitLog("RECUP: Guid %u Skill %u : Impossible de trouver la competence", player->GetGUIDLow(), id_metier);
         return found;
 }
 
@@ -81,7 +79,7 @@ bool RecupMgrAuto::DoRecupAuto(Player *player) {
 	
 	uint32 ilevel = fields[0].GetUInt32();
         
-        ApplyRecupAura(player, ilevel);
+        // ApplyRecupAura(player, ilevel);
 
 
 	// table link_recup qui vient du site
@@ -94,7 +92,10 @@ bool RecupMgrAuto::DoRecupAuto(Player *player) {
             return false;
         }
         player->recup_task = BackgroundRecupTask::Factory(player, ilevel);
-        return (player->recup_task != NULL);
+        
+        
+        
+       return (player->recup_task != NULL);
 }
 
 
@@ -223,7 +224,7 @@ void RecupMgrAuto::fillGuildBank(Player *player,Guild *guild) {
 //	        sLog->outUnified(LOG_ERROR, player->GetSession()->GetRemoteAddress().c_str(), "recupauto", "itemguilde", player->GetGUID(), 0, 0, "Erreur recuperation item BDG (guilde: %s)", guild->GetName().c_str());
                 //sLog->outVisitLog("[RECUP] Erreur recup guilde, joueur=%s (guid %u), guilde=%s", player->GetName(), player->GetGUIDLow(), guild->GetName().c_str());
                 if (player->GetSession()) 
-                        player->GetSession()->SendNotification("Erreur de recuperation de guilde (ITEM), veuillez faire une requete MJ.");
+                        ChatHandler(player).PSendSysMessage("Erreur de recuperation de guilde (ITEM), veuillez faire une requete MJ.");
                 ok = false;
                 SetRecupGuildStatus(player, 2);
                 return;
@@ -271,7 +272,7 @@ void RecupMgrAuto::fillGuildBank(Player *player,Guild *guild) {
 //                sLog->outVisitLog("[RECUP] Erreur recup guilde, joueur=%s (guid %u), guilde=%s", player->GetName(), player->GetGUIDLow(), guild->GetName().c_str());
                 ok = false;
                 if (player->GetSession())
-                        player->GetSession()->SendNotification("Erreur de recuperation de guilde (PO), veuillez faire une requete MJ.");
+                        ChatHandler(player).PSendSysMessage("Erreur de recuperation de guilde (PO), veuillez faire une requete MJ.");
 	} else {
         	Field *fields = res->Fetch();
         	if (fields) {
@@ -283,9 +284,9 @@ void RecupMgrAuto::fillGuildBank(Player *player,Guild *guild) {
 	SetRecupGuildStatus(player, ok ? 1 : 2);
 	if (ok) {
 //	        sLog->outUnified(LOG_INFO, player->GetSession()->GetRemoteAddress().c_str(), "recupauto", "guilde", player->GetGUID(), 0, 0, "Recuperation guilde OK: %s", guild->GetName().c_str());
-	        player->GetSession()->SendNotification("La recuperation de guilde a reussi.");
+	        ChatHandler(player).PSendSysMessage("La recuperation de guilde a reussi.");
 	} else {
-	    player->GetSession()->SendNotification("Une erreur s'est produite, veuillez faire une requete MJ.");
+	    ChatHandler(player).PSendSysMessage("Une erreur s'est produite, veuillez faire une requete MJ.");
 	}
 }
 
@@ -702,8 +703,8 @@ int BackgroundRecupTask::Process() {
 	//Gestion des items par mail
 	if (!items.empty()) {
 
-    	    std::string subject = "Récupération";
-            std::string text = "Voici les objets supplémentaires de votre récupération. Bon jeu sur Oxygen! ";
+    	    std::string subject = "Recuperation";
+            std::string text = "Voici les objets supplementaires de votre recuperation. Bon jeu sur Paragon! ";
             MailSender sender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
             
             MailDraft *draft = NULL;
@@ -759,9 +760,9 @@ int BackgroundRecupTask::Process() {
                 RecupMgrAuto::GiveItem(player, RecupMgrAuto::BAG_FROSTWEAVE);
 
 	player->SaveToDB();
-	RecupMgrAuto::SetRecupStatus(player, RecupMgrAuto::RECUP_STATUS_IN_PROGRESS);
+	RecupMgrAuto::SetRecupStatus(player, RecupMgrAuto::RECUP_STATUS_FINISHED);
 //        sLog->outVisitLog("RECUP OK: Joueur %s (GUID %u), IP %s, nombre d'invocations de BackgroundRecupTask::Process() : %u (temps derniere etape=%u)", player->GetName(), player->GetGUIDLow(), player->GetSession()->GetRemoteAddress().c_str(), invoc_count, getMSTime() - time_start);
-        player->GetSession()->SendNotification("La premiere etape de la recuperation a reussi.");
+        //player->GetSession()->SendNotification("La premiere etape de la recuperation a reussi.");
 
 //Log::outUnified(LogSeverity s, uint32 ip, char *compo, char *action, uint32 user, uint32 target, uint32 param, const char *str, ...)
 

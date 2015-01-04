@@ -1547,12 +1547,14 @@ void Player::Update(uint32 p_time)
         int r = recup_task->Process();
         if (r == 2) {
           //fini (erreur)
-          GetSession()->SendNotification("Une erreur s'est produite durant la récupération, veuillez faire une requête MJ.");
+          ChatHandler(this).PSendSysMessage("Une erreur technique s'est produite. Veuillez contacter un membre de l'equipe.");
           RecupMgr::SetRecupStatus(this, RecupMgr::RECUP_STATUS_FAILED);
           delete recup_task;
           recup_task = NULL;
         } else if (r == 0) {
           //fini (OK)
+          ChatHandler(this).PSendSysMessage(LANG_RECUP_DONE);
+          ChatHandler(this).PSendSysMessage("Veuillez vous deconnecter et vous reconnecter pour finaliser votre recuperation.");
           delete recup_task;
           recup_task = NULL;
         }

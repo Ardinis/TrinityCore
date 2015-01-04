@@ -25,9 +25,10 @@ class RecupMgr {
         enum RecupStatus {
             RECUP_STATUS_NONE = -1,
             RECUP_STATUS_NOT_STARTED = 0,
-            RECUP_STATUS_IN_PROGRESS = 1,
+            RECUP_STATUS_IN_PROGRESS = 1, //Statut pas utilise sur Paragon
             RECUP_STATUS_FINISHED = 2,
             RECUP_STATUS_FAILED = 3,
+            RECUP_STATUS_VALIDATION = 4, // En attente de validation
         };
         
         enum RecupChecks {

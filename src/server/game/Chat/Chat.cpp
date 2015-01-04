@@ -432,6 +432,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
 	{ "diamond",        SEC_PLAYER,         false, NULL,                                           "", diamondCommandTable },
 	{ "recup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleRecupCommand>,              "", NULL},
+	{ "autorecup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleAutorecupCommand>,              "", NULL},
+	{ "guildrecup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleGuildRecupCommand>,              "", NULL},
 	{ "wg",             SEC_ADMINISTRATOR,  false, NULL,                                 "", wintergraspCommandTable },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };

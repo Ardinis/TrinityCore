@@ -135,10 +135,7 @@ bool RecupMgr::IsDoubleStuff(Player *plr) {
 	return (fields[0].GetUInt32() & 1);
 }
 
-// 0 == unfinished, 1 == finished, autre valeur == recup n'existe pas
 int RecupMgr::GetRecupStatus(Player *plr) {
-        if ((RecupMgrAuto::GetRecupMode(plr) == 1) && (RecupMgr::GetRecupValidation(plr) != 1))
-                return -1; //recup non validee
 	PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_RECUP_STATUS);
 	stmt->setUInt32(0, plr->GetGUID());
 	PreparedQueryResult res = CharacterDatabase.Query(stmt);
@@ -147,6 +144,8 @@ int RecupMgr::GetRecupStatus(Player *plr) {
 	Field* fields = res->Fetch();
 	if (!fields)
 		return -1;
+        if ((RecupMgrAuto::GetRecupMode(plr) == 1) && (RecupMgr::GetRecupValidation(plr) != 1))
+                return RECUP_STATUS_VALIDATION; //recup non validee
 		
 	return (fields[0].GetUInt32());
 }

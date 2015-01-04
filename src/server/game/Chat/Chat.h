@@ -373,6 +373,10 @@ class ChatHandler
 	//Recup Command
 	bool HandleRecupCommand(const char* args);
 
+	//Autorecup Command
+	bool HandleAutorecupCommand(const char* args);
+	bool HandleGuildRecupCommand(const char* args);
+
         //Wintergrasp
         bool HandleWintergraspStatusCommand(const char *args);
         bool HandleWintergraspStartCommand(const char *args);

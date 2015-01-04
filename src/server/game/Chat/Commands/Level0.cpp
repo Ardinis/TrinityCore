@@ -30,6 +30,8 @@
 #include "Util.h"
 #include "ArenaTeamMgr.h"
 #include "math.h"
+#include "RecupMgrAuto.h"
+#include "GuildMgr.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -286,6 +288,105 @@ bool ChatHandler::HandleDiamondLevelCommand(const char* /*args*/)
 
   return true;
 }
+
+bool ChatHandler::HandleAutorecupCommand(const char* /*args*/) {
+  Player *player = m_session->GetPlayer();
+  switch(RecupMgr::GetRecupStatus(player)) {
+    case RecupMgr::RECUP_STATUS_NONE:
+      PSendSysMessage(LANG_RECUP_NOT_EXISTS);
+      return(true);
+    case RecupMgr::RECUP_STATUS_FINISHED:
+      PSendSysMessage(LANG_RECUP_ALREADY_DONE);
+      return(true);
+    case RecupMgr::RECUP_STATUS_VALIDATION:
+      PSendSysMessage(LANG_RECUP_WAITING);
+      return(true);
+    case RecupMgr::RECUP_STATUS_NOT_STARTED:
+      // Verifications
+      if (RecupMgr::MainBagSpace(player) < 14) {
+        PSendSysMessage("Votre sac principal doit etre vide. Veuillez le vider SVP.");
+        return(true);
+      }
+      if (player->GetFreePrimaryProfessionPoints() < 2) {
+        PSendSysMessage("Veuillez d'abord oublier vos metiers.");
+        return(true);
+      }
+      //Debut de la recuperation proprement dite
+      if (RecupMgrAuto::DoRecupAuto(player)) {
+        m_session->SendNotification("Recuperation en cours, veuillez patienter quelques secondes...");
+        // La Sauvegarde du perso & mise à jour de la table recup est faite à la fin de la tache de background
+        return(true);
+      } 
+    default:
+      PSendSysMessage("Une erreur technique s'est produite. Veuillez contacter un membre de l'equipe.");
+      return(true);
+  }
+}
+
+bool ChatHandler::HandleGuildRecupCommand(const char* args)
+{
+	if(!m_session)
+		return false;
+	if(!m_session->GetPlayer())
+		return false;
+	Player *player;
+	player=m_session->GetPlayer()->ToPlayer();
+	if (RecupMgr::GetRecupStatus(player) != RecupMgr::RECUP_STATUS_FINISHED)
+	{
+		PSendSysMessage("Vous devez d'abord finir la recuperation de votre personnage.");
+		return(true);
+	}
+	if(RecupMgrAuto::GetRecupGuildStatus(player) != 0)
+	{
+		PSendSysMessage("Ce personnage n'est pas reconnu comme un GM de guilde a recuperer.");
+		return true;
+	}
+		
+	if (!*args) {
+          PSendSysMessage("Vous devez indiquer un nom de guilde (entre guillemets si celui-ci contient des espaces)");					          
+          return true;
+        }
+
+	char* tailStr = *args != '"' ? strtok(NULL, "") : (char*)args;
+        if (!tailStr) {
+          PSendSysMessage("Vous devez indiquer un nom de guilde (entre guillemets si celui-ci contient des espaces)");					          
+          return true;
+        }
+
+	char *nomGuilde = extractQuotedArg(tailStr);
+	if (!nomGuilde) 
+        {
+          PSendSysMessage("Vous devez indiquer un nom de guilde (entre guillemets si celui-ci contient des espaces)");					
+          return true;
+        }
+
+	std::string nom = nomGuilde;
+
+    nom = nomGuilde;
+
+	//Bon creons la guilde
+    if (player->GetGuildId())
+    {
+        SendSysMessage (LANG_PLAYER_IN_GUILD);
+        return true;
+    }
+
+    Guild* guild = new Guild;
+    if (!guild->Create (player, nom))
+    {
+        delete guild;
+        SendSysMessage (LANG_GUILD_NOT_CREATED);
+        return true;
+    }
+
+    sGuildMgr->AddGuild(guild);
+
+
+    RecupMgrAuto::fillGuildBank(player, guild);
+	
+    return true;
+}
+
 
 bool ChatHandler::HandleRecupCommand(const char* /*args*/)
 {

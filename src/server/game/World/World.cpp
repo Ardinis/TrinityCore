@@ -81,6 +81,7 @@
 #include "../../../scripts/Custom/TransmoMgr.h"
 #include "CalendarMgr.h"
 #include "WorldSession.h"
+#include "RecupMgrAuto.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1813,6 +1814,16 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Calculate random battleground reset time..." );
     InitRandomBGResetTime();
+
+    sLog->outString("AutoRecup: Loading blacklists and whitelists...");
+    RecupMgrAuto::LoadFromDB();
+
+    sLog->outString("AutoRecup: Building faction maps..." );
+    RecupMgrAuto::BuildFactionReverseIndex();
+
+    sLog->outString("AutoRecup: Building taxi nodes maps..." );
+    RecupMgrAuto::BuildFlyMastersIndex();
+
 
     LoadCharacterNameData();
 

@@ -51,9 +51,9 @@ extern int m_ServiceStatus;
 
 #define CRASH_MAX 3
 #define CRASH_RECOVERY_INTERVAL 300000
-#define ANTICRASH_LOGFILE "/home/crashlog/anticrash.log" 
-#define ANTICRASH_HANDLER "/home/crashlog/bin/handler.sh"
-#define COREDUMP_HANDLER "/home/crashlog/bin/gencore.sh"
+#define ANTICRASH_LOGFILE getenv("ANTICRASH_LOGFILE") 
+#define ANTICRASH_HANDLER getenv("ANTICRASH_HANDLER")
+#define COREDUMP_HANDLER getenv("COREDUMP_HANDLER") 
   
 /*
  * Thread-local variables to store anticrash-related info. TODO move to something like sAntiCrashMgr  
@@ -176,7 +176,7 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                     /* crash_recovery is set if signal was received while doing InstanceMap::Update(). We do not handle other cases yet. 
                      * Crash recovery can be disabled globally by setting env var. ANTICRASH_DISABLE. 
                      */ 
-                    if (crash_recovery && !too_many_crash && !getenv("ANTICRASH_DISABLE")) {
+                    if (crash_recovery && !too_many_crash && getenv("ANTICRASH_ENABLE")) {
                         ACE_Stack_Trace st;
                         sLog->outError("SIGSEGV received during InstanceMap::Update(). Crash avoided.\n");
 
@@ -337,6 +337,7 @@ int Master::Run()
 
     // Initialise the signal handlers
     WorldServerSignalHandler SignalINT, SignalTERM;
+    WorldServerSignalHandler SignalSEGV, SignalILL, SignalABRT, SignalBUS, SignalFPE, SignalUSR1, SignalCHLD;
     #ifdef _WIN32
     WorldServerSignalHandler SignalBREAK;
     #endif /* _WIN32 */
@@ -345,6 +346,19 @@ int Master::Run()
     ACE_Sig_Handler Handler;
     Handler.register_handler(SIGINT, &SignalINT);
     Handler.register_handler(SIGTERM, &SignalTERM);
+
+#ifndef _WIN32
+    Handler.register_handler(SIGSEGV, &SignalSEGV);
+    Handler.register_handler(SIGILL, &SignalILL);
+    Handler.register_handler(SIGABRT, &SignalABRT);
+    Handler.register_handler(SIGBUS, &SignalBUS);
+    Handler.register_handler(SIGFPE, &SignalFPE);
+    Handler.register_handler(SIGUSR1, &SignalUSR1);
+
+    Handler.register_handler(SIGCHLD, &SignalCHLD);
+#endif
+
+
     #ifdef _WIN32
     Handler.register_handler(SIGBREAK, &SignalBREAK);
     #endif /* _WIN32 */

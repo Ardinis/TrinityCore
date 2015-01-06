@@ -85,6 +85,8 @@ void MapInstanced::Update(const uint32 t)
 				if (!player || !player->GetSession())
 					continue;
 					// NOT THREAD-SAFE
+					// En fait si, vu que on touche qu'a des objets qui appartiennent à la map qui a crash, donc ca peut pas etre utilisé par d'autres threads
+					// vu qu'il n'y a qu'une thread par map... Je sais pas ce que j'avais fumé ce jour la.
 					player->SaveToDB();
 					player->CleanupChannels();
 					player->UninviteFromGroup();
@@ -101,7 +103,7 @@ void MapInstanced::Update(const uint32 t)
 			std::ostringstream tmpstr;
 			std::string buf = "";
 			tmpstr << i->second->GetInstanceId();
-			buf = "Système Anti-Crash: " + std::string(i->second->GetMapName()) + ", ID " + tmpstr.str() + ": Plantage du script d'instance, Crash évité. Le petit coup de lag est du à l'écriture des informations de debug.";
+			buf = "Para-Chute(TM) : " + std::string(i->second->GetMapName()) + ", ID " + tmpstr.str() + ": Plantage du script d'instance, Crash évité. Le petit coup de lag est du à l'écriture des informations de debug.";
 			sWorld->SendWorldText(LANG_SYSTEMMESSAGE, buf.c_str());
 
 			m_InstancedMaps.erase(i++);
@@ -114,11 +116,20 @@ void MapInstanced::Update(const uint32 t)
                 crash_recovery = &env;
                 currently_updated = i->second->ToInstanceMap()->GetId();
                 InstanceMap *mymap = i->second->ToInstanceMap();
-                generate_coredump();
+                
+                
+                // Decommenter ca si on veut generer un coredump en cas de killinstance
+                // Pour l'instant ca sert pas à grand chose, vu qu'il faudrait au moins avoir une liste des pointeurs
+                // vers les objets de la map, et vers l'instancescript (TODO)
+                // generate_coredump();
+                
+                sLog->outError("KillInstance done on %s (ID %u)", i->second->GetMapName(), i->second->GetInstanceId());
+                
                 if (sigsetjmp(env,1)) {
                     crash_recovery = NULL;
                     i->second->ToInstanceMap()->SetHasCrashed(true);
                     in_handler = false;
+                    sLog->outError("warning: crash during instance cleanup (handled)");
                     continue; // proceed to next instancemap, current map will be Oblivated at next MapInstanced::Update() 
                 }
 #endif
@@ -128,6 +139,8 @@ void MapInstanced::Update(const uint32 t)
 			for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
 			{
 			        // NOT THREAD-SAFE
+                                // En fait si, vu que on touche qu'a des objets qui appartiennent à la map qui a crash, donc ca peut pas etre utilisé par d'autres threads
+                                // vu qu'il n'y a qu'une thread par map... Je sais pas ce que j'avais fumé ce jour la.
 				Player* player = itr->getSource();
 				if (!player || !player->GetSession())
 					continue;

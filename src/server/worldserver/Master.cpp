@@ -182,15 +182,16 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                      * Crash recovery can be disabled globally by setting env var. ANTICRASH_DISABLE. 
                      */ 
                     if (crash_recovery && !too_many_crash && getenv("ANTICRASH_ENABLE")) {
-                        ACE_Stack_Trace st;
+
+/*                        ACE_Stack_Trace st;
                         sLog->outError("SIGSEGV received during InstanceMap::Update(). Crash avoided.\n");
 
-                        /* The stack trace file will be used by the shellscript anti-crash handler */
                         FILE *f = fopen(ANTICRASH_LOGFILE, "w");
                         if (f) {
                                 fprintf(f, "%s\n", st.c_str());
                                 fclose(f);
                         }
+*/
 
 
                         /* We fork() to enable the core-dumping of the child process without freezing the main worldserver process *

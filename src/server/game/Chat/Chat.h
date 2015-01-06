@@ -331,6 +331,13 @@ class ChatHandler
         bool HandleRespawnCommand(const char* args);
         bool HandleComeToMeCommand(const char *args);
         bool HandleCombatStopCommand(const char *args);
+        
+        //Note
+        bool HandleNoteViewAccountCommand(const char* args);
+        bool HandleNoteViewPlayerCommand(const char* args);
+        bool HandleNoteAddCommand(const char* args);
+        bool HandleNoteViewHelper(uint32 accountid, char const* accountname);
+                                
 
         /*bool HandleCharDeleteCommand(const char *args);
         bool HandleSendMessageCommand(const char * args);*/

@@ -4585,3 +4585,146 @@ bool ChatHandler::HandleUnbindSightCommand(const char * /*args*/)
     m_session->GetPlayer()->StopCastingBindSight();
     return true;
 }
+
+bool ChatHandler::HandleKillInstanceCommand(const char *args)
+{
+    if (!*args)
+        return false;
+ 
+    char* px = strtok((char*)args, " ");
+    if (!px)
+        return false;
+
+    uint32 param_map = (uint32)atoi(px);
+
+    char *px2 = strtok(NULL, " ");
+    if (!px2)
+        return false;
+        
+    uint32 param_id = (uint32) atoi(px2);
+
+    Map *map = sMapMgr->FindMap(param_map, param_id);
+
+    if (map && map->ToInstanceMap()) {
+        map->ToInstanceMap()->SetHasBeenKilled(true);
+        PSendSysMessage("Le script d'instance a bien ete reinitialise.");            
+        return true;  
+    } else {
+      PSendSysMessage("Une erreur s'est produite (mauvais Map ou ID?).");            
+      return true;   
+    }
+}
+
+
+bool ChatHandler::HandleNoteViewAccountCommand(const char *args)
+{
+    if (!*args)
+        return false;
+
+    char* cname = strtok((char*)args, "");
+    if (!cname)
+        return false;
+
+    std::string account_name = cname;
+    if (!AccountMgr::normalizeString(account_name))
+    {
+        PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 accountid = AccountMgr::GetId(account_name);
+    if (!accountid)
+    {
+        PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
+        return true;
+    }
+
+    return HandleNoteViewHelper(accountid, account_name.c_str());
+}
+bool ChatHandler::HandleNoteViewPlayerCommand(const char *args)
+{
+    if (!*args)
+        return false;
+
+
+    char* cname = strtok((char*)args, "");
+    if (!cname)
+        return false;
+
+    std::string player_name = cname;
+    if (!normalizePlayerName(player_name))
+    {
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND, player_name.c_str());
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 accountid = sObjectMgr->GetPlayerAccountIdByPlayerName(player_name);
+    if (!accountid)
+    {
+        PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, player_name.c_str());
+        return true;
+    }
+
+    return HandleNoteViewHelper(accountid,player_name.c_str());
+}
+
+bool ChatHandler::HandleNoteAddCommand(const char *args)
+{
+    char *saveptr = NULL;
+    
+    if (!*args)
+        return false;
+
+    char* cname = strtok_r((char*)args, " ", &saveptr);
+    if (!cname)
+        return false;
+
+    char* motif = strtok_r(NULL, "", &saveptr);
+    if (!motif)
+        return false;
+    std::string motifstr(motif);
+
+    std::string account_name = cname;
+    if (!AccountMgr::normalizeString(account_name))
+    {
+        PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 accountid = AccountMgr::GetId(account_name);
+    if (!accountid)
+    {
+        PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, account_name.c_str());
+        return true;
+    }
+     
+    motifstr.insert(0, "NOTE: ");
+    PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_ADD_ACCOUNT_NOTE);
+    stmt->setUInt32(0, accountid);
+    stmt->setString(1, m_session ? m_session->GetPlayerName() : "<inconnu>");
+    stmt->setString(2, motifstr);
+    LoginDatabase.Execute(stmt); 
+
+    PSendSysMessage("La note a bien ete ajoutee.");
+    return true;
+}
+bool ChatHandler::HandleNoteViewHelper(uint32 accountid, char const* /* name */ )
+{
+    QueryResult result = LoginDatabase.PQuery("SELECT FROM_UNIXTIME(notedate), text, notedby FROM account_notes WHERE id = '%u' ORDER BY notedate ASC", accountid);
+    if (!result)
+    {
+        PSendSysMessage("Il n'y a pas de notes pour ce joueur.");
+        return true;
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+        PSendSysMessage("Par %s, le %s, %s", fields[2].GetCString(), fields[0].GetCString(), fields[1].GetCString());
+    } while (result->NextRow());
+
+    return true;
+}

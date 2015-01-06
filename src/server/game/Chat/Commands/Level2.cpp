@@ -108,6 +108,17 @@ bool ChatHandler::HandleMuteCommand(const char* args)
 
     PSendSysMessage(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, nameLink.c_str(), notspeaktime, mutereasonstr.c_str());
 
+    mutereasonstr.insert(0, "): ");
+    mutereasonstr.insert(0, nameStr);
+    mutereasonstr.insert(0, " MUTE(");
+    mutereasonstr.insert(0, delayStr);
+    PreparedStatement *stmt2 = LoginDatabase.GetPreparedStatement(LOGIN_ADD_ACCOUNT_NOTE);
+    stmt2->setUInt32(0, accountId);
+    stmt2->setString(1, m_session ? m_session->GetPlayerName() : "<inconnu>");
+    stmt2->setString(2, mutereasonstr);
+    LoginDatabase.Execute(stmt2);
+    
+
     return true;
 }
 

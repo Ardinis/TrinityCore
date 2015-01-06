@@ -67,6 +67,20 @@ static size_t appendCommandTable(ChatCommand* target, const ChatCommand* source)
 
 ChatCommand* ChatHandler::getCommandTable()
 {
+    static ChatCommand noteViewCommandTable[] =
+    {
+        { "account",            SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleNoteViewAccountCommand>,               "", NULL },
+        { "player",             SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleNoteViewPlayerCommand>,               "", NULL },
+        { NULL,             	0,                  false, NULL,                                           "", NULL }
+    };
+
+    static ChatCommand noteCommandTable[] =
+    {
+        { "add",        	SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleNoteAddCommand>,          "", NULL },
+        { "view",       	SEC_ADMINISTRATOR,  true,  NULL,               "", noteViewCommandTable },
+        { NULL,             	0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand banCommandTable[] =
     {
         { "account",        SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleBanAccountCommand>,          "", NULL },
@@ -415,6 +429,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "unmute",         SEC_MODERATOR,      true,  OldHandler<&ChatHandler::HandleUnmuteCommand>,              "", NULL },
         { "movegens",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleMovegensCommand>,            "", NULL },
         { "cometome",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleComeToMeCommand>,            "", NULL },
+        { "note",            SEC_ADMINISTRATOR,  true,  NULL,                                           "", noteCommandTable      },
         { "damage",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDamageCommand>,              "", NULL },
         { "combatstop",     SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleCombatStopCommand>,          "", NULL },
         { "flusharenapoints", SEC_ADMINISTRATOR, false, OldHandler<&ChatHandler::HandleFlushArenaPointsCommand>,    "", NULL },

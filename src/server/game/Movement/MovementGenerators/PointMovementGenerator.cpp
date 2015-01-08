@@ -133,8 +133,11 @@ void EffectMovementGenerator::Finalize(Unit &unit)
     if (unit.GetTypeId() != TYPEID_UNIT)
         return;
 
-    if (((Creature&)unit).AI() && unit.movespline->Finalized())
-        ((Creature&)unit).AI()->MovementInform(POINT_MOTION_TYPE, m_Id);
+    if (((Creature&)unit).AI() && unit.movespline->Finalized()) {
+        // TEMPORARY HACK - Revert once Ulduar scripts are fixed
+        // Use Oxygen-like MovementInform semantics if the creature is on map 603 (Ulduar).
+        ((Creature&)unit).AI()->MovementInform((unit.GetMapId() == 603) ? POINT_MOTION_TYPE : EFFECT_MOTION_TYPE, m_Id);
+    }
     // Need restore previous movement since we have no proper states system
     if (unit.isAlive() && !unit.HasUnitState(UNIT_STATE_CONFUSED | UNIT_STATE_FLEEING))
     {

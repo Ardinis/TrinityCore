@@ -2585,8 +2585,19 @@ public:
                         me->AddAura(SPELL_SANITY_WELL_DEBUFF,mover);
                 }else
                 {
-                    if(mover->HasAura(SPELL_SANITY_WELL_DEBUFF))
-                        mover->RemoveAurasDueToSpell(SPELL_SANITY_WELL_DEBUFF);
+                    // HACK (why the fuck this isn't handled with an area-aura ?)
+                    bool existsWellInRange = false;
+                    for (int i = 0 ; i < 5 ; i++) {
+                        if (mover->IsWithinDist2d(&FreyaSanityWellLocation[i], 6)) {
+                            existsWellInRange = true;
+                            break;
+                        }
+                    }
+                    if (!existsWellInRange) {
+                        if(mover->HasAura(SPELL_SANITY_WELL_DEBUFF))
+                            mover->RemoveAurasDueToSpell(SPELL_SANITY_WELL_DEBUFF);
+                    }
+                    
                 }
         }
 

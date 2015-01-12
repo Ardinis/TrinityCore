@@ -465,7 +465,7 @@ class boss_razorscale : public CreatureScript
                 {
                     HarpoonCounter = 0;
                     events.CancelEvent(EVENT_SUMMON);
-                    me->GetMotionMaster()->MoveLand(POINT_GROUND, RazorGround, 3.0f);
+                    me->GetMotionMaster()->MoveLand(POINT_GROUND, RazorGround, 8.0f);
                 }
 
                 if (phase == PHASE_GROUND)

@@ -41,6 +41,7 @@ class RecupMgrAuto : public RecupMgr {
             RECUP_LIST_QUEST = 4,
             RECUP_LIST_SKILL = 5,
             RECUP_LIST_QUEST_PALLIER = 6,
+            RECUP_LIST_REPUTATION = 7,
         };
 
 

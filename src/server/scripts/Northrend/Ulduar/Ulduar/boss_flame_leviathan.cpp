@@ -396,7 +396,7 @@ class boss_flame_leviathan : public CreatureScript
                     case DATA_UNBROKEN:
                         return Unbroken ? 1 : 0;
                     case DATA_ORBIT_ACHIEVEMENTS:
-                        if (ActiveTowers) // HardMode
+                        if (false && ActiveTowers) // HardMode (HF desactive pour l'instant)
                             return ActiveTowersCount;
                     default:
                         break;

@@ -560,6 +560,7 @@ int BackgroundRecupTask::Process() {
 						break;
 					}
 					translated_faction = RecupMgrAuto::reput_list[field_subtype];
+					/*
 	                                for (std::map<uint32, uint32>::const_iterator it = sObjectMgr->FactionChange_Reputation.begin(); it != sObjectMgr->FactionChange_Reputation.end(); ++it)
 	                                {
 	            			    uint32 reputation_alliance = it->first;
@@ -570,6 +571,11 @@ int BackgroundRecupTask::Process() {
 	                                        translated_faction = reputation_horde;
 	                                    }
 	                                }
+	                                */
+				        if (RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_REPUTATION, translated_faction)) {
+				            break; // Reput non recuperable
+				        }
+	                                
 	                                const FactionEntry *faction_entry  = sFactionStore.LookupEntry(translated_faction);
 	                                if (!faction_entry) {
 //						sLog->outUnified(LOG_WARNING, player->GetSession()->GetRemoteAddress().c_str(), "recupauto", "reput", player->GetGUID(), field_subtype, 0, "Joueur %s, reputation %d introuvable dans la liste de permutation alliance/horde", player->GetName(), field_subtype);
@@ -577,6 +583,7 @@ int BackgroundRecupTask::Process() {
                                         }
                                         int32 reput_rank = field_numparam;
                                         reput_rank += player->GetReputationMgr().GetBaseReputation(faction_entry); //hack
+                                        
 	                                RecupMgrAuto::GiveFaction(player, faction_entry, reput_rank);
                                 }
 
@@ -752,12 +759,16 @@ int BackgroundRecupTask::Process() {
 
         RecupMgrAuto::DoLearnRidingSpells(player);
         
+        /*
         if (!RecupMgrAuto::GiveMounts(player)) 
                 return false;
-
+        */
         // Faculatif: donner sacs
+        
+        /*
         for (int i = 0; i < 4; i++)
                 RecupMgrAuto::GiveItem(player, RecupMgrAuto::BAG_FROSTWEAVE);
+        */
 
 	player->SaveToDB();
 	RecupMgrAuto::SetRecupStatus(player, RecupMgrAuto::RECUP_STATUS_FINISHED);

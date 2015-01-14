@@ -407,7 +407,8 @@ enum eNPCs
     NPC_BROODLORD   = 12017,
     NPC_VOID_REAVER = 19516,
     NPC_JAN_ALAI    = 23578,
-    NPC_SARTHARION  = 28860
+    NPC_SARTHARION  = 28860,
+    NPC_LEVIATHAN   = 33113
 };
 
 // Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
@@ -445,6 +446,10 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
             break;
         case NPC_SARTHARION:                                         // sartharion (calculate box)
             if (x > 3218.86f && x < 3275.69f && y < 572.40f && y > 484.68f)
+                return false;
+            break;
+        case NPC_LEVIATHAN:                                           // flame leviathan (calculate box)
+            if (x > 145.14f && x < 447.26f && y < 83.29f && y > -149.73f)
                 return false;
             break;
         default: // For most of creatures that certain area is their home area.

@@ -1389,12 +1389,14 @@ class go_celestial_console : public GameObjectScript
 			InstanceScript* _instance = go->GetInstanceScript();
 
 			uint32 item = uint32(go->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? 45796 : 45798);
+			/*
 			if (go->GetMap()->GetDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL) {
-			    if (!player->HasAchieved(3189)) { /* Test HF mimiron 25 Hardmode */
+			    if (!player->HasAchieved(3189)) {
 			        sLog->outError("Algalon: On n'ouvre pas car le joueur %s n'a pas le HF", player->GetName());
 			        return true;
 			    }
 			}
+			*/
 			if (player->HasItemCount(item, 1))
 			{
 				if (Creature* Brann = go->SummonCreature(NPC_BRANN_ALGALON, WPs_ulduar[0][0],WPs_ulduar[0][1], WPs_ulduar[0][2])) 

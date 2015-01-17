@@ -1591,6 +1591,12 @@ void WorldObject::GetRandomPoint(const Position &pos, float distance, float &ran
 void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 {
     float new_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true, 5.0f));
+    float z_above = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z + 5.0f, true);
+    
+    // On prends le Z le plus proche (entre celui trouvé en dessous du z actuel, et celui trouvé en dessus du z actuel)
+    if (fabs(z_above - z) < fabs(new_z - z))
+      new_z = z_above;
+      
     if (new_z > INVALID_HEIGHT)
         z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
 }
@@ -2897,9 +2903,10 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     pos.m_orientation = m_orientation;
 }
 
-void WorldObject::MoveBlink(Position &pos, float dist, float angle)
+void WorldObject::MoveBlink(Position &pos, float dist, float angle, bool relative)
 {
-    GetPosition(&pos);
+    if (!relative)
+        GetPosition(&pos);
     angle += m_orientation;
     float destx, desty, destz, ground, floor;
     destx = pos.m_positionX + dist * cos(angle);
@@ -2954,7 +2961,7 @@ void WorldObject::MoveBlink(Position &pos, float dist, float angle)
         }
 
         // for server controlled moves playr work same as creature (but it can always swim)
-        if (!ToPlayer()->canFly())
+        if (ToPlayer() && !ToPlayer()->canFly())
         {
             ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
             floor = std::max<float>(GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true), GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true, 5.0f));

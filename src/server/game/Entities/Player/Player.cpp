@@ -76,6 +76,7 @@
 #include <cmath>
 #include "AccountMgr.h"
 #include "../../../scripts/Custom/TransmoMgr.h"
+#include "RecupMgrAuto.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -662,6 +663,8 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_jail_duration = 0;
 	// Jail end
 
+    m_doNotSave = false;
+    recup_task = NULL;
     m_speakTime = 0;
     m_speakCount = 0;
 
@@ -1539,6 +1542,24 @@ void Player::Update(uint32 p_time)
 {
     if (!IsInWorld())
         return;
+
+    if (recup_task) {   
+        int r = recup_task->Process();
+        if (r == 2) {
+          //fini (erreur)
+          ChatHandler(this).PSendSysMessage("Une erreur technique s'est produite. Veuillez contacter un membre de l'equipe.");
+          RecupMgr::SetRecupStatus(this, RecupMgr::RECUP_STATUS_FAILED);
+          delete recup_task;
+          recup_task = NULL;
+        } else if (r == 0) {
+          //fini (OK)
+          ChatHandler(this).PSendSysMessage(LANG_RECUP_DONE);
+          ChatHandler(this).PSendSysMessage("Veuillez vous deconnecter et vous reconnecter pour finaliser votre recuperation.");
+          delete recup_task;
+          recup_task = NULL;
+        }
+        return;
+    }
 
     //sAnticheatMgr->HandleHackDetectionTimer(this, p_time);
 
@@ -2664,8 +2685,10 @@ void Player::Regenerate(Powers power)
                                                                                             HasAura(31786)));
 
     // TODO: possible use of miscvalueb instead of amount
+    /*
     if (HasAuraTypeWithValue(SPELL_AURA_PREVENT_REGENERATE_POWER, power))
         return;
+    */
 
     float addvalue = 0.0f;
 
@@ -19033,7 +19056,7 @@ void Player::_SaveJail(void)
 void Player::SaveToDB(bool create /*=false*/)
 {
     // Jail: Prevent saving of jailed players
-    if (m_jail_isjailed) return;
+    if (m_jail_isjailed || m_doNotSave) return;
 
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld->getIntConfig(CONFIG_INTERVAL_SAVE);

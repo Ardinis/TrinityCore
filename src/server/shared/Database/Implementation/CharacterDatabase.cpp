@@ -411,4 +411,20 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_INS_CHAR_INSTANCE, "INSERT INTO character_instance (guid, instance, permanent) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PREPARE_STATEMENT(CHAR_DEL_CHAR_INSTANCE, "DELETE FROM character_instance WHERE guid = ?", CONNECTION_ASYNC);
     PREPARE_STATEMENT(CHAR_SEL_INSTANCE, "SELECT data, completedEncounters FROM instance WHERE map = ? AND id = ?", CONNECTION_SYNCH);
+ 
+    //Recups oxy
+    PREPARE_STATEMENT(CHAR_GET_RECUP_STATUS, "SELECT numparam from link_recup where guid = ? AND type = 8 AND subtype = 0", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_MODE, "SELECT numparam from link_recup where guid = ? AND type = 13 AND subtype = 0", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_VALIDATION, "SELECT numparam from link_recup where guid = ? AND type = 20 AND subtype = 0", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_DATA, "SELECT type,subtype,numparam,txtparam from link_recup where guid = ?", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_ILEVEL, "SELECT numparam from link_recup where guid = ? and type=10", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_GUILD_STATUS, "SELECT numparam from link_recup where guid = ? and type=19", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_SET_RECUP_STATUS, "UPDATE link_recup SET numparam = ? WHERE guid = ? AND type = 8 AND subtype = 0", CONNECTION_ASYNC)
+    PREPARE_STATEMENT(CHAR_SET_RECUP_GUILD_STATUS, "UPDATE link_recup SET numparam = ? WHERE guid = ? AND type = 19 AND subtype = 0", CONNECTION_ASYNC)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_LIST, "SELECT id from recup_list where type = ?", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_MAX_RECUP_LIST, "SELECT type from recup_list order by type desc limit 1", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_REMPLACE, "SELECT id, new_id from recup_stuff_remplace", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_GUILD_ITEMS, "SELECT type,subtype,numparam from link_recup where type >= 100 and type <= 105 and guid = ?", CONNECTION_SYNCH)
+    PREPARE_STATEMENT(CHAR_GET_RECUP_GUILD_GOLD, "SELECT numparam from link_recup where type=22 and guid = ?", CONNECTION_SYNCH)
+    
 }

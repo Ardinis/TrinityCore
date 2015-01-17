@@ -237,6 +237,28 @@ void ObjectAccessor::RemoveCorpse(Corpse* corpse)
         i_player2corpse.erase(iter);
     }
 }
+void ObjectAccessor::UnlinkCorpse(Corpse* corpse)
+{
+    if (!corpse || (corpse->GetType() == CORPSE_BONES)) {
+        sLog->outError("UnlinkCorpse: Invalid Corpse Type");
+        return;
+    }
+
+    // Critical section
+    {
+        TRINITY_WRITE_GUARD(ACE_RW_Thread_Mutex, i_corpseLock);
+
+        Player2CorpsesMapType::iterator iter = i_player2corpse.find(corpse->GetOwnerGUID());
+        if (iter == i_player2corpse.end()) // TODO: Fix this
+            return;
+
+        // build mapid*cellid -> guid_set map
+        CellCoord cellCoord = Trinity::ComputeCellCoord(corpse->GetPositionX(), corpse->GetPositionY());
+        sObjectMgr->DeleteCorpseCellData(corpse->GetMapId(), cellCoord.GetId(), GUID_LOPART(corpse->GetOwnerGUID()));
+
+        i_player2corpse.erase(iter);
+    }
+}
 
 void ObjectAccessor::AddCorpse(Corpse* corpse)
 {

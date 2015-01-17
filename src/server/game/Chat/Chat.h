@@ -173,6 +173,7 @@ class ChatHandler
         bool HandleUnPossessCommand(const char* args);
         bool HandleBindSightCommand(const char* args);
         bool HandleUnbindSightCommand(const char* args);
+        bool HandleKillInstanceCommand(const char* args);
 
         bool HandleGuildCreateCommand(const char* args);
         bool HandleGuildInviteCommand(const char* args);
@@ -331,6 +332,13 @@ class ChatHandler
         bool HandleRespawnCommand(const char* args);
         bool HandleComeToMeCommand(const char *args);
         bool HandleCombatStopCommand(const char *args);
+        
+        //Note
+        bool HandleNoteViewAccountCommand(const char* args);
+        bool HandleNoteViewPlayerCommand(const char* args);
+        bool HandleNoteAddCommand(const char* args);
+        bool HandleNoteViewHelper(uint32 accountid, char const* accountname);
+                                
 
         /*bool HandleCharDeleteCommand(const char *args);
         bool HandleSendMessageCommand(const char * args);*/
@@ -372,6 +380,10 @@ class ChatHandler
 
 	//Recup Command
 	bool HandleRecupCommand(const char* args);
+
+	//Autorecup Command
+	bool HandleAutorecupCommand(const char* args);
+	bool HandleGuildRecupCommand(const char* args);
 
         //Wintergrasp
         bool HandleWintergraspStatusCommand(const char *args);

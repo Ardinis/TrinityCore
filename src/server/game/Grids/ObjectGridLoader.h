@@ -83,4 +83,10 @@ class ObjectGridUnloader
     public:
         template<class T> void Visit(GridRefManager<T> &m);
 };
+
+class ObjectGridObliviator
+{
+    public:
+        template<class T> void Visit(GridRefManager<T> &m);
+};
 #endif

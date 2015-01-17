@@ -222,8 +222,14 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             player->ResurrectPlayer(0.5f, false);
             player->SpawnCorpseBones();
         }
-        else
+        else {
             sLog->outDebug(LOG_FILTER_MAPS, "Map::CanPlayerEnter - player '%s' is dead but does not have a corpse!", player->GetName());
+            /* 
+             * Cela peut arriver en cas de crash evite par le systeme anti crash, si le corps etait dans l'instance qui a crash. 
+             * Dans le doute on rescuscite le joueur.
+             */
+             player->ResurrectPlayer(0.5f, false);
+        }
     }
 
     //Get instance where player's group is bound & its map

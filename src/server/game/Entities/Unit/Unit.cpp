@@ -12951,6 +12951,17 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
   if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
 
+  // Exception regen mana flaques de saronite sur Vezax. --zangdar
+  if (spellInfo->Id == 63337) 
+      return false;
+  // Si on veut faire ca de maniere plus propre, commenter le check ci-dessus sur le spell 63337, et mettre le check ci-dessous à la place: 
+  // (par contre je suis pas sur que ca introduise pas des effets secondaires en modifiant la gestion de tous les autres sorts ayant le flag) 
+  
+  /*
+  if (spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
+      return false;  
+  */
+  
   // Cloac Of Shadow exceptions
   if (HasAura(35729, EFFECT_0) || HasAura(31224, EFFECT_0))
       if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766 || spellInfo->Id == 58433)
@@ -17330,6 +17341,10 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
     // clean InHateListOf
     if (Player* plrVictim = victim->ToPlayer())
     {
+
+        if (plrVictim->GetMap()->IsDungeon() && plrVictim->GetInstanceScript())
+            plrVictim->GetInstanceScript()->OnPlayerKilled(plrVictim->ToPlayer());
+                    
         // remember victim PvP death for corpse type and corpse reclaim delay
         // at original death (not at SpiritOfRedemtionTalent timeout)
         plrVictim->SetPvPDeath(player != NULL);

@@ -683,6 +683,7 @@ class World
         void SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = 0, uint32 team = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession* self = 0, uint32 team = 0);
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
+        void ForceKillSession(WorldSession *victim);
 
         uint32 pvp_ranks[HKRANKMAX];
 

@@ -445,6 +445,9 @@ class Map : public GridRefManager<NGridType>
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
         CreatureGroupHolderType CreatureGroupHolder;
 
+        void ObliviateWorldObjects();
+        void ObliviateGridObjects();
+                
         void UpdateIteratorBack(Player* player);
 
         TempSummon* SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties = NULL, uint32 duration = 0, Unit* summoner = NULL, uint32 spellId = 0, uint32 vehId = 0);
@@ -648,11 +651,18 @@ class InstanceMap : public Map
         uint32 GetMaxResetDelay() const;
 
         virtual void InitVisibilityDistance();
+        bool HasCrashed() { return _has_crashed; }
+        void SetHasCrashed(bool val) { _has_crashed = val; }
+        bool HasBeenKilled() { return _has_been_killed; }
+        void SetHasBeenKilled(bool val) { _has_been_killed = val; }
+
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
         InstanceScript* i_data;
         uint32 i_script_id;
+        bool _has_crashed;
+        bool _has_been_killed;
 };
 
 class BattlegroundMap : public Map

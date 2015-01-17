@@ -54,6 +54,7 @@ class PlayerMenu;
 class PlayerSocial;
 class SpellCastTargets;
 class UpdateMask;
+class BackgroundRecupTask;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -1082,6 +1083,8 @@ private:
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
+    friend class RecupMgr;
+    friend class RecupMgrAuto;
     friend void Item::AddToUpdateQueueOf(Player* player);
     friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
@@ -2045,6 +2048,7 @@ class Player : public Unit, public GridObject<Player>
         void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
         void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
         void ProcessDelayedOperations();
+        void SetDoNotSave(bool val) { m_doNotSave = val; }
 
         void CheckAreaExploreAndOutdoor(void);
 
@@ -2865,6 +2869,8 @@ class Player : public Unit, public GridObject<Player>
 	uint32 m_reduceCoolDown[MAX_RUNES];
 
     private:
+        bool m_doNotSave;
+        BackgroundRecupTask *recup_task;
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
         InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;

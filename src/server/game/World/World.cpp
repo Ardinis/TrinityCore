@@ -81,6 +81,7 @@
 #include "../../../scripts/Custom/TransmoMgr.h"
 #include "CalendarMgr.h"
 #include "WorldSession.h"
+#include "RecupMgrAuto.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1814,6 +1815,16 @@ void World::SetInitialWorldSettings()
     sLog->outString("Calculate random battleground reset time..." );
     InitRandomBGResetTime();
 
+    sLog->outString("AutoRecup: Loading blacklists and whitelists...");
+    RecupMgrAuto::LoadFromDB();
+
+    sLog->outString("AutoRecup: Building faction maps..." );
+    RecupMgrAuto::BuildFactionReverseIndex();
+
+    sLog->outString("AutoRecup: Building taxi nodes maps..." );
+    RecupMgrAuto::BuildFlyMastersIndex();
+
+
     LoadCharacterNameData();
 
     // possibly enable db logging; avoid massive startup spam by doing it here.
@@ -2332,6 +2343,18 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession* self, uint
     WorldPacket data;
     ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, text, NULL);
     SendZoneMessage(zone, &data, self, team);
+}
+
+//Remove player from session list
+void World::ForceKillSession(WorldSession *victim) {
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); itr++) {
+        WorldSession *current = itr->second;
+        if (current == victim) {
+            DecreasePlayerCount();
+            m_sessions.erase(itr);
+            return; 
+        }
+    } 
 }
 
 /// Kick (and save) all players

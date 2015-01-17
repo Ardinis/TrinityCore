@@ -244,6 +244,8 @@ typedef std::set <uint8> SlotIds;
 
 class Guild
 {
+    friend class RecupMgr;
+    friend class RecupMgrAuto;
 private:
     // Class representing guild member
     class Member
@@ -605,7 +607,7 @@ public:
     void HandleSetBankTabInfo(WorldSession* session, uint8 tabId, const std::string& name, const std::string& icon);
     void HandleSetMemberNote(WorldSession* session, const std::string& name, const std::string& note, bool officer);
     void HandleSetRankInfo(WorldSession* session, uint8 rankId, const std::string& name, uint32 rights, uint32 moneyPerDay, GuildBankRightsAndSlotsVec rightsAndSlots);
-    void HandleBuyBankTab(WorldSession* session, uint8 tabId);
+    void HandleBuyBankTab(WorldSession* session, uint8 tabId, bool hasToPay = true);
     void HandleInviteMember(WorldSession* session, const std::string& name);
     void HandleAcceptMember(WorldSession* session);
     void HandleLeaveMember(WorldSession* session);

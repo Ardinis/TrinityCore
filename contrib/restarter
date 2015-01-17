@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# anticrash config
+export ANTICRASH_LOGFILE=/home/trinity/core/prod/anticrash/trace.log
+export ANTICRASH_HANDLER=/home/trinity/core/prod/anticrash/handler.sh
+export ANTICRASH_ENABLE=1
+export COREDUMP_HANDLER=/home/trinity/core/prod/anticrash/coredump.sh
+
+# Settings
+bindir=./bin
+worldd=worldserver
+
+# Restarter
+sleep 1
+cd $bindir
+while [ 1 == 1 ]
+do
+    ./$worldd
+    sleep 5
+done

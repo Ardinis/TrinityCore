@@ -714,7 +714,8 @@ void Transport::CleanupsBeforeDelete(bool finalCleanup /*= true*/)
     while (!m_passengers.empty())
     {
         WorldObject* obj = m_passengers.begin()->second;
-        RemovePassenger(obj);
+        if (!RemovePassenger(obj))
+	  m_passengers.erase(m_passengers.begin());
     }
 
     GameObject::CleanupsBeforeDelete(finalCleanup);

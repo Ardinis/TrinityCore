@@ -151,65 +151,21 @@ void RecupMgrAuto::SetRecupGuildStatus(Player *plr, uint32 status) {
 
 bool RecupMgrAuto::recup_enable = false;
 
+// Fonction obsolete
 bool RecupMgrAuto::isInList(int type, uint32 id) {
-	if ((type < 0) || (type >= recup_lists.size())) {
+//	if ((type < 0) || (type >= recup_lists.size())) {
 	
 //	        sLog->outUnified(LOG_WARNING, NULL, "recupauto", "perso", 0, type, id, "Consultation d'une blacklist/whitelist inexistante!");
-		return false;
+/*		return false;
 	}
 	return (recup_lists[type].find(id) != recup_lists[type].end());
+	*/
+	return false;
 }
 
+
+// Fonction obsolete
 bool RecupMgrAuto::LoadFromDB() {
-	//(re)-load depuis la DB;
-	PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_MAX_RECUP_LIST);
-	PreparedQueryResult res = CharacterDatabase.Query(stmt);
-	if (!res) {
-//		sLog->outError("Impossible de charger les tables de blacklist/whitelists de recup!");
-		return false;
-	}
-	Field *fields = res->Fetch();
-	if (fields == NULL) {
-//		sLog->outError("Impossible de charger les tables de blacklist/whitelists de recup!");
-		return false;
-	}
-	uint32 list_size = fields[0].GetUInt32() + 1;      
-
-	recup_lists.resize(list_size);
-
-	
-	for (int i = 0; i < list_size; i++) {
-		PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_GET_RECUP_LIST);
-		stmt->setUInt32(0, i);
-		PreparedQueryResult res = CharacterDatabase.Query(stmt);
-		if (!res) {
-//			sLog->outError("Impossible de charger la table de blacklist/whitelist %d", i);
-			return false;
-		}
-		recup_lists[i].clear();
-		do {
-		        Field *fields = res->Fetch();
-		        if (!fields)
-		                break;
-			uint32 id = fields[0].GetUInt32();
-				recup_lists[i].insert(id);
-		} while (res->NextRow());
-	}
-	PreparedStatement *stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_GET_RECUP_REMPLACE);
-	PreparedQueryResult res2 = CharacterDatabase.Query(stmt2);
-	if (!res2) {
-//	        sLog->outError("Impossible de charger la table de remplacement de stuff");
-	        return false;
-	}
-	recup_remplace.clear();
-	do {
-	        Field *fields = res2->Fetch();
-	        if (!fields)
-	                break;
-	        uint32 id = fields[0].GetUInt32();
-	        uint32 new_id = fields[1].GetUInt32();
-	        recup_remplace[id] = new_id;
-	} while (res2->NextRow());
 	return true;
 	
 }
@@ -242,7 +198,7 @@ void RecupMgrAuto::fillGuildBank(Player *player,Guild *guild) {
                 ItemTemplate const* item_proto = sObjectMgr->GetItemTemplate(item_id);
                 if (tab > 8)
                     continue; // parano
-                if (RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_ITEM, item_id) || !item_proto || (item_count < 1))
+                if (!item_proto || (item_count < 1))
                         continue; // item invalide / blackliste ou autre connerie
                 while (item_count) {
                         uint32 current_stack = (item_count > item_proto->GetMaxStackSize()) ? item_proto->GetMaxStackSize() : item_count;
@@ -404,6 +360,10 @@ int BackgroundRecupTask::Process() {
     int count = 0;
     uint32 time_start = getMSTime();
     invoc_count ++;
+    if (invoc_count > 1000) {
+      // Le processus est apparemment Coinc (TM), on abandonne.
+      return 2;
+    }
 		
 	do { 
 	    uint32 now = getMSTime();
@@ -441,14 +401,13 @@ int BackgroundRecupTask::Process() {
 			case RecupMgrAuto::FIELD_TYPE_ITEM:
 			{
             
-                                    
-                            if (RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_ITEM, field_subtype))
-                                    continue; // blacklisted
-                
+                  
+                //Plus besoin de remplacement d'item                  
+                /*
                             if (RecupMgrAuto::recup_remplace.find(field_subtype) != RecupMgrAuto::recup_remplace.end()) {
-                                    //remplacement d'item
                                     field_subtype = RecupMgrAuto::recup_remplace[field_subtype];
                             }      
+                */
 			    if (!field_subtype) {
 //			        sLog->outUnified(LOG_ERROR, player->GetSession()->GetRemoteAddress().c_str(), "recupauto", "itemperso", player->GetGUID(), 0, 0, "Joueur %s, item recup %d invalide", player->GetName(), 0);
 			        return 2;
@@ -514,13 +473,17 @@ int BackgroundRecupTask::Process() {
 				la double spé!!
 				*/
 				{
+				
+				 // Si numparam==1, alors ca veut dire que le spell a ete whiteliste par l'outil, et on l'apprends obligatoirement.
+				 // Si numparam==0, le sort n'est pas whiteliste, et on l'apprends que si c'est la double spe, le vol par temps froid, ou un sort lie a un metier/recette.
+				
 				 const SpellInfo *_spell = sSpellMgr->GetSpellInfo(field_subtype);
 				 if (!_spell)
 				         break;
 				if (!player->IsSpellFitByClassAndRace(field_subtype))
 				        break;
 				        
-				if (RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_MONTURE_MINIPET, field_subtype)) {
+				if (field_numparam == 1) {
 				        player->learnSpell(field_subtype, false);
 				}
 				//Double Spé
@@ -572,9 +535,6 @@ int BackgroundRecupTask::Process() {
 	                                    }
 	                                }
 	                                */
-				        if (RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_REPUTATION, translated_faction)) {
-				            break; // Reput non recuperable
-				        }
 	                                
 	                                const FactionEntry *faction_entry  = sFactionStore.LookupEntry(translated_faction);
 	                                if (!faction_entry) {
@@ -595,7 +555,6 @@ int BackgroundRecupTask::Process() {
 			case RecupMgrAuto::FIELD_TYPE_HF: //En attente des blacklist
 			{
 			        //Exemple de verification blacklist
-			        if (!RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_ACHIEVEMENT, field_subtype)) { 
 				        AchievementEntry const* achiev = sAchievementStore.LookupEntry(field_subtype);
 				        if (!achiev) {
 //				                sLog->outVisitLog("RECUP: Guid %u, HF invalide %d\n", player->GetGUIDLow(), field_subtype);
@@ -604,7 +563,6 @@ int BackgroundRecupTask::Process() {
 				        }
 				        
 				        player->CompletedAchievement(achiev);
-				}
                         }
 			break;
 			case RecupMgrAuto::FIELD_TYPE_ACHIEVEMENT_CRITERIA:
@@ -615,9 +573,7 @@ int BackgroundRecupTask::Process() {
 //				                sLog->outUnified(LOG_WARNING, player->GetSession()->GetRemoteAddress().c_str(), "recupauto", "hf", player->GetGUID(), field_subtype, 0, "Joueur %s, recup critere HF %d invalide", player->GetName(), field_subtype);
                                         break;
                                 }
-                                if (!RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_CRITERIA, field_subtype)) {
                                         RecupMgrAuto::GiveCriteria(player, criteria, field_numparam);
-                                }
 			        
                         }
                         break;
@@ -651,9 +607,7 @@ int BackgroundRecupTask::Process() {
 			break;
 
 			case RecupMgrAuto::FIELD_TYPE_QUEST: //à vérifier
-			        if (sObjectMgr->GetQuestTemplate(field_subtype) && !RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_QUEST, field_subtype) && ((ilevel == 0) || !RecupMgrAuto::isInList(RecupMgrAuto::RECUP_LIST_QUEST_PALLIER, field_subtype))) {
 			                RecupMgrAuto::CompleteQuest(player, field_subtype);
-				}
                             if (ilevel != 0)
                                     continue; // recup par palliers
 			break;

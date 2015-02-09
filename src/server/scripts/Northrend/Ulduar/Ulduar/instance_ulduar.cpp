@@ -72,6 +72,7 @@ public:
         uint64 uiLeviathanGUID;
         uint64 uiLeviathanGateGUID;
         std::list<uint64> uiLeviathanDoorGUIDList;
+        bool bLeviathanHardMode, bLeviathanTowerFrost, bLeviathanTowerStorm, bLeviathanTowerFlame, bLeviathanTowerLife;
 
         // Ignis
         uint64 uiIgnisGUID;
@@ -258,6 +259,12 @@ public:
             uiAlgalonCountdown        = 62;
             uiCountdownTimer          = 1*MINUTE*IN_MILLISECONDS;
             conSpeedAtory             = false;
+            
+            bLeviathanHardMode = false;
+            bLeviathanTowerFlame = true;
+            bLeviathanTowerFrost = true;
+            bLeviathanTowerStorm = true;
+            bLeviathanTowerLife = true;
 
             memset(uiEncounter, 0, sizeof(uiEncounter));
             memset(uiAssemblyGUIDs, 0, sizeof(uiAssemblyGUIDs));
@@ -768,16 +775,16 @@ public:
                 switch (eventId)
                 {
                     case EVENT_TOWER_OF_STORM_DESTROYED:
-                        FlameLeviathan->AI()->DoAction(1);
+                        SetData(DATA_LEVIATHAN_TOWER_STORM, 0);
                         break;
                     case EVENT_TOWER_OF_FROST_DESTROYED:
-                        FlameLeviathan->AI()->DoAction(2);
+                        SetData(DATA_LEVIATHAN_TOWER_FROST, 0);
                         break;
                     case EVENT_TOWER_OF_FLAMES_DESTROYED:
-                        FlameLeviathan->AI()->DoAction(3);
+                        SetData(DATA_LEVIATHAN_TOWER_FLAME, 0);
                         break;
                     case EVENT_TOWER_OF_LIFE_DESTROYED:
-                        FlameLeviathan->AI()->DoAction(4);
+                        SetData(DATA_LEVIATHAN_TOWER_LIFE, 0);
                         break;
                 }
         }
@@ -923,6 +930,37 @@ public:
         {
             switch (type)
             {
+                case DATA_LEVIATHAN_HARD_MODE:
+#define LEVIATHAN_HM_DEBUG 1
+#ifdef LEVIATHAN_HM_DEBUG
+                    sLog->outString("[ID %u] Leviathan hardmode: %u", instance ? instance->GetInstanceId() : 0, data);
+#endif
+                    bLeviathanHardMode = data;
+                    break;
+                case DATA_LEVIATHAN_TOWER_STORM:
+#ifdef LEVIATHAN_HM_DEBUG
+                    sLog->outString("Leviathan tower of storm: %u", instance ? instance->GetInstanceId() : 0,data);
+#endif
+                    bLeviathanTowerStorm = data;
+                    break;
+                case DATA_LEVIATHAN_TOWER_FROST:
+#ifdef LEVIATHAN_HM_DEBUG
+                    sLog->outString("Leviathan tower of frost: %u", instance ? instance->GetInstanceId() : 0,data);
+#endif
+                    bLeviathanTowerFrost = data;
+                    break;
+                case DATA_LEVIATHAN_TOWER_FLAME:
+#ifdef LEVIATHAN_HM_DEBUG
+                    sLog->outString("Leviathan tower of flame: %u", instance ? instance->GetInstanceId() : 0,data);
+#endif
+                    bLeviathanTowerFlame = data;
+                    break;
+                case DATA_LEVIATHAN_TOWER_LIFE:
+#ifdef LEVIATHAN_HM_DEBUG
+                    sLog->outString("Leviathan tower of life: %u", instance ? instance->GetInstanceId() : 0,data);
+#endif
+                    bLeviathanTowerLife = data;
+                    break;
                 case TYPE_COLOSSUS:
                     ColossusData = data;
                     if (data == 2)
@@ -1128,6 +1166,16 @@ public:
         {
             switch (type)
             {
+                case DATA_LEVIATHAN_HARD_MODE:
+                    return bLeviathanHardMode;
+                case DATA_LEVIATHAN_TOWER_STORM:
+                    return bLeviathanTowerStorm;
+                case DATA_LEVIATHAN_TOWER_FROST:
+                    return bLeviathanTowerFrost;
+                case DATA_LEVIATHAN_TOWER_FLAME:
+                    return bLeviathanTowerFlame;
+                case DATA_LEVIATHAN_TOWER_LIFE:
+                    return bLeviathanTowerLife;
                 case TYPE_COLOSSUS:
                     return ColossusData;
                 case DATA_KEEPER_SUPPORT_YOGG:

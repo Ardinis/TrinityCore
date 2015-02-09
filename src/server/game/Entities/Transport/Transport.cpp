@@ -709,13 +709,27 @@ bool Transport::RemovePassenger(WorldObject* passenger)
     return true;
 }
 
+#define TRANSPORT_HACK 1
+#define TRANSPORT_HACK_MAXCOUNT 1000
+
 void Transport::CleanupsBeforeDelete(bool finalCleanup /*= true*/)
 {
+#ifdef TRANSPORT_HACK
+    unsigned int n = 0;
+#endif
+    
     while (!m_passengers.empty())
     {
         WorldObject* obj = m_passengers.begin()->second;
         if (!RemovePassenger(obj))
 	  m_passengers.erase(m_passengers.begin());
+#ifdef TRANSPORT_HACK
+	n++;
+	if (n > TRANSPORT_HACK_MAXCOUNT) {
+          sLog->outCrash("Transport: m_passengers too big, size=%d, transport ID=%u", m_passengers.size(), GetEntry());
+	  ASSERT(false);
+	}
+#endif	  
     }
 
     GameObject::CleanupsBeforeDelete(finalCleanup);

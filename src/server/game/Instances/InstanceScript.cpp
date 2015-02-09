@@ -26,6 +26,7 @@
 #include "Log.h"
 #include "LFGMgr.h"
 #include "Chat.h"
+#include "DebugTools.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -190,12 +191,19 @@ void InstanceScript::AddMinion(Creature* minion, bool add)
         itr->second.bossInfo->minion.erase(minion);
 }
 
+#define LANATHEL_DEBUG 1
+
 bool InstanceScript::SetBossState(uint32 id, EncounterState state)
 {
     if (id < bosses.size())
     {
         BossInfo* bossInfo = &bosses[id];
-
+#ifdef LANATHEL_DEBUG        
+        if (instance && (instance->GetId() == 631 /* ICC */) && (id == 8)) {
+            sLog->outString("[ID: %d] : ICC: Lanathel State set to %d", instance->GetInstanceId(), state);
+            genBackTrace();
+        }
+#endif
         if (IsRaidOldSchoolIlevelAvailable())
         {
             if (state == IN_PROGRESS)

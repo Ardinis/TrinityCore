@@ -153,6 +153,7 @@ public:
         uint64 uiYoggSaronBrainDoor1GUID;
         uint64 uiYoggSaronBrainDoor2GUID;
         uint64 uiYoggSaronBrainDoor3GUID;
+        uint32 uiLastFreeze;
 
         // Algalon
         uint64 uiAlgalonGUID;
@@ -260,6 +261,7 @@ public:
             uiCountdownTimer          = 1*MINUTE*IN_MILLISECONDS;
             conSpeedAtory             = false;
             
+            uiLastFreeze = 0;
             bLeviathanHardMode = false;
             bLeviathanTowerFlame = true;
             bLeviathanTowerFrost = true;
@@ -930,6 +932,9 @@ public:
         {
             switch (type)
             {
+                case DATA_LAST_FREEZE:
+                    uiLastFreeze = data;
+                    break;
                 case DATA_LEVIATHAN_HARD_MODE:
 #define LEVIATHAN_HM_DEBUG 1
 #ifdef LEVIATHAN_HM_DEBUG
@@ -1166,6 +1171,8 @@ public:
         {
             switch (type)
             {
+                case DATA_LAST_FREEZE:
+                    return uiLastFreeze;
                 case DATA_LEVIATHAN_HARD_MODE:
                     return bLeviathanHardMode;
                 case DATA_LEVIATHAN_TOWER_STORM:

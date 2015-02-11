@@ -37,6 +37,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
+#include "Chat.h"
 #include "ObjectAccessor.h"
 #include "CellImpl.h"
 #include "SharedDefines.h"
@@ -3164,7 +3165,22 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     if ((_triggeredCastFlags & TRIGGERED_IGNORE_COMBO_POINTS) || m_CastItem || !m_caster->m_movedPlayer)
         m_needComboPoints = false;
 
-    SpellCastResult result = CheckCast(true);
+	SpellCastResult result = CheckCast(true);
+
+	/*
+	 * When a spell with SPELL_ATTR0_DISABLED_WHILE_ACTIVE is casted, the button is immediately disabled (client-side). If the cast fails for some reason,
+	 * we must notify client to make the button usable again, otherwise the button will remain disabled forever. 
+	 *
+	 * This fix is currently restricted to Shadowform (15473) because the problem has been reported only for this spell, but it should be usable for any shapeshifting spell.
+	 */
+	if (Player *player = m_caster->ToPlayer()) 
+		if ((result != SPELL_CAST_OK) && (m_spellInfo->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE) && !player->HasAura(m_spellInfo->Id) && (m_spellInfo->Id == 15473)) {
+			WorldPacket data;
+			player->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, m_spellInfo->Id, player->GetSpellCooldownDelay(m_spellInfo->Id) * IN_MILLISECONDS);
+			player->GetSession()->SendPacket(&data);
+			player->SendCooldownEvent(m_spellInfo, 0, NULL, false);
+			ChatHandler(player).PSendSysMessage("[DEV] Un bug de shadowform a ete empeche."); //virer ca plus tard
+		}
     if (result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
     {
         // Periodic auras should be interrupted when aura triggers a spell which can't be cast

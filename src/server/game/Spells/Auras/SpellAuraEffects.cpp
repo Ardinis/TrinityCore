@@ -5905,7 +5905,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 // Master of Subtlety
                 case 31666:
                 {
-                    if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                    if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH) || !target->GetAuraEffectOfRankedSpell(31221, 0))
                         target->RemoveAurasDueToSpell(31665);
                     break;
                 }
@@ -6005,7 +6005,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 // Overkill
                 case 58428:
                 {
-                    if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                    if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH) || !target->HasAura(58426))
                         target->RemoveAurasDueToSpell(58427);
                     break;
                 }

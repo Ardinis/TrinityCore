@@ -1,4 +1,3 @@
-drop table if exists recup_formulaire;
 DROP TABLE IF EXISTS recup_list;
 drop table if exists recup_pack_guilde;
 drop table if exists link_recup;
@@ -16,5 +15,3 @@ create table recup_server (id INT not null, name VARCHAR(256), realmlist VARCHAR
 create table recup_stuff_remplace (id INT not null, new_id INT not null, primary key (id));
 create table recup_pack_guilde (id INT not null, name VARCHAR(256) not null, primary key (id));
 CREATE TABLE recup_list (type INT NOT NULL, id INT NOT NULL);
-CREATE TABLE recup_formulaire (recup_id INT NOT NULL, accname VARCHAR(64) NOT NULL, accpass_hash VARCHAR(64) NOT NULL, orig_char VARCHAR(64) NOT NULL, dest_guid INT NOT NULL, dest_class INT NOT NULL, dest_faction INT NOT NULL, realm_id INT NOT NULL, role INT NOT NULL, need_validation INT NOT NULL, mode INT NOT NULL, recup_status INT NOT NULL, primary key (recup_id)) Engine=INNODB;
-

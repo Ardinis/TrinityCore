@@ -1694,18 +1694,24 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
             {
                 // Master of subtlety
-                if (!apply)
-                    target->CastSpell(target, 31666, true);
-                else if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(31221, 0))
+                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(31221, 0))
                 {
-                    int32 basepoints0 = aurEff->GetAmount();
-                    target->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
+                    if (!apply)
+                        target->CastSpell(target, 31666, true);
+                    else
+                    {
+                        int32 basepoints0 = aurEff->GetAmount();
+                        target->CastCustomSpell(target, 31665, &basepoints0, NULL, NULL, true);
+                    }
                 }
                 // Overkill
-                if (!apply)
-                    target->CastSpell(target, 58428, true);
-                else if (target->HasAura(58426))
-                    target->CastSpell(target, 58427, true);
+                if (target->HasAura(58426))
+                {
+                    if (!apply)
+                        target->CastSpell(target, 58428, true);
+                    else
+                        target->CastSpell(target, 58427, true);
+                }
                 break;
             }
             break;

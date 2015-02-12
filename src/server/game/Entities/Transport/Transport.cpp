@@ -686,6 +686,7 @@ bool Transport::AddPassenger(WorldObject* passenger)
 
 bool Transport::RemovePassenger(WorldObject* passenger)
 {
+    size_t erased = 0;
     if (!passenger)
         return false;
 
@@ -695,7 +696,7 @@ bool Transport::RemovePassenger(WorldObject* passenger)
         switch (passenger->GetTypeId())
         {
             case TYPEID_PLAYER:
-                m_passengers.erase(passenger->GetGUID());
+                erased = m_passengers.erase(passenger->GetGUID());
                 sScriptMgr->OnRemovePassenger(this, passenger->ToPlayer());
                 break;
             case TYPEID_GAMEOBJECT:
@@ -708,9 +709,14 @@ bool Transport::RemovePassenger(WorldObject* passenger)
                 passenger->m_movementInfo.t_seat = -1;
                 passenger->m_movementInfo.t_time = 0;
                 passenger->m_movementInfo.t_time2 = 0;
-                m_passengers.erase(passenger->GetGUID());
+                erased = m_passengers.erase(passenger->GetGUID());
                 break;
         }
+    }
+    if (erased == 0) {
+        // Invalid TypeID or GUID field in passenger?
+        sLog->outString("Unable to erase passenger from transport %s", GetName());
+        return false;
     }
 
     sLog->outString("Player %s removed from transport %s.", passenger->GetName(), GetName());

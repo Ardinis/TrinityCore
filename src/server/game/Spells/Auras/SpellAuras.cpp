@@ -349,6 +349,8 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
 
     m_maxDuration = CalcMaxDuration(caster);
     m_duration = m_maxDuration;
+    m_auraStateTimer = 0;
+    m_auraStateTimerMask = 0;
     m_procCharges = CalcMaxCharges(caster);
     m_isUsingCharges = m_procCharges != 0;
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
@@ -740,6 +742,19 @@ void Aura::Update(uint32 diff, Unit* caster)
                 }
             }
         }
+        if (m_auraStateTimer > int32(diff)) {
+            m_auraStateTimer -= diff;
+        } else if (m_auraStateTimer != 0) {
+            m_auraStateTimer = 0;
+            std::list<AuraApplication*> effectApplications;
+            GetApplicationList(effectApplications);
+            for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr) {
+                Unit *tgt = (*apptItr)->GetTarget();
+                if (tgt)
+                    tgt->ModifyAuraState(GetSpellInfo()->GetAuraState(m_auraStateTimerMask), true);
+            }
+        }
+
     }
 }
 

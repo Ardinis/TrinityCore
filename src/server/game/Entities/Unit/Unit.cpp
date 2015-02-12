@@ -3453,8 +3453,14 @@ void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask)
         return;
       }
     // Update target aura state flag
-    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask))
-        ModifyAuraState(aState, true);
+    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask)) {
+        if (aura->GetSpellInfo()->DelayedAuraState() == 0) {
+            ModifyAuraState(aState, true);
+        } else {
+            aura->SetAuraStateTimer(aura->GetSpellInfo()->DelayedAuraState(), effMask);
+        }
+    }
+
     // sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32236");
     if (aurApp->GetRemoveMode())
       {

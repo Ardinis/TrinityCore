@@ -1802,6 +1802,13 @@ uint32 SpellInfo::GetExplicitTargetMask() const
     return ExplicitTargetMask;
 }
 
+uint32 SpellInfo::DelayedAuraState() const 
+{
+    if ((SpellFamilyName == SPELLFAMILY_WARLOCK) && (SpellFamilyFlags[0] & 4))
+        return IMMOLATE_AURASTATE_DELAY;
+    return 0;
+}
+
 AuraStateType SpellInfo::GetAuraState(uint8 effMask) const
 {
     // Seals

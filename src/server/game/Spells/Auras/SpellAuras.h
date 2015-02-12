@@ -125,6 +125,7 @@ class Aura
         time_t GetApplyTime() const { return m_applyTime; }
         int32 GetMaxDuration() const { return m_maxDuration; }
         void SetMaxDuration(int32 duration) { m_maxDuration = duration; }
+        void SetAuraStateTimer(int32 timer, uint8 effmask) { m_auraStateTimer = timer; m_auraStateTimerMask = effmask;}
         int32 CalcMaxDuration() const { return CalcMaxDuration(GetCaster()); }
         int32 CalcMaxDuration(Unit* caster) const;
         int32 GetDuration() const { return m_duration; }
@@ -238,6 +239,8 @@ class Aura
 
         int32 m_maxDuration;                                // Max aura duration
         int32 m_duration;                                   // Current time
+        int32 m_auraStateTimer;
+        uint8 m_auraStateTimerMask;
         int32 m_timeCla;                                    // Timer for power per sec calcultion
         int32 m_updateTargetMapInterval;                    // Timer for UpdateTargetMapOfEffect
 

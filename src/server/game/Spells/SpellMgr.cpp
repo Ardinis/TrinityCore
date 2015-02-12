@@ -61,6 +61,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         return DIMINISHING_NONE;
     switch (spellproto->Id)
     {
+    case 64695: //Poigne de terre (talent shaman)
+        return DIMINISHING_NONE;
         // Noblegarden Bunny transforms
     case 61716:
     case 61734:

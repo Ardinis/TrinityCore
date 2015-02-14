@@ -69,3 +69,6 @@ add_subdirectory(dep)
 
 # add core sources
 add_subdirectory(src)
+
+add_subdirectory(postinst)
+

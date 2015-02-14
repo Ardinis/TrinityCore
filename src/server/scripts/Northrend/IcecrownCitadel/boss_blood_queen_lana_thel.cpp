@@ -223,7 +223,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
                 if (instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) == IN_PROGRESS)
                     _killMinchar = true;
-                else
+                else if (instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) != DONE)
                 {
                     me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                     me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x01);

@@ -89,6 +89,10 @@ class Transport : public GameObject
         bool GenerateWaypoints(const GameObjectTemplate* goInfo, std::set<uint32> &mapids);
         void CleanupsBeforeDelete(bool finalCleanup = true);
         void Update(uint32 p_time);
+        
+        void DisableTransport() {
+            b_disableTransport = true;
+        }
 
         // non static passenger part
         bool AddPassenger(WorldObject* passenger);
@@ -194,6 +198,8 @@ class Transport : public GameObject
         uint32 GetPeriod() const { return GetUInt32Value(GAMEOBJECT_LEVEL); }
         void SetPeriod(uint32 period) { SetUInt32Value(GAMEOBJECT_LEVEL, period); }
         uint32 GetTimer() const { return GetGOValue()->Transport.PathProgress; }
+        
+        bool b_disableTransport;
 
 };
 #endif

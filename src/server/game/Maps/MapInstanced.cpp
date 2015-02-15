@@ -27,6 +27,7 @@
 #include "Group.h"
 #include "LFGMgr.h"
 #include "InstanceScript.h"
+#include "Transport.h"
 
 #ifndef _WIN32
 #include <setjmp.h>
@@ -386,6 +387,20 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
     if (itr->second->IsBattlegroundOrArena())
         sMapMgr->FreeInstanceId(itr->second->GetInstanceId());
 
+
+    // HACK: Disable transport update for destroyed maps
+    if (itr->second->GetId() == 631) {
+      MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
+      for (MapManager::TransportSet::iterator itr2 = sMapMgr->m_TransportsByInstanceIdMap[itr->first].begin(); itr2 != sMapMgr->m_TransportsByInstanceIdMap[itr->first].end(); ++itr2) {
+        Transport *trans = *itr2;
+        if (trans != NULL) {
+          if (trans->GetMap() == itr->second) {
+            trans->DisableTransport();
+          }
+        }
+      }
+    }
+            
     // erase map
     delete itr->second;
     m_InstancedMaps.erase(itr++);

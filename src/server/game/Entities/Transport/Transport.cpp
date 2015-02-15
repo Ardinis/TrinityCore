@@ -222,7 +222,7 @@ void MapManager::LoadTransportNPCs()
 
 Transport::Transport(uint32 period, uint32 script) : GameObject(), m_pathTime(0),
                                                      currenttguid(0), ScriptId(script), m_nextNodeTime(0), inInstance(false),
-                                                     _isMoving(true), _pendingStop(false), _triggeredArrivalEvent(false), _triggeredDepartureEvent(false)
+                                                     _isMoving(true), _pendingStop(false), _triggeredArrivalEvent(false), _triggeredDepartureEvent(false), b_disableTransport(false)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }
@@ -232,13 +232,15 @@ Transport::~Transport()
     for (CreatureSet::iterator itr = m_NPCPassengerSet.begin(); itr != m_NPCPassengerSet.end(); ++itr)
     {
         (*itr)->SetTransport(NULL);
-        GetMap()->AddObjectToRemoveList(*itr);
+        if (!b_disableTransport)
+            GetMap()->AddObjectToRemoveList(*itr);
     }
 
     for (GameObjectSet::iterator itr = m_GOPassengerSet.begin(); itr != m_GOPassengerSet.end(); ++itr)
     {
         (*itr)->SetTransport(NULL);
-        GetMap()->AddObjectToRemoveList(*itr);
+        if (!b_disableTransport)
+            GetMap()->AddObjectToRemoveList(*itr);
     }
 
     m_NPCPassengerSet.clear();
@@ -752,6 +754,9 @@ void Transport::CleanupsBeforeDelete(bool finalCleanup /*= true*/)
 
 void Transport::Update(uint32 p_diff)
 {
+    if (b_disableTransport)
+        return; //HACK
+    
     uint32 const positionUpdateDelay = 200;
 
     if (AI())

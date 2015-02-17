@@ -389,7 +389,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
 
 
     // HACK: Disable transport update for destroyed maps
-    if (itr->second->GetId() == 631) {
+//    if (itr->second->GetId() == 631) {
       MapManager::TransportMap& tmap = sMapMgr->m_TransportsByInstanceIdMap;
       for (MapManager::TransportSet::iterator itr2 = sMapMgr->m_TransportsByInstanceIdMap[itr->first].begin(); itr2 != sMapMgr->m_TransportsByInstanceIdMap[itr->first].end(); ++itr2) {
         Transport *trans = *itr2;
@@ -399,7 +399,7 @@ bool MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
           }
         }
       }
-    }
+ //   }
             
     // erase map
     delete itr->second;

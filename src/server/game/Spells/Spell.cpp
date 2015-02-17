@@ -7927,6 +7927,8 @@ uint32 Spell::GetCCDelay() {
     switch(m_spellInfo->Id) {
         case 33110:
             return 10;
+        case 379:
+            return 10;
         default:
             return 0;
     }

@@ -3417,8 +3417,19 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint8 effMask)
         AddInterruptMask(aurSpellInfo->AuraInterruptFlags);
     }
 
-    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask))
-        m_auraStateAuras.insert(AuraStateAurasMap::value_type(aState, aurApp));
+    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask)) {
+         m_auraStateAuras.insert(AuraStateAurasMap::value_type(aState, aurApp));
+        if ((1 << (aState-1)) & PER_CASTER_AURA_STATE_MASK) {
+            /* It is possible that the aura-type we're applying is already applied
+             * by another caster. In that case, UNIT_FIELD_AURASTATE will not change
+             * and will not be sent to clients. But if the aura has per-caster
+             * aurastate, then the (client-side) auraState will change for the aura's caster,
+             * therefore we need to send to client in that case.
+             */ 
+            if (HasAuraState(aState, NULL, NULL))
+                ForceValuesUpdateAtIndex(UNIT_FIELD_AURASTATE);
+        }
+    }
 
     aura->_ApplyForTarget(this, caster, aurApp);
     return aurApp;
@@ -3543,6 +3554,10 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
             }
             auraStateFound = true;
             ++itr;
+        }
+        if ((1 << (auraState-1)) & PER_CASTER_AURA_STATE_MASK) {
+            // Si on applique un auraState dependant du caster, alors il faut toujours propager l'info au client
+            ForceValuesUpdateAtIndex(UNIT_FIELD_AURASTATE);
         }
     }
 

@@ -38,7 +38,7 @@ struct SpellEntry;
 struct SpellCastTimesEntry;
 
 enum SpellAuraStateDelay {
-    IMMOLATE_AURASTATE_DELAY = 700,
+   IMMOLATE_AURASTATE_DELAY = 600,
 };
 
 enum SpellCastTargetFlags

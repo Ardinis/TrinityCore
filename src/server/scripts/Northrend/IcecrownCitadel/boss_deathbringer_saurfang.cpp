@@ -1161,6 +1161,8 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                             }
 
                     sMapMgr->m_Transports.insert(t);
+                    sMapMgr->m_TransportsByInstanceIdMap[tMap->GetInstanceId()].insert(t); // FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU. Vnr quoi.
+                    
                     t->Update(1);
                     return t;
             }

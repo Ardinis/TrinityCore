@@ -4087,6 +4087,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
                 spellInfo->excludeCasterAuraSpell = 31821;
                 break;
+            case 70890: //doubledip scourge strike
+                spellInfo->AttributesEx6 &= ~SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS;
+		break;
 
             default:
                 break;

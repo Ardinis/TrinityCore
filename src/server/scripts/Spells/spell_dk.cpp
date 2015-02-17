@@ -397,7 +397,13 @@ class spell_dk_scourge_strike : public SpellScriptLoader
         class spell_dk_scourge_strike_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dk_scourge_strike_SpellScript);
+            
+            public:
+            
+            spell_dk_scourge_strike_SpellScript() : m_coef(0.0f) { }
 
+            private:
+            
             bool Validate(SpellInfo const* /*spellEntry*/)
             {
                 return true;
@@ -439,7 +445,7 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                 Unit * caster = GetCaster();
                 Unit * target = GetHitUnit();
 
-                if (!target)
+                if ((!target) || (!caster))
                     return;
 
                 uint32 diseases = 0;
@@ -512,16 +518,29 @@ class spell_dk_scourge_strike : public SpellScriptLoader
                         }
                 }
 
-                int32 bp0 = (GetHitDamage() * GetEffectValue() * diseases) / 100;
-                if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
-                    AddPctN(bp0, aurEff->GetAmount());
-                caster->CastCustomSpell(target, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
+                m_coef = float(GetEffectValue() * diseases) / 100.0f;
+            }
+            
+            void HandleAfterHit() {
+                int32 bp0 = GetHitDamage() * m_coef;
+                Unit *caster = GetCaster();
+                Unit *target = GetHitUnit();
+                if (caster && target && (bp0 > 0)) {
+                /* -- already taken into account in Unit::SpellDamageBonusWhatever 
+                    if (AuraEffect* aurEff = caster->GetAuraEffectOfRankedSpell(DK_SPELL_BLACK_ICE_R1, EFFECT_0))
+                        AddPctN(bp0, aurEff->GetAmount());
+                */
+                    caster->CastCustomSpell(target, DK_SPELL_SCOURGE_STRIKE_TRIGGERED, &bp0, NULL, NULL, true);
+                }
             }
 
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_dk_scourge_strike_SpellScript::HandleDummy, EFFECT_2, SPELL_EFFECT_DUMMY);
+                AfterHit += SpellHitFn(spell_dk_scourge_strike_SpellScript::HandleAfterHit);
             }
+            private:
+                float m_coef;
         };
 
         SpellScript* GetSpellScript() const

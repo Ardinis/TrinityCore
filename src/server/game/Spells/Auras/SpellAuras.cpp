@@ -124,6 +124,12 @@ void AuraApplication::_InitFlags(Unit* caster, uint8 effMask)
     // mark as selfcasted if needed
     _flags |= (GetBase()->GetCasterGUID() == GetTarget()->GetGUID()) ? AFLAG_CASTER : AFLAG_NONE;
 
+
+    if (GetBase()->GetSpellInfo()->Id == 34709) {
+        _flags |= AFLAG_NEGATIVE;
+        return;
+    }
+        
     // aura is casted by self or an enemy
     // one negative effect and we know aura is negative
     if (IsSelfcasted() || !caster || !caster->IsFriendlyTo(GetTarget()))

@@ -117,6 +117,7 @@ World::World()
 
     m_updateTimeSum = 0;
     m_updateTimeCount = 0;
+    m_updateTimeMax = 0;
 
     m_isClosed = false;
 
@@ -1983,6 +1984,10 @@ void World::LoadAutobroadcasts()
 void World::Update(uint32 diff)
 {
     m_updateTime = diff;
+    if ((getMSTime() / 60000) > ((getMSTime()-diff) / 60000))
+	m_updateTimeMax = 0;
+    if (m_updateTimeMax < m_updateTime)
+	m_updateTimeMax = m_updateTime; 
 
     if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] && diff > m_int_configs[CONFIG_MIN_LOG_UPDATE])
     {

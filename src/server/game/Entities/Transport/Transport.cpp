@@ -232,14 +232,14 @@ Transport::~Transport()
     for (CreatureSet::iterator itr = m_NPCPassengerSet.begin(); itr != m_NPCPassengerSet.end(); ++itr)
     {
         (*itr)->SetTransport(NULL);
-        if (!b_disableTransport)
+        if (!b_disableTransport && !(GetMap()->ToInstanceMap() && GetMap()->ToInstanceMap()->HasCrashed()))
             GetMap()->AddObjectToRemoveList(*itr);
     }
 
     for (GameObjectSet::iterator itr = m_GOPassengerSet.begin(); itr != m_GOPassengerSet.end(); ++itr)
     {
         (*itr)->SetTransport(NULL);
-        if (!b_disableTransport)
+        if (!b_disableTransport && !(GetMap()->ToInstanceMap() && GetMap()->ToInstanceMap()->HasCrashed()))
             GetMap()->AddObjectToRemoveList(*itr);
     }
 
@@ -754,7 +754,7 @@ void Transport::CleanupsBeforeDelete(bool finalCleanup /*= true*/)
 
 void Transport::Update(uint32 p_diff)
 {
-    if (b_disableTransport)
+    if (b_disableTransport || (GetMap()->ToInstanceMap() && GetMap()->ToInstanceMap()->HasCrashed()))
         return; //HACK
     
     uint32 const positionUpdateDelay = 200;

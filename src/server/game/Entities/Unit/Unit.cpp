@@ -11047,6 +11047,26 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
     {
         if (spellProto->EquippedItemClass == -1 && (*i)->GetSpellInfo()->EquippedItemClass != -1)    //prevent apply mods from weapon specific case to non weapon specific spells (Example: thunder clap and two-handed weapon specialization)
             continue;
+            
+        // Pas DOUBLEDIP sur scourge strike avec les buffs ICC
+        if ((spellProto->Id == 70890 /* scourgestrike partie ombre */) && 
+            (
+             ((*i)->GetSpellInfo()->Id == 73762) ||
+             ((*i)->GetSpellInfo()->Id == 73824) ||
+             ((*i)->GetSpellInfo()->Id == 73825) ||
+             ((*i)->GetSpellInfo()->Id == 73826) ||
+             ((*i)->GetSpellInfo()->Id == 73827) ||
+             ((*i)->GetSpellInfo()->Id == 73828) ||
+             ((*i)->GetSpellInfo()->Id == 73816) ||
+             ((*i)->GetSpellInfo()->Id == 73818) ||
+             ((*i)->GetSpellInfo()->Id == 73819) ||
+             ((*i)->GetSpellInfo()->Id == 73820) ||
+             ((*i)->GetSpellInfo()->Id == 73821) ||
+             ((*i)->GetSpellInfo()->Id == 73822)
+            ))
+            
+            continue;
+                            
 
         if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
         {

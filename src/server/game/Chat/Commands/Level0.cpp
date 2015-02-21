@@ -116,6 +116,15 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleLatencyCommand(const char*) {
+	PSendSysMessage("Max latency: %u", sWorld->GetUpdateMax());
+	PSendSysMessage("CPU time: %u msec", sWorld->GetUpdateTimeVirtual());
+	PSendSysMessage("I/O time: %u msec", std::max(0,int32(sWorld->GetUpdateTimeReal() - sWorld->GetUpdateTimeVirtual())));
+	PSendSysMessage("Slack time: %u msec", std::max(0, int32((50 - sWorld->GetUpdateTimeReal()))));
+	PSendSysMessage("Jitter: %u msec", sWorld->GetJitter());
+	return true;
+}
+
 bool ChatHandler::HandleDismountCommand(const char* /*args*/)
 {
     //If player is not mounted, so go out :)

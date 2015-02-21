@@ -162,6 +162,10 @@ endif()
 
 set_target_properties(worldserver PROPERTIES LINK_FLAGS "${worldserver_LINK_FLAGS}")
 
+if( UNIX )
+  set(RT_LIBS "-lrt")
+endif()
+
 target_link_libraries(worldserver
   game
   shared
@@ -179,6 +183,7 @@ target_link_libraries(worldserver
   ${OPENSSL_EXTRA_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${OSX_LIBS}
+  ${RT_LIBS}
 )
 
 if( WIN32 )

@@ -118,6 +118,13 @@ World::World()
     m_updateTimeSum = 0;
     m_updateTimeCount = 0;
     m_updateTimeMax = 0;
+    m_updateTimeVirt = 0;
+    m_updateTimeReal = 0;
+    m_jitter = 0;
+    m_oldTimeMax = 0;
+    m_oldTimeVirt = 0;
+    m_oldTimeReal = 0;
+    m_oldJitter = 0;
 
     m_isClosed = false;
 
@@ -1981,14 +1988,17 @@ void World::LoadAutobroadcasts()
 }
 
 /// Update the World !
-void World::Update(uint32 diff)
+void World::Update(uint32 diff, uint32 jitter)
 {
-    m_updateTime = diff;
-    if ((getMSTime() / 60000) > ((getMSTime()-diff) / 60000))
-	m_updateTimeMax = 0;
-    if (m_updateTimeMax < m_updateTime)
-	m_updateTimeMax = m_updateTime; 
+#ifndef _WIN32
+    struct timespec ts_real1, ts_virt1, ts_real2, ts_virt2;
+    static uint32 latency_real = 0;
+    static uint32 latency_virt = 0;
 
+    clock_gettime(CLOCK_REALTIME, &ts_real1);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_virt1);
+#endif 
+    m_updateTime = diff;
     if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] && diff > m_int_configs[CONFIG_MIN_LOG_UPDATE])
     {
         if (m_updateTimeSum > m_int_configs[CONFIG_INTERVAL_LOG_UPDATE])
@@ -2163,6 +2173,33 @@ void World::Update(uint32 diff)
     ProcessCliCommands();
 
     sScriptMgr->OnWorldUpdate(diff);
+#ifndef _WIN32
+
+    if ((getMSTime() / 60000) > ((getMSTime()-diff) / 60000)) {
+        m_oldTimeMax = m_updateTimeMax;
+        m_oldTimeVirt = m_updateTimeVirt;
+        m_oldTimeReal = m_updateTimeReal;
+        m_oldJitter = m_jitter;
+	m_updateTimeMax = 0;
+	m_updateTimeVirt = 0;
+	m_updateTimeReal = 0;
+	m_jitter = 0;
+    }
+
+    if (m_updateTimeMax < m_updateTime) {
+	m_updateTimeMax = m_updateTime;
+	m_updateTimeVirt = latency_virt;
+	m_updateTimeReal = latency_real;
+	m_jitter = jitter;
+    }
+
+    clock_gettime(CLOCK_REALTIME, &ts_real2);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_virt2);
+
+    latency_real = (ts_real2.tv_sec - ts_real1.tv_sec)*1000 + (ts_real2.tv_nsec - ts_real1.tv_nsec)/1000000;
+    latency_virt = (ts_virt2.tv_sec - ts_virt1.tv_sec)*1000 + (ts_virt2.tv_nsec - ts_virt1.tv_nsec)/1000000;
+
+#endif
 }
 
 void World::ForceGameEventUpdate()

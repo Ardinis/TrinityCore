@@ -656,8 +656,14 @@ class World
         time_t const& GetGameTime() const { return m_gameTime; }
         /// Uptime (in secs)
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
+
         /// Update time
-        uint32 GetUpdateTime() const { return m_updateTimeMax; }
+        uint32 GetUpdateTime() const { return m_updateTime; }
+        uint32 GetUpdateMax() const { return (m_oldTimeMax > m_updateTimeMax) ? m_oldTimeMax : m_updateTimeMax; }
+	uint32 GetUpdateTimeReal() const {return (m_oldTimeMax > m_updateTimeMax) ? m_oldTimeReal : m_updateTimeReal; }
+	uint32 GetUpdateTimeVirtual() const {return (m_oldTimeMax > m_updateTimeMax) ? m_oldTimeVirt : m_updateTimeVirt; }
+	uint32 GetJitter() const {return (m_oldTimeMax > m_updateTimeMax) ? m_oldJitter : m_jitter; }
+
         void SetRecordDiffInterval(int32 t) { if (t >= 0) m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = (uint32)t; }
 
         /// Next daily quests and random bg reset time
@@ -697,7 +703,7 @@ class World
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
         static bool IsStopped() { return m_stopEvent; }
 
-        void Update(uint32 diff);
+        void Update(uint32 diff, uint32 jitter = 0);
 
         void UpdateSessions(uint32 diff);
         /// Set a server rate (see #Rates)
@@ -840,7 +846,7 @@ class World
         IntervalTimer m_timers[WUPDATE_COUNT];
         time_t mail_timer;
         time_t mail_timer_expires;
-        uint32 m_updateTime, m_updateTimeSum, m_updateTimeMax;
+        uint32 m_updateTime, m_updateTimeSum, m_updateTimeMax, m_updateTimeReal, m_updateTimeVirt, m_jitter, m_oldTimeMax, m_oldTimeReal, m_oldTimeVirt, m_oldJitter;
         uint32 m_updateTimeCount;
         uint32 m_currentTime;
 

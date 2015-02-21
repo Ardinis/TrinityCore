@@ -124,6 +124,12 @@ void AuraApplication::_InitFlags(Unit* caster, uint8 effMask)
     // mark as selfcasted if needed
     _flags |= (GetBase()->GetCasterGUID() == GetTarget()->GetGUID()) ? AFLAG_CASTER : AFLAG_NONE;
 
+
+    if (GetBase()->GetSpellInfo()->Id == 34709) {
+        _flags |= AFLAG_NEGATIVE;
+        return;
+    }
+        
     // aura is casted by self or an enemy
     // one negative effect and we know aura is negative
     if (IsSelfcasted() || !caster || !caster->IsFriendlyTo(GetTarget()))
@@ -349,6 +355,8 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
 
     m_maxDuration = CalcMaxDuration(caster);
     m_duration = m_maxDuration;
+    m_auraStateTimer = 0;
+    m_auraStateTimerMask = 0;
     m_procCharges = CalcMaxCharges(caster);
     m_isUsingCharges = m_procCharges != 0;
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
@@ -740,6 +748,19 @@ void Aura::Update(uint32 diff, Unit* caster)
                 }
             }
         }
+        if (m_auraStateTimer > int32(diff)) {
+            m_auraStateTimer -= diff;
+        } else if (m_auraStateTimer != 0) {
+            m_auraStateTimer = 0;
+            std::list<AuraApplication*> effectApplications;
+            GetApplicationList(effectApplications);
+            for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr) {
+                Unit *tgt = (*apptItr)->GetTarget();
+                if (tgt)
+                    tgt->ModifyAuraState(GetSpellInfo()->GetAuraState(m_auraStateTimerMask), true);
+            }
+        }
+
     }
 }
 
@@ -759,7 +780,7 @@ int32 Aura::CalcMaxDuration(Unit* caster) const
     if (IsPassive() && !m_spellInfo->DurationEntry)
         maxDuration = -1;
 
-    if (!IsPermanent() && modOwner)
+    if ((maxDuration != -1) && modOwner)
         modOwner->ApplySpellMod(GetId(), SPELLMOD_DURATION, maxDuration);
     return maxDuration;
 }

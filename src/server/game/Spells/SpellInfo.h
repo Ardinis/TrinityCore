@@ -37,6 +37,10 @@ struct SpellRadiusEntry;
 struct SpellEntry;
 struct SpellCastTimesEntry;
 
+enum SpellAuraStateDelay {
+   IMMOLATE_AURASTATE_DELAY = 600,
+};
+
 enum SpellCastTargetFlags
 {
     TARGET_FLAG_NONE            = 0x00000000,
@@ -453,6 +457,7 @@ public:
     uint32 GetExplicitTargetMask() const;
 
     AuraStateType GetAuraState(uint8 effMask) const;
+    uint32 DelayedAuraState() const;
     SpellSpecificType GetSpellSpecific() const;
 
     float GetMinRange(bool positive = false) const;

@@ -725,6 +725,7 @@ public:
 
             if(m_pInstance)
                 m_pInstance->SetBossState(TYPE_YOGGSARON,IN_PROGRESS);
+                m_pInstance->SetData(DATA_LAST_FREEZE, 0);
 
             lastBrainAction = Actions(0);
         }
@@ -2533,6 +2534,7 @@ public:
                             DoCast(me,SPELL_HODIRS_PROTECTIVE_GAZE,false);
                         uiSecondarySpell_Timer = 25000;
                     }
+                    return;
                 }
                 uiSecondarySpell_Timer = 10000;
             }else
@@ -3142,8 +3144,25 @@ public:
             Unit * target = GetTarget();
             if (dmgInfo.GetDamage() < target->GetHealth())
                 return;
+                
+            //hack de merde    
+            InstanceScript *scr = target->GetInstanceScript();
+            if (scr == NULL) {
+                absorbAmount = 0;
+                sLog->outString("Ulduar/Yogg : Unable to get instanceScript!");
+                return;
+            }
+            uint32 lastFreeze = scr->GetData(DATA_LAST_FREEZE);
+            sLog->outString("Last freeze time: %u (diff: %u)", lastFreeze, getMSTime() - lastFreeze); 
+            if ((getMSTime() - lastFreeze) < 25000) {
+                absorbAmount = 0;
+                return;
+            }
+            scr->SetData(DATA_LAST_FREEZE, getMSTime());
+            ////
 
             target->CastSpell(target, SPELL_FLASH_FREEZE, true);
+            
 
             // absorb hp till 1 hp
             absorbAmount = dmgInfo.GetDamage() - target->GetHealth() + 1;

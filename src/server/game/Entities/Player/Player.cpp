@@ -6245,8 +6245,16 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
         }
         case CR_HASTE_SPELL:
         {
-            float RatingChange = value * GetRatingMultiplier(cr);
-            ApplyCastTimePercentMod(RatingChange, apply);
+            int32 oldRating = m_baseRatingValue[cr] - (apply ? value : -value);
+            float hasteFromOldRating = oldRating * GetRatingMultiplier(cr);
+            float hasteFromNewRating = m_baseRatingValue[cr] * GetRatingMultiplier(cr);
+            
+            // remove haste from old rating
+            ApplyCastTimePercentMod(hasteFromOldRating, false);
+            
+            // apply haste from new rating
+            ApplyCastTimePercentMod(hasteFromNewRating, true);
+
             break;
         }
         default:

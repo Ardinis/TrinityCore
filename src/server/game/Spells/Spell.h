@@ -507,6 +507,7 @@ class Spell
         bool HasGlobalCooldown() const;
         void TriggerGlobalCooldown();
         void CancelGlobalCooldown();
+        uint32 GetCCDelay();
 
         void SendLoot(uint64 guid, LootType loottype);
 

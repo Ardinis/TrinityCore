@@ -38,7 +38,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner, bool upd
     if (owner.HasUnitState(UNIT_STATE_NOT_MOVE))
         return;
 
-    if (owner.GetTypeId() == TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner.ToCreature()))
+    if (owner.GetTypeId() == TYPEID_UNIT && !owner.IsControlledByPlayer() && !i_target->isInAccessiblePlaceFor(owner.ToCreature()))
         return;
 
     float x, y, z;

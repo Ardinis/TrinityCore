@@ -61,6 +61,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         return DIMINISHING_NONE;
     switch (spellproto->Id)
     {
+    case 64695: //Poigne de terre (talent shaman)
+        return DIMINISHING_NONE;
         // Noblegarden Bunny transforms
     case 61716:
     case 61734:
@@ -4076,6 +4078,19 @@ void SpellMgr::LoadDbcDataCorrections()
 				spellInfo->AttributesEx4 = SPELL_ATTR4_UNK5;
 				spellInfo->EffectRadiusIndex[EFFECT_0] = 3;
 				break;
+            case 31821: // aura mastery
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_40_YARDS;
+                spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_40_YARDS;
+                spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+                spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+                spellInfo->Effect[2] = SPELL_EFFECT_APPLY_AREA_AURA_RAID;
+                spellInfo->excludeCasterAuraSpell = 31821;
+                break;
+            case 70890: //doubledip scourge strike
+                spellInfo->AttributesEx6 &= ~SPELL_ATTR6_NO_DONE_PCT_DAMAGE_MODS;
+		break;
+
             default:
                 break;
         }

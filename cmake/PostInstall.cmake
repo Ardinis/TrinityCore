@@ -1,0 +1,11 @@
+if (UNIX)
+  MESSAGE("Extracting debug info...")
+  execute_process(COMMAND objcopy --only-keep-debug ${CMAKE_INSTALL_PREFIX}/bin/worldserver ${CMAKE_INSTALL_PREFIX}/bin/worldserver.dbg)
+  execute_process(COMMAND strip --strip-debug ${CMAKE_INSTALL_PREFIX}/bin/worldserver)
+  execute_process(COMMAND objcopy --add-gnu-debuglink=${CMAKE_INSTALL_PREFIX}/bin/worldserver.dbg ${CMAKE_INSTALL_PREFIX}/bin/worldserver)
+
+  execute_process(COMMAND objcopy --only-keep-debug ${CMAKE_INSTALL_PREFIX}/bin/authserver ${CMAKE_INSTALL_PREFIX}/bin/authserver.dbg)
+  execute_process(COMMAND strip --strip-debug ${CMAKE_INSTALL_PREFIX}/bin/authserver)
+  execute_process(COMMAND objcopy --add-gnu-debuglink=${CMAKE_INSTALL_PREFIX}/bin/authserver.dbg ${CMAKE_INSTALL_PREFIX}/bin/authserver)
+  MESSAGE("done.")
+endif (UNIX)

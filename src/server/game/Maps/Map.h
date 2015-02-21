@@ -471,6 +471,7 @@ class Map : public GridRefManager<NGridType>
 
 	void DeleteRespawnTimes();
 	void DeleteRespawnTimesInDB(uint16 mapId, uint32 instanceId);
+	bool IsUnderGround(float x, float y, float z) const;
 
     private:
         void LoadMapAndVMap(int gx, int gy);

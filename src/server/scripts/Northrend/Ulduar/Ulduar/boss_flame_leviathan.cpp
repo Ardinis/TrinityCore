@@ -31,6 +31,7 @@
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "Vehicle.h"
+#include "Group.h"
 #include "ulduar.h"
 
 
@@ -208,13 +209,15 @@ class boss_flame_leviathan : public CreatureScript
                 if (!me->isDead())
                     Reset();
 
-                ActiveTowersCount = 4;
+//                ActiveTowersCount = 4;
                 Shutdown = 0;
+                /*
                 ActiveTowers = false;
                 towerOfStorms = false;
                 towerOfLife = false;
                 towerOfFlames = false;
                 towerOfFrost = false;
+                */
                 Shutout = true;
                 Unbroken = true;
 
@@ -232,17 +235,19 @@ class boss_flame_leviathan : public CreatureScript
             }
 
             Vehicle* vehicle;
-            uint8 ActiveTowersCount;
             uint8 Shutdown;
-            bool ActiveTowers;
-            bool towerOfStorms;
-            bool towerOfLife;
-            bool towerOfFlames;
-            bool towerOfFrost;
             bool Shutout;
             bool Unbroken;
             bool Pursued;
 
+            bool isHardMode() const {
+                return instance->GetData(DATA_LEVIATHAN_HARD_MODE);
+            }
+            
+            unsigned int countActiveTowers() {
+                return (instance->GetData(DATA_LEVIATHAN_TOWER_FROST) + instance->GetData(DATA_LEVIATHAN_TOWER_STORM) + instance->GetData(DATA_LEVIATHAN_TOWER_LIFE) + instance->GetData(DATA_LEVIATHAN_TOWER_FLAME));
+            }
+            
             void Reset()
             {
                 _Reset();
@@ -304,33 +309,33 @@ class boss_flame_leviathan : public CreatureScript
 
             void ActiveTower()
             {
-                if (ActiveTowers)
+                if (isHardMode())
                 {
-                    if (towerOfFrost)
+                    if (instance->GetData(DATA_LEVIATHAN_TOWER_FROST))
                     {
                         me->AddAura(SPELL_BUFF_TOWER_OF_FR0ST, me);
                         events.ScheduleEvent(EVENT_HODIRS_FURY, 20*IN_MILLISECONDS);
                     }
 
-                    if (towerOfLife)
+                    if (instance->GetData(DATA_LEVIATHAN_TOWER_LIFE))
                     {
                         me->AddAura(SPELL_BUFF_TOWER_OF_LIFE, me);
                         events.ScheduleEvent(EVENT_FREYAS_WARD, 30*IN_MILLISECONDS);
                     }
 
-                    if (towerOfFlames)
+                    if (instance->GetData(DATA_LEVIATHAN_TOWER_FLAME))
                     {
                         me->AddAura(SPELL_BUFF_TOWER_OF_FLAMES, me);
                         events.ScheduleEvent(EVENT_MIMIRONS_INFERNO, 40*IN_MILLISECONDS);
                     }
 
-                    if (towerOfStorms)
+                    if (instance->GetData(DATA_LEVIATHAN_TOWER_STORM))
                     {
                         me->AddAura(SPELL_BUFF_TOWER_OF_STORMS, me);
                         events.ScheduleEvent(EVENT_THORIMS_HAMMER, 50*IN_MILLISECONDS);
                     }
 
-                    if (!towerOfLife && !towerOfFrost && !towerOfFlames && !towerOfStorms)
+                    if (countActiveTowers() == 0)
                         DoScriptText(SAY_TOWER_NONE, me);
                     else
                         DoScriptText(SAY_HARDMODE, me);
@@ -348,8 +353,8 @@ class boss_flame_leviathan : public CreatureScript
                 DoScriptText(SAY_DEATH, me);
 
                 if (GameObject* go = me->FindNearestGameObject(RAID_MODE<uint32>(GO_LEVIATHAN_CHEST_10, GO_LEVIATHAN_CHEST_25), 250.0f))
-                    if (ActiveTowers)
-                        switch (ActiveTowersCount)
+                    if (isHardMode())
+                        switch (countActiveTowers())
                         {
                             case 4: go->AddLootMode(LOOT_MODE_HARD_MODE_4);
                             case 3: go->AddLootMode(LOOT_MODE_HARD_MODE_3);
@@ -396,8 +401,8 @@ class boss_flame_leviathan : public CreatureScript
                     case DATA_UNBROKEN:
                         return Unbroken ? 1 : 0;
                     case DATA_ORBIT_ACHIEVEMENTS:
-                        if (false && ActiveTowers) // HardMode (HF desactive pour l'instant)
-                            return ActiveTowersCount;
+                        if (false && isHardMode()) // HardMode (HF desactive pour l'instant)
+                            return countActiveTowers();
                     default:
                         break;
                 }
@@ -541,6 +546,7 @@ class boss_flame_leviathan : public CreatureScript
 
                 switch (action)
                 {
+                /*
                     case ACTION_ACTIVATE_HARD_MODE:
                         ActiveTowers = true;
                         towerOfStorms = true;
@@ -576,6 +582,7 @@ class boss_flame_leviathan : public CreatureScript
                             --ActiveTowersCount;
                         }
                         break;
+                        */
                     default:
                         break;
                 }
@@ -1388,10 +1395,21 @@ class npc_lorekeeper : public CreatureScript
                 case GOSSIP_ACTION_INFO_DEF + 2:
                     if (player)
                         player->CLOSE_GOSSIP_MENU();
+                    
+                    if ((!player->GetGroup() || !player->GetGroup()->IsLeader(player->GetGUID())) && !player->isGameMaster()) {
+                        creature->MonsterSay("Seul le chef de raid peut faire cela...", LANG_UNIVERSAL, player->GetGUID());
+                        player->CLOSE_GOSSIP_MENU();
+                        break;
+                    }
+                    if (instance->GetBossState(TYPE_LEVIATHAN) == IN_PROGRESS) {
+                        creature->MonsterSay("Vous ne pouvez pas faire cela pendant le combat!", LANG_UNIVERSAL, player->GetGUID());
+                        player->CLOSE_GOSSIP_MENU();
+                        break;
+                    }
 
                     if (Creature* leviathan = instance->instance->GetCreature(instance->GetData64(TYPE_LEVIATHAN)))
                     {
-                        leviathan->AI()->DoAction(ACTION_ACTIVATE_HARD_MODE);
+                        instance->SetData(DATA_LEVIATHAN_HARD_MODE, 1);
                         creature->SetVisible(false);
 
                         if (Creature* Delorah = creature->FindNearestCreature(NPC_DELORAH, 200.0f, true))

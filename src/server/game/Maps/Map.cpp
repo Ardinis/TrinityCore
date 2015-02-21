@@ -1652,6 +1652,16 @@ inline GridMap* Map::GetGrid(float x, float y)
     return GridMaps[gx][gy];
 }
 
+bool Map::IsUnderGround(float x, float y, float z) const {
+    if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
+    {
+        float mapheight = gmap->getHeight(x, y);
+        if (z < mapheight)
+            return true;
+    }
+    return false;
+}
+
 float Map::GetWaterOrGroundLevel(float x, float y, float z, float* ground /*= NULL*/, bool swim /*= false*/) const
 {
     if (const_cast<Map*>(this)->GetGrid(x, y))

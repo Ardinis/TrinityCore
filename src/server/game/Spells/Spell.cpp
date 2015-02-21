@@ -1097,11 +1097,10 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         // Calculate minimum incoming time
         if (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay)
             m_delayMoment = targetInfo.timeDelay;
-    }
-    else if (!IsTriggered() && m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
-    {
-        targetInfo.timeDelay = 100;
-        m_delayMoment = 100;
+    } else if (uint32 d = GetCCDelay()) {
+        targetInfo.timeDelay = d;
+        m_delayMoment = d;
+        
     }
 	 // Apply delay for CC spells here, can be easily tweaked.
     /*	else if (m_spellInfo->Speed == 12345)
@@ -7902,4 +7901,19 @@ void Spell::CancelGlobalCooldown()
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->ToPlayer()->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
+}
+
+uint32 Spell::GetCCDelay() {
+    if (!IsTriggered() && m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC)
+    {
+        return 100;
+    }
+    switch(m_spellInfo->Id) {
+        case 33110:
+        case 48503:
+        case 379:
+            return 10;
+        default:
+            return 0;
+    }
 }

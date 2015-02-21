@@ -2021,8 +2021,10 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     float lborder =  -1 * (arc / 2.0f);                        // in range -pi..0
                     float rborder = (arc / 2.0f);                             // in range 0..p
                     isPointInBack = !((angle2 >= lborder) && (angle2 <= rborder));
+                    bool notUnderGround;
+                    notUnderGround = spellTarget->GetMap()->IsUnderGround(x, y, z + 0.5f) == spellTarget->GetMap()->IsUnderGround(spellTarget->GetPositionX(), spellTarget->GetPositionY(), spellTarget->GetPositionZ() + 0.5f);
 
-                    if (!spellTarget->IsWithinLOS(x, y, z) || !isPointInBack)
+                    if (!spellTarget->IsWithinLOS(x, y, z) || !notUnderGround || !isPointInBack)
                     {
                         bool losFree = false;
                         while (angle < 2 * M_PI)
@@ -2030,8 +2032,10 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                             spellTarget->GetNearPoint2D(x, y, distance2d, spellTarget->GetAngle(target) + angle);
                             z = spellTarget->GetPositionZ();
                             spellTarget->UpdateGroundPositionZ(x, y, z);
+                            
+                            notUnderGround = spellTarget->GetMap()->IsUnderGround(x, y, z + 0.5f) == spellTarget->GetMap()->IsUnderGround(spellTarget->GetPositionX(), spellTarget->GetPositionY(), spellTarget->GetPositionZ() + 0.5f);
 
-                            losFree = spellTarget->IsWithinLOS(x, y, z);
+                            losFree = spellTarget->IsWithinLOS(x, y, z) && notUnderGround;
 
                             arc = M_PI;
                             arc = MapManager::NormalizeOrientation(arc);

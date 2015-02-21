@@ -3417,8 +3417,19 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint8 effMask)
         AddInterruptMask(aurSpellInfo->AuraInterruptFlags);
     }
 
-    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask))
-        m_auraStateAuras.insert(AuraStateAurasMap::value_type(aState, aurApp));
+    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask)) {
+         m_auraStateAuras.insert(AuraStateAurasMap::value_type(aState, aurApp));
+        if ((1 << (aState-1)) & PER_CASTER_AURA_STATE_MASK) {
+            /* It is possible that the aura-type we're applying is already applied
+             * by another caster. In that case, UNIT_FIELD_AURASTATE will not change
+             * and will not be sent to clients. But if the aura has per-caster
+             * aurastate, then the (client-side) auraState will change for the aura's caster,
+             * therefore we need to send to client in that case.
+             */ 
+            if (HasAuraState(aState, NULL, NULL))
+                ForceValuesUpdateAtIndex(UNIT_FIELD_AURASTATE);
+        }
+    }
 
     aura->_ApplyForTarget(this, caster, aurApp);
     return aurApp;
@@ -3453,8 +3464,14 @@ void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask)
         return;
       }
     // Update target aura state flag
-    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask))
-        ModifyAuraState(aState, true);
+    if (AuraStateType aState = aura->GetSpellInfo()->GetAuraState(effMask)) {
+        if (aura->GetSpellInfo()->DelayedAuraState() == 0) {
+            ModifyAuraState(aState, true);
+        } else {
+            aura->SetAuraStateTimer(aura->GetSpellInfo()->DelayedAuraState(), effMask);
+        }
+    }
+
     // sLog->outDebug(LOG_FILTER_SPELLS_AURAS,"FIND CRASH : _ApplyAura L32236");
     if (aurApp->GetRemoveMode())
       {
@@ -3537,6 +3554,10 @@ void Unit::_UnapplyAura(AuraApplicationMap::iterator &i, AuraRemoveMode removeMo
             }
             auraStateFound = true;
             ++itr;
+        }
+        if ((1 << (auraState-1)) & PER_CASTER_AURA_STATE_MASK) {
+            // Si on applique un auraState dependant du caster, alors il faut toujours propager l'info au client
+            ForceValuesUpdateAtIndex(UNIT_FIELD_AURASTATE);
         }
     }
 
@@ -11026,6 +11047,26 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
     {
         if (spellProto->EquippedItemClass == -1 && (*i)->GetSpellInfo()->EquippedItemClass != -1)    //prevent apply mods from weapon specific case to non weapon specific spells (Example: thunder clap and two-handed weapon specialization)
             continue;
+            
+        // Pas DOUBLEDIP sur scourge strike avec les buffs ICC
+        if ((spellProto->Id == 70890 /* scourgestrike partie ombre */) && 
+            (
+             ((*i)->GetSpellInfo()->Id == 73762) ||
+             ((*i)->GetSpellInfo()->Id == 73824) ||
+             ((*i)->GetSpellInfo()->Id == 73825) ||
+             ((*i)->GetSpellInfo()->Id == 73826) ||
+             ((*i)->GetSpellInfo()->Id == 73827) ||
+             ((*i)->GetSpellInfo()->Id == 73828) ||
+             ((*i)->GetSpellInfo()->Id == 73816) ||
+             ((*i)->GetSpellInfo()->Id == 73818) ||
+             ((*i)->GetSpellInfo()->Id == 73819) ||
+             ((*i)->GetSpellInfo()->Id == 73820) ||
+             ((*i)->GetSpellInfo()->Id == 73821) ||
+             ((*i)->GetSpellInfo()->Id == 73822)
+            ))
+            
+            continue;
+                            
 
         if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
         {

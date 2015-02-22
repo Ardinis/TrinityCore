@@ -38,6 +38,7 @@ extern GridState* si_GridStates[];                          // debugging code, s
 
 MapManager::MapManager()
 {
+    b_newStyleManager = false;
     i_gridCleanUpDelay = sWorld->getIntConfig(CONFIG_INTERVAL_GRIDCLEAN);
     i_timer.SetInterval(sWorld->getIntConfig(CONFIG_INTERVAL_MAPUPDATE));
 }
@@ -273,27 +274,52 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
 
 void MapManager::Update(uint32 diff)
 {
+    static uint32 timertab[2] = {0, 0};
+    static int oddTick = 1;
+    uint32 real_diff;
+    
+    oddTick ^= 1;
+    timertab[oddTick] = diff;
+    
+    
     i_timer.Update(diff);
-    if (!i_timer.Passed())
-        return;
+    if (!b_newStyleManager) {
+        if (!i_timer.Passed())
+            return;
+        real_diff = i_timer.GetCurrent();
+    } else {
+        real_diff = timertab[0] + timertab[1];
+    }
 
     MapMapType::iterator iter = i_maps.begin();
     for (; iter != i_maps.end(); ++iter)
     {
+        if (b_newStyleManager) {
+            if ((iter->second->whenUpdate() & (1 << oddTick)) == 0)
+                continue;
+        } 
         if (m_updater.activated())
-            m_updater.schedule_update(*iter->second, uint32(i_timer.GetCurrent()));
+            m_updater.schedule_update(*iter->second, (b_newStyleManager && (iter->second->whenUpdate() == TICK_BOTH)) ? diff : real_diff);
         else
-            iter->second->Update(uint32(i_timer.GetCurrent()));
+            iter->second->Update((b_newStyleManager && (iter->second->whenUpdate() == TICK_BOTH)) ? diff : real_diff);
     }
     if (m_updater.activated())
         m_updater.wait();
 
-    for (iter = i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->DelayedUpdate(uint32(i_timer.GetCurrent()));
-
-    sObjectAccessor->Update(uint32(i_timer.GetCurrent()));
-    for (TransportSet::iterator itr = m_Transports.begin(); itr != m_Transports.end(); ++itr)
-        (*itr)->Update(uint32(i_timer.GetCurrent()));
+    for (iter = i_maps.begin(); iter != i_maps.end(); ++iter) {
+        if (b_newStyleManager) {
+            if ((iter->second->whenUpdate() & (1 << oddTick)) == 0)
+                continue;
+        } 
+        iter->second->DelayedUpdate((b_newStyleManager && (iter->second->whenUpdate() == TICK_BOTH)) ? diff : real_diff);
+    }
+    
+    if (!b_newStyleManager || oddTick) {
+        sObjectAccessor->Update(real_diff);
+        
+        for (TransportSet::iterator itr = m_Transports.begin(); itr != m_Transports.end(); ++itr)
+            (*itr)->Update(real_diff);
+    }
 
     i_timer.SetCurrent(0);
 }

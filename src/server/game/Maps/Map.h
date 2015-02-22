@@ -125,6 +125,13 @@ enum ZLiquidStatus
     LIQUID_MAP_UNDER_WATER  = 0x00000008
 };
 
+enum WhenUpdate 
+{
+    TICK_EVEN	= 1,
+    TICK_ODD 	= 2,
+#define TICK_BOTH (TICK_EVEN | TICK_ODD)
+};
+
 #define MAP_LIQUID_TYPE_NO_WATER    0x00
 #define MAP_LIQUID_TYPE_WATER       0x01
 #define MAP_LIQUID_TYPE_OCEAN       0x02
@@ -304,6 +311,8 @@ class Map : public GridRefManager<NGridType>
         {
             return IsGridLoaded(Trinity::ComputeGridCoord(x, y));
         }
+        
+        WhenUpdate whenUpdate() const;
 
         bool GetUnloadLock(const GridCoord &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
         void SetUnloadLock(const GridCoord &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadExplicitLock(on); }

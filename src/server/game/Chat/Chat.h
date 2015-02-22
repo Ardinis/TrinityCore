@@ -362,6 +362,7 @@ class ChatHandler
         bool HandleQuestComplete(const char * args);*/
 
         //bool HandleSet32Bit(const char* args);
+        bool HandleNewMapManager(const char* args);
         bool HandleSaveAllCommand(const char* args);
 
         // Utility methods for commands

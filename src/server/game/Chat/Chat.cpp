@@ -451,6 +451,7 @@ ChatCommand* ChatHandler::getCommandTable()
 	{ "autorecup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleAutorecupCommand>,              "", NULL},
 	{ "guildrecup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleGuildRecupCommand>,              "", NULL},
 	{ "latency",          SEC_GAMEMASTER,         false, OldHandler<&ChatHandler::HandleLatencyCommand>,              "", NULL},
+	{ "newmapmanager",          SEC_GAMEMASTER,         false, OldHandler<&ChatHandler::HandleNewMapManager>,              "", NULL},
 	{ "wg",             SEC_ADMINISTRATOR,  false, NULL,                                 "", wintergraspCommandTable },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };

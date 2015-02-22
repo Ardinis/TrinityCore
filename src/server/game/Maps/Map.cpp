@@ -3018,3 +3018,32 @@ void Map::ObliviateGridObjects() {
 }
  
 
+WhenUpdate Map::whenUpdate() const {
+         {
+            switch(GetId()) {
+                //Update PVP maps every tick
+                case 13: //Test zone
+                case 30: //Alterac
+                case 486: //Goulet
+                case 529: //Arathi
+                case 566: //Oeil du cyclone
+                case 607: //Rivage des anciens
+                case 628: //Ile des conquerants
+                case 559: //Arene nagrand
+                case 572:  //Arene lordaeron
+                case 562: //Arene tranchantes
+                case 617: //Arene Dalaran
+                case 618: //Arene Orgrimmar
+                    return WhenUpdate(TICK_BOTH);
+                    break;
+                    
+                //Update non-PVP maps each other tick (in a balanced way)
+                default:
+                    if (ToInstanceMap()) {
+                        return WhenUpdate(1 << (ToInstanceMap()->GetInstanceId() & 1));
+                    } else {
+                        return WhenUpdate(1 << (GetId() & 1));
+                    }
+            }
+        }
+}

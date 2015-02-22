@@ -4728,3 +4728,21 @@ bool ChatHandler::HandleNoteViewHelper(uint32 accountid, char const* /* name */ 
 
     return true;
 }
+
+bool ChatHandler::HandleNewMapManager(const char *args) 
+{
+        if (!*args)
+            return false;
+
+        if (strncmp(args, "on", 3) == 0) {
+            PSendSysMessage("Nouveau systeme de MapUpdate : actif");
+            sMapMgr->SetNewManager(true);
+        } else if (strncmp(args, "off", 4) == 0) {
+            PSendSysMessage("Nouveau systeme de MapUpdate : inactif");
+            sMapMgr->SetNewManager(false);
+        } else {
+            SendSysMessage(LANG_USE_BOL);
+            return false;
+        }
+        return(true);
+}

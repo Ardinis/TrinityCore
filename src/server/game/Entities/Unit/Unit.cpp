@@ -12801,38 +12801,39 @@ uint32 Unit::SpellHealingBonus(Unit* victim, SpellInfo const* spellProto, uint32
             TakenTotalMod *= 1.2f;
     }
 
-    // Taken mods
+    if (!(spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_HEALING_MOD)) {
+        // Taken mods
 
-    // Tenacity increase healing % taken
-    if (AuraEffect const* Tenacity = victim->GetAuraEffect(58549, 0))
-        AddPctN(TakenTotalMod, Tenacity->GetAmount());
+        // Tenacity increase healing % taken
+        if (AuraEffect const* Tenacity = victim->GetAuraEffect(58549, 0))
+            AddPctN(TakenTotalMod, Tenacity->GetAmount());
 
-    // Healing taken percent
-    float minval = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-    if (minval)
-        AddPctF(TakenTotalMod, minval);
+        // Healing taken percent
+        float minval = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (minval)
+            AddPctF(TakenTotalMod, minval);
 
-    float maxval = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-    if (maxval)
-        AddPctF(TakenTotalMod, maxval);
+        float maxval = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (maxval)
+            AddPctF(TakenTotalMod, maxval);
 
-    if (damagetype == DOT)
-    {
-        // Healing over time taken percent
-        float minval_hot = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HOT_PCT);
-        if (minval_hot)
-            AddPctF(TakenTotalMod, minval_hot);
+        if (damagetype == DOT)
+        {
+            // Healing over time taken percent
+            float minval_hot = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HOT_PCT);
+            if (minval_hot)
+                AddPctF(TakenTotalMod, minval_hot);
 
-        float maxval_hot = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HOT_PCT);
-        if (maxval_hot)
-            AddPctF(TakenTotalMod, maxval_hot);
+            float maxval_hot = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HOT_PCT);
+            if (maxval_hot)
+                AddPctF(TakenTotalMod, maxval_hot);
+        }
+
+        AuraEffectList const& mHealingGet= victim->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
+        for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
+            if (GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectedOnSpell(spellProto))
+                AddPctN(TakenTotalMod, (*i)->GetAmount());
     }
-
-    AuraEffectList const& mHealingGet= victim->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
-    for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
-        if (GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectedOnSpell(spellProto))
-            AddPctN(TakenTotalMod, (*i)->GetAmount());
-
     heal = (int32(heal) + TakenTotal) * TakenTotalMod;
 
     return uint32(std::max(heal, 0.0f));

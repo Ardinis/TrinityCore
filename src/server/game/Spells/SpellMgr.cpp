@@ -3005,6 +3005,14 @@ void SpellMgr::LoadSpellCustomAttr()
             case 59620:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_ENCHANT_PROC;
                 break;
+                /* Bouclier de terre */
+            case 974:
+            case 32593:
+            case 32594:
+            case 49283:
+            case 49284:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_HEALING_MOD;
+                break;
             default:
                 break;
         }

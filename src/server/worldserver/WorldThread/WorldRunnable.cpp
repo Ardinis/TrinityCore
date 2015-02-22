@@ -78,6 +78,7 @@ void WorldRunnable::run()
 	if (((ts.tv_sec - ts_temp.tv_sec)*1000 + (ts.tv_nsec - ts_temp.tv_nsec)/1000000) > 0) {
 	    jitter = std::max(0, int32((ts2.tv_sec - ts.tv_sec)*1000 + (ts2.tv_nsec - ts.tv_nsec)/1000000));
 	} else {
+	    ts = ts2;
 	    jitter = 0;
 	}
 #endif

@@ -2175,7 +2175,7 @@ void World::Update(uint32 diff, uint32 jitter)
     sScriptMgr->OnWorldUpdate(diff);
 #ifndef _WIN32
 
-    if ((getMSTime() / 60000) > ((getMSTime()-diff) / 60000)) {
+    if ((getMSTime() / 1000) > ((getMSTime()-diff) / 1000)) {
         m_oldTimeMax = m_updateTimeMax;
         m_oldTimeVirt = m_updateTimeVirt;
         m_oldTimeReal = m_updateTimeReal;

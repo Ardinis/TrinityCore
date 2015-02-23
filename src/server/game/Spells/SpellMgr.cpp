@@ -660,6 +660,16 @@ SpellSpellGroupMapBounds SpellMgr::GetSpellSpellGroupMapBounds(uint32 spell_id) 
     return SpellSpellGroupMapBounds(mSpellSpellGroup.lower_bound(spell_id), mSpellSpellGroup.upper_bound(spell_id));
 }
 
+SpellGroupStackRule SpellMgr::GetSpellGroupStackRule(uint32 group_id) const
+{
+    SpellGroupStackMap::const_iterator found = mSpellGroupStack.find(SpellGroup(group_id));
+    if (found != mSpellGroupStack.end()) {
+        return found->second;
+    }
+    return SPELL_GROUP_STACK_RULE_DEFAULT;
+}
+
+        
 uint32 SpellMgr::IsSpellMemberOfSpellGroup(uint32 spellid, SpellGroup groupid) const
 {
     SpellSpellGroupMapBounds spellGroup = GetSpellSpellGroupMapBounds(spellid);

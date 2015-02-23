@@ -36,6 +36,7 @@
 #include "Path.h"
 #include "WorldPacket.h"
 #include "Timer.h"
+#include "SpellGroup.h"
 #include <list>
 
 #define WORLD_TRIGGER   12999
@@ -1987,7 +1988,11 @@ class Unit : public WorldObject
         EventProcessor m_Events;
 
         // stat system
-        bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);
+        void AddToExclusiveGroup(ModifierAuraGroupMap &groupmap, SpellInfo const *spellInfo, float amount, bool apply);
+        bool IsExclusiveAura(SpellInfo const* spellInfo);
+        float ComputeExclusiveAuraContribution(ModifierAuraGroupMap &groupmap, UnitModifierType modifierType);
+
+        bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply, SpellInfo const *by_spell = NULL);
         void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value) { m_auraModifiersGroup[unitMod][modifierType] = value; }
         float GetModifierValue(UnitMods unitMod, UnitModifierType modifierType) const;
         float GetTotalStatValue(Stats stat) const;
@@ -2352,6 +2357,7 @@ class Unit : public WorldObject
         uint32 m_interruptMask;
 
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
+        ModifierAuraGroupMap m_auraModifiersGroupMap[UNIT_MOD_END][MODIFIER_TYPE_END];
         float m_weaponDamage[MAX_ATTACK][2];
         bool m_canModifyStats;
         VisibleAuraMap m_visibleAuras;

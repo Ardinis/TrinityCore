@@ -470,8 +470,14 @@ public:
                 // register survivor
                 DoAction(0);
 
-                if (saveCount == 50)
-                    CAST_AI(npc_fleeing_peasant::npc_fleeing_peasantAI, me->FindNearestCreature(NPC_INJURED_PEASANT, 10.0f, 1)->AI())->StartOutro();
+                if (saveCount == 50) {
+                    Creature *peasant = me->FindNearestCreature(NPC_INJURED_PEASANT, 10.0f, 1);
+                    if (peasant) {
+                        CAST_AI(npc_fleeing_peasant::npc_fleeing_peasantAI, peasant->AI())->StartOutro();
+                    } else {
+                        sLog->outError("eris_havenfireAI: NPC_INJURED_PEASANT not found (crash avoided)");
+                    }
+                }
             }
 
 

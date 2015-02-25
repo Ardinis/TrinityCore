@@ -29,6 +29,7 @@
 #include "SharedDefines.h"
 #include "QueryResult.h"
 #include "Callback.h"
+#include "ProfilingMgr.h"
 
 #include <map>
 #include <set>
@@ -663,6 +664,10 @@ class World
 	uint32 GetUpdateTimeReal() const {return (m_oldTimeMax > m_updateTimeMax) ? m_oldTimeReal : m_updateTimeReal; }
 	uint32 GetUpdateTimeVirtual() const {return (m_oldTimeMax > m_updateTimeMax) ? m_oldTimeVirt : m_updateTimeVirt; }
 	uint32 GetJitter() const {return (m_oldTimeMax > m_updateTimeMax) ? m_oldJitter : m_jitter; }
+	uint32 GetMapUpdateTime(uint32 mapid) { return ProfilingMgr::getMaxTime(mapid, (m_oldTimeMax > m_updateTimeMax)); }
+	void GetUpdatedGrid(uint32 mapid, uint32 &gridx, uint32 &gridy) {
+		ProfilingMgr::getLastUpdatedGrid(mapid, gridx, gridy, (m_oldTimeMax > m_updateTimeMax));
+	}
 
         void SetRecordDiffInterval(int32 t) { if (t >= 0) m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = (uint32)t; }
 

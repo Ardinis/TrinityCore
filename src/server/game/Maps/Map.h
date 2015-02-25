@@ -505,6 +505,8 @@ class Map : public GridRefManager<NGridType>
         bool _creatureToMoveLock;
         std::vector<Creature*> _creaturesToMove;
 
+	uint32 split;
+
         bool IsGridLoaded(const GridCoord &) const;
         void EnsureGridCreated(const GridCoord &);
         void EnsureGridCreated_i(const GridCoord &);

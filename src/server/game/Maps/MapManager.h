@@ -158,6 +158,9 @@ class MapManager
         void SetNewManager(bool val) {
             b_newStyleManager = val;
         }
+        inline bool isNewManager() const {
+            return b_newStyleManager;
+        }
 
     private:
         typedef UNORDERED_MAP<uint32, Map*> MapMapType;

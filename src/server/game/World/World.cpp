@@ -82,6 +82,7 @@
 #include "CalendarMgr.h"
 #include "WorldSession.h"
 #include "RecupMgrAuto.h"
+#include "ProfilingMgr.h"
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1831,6 +1832,9 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("AutoRecup: Building taxi nodes maps..." );
     RecupMgrAuto::BuildFlyMastersIndex();
+    
+    sLog->outString("Initialising Profiling Manager...");
+    ProfilingMgr::Initialize();
 
 
     LoadCharacterNameData();
@@ -1994,6 +1998,26 @@ void World::Update(uint32 diff, uint32 jitter)
     struct timespec ts_real1, ts_virt1, ts_real2, ts_virt2;
     static uint32 latency_real = 0;
     static uint32 latency_virt = 0;
+
+    if ((getMSTime() / 1000) > ((getMSTime()-diff) / 1000)) {
+        m_oldTimeMax = m_updateTimeMax;
+        m_oldTimeVirt = m_updateTimeVirt;
+        m_oldTimeReal = m_updateTimeReal;
+        m_oldJitter = m_jitter;
+	m_updateTimeMax = 0;
+	m_updateTimeVirt = 0;
+	m_updateTimeReal = 0;
+	m_jitter = 0;
+	ProfilingMgr::rotateMaxTime();
+    }
+
+    if (m_updateTimeMax < latency_real) {
+	m_updateTimeMax = latency_real;
+	m_updateTimeVirt = latency_virt;
+	m_updateTimeReal = latency_real;
+	m_jitter = jitter;
+	ProfilingMgr::recordMaxTime();
+    }
 
     clock_gettime(CLOCK_REALTIME, &ts_real1);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_virt1);
@@ -2174,24 +2198,6 @@ void World::Update(uint32 diff, uint32 jitter)
 
     sScriptMgr->OnWorldUpdate(diff);
 #ifndef _WIN32
-
-    if ((getMSTime() / 60000) > ((getMSTime()-diff) / 60000)) {
-        m_oldTimeMax = m_updateTimeMax;
-        m_oldTimeVirt = m_updateTimeVirt;
-        m_oldTimeReal = m_updateTimeReal;
-        m_oldJitter = m_jitter;
-	m_updateTimeMax = 0;
-	m_updateTimeVirt = 0;
-	m_updateTimeReal = 0;
-	m_jitter = 0;
-    }
-
-    if (m_updateTimeMax < m_updateTime) {
-	m_updateTimeMax = m_updateTime;
-	m_updateTimeVirt = latency_virt;
-	m_updateTimeReal = latency_real;
-	m_jitter = jitter;
-    }
 
     clock_gettime(CLOCK_REALTIME, &ts_real2);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_virt2);

@@ -2,6 +2,7 @@
 #include "DelayExecutor.h"
 #include "Map.h"
 #include "DatabaseEnv.h"
+#include "ProfilingMgr.h"
 
 #include <ace/Guard_T.h>
 #include <ace/Method_Request.h>
@@ -51,7 +52,17 @@ class MapUpdateRequest : public ACE_Method_Request
 
         virtual int call()
         {
+#ifndef _WIN32
+            struct timespec ts1, ts2;
+            uint32 profiling;
+            clock_gettime(CLOCK_REALTIME, &ts1);
+#endif
             m_map.Update (m_diff);
+#ifndef _WIN32
+            clock_gettime(CLOCK_REALTIME, &ts2);
+            profiling = (ts2.tv_sec - ts1.tv_sec)*1000 + (ts2.tv_nsec - ts1.tv_nsec)/1000000;
+            ProfilingMgr::setMapCurTime(m_map.GetId(), profiling);
+#endif
             m_updater.update_finished ();
             return 0;
         }

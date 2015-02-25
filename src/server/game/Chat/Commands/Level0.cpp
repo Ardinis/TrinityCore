@@ -32,6 +32,7 @@
 #include "math.h"
 #include "RecupMgrAuto.h"
 #include "GuildMgr.h"
+#include "ProfilingMgr.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -116,12 +117,31 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     return true;
 }
 
+static bool perf_compare(const std::pair<uint32,uint32> &first, const std::pair<uint32,uint32> &second)
+{
+  return (first.second > second.second);
+}
+
 bool ChatHandler::HandleLatencyCommand(const char*) {
+        std::list< std::pair<uint32, uint32> > profList;
+	PSendSysMessage("=== World Latency Report ===");
 	PSendSysMessage("Max latency: %u", sWorld->GetUpdateMax());
 	PSendSysMessage("CPU time: %u msec", sWorld->GetUpdateTimeVirtual());
 	PSendSysMessage("I/O time: %u msec", std::max(0,int32(sWorld->GetUpdateTimeReal() - sWorld->GetUpdateTimeVirtual())));
 	PSendSysMessage("Slack time: %u msec", std::max(0, int32((50 - sWorld->GetUpdateTimeReal()))));
 	PSendSysMessage("Jitter: %u msec", sWorld->GetJitter());
+	PSendSysMessage("=== Map Profiling Report ===");
+	for (int i = 0; i < ProfilingMgr::MAX_MAP; i++) {
+	  profList.push_back(std::make_pair(i, sWorld->GetMapUpdateTime(i)));
+	}
+	profList.sort(perf_compare);
+	int i = 0;
+	for (std::list< std::pair<uint32, uint32> >::const_iterator it = profList.begin(); (it != profList.end()) && (i < 10); it++, i++) {
+	  uint32 gridx, gridy;
+	  sWorld->GetUpdatedGrid(it->first, gridx, gridy);
+	  PSendSysMessage("Map %u (%u msec) (Grid X=%u Y=%u)", it->first, it->second, gridx, gridy);
+	}
+	PSendSysMessage("============================");
 	return true;
 }
 

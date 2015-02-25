@@ -174,6 +174,8 @@ void DelayedUnitRelocation::Visit(CreatureMapType &m)
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         Creature* unit = iter->getSource();
+        if (b_split && (m_split != (unit->GetGUIDLow() % 10))) 
+            continue;
         if (!unit->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))
             continue;
 
@@ -192,6 +194,8 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         Player* player = iter->getSource();
+        if (b_split && (m_split != (player->GetGUIDLow() % 10))) 
+            continue;
         WorldObject const* viewPoint = player->m_seer;
 
         if (!viewPoint->isNeedNotify(NOTIFY_VISIBILITY_CHANGED))

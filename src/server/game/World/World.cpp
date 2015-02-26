@@ -2018,6 +2018,7 @@ void World::Update(uint32 diff, uint32 jitter)
 	m_jitter = jitter;
 	ProfilingMgr::recordMaxTime();
     }
+    ProfilingMgr::eraseMaxTime();
 
     clock_gettime(CLOCK_REALTIME, &ts_real1);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_virt1);

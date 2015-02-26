@@ -3053,13 +3053,13 @@ WhenUpdate Map::whenUpdate() const {
                     return WhenUpdate(TICK_BOTH);
                     break;
                     
-                //Update non-PVP maps each other tick (in a balanced way)
+                case 0:
+                case 1:
+                case 530:
+                case 571:
+                    return WhenUpdate(TICK_EVEN);
                 default:
-                    if (ToInstanceMap()) {
-                        return WhenUpdate(1 << (ToInstanceMap()->GetInstanceId() & 1));
-                    } else {
-                        return WhenUpdate(1 << (GetId() & 1));
-                    }
+                    return WhenUpdate(TICK_ODD);
             }
         }
 }

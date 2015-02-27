@@ -3023,6 +3023,8 @@ void SpellMgr::LoadSpellCustomAttr()
             case 49284:
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_HEALING_MOD;
                 break;
+            case 69762:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEVER_PROC_TRIGGERED;
             default:
                 break;
         }

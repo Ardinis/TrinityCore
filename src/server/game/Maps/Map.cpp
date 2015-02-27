@@ -622,7 +622,6 @@ struct ResetNotifier
 
 void Map::ProcessRelocationNotifies(const uint32 diff)
 {
-    static uint32 split = 0;
     split = (split + 1) % 10; // TODO make this configurable 
     
     bool do_split = sMapMgr->isNewManager();

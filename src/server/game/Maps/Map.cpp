@@ -238,6 +238,7 @@ m_activeNonPlayersIter(m_activeNonPlayers.end()), i_gridExpiry(expiry),
 i_scriptLock(false)
 {
     m_parentMap = (_parent ? _parent : this);
+    split = 0;
     for (unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
         for (unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
@@ -621,7 +622,6 @@ struct ResetNotifier
 
 void Map::ProcessRelocationNotifies(const uint32 diff)
 {
-    static uint32 split = 0;
     split = (split + 1) % 10; // TODO make this configurable 
     
     bool do_split = sMapMgr->isNewManager();

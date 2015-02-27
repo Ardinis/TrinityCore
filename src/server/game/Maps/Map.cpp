@@ -238,6 +238,7 @@ m_activeNonPlayersIter(m_activeNonPlayers.end()), i_gridExpiry(expiry),
 i_scriptLock(false)
 {
     m_parentMap = (_parent ? _parent : this);
+    split = 0;
     for (unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
         for (unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
@@ -621,7 +622,10 @@ struct ResetNotifier
 
 void Map::ProcessRelocationNotifies(const uint32 diff)
 {
+<<<<<<< HEAD
     static uint32 split = 0;
+=======
+>>>>>>> 47afeebf4f039bfb892e474a0ae89c5418805959
     split = (split + 1) % 10; // TODO make this configurable 
     
     bool do_split = sMapMgr->isNewManager();
@@ -3053,13 +3057,13 @@ WhenUpdate Map::whenUpdate() const {
                     return WhenUpdate(TICK_BOTH);
                     break;
                     
-                //Update non-PVP maps each other tick (in a balanced way)
+                case 0:
+                case 1:
+                case 530:
+                case 571:
+                    return WhenUpdate(TICK_EVEN);
                 default:
-                    if (ToInstanceMap()) {
-                        return WhenUpdate(1 << (ToInstanceMap()->GetInstanceId() & 1));
-                    } else {
-                        return WhenUpdate(1 << (GetId() & 1));
-                    }
+                    return WhenUpdate(TICK_ODD);
             }
         }
 }

@@ -44,6 +44,17 @@ void ProfilingMgr::Initialize() {
             }
 }
 
+<<<<<<< HEAD
+=======
+void ProfilingMgr::eraseMaxTime() {
+            for (int i = 0; i < MAX_MAP; i++) {
+                timetab[i] = 0;
+		gridtabx[i] = 0;
+		gridtaby[i] = 0;
+            }
+}
+
+>>>>>>> 47afeebf4f039bfb892e474a0ae89c5418805959
 uint32 ProfilingMgr::getMaxTime(uint32 mapid, bool old) {
     if (mapid >= MAX_MAP)
         return 0;

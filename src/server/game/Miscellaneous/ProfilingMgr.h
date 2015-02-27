@@ -25,6 +25,7 @@ class ProfilingMgr {
         static void recordMaxTime();
         static void rotateMaxTime();
         static void Initialize();
+        static void eraseMaxTime();
         
     private:
         static uint32 timetab[MAX_MAP];

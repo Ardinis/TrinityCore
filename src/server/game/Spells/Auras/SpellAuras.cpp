@@ -38,7 +38,7 @@
 
 AuraApplication::AuraApplication(Unit* target, Unit* caster, Aura* aura, uint8 effMask):
 _target(target), _base(aura), _removeMode(AURA_REMOVE_NONE), _slot(MAX_AURAS),
-_flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false)
+_flags(AFLAG_NONE), _effectsToApply(effMask), _needClientUpdate(false), m_rdot(NULL)
 {
     ASSERT(GetTarget() && GetBase());
 
@@ -799,6 +799,24 @@ void Aura::SetDuration(int32 duration, bool withMods)
 
 void Aura::RefreshDuration()
 {
+            
+    // rollindots: do soft refresh
+    Unit *caster = GetCaster();
+    std::list<AuraApplication*> applications;
+    GetApplicationList(applications);
+    for (std::list<AuraApplication*>::const_iterator apptItr = applications.begin(); apptItr != applications.end(); ++apptItr) {
+        AuraApplication *aurApp = (*apptItr);
+        for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i) {
+	    if (!GetSpellInfo() || !GetSpellInfo()->Effects[i].Effect || !GetSpellInfo()->Effects[i].ApplyAuraName)
+	        continue;
+            if (GetEffect(i) && aurApp->HasRollingDot()) {
+	        aurApp->GetRollingDot()->doSoftRefresh(caster, aurApp->GetTarget());
+	        break;
+            }
+        }
+    }
+        
+    
     SetDuration(GetMaxDuration());
 
     if (m_spellInfo->ManaPerSecond || m_spellInfo->ManaPerSecondPerLevel)
@@ -1966,13 +1984,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 	  continue;
 	if (GetEffect(i))
 	{
-	  if (caster && target)
-	    GetEffect(i)->SetDamageBonus(caster->SpellDamageBonusDone(target, m_spellInfo, GetEffect(i)->GetAmount(), DOT, GetStackAmount()) - GetEffect(i)->GetAmount());
-	  //	  GetEffect(i)->SetHealingBonus(caster->SpellHealingBonus(target, GetSpellInfo(), GetEffect(i)->GetAmount(), DOT, GetStackAmount()) - GetEffect(i)->GetAmount());
+	  if (caster && target) {
+	      const_cast<AuraApplication*>(aurApp)->InitRollingDot();
+	      const_cast<AuraApplication*>(aurApp)->GetRollingDot()->doHardRefresh(caster, target);
+	      break;
+          }
 	}
       }
     }
-
 }
 
 
@@ -2804,4 +2823,24 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* /*caster*
                 targets[*itr] = 1<<effIndex;
         }
     }
+}
+
+void AuraApplication::InitRollingDot() {
+	    if (m_rdot == NULL) {
+	        m_rdot = new RollingDot(_base->GetSpellInfo());
+	    }
+}
+
+AuraApplication::~AuraApplication() {
+            if (m_rdot != NULL) {
+                delete m_rdot;
+                m_rdot = NULL;
+            }
+}
+
+RollingDot *Aura::GetRollingDotFor(Unit *target) {
+    AuraApplication *aurApp = GetApplicationOfTarget(target->GetGUID());
+    if (!aurApp)
+        return NULL;
+    return aurApp->GetRollingDot();
 }

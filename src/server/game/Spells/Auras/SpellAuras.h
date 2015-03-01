@@ -21,6 +21,7 @@
 
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
+#include "RollingDot.h"
 
 class Unit;
 class SpellInfo;
@@ -38,6 +39,8 @@ class ProcInfo;
 // update aura target map every 500 ms instead of every update - reduce amount of grid searcher calls
 #define UPDATE_TARGET_MAP_INTERVAL 500
 
+
+
 class AuraApplication
 {
     friend void Unit::_ApplyAura(AuraApplication * aurApp, uint8 effMask);
@@ -53,6 +56,7 @@ class AuraApplication
         uint8 _flags;                                  // Aura info flag
         uint8 _effectsToApply;                         // Used only at spell hit to determine which effect should be applied
         bool _needClientUpdate:1;
+        RollingDot *m_rdot;
 
         explicit AuraApplication(Unit* target, Unit* caster, Aura* base, uint8 effMask);
         void _Remove();
@@ -60,7 +64,7 @@ class AuraApplication
         void _InitFlags(Unit* caster, uint8 effMask);
         void _HandleEffect(uint8 effIndex, bool apply);
     public:
-
+        ~AuraApplication();        
         Unit* GetTarget() const { return _target; }
         Aura* GetBase() const { return _base; }
 
@@ -79,6 +83,16 @@ class AuraApplication
         bool IsNeedClientUpdate() const { return _needClientUpdate;}
         void BuildUpdatePacket(ByteBuffer& data, bool remove) const;
         void ClientUpdate(bool remove = false);
+	void InitRollingDot();
+	bool HasRollingDot() {
+	    return (m_rdot != NULL);
+	}
+	
+	RollingDot *GetRollingDot() {
+	    return m_rdot;
+	}
+        
+        
 };
 
 class Aura
@@ -121,6 +135,7 @@ class Aura
 
         void UpdateOwner(uint32 diff, WorldObject* owner);
         void Update(uint32 diff, Unit* caster);
+        RollingDot *GetRollingDotFor(Unit *target);
 
         time_t GetApplyTime() const { return m_applyTime; }
         int32 GetMaxDuration() const { return m_maxDuration; }
@@ -158,6 +173,7 @@ class Aura
         bool CanBeSaved() const;
         bool IsRemoved() const { return m_isRemoved; }
         bool CanBeSentToClient() const;
+        
         // Single cast aura helpers
         bool IsSingleTarget() const {return m_isSingleTarget;}
         void SetIsSingleTarget(bool val) { m_isSingleTarget = val;}

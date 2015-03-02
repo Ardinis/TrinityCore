@@ -4022,14 +4022,14 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                 break;
-            case 22959: // Scorch
+//            case 22959: // Scorch
                 //            case 58567: // sunder armor
             case 12579: // Winterchill
             case 17364: // Stormstrike
             case 50328: // Leeching Poison
             case 40520: // Shade Soul Channel
-            case 58684:
-            case 58683:
+//            case 58684:
+//            case 58683:
             case 33198:
             case 33197:
             case 33196:

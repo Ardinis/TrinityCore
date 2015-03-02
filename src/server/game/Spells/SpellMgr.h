@@ -18,6 +18,7 @@
 
 #ifndef _SPELLMGR_H
 #define _SPELLMGR_H
+#include "SpellGroup.h"
 
 // For static or at-server-startup loaded spell data
 
@@ -319,16 +320,6 @@ struct SpellBonusEntry
 };
 
 typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
-
-enum SpellGroup
-{
-    SPELL_GROUP_NONE = 0,
-    SPELL_GROUP_ELIXIR_BATTLE = 1,
-    SPELL_GROUP_ELIXIR_GUARDIAN = 2,
-    SPELL_GROUP_ELIXIR_UNSTABLE = 3,
-    SPELL_GROUP_ELIXIR_SHATTRATH = 4,
-    SPELL_GROUP_CORE_RANGE_MAX = 5,
-};
 
 #define SPELL_GROUP_DB_RANGE_MIN 1000
 
@@ -674,6 +665,9 @@ class SpellMgr
         // Spell bonus data table
         SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const;
 
+        SpellGroupStackRule GetSpellGroupStackRule(uint32 group_id) const;                                                        
+        
+        
         // Spell threat table
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellID) const;
 

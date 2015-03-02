@@ -83,6 +83,11 @@ float playerBaseMoveSpeed[MAX_MOVE_TYPE] = {
     3.14f                  // MOVE_PITCH_RATE
 };
 
+
+bool ModifierAuraComparator::operator()(const ModifierAura& a, const ModifierAura& b) const {
+    return (abs(a.amount) > abs(b.amount));
+}
+
 // Used for prepare can/can`t triggr aura
 static bool InitTriggerAuraData();
 // Define can trigger auras
@@ -3622,6 +3627,22 @@ void Unit::_RemoveNoStackAurasDueToAura(Aura* aura)
     // passive spell special case (only non stackable with ranks)
     if (spellProto->IsPassiveStackableWithRanks())
         return;
+
+
+    //First check non-owner aura application
+    std::list<AuraApplication*> to_remove;
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter) {
+        AuraApplication *aurApp = iter->second;
+        if (aurApp && aurApp->GetBase() && !aura->CanStackWith(aurApp->GetBase()) && (aurApp->GetBase()->GetOwner() != this)) {
+            to_remove.push_back(aurApp);
+        }
+    }
+    
+    for (std::list<AuraApplication*>::iterator iter = to_remove.begin(); iter != to_remove.end(); iter++) {
+        AuraApplication *aurApp = *iter;
+        _UnapplyAura(aurApp, AURA_REMOVE_BY_DEFAULT);
+        
+    }
 
     bool remove = false;
     for (AuraApplicationMap::iterator i = m_appliedAuras.begin(); i != m_appliedAuras.end(); ++i)
@@ -11035,13 +11056,14 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
     float ApCoeffMod = 1.0f;
     int32 DoneTotal = 0;
     int32 TakenTotal = 0;
-    std::map<SpellGroup, int32> SameEffectSpellGroup;
 
     // ..done
     // Pet damage?
     if (GetTypeId() == TYPEID_UNIT && !ToCreature()->isPet())
         DoneTotalMod *= ToCreature()->GetSpellDamageMod(ToCreature()->GetCreatureInfo()->rank);
 
+    /* CUMUL: fait */
+    std::map<SpellGroup, int32> SameEffectSpellGroup;
     AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
     {
@@ -11070,13 +11092,19 @@ uint32 Unit::SpellDamageBonus(Unit* victim, SpellInfo const* spellProto, uint32 
 
         if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
         {
-            if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
-                DoneTotalMod += float((*i)->GetAmount() / 100.0f);
-            else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
-                DoneTotalMod += float((*i)->GetAmount() / 100.0f);
+            if ((*i)->GetSpellInfo()->EquippedItemClass == -1) {
+                //On ne gere le cumul que pour les buffs qui ne dependent pas d'items
+                if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), SameEffectSpellGroup))
+                    AddPctN(DoneTotalMod, (*i)->GetAmount());
+            } else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
+                AddPctN(DoneTotalMod, (*i)->GetAmount());
             else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
                 DoneTotalMod += float((*i)->GetAmount() / 100.0f);
         }
+    }
+    //rajouter les buffs non cumulables
+    for (std::map<SpellGroup, int32>::const_iterator itr = SameEffectSpellGroup.begin(); itr != SameEffectSpellGroup.end(); ++itr) {
+        AddPctN(DoneTotalMod, itr->second);
     }
 
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
@@ -12801,38 +12829,39 @@ uint32 Unit::SpellHealingBonus(Unit* victim, SpellInfo const* spellProto, uint32
             TakenTotalMod *= 1.2f;
     }
 
-    // Taken mods
+    if (!(spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_HEALING_MOD)) {
+        // Taken mods
 
-    // Tenacity increase healing % taken
-    if (AuraEffect const* Tenacity = victim->GetAuraEffect(58549, 0))
-        AddPctN(TakenTotalMod, Tenacity->GetAmount());
+        // Tenacity increase healing % taken
+        if (AuraEffect const* Tenacity = victim->GetAuraEffect(58549, 0))
+            AddPctN(TakenTotalMod, Tenacity->GetAmount());
 
-    // Healing taken percent
-    float minval = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-    if (minval)
-        AddPctF(TakenTotalMod, minval);
+        // Healing taken percent
+        float minval = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (minval)
+            AddPctF(TakenTotalMod, minval);
 
-    float maxval = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-    if (maxval)
-        AddPctF(TakenTotalMod, maxval);
+        float maxval = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (maxval)
+            AddPctF(TakenTotalMod, maxval);
 
-    if (damagetype == DOT)
-    {
-        // Healing over time taken percent
-        float minval_hot = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HOT_PCT);
-        if (minval_hot)
-            AddPctF(TakenTotalMod, minval_hot);
+        if (damagetype == DOT)
+        {
+            // Healing over time taken percent
+            float minval_hot = (float)victim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HOT_PCT);
+            if (minval_hot)
+                AddPctF(TakenTotalMod, minval_hot);
 
-        float maxval_hot = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HOT_PCT);
-        if (maxval_hot)
-            AddPctF(TakenTotalMod, maxval_hot);
+            float maxval_hot = (float)victim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HOT_PCT);
+            if (maxval_hot)
+                AddPctF(TakenTotalMod, maxval_hot);
+        }
+
+        AuraEffectList const& mHealingGet= victim->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
+        for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
+            if (GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectedOnSpell(spellProto))
+                AddPctN(TakenTotalMod, (*i)->GetAmount());
     }
-
-    AuraEffectList const& mHealingGet= victim->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_RECEIVED);
-    for (AuraEffectList::const_iterator i = mHealingGet.begin(); i != mHealingGet.end(); ++i)
-        if (GetGUID() == (*i)->GetCasterGUID() && (*i)->IsAffectedOnSpell(spellProto))
-            AddPctN(TakenTotalMod, (*i)->GetAmount());
-
     heal = (int32(heal) + TakenTotal) * TakenTotalMod;
 
     return uint32(std::max(heal, 0.0f));
@@ -13159,6 +13188,8 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
     float TakenTotalMod = 1.0f;
 
     // ..done
+    /* CUMUL: todo, ici! */
+    std::map<SpellGroup, int32> SameEffectSpellGroup;
     AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
     {
@@ -13166,15 +13197,22 @@ void Unit::MeleeDamageBonus(Unit* victim, uint32 *pdamage, WeaponAttackType attT
         {
             if ((*i)->GetMiscValue() & spellProto->GetSchoolMask() && !(spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL))
             {
-                if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
-                    DoneTotalMod += float((*i)->GetAmount() / 100.0f);
-                else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
-                    DoneTotalMod += float((*i)->GetAmount() / 100.0f);
+                if ((*i)->GetSpellInfo()->EquippedItemClass == -1) {
+                    //gestion du cumul uniquement pour les buffs ne dependant pas d'objets
+                    if (!sSpellMgr->AddSameEffectStackRuleSpellGroups((*i)->GetSpellInfo(), (*i)->GetAmount(), SameEffectSpellGroup))
+                        AddPctN(DoneTotalMod, (*i)->GetAmount());
+                } else if (!((*i)->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
+                    AddPctN(DoneTotalMod, (*i)->GetAmount());
                 else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
                     DoneTotalMod += float((*i)->GetAmount() / 100.0f);
             }
         }
     }
+    //rajouter les buffs non cumulables
+    for (std::map<SpellGroup, int32>::const_iterator itr = SameEffectSpellGroup.begin(); itr != SameEffectSpellGroup.end(); ++itr) {
+        AddPctN(DoneTotalMod, itr->second);
+    }
+    
 
     AuraEffectList const& mDamageDoneVersus = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
     for (AuraEffectList::const_iterator i = mDamageDoneVersus.begin(); i != mDamageDoneVersus.end(); ++i)
@@ -14992,7 +15030,101 @@ uint32 Unit::GetCreatureType() const
 ########                         ########
 #######################################*/
 
-bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply)
+
+/*
+ * Gestion du cumul de buff "par effet".
+ *
+ * PRINCIPE DU MERDIER: si deux buffs [aura1] et [aura2] sont dans un meme groupe de sorts (spell_group) avec le stacking rule SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT,,
+ * alors les deux auras peuvent etre cumulés, mais les boost de stats communes entre les deux non. Exemple si aura1 file +10 intel/agi et aura2 file +10 forge/agi, alors
+ * les deux auras cumulées fileront au total +10 intel/agi/force (et pas +10intel/force et +20 agi). 
+ *
+ * IMPLEMENTATION: 
+ * 1) Pour chaque unite/unitMod/auraModifierGroup (voir Unit::m_auraModifiersGroups) on maintient une ModifierAuraGroupMap, qui associe chaque group-id de buffs ne
+ * se stackant pas (SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) a un ModifierAuraGroup. Chaque ModifierAuraGroup continuent une liste triee (par ordre decroissant) des auras actuellement
+ * actives et modifiant cette stat. 
+ *
+ * 2) L'unite peut posseder a la fois des auras cumulables classiques, et des auras non-cumulables. La contribution des auras non-cumulables au stat-modifier est calculee a partir de
+ * la premiere aura (dans la liste) pour chaque groupe. 
+ *
+ * 3) Lorsque des auras sont appliquees ou sont dispel : 
+ * - Si c'est une aura cumulable, on change le modifier de maniere classique (par ex si on avait une aura sans restriction de cumul filant un buff endu de +30, bah on colle un -30 au
+ * modifier lorsque l'aura degage)
+ * - Si on enleve/ajoute une aura non cumulable (avec regle SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT), alors on calcule : 
+ *   NouveauModifier = AncienModifier - AnciennesAurasNonCumulables + NouvellesAurasNonCumulables
+ * c-a-d on calcule la contribution au modifier des auras non-cumulables actuelles (voir petit 2), on retranche ca au modifier, ensuite on met à jour le ModifierAuraGroupMap, puis
+ * on rajoute la contribution des nouvelles auras non cumulables (recalculee apres la MaJ du ModifierAuraGroupMap).
+ *
+ * NOTE: Pour que ca marche, il faut bien appeler HandleStatModifier avec l'argument "by_spell" pour indiquer quelle est l'aura responsable du changement de stats.
+ *
+ */
+ 
+void Unit::AddToExclusiveGroup(ModifierAuraGroupMap &groupmap, SpellInfo const *spellInfo, float amount, bool apply)
+{
+    uint32 spellId = spellInfo->GetFirstRankSpell()->Id;
+    SpellSpellGroupMapBounds spellGroup = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+    for (SpellSpellGroupMap::const_iterator itr = spellGroup.first; itr != spellGroup.second ; ++itr)
+    {
+        SpellGroup group = itr->second;
+        SpellGroupStackRule rule = sSpellMgr->GetSpellGroupStackRule(group);
+        if (rule == SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT) {
+            ModifierAura mod_aura;
+            mod_aura.spell_id = spellId;
+            mod_aura.amount = amount;
+            
+            if (apply) {
+               groupmap[group].insert(mod_aura);
+            } else {
+                ModifierAuraGroup::iterator iter = groupmap[group].find(mod_aura);
+                if (iter == groupmap[group].end()) {
+                    sLog->outError("BUG: ne trouve pas l'aura dans groupmap[group]. UnitGUID=%u spellId=%u", GetGUIDLow(), spellId);
+                }
+                groupmap[group].erase(iter);
+                if (groupmap[group].empty()) {
+                    groupmap.erase(group);
+                }
+            }
+        }
+    }
+}
+bool Unit::IsExclusiveAura(SpellInfo const* spellInfo) {
+    uint32 spellId = spellInfo->GetFirstRankSpell()->Id;
+    SpellSpellGroupMapBounds spellGroup = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+    for (SpellSpellGroupMap::const_iterator itr = spellGroup.first; itr != spellGroup.second ; ++itr)
+    {
+        SpellGroup group = itr->second;
+        SpellGroupStackRule rule = sSpellMgr->GetSpellGroupStackRule(group);
+        if (rule == SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT)
+            return true;
+    }
+    return false;
+}
+
+float Unit::ComputeExclusiveAuraContribution(ModifierAuraGroupMap &groupmap, UnitModifierType modifierType) {
+    float contrib = 0;
+    for (ModifierAuraGroupMap::iterator iter = groupmap.begin(); iter != groupmap.end(); iter++) {
+        ModifierAuraGroup &group = iter->second;
+        if (!group.empty()) {
+            ModifierAuraGroup::iterator iter2 = group.begin();
+            switch(modifierType) {
+                case BASE_VALUE:
+                case TOTAL_VALUE:
+                    contrib += iter2->amount;
+                    break;
+                case BASE_PCT:
+                case TOTAL_PCT:
+                    contrib += 100.0f;
+                    ApplyPercentModFloatVar(contrib, iter2->amount, true);
+                    contrib -= 100.0f;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    return contrib;
+}
+
+bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply, SpellInfo const *by_spell)
 {
     if (unitMod >= UNIT_MOD_END || modifierType >= MODIFIER_TYPE_END)
     {
@@ -15004,11 +15136,26 @@ bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, f
     {
         case BASE_VALUE:
         case TOTAL_VALUE:
-            m_auraModifiersGroup[unitMod][modifierType] += apply ? amount : -amount;
+            if (by_spell && IsExclusiveAura(by_spell)) {
+                float current_contrib = ComputeExclusiveAuraContribution(m_auraModifiersGroupMap[unitMod][modifierType], modifierType);
+                AddToExclusiveGroup(m_auraModifiersGroupMap[unitMod][modifierType], by_spell, amount, apply);
+                float new_contrib = ComputeExclusiveAuraContribution(m_auraModifiersGroupMap[unitMod][modifierType], modifierType);
+                m_auraModifiersGroup[unitMod][modifierType] = m_auraModifiersGroup[unitMod][modifierType] - current_contrib + new_contrib;
+            } else {
+                m_auraModifiersGroup[unitMod][modifierType] += apply ? amount : -amount;
+            }
             break;
         case BASE_PCT:
         case TOTAL_PCT:
-            ApplyPercentModFloatVar(m_auraModifiersGroup[unitMod][modifierType], amount, apply);
+            if (by_spell && IsExclusiveAura(by_spell)) {
+                float current_contrib = ComputeExclusiveAuraContribution(m_auraModifiersGroupMap[unitMod][modifierType], modifierType);
+                AddToExclusiveGroup(m_auraModifiersGroupMap[unitMod][modifierType], by_spell, amount, apply);
+                float new_contrib = ComputeExclusiveAuraContribution(m_auraModifiersGroupMap[unitMod][modifierType], modifierType);
+                ApplyPercentModFloatVar(m_auraModifiersGroup[unitMod][modifierType], current_contrib, false);
+                ApplyPercentModFloatVar(m_auraModifiersGroup[unitMod][modifierType], new_contrib, true);
+            } else {
+                ApplyPercentModFloatVar(m_auraModifiersGroup[unitMod][modifierType], amount, apply);
+            }
             break;
         default:
             break;

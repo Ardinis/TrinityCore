@@ -1118,6 +1118,19 @@ class Player : public Unit, public GridObject<Player>
             m_summon_y = y;
             m_summon_z = z;
         }
+        
+        ModifierAuraGroupMap m_cumulDegats;
+        void ApplyPercentModFloatValueCumul(uint16 index, float val, bool apply, ModifierAuraGroupMap &groupmap, SpellInfo const* by_spell) {
+            if (by_spell && IsExclusiveAura(by_spell)) {
+                float current_contrib = ComputeExclusiveAuraContribution(groupmap, BASE_PCT);
+                AddToExclusiveGroup(groupmap, by_spell, val, apply);
+                float new_contrib = ComputeExclusiveAuraContribution(groupmap, BASE_PCT);
+                ApplyPercentModFloatValue(index, current_contrib, false);
+                ApplyPercentModFloatValue(index, new_contrib, true);
+            } else {
+                ApplyPercentModFloatValue(index, val, apply);
+            }
+        }
         void SummonIfPossible(bool agree);
 
         bool Create(uint32 guidlow, CharacterCreateInfo* createInfo);

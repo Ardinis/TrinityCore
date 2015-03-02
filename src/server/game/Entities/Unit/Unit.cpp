@@ -14627,9 +14627,14 @@ Unit* Creature::SelectVictim()
         Unit* caster = tauntAuras.back()->GetCaster();
 
         // The last taunt aura caster is alive an we are happy to attack him
-        if (caster && caster->isAlive())
-            return getVictim();
-        else if (tauntAuras.size() > 1)
+        if (caster && caster->isAlive()) {
+            if (getVictim() == caster) {
+                return getVictim();
+            } else {
+                sLog->outError("[Bug Abuse] SelectVictim(%s, GUID %u): Last-Taunter %s (GUID %u) isn't currently attacked! Updating target.", GetName(), GetGUIDLow(), caster->GetName(), caster->GetGUIDLow());
+            }
+        
+        } else if (tauntAuras.size() > 1)
         {
             // We do not have last taunt aura caster but we have more taunt auras,
             // so find first available target

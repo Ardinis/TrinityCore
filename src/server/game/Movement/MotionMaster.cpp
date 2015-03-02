@@ -177,6 +177,8 @@ void MotionMaster::DelayedExpire()
 
 void MotionMaster::MoveIdle()
 {
+    if (m_disabled)
+        return;
     //! Should be preceded by MovementExpired or Clear if there's an overlying movementgenerator active
     if (empty() || !isStatic(top()))
         Mutate(&si_idleMovement, MOTION_SLOT_IDLE);
@@ -184,6 +186,8 @@ void MotionMaster::MoveIdle()
 
 void MotionMaster::MoveRandom(float spawndist)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_UNIT)
     {
         sLog->outStaticDebug("Creature (GUID: %u) start moving random", _owner->GetGUIDLow());
@@ -193,6 +197,7 @@ void MotionMaster::MoveRandom(float spawndist)
 
 void MotionMaster::MoveTargetedHome()
 {
+    DisableMotion(false);
     Clear(false);
 
     if (_owner->GetTypeId()==TYPEID_UNIT && !((Creature*)_owner)->GetCharmerOrOwnerGUID())
@@ -218,6 +223,8 @@ void MotionMaster::MoveTargetedHome()
 
 void MotionMaster::MoveConfused()
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) move confused", _owner->GetGUIDLow());
@@ -233,6 +240,8 @@ void MotionMaster::MoveConfused()
 
 void MotionMaster::MoveChase(Unit* target, float dist, float angle, uint32 spellId)
 {
+    if (m_disabled)
+        return;
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
@@ -258,6 +267,8 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle, uint32 spell
 
 void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slot, uint32 spellId)
 {
+    if (m_disabled)
+        return;
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
@@ -282,6 +293,8 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) targeted point (Id: %u X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), id, x, y, z);
@@ -297,6 +310,8 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 
 void MotionMaster::MoveLand(uint32 id, Position const& pos, float speed)
 {
+    if (m_disabled)
+        return;
     float x, y, z;
     pos.GetPosition(x, y, z);
 
@@ -312,6 +327,8 @@ void MotionMaster::MoveLand(uint32 id, Position const& pos, float speed)
 
 void MotionMaster::MoveTakeoff(uint32 id, Position const& pos, float speed)
 {
+    if (m_disabled)
+        return;
     float x, y, z;
     pos.GetPosition(x, y, z);
 
@@ -327,6 +344,8 @@ void MotionMaster::MoveTakeoff(uint32 id, Position const& pos, float speed)
 
 void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ)
 {
+    if (m_disabled)
+        return;
     //this function may make players fall below map
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -341,6 +360,8 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
 
 void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
 {
+    if (m_disabled)
+        return;
     //this function may make players fall below map
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -355,6 +376,8 @@ void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
 
 void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id)
 {
+    if (m_disabled)
+        return;
     sLog->outStaticDebug("Unit (GUID: %u) jump to point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
 
     float moveTimeHalf = speedZ / Movement::gravity;
@@ -370,6 +393,8 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
 
 void MotionMaster::MoveFall(uint32 id/*=0*/)
 {
+    if (m_disabled)
+        return;
     // use larger distance for vmap height search than in most other cases
     float tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
     if (tz <= INVALID_HEIGHT)
@@ -392,6 +417,8 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
 
 void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id, bool generatePath)
 {
+    if (m_disabled)
+        return;
     if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
         return;
 
@@ -411,6 +438,8 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id,
 
 void MotionMaster::MoveCharge(PathGenerator path, float speed, uint32 id)
 {
+    if (m_disabled)
+        return;
     Vector3 dest = path.GetActualEndPosition();
 
     MoveCharge(dest.x, dest.y, dest.z);
@@ -422,6 +451,8 @@ void MotionMaster::MoveCharge(PathGenerator path, float speed, uint32 id)
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outError("Player (GUID: %u) attempt to seek assistance", _owner->GetGUIDLow());
@@ -438,6 +469,8 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 
 void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outError("Player (GUID: %u) attempt to call distract after assistance", _owner->GetGUIDLow());
@@ -478,6 +511,8 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 
 void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         if (path < sTaxiPathNodesByPath.size())
@@ -501,6 +536,8 @@ void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 
 void MotionMaster::MoveDistract(uint32 timer)
 {
+    if (m_disabled)
+        return;
     if (Impl[MOTION_SLOT_CONTROLLED])
         return;
 
@@ -545,6 +582,8 @@ void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
 
 void MotionMaster::MovePath(uint32 path_id, bool repeatable)
 {
+    if (m_disabled)
+        return;
     if (!path_id)
         return;
     //We set waypoint movement as new default movement generator
@@ -569,6 +608,8 @@ void MotionMaster::MovePath(uint32 path_id, bool repeatable)
 
 void MotionMaster::MoveRotate(uint32 time, RotateDirection direction)
 {
+    if (m_disabled)
+        return;
     if (!time)
         return;
 

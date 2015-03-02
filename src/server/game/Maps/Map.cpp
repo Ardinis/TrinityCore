@@ -3040,7 +3040,7 @@ WhenUpdate Map::whenUpdate() const {
                 //Update PVP maps every tick
                 case 13: //Test zone
                 case 30: //Alterac
-                case 486: //Goulet
+                case 489: //Goulet
                 case 529: //Arathi
                 case 566: //Oeil du cyclone
                 case 607: //Rivage des anciens

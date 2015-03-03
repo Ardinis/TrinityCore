@@ -14453,6 +14453,33 @@ void Unit::setDeathState(DeathState s)
 
     if (s == JUST_DIED)
     {
+        if (TempSummon *summon = ToTempSummon()) {
+            if (Unit *summoner = summon->GetSummoner()) {
+                if (summoner->GetMinionGUID() == GetGUID()) {
+                    // "Main" minion died, find another
+                    bool found = false;
+                    for (ControlList::const_iterator itr = summoner->m_Controlled.begin(); itr != summoner->m_Controlled.end(); ++itr) {
+                        sLog->outString("attempting: %s (%u)", (*itr)->GetName(), (*itr)->GetGUIDLow());
+                        if (!(*itr)->isAlive())
+                            continue;
+                        if (!(*itr)->HasUnitTypeMask(UNIT_MASK_MINION))
+                            continue;
+                        sLog->outString("DEBUG: Replacing minion GUID");
+                        summoner->SetUInt64Value(UNIT_FIELD_SUMMON, (*itr)->GetGUID());
+                        found = true;
+                        break;
+                    }
+                    if (!found) {
+                        sLog->outString("Not found...");
+                    } else {
+                        if (Player *plr = summoner->ToPlayer()) {
+                            plr->CharmSpellInitialize();
+                        }
+                    }
+                    
+                }
+            }
+        }
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         // remove aurastates allowing special moves

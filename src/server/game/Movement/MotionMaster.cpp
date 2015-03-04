@@ -687,6 +687,7 @@ void MotionMaster::DirectDelete(_Ty curr)
 				sLog->outString("BUG ABUSE on %s (tank: %s)", _owner->GetName(), (tank ? tank->GetName() : "<not found>"));
 				str = "Possible bug abuse on " + std::string(_owner->GetName()) + " (tank: " + (tank ? std::string(tank->GetName()) : "<not found>") + ")";
 				sWorld->SendGMText(LANG_GM_BROADCAST, str.c_str());
+				sLog->outDB(LOG_TYPE_DEBUG, str.c_str());
 				genBackTrace();
 			}
 		}

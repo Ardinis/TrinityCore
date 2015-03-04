@@ -19,6 +19,8 @@ void genBackTrace() {
   if (buf != NULL) {
     for (int i = 0; i < size; i++) {
       sLog->outString("%u: %s", i, buf[i]);
+      if (i < 10)
+        sLog->outDB(LOG_TYPE_DEBUG, buf[i]);
     }
   }
 }

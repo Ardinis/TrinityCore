@@ -191,7 +191,7 @@ void InstanceScript::AddMinion(Creature* minion, bool add)
         itr->second.bossInfo->minion.erase(minion);
 }
 
-#define LANATHEL_DEBUG 1
+#define LANATHEL_DEBUG 0
 
 bool InstanceScript::SetBossState(uint32 id, EncounterState state)
 {

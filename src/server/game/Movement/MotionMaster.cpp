@@ -19,6 +19,7 @@
 #include "MotionMaster.h"
 #include "CreatureAISelector.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
@@ -30,6 +31,7 @@
 #include "RandomMovementGenerator.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
+#include "DebugTools.h"
 #include <cassert>
 
 inline bool isStatic(MovementGenerator *mv)
@@ -656,6 +658,40 @@ void MotionMaster::DirectDelete(_Ty curr)
 {
     if (isStatic(curr))
         return;
+
+    if (Creature *creature = _owner->ToCreature()) {
+	if (!creature->movespline->Finalized() && creature->isAlive() && creature->AI() && !creature->AI()->isStartingEvade() && (creature->GetScriptName().find("boss") != std::string::npos) && _owner->CanHaveThreatList()) {
+		MovementGeneratorType old_type = curr->GetMovementGeneratorType();
+		if ((old_type == POINT_MOTION_TYPE) ||
+		    (old_type == EFFECT_MOTION_TYPE)) {
+			// If we are here, all the following conditions are all true:
+			// - The movement has been interrupted (!Finalized)
+			// - The movement would have called AI MovementInform() (had it not been interrupted)
+			// - The creature is a boss
+			// - The creature is not entering evade mode
+			Player *tank = NULL;
+			const std::list<HostileReference*>& threatlist = _owner->getThreatManager().getThreatList();
+			for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr) {
+				Unit *target = (*itr)->getTarget();
+				if (target && target->ToPlayer()) {
+					tank = target->ToPlayer();
+					break;
+				}	
+			}
+			if (tank) {
+				std::string str = "";
+				str = "|cFFFFFC00Possible bug abuse on |cFF60FF00" + std::string(_owner->GetName()) + "|cFFFFFC00 (tank: |cFF60FF00" + (tank ? std::string(tank->GetName()) : "<not found>") + "|cFFFFFC00)";
+				WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
+				data << str;
+				sWorld->SendGlobalGMMessage(&data);
+				sLog->outString("BUG ABUSE on %s (tank: %s)", _owner->GetName(), (tank ? tank->GetName() : "<not found>"));
+				str = "Possible bug abuse on " + std::string(_owner->GetName()) + " (tank: " + (tank ? std::string(tank->GetName()) : "<not found>") + ")";
+				sWorld->SendGMText(LANG_GM_BROADCAST, str.c_str());
+				genBackTrace();
+			}
+		}
+	}
+    }
     curr->Finalize(*_owner);
     delete curr;
 }

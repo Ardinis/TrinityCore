@@ -196,6 +196,8 @@ void CreatureAI::EnterEvadeMode()
     if (!_EnterEvadeMode())
         return;
 
+
+    SetStartingEvade(true);
     sLog->outDebug(LOG_FILTER_UNITS, "Creature %u enters evade mode.", me->GetEntry());
 
     if (!me->GetVehicle()) // otherwise me will be in evade mode forever
@@ -209,6 +211,7 @@ void CreatureAI::EnterEvadeMode()
             me->GetMotionMaster()->MoveTargetedHome();
     }
 
+    SetStartingEvade(false);
     Reset();
 
     if (me->IsVehicle()) // use the same sequence of addtoworld, aireset may remove all summons!

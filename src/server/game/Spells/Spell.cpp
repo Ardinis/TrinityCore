@@ -5198,6 +5198,15 @@ SpellCastResult Spell::CheckCast(bool strict)
             // Target must be facing you
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
                 return SPELL_FAILED_NOT_INFRONT;
+                
+            if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_CHARGE) {
+                float ztarget = target->m_positionZ;
+                m_caster->UpdateAllowedPositionZ(target->m_positionX, target->m_positionY, ztarget);
+                if (fabs(ztarget - target->m_positionZ) > 5.0f) {
+                    return SPELL_FAILED_LINE_OF_SIGHT;
+                }
+                                                        
+            }
 
             if (!IsTriggered() && m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
                 if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_caster->IsWithinLOSInMap(target))

@@ -374,9 +374,11 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
     }
 
     mover->UpdatePosition(movementInfo.pos);
+    
 
     if (plMover)                                            // nothing is charmed, or player charmed
     {
+        plMover->CheckUnderMap(UNDERMAP_CHECK_MOVEMENT);
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
         float underMapValueZ;

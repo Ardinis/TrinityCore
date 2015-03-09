@@ -580,6 +580,7 @@ void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
         _needInit[slot] = false;
         m->Initialize(*_owner);
     }
+    m_lastMotion = m->GetMovementGeneratorType();
 }
 
 void MotionMaster::MovePath(uint32 path_id, bool repeatable)

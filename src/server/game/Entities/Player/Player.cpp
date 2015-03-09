@@ -664,6 +664,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
 	// Jail end
 
     m_doNotSave = false;
+    b_wasUnderMap = false;
     recup_task = NULL;
     m_speakTime = 0;
     m_speakCount = 0;
@@ -889,6 +890,13 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
  spectateFrom = NULL;
 
     SetPendingBind(0, 0);
+    
+    m_undermapX = 0.0f;
+    m_undermapY = 0.0f;
+    m_undermapZ = 0.0f;
+    m_splineTime = 0;
+    m_undermapTime = 0;
+    m_undermapType = UNDERMAP_CHECK_NULL;
 }
 
 Player::~Player ()
@@ -2336,6 +2344,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
+            CheckUnderMap(UNDERMAP_CHECK_TELEPORT);
             SendTeleportAckPacket();
             SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
         }
@@ -26069,4 +26078,55 @@ bool Player::HaveTransmoByItem(uint32 guidlow)
     return true;
 
   return false;
+}
+
+void Player::CheckUnderMap(UnderMapCheckType _type) {
+  if (isGameMaster())
+    return;
+  bool isUnderMap;
+  float z1 = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ());
+  float z2 = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ() + 5.0f, true, 10.0f);
+  
+  if (z1 > INVALID_HEIGHT) {
+    isUnderMap = (z1 > GetPositionZ() + (0.25f));
+  } else {
+    isUnderMap = (z2 > INVALID_HEIGHT);
+  }
+  
+  
+  if (b_wasUnderMap) {
+    if (isUnderMap || (z1 <= INVALID_HEIGHT)) {
+      float good_z = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ() + 25.0f, true, 50.0f);
+      printf("goodz=%f z=%f\n", good_z, GetPositionZ());
+      if ((GetPositionZ() < (good_z - 5.0f)) && (GetPositionZ() < m_undermapZ)) {
+        ChatHandler(this).PSendSysMessage("Sous-map détecté! Système de téléportation d'urgence activé. Rapport d'erreur : %06x.", time(NULL) & 0xFFFFFF);
+        isUnderMap = false;
+        b_wasUnderMap = false;
+        sLog->outString("Undermap confirmed. Player=%s MapId=%u Pos=%f,%f,%f type=%d motiontype=%d splinetime=%d splinedump=%s", GetName(), GetMapId(), m_undermapX, m_undermapY, m_undermapZ, m_undermapType, GetMotionMaster()->getLastMotion(), getMSTime() - m_splineTime, movespline->ToString().c_str());
+        char buf[4096];
+        snprintf(buf, 4096, "UNDERMAP Player=%s MapId=%u Pos=%f,%f,%f type=%d motiontype=%d splinetime=%d splinedump=%s", GetName(), GetMapId(), m_undermapX, m_undermapY, m_undermapZ, m_undermapType, GetMotionMaster()->getLastMotion(), getMSTime() - m_splineTime, movespline->ToString().c_str());
+        buf[4095] = 0;
+        sLog->outDB(LOG_TYPE_DEBUG, buf);
+        TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), good_z + 0.5f, GetOrientation());
+        
+        // Log undermap info
+      }
+    }
+    if (!isUnderMap) {
+      if (m_undermapTime + 3000 < getMSTime()) {
+        b_wasUnderMap = false;
+        sLog->outString("CheckUnderMap: False positive.");
+      }
+    }
+  } else {
+    if (isUnderMap) {
+      sLog->outString("CheckUnderMap: Possible undermap detected! Type=%d\n", _type);
+      m_undermapTime = getMSTime();
+      m_undermapType = _type;
+      m_undermapX = GetPositionX();
+      m_undermapY = GetPositionY();
+      m_undermapZ = GetPositionZ();
+      b_wasUnderMap = true;
+    }
+  }
 }

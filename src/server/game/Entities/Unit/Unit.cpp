@@ -396,6 +396,9 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 
     if (movespline->Finalized())
         return;
+    if (ToPlayer()) {
+        ToPlayer()->setSplineTime(getMSTime());
+    }
 
     movespline->updateState(t_diff);
     bool arrived = movespline->Finalized();
@@ -420,9 +423,10 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
                 transport->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
         }
 
-        if (GetTypeId() == TYPEID_PLAYER)
+        if (GetTypeId() == TYPEID_PLAYER) {
             ((Player*)this)->UpdatePosition(loc.x,loc.y,loc.z,loc.orientation);
-        else
+            ((Player*)this)->CheckUnderMap(UNDERMAP_CHECK_SPLINE);
+        } else
             GetMap()->CreatureRelocation((Creature*)this,loc.x,loc.y,loc.z,loc.orientation);
     }
 }

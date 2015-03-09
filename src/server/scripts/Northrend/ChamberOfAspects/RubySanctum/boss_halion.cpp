@@ -2188,6 +2188,8 @@ public :
             Map::PlayerList const &PlayerList = map->GetPlayers();
             if (PlayerList.isEmpty())
                 return;
+			if (Unit *victim = caster->getVictim())
+				caster->SetInFront(victim);
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())
                     if (player->isAlive())
@@ -2343,6 +2345,8 @@ public :
             Map::PlayerList const &PlayerList = map->GetPlayers();
             if (PlayerList.isEmpty())
                 return;
+			if (Unit *victim = caster->getVictim())
+				caster->SetInFront(victim);
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())
                     if (player->isAlive())

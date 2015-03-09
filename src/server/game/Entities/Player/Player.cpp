@@ -890,13 +890,13 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
  spectateFrom = NULL;
 
     SetPendingBind(0, 0);
-    
     m_undermapX = 0.0f;
     m_undermapY = 0.0f;
     m_undermapZ = 0.0f;
     m_splineTime = 0;
     m_undermapTime = 0;
     m_undermapType = UNDERMAP_CHECK_NULL;
+	m_combatHack = 0;
 }
 
 Player::~Player ()
@@ -1670,6 +1670,29 @@ if (m_jail_amnestie == true && sObjectMgr->m_jailconf_amnestie > 0)
 }
 
     time_t now = time(NULL);
+	// TEMPORARY HACK : Log combat status bugs. This hack will be removed once we have examined the logs; 
+	if (m_combatHack && (now > m_combatHack)) {
+		m_combatHack = 0;
+		if (isInCombat()) {
+			ChatHandler(this).PSendSysMessage("Un bug combat a été détecté et automatiquement supprimé.");
+			HostileRefManager &manager = getHostileRefManager();
+			for (HostileRefManager::iterator iter= manager.begin(); iter != manager.end(); ++iter) {
+				ThreatManager *tm = iter->getSource();
+				if (tm) {
+					Unit *hater = tm->getOwner();
+					if (hater) {
+						char buf[2048];
+						snprintf(buf, 2014, "[BUG] Player %s (GUID: %u) hated by %s (ID: %u GUID: %u)", GetName(), GetGUIDLow(), hater->GetName(), hater->GetEntry(), hater->GetGUIDLow());
+						buf[2047] = 0;
+						sLog->outDB(LOG_TYPE_DEBUG, buf);
+					}
+				}
+			}
+			CombatStop();
+			manager.deleteReferences();
+		}
+	}
+
 
     UpdatePvPFlag(now);
 

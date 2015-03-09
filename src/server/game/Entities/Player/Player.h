@@ -2624,6 +2624,8 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetXPRate() { return m_XPRate; }
         void SetXPRate(uint8 rate) { m_XPRate = rate; }
 
+		void setCombatHack(uint32 val) { m_combatHack = val; }
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -2987,6 +2989,9 @@ class Player : public Unit, public GridObject<Player>
         std::map<uint32, uint32> m_CustomTransmo;
 
         uint8 m_XPRate;
+
+		//hacks
+		uint32 m_combatHack;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

@@ -715,6 +715,8 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                         *data << uint16(0);
                         *data << uint16(-1);
                     }
+                } else if (index == GAMEOBJECT_FLAGS) {
+                    *data << (m_uint32Values[index] & 0x7FF); // filter private flags
                 }
                 else
                     *data << m_uint32Values[index];                // other cases

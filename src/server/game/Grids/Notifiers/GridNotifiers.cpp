@@ -40,7 +40,15 @@ void VisibleNotifier::SendToSelf()
     for (Player::ClientGUIDs::const_iterator it = vis_guids.begin();it != vis_guids.end(); ++it)
     {
         i_player.m_clientGUIDs.erase(*it);
-        i_data.AddOutOfRangeGUID(*it);
+        
+        bool send_to_client = true;
+        if (IS_GAMEOBJECT_GUID(*it)) {
+            GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(GUID_ENPART(*it));
+            if (goinfo && (goinfo->flags & GO_FLAG_INFINITE_RANGE))
+                send_to_client = false;
+        }      
+        if (send_to_client)  
+            i_data.AddOutOfRangeGUID(*it);
 
         if (IS_PLAYER_GUID(*it))
         {

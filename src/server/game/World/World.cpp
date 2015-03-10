@@ -83,7 +83,7 @@
 #include "WorldSession.h"
 #include "RecupMgrAuto.h"
 #include "ProfilingMgr.h"
-
+#include "DynConfigMgr.h"
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 volatile uint32 World::m_worldLoopCounter = 0;
@@ -1835,7 +1835,8 @@ void World::SetInitialWorldSettings()
     
     sLog->outString("Initialising Profiling Manager...");
     ProfilingMgr::Initialize();
-
+    
+    DynConfigMgr::reload();
 
     LoadCharacterNameData();
 

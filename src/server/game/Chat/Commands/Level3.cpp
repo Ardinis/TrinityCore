@@ -63,6 +63,7 @@
 #include "SmartAI.h"
 #include "Group.h"
 #include "ChannelMgr.h"
+#include "DynConfigMgr.h"
 
 //TrinityJail reload commands Edited by LordPsyan ajustado por Eilo
 	bool ChatHandler::HandleJailReloadCommand(const char* arg)
@@ -4745,4 +4746,46 @@ bool ChatHandler::HandleNewMapManager(const char *args)
             return false;
         }
         return(true);
+}
+
+bool ChatHandler::HandleConfigGetCommand(const char *args) {
+    if (!*args)
+        return false;
+        
+    uint32 id = (uint32)atoi(args);
+    PSendSysMessage("La valeur de l'ID %u est %u", id, DynConfigMgr::getValue(id));
+    return true;
+}
+bool ChatHandler::HandleConfigReloadCommand(const char *args) {
+    if (DynConfigMgr::reload()) {
+        PSendSysMessage("Rechargement de la config a partir de la DB...");
+        return true;
+    } else {
+        PSendSysMessage("Le rechargement a echoue.");
+        return false;
+    }
+}
+bool ChatHandler::HandleConfigSetCommand(const char *args) {
+    if (!*args)
+        return false;
+ 
+    char* px = strtok((char*)args, " ");
+    if (!px)
+        return false;
+
+    uint32 id = (uint32)atoi(px);
+
+    char *px2 = strtok(NULL, " ");
+    if (!px2)
+        return false;
+        
+    uint32 val = (uint32) atoi(px2);
+    uint32 oldval = DynConfigMgr::getValue(id);
+    if (DynConfigMgr::setValue(id, val)) {
+        PSendSysMessage("La valeur de l'ID %u est passee de %u a %u", id, oldval, val);
+        return true;
+    } else {
+        PSendSysMessage("L'operation a echouee (ID invalide?).");
+        return false;
+    }
 }

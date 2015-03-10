@@ -679,7 +679,17 @@ void MotionMaster::DirectDelete(_Ty curr)
 					break;
 				}	
 			}
-			if (tank) {
+			bool false_positive = false;
+			
+			// False positives
+			if ((creature->GetEntry() == 36853) || (creature->GetEntry() == 38265) || (creature->GetEntry() == 38266) || (creature->GetEntry() == 38267)) {
+			    //Sindragosa pull
+			    if (curr->getId() == 1 /* POINT_FROSTWYRM_FLY_IN */ )
+			        false_positive = true;
+			    
+			}
+			
+			if (tank && !false_positive) {
 				std::string str = "";
 				str = "|cFFFFFC00Possible bug abuse on |cFF60FF00" + std::string(_owner->GetName()) + "|cFFFFFC00 (tank: |cFF60FF00" + (tank ? std::string(tank->GetName()) : "<not found>") + "|cFFFFFC00)";
 				WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));

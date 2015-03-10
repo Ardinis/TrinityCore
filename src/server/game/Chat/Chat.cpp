@@ -81,6 +81,14 @@ ChatCommand* ChatHandler::getCommandTable()
         { NULL,             	0,                  false, NULL,                                           "", NULL }
     };
 
+    static ChatCommand configCommandTable[] =
+    {
+        { "get",        	SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleConfigGetCommand>,          "", NULL },
+        { "set",        	SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleConfigSetCommand>,          "", NULL },
+        { "reload",        	SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleConfigReloadCommand>,          "", NULL },
+        { NULL,             	0,                  false, NULL,                                           "", NULL }
+    };
+
     static ChatCommand banCommandTable[] =
     {
         { "account",        SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleBanAccountCommand>,          "", NULL },
@@ -430,6 +438,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "movegens",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleMovegensCommand>,            "", NULL },
         { "cometome",       SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleComeToMeCommand>,            "", NULL },
         { "note",            SEC_ADMINISTRATOR,  true,  NULL,                                           "", noteCommandTable      },
+        { "config",            SEC_ADMINISTRATOR,  true,  NULL,                                           "", configCommandTable      },
         { "damage",         SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDamageCommand>,              "", NULL },
         { "combatstop",     SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleCombatStopCommand>,          "", NULL },
         { "flusharenapoints", SEC_ADMINISTRATOR, false, OldHandler<&ChatHandler::HandleFlushArenaPointsCommand>,    "", NULL },

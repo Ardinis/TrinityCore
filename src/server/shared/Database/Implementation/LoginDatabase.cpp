@@ -63,4 +63,8 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM, "DELETE FROM account_access WHERE id = ? AND (RealmID = ? OR RealmID = -1)", CONNECTION_ASYNC);
     PREPARE_STATEMENT(LOGIN_INS_ACCOUNT_ACCESS, "INSERT INTO account_access (id,gmlevel,RealmID) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PREPARE_STATEMENT(LOGIN_ADD_ACCOUNT_NOTE, "INSERT INTO account_notes (id, notedate, notedby, text) VALUES (?, UNIX_TIMESTAMP(), ?, ?)", CONNECTION_ASYNC);
+    PREPARE_STATEMENT(LOGIN_CONFIG_SET, "REPLACE INTO config (id, realm, val) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PREPARE_STATEMENT(LOGIN_CONFIG_GET, "SELECT val FROM config WHERE realm = ? and id = ?", CONNECTION_SYNCH);
+    PREPARE_STATEMENT(LOGIN_CONFIG_LOAD, "SELECT id, val FROM config WHERE realm = ?", CONNECTION_SYNCH);
+    
 }

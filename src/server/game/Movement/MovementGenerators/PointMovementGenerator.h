@@ -42,6 +42,7 @@ class PointMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() { return POINT_MOTION_TYPE; }
 
         bool GetDestination(float& x, float& y, float& z) const { x=i_x; y=i_y; z=i_z; return true; }
+        uint32 getId() { return id; }
     private:
         uint32 id;
         float i_x, i_y, i_z;
@@ -71,6 +72,7 @@ class EffectMovementGenerator : public MovementGenerator
         void Reset(Unit &) {}
         bool Update(Unit &u, const uint32);
         MovementGeneratorType GetMovementGeneratorType() { return EFFECT_MOTION_TYPE; }
+        uint32 getId() { return m_Id; }
     private:
         uint32 m_Id;
 };

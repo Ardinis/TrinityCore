@@ -43,6 +43,8 @@ class MovementGenerator
         virtual MovementGeneratorType GetMovementGeneratorType() = 0;
 
         virtual void unitSpeedChanged() { }
+        
+        virtual uint32 getId() { return 0; }
 };
 
 template<class T, class D>

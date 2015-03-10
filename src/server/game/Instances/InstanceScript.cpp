@@ -27,6 +27,7 @@
 #include "LFGMgr.h"
 #include "Chat.h"
 #include "DebugTools.h"
+#include "DynConfigMgr.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -207,7 +208,7 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
 		if (state == DONE) {
 			InstanceMap::PlayerList const& players = instance->GetPlayers();
 
-			if (!players.isEmpty())
+			if (!players.isEmpty() && DynConfigMgr::getValue(DynConfigMgr::CONFIG_COMBAT_CHECK))
 			{
 				for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
 					if (Player* player = i->getSource()) {

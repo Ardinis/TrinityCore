@@ -32,6 +32,7 @@
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
 #include "DebugTools.h"
+#include "DynConfigMgr.h"
 #include <cassert>
 
 inline bool isStatic(MovementGenerator *mv)
@@ -689,7 +690,7 @@ void MotionMaster::DirectDelete(_Ty curr)
 			    
 			}
 			
-			if (tank && !false_positive) {
+			if (tank && !false_positive && DynConfigMgr::getValue(DynConfigMgr::CONFIG_CHEAT_ALERT)) {
 				std::string str = "";
 				str = "|cFFFFFC00Possible bug abuse on |cFF60FF00" + std::string(_owner->GetName()) + "|cFFFFFC00 (tank: |cFF60FF00" + (tank ? std::string(tank->GetName()) : "<not found>") + "|cFFFFFC00)";
 				WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));

@@ -5,9 +5,10 @@
 class DynConfigMgr {
     public:
         enum ConfigTypes {
-            CONFIG_TEST0 = 0,
-            CONFIG_TEST1 = 1,
-            CONFIG_COUNT = 2,
+            CONFIG_UNDERMAP_CHECK = 0,
+            CONFIG_CHEAT_ALERT = 1,
+			CONFIG_COMBAT_CHECK = 2,
+            CONFIG_COUNT = 3,
         };
         
     

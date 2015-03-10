@@ -77,6 +77,7 @@
 #include "AccountMgr.h"
 #include "../../../scripts/Custom/TransmoMgr.h"
 #include "RecupMgrAuto.h"
+#include "DynConfigMgr.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -26106,6 +26107,8 @@ bool Player::HaveTransmoByItem(uint32 guidlow)
 void Player::CheckUnderMap(UnderMapCheckType _type) {
   if (isGameMaster())
     return;
+  if (!DynConfigMgr::getValue(DynConfigMgr::CONFIG_UNDERMAP_CHECK))
+		return;
   bool isUnderMap;
   float z1 = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ());
   float z2 = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ() + 5.0f, true, 10.0f);

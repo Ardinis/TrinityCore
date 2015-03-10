@@ -191,7 +191,7 @@ void InstanceScript::AddMinion(Creature* minion, bool add)
         itr->second.bossInfo->minion.erase(minion);
 }
 
-#define LANATHEL_DEBUG 1
+//#define LANATHEL_DEBUG 1
 
 bool InstanceScript::SetBossState(uint32 id, EncounterState state)
 {
@@ -204,6 +204,19 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
             genBackTrace();
         }
 #endif
+		if (state == DONE) {
+			InstanceMap::PlayerList const& players = instance->GetPlayers();
+
+			if (!players.isEmpty())
+			{
+				for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+					if (Player* player = i->getSource()) {
+						if (player->isAlive() && (player->GetMap() == instance) && !player->isGameMaster()) {
+							player->setCombatHack(time(NULL) + 3);
+						}
+					}
+			}
+		}
         if (IsRaidOldSchoolIlevelAvailable())
         {
             if (state == IN_PROGRESS)

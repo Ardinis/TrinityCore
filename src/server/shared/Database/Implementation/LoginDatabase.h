@@ -85,6 +85,11 @@ enum LoginDatabaseStatements
     
     //Notes
      LOGIN_ADD_ACCOUNT_NOTE,
+     
+    //Config
+    LOGIN_CONFIG_SET,
+    LOGIN_CONFIG_GET,
+    LOGIN_CONFIG_LOAD,
 
     MAX_LOGINDATABASE_STATEMENTS,
 };

@@ -79,7 +79,7 @@ class CreatureAI : public UnitAI
 
     public:
         void Talk(uint8 id, uint64 WhisperGuid = 0);
-        explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false) {}
+        explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false), b_startingEvade(false) {}
 
         virtual ~CreatureAI() {}
 
@@ -175,6 +175,9 @@ class CreatureAI : public UnitAI
         virtual void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/) {}
 
         virtual bool CanSeeAlways(WorldObject const* /*obj*/) { return false; }
+	inline void SetStartingEvade(bool val) { b_startingEvade = val; }
+	inline bool isStartingEvade() { return b_startingEvade; }
+	
     protected:
         virtual void MoveInLineOfSight(Unit* /*who*/);
 
@@ -182,6 +185,7 @@ class CreatureAI : public UnitAI
 
     private:
         bool m_MoveInLineOfSight_locked;
+	bool b_startingEvade;
 };
 
 enum Permitions

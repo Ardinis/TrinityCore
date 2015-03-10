@@ -1,5 +1,7 @@
 #include <stdio.h>
+#ifndef _WIN32
 #include <execinfo.h>
+#endif
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,6 +13,7 @@
 
 // I don't use the default ACE stack trace generator because it appears buggy
 void genBackTrace() {
+#ifndef _WIN32
   void *array[BACKTRACE_SIZE];
   size_t size;
   char **buf = NULL;
@@ -19,7 +22,10 @@ void genBackTrace() {
   if (buf != NULL) {
     for (int i = 0; i < size; i++) {
       sLog->outString("%u: %s", i, buf[i]);
+      if (i < 10)
+        sLog->outDB(LOG_TYPE_DEBUG, buf[i]);
     }
   }
+#endif
 }
 

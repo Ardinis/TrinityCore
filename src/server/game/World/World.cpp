@@ -83,7 +83,7 @@
 #include "WorldSession.h"
 #include "RecupMgrAuto.h"
 #include "ProfilingMgr.h"
-
+#include "DynConfigMgr.h"
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 volatile uint32 World::m_worldLoopCounter = 0;
@@ -1835,7 +1835,8 @@ void World::SetInitialWorldSettings()
     
     sLog->outString("Initialising Profiling Manager...");
     ProfilingMgr::Initialize();
-
+    
+    DynConfigMgr::reload();
 
     LoadCharacterNameData();
 
@@ -1999,7 +2000,7 @@ void World::Update(uint32 diff, uint32 jitter)
     static uint32 latency_real = 0;
     static uint32 latency_virt = 0;
 
-    if ((getMSTime() / 1000) > ((getMSTime()-diff) / 1000)) {
+    if ((getMSTime() / 60000) > ((getMSTime()-diff) / 60000)) {
         m_oldTimeMax = m_updateTimeMax;
         m_oldTimeVirt = m_updateTimeVirt;
         m_oldTimeReal = m_updateTimeReal;

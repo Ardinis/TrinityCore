@@ -19,6 +19,7 @@
 #include "MotionMaster.h"
 #include "CreatureAISelector.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
@@ -30,6 +31,7 @@
 #include "RandomMovementGenerator.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
+#include "DebugTools.h"
 #include <cassert>
 
 inline bool isStatic(MovementGenerator *mv)
@@ -177,6 +179,8 @@ void MotionMaster::DelayedExpire()
 
 void MotionMaster::MoveIdle()
 {
+    if (m_disabled)
+        return;
     //! Should be preceded by MovementExpired or Clear if there's an overlying movementgenerator active
     if (empty() || !isStatic(top()))
         Mutate(&si_idleMovement, MOTION_SLOT_IDLE);
@@ -184,6 +188,8 @@ void MotionMaster::MoveIdle()
 
 void MotionMaster::MoveRandom(float spawndist)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_UNIT)
     {
         sLog->outStaticDebug("Creature (GUID: %u) start moving random", _owner->GetGUIDLow());
@@ -193,6 +199,7 @@ void MotionMaster::MoveRandom(float spawndist)
 
 void MotionMaster::MoveTargetedHome()
 {
+    DisableMotion(false);
     Clear(false);
 
     if (_owner->GetTypeId()==TYPEID_UNIT && !((Creature*)_owner)->GetCharmerOrOwnerGUID())
@@ -218,6 +225,8 @@ void MotionMaster::MoveTargetedHome()
 
 void MotionMaster::MoveConfused()
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) move confused", _owner->GetGUIDLow());
@@ -233,6 +242,8 @@ void MotionMaster::MoveConfused()
 
 void MotionMaster::MoveChase(Unit* target, float dist, float angle, uint32 spellId)
 {
+    if (m_disabled)
+        return;
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
@@ -258,6 +269,8 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle, uint32 spell
 
 void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlot slot, uint32 spellId)
 {
+    if (m_disabled)
+        return;
     // ignore movement request if target not exist
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
@@ -282,6 +295,8 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outStaticDebug("Player (GUID: %u) targeted point (Id: %u X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), id, x, y, z);
@@ -297,6 +312,8 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 
 void MotionMaster::MoveLand(uint32 id, Position const& pos, float speed)
 {
+    if (m_disabled)
+        return;
     float x, y, z;
     pos.GetPosition(x, y, z);
 
@@ -312,6 +329,8 @@ void MotionMaster::MoveLand(uint32 id, Position const& pos, float speed)
 
 void MotionMaster::MoveTakeoff(uint32 id, Position const& pos, float speed)
 {
+    if (m_disabled)
+        return;
     float x, y, z;
     pos.GetPosition(x, y, z);
 
@@ -327,6 +346,8 @@ void MotionMaster::MoveTakeoff(uint32 id, Position const& pos, float speed)
 
 void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ)
 {
+    if (m_disabled)
+        return;
     //this function may make players fall below map
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -341,6 +362,8 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
 
 void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
 {
+    if (m_disabled)
+        return;
     //this function may make players fall below map
     if (_owner->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -355,6 +378,8 @@ void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
 
 void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id)
 {
+    if (m_disabled)
+        return;
     sLog->outStaticDebug("Unit (GUID: %u) jump to point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
 
     float moveTimeHalf = speedZ / Movement::gravity;
@@ -370,6 +395,8 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
 
 void MotionMaster::MoveFall(uint32 id/*=0*/)
 {
+    if (m_disabled)
+        return;
     // use larger distance for vmap height search than in most other cases
     float tz = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), true, MAX_FALL_DISTANCE);
     if (tz <= INVALID_HEIGHT)
@@ -392,6 +419,8 @@ void MotionMaster::MoveFall(uint32 id/*=0*/)
 
 void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id, bool generatePath)
 {
+    if (m_disabled)
+        return;
     if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
         return;
 
@@ -411,6 +440,8 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id,
 
 void MotionMaster::MoveCharge(PathGenerator path, float speed, uint32 id)
 {
+    if (m_disabled)
+        return;
     Vector3 dest = path.GetActualEndPosition();
 
     MoveCharge(dest.x, dest.y, dest.z);
@@ -422,6 +453,8 @@ void MotionMaster::MoveCharge(PathGenerator path, float speed, uint32 id)
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outError("Player (GUID: %u) attempt to seek assistance", _owner->GetGUIDLow());
@@ -438,6 +471,8 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 
 void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outError("Player (GUID: %u) attempt to call distract after assistance", _owner->GetGUIDLow());
@@ -478,6 +513,8 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 
 void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 {
+    if (m_disabled)
+        return;
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         if (path < sTaxiPathNodesByPath.size())
@@ -501,6 +538,8 @@ void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 
 void MotionMaster::MoveDistract(uint32 timer)
 {
+    if (m_disabled)
+        return;
     if (Impl[MOTION_SLOT_CONTROLLED])
         return;
 
@@ -541,10 +580,13 @@ void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
         _needInit[slot] = false;
         m->Initialize(*_owner);
     }
+    m_lastMotion = m->GetMovementGeneratorType();
 }
 
 void MotionMaster::MovePath(uint32 path_id, bool repeatable)
 {
+    if (m_disabled)
+        return;
     if (!path_id)
         return;
     //We set waypoint movement as new default movement generator
@@ -569,6 +611,8 @@ void MotionMaster::MovePath(uint32 path_id, bool repeatable)
 
 void MotionMaster::MoveRotate(uint32 time, RotateDirection direction)
 {
+    if (m_disabled)
+        return;
     if (!time)
         return;
 
@@ -615,6 +659,51 @@ void MotionMaster::DirectDelete(_Ty curr)
 {
     if (isStatic(curr))
         return;
+
+    if (Creature *creature = _owner->ToCreature()) {
+	if (!creature->movespline->Finalized() && creature->isAlive() && creature->AI() && !creature->AI()->isStartingEvade() && (creature->GetScriptName().find("boss") != std::string::npos) && _owner->CanHaveThreatList()) {
+		MovementGeneratorType old_type = curr->GetMovementGeneratorType();
+		if ((old_type == POINT_MOTION_TYPE) ||
+		    (old_type == EFFECT_MOTION_TYPE)) {
+			// If we are here, all the following conditions are all true:
+			// - The movement has been interrupted (!Finalized)
+			// - The movement would have called AI MovementInform() (had it not been interrupted)
+			// - The creature is a boss
+			// - The creature is not entering evade mode
+			Player *tank = NULL;
+			const std::list<HostileReference*>& threatlist = _owner->getThreatManager().getThreatList();
+			for (std::list<HostileReference*>::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr) {
+				Unit *target = (*itr)->getTarget();
+				if (target && target->ToPlayer()) {
+					tank = target->ToPlayer();
+					break;
+				}	
+			}
+			bool false_positive = false;
+			
+			// False positives
+			if ((creature->GetEntry() == 36853) || (creature->GetEntry() == 38265) || (creature->GetEntry() == 38266) || (creature->GetEntry() == 38267)) {
+			    //Sindragosa pull
+			    if (curr->getId() == 1 /* POINT_FROSTWYRM_FLY_IN */ )
+			        false_positive = true;
+			    
+			}
+			
+			if (tank && !false_positive) {
+				std::string str = "";
+				str = "|cFFFFFC00Possible bug abuse on |cFF60FF00" + std::string(_owner->GetName()) + "|cFFFFFC00 (tank: |cFF60FF00" + (tank ? std::string(tank->GetName()) : "<not found>") + "|cFFFFFC00)";
+				WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
+				data << str;
+				sWorld->SendGlobalGMMessage(&data);
+				sLog->outString("BUG ABUSE on %s (tank: %s)", _owner->GetName(), (tank ? tank->GetName() : "<not found>"));
+				str = "Possible bug abuse on " + std::string(_owner->GetName()) + " (tank: " + (tank ? std::string(tank->GetName()) : "<not found>") + ")";
+				sWorld->SendGMText(LANG_GM_BROADCAST, str.c_str());
+				sLog->outDB(LOG_TYPE_DEBUG, str.c_str());
+				genBackTrace();
+			}
+		}
+	}
+    }
     curr->Finalize(*_owner);
     delete curr;
 }

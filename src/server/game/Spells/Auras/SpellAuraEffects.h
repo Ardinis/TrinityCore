@@ -91,8 +91,11 @@ class AuraEffect
 
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(Unit* target, bool apply) const;
+        /*
 	void SetDamageBonus(int32 bonus) { damageBonus = bonus; }
 	void SetHealingBonus(int32 bonus) { healingBonus = bonus; }
+	*/
+	
     private:
         Aura* const m_base;
 

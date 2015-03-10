@@ -38,6 +38,7 @@
 #include "Timer.h"
 #include "SpellGroup.h"
 #include <list>
+#include "RollingDot.h"
 
 #define WORLD_TRIGGER   12999
 
@@ -2088,8 +2089,9 @@ class Unit : public WorldObject
         int32 SpellBaseHealingBonus(SpellSchoolMask schoolMask);
         int32 SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit* pVictim);
         int32 SpellBaseHealingBonusForVictim(SpellSchoolMask schoolMask, Unit* pVictim);
-        uint32 SpellDamageBonus(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
-        uint32 SpellDamageBonusDone(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
+        float SpellDamageBonusDonePct(SpellInfo const* spellProto);
+        uint32 SpellDamageBonusNOT_USED(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1);
+        uint32 SpellDamageBonusDone(Unit* pVictim, SpellInfo const* spellProto, uint32 damage, DamageEffectType damagetype, uint32 stack = 1, RollingDot *rdot = NULL);
 	uint32 SpellDamageBonusTaken(Unit *caster, SpellInfo const *spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack = 1);
 	int32 SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask);
 	float CalculateDefaultCoefficient(SpellInfo const *spellInfo, DamageEffectType damagetype);
@@ -2097,8 +2099,9 @@ class Unit : public WorldObject
         uint32 SpellHealingBonus(Unit* pVictim, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack = 1);
         bool   isSpellBlocked(Unit* pVictim, SpellInfo const* spellProto, WeaponAttackType attackType = BASE_ATTACK);
         bool   isBlockCritical();
-        bool   isSpellCrit(Unit* pVictim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
-        uint32 SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage, Unit* pVictim);
+        bool   isSpellCrit(Unit* pVictim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK, RollingDot *rdot = NULL) const;
+        float CalcCritChance(Unit* pVictim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK) const;
+        uint32 SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage, Unit* pVictim, RollingDot *rdot = NULL);
         uint32 SpellCriticalHealingBonus(SpellInfo const* spellProto, uint32 damage, Unit* pVictim);
 
         void SetLastManaUse(uint32 spellCastTime) { m_lastManaUse = spellCastTime; }

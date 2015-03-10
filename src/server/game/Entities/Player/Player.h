@@ -62,6 +62,16 @@ typedef std::deque<Mail*> PlayerMails;
 #define PLAYER_MAX_DAILY_QUESTS     25
 #define PLAYER_EXPLORED_ZONES_SIZE  128
 
+
+// For undermap detection
+enum UnderMapCheckType
+{
+    UNDERMAP_CHECK_NULL = 0,
+    UNDERMAP_CHECK_MOVEMENT = 1, // Normal player movement
+    UNDERMAP_CHECK_SPLINE = 2, // Movement by spline (fear, bump, charge, ...)
+    UNDERMAP_CHECK_TELEPORT = 3, // Near teleport (blink, shadowstep, ...)
+};
+
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
@@ -1109,6 +1119,8 @@ class Player : public Unit, public GridObject<Player>
             return TeleportTo(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation(), options);
         }
         bool TeleportToBGEntryPoint();
+        
+        void CheckUnderMap(UnderMapCheckType _type);
 
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
@@ -2612,6 +2624,8 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetXPRate() { return m_XPRate; }
         void SetXPRate(uint8 rate) { m_XPRate = rate; }
 
+		void setCombatHack(uint32 val) { m_combatHack = val; }
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -2881,8 +2895,19 @@ class Player : public Unit, public GridObject<Player>
 	bool reduceRuneCoolDown[MAX_RUNES];
 	uint32 m_reduceCoolDown[MAX_RUNES];
 
+
+	void setSplineTime(uint32 sp) {
+	    m_splineTime = sp;
+	}
+
     private:
         bool m_doNotSave;
+        bool b_wasUnderMap;
+        uint32 m_undermapTime;
+        float m_undermapX, m_undermapY, m_undermapZ;
+        UnderMapCheckType m_undermapType;
+        uint32 m_splineTime;
+        
         BackgroundRecupTask *recup_task;
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
@@ -2964,6 +2989,9 @@ class Player : public Unit, public GridObject<Player>
         std::map<uint32, uint32> m_CustomTransmo;
 
         uint8 m_XPRate;
+
+		//hacks
+		uint32 m_combatHack;
 };
 
 void AddItemsSetItem(Player*player, Item* item);

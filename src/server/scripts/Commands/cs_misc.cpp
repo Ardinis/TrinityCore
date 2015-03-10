@@ -30,9 +30,57 @@ public:
             { "dev",                SEC_ADMINISTRATOR,      false,  &HandleDevCommand,          "", NULL },
             { "wintrade",           SEC_ADMINISTRATOR,      false,  &HandleWintradeCommand,     "", NULL },
             { "xp",                 SEC_PLAYER,             false,  &HandleXPRateCommand,       "", NULL },
+            { "listcombat",      SEC_ADMINISTRATOR,  false, &HandleListCombatCommand,                  "", NULL },
             { NULL,                 0,                      false,  NULL,                       "", NULL }
         };
         return commandTable;
+    }
+    static bool HandleListCombatCommand(ChatHandler* handler, char const* args)
+    {
+        WorldObject *object = NULL;
+        Unit *unit = NULL;
+        object = handler->getSelectedUnit();
+        unit = object->ToUnit();
+        if (unit == NULL) {
+            handler->SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+	if (unit->ToPlayer()) {
+	    Player *player = unit->ToPlayer();
+	    HostileRefManager &manager = player->getHostileRefManager();
+	    if (manager.isEmpty()) {
+	        handler->PSendSysMessage("Ce joueur n'est hai par aucune creature");
+	    }
+            for (HostileRefManager::iterator iter= manager.begin(); iter != manager.end(); ++iter) {
+                ThreatManager *tm = iter->getSource();
+                if (tm) {
+                    Unit *hater = tm->getOwner();
+                    if (hater) {
+                    
+                        handler->PSendSysMessage("Joueur hai par la creature: %s (GUID %u)", hater->GetName(), hater->GetGUID());
+                    } else handler->PSendSysMessage("Joueur hai par une creature inconnue (ThreatManager::getOwner() == NULL, ceci ne devrait pas se produire)");
+                } 
+            }
+            handler->PSendSysMessage("CombatTimer actuel du joueur: %u millisecondes", player->GetCombatTimer());
+	} else if (unit->ToCreature()) {
+	
+	    Creature *creature = unit->ToCreature();
+	    if (creature->CanHaveThreatList()) {
+	        Unit *target = creature->getThreatManager().getHostilTarget();
+	        if (target) {
+	            handler->PSendSysMessage("Cette creature est en combat, la 1ere cible sur la table d'aggro est: %s (GUID %u)", target->GetName(), target->GetGUID());
+                } else if (!creature->isInCombat()) {
+                    handler->PSendSysMessage("Cette creature n'est pas en combat.");
+                } else {
+                    handler->PSendSysMessage("Cette creature n'a pas de cible, mais est en combat! (ceci ne devrait pas arriver, a part pour des boss / creatures avec script)");
+                }
+	    }
+	} else {
+	    sLog->outError("listcombat: ni creature ni joueur ?? (ne devrait pas arriver!)");
+	    return false;
+	}
+	
     }
 
     static bool HandleDevCommand(ChatHandler* handler, char const* args)

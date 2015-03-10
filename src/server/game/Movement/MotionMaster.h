@@ -96,9 +96,10 @@ class MotionMaster //: private std::stack<MovementGenerator *>
 
         bool needInitTop() const { return _needInit[_top]; }
         void InitTop();
+        
     public:
 
-        explicit MotionMaster(Unit* unit) : _expList(NULL), _top(-1), _owner(unit), _cleanFlag(MMCF_NONE)
+        explicit MotionMaster(Unit* unit) : _expList(NULL), _top(-1), _owner(unit), _cleanFlag(MMCF_NONE), m_disabled(false), m_lastMotion(NULL_MOTION_TYPE)
         {
             for (uint8 i = 0; i < MAX_MOTION_SLOT; ++i)
             {
@@ -107,6 +108,10 @@ class MotionMaster //: private std::stack<MovementGenerator *>
             }
         }
         ~MotionMaster();
+        
+        MovementGeneratorType getLastMotion() {
+            return m_lastMotion;
+        }
 
         void Initialize();
         void InitDefault();
@@ -145,6 +150,10 @@ class MotionMaster //: private std::stack<MovementGenerator *>
             }
             else
                 DirectExpire(reset);
+        }
+        
+        void DisableMotion(bool disable) {
+            m_disabled = disable;
         }
 
         void MoveIdle();
@@ -199,5 +208,7 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         Unit* _owner;
         bool _needInit[MAX_MOTION_SLOT];
         uint8 _cleanFlag;
+        bool m_disabled;
+        MovementGeneratorType m_lastMotion;
 };
 #endif

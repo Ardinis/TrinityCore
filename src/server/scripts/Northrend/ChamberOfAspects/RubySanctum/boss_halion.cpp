@@ -1546,12 +1546,12 @@ class npc_living_inferno : public CreatureScript
                         me->GetPosition(&pos);
                         if ((*itr)->GetExactDist(&pos) < 15.0f)
                         {
-                            if (!(*itr)->HasAura(SPELL_AWAKEN_FLAMES))
+                            //if (!(*itr)->HasAura(SPELL_AWAKEN_FLAMES))
                                 (*itr)->AddAura(SPELL_AWAKEN_FLAMES, (*itr));
                         } else if ((*itr)->HasAura(SPELL_AWAKEN_FLAMES))
                             (*itr)->RemoveAura(SPELL_AWAKEN_FLAMES);
                     }
-                    emberCheck = 1000;
+                    emberCheck = 2000;
                 }
                 else emberCheck -= diff;
 
@@ -2188,6 +2188,8 @@ public :
             Map::PlayerList const &PlayerList = map->GetPlayers();
             if (PlayerList.isEmpty())
                 return;
+			if (Unit *victim = caster->getVictim())
+				caster->SetInFront(victim);
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())
                     if (player->isAlive())
@@ -2343,6 +2345,8 @@ public :
             Map::PlayerList const &PlayerList = map->GetPlayers();
             if (PlayerList.isEmpty())
                 return;
+			if (Unit *victim = caster->getVictim())
+				caster->SetInFront(victim);
             for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
                 if (Player *player = i->getSource())
                     if (player->isAlive())

@@ -120,6 +120,7 @@ namespace Movement
         int32 currentPathIdx() const;
         bool onTransport;
         std::string ToString() const;
+        std::string DumpPath() const;
     };
 }
 #endif // TRINITYSERVER_MOVEPLINE_H

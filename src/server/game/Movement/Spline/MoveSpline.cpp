@@ -281,6 +281,12 @@ MoveSpline::UpdateResult MoveSpline::_updateState(int32& ms_time_diff)
     return result;
 }
 
+std::string MoveSpline::DumpPath() const
+{
+    std::stringstream str;
+    str << spline.DumpPath();
+    return str.str();
+}
 std::string MoveSpline::ToString() const
 {
     std::stringstream str;

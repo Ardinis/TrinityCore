@@ -1514,7 +1514,7 @@ class npc_living_inferno : public CreatureScript
 
         struct npc_living_infernoAI : public ScriptedAI
         {
-            npc_living_infernoAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+            npc_living_infernoAI(Creature* creature) : ScriptedAI(creature), emberCheck(2000) { Reset(); }
 
 
             void Reset()
@@ -1528,7 +1528,6 @@ class npc_living_inferno : public CreatureScript
                     me->DespawnOrUnsummon();
                 me->SetInCombatWithZone();
                 me->CastSpell(me, SPELL_BLAZING_AURA, true);
-                emberCheck = 2000;
             }
 
             void UpdateAI(uint32 const diff)

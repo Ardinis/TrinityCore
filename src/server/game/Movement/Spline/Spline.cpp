@@ -302,4 +302,17 @@ std::string SplineBase::ToString() const
     return str.str();
 }
 
+std::string SplineBase::DumpPath() const
+{
+    std::stringstream str;
+
+    index_type count = this->points.size();
+    str << "points count: " << count << std::endl;
+    for (index_type i = 0; i < count; ++i)
+        str << "point " << i << " : " << points[i].toString() << std::endl;
+
+    return str.str();
+}
+
+
 }

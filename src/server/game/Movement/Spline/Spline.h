@@ -128,6 +128,7 @@ public:
     float SegLength(index_type i) const { return (this->*seglengths[m_mode])(i);}
 
     std::string ToString() const;
+    std::string DumpPath() const;
 };
 
 template<typename length_type>

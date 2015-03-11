@@ -14463,18 +14463,18 @@ void Unit::setDeathState(DeathState s)
                     // "Main" minion died, find another
                     bool found = false;
                     for (ControlList::const_iterator itr = summoner->m_Controlled.begin(); itr != summoner->m_Controlled.end(); ++itr) {
-                        sLog->outString("attempting: %s (%u)", (*itr)->GetName(), (*itr)->GetGUIDLow());
+//                        sLog->outString("attempting: %s (%u)", (*itr)->GetName(), (*itr)->GetGUIDLow());
                         if (!(*itr)->isAlive())
                             continue;
                         if (!(*itr)->HasUnitTypeMask(UNIT_MASK_MINION))
                             continue;
-                        sLog->outString("DEBUG: Replacing minion GUID");
+//                        sLog->outString("DEBUG: Replacing minion GUID");
                         summoner->SetUInt64Value(UNIT_FIELD_SUMMON, (*itr)->GetGUID());
                         found = true;
                         break;
                     }
                     if (!found) {
-                        sLog->outString("Not found...");
+//                        sLog->outString("Not found...");
                     } else {
                         if (Player *plr = summoner->ToPlayer()) {
                             plr->CharmSpellInitialize();

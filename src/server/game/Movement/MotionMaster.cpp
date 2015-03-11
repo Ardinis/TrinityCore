@@ -689,6 +689,8 @@ void MotionMaster::DirectDelete(_Ty curr)
 			        false_positive = true;
 			    
 			}
+			if (creature->GetMapId() != 631)
+				false_positive = true; // For now, do this only on ICC
 			
 			if (tank && !false_positive && DynConfigMgr::getValue(DynConfigMgr::CONFIG_CHEAT_ALERT)) {
 				std::string str = "";

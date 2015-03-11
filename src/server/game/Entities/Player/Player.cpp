@@ -1675,7 +1675,7 @@ if (m_jail_amnestie == true && sObjectMgr->m_jailconf_amnestie > 0)
 	if (m_combatHack && (now > m_combatHack)) {
 		m_combatHack = 0;
 		if (isInCombat()) {
-			ChatHandler(this).PSendSysMessage("Un bug combat a été détecté et automatiquement supprimé.");
+			ChatHandler(this).PSendSysMessage("Un bug combat a été détecté et automatiquement supprimé. Rapport d'erreur : %06x.", time(NULL) & 0xFFFFFF);
 			HostileRefManager &manager = getHostileRefManager();
 			for (HostileRefManager::iterator iter= manager.begin(); iter != manager.end(); ++iter) {
 				ThreatManager *tm = iter->getSource();
@@ -26110,8 +26110,8 @@ void Player::CheckUnderMap(UnderMapCheckType _type) {
   if (!DynConfigMgr::getValue(DynConfigMgr::CONFIG_UNDERMAP_CHECK))
 		return;
   bool isUnderMap;
-  float z1 = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ());
-  float z2 = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ() + 5.0f, true, 10.0f);
+  float z1 = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 0.5f);
+  float z2 = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 5.5f, true, 10.0f);
   
   if (z1 > INVALID_HEIGHT) {
     isUnderMap = (z1 > GetPositionZ() + (0.25f));
@@ -26122,15 +26122,16 @@ void Player::CheckUnderMap(UnderMapCheckType _type) {
   
   if (b_wasUnderMap) {
     if (isUnderMap || (z1 <= INVALID_HEIGHT)) {
-      float good_z = GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ() + 25.0f, true, 50.0f);
+      float good_z = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 25.5f, true, 50.0f);
       printf("goodz=%f z=%f\n", good_z, GetPositionZ());
-      if ((GetPositionZ() < (good_z - 5.0f)) && (GetPositionZ() < m_undermapZ)) {
+	  bool really_undermap = (GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 0.5f, true, 2048.0f)) <= INVALID_HEIGHT;
+      if ((GetPositionZ() < (good_z - 5.0f)) && (GetPositionZ() < m_undermapZ) && really_undermap) {
         ChatHandler(this).PSendSysMessage("Sous-map détecté! Système de téléportation d'urgence activé. Rapport d'erreur : %06x.", time(NULL) & 0xFFFFFF);
         isUnderMap = false;
         b_wasUnderMap = false;
-        sLog->outString("Undermap confirmed. Player=%s MapId=%u Pos=%f,%f,%f type=%d motiontype=%d splinetime=%d splinedump=%s", GetName(), GetMapId(), m_undermapX, m_undermapY, m_undermapZ, m_undermapType, GetMotionMaster()->getLastMotion(), getMSTime() - m_splineTime, movespline->ToString().c_str());
+        sLog->outString("Undermap confirmed. Player=%s MapId=%u Pos=%f,%f,%f type=%d motiontype=%d splinetime=%d splinedump=%s", GetName(), GetMapId(), m_undermapX, m_undermapY, m_undermapZ, m_undermapType, GetMotionMaster()->getLastMotion(), getMSTime() - m_splineTime, movespline->DumpPath().c_str());
         char buf[4096];
-        snprintf(buf, 4096, "UNDERMAP Player=%s MapId=%u Pos=%f,%f,%f type=%d motiontype=%d splinetime=%d splinedump=%s", GetName(), GetMapId(), m_undermapX, m_undermapY, m_undermapZ, m_undermapType, GetMotionMaster()->getLastMotion(), getMSTime() - m_splineTime, movespline->ToString().c_str());
+        snprintf(buf, 4096, "UNDERMAP Player=%s MapId=%u Pos=%f,%f,%f type=%d motiontype=%d splinetime=%d splinedump=%s", GetName(), GetMapId(), m_undermapX, m_undermapY, m_undermapZ, m_undermapType, GetMotionMaster()->getLastMotion(), getMSTime() - m_splineTime, movespline->DumpPath().c_str());
         buf[4095] = 0;
         sLog->outDB(LOG_TYPE_DEBUG, buf);
         TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), good_z + 0.5f, GetOrientation());

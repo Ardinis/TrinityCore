@@ -190,10 +190,132 @@ public:
   }
 
 };
+/////////////////////////
+//Vengance des �cureuils/
+/////////////////////////
+class ecureuil_vengeance : public CreatureScript
+{
+public:
+    ecureuil_vengeance() : CreatureScript("ecureuil_vengeance") { }
+
+    struct ecureuil_vengeanceAI : public ScriptedAI
+    {
+        ecureuil_vengeanceAI(Creature* creature) : ScriptedAI(creature){}
+
+		void JustDied(Unit* killer)
+		{
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				switch(urand(1,5))
+				{
+					case 1:
+						ecureuilVengeur->MonsterYell(-1412000,LANG_UNIVERSAL,NULL);
+						break;
+					case 2:
+						ecureuilVengeur->MonsterYell(-1412001,LANG_UNIVERSAL,NULL);
+						break;
+					case 3:
+						ecureuilVengeur->MonsterYell(-1412002,LANG_UNIVERSAL,NULL);
+						break;
+					case 4:
+						ecureuilVengeur->MonsterYell(-1412003,LANG_UNIVERSAL,NULL);
+						break;
+					case 5:
+						ecureuilVengeur->MonsterYell(-1412004,LANG_UNIVERSAL,NULL);
+						break;
+				}
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+1.0f,me->GetPositionY()+1.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+1.5f,me->GetPositionY()+1.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+2.0f,me->GetPositionY()+2.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-1.0f,me->GetPositionY()-1.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-1.5f,me->GetPositionY()-1.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-2.0f,me->GetPositionY()-2.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+3.0f,me->GetPositionY()+3.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+2.5f,me->GetPositionY()+2.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-2.5f,me->GetPositionY()-2.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+1.0f,me->GetPositionY()-1.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+1.5f,me->GetPositionY()-1.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+2.0f,me->GetPositionY()-2.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-1.0f,me->GetPositionY()+1.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-1.5f,me->GetPositionY()+1.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-2.0f,me->GetPositionY()+2.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+3.0f,me->GetPositionY()-3.0f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()+2.5f,me->GetPositionY()-2.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+			if(Creature *ecureuilVengeur = me->SummonCreature(14120,me->GetPositionX()-2.5f,me->GetPositionY()+2.5f,me->GetPositionZ(),0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000)){
+				ecureuilVengeur->GetMotionMaster()->MoveChase(killer);
+				ecureuilVengeur->Attack(killer,true);
+			}
+		}
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new ecureuil_vengeanceAI(creature);
+    }
+};
 
 void AddSC_dalaran()
 {
     new npc_mageguard_dalaran;
     new npc_hira_snowdawn;
     new gob_lk();
+	new ecureuil_vengeance();
 }

@@ -1691,10 +1691,13 @@ if (m_jail_amnestie == true && sObjectMgr->m_jailconf_amnestie > 0)
 			}
 			CombatStop();
 			manager.deleteReferences();
-			if (Pet *pet = GetPet()) {
-				HostileRefManager &petmanager = pet->getHostileRefManager();
-				pet->CombatStop();
-				petmanager.deleteReferences();
+			for (ControlList::const_iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr) {
+				Unit *pet = (*itr);
+				if (pet) {
+					HostileRefManager &petmanager = pet->getHostileRefManager();
+					pet->CombatStop();
+					petmanager.deleteReferences();
+				}
 			}
 		}
 	}

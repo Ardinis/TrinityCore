@@ -12385,11 +12385,11 @@ float Unit::CalcCritChance(Unit* victim, SpellInfo const* spellProto, SpellSchoo
     //! Mobs can't crit with spells. Player Totems can
     //! Fire Elemental (from totem) can too - but this part is a hack and needs more research
     if (IS_CREATURE_GUID(GetGUID()) && !(isTotem() && IS_PLAYER_GUID(GetOwnerGUID())) && GetEntry() != 15438)
-        return false;
+        return 0.0f;
 
     // not critting spell
     if ((spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT))
-        return false;
+        return 0.0f;
 
     float crit_chance = 0.0f;
     switch (spellProto->DmgClass)
@@ -12402,7 +12402,7 @@ float Unit::CalcCritChance(Unit* victim, SpellInfo const* spellProto, SpellSchoo
                 crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
                 break;
             }
-            return false;
+            return 0.0f;
         }
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
@@ -12512,7 +12512,7 @@ float Unit::CalcCritChance(Unit* victim, SpellInfo const* spellProto, SpellSchoo
                         else if (spellProto->Category == 19)
                         {
                             if (victim->GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD)
-                                return true;
+                                return 100.0f;
                             break;
                         }
                     break;
@@ -12522,7 +12522,7 @@ float Unit::CalcCritChance(Unit* victim, SpellInfo const* spellProto, SpellSchoo
                         {
                             if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
                                 if (victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
-                                    return true;
+                                    return 100.0f;
                             break;
                         }
                     break;
@@ -12569,7 +12569,7 @@ float Unit::CalcCritChance(Unit* victim, SpellInfo const* spellProto, SpellSchoo
             break;
         }
         default:
-            return false;
+            return 0.0f;
     }
     // percent done
     // only players use intelligence for critical chance computations

@@ -26125,7 +26125,9 @@ void Player::CheckUnderMap(UnderMapCheckType _type) {
       float good_z = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 25.5f, true, 50.0f);
       printf("goodz=%f z=%f\n", good_z, GetPositionZ());
 	  bool really_undermap = (GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 0.5f, true, 2048.0f)) <= INVALID_HEIGHT;
-      if ((GetPositionZ() < (good_z - 5.0f)) && (GetPositionZ() < m_undermapZ) && really_undermap) {
+	  if ((m_undermapType == UNDERMAP_CHECK_MOVEMENT) && ((m_splineTime + 5000) < getMSTime()))
+		  really_undermap = false;
+      if ((GetPositionZ() < (good_z - 5.0f)) && (GetPositionZ() < m_undermapZ) && really_undermap && m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING)) {
         ChatHandler(this).PSendSysMessage("Sous-map détecté! Système de téléportation d'urgence activé. Rapport d'erreur : %06x.", time(NULL) & 0xFFFFFF);
         isUnderMap = false;
         b_wasUnderMap = false;

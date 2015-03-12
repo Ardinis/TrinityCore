@@ -1658,7 +1658,7 @@ class spell_item_nitro_boots : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                caster->CastSpell(caster, roll_chance_i(99) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
+                caster->CastSpell(caster, (roll_chance_i(99) || caster->GetMap()->IsDungeon())? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
             }
 
             void Register()

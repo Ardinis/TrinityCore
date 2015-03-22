@@ -208,7 +208,13 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
 		if (state == DONE) {
 			InstanceMap::PlayerList const& players = instance->GetPlayers();
 
-			if (!players.isEmpty() && DynConfigMgr::getValue(DynConfigMgr::CONFIG_COMBAT_CHECK))
+			bool disabled = false;
+			if (instance) {
+				if (instance->GetId() == 229)
+					disabled = true;
+			}
+
+			if (!players.isEmpty() && DynConfigMgr::getValue(DynConfigMgr::CONFIG_COMBAT_CHECK) && !disabled)
 			{
 				for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
 					if (Player* player = i->getSource()) {

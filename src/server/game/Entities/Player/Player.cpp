@@ -898,6 +898,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_undermapTime = 0;
     m_undermapType = UNDERMAP_CHECK_NULL;
 	m_combatHack = 0;
+    cross_faction = false;
 }
 
 Player::~Player ()
@@ -7527,7 +7528,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool pvpt
         {
             Player* pVictim = uVictim->ToPlayer();
 
-            if (GetTeam() == pVictim->GetTeam() && !sWorld->IsFFAPvPRealm())
+            if (GetTeam(true) == pVictim->GetTeam(true) && !sWorld->IsFFAPvPRealm())
                 return false;
 
             uint8 k_level = getLevel();
@@ -7598,7 +7599,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool pvpt
             ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS, pVictim->getClass());
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, pVictim->getRace());
+            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, (isCrossFaction() == pVictim->isCrossFaction()) ? pVictim->getRace(): pVictim->getSwitchedRace());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, GetAreaId());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, 1, 0, pVictim);
             UpdateKnownTitles();
@@ -17751,6 +17752,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
     }
 
+    if (extraflags & PLAYER_EXTRA_ALLOWINTERFACTIONBG) {
+           m_ExtraFlags |= PLAYER_EXTRA_ALLOWINTERFACTIONBG;
+    } 
+
     // RaF stuff.
     m_grantableLevels = fields[66].GetUInt32();
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
@@ -17773,6 +17778,23 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     return true;
 }
+
+void Player::SetInterfactionAllowed(bool setOn) {
+
+    if (setOn)
+    {
+        m_ExtraFlags |= PLAYER_EXTRA_ALLOWINTERFACTIONBG;
+    }
+    else {
+        m_ExtraFlags &= ~ PLAYER_EXTRA_ALLOWINTERFACTIONBG;
+    }
+}
+
+bool Player::isInterfactionAllowed()
+{
+        return (m_ExtraFlags & PLAYER_EXTRA_ALLOWINTERFACTIONBG);
+}
+
 
 void Player::_LoadJail(void)
 {
@@ -23918,7 +23940,7 @@ bool Player::CanUseBattlegroundObject(GameObject* gameobject)
 {
   if (gameobject == NULL)
     return false;
-  FactionTemplateEntry const* playerFaction = getFactionTemplateEntry();
+  FactionTemplateEntry const* playerFaction = getFactionTemplateEntry(true);
   FactionTemplateEntry const* faction = sFactionTemplateStore.LookupEntry(gameobject->GetUInt32Value(GAMEOBJECT_FACTION));
 
   if (playerFaction && faction && !playerFaction->IsFriendlyTo(*faction))
@@ -26167,3 +26189,56 @@ void Player::CheckUnderMap(UnderMapCheckType _type) {
     }
   }
 }
+void Player::SetCrossFaction(bool val) {
+
+ if (cross_faction == val)
+   return;
+ cross_faction = val;
+
+ _changedFields[UNIT_FIELD_FACTIONTEMPLATE] = true;
+ _changedFields[UNIT_FIELD_BYTES_0] = true;
+ sObjectAccessor->AddUpdateObject(this);
+ m_objectUpdated = true;
+   uint32 orig = GetPhaseMask();
+    SetPhaseMask(65536, true);
+    SetPhaseMask(orig, true);
+}
+uint8 Player::getSwitchedRace() const {
+    uint8 switched_race = getRace();
+                        switch(switched_race) {
+                            case RACE_HUMAN:
+                                switched_race = RACE_ORC;
+                                break;
+                            case RACE_ORC:
+                                switched_race = RACE_HUMAN;
+                                break;
+                            case RACE_DWARF:
+                                switched_race = RACE_TAUREN;
+                                break;
+                            case RACE_TAUREN:
+                                switched_race = RACE_DWARF;
+                                break;
+                            case RACE_GNOME:
+                                switched_race = RACE_TROLL;
+                                break; 
+                            case RACE_TROLL:
+                                switched_race = RACE_GNOME;
+                                break;
+                            case RACE_NIGHTELF:
+                                switched_race = RACE_UNDEAD_PLAYER;
+                                break;
+                            case RACE_UNDEAD_PLAYER:
+                                switched_race = RACE_NIGHTELF;
+                                break;
+                            case RACE_DRAENEI:
+                                switched_race = RACE_BLOODELF;
+                                break;
+                            case RACE_BLOODELF:
+                                switched_race = RACE_DRAENEI;
+                                break;
+                            default:
+                                break;
+                        }
+                return switched_race;
+}
+

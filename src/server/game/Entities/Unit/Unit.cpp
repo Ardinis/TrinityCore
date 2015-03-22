@@ -9879,9 +9879,9 @@ void Unit::setPowerType(Powers new_powertype)
     }
 }
 
-FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
+FactionTemplateEntry const* Unit::getFactionTemplateEntry(bool handle_cross_faction) const
 {
-    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(getFaction());
+    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(handle_cross_faction ? getCrossFaction() : getFaction());
     if (!entry)
     {
         static uint64 guid = 0;                             // prevent repeating spam same faction problem
@@ -9945,11 +9945,15 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
             {
                 if (FactionTemplateEntry const* targetFactionTemplateEntry = target->getFactionTemplateEntry())
                 {
+                    uint32 adjusted_faction = targetFactionTemplateEntry->faction;
+                    if (selfPlayerOwner->isCrossFaction()) {
+                        adjusted_faction = sObjectMgr->faction_convert(adjusted_faction);
+                    }
                     if (ReputationRank const* repRank = selfPlayerOwner->GetReputationMgr().GetForcedRankIfAny(targetFactionTemplateEntry))
                         return *repRank;
                     if (!selfPlayerOwner->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
                     {
-                        if (FactionEntry const* targetFactionEntry = sFactionStore.LookupEntry(targetFactionTemplateEntry->faction))
+                        if (FactionEntry const* targetFactionEntry = sFactionStore.LookupEntry(adjusted_faction))
                         {
                             if (targetFactionEntry->CanHaveReputation())
                             {
@@ -9970,7 +9974,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
         }
     }
     // do checks dependant only on our faction
-    return GetFactionReactionTo(getFactionTemplateEntry(), target);
+    return GetFactionReactionTo(getFactionTemplateEntry(true), target);
 }
 
 ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTemplateEntry, Unit const* target)
@@ -9979,12 +9983,16 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
     if (!factionTemplateEntry)
         return REP_NEUTRAL;
 
-    FactionTemplateEntry const* targetFactionTemplateEntry = target->getFactionTemplateEntry();
+    FactionTemplateEntry const* targetFactionTemplateEntry = target->getFactionTemplateEntry(true);
     if (!targetFactionTemplateEntry)
         return REP_NEUTRAL;
 
     if (Player const* targetPlayerOwner = target->GetAffectingPlayer())
     {
+        uint32 adjusted_faction = factionTemplateEntry->faction;
+        if (targetPlayerOwner->isCrossFaction()) {
+            adjusted_faction = sObjectMgr->faction_convert(adjusted_faction);
+        }
         // check contested flags
         if (factionTemplateEntry->factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD
             && targetPlayerOwner->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
@@ -9993,7 +10001,7 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
             return *repRank;
         if (!target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
         {
-            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
+            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(adjusted_faction))
             {
                 if (factionEntry->CanHaveReputation())
                 {
@@ -19793,4 +19801,57 @@ void Unit::BuildCooldownPacket(WorldPacket& data, uint8 flags, PacketCooldowns c
         data << uint32(itr->first);
         data << uint32(itr->second);
     }
+}
+uint32 Unit::getCrossFaction() const {
+    bool cross_faction;
+    uint32 real_id = getFaction();
+    if (ToPlayer() && ToPlayer()->isCrossFaction()) {
+        cross_faction = true;
+    } else if (IsControlledByPlayer() && GetCharmerOrOwner() && GetCharmerOrOwner()->ToPlayer() && GetCharmerOrOwner()->ToPlayer()->isCrossFaction()) {
+        cross_faction = true;
+    } else {
+        cross_faction = false;
+    }
+
+    if (!cross_faction)
+        return real_id;
+
+    uint32 new_id;
+    switch(real_id) {
+        //alliance
+        case 1: //humain
+            new_id = 2;
+            break;
+        case 3: //nain
+            new_id = 6;
+            break;
+        case 115: //gnome
+            new_id = 116;
+            break;
+        case 4: //elfe de la nuit
+            new_id = 5;
+            break;
+        case 1629: //draenei
+            new_id = 1610;
+            break;
+        //horde
+        case 2: //orc
+            new_id = 1;
+            break;
+        case 6: //tauren
+            new_id = 3;
+            break;
+        case 116: //troll
+            new_id = 115;
+            break;
+        case 5: //mort-vivant
+            new_id = 4;
+            break;
+        case 1610: //elfe de sang
+            new_id = 1629;
+            break;
+        default:
+            return real_id;
+    }
+    return new_id;
 }

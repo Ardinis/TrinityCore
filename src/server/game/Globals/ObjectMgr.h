@@ -1219,6 +1219,7 @@ class ObjectMgr
         CharacterConversionMap FactionChange_Items;
         CharacterConversionMap FactionChange_Spells;
         CharacterConversionMap FactionChange_Reputation;
+        CharacterConversionMap FactionChange_Reputation_Reverse;
 
         void LoadFactionChangeAchievements();
         void LoadFactionChangeItems();
@@ -1226,6 +1227,17 @@ class ObjectMgr
         void LoadFactionChangeReputations();
 
         ArenaSeason *_arenaSeasonExtraInfos;
+
+        inline uint32 faction_convert(uint32 orig) {
+            std::map<uint32, uint32>::const_iterator it = FactionChange_Reputation.find(orig);
+            if (it != FactionChange_Reputation.end())
+                return it->second;
+            std::map<uint32, uint32>::const_iterator it2 = FactionChange_Reputation_Reverse.find(orig);
+            if (it2 != FactionChange_Reputation_Reverse.end())
+                return it2->second;
+            
+            return orig;  
+        }
 
     private:
         // first free id for selected id type

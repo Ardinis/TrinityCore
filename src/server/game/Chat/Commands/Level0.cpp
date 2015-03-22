@@ -505,3 +505,28 @@ bool ChatHandler::HandleRecupCommand(const char* /*args*/)
 
   return true;
 }
+
+bool ChatHandler::HandleBGInterCommand(const char *args) {
+        std::string param = (char*)args;
+        if (!m_session)
+                return false;
+        if (!m_session->GetPlayer())
+                return false;
+
+        if (param == "on")
+        {
+                m_session->GetPlayer()->SetInterfactionAllowed(false);
+                m_session->SendNotification("BG: Votre passage en interfaction est maintenant autorise.");
+                return true;
+        } else if (param == "off" )
+        {
+                m_session->GetPlayer()->SetInterfactionAllowed(true);
+                m_session->SendNotification("BG: Votre passage en interfaction est maintenant bloque.");
+                return true;
+        } else {
+                SendSysMessage(LANG_USE_BOL);
+                SetSentErrorMessage(true);
+                return false;
+        }
+ 
+}

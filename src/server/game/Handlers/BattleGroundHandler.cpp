@@ -202,7 +202,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         if (grp->GetLeaderGUID() != _player->GetGUID())
             return;
         err = grp->CanJoinBattlegroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
-        isPremade = (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
+        isPremade = false; //(grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
 
         BattlegroundQueue& bgQueue = sBattlegroundMgr->m_BattlegroundQueues[bgQueueTypeId];
         GroupQueueInfo* ginfo = NULL;
@@ -242,7 +242,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recv_data)
         sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: group end");
 
     }
-    sBattlegroundMgr->ScheduleQueueUpdate(0, 0, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+    //sBattlegroundMgr->ScheduleQueueUpdate(0, 0, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
 }
 
 void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket & /*recv_data*/)
@@ -450,6 +450,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             // set the destination instance id
             _player->SetBattlegroundId(bg->GetInstanceID(), bgTypeId);
             // set the destination team
+            _player->SetCrossFaction(ginfo.xfaction);
             _player->SetBGTeam(ginfo.Team);
             // bg->HandleBeforeTeleportToBattleground(_player);
             sBattlegroundMgr->SendToBattleground(_player, ginfo.IsInvitedToBGInstanceGUID, bgTypeId);

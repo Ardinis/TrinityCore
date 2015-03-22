@@ -454,6 +454,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "bindsight",      SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleBindSightCommand>,           "", NULL },
         { "unbindsight",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnbindSightCommand>,         "", NULL },
         { "killinstance",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleKillInstanceCommand>,         "", NULL },
+        { "bginter",    SEC_PLAYER,  false, OldHandler<&ChatHandler::HandleBGInterCommand>,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
 	{ "diamond",        SEC_PLAYER,         false, NULL,                                           "", diamondCommandTable },
 	{ "recup",          SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleRecupCommand>,              "", NULL},

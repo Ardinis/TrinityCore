@@ -46,6 +46,7 @@
 #include "SharedDefines.h"
 #include "Formulas.h"
 #include "DisableMgr.h"
+#include "DynConfigMgr.h"
 
 /*********************************************************/
 /***            BATTLEGROUND MANAGER                   ***/
@@ -57,6 +58,7 @@ BattlegroundMgr::BattlegroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
         m_Battlegrounds[i].clear();
     m_NextRatingDiscardUpdate = 3000; //sWorld->getIntConfig(CONFIG_ARENA_RATING_DISCARD_TIMER);
     m_Testing=false;
+    m_bgUpdateTimer = 0;
 }
 
 BattlegroundMgr::~BattlegroundMgr()
@@ -117,10 +119,31 @@ void BattlegroundMgr::Update(uint32 diff)
     }
 
     // update events timer
-    for (int qtype = BATTLEGROUND_QUEUE_NONE; qtype < MAX_BATTLEGROUND_QUEUE_TYPES; ++qtype)
+    bool update_queue = false;
+    if (m_bgUpdateTimer > diff) {
+        m_bgUpdateTimer -= diff;
+    } else {
+        sLog->outString("BG update now");
+        update_queue = true;
+        m_bgUpdateTimer = DynConfigMgr::getValue(DynConfigMgr::CONFIG_BG_UPDATE_INTERVAL);
+        if (m_bgUpdateTimer == 0)
+            m_bgUpdateTimer = 30000; // default value
+    }
+    for (int qtype = BATTLEGROUND_QUEUE_NONE; qtype < MAX_BATTLEGROUND_QUEUE_TYPES; ++qtype) {
         m_BattlegroundQueues[qtype].UpdateEvents(diff);
+        if (update_queue) {
+            // update BG queues (arena is processed later)
+            if ((qtype >= BATTLEGROUND_QUEUE_AV) && (qtype <= BATTLEGROUND_QUEUE_RB)) {
+                BattlegroundTypeId bgTypeId = BGTemplateId(BattlegroundQueueTypeId(qtype));
+                
+                // update for all brackets, function will return immediately if bracket is empty
+                for (uint32 bracket_id = 0; bracket_id < MAX_BATTLEGROUND_BRACKETS; bracket_id++)
+                    m_BattlegroundQueues[qtype].BattlegroundQueueUpdate(diff /* unused */, bgTypeId, BattlegroundBracketId(bracket_id), 0, false, 0);
+            }
+        }
+    }
 
-    // update scheduled queues
+    // update scheduled queues (ARENA only, not BG)
     if (!m_QueueUpdateScheduler.empty())
     {
         std::vector<uint64> scheduled;
@@ -130,6 +153,8 @@ void BattlegroundMgr::Update(uint32 diff)
         {
             uint32 arenaMMRating = scheduled[i] >> 32;
             uint8 arenaType = scheduled[i] >> 24 & 255;
+            if (!arenaType)
+                continue; // skip BG
             BattlegroundQueueTypeId bgQueueTypeId = BattlegroundQueueTypeId(scheduled[i] >> 16 & 255);
             BattlegroundTypeId bgTypeId = BattlegroundTypeId((scheduled[i] >> 8) & 255);
             BattlegroundBracketId bracket_id = BattlegroundBracketId(scheduled[i] & 255);
@@ -495,7 +520,7 @@ uint32 BattlegroundMgr::CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeI
 }
 
 // create a new battleground that will really be used to play
-Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated)
+Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, uint32 playersPerTeam)
 {
     // get the template BG
     Battleground* bg_template = GetBattlegroundTemplate(bgTypeId);
@@ -524,8 +549,17 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
         uint32 selectedWeight = 0;
         bgTypeId = BATTLEGROUND_TYPE_NONE;
         // Get sum of all weights
-        for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
+        for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it) {
+            Battleground *tpl = GetBattlegroundTemplate(it->first);
+            if (!tpl || (tpl->GetMinPlayersPerTeam() > playersPerTeam)) {
+                if (tpl) {
+                    sLog->outString("battleground %s excluded from random choices because minplayers=%u", tpl->GetName(), tpl->GetMinPlayersPerTeam());
+                    continue;
+                }
+            }
+        
             Weight += it->second;
+        }
         if (!Weight)
             return NULL;
         // Select a random value
@@ -535,14 +569,18 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
         Weight = 0;
         for (BattlegroundSelectionWeightMap::const_iterator it = selectionWeights->begin(); it != selectionWeights->end(); ++it)
         {
+            Battleground *tpl = GetBattlegroundTemplate(it->first);
+            if (!tpl || (tpl->GetMinPlayersPerTeam() > playersPerTeam))
+                continue;
+                
             Weight += it->second;
-            if (selectedWeight < Weight && bgTypeId != BATTLEGROUND_AV && bgTypeId != BATTLEGROUND_IC)
+            if (selectedWeight < Weight)
             {
+                bg_template = tpl;
                 bgTypeId = it->first;
                 break;
             }
         }
-        bg_template = GetBattlegroundTemplate(bgTypeId);
         if (!bg_template)
         {
             sLog->outError("Battleground: CreateNewBattleground - bg template not found for %u", bgTypeId);
@@ -876,11 +914,25 @@ void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, Batt
         float x, y, z, O;
         uint32 team = player->GetBGTeam();
         if (team == 0)
-            team = player->GetTeam();
+            team = player->GetTeam(true);
         bg->GetTeamStartLoc(team, x, y, z, O);
 
         sLog->outDetail("BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", player->GetName(), mapid, x, y, z, O);
         player->TeleportTo(mapid, x, y, z, O);
+        //BG interfaction 
+        if (player->GetSession()) {
+            player->GetSession()->SendNameQueryOpcode(player->GetGUID(), player);
+        }
+        for (Battleground::BattlegroundPlayerMap::const_iterator itr = bg->GetPlayers().begin(); itr != bg->GetPlayers().end(); ++itr) {
+            if (Player* bg_player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER))) {
+                if (player->GetSession()) {
+                    player->GetSession()->SendNameQueryOpcode(bg_player->GetGUID(), bg_player);
+                }
+                if (bg_player->GetSession()) {
+                    bg_player->GetSession()->SendNameQueryOpcode(player->GetGUID(), player);
+                }
+            }
+        }
     }
     else
     {

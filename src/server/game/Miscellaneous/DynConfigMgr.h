@@ -7,8 +7,12 @@ class DynConfigMgr {
         enum ConfigTypes {
             CONFIG_UNDERMAP_CHECK = 0,
             CONFIG_CHEAT_ALERT = 1,
-			CONFIG_COMBAT_CHECK = 2,
-            CONFIG_COUNT = 3,
+            CONFIG_COMBAT_CHECK = 2,
+            CONFIG_BG_INTERFACTION = 3,
+            CONFIG_BG_UPDATE_INTERVAL = 4,
+            CONFIG_ALLOW_NON_FULL_BG = 5,
+            CONFIG_BG_BALANCE = 6,
+            CONFIG_COUNT = 7,
         };
         
     

@@ -864,9 +864,9 @@ void BattlegroundSA::EndBattleground(uint32 winner)
         for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             if (Player* creditedPlayer = ObjectAccessor::FindPlayer(itr->first))
             {
-                if (creditedPlayer->GetTeam() == ALLIANCE && destroyedGateAllyHF)
+                if (creditedPlayer->GetTeam(true) == ALLIANCE && destroyedGateAllyHF)
                     creditedPlayer->CompletedAchievement(pAEAlly);
-                else if (creditedPlayer->GetTeam() == HORDE && destroyedGateHordeHF)
+                else if (creditedPlayer->GetTeam(true) == HORDE && destroyedGateHordeHF)
                     creditedPlayer->CompletedAchievement(pAEHorde);
             }
     //complete map_end rewards (even if no team wins)

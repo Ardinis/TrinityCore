@@ -344,6 +344,9 @@ class ChatHandler
         bool HandleConfigSetCommand(const char *args);
         bool HandleConfigGetCommand(const char *args);
         bool HandleConfigReloadCommand(const char *args);
+        
+        // BG
+        bool HandleBGInterCommand(const char *args);
                                 
 
         /*bool HandleCharDeleteCommand(const char *args);

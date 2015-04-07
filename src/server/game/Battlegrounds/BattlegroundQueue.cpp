@@ -1129,7 +1129,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         if (bg_template->isArena()) { // non-rated arena only (rated arena handled elsewere) 
             create = CheckNormalMatch(bg_template, bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam) || CheckSkirmishForSameFaction(bracket_id, MinPlayersPerTeam);
         } else { // BG
-            MinPlayersPerTeam = 1; // TEST (TODO: remove)
+            //MinPlayersPerTeam = 1; // TEST (TODO: remove)
             if (can_create_bg) {
                 sLog->outString("[%d] Attempting to create battleground", bracket_id);
                 playersPerTeam = SelectGroups(bracket_id, 0, MinPlayersPerTeam, MinPlayersPerTeam, MaxPlayersPerTeam, MaxPlayersPerTeam);

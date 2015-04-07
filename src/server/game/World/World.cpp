@@ -1836,6 +1836,16 @@ void World::SetInitialWorldSettings()
     sLog->outString("Initialising Profiling Manager...");
     ProfilingMgr::Initialize();
     
+    sLog->outString("Build faction-to-template map...");
+    for (unsigned int i = 1; i < sFactionTemplateStore.GetNumRows(); i++)
+    {
+                const FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
+                if (!factionTemplateEntry)
+                        continue;
+                faction2template[factionTemplateEntry->faction] = factionTemplateEntry->ID;
+    }
+    
+    
     DynConfigMgr::reload();
 
     LoadCharacterNameData();

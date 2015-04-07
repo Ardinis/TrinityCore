@@ -583,7 +583,7 @@ inline Player* Battleground::_GetPlayerForTeam(uint32 teamId, BattlegroundPlayer
     {
         uint32 team = itr->second.Team;
         if (!team)
-            team = player->GetTeam();
+            team = player->GetTeam(true);
         if (team != teamId)
             player = NULL;
     }
@@ -666,10 +666,14 @@ void Battleground::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
 
 void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID)
 {
-    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id))
+    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id)) {
+        FactionEntry const* factionEntry_switched = sFactionStore.LookupEntry(sObjectMgr->faction_convert(faction_id));
+        if (factionEntry_switched == NULL)
+            factionEntry_switched = factionEntry;
         for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardReputationToTeam"))
-                player->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
+                player->GetReputationMgr().ModifyReputation(player->isCrossFaction() ? factionEntry_switched : factionEntry, Reputation);
+    }
 }
 
 void Battleground::UpdateWorldState(uint32 Field, uint32 Value)
@@ -1025,7 +1029,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         {
             player->ClearAfkReports();
 
-            if (!team) team = player->GetTeam();
+            if (!team) team = player->GetTeam(true);
 
             // if arena, remove the specific arena auras
             if (isArena())
@@ -1082,7 +1086,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         {
             // a player has left the battleground, so there are free slots -> add to queue
             AddToBGFreeSlotQueue();
-            sBattlegroundMgr->ScheduleQueueUpdate(0, 0, bgQueueTypeId, bgTypeId, GetBracketId());
+            //sBattlegroundMgr->ScheduleQueueUpdate(0, 0, bgQueueTypeId, bgTypeId, GetBracketId());
         }
         // Let others know
         WorldPacket data;
@@ -1190,14 +1194,14 @@ void Battleground::AddPlayer(Player* player)
         player->RemoveArenaEnchantments(TEMP_ENCHANTMENT_SLOT);
         if (team == ALLIANCE)                                // gold
         {
-            if (player->GetTeam() == HORDE)
+            if (player->GetTeam(true) == HORDE)
                 player->CastSpell(player, SPELL_HORDE_GOLD_FLAG, true);
             else
                 player->CastSpell(player, SPELL_ALLIANCE_GOLD_FLAG, true);
         }
         else                                                // green
         {
-            if (player->GetTeam() == HORDE)
+            if (player->GetTeam(true) == HORDE)
                 player->CastSpell(player, SPELL_HORDE_GREEN_FLAG, true);
             else
                 player->CastSpell(player, SPELL_ALLIANCE_GREEN_FLAG, true);
@@ -1307,8 +1311,8 @@ void Battleground::EventPlayerLoggedOut(Player* player)
 	RemovePlayer(player, guid, GetPlayerTeam(guid));
 	// 1 player is logging out, if it is the last, then end arena!
 	if (isArena())
-	  if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
-	    EndBattleground(GetOtherTeam(player->GetTeam()));
+	  if (GetAlivePlayersCountByTeam(player->GetTeam(true)) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam(true))))
+	    EndBattleground(GetOtherTeam(player->GetTeam(true)));
       }
     }
 
@@ -1353,8 +1357,17 @@ void Battleground::RemoveFromBGFreeSlotQueue()
 uint32 Battleground::GetFreeSlotsForTeam(uint32 Team) const
 {
     // if BG is starting ... invite anyone
-    if (GetStatus() == STATUS_WAIT_JOIN)
+    if (GetStatus() == STATUS_WAIT_JOIN) {
         return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
+    } else if (GetStatus() == STATUS_IN_PROGRESS) {
+        int32 slots = GetMaxPlayersPerTeam() - GetInvitedCount(Team) - GetPlayersCountByTeam(Team);
+        return (slots > 0) ? slots : 0;
+    }
+    
+    return 0; 
+    
+    // the following code is useless because balancing will be handler in BattlegroundQueue::SelectGroups()
+    
     // if BG is already started .. do not allow to join too much players of one faction
     uint32 otherTeam;
     uint32 otherIn;
@@ -1853,7 +1866,7 @@ void Battleground::HandleKillPlayer(Player* player, Player* killer)
             if (!creditedPlayer || creditedPlayer == killer)
                 continue;
 
-            if (creditedPlayer->GetTeam() == killer->GetTeam() && creditedPlayer->IsAtGroupRewardDistance(player))
+            if (creditedPlayer->GetTeam(true) == killer->GetTeam(true) && creditedPlayer->IsAtGroupRewardDistance(player))
                 UpdatePlayerScore(creditedPlayer, SCORE_HONORABLE_KILLS, 1);
         }
     }
@@ -1971,7 +1984,7 @@ void Battleground::SetBgRaid(uint32 TeamID, Group* bg_raid)
 
 WorldSafeLocsEntry const* Battleground::GetClosestGraveYard(Player* player)
 {
-    return sObjectMgr->GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+    return sObjectMgr->GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam(true));
 }
 
 bool Battleground::IsTeamScoreInRange(uint32 team, uint32 minScore, uint32 maxScore) const

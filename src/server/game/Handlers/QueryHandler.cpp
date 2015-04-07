@@ -30,23 +30,30 @@
 #include "NPCHandler.h"
 #include "Pet.h"
 #include "MapManager.h"
-
-void WorldSession::SendNameQueryOpcode(uint64 guid)
+void WorldSession::SendNameQueryOpcode(uint64 guid, Player *override_player)
 {
     Player* player = NULL;
     const CharacterNameData* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
-    if (nameData)
-        player = ObjectAccessor::FindPlayer(guid);
+    if (nameData) {
+        if (override_player && (override_player->GetGUID() == guid)) {
+            player = override_player;
+        } else {
+            player = ObjectAccessor::FindPlayer(guid);
+        }
 
+    }
                                                             // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+10));
     data.appendPackGUID(guid);
     data << uint8(0);                                       // added in 3.1
     if (nameData)
     {
+        uint8 switched_race = nameData->m_race;
+        if (player && player->isCrossFaction())
+            switched_race = player->getSwitchedRace();
         data << nameData->m_name;                                   // played name
         data << uint8(0);                                       // realm name for cross realm BG usage
-        data << uint8(nameData->m_race);
+        data << uint8(switched_race);
         data << uint8(nameData->m_gender);
         data << uint8(nameData->m_class);
     }

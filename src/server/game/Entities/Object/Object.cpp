@@ -632,11 +632,27 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                 else if (index == UNIT_FIELD_BYTES_2 || index == UNIT_FIELD_FACTIONTEMPLATE)
                 {
                     Unit const* unit = ToUnit();
-                    if (unit->IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && unit->IsInRaidWith(target))
-                    {
-                        FactionTemplateEntry const* ft1 = unit->getFactionTemplateEntry();
-                        FactionTemplateEntry const* ft2 = target->getFactionTemplateEntry();
-                        if (ft1 && ft2 && !ft1->IsFriendlyTo(*ft2))
+                    uint32 value = m_uint32Values[index];
+                    
+                    if (!unit->IsControlledByPlayer() && index == UNIT_FIELD_FACTIONTEMPLATE && unit->getFactionTemplateEntry()) {
+                        //faction temporaire (joueur vs creature), on envoie la faction de l'unitée remappée selon les tables de changement de réputation
+                        Player *player = target;
+                        uint32 converted_faction = sObjectMgr->faction_convert(unit->getFactionTemplateEntry()->faction);
+                        if (player->isCrossFaction() && (sWorld->faction2template.find(converted_faction) != sWorld->faction2template.end())) {
+                            value = uint32(sWorld->faction2template[converted_faction]);
+                        } else value = uint32(unit->getFaction());
+                    } 
+                    else if (unit->IsControlledByPlayer() && index == UNIT_FIELD_FACTIONTEMPLATE) {
+                        //faction temporaire (joueur vs joueur/pet), on envoie la faction du joueur remappée selon les races a2/h2
+                        value = uint32(unit->getCrossFaction());                        
+                    }
+                    
+                    // value == valeur du champ apres avoir pris en compte la faction temporaire
+                    if (unit->IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && unit->IsInRaidWith(target)) {
+                        //groupe interfaction
+                        FactionTemplateEntry const* ft1 = unit->getFactionTemplateEntry(true);
+                        FactionTemplateEntry const* ft2 = target->getFactionTemplateEntry(true);
+                        if (ft1 && ft2 && !ft1->IsFriendlyTo(*ft2)) //on prends en compte la faction temporaire dans le calcul de l'interfaction en groupe
                         {
                             if (index == UNIT_FIELD_BYTES_2)
                             {
@@ -646,16 +662,16 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                             else
                             {
                                 // pretend that all other HOSTILE players have own faction, to allow follow, heal, rezz (trade wont work)
+                                // groupés, interfaction activée : on fait comme si c'etait dans la meme faction, quelque soit la faction réelle/temporaire
                                 uint32 faction = target->getFaction();
                                 *data << uint32(faction);
                             }
                         }
                         else
-                            *data << m_uint32Values[index];
-                    }
-                    else
-                        *data << m_uint32Values[index];
-                }
+                            *data << value; // groupés, mais meme faction (temporaire)
+                    } else //fin test interfaction & faction temporaire
+                        *data << value; // pas groupés, ou bien interfaction desactivée
+                } // if (index == UNIT_FIELD_BYTES_2 || index == UNIT_FIELD_FACTIONTEMPLATE)
                 else
                 {
                     // send in current format (float as float, uint32 as uint32)

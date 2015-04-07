@@ -31,10 +31,41 @@ public:
             { "wintrade",           SEC_ADMINISTRATOR,      false,  &HandleWintradeCommand,     "", NULL },
             { "xp",                 SEC_PLAYER,             false,  &HandleXPRateCommand,       "", NULL },
             { "listcombat",      SEC_ADMINISTRATOR,  false, &HandleListCombatCommand,                  "", NULL },
+            { "togglefaction",      SEC_ADMINISTRATOR,  false, &HandleToggleFactionCommand,                  "", NULL },
             { NULL,                 0,                      false,  NULL,                       "", NULL }
         };
         return commandTable;
     }
+    static bool HandleToggleFactionCommand(ChatHandler* handler, char const* args)
+    {
+        WorldObject *object = NULL;
+        Unit *unit = NULL;
+        object = handler->getSelectedUnit();
+        unit = object->ToUnit();
+        if (unit == NULL) {
+            handler->SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        if (unit->ToPlayer()) {
+            Player *player = unit->ToPlayer();
+            if (player->isCrossFaction()) {   
+                player->SetCrossFaction(false);
+                handler->PSendSysMessage("Le joueur est maintenant dans sa faction d'origine.");
+            } else {
+                player->SetCrossFaction(true);
+                handler->PSendSysMessage("Le joueur est maintenant temporairement dans la faction opposee.");
+            }
+            //sObjectAccessor->AddUpdateObject(player); //refresh
+            /*
+            player->SendUpdateToPlayer(player);
+            player->SendUpdateToPlayer(handler->GetSession()->GetPlayer());
+            */
+              
+            return true;
+        }
+    }
+
     static bool HandleListCombatCommand(ChatHandler* handler, char const* args)
     {
         WorldObject *object = NULL;

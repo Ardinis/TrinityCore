@@ -9155,6 +9155,7 @@ void ObjectMgr::LoadFactionChangeReputations()
             sLog->outErrorDb("Reputation %u referenced in `player_factionchange_reputations` does not exist, pair skipped!", horde);
         else
             FactionChange_Reputation[alliance] = horde;
+            FactionChange_Reputation_Reverse[horde] = alliance; //workaround for incomplete DB table info
 
         ++count;
     }

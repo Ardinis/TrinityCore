@@ -823,6 +823,7 @@ class World
 
         uint32 GetCleaningFlags() const { return m_CleaningFlags; }
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
+        std::map<uint32, uint32> faction2template;
         void   ResetEventSeasonalQuests(uint16 event_id);
     protected:
         void _UpdateGameTime();

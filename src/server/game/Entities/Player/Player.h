@@ -517,6 +517,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_GM_INVISIBLE       = 0x0010,
     PLAYER_EXTRA_GM_CHAT            = 0x0020,               // Show GM badge in chat messages
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
+    
+    PLAYER_EXTRA_ALLOWINTERFACTIONBG	= 0x4000,
 
     // other states
     PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
@@ -1189,6 +1191,9 @@ class Player : public Unit, public GridObject<Player>
         void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
         bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
+        bool isCrossFaction() const { return cross_faction; }
+        uint8 getSwitchedRace() const;
+        void SetCrossFaction(bool val);
         bool isGMChat() const { return m_ExtraFlags & PLAYER_EXTRA_GM_CHAT; }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
         bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
@@ -1570,6 +1575,8 @@ class Player : public Unit, public GridObject<Player>
 
         bool LoadFromDB(uint32 guid, SQLQueryHolder *holder);
         bool isBeingLoaded() const { return GetSession()->PlayerLoading();}
+        void SetInterfactionAllowed(bool setOn);
+        bool isInterfactionAllowed();
 
         void Initialize(uint32 guid);
         static uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
@@ -2078,8 +2085,14 @@ class Player : public Unit, public GridObject<Player>
         void CheckAreaExploreAndOutdoor(void);
 
         static uint32 TeamForRace(uint8 race);
-        uint32 GetTeam() const { return m_team; }
-        TeamId GetTeamId() const { return m_team == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE; }
+        uint32 GetTeam(bool handle_crossfaction = false) const {
+            if (handle_crossfaction && isCrossFaction()) {
+                return (m_team == ALLIANCE) ? HORDE : ALLIANCE;
+            }
+            return m_team;
+        }
+        TeamId GetTeamId(bool handle_crossfaction = true) const { return (GetTeam(handle_crossfaction) == ALLIANCE) ? TEAM_ALLIANCE : TEAM_HORDE; }
+
         void setFactionForRace(uint8 race);
 
         void InitDisplayIds();
@@ -2909,6 +2922,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_splineTime;
         
         BackgroundRecupTask *recup_task;
+        bool cross_faction;
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
         InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;

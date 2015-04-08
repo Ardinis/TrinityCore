@@ -555,9 +555,26 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                         *data << m_uint32Values[index];
                 }
                 // use modelid_a if not gm, _h if gm for CREATURE_FLAG_EXTRA_TRIGGER creatures
+				else if (index == UNIT_FIELD_NATIVEDISPLAYID) {
+					if (const Player *plr = ToPlayer()) {
+						if (plr->isCrossFaction() && (plr != target)) {
+							*data << const_cast<Player*>(plr)->GetSwitchedDisplayId();
+						} else {
+							*data << m_uint32Values[index];
+						}
+					} else {
+						*data << m_uint32Values[index];
+					}
+				}
                 else if (index == UNIT_FIELD_DISPLAYID)
                 {
-                    if (GetTypeId() == TYPEID_UNIT)
+					if (const Player *plr = ToPlayer()) {
+						if (plr->isCrossFaction() && (plr != target)) {
+							*data << const_cast<Player*>(plr)->GetSwitchedDisplayId();
+						} else {
+							*data << m_uint32Values[index];
+						}
+					} else if (GetTypeId() == TYPEID_UNIT)
                     {
                         CreatureTemplate const* cinfo = ToCreature()->GetCreatureInfo();
 
@@ -627,7 +644,17 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                           if (!unit->HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetGUID()))
                                 dynamicFlags &= ~UNIT_DYNFLAG_TRACK_UNIT;
                     *data << dynamicFlags;
-                }
+                } else if (index == UNIT_FIELD_BYTES_0) {
+					uint32 value = m_uint32Values[index];
+					// switch race for crossfaction players
+					if (const Player *plr = ToPlayer()) {
+						if (plr->isCrossFaction() && (plr != target)) {
+							value = (value & 0xFFFFFF00) | plr->getSwitchedRace();
+						}
+					}
+					*data << value;
+
+				}
                 // FG: pretend that OTHER players in own group are friendly ("blue")
                 else if (index == UNIT_FIELD_BYTES_2 || index == UNIT_FIELD_FACTIONTEMPLATE)
                 {

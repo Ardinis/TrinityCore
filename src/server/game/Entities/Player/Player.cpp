@@ -26195,8 +26195,20 @@ void Player::SetCrossFaction(bool val) {
    return;
  cross_faction = val;
 
+ if (cross_faction) {
+	 ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(getSwitchedRace());
+	 if (rEntry) {
+		 uint32 display_id = (getGender() == GENDER_MALE) ? rEntry->model_m : rEntry->model_f;
+		 SetSwitchedDisplayId(display_id);
+	 } else {
+		 SetSwitchedDisplayId(GetNativeDisplayId()); // should not happen
+	 }
+ } 
+
  _changedFields[UNIT_FIELD_FACTIONTEMPLATE] = true;
  _changedFields[UNIT_FIELD_BYTES_0] = true;
+ _changedFields[UNIT_FIELD_DISPLAYID] = true;
+ _changedFields[UNIT_FIELD_NATIVEDISPLAYID] = true;
  sObjectAccessor->AddUpdateObject(this);
  m_objectUpdated = true;
    uint32 orig = GetPhaseMask();

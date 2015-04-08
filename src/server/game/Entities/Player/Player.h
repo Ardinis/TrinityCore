@@ -1194,6 +1194,8 @@ class Player : public Unit, public GridObject<Player>
         bool isCrossFaction() const { return cross_faction; }
         uint8 getSwitchedRace() const;
         void SetCrossFaction(bool val);
+		uint32 GetSwitchedDisplayId() { return m_switchedDisplayId; }
+		void SetSwitchedDisplayId(uint32 val) { m_switchedDisplayId = val;}
         bool isGMChat() const { return m_ExtraFlags & PLAYER_EXTRA_GM_CHAT; }
         void SetGMChat(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_CHAT; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_CHAT; }
         bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
@@ -2923,6 +2925,7 @@ class Player : public Unit, public GridObject<Player>
         
         BackgroundRecupTask *recup_task;
         bool cross_faction;
+		uint32 m_switchedDisplayId;
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
         InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;

@@ -1361,8 +1361,7 @@ uint32 Battleground::GetFreeSlotsForTeam(uint32 Team) const
     if (GetStatus() == STATUS_WAIT_JOIN) {
         return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
     } else if (GetStatus() == STATUS_IN_PROGRESS) {
-        int32 slots = GetMaxPlayersPerTeam() - GetInvitedCount(Team) - GetPlayersCountByTeam(Team);
-        return (slots > 0) ? slots : 0;
+        return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
     }
     
     return 0; 

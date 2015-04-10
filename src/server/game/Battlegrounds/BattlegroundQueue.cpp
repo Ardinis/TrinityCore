@@ -1001,6 +1001,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
         {
             Battleground* bg = *itr; //we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
             // and iterator is invalid
+			sLog->outString("Looking in existing bg: %s freeSlots(alliance)=%d freeSlots(horde)=%d", bg->GetName(), bg->GetFreeSlotsForTeam(ALLIANCE), bg->GetFreeSlotsForTeam(HORDE));
             
             if ((aliMinGroup < bg->GetFreeSlotsForTeam(ALLIANCE)) || (hordeMinGroup < bg->GetFreeSlotsForTeam(HORDE))) {
                 /* 

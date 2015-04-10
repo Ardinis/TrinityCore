@@ -7140,7 +7140,7 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, b
 void Player::SendMessageToSet(WorldPacket* data, Player const* skipped_rcvr)
 {
 	Battleground *bg = GetBattleground();
-	if (bg && ((GetGUID() == bg->GetFlagPickerGUID(BG_TEAM_ALLIANCE)) ||
+	if (bg && (DynConfigMgr::getValue(DynConfigMgr::CONFIG_BG_INTERFACTION) == 1) && ((GetGUID() == bg->GetFlagPickerGUID(BG_TEAM_ALLIANCE)) ||
 	    (GetGUID() == bg->GetFlagPickerGUID(BG_TEAM_HORDE)))) {
 		bg->SendPacketToAll(data, const_cast<Player*>(skipped_rcvr));
 		return;
@@ -22108,9 +22108,11 @@ bool Player::CanAlwaysSee(WorldObject const* obj) const
         if (obj->GetGUID() == guid)
             return true;
 	if (Battleground *bg = GetBattleground()) {
+		if (DynConfigMgr::getValue(DynConfigMgr::CONFIG_BG_INTERFACTION) == 1) {
 		if ((obj->GetGUID() == bg->GetFlagPickerGUID(BG_TEAM_ALLIANCE)) ||
 			(obj->GetGUID() == bg->GetFlagPickerGUID(BG_TEAM_HORDE))) {
 			return true;
+		}
 		}
 	}
 

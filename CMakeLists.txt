@@ -63,6 +63,7 @@ include(cmake/genrev.cmake)
 
 # print out the results before continuing
 include(cmake/showoptions.cmake)
+add_subdirectory(prebuild)
 
 # add dependencies
 add_subdirectory(dep)

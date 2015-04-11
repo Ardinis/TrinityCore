@@ -557,7 +557,14 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
                     continue;
                 }
             }
-        
+            char buf[512];
+            if (!tpl) {
+                sLog->outDB(LOG_TYPE_DEBUG, "Invalid bg template???");
+            } else {
+                snprintf(buf, 512, "Prise en compte du BG dans le /rand : %s (poids: %d)", tpl->GetName(), it->second);
+                buf[511] = 0;
+                sLog->outDB(LOG_TYPE_DEBUG, buf);
+            }
             Weight += it->second;
         }
         if (!Weight)

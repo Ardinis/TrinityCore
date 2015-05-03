@@ -1022,6 +1022,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         }
     }
 
+    BattlegroundStatus status_before_remove = GetStatus();
     RemovePlayer(player, guid, team);                           // BG subclass specific code
 
     if (participant) // if the player was a match participant, remove auras, calc rating, update queue
@@ -1043,7 +1044,7 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                 player->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT);
                 player->ResummonPetTemporaryUnSummonedIfAny();
 
-                if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
+                if (isRated() && (status_before_remove == STATUS_IN_PROGRESS)||(status_before_remove==STATUS_WAIT_JOIN))
                 {
                     //left a rated match while the encounter was in progress, consider as loser
                     ArenaTeam* winner_arena_team = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));

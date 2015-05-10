@@ -132,11 +132,22 @@ void GameObject::AddToWorld()
 
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-        bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false || IsTransport());
+		/*
+		 * Experimentation suggests that GO_STATE_ACTIVE means open door, regardless of startOpen value
+		 * --zangdar
+		 */
+		if (GetGoType() == GAMEOBJECT_TYPE_DOOR)
+			startOpen = false;
+        //bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false || IsTransport());
+		bool toggledState = GetGoState() == GO_STATE_ACTIVE; //GoState can change between Create and AddToWorld
         if (m_model)
             GetMap()->Insert(*m_model);
         if ((startOpen && !toggledState) || (!startOpen && toggledState))
             EnableCollision(false);
+
+		/* TempHack: disable collision in instance if it is not a door */
+	   if (GetMap() && GetMap()->IsDungeon() && (GetGoType() != GAMEOBJECT_TYPE_DOOR))
+		   EnableCollision(false);	   
 
         WorldObject::AddToWorld();
     }
@@ -1968,10 +1979,18 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
         if (GetGOData() && GetGOData()->go_state == GO_NOT_READY)
             startOpen = !startOpen;
+		/*
+		 * Experimentation suggests that GO_STATE_ACTIVE means open door, regardless of startOpen value
+		 * --zangdar
+		 */
+		if (GetGoType() == GAMEOBJECT_TYPE_DOOR) {
+			startOpen = false;
+			return; //why the fuck collision state is updated on SetLootState() anyway?  --zangdar
+		}
 
-        if (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)
+        if (state == GO_ACTIVATED)
             EnableCollision(startOpen);
-        else if (state == GO_READY)
+        else if (state == GO_JUST_DEACTIVATED)
             EnableCollision(!startOpen);
     }
 }
@@ -1990,6 +2009,12 @@ void GameObject::SetGoState(GOState state)
         if (GetGOData() && GetGOData()->go_state == GO_NOT_READY)
             startOpen = !startOpen;
 
+		/*
+		 * Experimentation suggests that GO_STATE_ACTIVE means open door, regardless of startOpen value
+		 * --zangdar
+		 */
+		if (GetGoType() == GAMEOBJECT_TYPE_DOOR)
+			startOpen = false;
         if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
             EnableCollision(startOpen);
         else if (state == GO_STATE_READY)

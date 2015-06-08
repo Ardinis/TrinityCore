@@ -134,7 +134,7 @@ void BattlegroundRV::AddPlayer(Player* player)
 
 void BattlegroundRV::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/)
 {
-    if (GetStatus() == STATUS_WAIT_LEAVE)
+    if ((GetStatus() == STATUS_WAIT_LEAVE)||(GetStatus()==STATUS_WAIT_JOIN))
         return;
 
     UpdateWorldState(BG_RV_WORLD_STATE_A, GetAlivePlayersCountByTeam(ALLIANCE));

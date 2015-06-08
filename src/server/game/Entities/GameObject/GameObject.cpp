@@ -132,11 +132,22 @@ void GameObject::AddToWorld()
 
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
-        bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false || IsTransport());
+		/*
+		 * Experimentation suggests that GO_STATE_ACTIVE means open door, regardless of startOpen value
+		 * --zangdar
+		 */
+		if (GetGoType() == GAMEOBJECT_TYPE_DOOR)
+			startOpen = false;
+        //bool toggledState = (GetGOData() ? GetGOData()->go_state == GO_STATE_ACTIVE : false || IsTransport());
+		bool toggledState = GetGoState() == GO_STATE_ACTIVE; //GoState can change between Create and AddToWorld
         if (m_model)
             GetMap()->Insert(*m_model);
         if ((startOpen && !toggledState) || (!startOpen && toggledState))
             EnableCollision(false);
+
+		/* TempHack: disable collision in instance if it is not a door */
+	   if (GetMap() && GetMap()->IsDungeon() && (GetGoType() != GAMEOBJECT_TYPE_DOOR))
+		   EnableCollision(false);	   
 
         WorldObject::AddToWorld();
     }
@@ -296,9 +307,9 @@ void GameObject::Update(uint32 diff)
                     GameObjectTemplate const* goInfo = GetGOInfo();
                     // Bombs
                     if (goInfo->trap.type == 2)
-                        m_cooldownTime = time(NULL) + 10;   // Hardcoded tooltip value
+                        m_cooldownTime = getMSTime() + 10 * IN_MILLISECONDS;   // Hardcoded tooltip value
                     else if (Unit* owner = GetOwner())
-                        m_cooldownTime = time(NULL) + goInfo->trap.startDelay;
+                        m_cooldownTime = getMSTime() + (goInfo->trap.startDelay) * ((goInfo->trap.startDelay > 1000) ? 1 : IN_MILLISECONDS);
 
                     m_lootState = GO_READY;
                     break;
@@ -404,7 +415,7 @@ void GameObject::Update(uint32 diff)
                 GameObjectTemplate const* goInfo = GetGOInfo();
                 if (goInfo->type == GAMEOBJECT_TYPE_TRAP)
                 {
-                    if (m_cooldownTime >= time(NULL))
+                    if (m_cooldownTime >= getMSTime())
                         return;
 
                     // Type 2 - Bomb (will go away after casting it's spell)
@@ -484,7 +495,7 @@ void GameObject::Update(uint32 diff)
                             if (sScriptMgr->OnGossipHello(ok->ToPlayer(), this))
                                 return;
 
-                        m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
+                        m_cooldownTime = getMSTime() + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4)) * IN_MILLISECONDS;   // template or 4 seconds
 
                         if (goInfo->trap.type == 1)
                             SetLootState(GO_JUST_DEACTIVATED);
@@ -516,11 +527,11 @@ void GameObject::Update(uint32 diff)
             {
                 case GAMEOBJECT_TYPE_DOOR:
                 case GAMEOBJECT_TYPE_BUTTON:
-                    if (GetGOInfo()->GetAutoCloseTime() && (m_cooldownTime < time(NULL)))
+                    if (GetGOInfo()->GetAutoCloseTime() && (m_cooldownTime < getMSTime()))
                         ResetDoorOrButton();
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
-                    if (m_cooldownTime < time(NULL))
+                    if (m_cooldownTime < getMSTime())
                     {
                         RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
 
@@ -1036,7 +1047,7 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = f
     SwitchDoorOrButton(true, alternative);
     SetLootState(GO_ACTIVATED, user);
 
-    m_cooldownTime = time(NULL) + time_to_restore;
+    m_cooldownTime = getMSTime() + time_to_restore * IN_MILLISECONDS;
 }
 
 void GameObject::SetGoArtKit(uint8 kit)
@@ -1093,10 +1104,10 @@ void GameObject::Use(Unit* user)
     // If cooldown data present in template
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
     {
-        if (m_cooldownTime > sWorld->GetGameTime())
+        if (m_cooldownTime > getMSTime())
             return;
 
-        m_cooldownTime = sWorld->GetGameTime() + cooldown;
+        m_cooldownTime = getMSTime() + cooldown * IN_MILLISECONDS;
     }
 
     switch (GetGoType())
@@ -1127,7 +1138,7 @@ void GameObject::Use(Unit* user)
             if (goInfo->trap.spellId)
                 CastSpell(user, goInfo->trap.spellId);
 
-            m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4));   // template or 4 seconds
+            m_cooldownTime = getMSTime() + (goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4)) * IN_MILLISECONDS;   // template or 4 seconds
 
             if (goInfo->trap.type == 1)         // Deactivate after trigger
                 SetLootState(GO_JUST_DEACTIVATED);
@@ -1278,7 +1289,7 @@ void GameObject::Use(Unit* user)
             else
                 SetGoState(GO_STATE_ACTIVE);
 
-            m_cooldownTime = time(NULL) + info->GetAutoCloseTime();
+            m_cooldownTime = getMSTime() + info->GetAutoCloseTime() * IN_MILLISECONDS;
 
             // cast this spell later if provided
             spellId = info->goober.spellId;
@@ -1968,10 +1979,18 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 
         if (GetGOData() && GetGOData()->go_state == GO_NOT_READY)
             startOpen = !startOpen;
+		/*
+		 * Experimentation suggests that GO_STATE_ACTIVE means open door, regardless of startOpen value
+		 * --zangdar
+		 */
+		if (GetGoType() == GAMEOBJECT_TYPE_DOOR) {
+			startOpen = false;
+			return; //why the fuck collision state is updated on SetLootState() anyway?  --zangdar
+		}
 
-        if (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)
+        if (state == GO_ACTIVATED)
             EnableCollision(startOpen);
-        else if (state == GO_READY)
+        else if (state == GO_JUST_DEACTIVATED)
             EnableCollision(!startOpen);
     }
 }
@@ -1990,6 +2009,12 @@ void GameObject::SetGoState(GOState state)
         if (GetGOData() && GetGOData()->go_state == GO_NOT_READY)
             startOpen = !startOpen;
 
+		/*
+		 * Experimentation suggests that GO_STATE_ACTIVE means open door, regardless of startOpen value
+		 * --zangdar
+		 */
+		if (GetGoType() == GAMEOBJECT_TYPE_DOOR)
+			startOpen = false;
         if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
             EnableCollision(startOpen);
         else if (state == GO_STATE_READY)

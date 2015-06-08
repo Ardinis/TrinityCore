@@ -9467,7 +9467,8 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
     data << Field;
     data << Value;
-    GetSession()->SendPacket(&data);
+	if (GetSession())
+		GetSession()->SendPacket(&data);
 }
 
 void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)

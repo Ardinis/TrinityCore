@@ -157,7 +157,7 @@ void BattlegroundDS::AddPlayer(Player* player)
 
 void BattlegroundDS::RemovePlayer(Player* /*player*/, uint64 /*guid*/, uint32 /*team*/)
 {
-    if (GetStatus() == STATUS_WAIT_LEAVE)
+    if ((GetStatus() == STATUS_WAIT_LEAVE)||(GetStatus()==STATUS_WAIT_JOIN))
         return;
 
     UpdateArenaWorldState();

@@ -1331,7 +1331,7 @@ class spell_sindragosa_ice_tomb : public SpellScriptLoader
                             /*                            if (sindragose->HealthAbovePct(35))
                                 go->EnableCollision(false);
                                 else*/
-                            go->EnableCollision(true);
+                            go->EnableCollision(false);
                         }
                         summon->AddGameObject(go);
                     }

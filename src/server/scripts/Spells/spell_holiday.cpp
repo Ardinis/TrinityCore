@@ -104,7 +104,56 @@ class spell_love_is_in_the_air_romantic_picnic : public SpellScriptLoader
         }
 };
 
+class spell_braziers_hit : public SpellScriptLoader
+{
+public:
+    spell_braziers_hit() : SpellScriptLoader("spell_braziers_hit") { }
+
+    class spell_braziers_hit_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_braziers_hit_AuraScript);
+
+        void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit *caster = GetUnitOwner())
+                if (Player *player = caster->ToPlayer())
+                {
+                    switch (GetStackAmount())
+                    {
+                        case 8:
+                            if (player->GetQuestStatus(11731) == QUEST_STATUS_INCOMPLETE)
+                                player->CastSpell(player, 45719, true);
+                            else if (player->GetQuestStatus(11922) == QUEST_STATUS_INCOMPLETE)
+                                player->CastSpell(player, 46651, true);
+                            break;
+                        case 20:
+                            if (player->GetQuestStatus(11921) == QUEST_STATUS_INCOMPLETE)
+                                player->CastSpell(player, 45719, true);
+                            else if (player->GetQuestStatus(11926) == QUEST_STATUS_INCOMPLETE)
+                                player->CastSpell(player, 46651, true);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_braziers_hit_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_braziers_hit_AuraScript();
+    }
+};
+
+
+
 void AddSC_holiday_spell_scripts()
 {
     new spell_love_is_in_the_air_romantic_picnic();
+    new spell_braziers_hit();
 }

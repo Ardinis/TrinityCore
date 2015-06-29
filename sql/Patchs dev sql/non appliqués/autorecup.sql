@@ -11,10 +11,10 @@ drop table if exists recup_groupe_guilde;
 create table link_recup (guid int not null, type int not null, subtype int not null, numparam bigint not null, txtparam varchar(64) not null default "", PRIMARY KEY (guid,type,subtype)) ENGINE=INNODB;
 create table recup_log (guid INT not null, server_id INT not null, dest_guid INT not null, pseudo_orig VARCHAR(64) DEFAULT NULL, primary key (guid,server_id)) ENGINE=INNODB;
 create table recup_guilde (dest_guid INT not null, server_id INT not null, status INT not null, guild_name VARCHAR(256) not null, guildrecup_id INT not null, primary key (dest_guid));
-create table recup_rules (guild INT not null, group INT not null, type INT not null, value INT not null, primary key (guild, type));
-create table recup_server (id INT not null, name VARCHAR(256), realmlist VARCHAR(256) not null, realm VARCHAR(256) not null, seuil_pc INT not null, seuil_pc_guilde INT not null, taux_pc INT not null, ilevel INT not null, extension INT not null DEFAULT 3, group INT NOT NULL, primary key (id));
+create table recup_rules (guild INT not null, groupe INT not null, type INT not null, value INT not null, primary key (guild, type));
+create table recup_server (id INT not null, name VARCHAR(256), realmlist VARCHAR(256) not null, realm VARCHAR(256) not null, seuil_pc INT not null, seuil_pc_guilde INT not null, taux_pc INT not null, ilevel INT not null, extension INT not null DEFAULT 3, groupe INT NOT NULL, primary key (id));
 create table recup_stuff_remplace (id INT not null, new_id INT not null, primary key (id));
 create table recup_pack_guilde (id INT not null, name VARCHAR(256) not null, primary key (id));
-CREATE TABLE recup_list (group INT not null, type INT NOT NULL, id INT NOT NULL, qte INT NOT NULL);
+CREATE TABLE recup_list (groupe INT not null, type INT NOT NULL, id INT NOT NULL, qte INT NOT NULL);
 CREATE TABLE recup_formulaire (recup_id INT NOT NULL, accname VARCHAR(64) NOT NULL, accpass_hash VARCHAR(64) NOT NULL, orig_char VARCHAR(64) NOT NULL, dest_guid INT NOT NULL, dest_class INT NOT NULL, dest_faction INT NOT NULL, realm_id INT NOT NULL, role INT NOT NULL, need_validation INT NOT NULL, mode INT NOT NULL, recup_status INT NOT NULL, primary key (recup_id)) Engine=INNODB;
 

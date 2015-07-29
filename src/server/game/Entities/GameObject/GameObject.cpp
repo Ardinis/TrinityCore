@@ -1721,7 +1721,7 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
             trigger->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
         if (owner->GetByteValue(UNIT_FIELD_BYTES_2, 1) & UNIT_BYTE2_FLAG_FFA_PVP)
             trigger->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
-        trigger->setFaction(owner->getFaction());
+        trigger->setFaction(owner->getCrossFaction());
         // needed for GO casts for proper target validation checks
         trigger->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
         trigger->CastSpell(target ? target : trigger, spellInfo, true, 0, 0, owner->GetGUID());

@@ -348,11 +348,11 @@ public:
         uint8   saveCount;
         uint8   killCount;
         uint32  soldierTimer[3];
-        Player* pPriest;
+		uint64 PriestGUID;
 
         void Reset()
         {
-            pPriest = NULL;
+            PriestGUID = 0;
             eventActive = false;
             soldierTimer[0] =0;
             soldierTimer[1] = 0;
@@ -365,9 +365,11 @@ public:
 
         void DoAction(const int32 action)
         {
+			Player *pPriest = PriestGUID ? ObjectAccessor::GetPlayer(*me , PriestGUID) : 0;
             if (!eventActive || !pPriest || !pPriest->IsInWorld())
             {
                 pPriest = NULL;
+				PriestGUID = 0;
                 eventActive = false;
                 return;
             }
@@ -389,6 +391,7 @@ public:
                 me->Kill(me);
                 eventActive = false;
                 pPriest = NULL;
+				PriestGUID = 0;
             }
             else if (saveCount >= 50)
             {
@@ -397,6 +400,7 @@ public:
                 pPriest->CompleteQuest(QUEST_BALANCE_OF_LIGHT_AND_SHADOW);
                 eventActive = false;
                 pPriest = NULL;
+				PriestGUID = 0;
             }
         }
 
@@ -414,7 +418,7 @@ public:
             waveCount = 0;
             saveCount = 0;
             killCount = 0;
-            pPriest = pPlayer;
+			PriestGUID = pPlayer->GetGUID();
 
             // spawn archer
             for (uint8 i = 6; i < 13; i++)
@@ -435,9 +439,11 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
+			Player *pPriest = PriestGUID ? ObjectAccessor::GetPlayer(*me , PriestGUID) : 0;
             if (!eventActive || !pPriest || !pPriest->IsInWorld())
             {
                 pPriest = NULL;
+				PriestGUID = 0;
                 eventActive = false;
                 return;
             }
@@ -463,6 +469,7 @@ public:
                 if (!eventActive || !pPriest || !pPriest->IsInWorld())
                 {
                     pPriest = NULL;
+				PriestGUID = 0;
                     eventActive = false;
                     return;
                 }

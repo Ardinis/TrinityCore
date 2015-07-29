@@ -13646,7 +13646,7 @@ void Unit::Dismount()
 void Unit::SetInCombatWith(Unit* enemy)
 {
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
-    if (eOwner->IsPvP())
+    if (eOwner->IsPvP() || (enemy->ToCreature() && enemy->ToCreature()->GetCreatureInfo() && (enemy->ToCreature()->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_PVP_VEHICLE)))
     {
         SetInCombatState(true, enemy);
         return;
@@ -14543,8 +14543,8 @@ bool Unit::CanHaveThreatList() const
         return false;
 
     // vehicles can not have threat list
-    //if (ToCreature()->IsVehicle())
-    //    return false;
+    if (ToCreature()->IsVehicle() && ToCreature()->GetCreatureInfo() && (ToCreature()->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_PVP_VEHICLE))
+        return false;
 
     // summons can not have a threat list, unless they are controlled by a creature
     if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(((Pet*)this)->GetOwnerGUID()))

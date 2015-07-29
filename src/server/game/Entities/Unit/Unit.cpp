@@ -13057,10 +13057,11 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo)
     }
     if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
         return true;
-
+    /*
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         if (HasAura(46924) && IsImmunedToSpellEffect(spellInfo, i))
             return true;
+    */
 
     if (spellInfo->Id != 42292 && spellInfo->Id !=59752)
     {

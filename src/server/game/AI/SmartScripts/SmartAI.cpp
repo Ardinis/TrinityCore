@@ -452,14 +452,27 @@ void SmartAI::EnterEvadeMode()
     if (!me->isAlive()  || me->IsInEvadeMode())
         return;
 
+	bool was_charmed = me->isCharmed();
+	Creature *saved_creature = me;
     RemoveAuras();
+	bool control_aura_deleted = was_charmed && !me->isCharmed();
 
-    me->AddUnitState(UNIT_STATE_EVADE);
-    me->DeleteThreatList();
-    me->CombatStop(true);
-    me->LoadCreaturesAddon();
-    me->SetLootRecipient(NULL);
-    me->ResetPlayerDamageReq();
+    saved_creature->AddUnitState(UNIT_STATE_EVADE);
+    saved_creature->DeleteThreatList();
+    saved_creature->CombatStop(true);
+    saved_creature->LoadCreaturesAddon();
+    saved_creature->SetLootRecipient(NULL);
+    saved_creature->ResetPlayerDamageReq();
+
+	if (control_aura_deleted) {
+		// If this code is reached, then AIM_Initialize() has been called inside RemoveAura(), deleting me->i_AI (aka "this").
+		char buf[4096];
+		snprintf(buf, 4096, "SmartAI: AI deleted while doing EnterEvadeMode(), crash avoided (ID=%u)", saved_creature->GetEntry());
+		buf[4095] = 0;
+		sLog->outDB(LOG_TYPE_DEBUG, buf);
+		saved_creature->AI()->Reset();
+		return;
+	}
 
     GetScript()->ProcessEventsFor(SMART_EVENT_EVADE);//must be after aura clear so we can cast spells from db
 

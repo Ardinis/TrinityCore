@@ -306,6 +306,7 @@ struct Areas
 };
 
 #define MAX_RUNES       6
+#define RUNE_GRACE_PERIOD 2500 // Max. rune grace period (in msec)
 
 enum RuneCooldowns
 {
@@ -327,7 +328,9 @@ struct RuneInfo
     uint8 BaseRune;
     uint8 CurrentRune;
     uint32 Cooldown;
+    uint32 GraceTime; /* Timestamp for beginning of rune grace period */
     AuraEffect const* ConvertAura;
+	bool WasJustUsed;
 };
 
 struct Runes
@@ -2552,7 +2555,29 @@ class Player : public Unit, public GridObject<Player>
         void SetLastUsedRune(RuneType type) { m_runes->lastUsedRune = type; }
         void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
-        void SetRuneCooldown(uint8 index, uint32 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
+        void SetRuneGraceTime(uint8 index, uint32 ts) { m_runes->runes[index].GraceTime = ts; }
+        uint32 GetRuneGraceTime(uint8 index) { return m_runes->runes[index].GraceTime; }
+        void UseRuneGracePeriod(uint8 index) {
+                       uint32 grace = 0;
+                       if (GetRuneGraceTime(index) > 0) {
+                               grace = getMSTime() - GetRuneGraceTime(index);
+                               if (grace > RUNE_GRACE_PERIOD)
+                                       grace = RUNE_GRACE_PERIOD;
+                       }
+                       uint32 cd = GetRuneCooldown(index);
+                       SetRuneCooldown(index, (cd > grace) ? (cd - grace) : 0);
+        }
+        void ResetRuneGracePeriod() {
+                       uint32 index;
+                       if (m_runes == NULL)
+                               return;
+                       for (index = 0; index < MAX_RUNES; index++) {
+                               m_runes->runes[index].GraceTime = 0; 
+                       }
+        }
+        void SetWasJustUsed(uint8 index, bool val) { m_runes->runes[index].WasJustUsed = val; }
+		bool GetWasJustUsed(uint8 index) { return m_runes->runes[index].WasJustUsed; }
+		void SetRuneCooldown(uint8 index, uint32 cooldown) { m_runes->runes[index].WasJustUsed = false; m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
         void SetRuneConvertAura(uint8 index, AuraEffect const* aura) { m_runes->runes[index].ConvertAura = aura; }
         void AddRuneByAuraEffect(uint8 index, RuneType newType, AuraEffect const* aura) { SetRuneConvertAura(index, aura); ConvertRune(index, newType); }
         void RemoveRunesByAuraEffect(AuraEffect const* aura);
@@ -2907,9 +2932,11 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_grantableLevels;
 
  public :
+ /*
+        // obsolete rune grace period system
 	bool reduceRuneCoolDown[MAX_RUNES];
 	uint32 m_reduceCoolDown[MAX_RUNES];
-
+ */
 
 	void setSplineTime(uint32 sp) {
 	    m_splineTime = sp;

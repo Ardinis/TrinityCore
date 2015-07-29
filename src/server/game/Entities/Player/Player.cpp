@@ -864,11 +864,13 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     m_isActive = true;
 
     m_runes = NULL;
+    /*
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
       reduceRuneCoolDown[i] = false;
       m_reduceCoolDown[i] = time(0);
     }
+    */
 
     m_lastFallTime = 0;
     m_lastFallZ = 0;
@@ -2681,12 +2683,15 @@ void Player::RegenerateAll()
 	  //  m_reduceCoolDown[i] -= m_regenTimer;
 	  // if (m_reduceCoolDown[i] > 0)
 	  //  m_reduceCoolDown[i] = 0;
-	  if (cd < m_regenTimer && cd > 0)
-	  {
-	    reduceRuneCoolDown[i] = true;
-	    m_reduceCoolDown[i] = time(0);
-	  }
 	  SetRuneCooldown(i, (cd > m_regenTimer) ? cd - m_regenTimer : 0);
+	  if (isInCombat() && (cd <= m_regenTimer && cd > 0)) {
+            if (GetRuneGraceTime(i) == 0) { // Prevent overwriting rune grace time in case of miss (not sure if that's necessary)
+              SetRuneGraceTime(i, getMSTime());
+         //     ChatHandler(this).PSendSysMessage("[Rune %d] Debut de la RuneGracePeriod, timestamp=%d", i, getMSTime());
+            } /*else {
+              ChatHandler(this).PSendSysMessage("[Rune %d] Rune up suite a un GCD du a un miss, pas de reset de la RuneGracePeriod.", i);
+            } */
+	  }
 	}
     if (m_regenTimerCount >= 2000)
     {
@@ -24246,14 +24251,18 @@ void Player::InitRunes()
 
     for (uint8 i = 0; i < MAX_RUNES; ++i)
     {
+    /*
       reduceRuneCoolDown[i] = false;
       m_reduceCoolDown[i] = 2000;
+    */
         SetBaseRune(i, runeSlotTypes[i]);                              // init base types
         SetCurrentRune(i, runeSlotTypes[i]);                           // init current types
         SetRuneCooldown(i, 0);                                         // reset cooldowns
         SetRuneConvertAura(i, NULL);
+		SetWasJustUsed(i, false);
         m_runes->SetRuneState(i);
     }
+    ResetRuneGracePeriod();
 
     for (uint8 i = 0; i < NUM_RUNE_TYPES; ++i)
         SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);

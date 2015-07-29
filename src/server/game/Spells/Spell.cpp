@@ -4796,16 +4796,15 @@ void Spell::TakeRunePower(bool didHit)
         RuneType rune = player->GetCurrentRune(i);
         if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
         {
-	  uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
-	  if (didHit)
-	  {
-	    cooldownRunes = player->GetRuneBaseCooldown(i);
-	    if (player->reduceRuneCoolDown[i])
-	      if (time(0) - player->m_reduceCoolDown[i] < 3)
-		cooldownRunes -= 2000;
-	    player->reduceRuneCoolDown[i] = false;
-	  }
+            uint32 cooldownRunes = didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN);
             player->SetRuneCooldown(i, cooldownRunes);
+            if (didHit) {
+                // On hit, apply CD reduction (Rune grace Period)
+	        player->UseRuneGracePeriod(i);
+//                ChatHandler(player).PSendSysMessage("[Rune %d] RuneGracePeriod: reduction du CD de %d", i, player->GetRuneCooldown(i) - cooldownRunes);
+	        player->SetRuneGraceTime(i, 0);
+			player->SetWasJustUsed(i, true);
+            } // else ChatHandler(player).PSendSysMessage("[Rune %d] Miss, application du CD standard de 1500msec", i);
             player->SetLastUsedRune(rune);
             runeCost[rune]--;
             usedRunes++;
@@ -4821,16 +4820,15 @@ void Spell::TakeRunePower(bool didHit)
           RuneType rune = player->GetCurrentRune(i);
           if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
           {
-              uint32 cooldownRunes = uint32(RUNE_MISS_COOLDOWN);
-              if (didHit)
-              {
-                  cooldownRunes = player->GetRuneBaseCooldown(i);
-                  if (player->reduceRuneCoolDown[i])
-                      if (time(0) - player->m_reduceCoolDown[i] < 3)
-                          cooldownRunes -= 2000;
-                  player->reduceRuneCoolDown[i] = false;
-              }
+              uint32 cooldownRunes = didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN);
               player->SetRuneCooldown(i, cooldownRunes);
+              if (didHit) {
+                  // On hit, apply CD reduction (Rune grace Period)
+	          player->UseRuneGracePeriod(i);
+//                ChatHandler(player).PSendSysMessage("[Rune %d] RuneGracePeriod: reduction du CD de %d", i, player->GetRuneCooldown(i) - cooldownRunes);
+	          player->SetRuneGraceTime(i, 0);
+			player->SetWasJustUsed(i, true);
+              } //else ChatHandler(player).PSendSysMessage("[Rune %d] Miss, application du CD standard de 1500msec", i);
               player->SetLastUsedRune(rune);
               runeCost[rune]--;
               usedRunes++;

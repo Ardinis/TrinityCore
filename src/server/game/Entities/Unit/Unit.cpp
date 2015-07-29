@@ -8816,10 +8816,15 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
 			      player->GetBaseRune(i) != RUNE_BLOOD)
 			    continue;
                         }
+						if (!player->GetWasJustUsed(i))
+							continue;
+						player->SetWasJustUsed(i, false);
+						/*
 			if (player->GetRuneCooldown(i) != player->GetRuneBaseCooldown(i) &&
 			    (player->GetRuneCooldown(i) - player->GetRuneBaseCooldown(i)) != 2000 &&
 			    (player->GetRuneCooldown(i) - player->GetRuneBaseCooldown(i)) != -2000)
 			  continue;
+			  */
                         --runesLeft;
                         // Mark aura as used
                         player->AddRuneByAuraEffect(i, RUNE_DEATH, aurEff);
@@ -13911,8 +13916,14 @@ void Unit::ClearInCombat()
         else if (!isCharmed())
             return;
     }
-    else
+    else {
         ToPlayer()->UpdatePotionCooldown();
+        if (ToPlayer()->getClass() == CLASS_DEATH_KNIGHT) {
+               ToPlayer()->ResetRuneGracePeriod(); /*
+               if (ToPlayer()->GetSession() && ToPlayer()->GetSession()->GetPlayer())
+                   ChatHandler(ToPlayer()).PSendSysMessage("[DK] Sortie de combat, annulation de toutes les RuneGracePeriods en cours"); */
+        }
+    }
 
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }

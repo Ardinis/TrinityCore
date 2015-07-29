@@ -405,7 +405,7 @@ class Spell
         void _handle_finish_phase();
 
         SpellCastResult CheckItems();
-        SpellCastResult CheckRange(bool strict);
+        SpellCastResult CheckRange(bool strict, bool pet_cast = false);
         SpellCastResult CheckPower();
         SpellCastResult CheckRuneCost(uint32 runeCostID);
         SpellCastResult CheckCasterAuras() const;

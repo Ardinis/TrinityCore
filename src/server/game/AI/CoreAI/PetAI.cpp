@@ -86,6 +86,10 @@ void PetAI::UpdateAI(const uint32 diff)
         UpdateAllies();
     else
         m_updateAlliesTimer -= diff;
+        
+    if (me->IsNonMeleeSpellCasted(false, false,  true, false, true)) {
+        return;
+    }
 
     if (me->getVictim() && me->getVictim()->isAlive())
     {

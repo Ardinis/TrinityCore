@@ -6230,7 +6230,7 @@ bool Spell::CanAutoCast(Unit* target)
     return false;                                           //target invalid
 }
 
-SpellCastResult Spell::CheckRange(bool strict)
+SpellCastResult Spell::CheckRange(bool strict, bool pet_cast)
 {
     // Don't check for instant cast spells
     if (!strict && m_casttime == 0)
@@ -6257,6 +6257,9 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     if (target && target != m_caster)
     {
+        if (pet_cast && (max_range > 10.0f) && (GetCastTime() || m_spellInfo->IsChanneled())) {
+            max_range = std::min(max_range, std::max(min_range + 5.0f, max_range - target->GetSpeed(MOVE_RUN)*GetCastTime() - 3.0f));
+        }
         if (range_type == SPELL_RANGE_MELEE)
         {
             // Because of lag, we can not check too strictly here.

@@ -131,7 +131,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T &owner, const uint32 & time
 
     // prevent movement while casting spells with cast time or channel time
     //    if (owner.IsNonMeleeSpellCasted(false, false,  true))
-    if (owner.HasUnitState(UNIT_STATE_CASTING))
+    if (owner.HasUnitState(UNIT_STATE_CASTING) || (owner.IsNonMeleeSpellCasted(false, false,  true, false, true) && owner.IsControlledByPlayer()))
     {
         if (!owner.IsStopped())
             owner.StopMoving();
@@ -151,7 +151,8 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T &owner, const uint32 & time
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(i_spell);
         Spell* spell = new Spell(owner.ToUnit(), spellInfo, TRIGGERED_NONE);
         SpellCastResult result = spell->CheckPetCast(i_target.getTarget());
-        if (result == SPELL_CAST_OK)
+        SpellCastResult range_result = spell->CheckRange(true, true);
+        if ((result == SPELL_CAST_OK) && (range_result == SPELL_CAST_OK))
         {
             spell->prepare(&(spell->m_targets));
             // Reset i_spell here to prevent chaincasting.

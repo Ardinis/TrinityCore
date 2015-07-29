@@ -1278,6 +1278,8 @@ class Unit : public WorldObject
         float GetSpellMinRangeForTarget(Unit const* target, SpellInfo const* spellInfo) const;
 
         virtual void Update(uint32 time);
+        uint32 CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, bool binary, SpellInfo const * spellProto) const;
+        uint32 GetSpellPenetration(SpellSchoolMask schoolMask) const;
 
         void setAttackTimer(WeaponAttackType type, uint32 time) { m_attackTimer[type] = time; }
         void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);

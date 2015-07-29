@@ -315,6 +315,108 @@ Unit::~Unit()
     ASSERT(m_dynObj.empty());
 }
 
+
+/*
+ * Computes spell resist chance (percent). DOES NOT take MechanicResistance into account.
+ */
+uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, bool binary, SpellInfo const * spellProto) const
+{
+    /* TempHACK: Currently only used for total (binary) resists, as partial resists appears to be handled elsewhere. */
+    if (!binary)
+        return 0;
+        
+    // No resist against physical / holy
+    if (uint32(schoolMask & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY)) > 0)
+        return 0;
+    
+    // TempHACK: ignore resistance for pets, as it is currently bugged
+    if (pVictim->GetOwner() && pVictim->GetOwner()->ToPlayer())
+        return 0;
+    
+
+    // These spells should ignore any resistances
+    if (spellProto && 
+        ((spellProto->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT) ||
+         (spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_RESISTANCE) ||
+         (spellProto->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES)))
+        return 0;
+
+    uint8 BOSS_LEVEL = 83;
+    int32 BOSS_RESISTANCE_CONSTANT = 510;
+
+    int32 resistanceConstant = 0;
+    if (getLevel() >= BOSS_LEVEL)
+        resistanceConstant = BOSS_RESISTANCE_CONSTANT;
+    else
+        resistanceConstant = pVictim->getLevel() * 5;
+
+    int32 levelDiff = std::max<int32>(pVictim->getLevel() - getLevel(), 0);
+
+    int32 baseVictimResistance = pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
+    uint32 spellPenetration = GetSpellPenetration(schoolMask);
+    int32 victimResistance = std::max<int32>(baseVictimResistance - spellPenetration, 0);
+
+    int32 ignoredResistance = 0;
+
+    if (victimResistance > 0)
+    {
+        AuraEffectList const & aurasA = GetAuraEffectsByType(SPELL_AURA_MOD_ABILITY_IGNORE_TARGET_RESIST);
+        for (AuraEffectList::const_iterator itr = aurasA.begin(); itr != aurasA.end(); ++itr)
+            if (((*itr)->GetMiscValue() & schoolMask) && (*itr)->IsAffectedOnSpell(spellProto))
+                ignoredResistance += (*itr)->GetAmount();
+
+        AuraEffectList const & aurasB = GetAuraEffectsByType(SPELL_AURA_MOD_IGNORE_TARGET_RESIST);
+        for (AuraEffectList::const_iterator itr = aurasB.begin(); itr != aurasB.end(); ++itr)
+            if ((*itr)->GetMiscValue() & schoolMask)
+                ignoredResistance += (*itr)->GetAmount();
+
+        ignoredResistance = std::min<int32>(ignoredResistance, 100);
+    }
+
+    victimResistance = victimResistance * (100 - ignoredResistance) / 100;
+    if (!binary)
+        victimResistance += (levelDiff * 5); // Level diff resistance cannot be pierced
+
+    if (victimResistance <= 0)
+        return 0;
+        
+    /* victimResistance contains the "final" victim's spell resistance, modified by auras and attacker's spell penetration */
+
+    float averageResist = float(victimResistance) / float(victimResistance + resistanceConstant);
+
+    if (binary) // No partial resists for binary spells
+    {
+        int32 tmp = int32(averageResist * 10000);
+        int32 rand = irand(0, 10000);
+        return rand < tmp ? 100 : 0;
+    }
+    
+    // Handle partial resists here [NOT USED CURRENTLY]
+
+    float discreteResistProbability[11];
+    uint32 discreteProbabilitySum = 0;
+    for (uint32 i = 0; i < 11; i++)
+    {
+        discreteResistProbability[i] = 0.5f - 2.5f * fabs(0.1f * i - averageResist);
+        if (discreteResistProbability[i] < 0.0f)
+            discreteResistProbability[i] = 0.0f;
+        discreteProbabilitySum += uint32(discreteResistProbability[i] * 10000);
+    }
+
+    uint32 resistance = 0;
+    uint32 rand = urand(0, discreteProbabilitySum); /* maybe discreteProbabilitySum<10000 because of rounding errors */
+    uint32 sum = 0;
+    for (int i = 0; i < 11; i++) {
+        sum += uint32(discreteResistProbability[i] * 10000);
+        if (sum >= rand) {
+            resistance = i;
+            break;
+        }
+    }
+    return (resistance * 10);
+}
+
+
 void Unit::Update(uint32 p_time)
 {
     // WARNING! Order of execution here is important, do not change.
@@ -1696,6 +1798,33 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
 
     return (newdamage > 1) ? newdamage : 1;
 }
+uint32 Unit::GetSpellPenetration(SpellSchoolMask schoolMask) const
+{
+    int32 spellPenetration = 0;
+    const Unit * source = ToPlayer();
+
+    if (!source)
+    {
+        source = ToCreature();
+  
+        if (source)
+        {
+            source = source->ToCreature()->GetOwner();
+
+            if (source) 
+                source = source->ToPlayer();
+        }
+    }
+
+    if (source && !isTotem())
+        spellPenetration += source->ToPlayer()->GetSpellPenetrationItemMod();
+    else
+        source = this;
+
+    spellPenetration += -source->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
+
+    return uint32(std::max<int32>(spellPenetration, 0));
+}
 
 void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, uint32 const damage, uint32 *absorb, uint32 *resist, SpellInfo const* spellInfo)
 {
@@ -1704,7 +1833,7 @@ void Unit::CalcAbsorbResist(Unit* victim, SpellSchoolMask schoolMask, DamageEffe
 
     DamageInfo dmgInfo = DamageInfo(this, victim, damage, spellInfo, schoolMask, damagetype);
 
-    // Magic damage, check for resists
+    // Magic damage, check for resists (TODO: call CalcSpellResistance() instead of doing it here)
     if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0 && (!spellInfo || (spellInfo->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES) == 0))
     {
         float victimResistance = float(victim->GetResistance(schoolMask));

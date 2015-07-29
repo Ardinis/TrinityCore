@@ -2829,6 +2829,73 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         }
 
+        if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+        {
+            if (spellInfo->Mechanic != 0 &&
+                spellInfo->Mechanic != MECHANIC_INFECTED)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+            else if (spellInfo->Effects[0].Mechanic != 0 &&
+                     spellInfo->Effects[0].Mechanic != MECHANIC_INFECTED &&
+                     spellInfo->Effects[1].Effect != SPELL_EFFECT_SCHOOL_DAMAGE)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+            else if (spellInfo->Effects[1].Mechanic != 0 &&
+                     spellInfo->Effects[1].Mechanic != MECHANIC_INFECTED)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+            else if (spellInfo->Effects[0].Effect == SPELL_EFFECT_DISPEL ||
+                     spellInfo->Effects[1].Effect == SPELL_EFFECT_DISPEL ||
+                     spellInfo->Effects[2].Effect == SPELL_EFFECT_DISPEL)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+            else if (spellInfo->Effects[0].Effect == SPELL_EFFECT_STEAL_BENEFICIAL_BUFF ||
+                     spellInfo->Effects[1].Effect == SPELL_EFFECT_STEAL_BENEFICIAL_BUFF ||
+                     spellInfo->Effects[2].Effect == SPELL_EFFECT_STEAL_BENEFICIAL_BUFF)
+            {
+                spellInfo->AttributesCu |=  SPELL_ATTR0_CU_BINARY;
+            }
+            else if (spellInfo->Effects[0].Effect == SPELL_EFFECT_POWER_BURN ||
+                     spellInfo->Effects[1].Effect == SPELL_EFFECT_POWER_BURN ||
+                     spellInfo->Effects[2].Effect == SPELL_EFFECT_POWER_BURN)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+            else if (spellInfo->Effects[0].Effect == SPELL_EFFECT_POWER_DRAIN ||
+                     spellInfo->Effects[1].Effect == SPELL_EFFECT_POWER_DRAIN ||
+                     spellInfo->Effects[2].Effect == SPELL_EFFECT_POWER_DRAIN)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+			else if (spellInfo->Effects[0].ApplyAuraName == SPELL_AURA_PERIODIC_MANA_LEECH ||
+                     spellInfo->Effects[1].ApplyAuraName == SPELL_AURA_PERIODIC_MANA_LEECH ||
+                     spellInfo->Effects[2].ApplyAuraName == SPELL_AURA_PERIODIC_MANA_LEECH)
+            {
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+            }
+            else if ((spellInfo->Dispel == DISPEL_POISON) ||
+                (spellInfo->Dispel == DISPEL_CURSE) ||
+                (spellInfo->Dispel == DISPEL_DISEASE))
+            {
+                if (spellInfo->Effects[0].Effect != SPELL_EFFECT_SCHOOL_DAMAGE &&
+                    spellInfo->Effects[1].Effect != SPELL_EFFECT_SCHOOL_DAMAGE &&
+                    spellInfo->Effects[2].Effect != SPELL_EFFECT_SCHOOL_DAMAGE &&
+                    spellInfo->Effects[0].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE &&
+                    spellInfo->Effects[1].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE &&
+                    spellInfo->Effects[2].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE &&
+                    spellInfo->Effects[0].ApplyAuraName != SPELL_AURA_PERIODIC_LEECH &&
+                    spellInfo->Effects[1].ApplyAuraName != SPELL_AURA_PERIODIC_LEECH &&
+                    spellInfo->Effects[2].ApplyAuraName != SPELL_AURA_PERIODIC_LEECH)
+                {
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
+                }
+            }
+        }
+
         if (!spellInfo->_IsPositiveEffect(EFFECT_0, false))
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
 
@@ -3002,6 +3069,23 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+                break;
+            case 61988:
+            case 61987:
+            case 72502:
+            case 72501:
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_RESISTANCE;
+             break ;
+            case 15407: /* mind flay */
+            case 17311:
+            case 17312:
+            case 17313:
+            case 17314:
+            case 18807:
+            case 25387:
+            case 48155:
+            case 48156:
+                spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_BINARY;
                 break;
             case 8187:
             case 10579:

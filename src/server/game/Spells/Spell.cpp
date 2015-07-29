@@ -1584,7 +1584,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 
         if (m_caster->_IsValidAttackTarget(unit, m_spellInfo))
         {
+            uint32 m_resist;
             unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
+            bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_BINARY) > 0);
+                        m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask(), binary, m_spellInfo);
+            if (m_resist >= 100)
+                return SPELL_MISS_RESIST;
+            
         }
         else if (m_caster->IsFriendlyTo(unit))
         {

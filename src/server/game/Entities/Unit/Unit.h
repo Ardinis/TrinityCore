@@ -259,7 +259,7 @@ enum UnitRename
 };
 
 #define CREATURE_MAX_SPELLS     8
-#define MAX_SPELL_CHARM         4
+#define MAX_SPELL_CHARM         5
 #define MAX_SPELL_VEHICLE       6
 #define MAX_SPELL_POSSESS       8
 #define MAX_SPELL_CONTROL_BAR   10
@@ -1174,7 +1174,7 @@ struct CharmInfo
 
         Unit* m_unit;
         UnitActionBarEntry PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
-        CharmSpellInfo m_charmspells[4];
+        CharmSpellInfo m_charmspells[5];
         CommandStates   m_CommandState;
         uint32          m_petnumber;
         bool            m_barInit;

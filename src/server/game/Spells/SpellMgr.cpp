@@ -2832,7 +2832,7 @@ void SpellMgr::LoadSpellCustomAttr()
         if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
         {
             if (spellInfo->Mechanic != 0 &&
-                spellInfo->Mechanic != MECHANIC_INFECTED)
+                (spellInfo->Mechanic != MECHANIC_INFECTED) && (spellInfo->Mechanic != MECHANIC_SNARE))
             {
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY;
             }

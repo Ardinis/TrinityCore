@@ -104,6 +104,12 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
                 condMeets = player->getRaceMask() & ConditionValue1;
             break;
         }
+        case CONDITION_GENDER:
+        {
+            if (Player* player = object->ToPlayer())
+                condMeets = player->getGender() == ConditionValue1;
+            break;
+        }
         case CONDITION_SKILL:
         {
             if (Player* player = object->ToPlayer())
@@ -277,6 +283,12 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_PHASEMASK:
         {
             condMeets = object->GetPhaseMask() & ConditionValue1;
+            break;
+        }
+        case CONDITION_UNIT_STATE:
+        {
+            if (Unit* unit = object->ToUnit())
+                condMeets = unit->HasUnitState(ConditionValue1);
             break;
         }
         default:
@@ -1471,8 +1483,8 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                         return false;
                     }
                     break;
-                case TYPEID_PLAYER:
                 case TYPEID_CORPSE:
+                case TYPEID_PLAYER:
                     if (cond->ConditionValue2)
                         sLog->outErrorDb("ObjectEntry condition has useless data in value2 (%u)!", cond->ConditionValue2);
                     break;
@@ -1615,13 +1627,31 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 sLog->outErrorDb("Phasemask condition has useless data in value3 (%u)!", cond->ConditionValue3);
             break;
         }
+        case CONDITION_GENDER:
+        {
+            if (!Player::IsValidGender(uint8(cond->ConditionValue1)))
+            {
+                sLog->outErrorDb("Gender condition has invalid gender (%u), skipped", cond->ConditionValue1);
+                return false;
+            }
+
+            if (cond->ConditionValue2)
+                sLog->outErrorDb("Gender condition has useless data in value2 (%u)!", cond->ConditionValue2);
+            if (cond->ConditionValue3)
+                sLog->outErrorDb("Gender condition has useless data in value3 (%u)!", cond->ConditionValue3);
+            break;
+        }
+        case CONDITION_UNIT_STATE:
+        {
+            if (cond->ConditionValue1 > uint32(UNIT_STATE_ALL_STATE))
+            {
+                sLog->outErrorDb("UnitState condition has non existing UnitState in value1 (%u), skipped", cond->ConditionValue1);
+                return false;
+            }
+            break;
+        }
+
         case CONDITION_UNUSED_19:
-            sLog->outErrorDb("Found ConditionTypeOrReference = CONDITION_UNUSED_19 in `conditions` table - ignoring");
-            return false;
-        case CONDITION_UNUSED_20:
-            sLog->outErrorDb("Found ConditionTypeOrReference = CONDITION_UNUSED_19 in `conditions` table - ignoring");
-            return false;
-        case CONDITION_UNUSED_21:
             sLog->outErrorDb("Found ConditionTypeOrReference = CONDITION_UNUSED_19 in `conditions` table - ignoring");
             return false;
         case CONDITION_UNUSED_24:

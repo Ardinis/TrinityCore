@@ -1101,7 +1101,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
     } else if (uint32 d = GetCCDelay()) {
         targetInfo.timeDelay = d;
         m_delayMoment = d;
-        
+
     }
 	 // Apply delay for CC spells here, can be easily tweaked.
     /*	else if (m_spellInfo->Speed == 12345)
@@ -1590,7 +1590,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                         m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask(), binary, m_spellInfo);
             if (m_resist >= 100)
                 return SPELL_MISS_RESIST;
-            
+
         }
         else if (m_caster->IsFriendlyTo(unit))
         {
@@ -2448,7 +2448,7 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
                 default:
                     if (GetSpellInfo()->HasEffect(SPELL_EFFECT_SUMMON)) {
                         // Evite les invocations sous-map, dans les murs, etc.
-                        // On le fait que pour les sorts de summon vu que MoveBlink() est quand meme une fonction assez couteuse... 
+                        // On le fait que pour les sorts de summon vu que MoveBlink() est quand meme une fonction assez couteuse...
                         m_caster->MoveBlink(pos, dist, angle);
                     } else {
                         m_caster->GetNearPosition(pos, dist, angle);
@@ -2716,6 +2716,10 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
         SpellTargets targetType;
         switch (cur.GetTarget())
         {
+            case TARGET_CORPSE_SRC_AREA_ENEMY:
+                radius = m_spellInfo->Effects[i].CalcRadius();
+                targetType = SPELL_TARGETS_ANY;
+                break;
             case TARGET_UNIT_SRC_AREA_ENEMY:
             case TARGET_UNIT_DEST_AREA_ENEMY:
             case TARGET_UNIT_CONE_ENEMY_24:
@@ -3175,11 +3179,11 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
 	/*
 	 * When a spell with SPELL_ATTR0_DISABLED_WHILE_ACTIVE is casted, the button is immediately disabled (client-side). If the cast fails for some reason,
-	 * we must notify client to make the button usable again, otherwise the button will remain disabled forever. 
+	 * we must notify client to make the button usable again, otherwise the button will remain disabled forever.
 	 *
 	 * This fix is currently restricted to Shadowform (15473) because the problem has been reported only for this spell, but it should be usable for any shapeshifting spell.
 	 */
-	if (Player *player = m_caster->ToPlayer()) 
+	if (Player *player = m_caster->ToPlayer())
 		if ((result != SPELL_CAST_OK) && (m_spellInfo->Attributes & SPELL_ATTR0_DISABLED_WHILE_ACTIVE) && !player->HasAura(m_spellInfo->Id) && (m_spellInfo->Id == 15473)) {
 			WorldPacket data;
 			player->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, m_spellInfo->Id, player->GetSpellCooldownDelay(m_spellInfo->Id) * IN_MILLISECONDS);
@@ -5202,14 +5206,14 @@ SpellCastResult Spell::CheckCast(bool strict)
             // Target must be facing you
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
                 return SPELL_FAILED_NOT_INFRONT;
-                
+
             if (m_spellInfo->AttributesCu & SPELL_ATTR0_CU_CHARGE) {
                 float ztarget = target->m_positionZ;
                 m_caster->UpdateAllowedPositionZ(target->m_positionX, target->m_positionY, ztarget);
                 if (fabs(ztarget - target->m_positionZ) > 5.0f) {
                     return SPELL_FAILED_LINE_OF_SIGHT;
                 }
-                                                        
+
             }
 
             if (!IsTriggered() && m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
@@ -6941,7 +6945,7 @@ void Spell::UpdatePointers()
         bool alreadyTookCastItem = (m_CastItem == NULL);
         m_CastItem = m_caster->ToPlayer()->GetItemByGuid(m_castItemGUID);
         if ((m_CastItem == NULL) && !alreadyTookCastItem) {
-            sLog->outError("Spell::UpdatePointers(): CastItem vanished during spellcast! Player=%s PlayerGUIDLow=%u SpellID=%u CastItemGUID=" UI64FMTD, 
+            sLog->outError("Spell::UpdatePointers(): CastItem vanished during spellcast! Player=%s PlayerGUIDLow=%u SpellID=%u CastItemGUID=" UI64FMTD,
                 m_caster->GetName(), m_caster->GetGUIDLow(), m_spellInfo->Id, m_castItemGUID);
             cancel(); // Since it's probably a cheat attempt, we cancel the spell
         }

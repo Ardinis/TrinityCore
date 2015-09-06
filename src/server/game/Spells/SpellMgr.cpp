@@ -3322,7 +3322,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 48246: // Ball of Flame
             case 64599: // Arcane Barrage
             case 64607: // Arcane Barrage
-                                    
+
                 spellInfo->MaxAffectedTargets = 1;
                 break;
             case 36384: // Skartax Purple Beam

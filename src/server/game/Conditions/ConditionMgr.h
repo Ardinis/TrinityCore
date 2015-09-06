@@ -50,8 +50,8 @@ enum ConditionTypes
     CONDITION_ACHIEVEMENT           = 17,                   // achievement_id   0              0                  true if achievement is complete
     CONDITION_SPELL_SCRIPT_TARGET   = 18,                   // SpellScriptTargetType, TargetEntry,            0
     CONDITION_UNUSED_19             = 19,                   //
-    CONDITION_UNUSED_20             = 20,                   //
-    CONDITION_UNUSED_21             = 21,                   //
+    CONDITION_GENDER                = 20,                   //
+    CONDITION_UNIT_STATE            = 21,                   //
     CONDITION_MAPID                 = 22,                   // map_id           0              0                  true if in map_id
     CONDITION_AREAID                = 23,                   // area_id          0              0                  true if in area_id
     CONDITION_UNUSED_24             = 24,                   //

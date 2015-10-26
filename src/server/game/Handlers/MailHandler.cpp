@@ -167,11 +167,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
         return;
     }
 
-    if (receiveLevel < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    /*    if (receiveLevel < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
     {
         SendNotification(GetTrinityString(LANG_MAIL_RECEIVER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         return;
-    }
+        }*/
 
     uint32 rc_account = receive
         ? receive->GetSession()->GetAccountId()

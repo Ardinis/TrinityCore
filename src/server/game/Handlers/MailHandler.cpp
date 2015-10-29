@@ -77,12 +77,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
 
     Player* player = _player;
 
-    if (player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
-    {
-        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
-        return;
-    }
-
     uint64 rc = 0;
     if (normalizePlayerName(receiver))
         rc = sObjectMgr->GetPlayerGUIDByName(receiver);
@@ -94,6 +88,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
+
 
     sLog->outDetail("Player %u is sending mail to %s (GUID: %u) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", player->GetGUIDLow(), receiver.c_str(), GUID_LOPART(rc), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
 
@@ -114,6 +109,14 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data)
     }
 
     Player* receive = ObjectAccessor::FindPlayer(rc);
+
+    bool isMailException = sObjectMgr->GetPlayerAccountIdByGUID(rc) == sObjectMgr->GetPlayerAccountIdByGUID(player->GetGUID());
+
+    if (!isMailException && player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    {
+        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        return;
+    }
 
     uint32 rc_team = 0;
     uint8 mails_count = 0;                                  //do not allow to send to one player more than 100 mails

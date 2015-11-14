@@ -328,7 +328,7 @@ void ArenaReward::reward2C2Season()
 
 void ArenaReward::resetSeason()
 {
-    CharacterDatabase.PQuery("UPDATE character_pvp_stats SET matchMakerRating = 0");
+    CharacterDatabase.PQuery("UPDATE character_arena_stats SET matchMakerRating = 0");
     CharacterDatabase.PQuery("UPDATE character_battleground_stats SET rating = 0");
     CharacterDatabase.PQuery("UPDATE arena_team SET rating = 0, seasonGames = 0, seasonWins = 0, rank = 0");
     CharacterDatabase.PQuery("UPDATE arena_team_member SET personalRating = 0, seasonGames = 0, seasonWins = 0");

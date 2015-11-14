@@ -18,6 +18,7 @@ file(GLOB_RECURSE sources_Achievements Achievements/*.cpp Achievements/*.h)
 file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
 file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
 file(GLOB_RECURSE sources_ArenaSeason ArenaSeason/*.cpp ArenaSeason/*.h)
+file(GLOB_RECURSE sources_ArenaReward ArenaReward/*.cpp ArenaReward/*.h)
 file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
 file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
@@ -91,6 +92,7 @@ set(game_STAT_SRCS
   ${sources_Loot}
   ${sources_Mails}
   ${sources_Maps}
+  ${sources_ArenaReward}
   ${sources_Miscellaneous}
   ${sources_Movement}
   ${sources_OutdoorPvP}
@@ -187,6 +189,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Mails
   ${CMAKE_CURRENT_SOURCE_DIR}/Maps
   ${CMAKE_CURRENT_SOURCE_DIR}/Miscellaneous
+  ${CMAKE_CURRENT_SOURCE_DIR}/ArenaReward
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Spline
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement/MovementGenerators

@@ -22,6 +22,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_CHARACTERDATABASE_STATEMENTS);
 
+    PrepareStatement(CHAR_INS_ARENA_SEASON_CHAR_REWARD, "INSERT INTO `character_arena_reward` (guid, rank, currentSeason, type) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+
     PREPARE_STATEMENT(CHAR_DEL_QUEST_POOL_SAVE, "DELETE FROM pool_quest_save WHERE pool_id = ?", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_INS_QUEST_POOL_SAVE, "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)", CONNECTION_ASYNC)
     PREPARE_STATEMENT(CHAR_DEL_NONEXISTENT_GUILD_BANK_ITEM, "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?", CONNECTION_ASYNC)
@@ -411,7 +413,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_INS_CHAR_INSTANCE, "INSERT INTO character_instance (guid, instance, permanent) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PREPARE_STATEMENT(CHAR_DEL_CHAR_INSTANCE, "DELETE FROM character_instance WHERE guid = ?", CONNECTION_ASYNC);
     PREPARE_STATEMENT(CHAR_SEL_INSTANCE, "SELECT data, completedEncounters FROM instance WHERE map = ? AND id = ?", CONNECTION_SYNCH);
- 
+
     //Recups oxy
     PREPARE_STATEMENT(CHAR_GET_RECUP_STATUS, "SELECT numparam from link_recup where guid = ? AND type = 8 AND subtype = 0", CONNECTION_SYNCH)
     PREPARE_STATEMENT(CHAR_GET_RECUP_MODE, "SELECT numparam from link_recup where guid = ? AND type = 13 AND subtype = 0", CONNECTION_SYNCH)
@@ -426,5 +428,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_GET_RECUP_REMPLACE, "SELECT id, new_id from recup_stuff_remplace", CONNECTION_SYNCH)
     PREPARE_STATEMENT(CHAR_GET_RECUP_GUILD_ITEMS, "SELECT type,subtype,numparam from link_recup where type >= 100 and type <= 105 and guid = ?", CONNECTION_SYNCH)
     PREPARE_STATEMENT(CHAR_GET_RECUP_GUILD_GOLD, "SELECT numparam from link_recup where type=22 and guid = ?", CONNECTION_SYNCH)
-    
+
 }

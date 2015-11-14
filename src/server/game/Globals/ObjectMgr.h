@@ -42,6 +42,7 @@
 #include <limits>
 #include "ConditionMgr.h"
 #include "../../ArenaSeason/ArenaSeason.h"
+#include "../../ArenaReward/ArenaReward.h"
 #include <functional>
 
 #define MAX_FREE_GUID 1500000
@@ -1227,6 +1228,7 @@ class ObjectMgr
         void LoadFactionChangeReputations();
 
         ArenaSeason *_arenaSeasonExtraInfos;
+        ArenaReward *_arenaReward;
 
         inline uint32 faction_convert(uint32 orig) {
             std::map<uint32, uint32>::const_iterator it = FactionChange_Reputation.find(orig);
@@ -1235,8 +1237,8 @@ class ObjectMgr
             std::map<uint32, uint32>::const_iterator it2 = FactionChange_Reputation_Reverse.find(orig);
             if (it2 != FactionChange_Reputation_Reverse.end())
                 return it2->second;
-            
-            return orig;  
+
+            return orig;
         }
 
     private:

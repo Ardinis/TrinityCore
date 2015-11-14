@@ -3596,7 +3596,7 @@ void ObjectMgr::LoadPlayerInfo()
         sLog->outString(">> Loaded %u xp for level definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         sLog->outString();
         _arenaSeasonExtraInfos = new ArenaSeason();
-
+        _arenaReward = new ArenaReward();
     }
 }
 

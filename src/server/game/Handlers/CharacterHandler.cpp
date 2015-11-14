@@ -1036,6 +1036,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     m_playerLoading = false;
 
     sScriptMgr->OnPlayerLogin(pCurrChar);
+    sObjectMgr->_arenaReward->CheckValidArenaReward(pCurrChar);
     delete holder;
 }
 

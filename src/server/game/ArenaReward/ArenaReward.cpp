@@ -198,6 +198,7 @@ void ArenaReward::CheckValidArenaReward(Player *player)
 void ArenaReward::reward3C3Season()
 {
     // Get 3v3 team top 8
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Analyse des match et mise en place des distribition pour la V3...");
     QueryResult result = CharacterDatabase.PQuery("select name, arenaTeamId, rating from arena_team where type = 3 and seasonGames > 9 order by rating desc limit %u", V3_DUEL_CUTOFF);
     if (result)
     {
@@ -228,7 +229,7 @@ void ArenaReward::reward3C3Season()
             }
 
             // Get team members for each 3v3 team
-            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member join character_pvp_stats on arena_team_member.guid = character_pvp_stats.guid where arena_team_member.arenateamid = '%u' and character_pvp_stats.slot = 0", teamid);
+            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member join character_arena_stats on arena_team_member.guid = character_arena_stats.guid where arena_team_member.arenateamid = '%u' and character_arena_stats.slot = 0", teamid);
             if (res2)
             {
                 do
@@ -255,10 +256,12 @@ void ArenaReward::reward3C3Season()
         }
         while (result->NextRow());
     }
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Analyse des match et mise en place des distribition pour la V3 terminee.");
 }
 
 void ArenaReward::reward2C2Season()
 {
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Analyse des match et mise en place des distribition pour la V2...");
     QueryResult result = CharacterDatabase.PQuery("select name, arenaTeamId, rating from arena_team where type = 2 and seasonGames > 9 order by rating desc limit %u", V2_CHALLANGER_CUTOFF);
     if (result)
     {
@@ -297,7 +300,7 @@ void ArenaReward::reward2C2Season()
             }
 
             // Get team members for each 2v2 team
-            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member join character_pvp_stats on arena_team_member.guid = character_pvp_stats.guid where arena_team_member.arenateamid = '%u' and character_pvp_stats.slot = 0", teamid);
+            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member join character_arena_stats on arena_team_member.guid = character_arena_stats.guid where arena_team_member.arenateamid = '%u' and character_arena_stats.slot = 0", teamid);
             if (res2)
             {
                 do
@@ -324,13 +327,16 @@ void ArenaReward::reward2C2Season()
         }
         while (result->NextRow());
     }
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Analyse des match et mise en place des distribition pour la V2 terminee.");
 }
 
 void ArenaReward::resetSeason()
 {
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Demerrage du reset de la saison en cours...");
     CharacterDatabase.PQuery("UPDATE character_arena_stats SET matchMakerRating = 0");
-    CharacterDatabase.PQuery("UPDATE character_battleground_stats SET rating = 0");
     CharacterDatabase.PQuery("UPDATE arena_team SET rating = 0, seasonGames = 0, seasonWins = 0, rank = 0");
     CharacterDatabase.PQuery("UPDATE arena_team_member SET personalRating = 0, seasonGames = 0, seasonWins = 0");
-    CharacterDatabase.PQuery("UPDATE character_currency SET season_cap = 0");
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Reset de la saison termine...");
+    sWorld->SendServerMessage(SERVER_MSG_STRING, "Redemarrage du serveur afin de valider la nouvelle saison");
+    sWorld->ShutdownServ (60000, SHUTDOWN_MASK_RESTART, exitcode);
 }

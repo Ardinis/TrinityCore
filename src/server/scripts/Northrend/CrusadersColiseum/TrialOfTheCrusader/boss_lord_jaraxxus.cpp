@@ -121,7 +121,6 @@ public:
         {
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_JARAXXUS, NOT_STARTED);
-            SetEquipmentSlots(false, EQUIP_MAIN, EQUIP_OFFHAND, EQUIP_RANGED);
             m_uiFelFireballTimer = 5*IN_MILLISECONDS;
             m_uiFelLightningTimer = urand(10*IN_MILLISECONDS, 15*IN_MILLISECONDS);
             m_uiIncinerateFleshTimer = urand(20*IN_MILLISECONDS, 25*IN_MILLISECONDS);

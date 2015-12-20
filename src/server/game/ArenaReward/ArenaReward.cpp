@@ -34,7 +34,7 @@
 
 enum TitleDistribution
 {
-    CURRENT_SEASON = 8,
+    CURRENT_SEASON = 2,
 
     RANK_ONE_CUTOFF          = 1,
     V2_GLADIATOR_CUTOFF      = 4,
@@ -229,7 +229,7 @@ void ArenaReward::reward3C3Season()
             }
 
             // Get team members for each 3v3 team
-            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member join character_arena_stats on arena_team_member.guid = character_arena_stats.guid where arena_team_member.arenateamid = '%u' and character_arena_stats.slot = 0", teamid);
+            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member where arena_team_member.arenateamid = '%u'", teamid);
             if (res2)
             {
                 do
@@ -300,7 +300,7 @@ void ArenaReward::reward2C2Season()
             }
 
             // Get team members for each 2v2 team
-            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member join character_arena_stats on arena_team_member.guid = character_arena_stats.guid where arena_team_member.arenateamid = '%u' and character_arena_stats.slot = 0", teamid);
+            QueryResult res2 = CharacterDatabase.PQuery("select arena_team_member.guid, arena_team_member.personalRating from arena_team_member where arena_team_member.arenateamid = '%u'", teamid);
             if (res2)
             {
                 do
@@ -338,5 +338,5 @@ void ArenaReward::resetSeason()
     CharacterDatabase.PQuery("UPDATE arena_team_member SET personalRating = 0, seasonGames = 0, seasonWins = 0");
     sWorld->SendServerMessage(SERVER_MSG_STRING, "Reset de la saison termine...");
     sWorld->SendServerMessage(SERVER_MSG_STRING, "Redemarrage du serveur afin de valider la nouvelle saison");
-    sWorld->ShutdownServ (60000, SHUTDOWN_MASK_RESTART, exitcode);
+    sWorld->ShutdownServ (60, SHUTDOWN_MASK_RESTART, 0);
 }

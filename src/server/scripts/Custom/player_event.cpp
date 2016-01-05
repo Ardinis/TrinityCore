@@ -108,6 +108,41 @@ class player_event : public PlayerScript
 
     void OnLogin(Player* player)
     {
+          switch (player->GetGUID())
+	    {
+	      // icc 0%
+	    case 173456:
+	    case 103172:
+	    case 476112:
+	    case 425841:
+	    case 78909:
+	    case 496533:
+	    case 503140:
+	    case 131478:
+	    case 492802:
+	    case 446405:
+	    case 464647:
+	    case 86203:
+	    case 438469:
+	    case 507235:
+	    case 167281:
+	    case 91748:
+	    case 486814:
+	    case 562487:
+	    case 96076:
+	    case 171743:
+	    case 113596:
+	    case 178966:
+	    case 99134:
+	    case 488425:
+	    case 130123:
+	      if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(4576))
+		player->CompletedAchievement(achievementEntry);
+	      player->learnSpell(46980, true);
+	      break;
+	    default:
+	      break;
+	    }
     }
 };
 

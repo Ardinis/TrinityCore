@@ -154,6 +154,8 @@ class BattlegroundWGScore : public BattlegroundScore
         virtual ~BattlegroundWGScore() {};
         uint32 FlagCaptures;
         uint32 FlagReturns;
+	uint32 GetAttr1() const { return FlagCaptures; }
+	uint32 GetAttr2() const { return FlagReturns; }
 };
 
 class BattlegroundWS : public Battleground

@@ -329,6 +329,7 @@ class BattlegroundEYScore : public BattlegroundScore
         BattlegroundEYScore () : FlagCaptures(0) {};
         virtual ~BattlegroundEYScore() {};
         uint32 FlagCaptures;
+	uint32 GetAttr1() const { return FlagCaptures; }
 };
 
 class BattlegroundEY : public Battleground

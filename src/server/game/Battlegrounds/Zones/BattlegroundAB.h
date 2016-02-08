@@ -239,6 +239,8 @@ class BattlegroundABScore : public BattlegroundScore
         virtual ~BattlegroundABScore() {};
         uint32 BasesAssaulted;
         uint32 BasesDefended;
+	uint32 GetAttr1() const { return BasesAssaulted; }
+	uint32 GetAttr2() const { return BasesDefended; }
 };
 
 class BattlegroundAB : public Battleground

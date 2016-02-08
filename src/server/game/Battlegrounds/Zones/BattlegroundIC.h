@@ -854,6 +854,8 @@ class BattlegroundICScore : public BattlegroundScore
         virtual ~BattlegroundICScore() {};
         uint32 BasesAssaulted;
         uint32 BasesDefended;
+	uint32 GetAttr1() const { return BasesAssaulted; }
+	uint32 GetAttr2() const { return BasesDefended; }
 };
 
 class BattlegroundIC : public Battleground

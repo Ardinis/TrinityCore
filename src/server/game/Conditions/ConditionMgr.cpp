@@ -48,7 +48,14 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_AURA:
         {
             if (Unit* unit = object->ToUnit())
+            {
                 condMeets = unit->HasAuraEffect(ConditionValue1, ConditionValue2);
+                if (condMeets && ConditionValue3 > 0)
+                {
+                    if (Aura *aur = unit->GetAura(ConditionValue1))
+                        condMeets = aur->GetStackAmount() == ConditionValue3;
+                }
+            }
             break;
         }
         case CONDITION_ITEM:
@@ -1172,8 +1179,6 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 sLog->outErrorDb("Aura condition has non existing effect index (%u) (must be 0..2), skipped", cond->ConditionValue2);
                 return false;
             }
-            if (cond->ConditionValue3)
-                sLog->outErrorDb("Aura condition has useless data in value3 (%u)!", cond->ConditionValue3);
             break;
         }
         case CONDITION_ITEM:

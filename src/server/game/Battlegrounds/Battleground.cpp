@@ -972,7 +972,7 @@ void Battleground::EndBattleground(uint32 winner)
 	    stmt->setUInt32(11, score->second->GetAttr4());
 	    stmt->setUInt32(12, score->second->GetAttr5());
 	    stmt->setUInt8(13, player->GetTeam() == HORDE ? WINNER_HORDE : WINNER_ALLIANCE);
-	    stmt->setUInt8(14, player->GetGuildId());
+	    stmt->setUInt32(14, player->GetGuildId());
 	    CharacterDatabase.Execute(stmt);
 	}
 

@@ -167,6 +167,7 @@ class Group
             uint8       group;
             uint8       flags;
             uint8       roles;
+            uint32      guildId;
         };
         typedef std::list<MemberSlot> MemberSlotList;
         typedef MemberSlotList::const_iterator member_citerator;
@@ -221,6 +222,10 @@ class Group
         bool IsLeader(uint64 guid) const;
         uint64 GetMemberGUID(const std::string& name);
         bool IsAssistant(uint64 guid) const;
+        bool IsGuildGroupFor(Player *player);
+        uint32 GetMembersCountOfGuild(uint32 guildId);
+        uint32 GetNeededMembersOfSameGuild(uint8 arenaType, Map const *map);
+        void UpdateGuildFor(uint64 guid, uint32 guildId);
 
         Player* GetInvited(uint64 guid) const;
         Player* GetInvited(const std::string& name) const;

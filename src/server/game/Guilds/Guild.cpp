@@ -26,6 +26,7 @@
 #include "Log.h"
 #include "AccountMgr.h"
 #include "CalendarMgr.h"
+#include "Group.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -1393,7 +1394,7 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId, bool hasToPay)
         if (!tabCost)
             return;
 
-        
+
         if (!player->HasEnoughMoney(tabCost))                   // Should not happen, this is checked by client
             return;
 
@@ -2169,6 +2170,10 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
 
     _UpdateAccountsNumber();
 
+    if (player)
+        if (Group *group = player->GetGroup())
+            group->UpdateGuildFor(guid, m_id);
+
     // Call scripts if member was succesfully added (and stored to database)
     sScriptMgr->OnGuildAddMember(this, player, rankId);
 
@@ -2224,6 +2229,10 @@ void Guild::DeleteMember(uint64 guid, bool isDisbanding, bool isKicked)
     {
         player->SetInGuild(0);
         player->SetRank(0);
+
+        // Update GuildId in group
+        if (Group *group = player->GetGroup())
+            group->UpdateGuildFor(guid, 0);
     }
 
     _DeleteMemberFromDB(lowguid);

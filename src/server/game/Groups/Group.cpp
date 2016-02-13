@@ -34,6 +34,7 @@
 #include "MapInstanced.h"
 #include "Util.h"
 #include "LFGMgr.h"
+#include "Guild.h"
 
 Roll::Roll(uint64 _guid, LootItem const& li) : itemGUID(_guid), itemid(li.itemid),
 itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix), itemCount(li.count),
@@ -362,6 +363,7 @@ bool Group::AddMember(Player* player)
     member.group     = subGroup;
     member.flags     = 0;
     member.roles     = 0;
+    member.guildId   = player->GetGuildId();
     m_memberSlots.push_back(member);
 
     SubGroupCounterIncrease(subGroup);
@@ -2046,6 +2048,71 @@ bool Group::IsAssistant(uint64 guid) const
     return mslot->flags & MEMBER_FLAG_ASSISTANT;
 }
 
+bool Group::IsGuildGroupFor(Player *player)
+{
+    if (!IsMember(player->GetGUID()))
+        return false;
+
+    if (!player->GetGuildId())
+        return false;
+
+    if (!player->GetMap()->IsDungeon() &&
+        !(player->InArena()))
+        return false;
+
+    if (GetMembersCountOfGuild(player->GetGuildId()) < GetNeededMembersOfSameGuild((player->InArena() && player->GetBattleground()->isRated())
+                                                                                   ? player->GetBattleground()->GetArenaType() : 0, player->GetMap()))
+        return false;
+
+    return true;
+}
+
+uint32 Group::GetMembersCountOfGuild(uint32 guildId)
+{
+    uint32 count = 0;
+
+    for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+        if (itr->guildId == guildId)
+            ++count;
+
+    return count;
+}
+
+uint32 Group::GetNeededMembersOfSameGuild(uint8 arenaType, Map const *map)
+{
+    // For arena (100% of member)
+    if (arenaType && map->IsBattleArena())
+        return arenaType;
+
+    if (map->IsNonRaidDungeon())
+        return 3;
+
+    if (map->IsRaid())
+    {
+        if (map->GetEntry()->Expansion() == 0) // classic
+            return 10;
+
+        if (map->GetEntry()->Expansion() == 1) // TBC
+            return 8;
+
+        if (map->Is25ManRaid())
+            return 20;
+
+        return 8;
+    }
+
+    return 0;
+}
+
+void Group::UpdateGuildFor(uint64 guid, uint32 guildId)
+{
+    for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+    {
+        if (itr->guid == guid)
+            itr->guildId = guildId; // Change guild ID
+    }
+}
+
 bool Group::SameSubGroup(uint64 guid1, uint64 guid2) const
 {
     member_citerator mslot2 = _getMemberCSlot(guid2);
@@ -2243,4 +2310,3 @@ void Group::ToggleGroupMemberFlag(member_witerator slot, uint8 flag, bool apply)
     else
         slot->flags &= ~flag;
 }
-

@@ -108,182 +108,41 @@ class player_event : public PlayerScript
 
     void OnLogin(Player* player)
     {
-        uint32 gladAchievement = 2091;
-        uint32 duelAchievement = 2092;
-        uint32 rivalAchievement = 2093;
-        uint32 compAchievement = 2090;
-        uint32 gladTitle = 42;
-        uint32 duellisteTitle = 43;
-        uint32 rivalTitle = 44;
-        uint32 compTitle = 45;
-
-        switch (player->GetGUID())
-        {
-            // glad titré
-            case 542102:
-            case 574602:
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(128))
-                    player->SetTitle(titleInfo);
-                // glad simple
-            case 102703:
-            case 446405:
-            case 61050:
-            case 199034:
-            case 93405:
-            case 145880:
-            case 541401:
-            {
-                for (int i = 0; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
-                        player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 1; i < 4; i++)
-                    if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                        player->SetTitle(titleInfo, true);
-                break;
-            }
-            case 96038:
-            {
-                for (int i = 0; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
-                        player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 0; i < 4; i++)
-                    if (gladTitle+i != gladTitle && gladTitle+i != duellisteTitle)
-                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                            player->SetTitle(titleInfo, true);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
-                    player->SetTitle(titleInfo);
-                break;
-            }
-            // duelliste1
-            case 95057:
-            case 437264:
-            case 57687:
-            case 69420:
-            case 80853:
-            {
-                for (int i = 1; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
-                        player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 0; i < 4; i++)
-                    if (i != 1)
-                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                            player->SetTitle(titleInfo, true);
-                break;
-            }
-            // rival
-            case 49021:
-            case 58488:
-            {
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(128))
-                    player->SetTitle(titleInfo);
-                for (int i = 0; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
-                        player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle))
-                    player->SetTitle(titleInfo);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(rivalTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 1; i < 4; i++)
-                    if (gladTitle+i != rivalTitle && gladTitle+i != rivalTitle)
-                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                            player->SetTitle(titleInfo, true);
-                break;
-            }
-            case 101344:
-            case 176353:
-            {
-                for (int i = 2; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
-                        player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(rivalTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 0; i < 4; i++)
-                    if (i != 2)
-                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                            player->SetTitle(titleInfo, true);
-                break;
-            }
-            // competiteur
-            case 88424:
-            case 448355:
-            {
-                for (int i = 1; i < 4; i++)
-                    if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement+i))
-                        player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(duellisteTitle))
-                    player->SetTitle(titleInfo);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(compTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 0; i < 4; i++)
-                    if (gladTitle+i != duellisteTitle && gladTitle+i != compTitle)
-                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                            player->SetTitle(titleInfo, true);
-                break;
-            }
-            case 111064:
-            case 44899:
-            case 439653:
-            {
-                if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(compAchievement))
-                    player->CompletedAchievement(achievementEntry);
-                if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(compTitle))
-                    player->SetTitle(titleInfo);
-                for (int i = 0; i < 4; i++)
-                    if (i != 3)
-                        if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                            player->SetTitle(titleInfo, true);
-                break;
-            }
-            default:
-            {
-                for (int i = 0; i < 4; i++)
-                    if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(gladTitle+i))
-                        player->SetTitle(titleInfo, true);
-                break;
-            }
-        }
-
-        switch (player->GetGUID())
-        {
-            // icc 0%
-            case 173456:
-            case 103172:
-            case 476112:
-            case 425841:
-            case 78909:
-            case 496533:
-            case 503140:
-            case 131478:
-            case 492802:
-            case 446405:
-            case 464647:
-            case 86203:
-            case 438469:
-            case 507235:
-            case 167281:
-            case 91748:
-            case 486814:
-            case 562487:
-            case 96076:
-            case 171743:
-            case 113596:
-            case 178966:
-            case 99134:
-            case 488425:
-            case 130123:
-                if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(4576))
-                    player->CompletedAchievement(achievementEntry);
-                player->learnSpell(46980, true);
-                break;
-            default:
-                break;
-        }
+          switch (player->GetGUID())
+	    {
+	      // icc 0%
+	    case 173456:
+	    case 103172:
+	    case 476112:
+	    case 425841:
+	    case 78909:
+	    case 496533:
+	    case 503140:
+	    case 131478:
+	    case 492802:
+	    case 446405:
+	    case 464647:
+	    case 86203:
+	    case 438469:
+	    case 507235:
+	    case 167281:
+	    case 91748:
+	    case 486814:
+	    case 562487:
+	    case 96076:
+	    case 171743:
+	    case 113596:
+	    case 178966:
+	    case 99134:
+	    case 488425:
+	    case 130123:
+	      if (AchievementEntry const* achievementEntry = sAchievementStore.LookupEntry(4576))
+		player->CompletedAchievement(achievementEntry);
+	      player->learnSpell(46980, true);
+	      break;
+	    default:
+	      break;
+	    }
     }
 };
 

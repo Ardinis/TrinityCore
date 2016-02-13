@@ -48,14 +48,14 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_AURA:
         {
             if (Unit* unit = object->ToUnit())
-            {
+	      {
                 condMeets = unit->HasAuraEffect(ConditionValue1, ConditionValue2);
-                if (condMeets && ConditionValue3 > 0)
-                {
-                    if (Aura *aur = unit->GetAura(ConditionValue1))
-                        condMeets = aur->GetStackAmount() == ConditionValue3;
-                }
-            }
+		if (condMeets && ConditionValue3 > 0)
+		  {
+		    if (Aura *aur = unit->GetAura(ConditionValue1))
+		      condMeets = aur->GetStackAmount() == ConditionValue3;
+		  }
+	      }
             break;
         }
         case CONDITION_ITEM:

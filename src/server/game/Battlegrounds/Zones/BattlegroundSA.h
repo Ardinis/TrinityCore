@@ -28,6 +28,8 @@ class BattlegroundSAScore : public BattlegroundScore
         virtual ~BattlegroundSAScore() {};
     uint8 demolishers_destroyed;
     uint8 gates_destroyed;
+    uint32 GetAttr1() const { return demolishers_destroyed; }
+    uint32 GetAttr2() const { return gates_destroyed; }
 };
 
 #define BG_SA_FLAG_AMOUNT 3

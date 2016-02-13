@@ -1532,6 +1532,11 @@ class BattlegroundAVScore : public BattlegroundScore
         uint32 MinesCaptured;
         uint32 LeadersKilled;
         uint32 SecondaryObjectives;
+	uint32 GetAttr1() const { return GraveyardsAssaulted; }
+	uint32 GetAttr2() const { return GraveyardsDefended; }
+	uint32 GetAttr3() const { return TowersAssaulted; }
+	uint32 GetAttr4() const { return TowersDefended; }
+	uint32 GetAttr5() const { return MinesCaptured; }
 };
 
 class BattlegroundAV : public Battleground

@@ -226,6 +226,7 @@ m_ThreatManager(this), m_vehicle(NULL), m_vehicleKit(NULL), m_unitTypeMask(UNIT_
     m_baseSpellCritChance = 5;
 
     m_CombatTimer = 0;
+    m_CombatDuration = 0;
     m_lastManaUse = 0;
 
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -324,18 +325,18 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
     /* TempHACK: Currently only used for total (binary) resists, as partial resists appears to be handled elsewhere. */
     if (!binary)
         return 0;
-        
+
     // No resist against physical / holy
     if (uint32(schoolMask & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY)) > 0)
         return 0;
-    
+
     // TempHACK: ignore resistance for pets, as it is currently bugged
     if (pVictim->GetOwner() && pVictim->GetOwner()->ToPlayer())
         return 0;
-    
+
 
     // These spells should ignore any resistances
-    if (spellProto && 
+    if (spellProto &&
         ((spellProto->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT) ||
          (spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_RESISTANCE) ||
          (spellProto->AttributesEx4 & SPELL_ATTR4_IGNORE_RESISTANCES)))
@@ -379,7 +380,7 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 
     if (victimResistance <= 0)
         return 0;
-        
+
     /* victimResistance contains the "final" victim's spell resistance, modified by auras and attacker's spell penetration */
 
     float averageResist = float(victimResistance) / float(victimResistance + resistanceConstant);
@@ -390,7 +391,7 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
         int32 rand = irand(0, 10000);
         return rand < tmp ? 100 : 0;
     }
-    
+
     // Handle partial resists here [NOT USED CURRENTLY]
 
     float discreteResistProbability[11];
@@ -435,6 +436,9 @@ void Unit::Update(uint32 p_time)
 
     if (CanHaveThreatList() && getThreatManager().isNeedUpdateToClient(p_time))
         SendThreatListUpdate();
+
+    if (isInCombat())
+        m_CombatDuration += p_time;
 
     // update combat timer only for players and pets (only pets with PetAI)
     if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || (ToCreature()->isPet() && IsControlledByPlayer())))
@@ -1806,12 +1810,12 @@ uint32 Unit::GetSpellPenetration(SpellSchoolMask schoolMask) const
     if (!source)
     {
         source = ToCreature();
-  
+
         if (source)
         {
             source = source->ToCreature()->GetOwner();
 
-            if (source) 
+            if (source)
                 source = source->ToPlayer();
         }
     }
@@ -3563,7 +3567,7 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint8 effMask)
              * and will not be sent to clients. But if the aura has per-caster
              * aurastate, then the (client-side) auraState will change for the aura's caster,
              * therefore we need to send to client in that case.
-             */ 
+             */
             if (HasAuraState(aState, NULL, NULL))
                 ForceValuesUpdateAtIndex(UNIT_FIELD_AURASTATE);
         }
@@ -11215,9 +11219,9 @@ uint32 Unit::SpellDamageBonusNOT_USED(Unit* victim, SpellInfo const* spellProto,
     {
         if (spellProto->EquippedItemClass == -1 && (*i)->GetSpellInfo()->EquippedItemClass != -1)    //prevent apply mods from weapon specific case to non weapon specific spells (Example: thunder clap and two-handed weapon specialization)
             continue;
-            
+
         // Pas DOUBLEDIP sur scourge strike avec les buffs ICC
-        if ((spellProto->Id == 70890 /* scourgestrike partie ombre */) && 
+        if ((spellProto->Id == 70890 /* scourgestrike partie ombre */) &&
             (
              ((*i)->GetSpellInfo()->Id == 73762) ||
              ((*i)->GetSpellInfo()->Id == 73824) ||
@@ -11232,9 +11236,9 @@ uint32 Unit::SpellDamageBonusNOT_USED(Unit* victim, SpellInfo const* spellProto,
              ((*i)->GetSpellInfo()->Id == 73821) ||
              ((*i)->GetSpellInfo()->Id == 73822)
             ))
-            
+
             continue;
-                            
+
 
         if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
         {
@@ -11798,7 +11802,7 @@ uint32 Unit::SpellDamageBonusNOT_USED(Unit* victim, SpellInfo const* spellProto,
 float Unit::SpellDamageBonusDonePct(SpellInfo const* spellProto) {
     float DoneTotalMod = 0.0f;
     std::map<SpellGroup, int32> SameEffectSpellGroup;
-    
+
     AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
     {
@@ -11806,7 +11810,7 @@ float Unit::SpellDamageBonusDonePct(SpellInfo const* spellProto) {
             continue;
 
         // Pas DOUBLEDIP sur scourge strike avec les buffs ICC
-        if ((spellProto->Id == 70890 /* scourgestrike partie ombre */) && 
+        if ((spellProto->Id == 70890 /* scourgestrike partie ombre */) &&
             (
              ((*i)->GetSpellInfo()->Id == 73762) ||
              ((*i)->GetSpellInfo()->Id == 73824) ||
@@ -11821,9 +11825,9 @@ float Unit::SpellDamageBonusDonePct(SpellInfo const* spellProto) {
              ((*i)->GetSpellInfo()->Id == 73821) ||
              ((*i)->GetSpellInfo()->Id == 73822)
             ))
-            
+
             continue;
-                            
+
 
         if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
         {
@@ -12236,7 +12240,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 	// rollingdots : check saved value (spell power)
 	int32 DoneAdvertisedBenefit  = RollingDot::getValue(ROLLING_SPELL_POWER, this, victim, spellProto, rdot);
 	// SpellBaseDamageBonus(spellProto->GetSchoolMask());
-	
+
     // Pets just add their bonus damage to their spell damage
     // note that their spell damage is just gain of their own auras
     if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
@@ -12519,7 +12523,7 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         return true;
     return false;
 }
-    
+
 
 float Unit::CalcCritChance(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
@@ -13219,16 +13223,16 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
         return false;
 
   // Exception regen mana flaques de saronite sur Vezax. --zangdar
-  if (spellInfo->Id == 63337) 
+  if (spellInfo->Id == 63337)
       return false;
-  // Si on veut faire ca de maniere plus propre, commenter le check ci-dessus sur le spell 63337, et mettre le check ci-dessous à la place: 
-  // (par contre je suis pas sur que ca introduise pas des effets secondaires en modifiant la gestion de tous les autres sorts ayant le flag) 
-  
+  // Si on veut faire ca de maniere plus propre, commenter le check ci-dessus sur le spell 63337, et mettre le check ci-dessous à la place:
+  // (par contre je suis pas sur que ca introduise pas des effets secondaires en modifiant la gestion de tous les autres sorts ayant le flag)
+
   /*
   if (spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
-      return false;  
+      return false;
   */
-  
+
   // Cloac Of Shadow exceptions
   if (HasAura(35729, EFFECT_0) || HasAura(31224, EFFECT_0))
       if (spellInfo->Id == 55095 || spellInfo->Id == 55078 || spellInfo->Id == 1978 || spellInfo->Id == 6358 || spellInfo->Id == 68766 || spellInfo->Id == 58433)
@@ -13849,6 +13853,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         return;
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+
+    m_CombatDuration = 0;
 
     if (m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_FINISHED)
         if (m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Attributes & SPELL_ATTR0_CANT_USED_IN_COMBAT)
@@ -14629,7 +14635,7 @@ void Unit::setDeathState(DeathState s)
                             plr->CharmSpellInitialize();
                         }
                     }
-                    
+
                 }
             }
         }
@@ -14813,7 +14819,7 @@ Unit* Creature::SelectVictim()
             } else {
                 sLog->outError("[Bug Abuse] SelectVictim(%s, GUID %u): Last-Taunter %s (GUID %u) isn't currently attacked! Updating target.", GetName(), GetGUIDLow(), caster->GetName(), caster->GetGUIDLow());
             }
-        
+
         } else if (tauntAuras.size() > 1)
         {
             // We do not have last taunt aura caster but we have more taunt auras,
@@ -17651,6 +17657,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         if (Group* group = player->GetGroup())
         {
             group->BroadcastPacket(&data, group->GetMemberGroup(player->GetGUID()));
+            group->SaveGuildProgress(creature);
 
             if (creature)
             {
@@ -17767,7 +17774,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
 
         if (plrVictim->GetMap()->IsDungeon() && plrVictim->GetInstanceScript())
             plrVictim->GetInstanceScript()->OnPlayerKilled(plrVictim->ToPlayer());
-                    
+
         // remember victim PvP death for corpse type and corpse reclaim delay
         // at original death (not at SpiritOfRedemtionTalent timeout)
         plrVictim->SetPvPDeath(player != NULL);

@@ -2048,6 +2048,34 @@ bool Group::IsAssistant(uint64 guid) const
     return mslot->flags & MEMBER_FLAG_ASSISTANT;
 }
 
+void Group::SaveGuildProgress(Creature *creature)
+{
+    if (!creature)
+        return;
+
+    uint32 entry = creature->GetEntry();
+    pvestats_config *stats = sObjectMgr->GetPVEStatsConfig(entry);
+    if (!stats)
+        return;
+    uint32 guildId = 0;
+    for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+        if (Player *player = ObjectAccessor::FindPlayer(itr->guid))
+            if (IsGuildGroupFor(player))
+            {
+                guildId = player->GetGuildId();
+                break;
+            }
+    if (guildId > 0)
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PVESTATS_GUILD);
+        stmt->setUInt32(0, guildId);
+        stmt->setUInt32(1, entry);
+        stmt->setUInt32(2, creature->GetCombatDuration());
+        stmt->setUInt32(3, 0 /* death count not handle for now */);
+        stmt->setUInt32(4, (uint32)GetDifficulty(true) /* difficulty only enabled for raid */);
+    }
+}
+
 bool Group::IsGuildGroupFor(Player *player)
 {
     if (!IsMember(player->GetGUID()))

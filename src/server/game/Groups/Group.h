@@ -226,6 +226,7 @@ class Group
         uint32 GetMembersCountOfGuild(uint32 guildId);
         uint32 GetNeededMembersOfSameGuild(uint8 arenaType, Map const *map);
         void UpdateGuildFor(uint64 guid, uint32 guildId);
+        void SaveGuildProgress(Creature *creature);
 
         Player* GetInvited(uint64 guid) const;
         Player* GetInvited(const std::string& name) const;

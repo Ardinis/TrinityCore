@@ -1555,7 +1555,7 @@ void Player::Update(uint32 p_time)
     if (!IsInWorld())
         return;
 
-    if (recup_task) {   
+    if (recup_task) {
         int r = recup_task->Process();
         if (r == 2) {
           //fini (erreur)
@@ -1674,7 +1674,7 @@ if (m_jail_amnestie == true && sObjectMgr->m_jailconf_amnestie > 0)
 }
 
     time_t now = time(NULL);
-	// TEMPORARY HACK : Log combat status bugs. This hack will be removed once we have examined the logs; 
+	// TEMPORARY HACK : Log combat status bugs. This hack will be removed once we have examined the logs;
 	if (m_combatHack && (now > m_combatHack)) {
 		m_combatHack = 0;
 		if (isInCombat()) {
@@ -6295,10 +6295,10 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
             int32 oldRating = m_baseRatingValue[cr] - (apply ? value : -value);
             float hasteFromOldRating = oldRating * GetRatingMultiplier(cr);
             float hasteFromNewRating = m_baseRatingValue[cr] * GetRatingMultiplier(cr);
-            
+
             // remove haste from old rating
             ApplyCastTimePercentMod(hasteFromOldRating, false);
-            
+
             // apply haste from new rating
             ApplyCastTimePercentMod(hasteFromNewRating, true);
 
@@ -17767,7 +17767,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     if (extraflags & PLAYER_EXTRA_ALLOWINTERFACTIONBG) {
            m_ExtraFlags |= PLAYER_EXTRA_ALLOWINTERFACTIONBG;
-    } 
+    }
 
     // RaF stuff.
     m_grantableLevels = fields[66].GetUInt32();
@@ -26167,14 +26167,14 @@ void Player::CheckUnderMap(UnderMapCheckType _type) {
   bool isUnderMap;
   float z1 = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 0.5f);
   float z2 = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 5.5f, true, 10.0f);
-  
+
   if (z1 > INVALID_HEIGHT) {
     isUnderMap = (z1 > GetPositionZ() + (0.25f));
   } else {
     isUnderMap = (z2 > INVALID_HEIGHT);
   }
-  
-  
+
+
   if (b_wasUnderMap) {
     if (isUnderMap || (z1 <= INVALID_HEIGHT)) {
       float good_z = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ() + 25.5f, true, 50.0f);
@@ -26192,7 +26192,7 @@ void Player::CheckUnderMap(UnderMapCheckType _type) {
         buf[4095] = 0;
         sLog->outDB(LOG_TYPE_DEBUG, buf);
         TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), good_z + 0.5f, GetOrientation());
-        
+
         // Log undermap info
       }
     }
@@ -26228,7 +26228,7 @@ void Player::SetCrossFaction(bool val) {
 	 } else {
 		 SetSwitchedDisplayId(GetNativeDisplayId()); // should not happen
 	 }
- } 
+ }
 
  _changedFields[UNIT_FIELD_FACTIONTEMPLATE] = true;
  _changedFields[UNIT_FIELD_BYTES_0] = true;
@@ -26257,7 +26257,7 @@ uint8 Player::getSwitchedRace() const {
                                 break;
                             case RACE_GNOME:
                                 switched_race = RACE_TROLL;
-                                break; 
+                                break;
                             case RACE_TROLL:
                                 switched_race = RACE_GNOME;
                                 break;
@@ -26278,4 +26278,3 @@ uint8 Player::getSwitchedRace() const {
                         }
                 return switched_race;
 }
-

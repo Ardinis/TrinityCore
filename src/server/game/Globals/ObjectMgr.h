@@ -499,6 +499,14 @@ struct GossipMenus
     ConditionList   conditions;
 };
 
+struct pvestats_config
+{
+    uint32 entry;
+    uint32 extra_point;
+    uint32 map_id;
+    uint32 difficulty;
+};
+
 typedef std::multimap<uint32, GossipMenus> GossipMenusContainer;
 typedef std::pair<GossipMenusContainer::const_iterator, GossipMenusContainer::const_iterator> GossipMenusMapBounds;
 typedef std::pair<GossipMenusContainer::iterator, GossipMenusContainer::iterator> GossipMenusMapBoundsNonConst;
@@ -789,6 +797,8 @@ class ObjectMgr
 
         VehicleAccessoryList const* GetVehicleAccessoryList(Vehicle* veh) const;
 
+        void LoadPVEStatsConfig();
+
         DungeonEncounterList const* GetDungeonEncounterList(uint32 mapId, Difficulty difficulty)
         {
             UNORDERED_MAP<uint32, DungeonEncounterList>::const_iterator itr = _dungeonEncounterStore.find(MAKE_PAIR32(mapId, difficulty));
@@ -952,6 +962,7 @@ class ObjectMgr
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint8 level);
         uint32 GetXPForLevel(uint8 level);
+        pvestats_config * GetPVEStatsConfig(uint32 bossEntry);
 
         int32 GetFishingBaseSkillLevel(uint32 entry) const
         {
@@ -1346,6 +1357,9 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, ItemSetNameEntry> ItemSetNameContainer;
         ItemSetNameContainer _itemSetNameStore;
+
+        typedef std::map<uint32, pvestats_config *> PVEStatsConfigContainer;
+        PVEStatsConfigContainer _pveStatsConfig;
 
         MapObjectGuids _mapObjectGuidsStore;
         CreatureDataContainer _creatureDataStore;

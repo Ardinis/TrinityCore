@@ -1730,6 +1730,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
 
+    sLog->outString("Loading PvEConfigs...");
+    sObjectMgr->LoadPVEStatsConfig();
+
     ///- Initialize game time and timers
     sLog->outString("Initialize game time and timers");
     m_gameTime = time(NULL);
@@ -1833,10 +1836,10 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("AutoRecup: Building taxi nodes maps..." );
     RecupMgrAuto::BuildFlyMastersIndex();
-    
+
     sLog->outString("Initialising Profiling Manager...");
     ProfilingMgr::Initialize();
-    
+
     sLog->outString("Build faction-to-template map...");
     for (unsigned int i = 1; i < sFactionTemplateStore.GetNumRows(); i++)
     {
@@ -1845,8 +1848,8 @@ void World::SetInitialWorldSettings()
                         continue;
                 faction2template[factionTemplateEntry->faction] = factionTemplateEntry->ID;
     }
-    
-    
+
+
     DynConfigMgr::reload();
 
     LoadCharacterNameData();
@@ -2034,7 +2037,7 @@ void World::Update(uint32 diff, uint32 jitter)
 
     clock_gettime(CLOCK_REALTIME, &ts_real1);
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_virt1);
-#endif 
+#endif
     m_updateTime = diff;
     if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] && diff > m_int_configs[CONFIG_MIN_LOG_UPDATE])
     {
@@ -2413,9 +2416,9 @@ void World::ForceKillSession(WorldSession *victim) {
         if (current == victim) {
             DecreasePlayerCount();
             m_sessions.erase(itr);
-            return; 
+            return;
         }
-    } 
+    }
 }
 
 /// Kick (and save) all players

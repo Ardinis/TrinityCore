@@ -143,6 +143,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PREPARE_STATEMENT(CHAR_SEL_PVPSTATS_MAXID, "SELECT MAX(id) FROM pvpstats_battlegrounds", CONNECTION_SYNCH);
     PREPARE_STATEMENT(CHAR_INS_PVPSTATS_BATTLEGROUND, "INSERT INTO pvpstats_battlegrounds (id, winner_faction, bracket_id, type, date) VALUES (?, ?, ?, ?, NOW())", CONNECTION_ASYNC);
     PREPARE_STATEMENT(CHAR_INS_PVPSTATS_PLAYER, "INSERT INTO pvpstats_players (battleground_id, character_guid, score_killing_blows, score_deaths, score_honorable_kills, score_bonus_honor, score_damage_done, score_healing_done, attr_1, attr_2, attr_3, attr_4, attr_5, player_faction, guild_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    // pve stats
+    PREPARE_STATEMENT(CHAR_SEL_PVESTATS_CONFIG, "SELECT entry, extra_point, map_id, difficulty FROM pvestats_config", CONNECTION_SYNCH);
+    PREPARE_STATEMENT(CHAR_INS_PVESTATS_GUILD, "INSERT INTO pvestats_guild (id, guild_id, boss_entry, boss_name, kill_timer, death_count, date) VALUES (?, ?, ?, ?, ?, ?, NOW())", CONNECTION_ASYNC);
 
     // Guild handling
     // 0: uint32, 1: string, 2: uint32, 3: string, 4: string, 5: uint64, 6-10: uint32, 11: uint64

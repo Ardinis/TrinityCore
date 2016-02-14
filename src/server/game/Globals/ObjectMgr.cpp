@@ -6732,6 +6732,11 @@ uint32 ObjectMgr::GetXPForLevel(uint8 level)
     return 0;
 }
 
+pvestats_config* ObjectMgr::GetPVEStatsConfig(uint32 bossEntry)
+{
+    return _pveStatsConfig[bossEntry];
+}
+
 void ObjectMgr::LoadPetNames()
 {
     uint32 oldMSTime = getMSTime();
@@ -9198,4 +9203,33 @@ VehicleAccessoryList const* ObjectMgr::GetVehicleAccessoryList(Vehicle* veh) con
     if (itr != _vehicleTemplateAccessoryStore.end())
         return &itr->second;
     return NULL;
+}
+
+void ObjectMgr::LoadPVEStatsConfig()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _pveStatsConfig.clear();                              // need for reload case
+
+    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_SEL_PVESTATS_CONFIG));
+    if (!result)
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        pvestats_config *stat = new pvestats_config();
+        stat->entry = fields[0].GetUInt32();
+        stat->extra_point = fields[1].GetUInt32();
+        stat->map_id = fields[2].GetUInt32();
+        stat->difficulty = fields[3].GetUInt32();
+        _pveStatsConfig[stat->entry] = stat;
+
+    } while (result->NextRow());
+
+    sLog->outString(">> Loaded %lu CHAR_SEL_PVESTATS_CONFIG  in %u ms", (unsigned long)_pveStatsConfig.size(), GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
 }

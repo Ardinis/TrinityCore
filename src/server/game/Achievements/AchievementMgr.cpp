@@ -428,10 +428,7 @@ bool AchievementCriteriaDataSet::Meets(Player const* source, Unit const* target,
     return true;
 }
 
-AchievementMgr::AchievementMgr(Player* player)
-{
-    m_player = player;
-}
+AchievementMgr::AchievementMgr(Player* player): m_player(player), _achievementPoints(0) { }
 
 AchievementMgr::~AchievementMgr()
 {
@@ -454,6 +451,7 @@ void AchievementMgr::Reset()
     }
 
     m_completedAchievements.clear();
+    _achievementPoints = 0;
     m_criteriaProgress.clear();
     DeleteFromDB(m_player->GetGUIDLow());
 
@@ -622,6 +620,8 @@ void AchievementMgr::LoadFromDB(PreparedQueryResult achievementResult, PreparedQ
             CompletedAchievementData& ca = m_completedAchievements[achievementid];
             ca.date = time_t(fields[1].GetUInt32());
             ca.changed = false;
+
+            _achievementPoints += achievement->points;
 
             // title achievement rewards are retroactive
             if (AchievementReward const* reward = sAchievementMgr->GetAchievementReward(achievement))
@@ -2040,6 +2040,8 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     CompletedAchievementData& ca =  m_completedAchievements[achievement->ID];
     ca.date = time(NULL);
     ca.changed = true;
+
+    _achievementPoints += achievement->points;
 
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
     // TODO: where do set this instead?

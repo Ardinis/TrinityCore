@@ -2073,6 +2073,7 @@ void Group::SaveGuildProgress(Creature *creature)
         stmt->setUInt32(2, creature->GetCombatDuration());
         stmt->setUInt32(3, 0 /* death count not handle for now */);
         stmt->setUInt32(4, (uint32)GetDifficulty(true) /* difficulty only enabled for raid */);
+        CharacterDatabase.Execute(stmt);
     }
 }
 

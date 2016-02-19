@@ -520,7 +520,7 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_GM_INVISIBLE       = 0x0010,
     PLAYER_EXTRA_GM_CHAT            = 0x0020,               // Show GM badge in chat messages
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
-    
+
     PLAYER_EXTRA_ALLOWINTERFACTIONBG	= 0x4000,
 
     // other states
@@ -1124,7 +1124,7 @@ class Player : public Unit, public GridObject<Player>
             return TeleportTo(loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ(), loc.GetOrientation(), options);
         }
         bool TeleportToBGEntryPoint();
-        
+
         void CheckUnderMap(UnderMapCheckType _type);
 
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
@@ -2572,7 +2572,7 @@ class Player : public Unit, public GridObject<Player>
                        if (m_runes == NULL)
                                return;
                        for (index = 0; index < MAX_RUNES; index++) {
-                               m_runes->runes[index].GraceTime = 0; 
+                               m_runes->runes[index].GraceTime = 0;
                        }
         }
         void SetWasJustUsed(uint8 index, bool val) { m_runes->runes[index].WasJustUsed = val; }
@@ -2593,6 +2593,7 @@ class Player : public Unit, public GridObject<Player>
         void CompletedAchievement(AchievementEntry const* entry);
         void FailedAchievement(AchievementEntry const* entry);
         bool HasAchieved(uint32 entry);
+        uint32 GetAchievementPoints() const;
 
         bool HasTitle(uint32 bitIndex);
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
@@ -2949,7 +2950,7 @@ class Player : public Unit, public GridObject<Player>
         float m_undermapX, m_undermapY, m_undermapZ;
         UnderMapCheckType m_undermapType;
         uint32 m_splineTime;
-        
+
         BackgroundRecupTask *recup_task;
         bool cross_faction;
 		uint32 m_switchedDisplayId;

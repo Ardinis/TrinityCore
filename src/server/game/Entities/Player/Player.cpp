@@ -19259,6 +19259,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setString(index++, ss.str());
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
+        stmt->setUInt32(index++, GetAchievementPoints());
     }
     else
     {
@@ -19370,6 +19371,7 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setString(index++, ss.str());
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
+        stmt->setUInt32(index++, GetAchievementPoints());
 
         stmt->setUInt8(index++, IsInWorld() ? 1 : 0);
         stmt->setUInt8(index++, m_XPRate);
@@ -24665,6 +24667,12 @@ void Player::FailedAchievement(AchievementEntry const* entry)
 {
     GetAchievementMgr().FailedAchievement(entry);
 }
+
+uint32 Player::GetAchievementPoints() const
+{
+    return  GetAchievementMgr().GetAchievementPoints();
+}
+
 
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)
 {

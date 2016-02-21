@@ -575,9 +575,9 @@ class boss_the_lich_king : public CreatureScript
 
                 if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, player))
                 {
-                    EnterEvadeMode();
+                    /*                    EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
+                    return;*/
                 }
 
                 me->setActive(true);
@@ -748,7 +748,6 @@ class boss_the_lich_king : public CreatureScript
 
             void JustSummoned(Creature* summon)
             {
-	      //	      DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
                 switch (summon->GetEntry())
                 {
                     case NPC_RAGING_SPIRIT:
@@ -757,6 +756,11 @@ class boss_the_lich_king : public CreatureScript
                         summons.Summon(summon);
                         break;
                     case NPC_SHAMBLING_HORROR:
+                        summon->CastSpell(summon, SPELL_RISEN_WITCH_DOCTOR_SPAWN, true);
+                        summon->SetReactState(REACT_PASSIVE);
+                        summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                        summon->m_Events.AddEvent(new StartMovementEventOnNonCaster(me, summon), summon->m_Events.CalculateTime(4000));
+                        break;
                     case NPC_DRUDGE_GHOUL:
                         summon->CastSpell(summon, SPELL_RISEN_WITCH_DOCTOR_SPAWN, true);
                         summon->SetReactState(REACT_PASSIVE);
@@ -1007,9 +1011,9 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_INTRO_CAST_FREEZE:
                             Talk(SAY_LK_INTRO_3);
-			    if (Unit* Tirion = me->GetMap()->GetCreature(instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
-			      DoCast(Tirion, SPELL_ICE_LOCK, false);
-			    //                            DoCastAOE(SPELL_ICE_LOCK, false);
+                            if (Unit* Tirion = me->GetMap()->GetCreature(instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
+                                DoCast(Tirion, SPELL_ICE_LOCK, false);
+                            //                            DoCastAOE(SPELL_ICE_LOCK, false);
 
                             events.ScheduleEvent(EVENT_FINISH_INTRO, 1000, 0, PHASE_INTRO);
                             break;
@@ -1018,7 +1022,7 @@ class boss_the_lich_king : public CreatureScript
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             me->SetReactState(REACT_AGGRESSIVE);
                             events.SetPhase(PHASE_ONE);
-			    me->SetInCombatWithZone();
+                            me->SetInCombatWithZone();
                             break;
                         case EVENT_SUMMON_SHAMBLING_HORROR:
                             DoCast(me, SPELL_SUMMON_SHAMBLING_HORROR);
@@ -2467,7 +2471,8 @@ class spell_the_lich_king_necrotic_plague : public SpellScriptLoader
 
                 CustomSpellValues values;
                 //values.AddSpellMod(SPELLVALUE_AURA_STACK, 2);
-                values.AddSpellMod(SPELLVALUE_MAX_TARGETS, 1);
+                //                values.AddSpellMod(SPELLVALUE_MAX_TARGETS, 1);
+
                 GetTarget()->CastCustomSpell(SPELL_NECROTIC_PLAGUE_JUMP, values, NULL, true, NULL, NULL, GetCasterGUID());
                 if (Unit* caster = GetCaster())
                     caster->CastSpell(caster, SPELL_PLAGUE_SIPHON, true);
@@ -2502,11 +2507,28 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
 
             void SelectTarget(std::list<Unit*>& targets)
             {
+                targets.clear();
+                if (!GetCaster())
+                    return;
+                // AnyUnitInObjectRangeCheck
+                Trinity::AnyUnitInObjectRangeCheck checker(GetCaster(), 8.0f);
+                Trinity::UnitListSearcher<Trinity::AnyUnitInObjectRangeCheck> searcher(GetCaster(), targets, checker);
+                GetCaster()->VisitNearbyObject(30.0f, searcher);
+                targets.remove(GetCaster());
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
+                for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
+                {
+                    if ((*itr)->HasAura(72846))
+                    {
+                        targets.remove(*itr);
+                        itr = targets.begin();
+                    }
+                }
+
                 if (targets.size() < 2)
                     return;
-
                 targets.resize(1);
+                Unit *target = targets.front();
             }
 
             void CheckAura()
@@ -2523,6 +2545,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
 
             void Register()
             {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_the_lich_king_necrotic_plague_SpellScript::SelectTarget, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
                 BeforeHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::CheckAura);
                 OnHit += SpellHitFn(spell_the_lich_king_necrotic_plague_SpellScript::AddMissingStack);
             }

@@ -185,7 +185,6 @@ void ArenaReward::CheckValidArenaReward(Player *player)
                         if (rwd.achievement)
                             if (AchievementEntry const *achievementEntry = sAchievementStore.LookupEntry(rwd.achievement))
                                 player->CompletedAchievement(achievementEntry);
-                        std::cout << "UPDATE character_arena_reward SET isRewarded = 1 WHERE guid = " << rwdCharInfos.guid << std::endl;
                         CharacterDatabase.PQuery("UPDATE character_arena_reward SET isRewarded = 1 WHERE currentSeason = %u AND guid = %u AND rank = %u AND type = %u", rwdCharInfos.seasonID, rwdCharInfos.guid, rwdCharInfos.rank,  rwdCharInfos.type);
 
                     }

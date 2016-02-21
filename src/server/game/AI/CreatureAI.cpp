@@ -153,7 +153,10 @@ void CreatureAI::MoveInLineOfSight_Safe(Unit* who)
 
 void CreatureAI::MoveInLineOfSight(Unit* who)
 {
-    if (!me->HasReactState(REACT_AGGRESSIVE))
+    if (!me->HasReactState(REACT_AGGRESSIVE) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        return;
+
+    if (!me->IsInitialize())
         return;
 
     if (me->getVictim())

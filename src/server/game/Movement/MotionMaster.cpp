@@ -678,20 +678,20 @@ void MotionMaster::DirectDelete(_Ty curr)
 				if (target && target->ToPlayer()) {
 					tank = target->ToPlayer();
 					break;
-				}	
+				}
 			}
 			bool false_positive = false;
-			
+
 			// False positives
 			if ((creature->GetEntry() == 36853) || (creature->GetEntry() == 38265) || (creature->GetEntry() == 38266) || (creature->GetEntry() == 38267)) {
 			    //Sindragosa pull
 			    if (curr->getId() == 1 /* POINT_FROSTWYRM_FLY_IN */ )
 			        false_positive = true;
-			    
+
 			}
 			if (creature->GetMapId() != 631)
 				false_positive = true; // For now, do this only on ICC
-			
+
 			if (tank && !false_positive && DynConfigMgr::getValue(DynConfigMgr::CONFIG_CHEAT_ALERT)) {
 				std::string str = "";
 				str = "|cFFFFFC00Possible bug abuse on |cFF60FF00" + std::string(_owner->GetName()) + "|cFFFFFC00 (tank: |cFF60FF00" + (tank ? std::string(tank->GetName()) : "<not found>") + "|cFFFFFC00)";

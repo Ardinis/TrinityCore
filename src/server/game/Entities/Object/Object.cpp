@@ -660,7 +660,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                 {
                     Unit const* unit = ToUnit();
                     uint32 value = m_uint32Values[index];
-                    
+
                     if (!unit->IsControlledByPlayer() && index == UNIT_FIELD_FACTIONTEMPLATE && unit->getFactionTemplateEntry()) {
                         //faction temporaire (joueur vs creature), on envoie la faction de l'unitée remappée selon les tables de changement de réputation
                         Player *player = target;
@@ -668,12 +668,12 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                         if (player->isCrossFaction() && (sWorld->faction2template.find(converted_faction) != sWorld->faction2template.end())) {
                             value = uint32(sWorld->faction2template[converted_faction]);
                         } else value = uint32(unit->getFaction());
-                    } 
+                    }
                     else if (unit->IsControlledByPlayer() && index == UNIT_FIELD_FACTIONTEMPLATE) {
                         //faction temporaire (joueur vs joueur/pet), on envoie la faction du joueur remappée selon les races a2/h2
-                        value = uint32(unit->getCrossFaction());                        
+                        value = uint32(unit->getCrossFaction());
                     }
-                    
+
                     // value == valeur du champ apres avoir pris en compte la faction temporaire
                     if (unit->IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && unit->IsInRaidWith(target)) {
                         //groupe interfaction
@@ -1637,11 +1637,11 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 {
     float new_z = std::max<float>(GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true), GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true, 5.0f));
     float z_above = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z + 5.0f, true);
-    
+
     // On prends le Z le plus proche (entre celui trouvé en dessous du z actuel, et celui trouvé en dessus du z actuel)
     if (fabs(z_above - z) < fabs(new_z - z))
       new_z = z_above;
-      
+
     if (new_z > INVALID_HEIGHT)
         z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
 }
@@ -2337,9 +2337,10 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     summon->SetHomePosition(pos);
 
     summon->InitStats(duration);
+    summon->SetInitialized(false);
     AddToMap(summon->ToCreature());
     summon->InitSummon();
-
+    summon->SetInitialized(true);
     //ObjectAccessor::UpdateObjectVisibility(summon);
 
     return summon;

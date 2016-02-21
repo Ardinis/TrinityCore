@@ -86,7 +86,7 @@ void PetAI::UpdateAI(const uint32 diff)
         UpdateAllies();
     else
         m_updateAlliesTimer -= diff;
-        
+
     if (me->IsNonMeleeSpellCasted(false, false,  true, false, true)) {
         return;
     }
@@ -340,7 +340,6 @@ void PetAI::AttackStart(Unit* target)
 void PetAI::AttackStart(Unit* target, uint32 spellId)
 {
     // Overrides Unit::AttackStart to correctly evaluate Pet states
-
     // Check all pet states to decide if we can attack this target
     if (!CanAttack(target))
         return;

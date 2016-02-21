@@ -79,7 +79,7 @@ class CreatureAI : public UnitAI
 
     public:
         void Talk(uint8 id, uint64 WhisperGuid = 0);
-        explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false), b_startingEvade(false) {}
+        explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false), b_startingEvade(false), notInitialized(false) {}
 
         virtual ~CreatureAI() {}
 
@@ -141,11 +141,11 @@ class CreatureAI : public UnitAI
         // Called at text emote receive from player
         virtual void ReceiveEmote(Player* /*player*/, uint32 /*emoteId*/) {}
 
-	// Called when owner takes damage
-	virtual void OwnerAttackedBy(Unit* /*attacker*/) {}
+        // Called when owner takes damage
+        virtual void OwnerAttackedBy(Unit* /*attacker*/) {}
 
-	// Called when owner attacks something
-	virtual void OwnerAttacked(Unit* /*target*/) {}
+        // Called when owner attacks something
+        virtual void OwnerAttacked(Unit* /*target*/) {}
 
         /// == Triggered Actions Requested ==================
 
@@ -175,9 +175,9 @@ class CreatureAI : public UnitAI
         virtual void PassengerBoarded(Unit* /*passenger*/, int8 /*seatId*/, bool /*apply*/) {}
 
         virtual bool CanSeeAlways(WorldObject const* /*obj*/) { return false; }
-	inline void SetStartingEvade(bool val) { b_startingEvade = val; }
-	inline bool isStartingEvade() { return b_startingEvade; }
-	
+        inline void SetStartingEvade(bool val) { b_startingEvade = val; }
+        inline bool isStartingEvade() { return b_startingEvade; }
+
     protected:
         virtual void MoveInLineOfSight(Unit* /*who*/);
 
@@ -185,7 +185,8 @@ class CreatureAI : public UnitAI
 
     private:
         bool m_MoveInLineOfSight_locked;
-	bool b_startingEvade;
+        bool b_startingEvade;
+        bool notInitialized;
 };
 
 enum Permitions

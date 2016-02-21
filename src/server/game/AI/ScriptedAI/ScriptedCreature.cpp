@@ -147,7 +147,6 @@ void ScriptedAI::DoStartNoMovement(Unit* victim)
 {
     if (!victim)
         return;
-
     me->GetMotionMaster()->MoveIdle();
 }
 
@@ -467,7 +466,6 @@ void Scripted_NoMovementAI::AttackStart(Unit* target)
 {
     if (!target)
         return;
-
     if (me->Attack(target, true))
         DoStartNoMovement(target);
 }

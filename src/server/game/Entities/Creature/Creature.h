@@ -472,6 +472,9 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
         //bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
 
+        bool SetInitialized(bool value) { IsInitialized = value; }
+        bool IsInitialize() { return IsInitialized; }
+
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() { return m_reactState; }
         bool HasReactState(ReactStates state) const { return (m_reactState == state); }
@@ -795,6 +798,7 @@ class Creature : public Unit, public GridObject<Creature>, public MapCreature
         //Formation var
         CreatureGroup* m_formation;
         bool TriggerJustRespawned;
+        bool IsInitialized;
 };
 
 class AssistDelayEvent : public BasicEvent

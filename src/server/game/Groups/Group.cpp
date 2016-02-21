@@ -2118,16 +2118,10 @@ uint32 Group::GetNeededMembersOfSameGuild(uint8 arenaType, Map const *map)
 
     if (map->IsRaid())
     {
-        if (map->GetEntry()->Expansion() == 0) // classic
-            return 10;
-
-        if (map->GetEntry()->Expansion() == 1) // TBC
-            return 8;
-
         if (map->Is25ManRaid())
-            return 20;
+	  return 13;
 
-        return 8;
+	return 6;
     }
 
     return 0;

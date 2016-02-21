@@ -548,12 +548,16 @@ class boss_the_lich_king : public CreatureScript
 
             void EnterCombat(Unit* target)
             {
-                /*                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()))
+                Player *player = target->ToPlayer();
+                if (player == NULL)
+                    player = target->GetOwner() ? target->GetOwner()->ToPlayer() : NULL;
+
+                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, player))
                 {
                     EnterEvadeMode();
                     instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
                     return;
-                    }*/
+                }
 
                 me->setActive(true);
                 DoZoneInCombat();

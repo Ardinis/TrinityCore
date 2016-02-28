@@ -14458,16 +14458,41 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     int32 slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
     if (slow)
     {
+        std::cout << "original speed detected " << speed << std::endl;
+        float saveSpeed = speed;
         AddPctN(speed, slow);
-        if (float minSpeedMod = (float)GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
+        if (int32 minSpeedMod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
         {
-            float min_speed = minSpeedMod / 100.0f;
-	    if (float minSpeedMod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
-	      {
-		float min_speed = minSpeedMod / 100.0f;
-		if (speed < min_speed)
-		  speed = min_speed;
-	      }
+            if (GetTypeId() == TYPEID_UNIT)
+            {
+                float startSpeed = 1.0f;
+                switch (mtype)
+                {
+                    case MOVE_WALK:
+                        startSpeed = sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_walk;
+                        break;
+                    case MOVE_RUN:
+                        startSpeed = sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_run;
+                        break;
+                    case MOVE_SWIM:
+                       startSpeed = sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_swim;
+                        break;
+                    case MOVE_FLIGHT:
+                        startSpeed = sObjectMgr->GetCreatureTemplate(ToCreature()->GetEntry())->speed_fly;
+                        break;
+                }
+                startSpeed *=  minSpeedMod / 100.0f;
+                std::cout << "speed detected " << speed << std::endl;
+                if (speed < startSpeed)
+                    speed = startSpeed;
+                std::cout << "speed detected 2 = " << speed << std::endl;
+            }
+            else
+            {
+                float min_speed = minSpeedMod / 100.0f;
+                if (speed < min_speed)
+                    speed = min_speed;
+            }
         }
     }
     SetSpeed(mtype, speed, forced);

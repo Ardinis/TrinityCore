@@ -269,6 +269,8 @@ enum Events
     EVENT_TELEPORT                  = 62,
     EVENT_MOVE_TO_LICH_KING         = 63,
     EVENT_DESPAWN_SELF              = 64,
+    EVENT_MOVE_P1_END,
+    EVENT_MOVE_P2_END
 };
 
 enum EventGroups
@@ -555,6 +557,7 @@ class boss_the_lich_king : public CreatureScript
                 mui_sumVile = 10000;
                 _harvestGUID.clear();
                 special = false;
+                transition = false;
                 isFirstActivation = true;
             }
 
@@ -653,8 +656,8 @@ class boss_the_lich_king : public CreatureScript
                         SendLightOverride(0, 5000);
                         break;
                     case ACTION_BREAK_FROSTMOURNE:
-                        DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE);
-                        DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE_2);
+                        me->CastSpell(me, SPELL_SUMMON_BROKEN_FROSTMOURNE, true);
+                        me->CastSpell(me, SPELL_SUMMON_BROKEN_FROSTMOURNE_2, true);
                         SetEquipmentSlots(false, EQUIP_BROKEN_FROSTMOURNE);
                         events.ScheduleEvent(EVENT_OUTRO_TALK_6, 2500, 0, PHASE_OUTRO);
                         break;
@@ -704,26 +707,23 @@ class boss_the_lich_king : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/)
             {
-                if (events.GetPhaseMask() & PHASE_MASK_ONE && !HealthAbovePct(70))
+                if (events.GetPhaseMask() & PHASE_MASK_ONE && !HealthAbovePct(70) && !transition)
                 {
-                    events.SetPhase(PHASE_TRANSITION);
-                    SetImmuneToTaunt(true);
-                    me->GetMotionMaster()->MovePoint(POINT_CENTER_1, CenterPosition);
-                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                    transition = true;
+                    events.ScheduleEvent(EVENT_MOVE_P1_END, 100, 0, PHASE_ONE);
                     return;
                 }
 
-                if (events.GetPhaseMask() & PHASE_MASK_TWO && !HealthAbovePct(40))
+                if (events.GetPhaseMask() & PHASE_MASK_TWO && !HealthAbovePct(40) && !transition)
                 {
-                    events.SetPhase(PHASE_TRANSITION);
-                    SetImmuneToTaunt(true);
-                    me->GetMotionMaster()->MovePoint(POINT_CENTER_2, CenterPosition);
-                    me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                    transition = true;
+                    events.ScheduleEvent(EVENT_MOVE_P2_END, 100, 0, PHASE_TWO);
                     return;
                 }
 
                 if (events.GetPhaseMask() & PHASE_MASK_THREE && !HealthAbovePct(10))
                 {
+                    TeleportPlayersToPlatform();
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     events.Reset();
@@ -789,12 +789,7 @@ class boss_the_lich_king : public CreatureScript
                     case NPC_FROSTMOURNE_TRIGGER:
                     {
                         summons.Summon(summon);
-                        summon->CastSpell((Unit*)NULL, SPELL_BROKEN_FROSTMOURNE, true);
 
-                        SendLightOverride(LIGHT_SOULSTORM, 10000);
-                        SendWeather(WEATHER_STATE_BLACKSNOW);
-
-                        events.ScheduleEvent(EVENT_OUTRO_SOUL_BARRAGE, 5000, 0, PHASE_OUTRO);
                         return;
                     }
                     case NPC_VILE_SPIRIT:
@@ -866,6 +861,20 @@ class boss_the_lich_king : public CreatureScript
                 }
             }
 
+            void TeleportPlayersToPlatform()
+            {
+                Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                if (!players.isEmpty())
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                        if (Player* player = itr->getSource())
+                            if (!player->isAlive())
+                            {
+                                float y = -2128.0f + rand() % 30;
+                                float x = 505.0f + rand() % 30;
+                                player->TeleportTo(631, x, y, 841.0f, 0.0f);
+                            }
+            }
+
             void MovementInform(uint32 type, uint32 pointId)
             {
                 if (type != POINT_MOTION_TYPE)
@@ -886,6 +895,7 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_INTRO_TALK_1, 9000, 0, PHASE_INTRO);
                         break;
                     case POINT_CENTER_1:
+                    {
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         SendMusicToPlayers(MUSIC_SPECIAL);
@@ -893,7 +903,7 @@ class boss_the_lich_king : public CreatureScript
                         me->AttackStop();
                         SetImmuneToTaunt(false);
                         DoCast(me, SPELL_REMORSELESS_WINTER_1);
-                        events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
+                        //                        events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
                         events.ScheduleEvent(EVENT_QUAKE, 62500, 0, PHASE_TRANSITION);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 4000, 0, PHASE_TRANSITION);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, 0, PHASE_TRANSITION);
@@ -903,8 +913,16 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_DEFILE, 97000, 0, PHASE_TWO);
                         events.ScheduleEvent(EVENT_SOUL_REAPER, 94000, 0, PHASE_TWO);
                         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+
+                        std::list<Creature*> CloudList;
+                        me->GetCreatureListWithEntryInGrid(CloudList, 39137,100.0f);
+                        for (std::list<Creature*>::iterator itr = CloudList.begin(); itr != CloudList.end(); itr++)
+                            (*itr)->DespawnOrUnsummon(100);
+
                         break;
+                    }
                     case POINT_CENTER_2:
+                    {
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         SendMusicToPlayers(MUSIC_SPECIAL);
@@ -913,7 +931,7 @@ class boss_the_lich_king : public CreatureScript
                         SetImmuneToTaunt(false);
                         DoCast(me, SPELL_REMORSELESS_WINTER_2);
                         summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
-                        events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
+                        //                        events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions
                         events.ScheduleEvent(EVENT_QUAKE_2, 62500, 0, PHASE_TRANSITION);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 6000, 0, PHASE_TRANSITION);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, 0, PHASE_TRANSITION);
@@ -924,7 +942,14 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 73500, 0, PHASE_THREE);
                         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
                         special = true;
+
+                        std::list<Creature*> CloudList;
+                        me->GetCreatureListWithEntryInGrid(CloudList, 39137,100.0f);
+                        for (std::list<Creature*>::iterator itr = CloudList.begin(); itr != CloudList.end(); itr++)
+                            (*itr)->DespawnOrUnsummon(100);
+
                         break;
+                    }
                     case POINT_LK_OUTRO_1:
                         events.ScheduleEvent(EVENT_OUTRO_TALK_4, 1, 0, PHASE_OUTRO);
                         events.ScheduleEvent(EVENT_OUTRO_RAISE_DEAD, 1000, 0, PHASE_OUTRO);
@@ -966,13 +991,7 @@ class boss_the_lich_king : public CreatureScript
 
                 if (mui_dead <= diff)
                 {
-                    Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                    if (!players.isEmpty())
-                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            if (Player* player = itr->getSource())
-                                if (!player->isAlive())
-                                    player->TeleportTo(631, 505.0f, -2128.0f, 841.0f, 0.0f);
-                    //			    player->GetSession()->SendPacket(data);
+                    //                    TeleportPlayersToPlatform();
                     mui_dead = 15000;
                 }
                 else mui_dead -= diff;
@@ -982,6 +1001,20 @@ class boss_the_lich_king : public CreatureScript
                 {
                     switch (eventId)
                     {
+                        case EVENT_MOVE_P1_END:
+                            SetImmuneToTaunt(true);
+                            me->GetMotionMaster()->MovePoint(POINT_CENTER_1, CenterPosition);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                            events.SetPhase(PHASE_TRANSITION);
+                            transition = false;
+                            break;
+                        case EVENT_MOVE_P2_END:
+                            SetImmuneToTaunt(true);
+                            me->GetMotionMaster()->MovePoint(POINT_CENTER_2, CenterPosition);
+                            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                            events.SetPhase(PHASE_TRANSITION);
+                            transition = false;
+                            break;
                         case EVENT_INTRO_MOVE_1:
                             me->SetSheath(SHEATH_STATE_MELEE);
                             me->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
@@ -1075,7 +1108,10 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_SUMMON_ICE_SPHERE:
                             DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
-                            events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
+                            if (special)
+                                events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 5000, 0, PHASE_TRANSITION);
+                            else
+                                events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 7500, 0, PHASE_TRANSITION);
                             break;
                         case EVENT_SUMMON_RAGING_SPIRIT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -1226,16 +1262,20 @@ class boss_the_lich_king : public CreatureScript
                             if (Creature* tirion = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HIGHLORD_TIRION_FORDRING)))
                                 tirion->SetFacingToObject(me);
                             me->ClearUnitState(UNIT_STATE_CASTING);
-                            DoCastAOE(SPELL_SUMMON_BROKEN_FROSTMOURNE_3);
+                            me->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
                             SetEquipmentSlots(false, EQUIP_UNEQUIP);
+                            events.ScheduleEvent(EVENT_OUTRO_SOUL_BARRAGE, 5000, 0, PHASE_OUTRO);
                             break;
                         case EVENT_OUTRO_SOUL_BARRAGE:
-                            DoCastAOE(SPELL_SOUL_BARRAGE);
+                            me->CastSpell((Unit*)NULL, SPELL_SOUL_BARRAGE, TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                            //                            DoCastAOE(SPELL_SOUL_BARRAGE);
                             sCreatureTextMgr->SendSound(me, SOUND_PAIN, CHAT_MSG_MONSTER_YELL, 0, TEXT_RANGE_NORMAL, TEAM_OTHER, false);
                             // set flight
                             me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                             me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0x03);
                             me->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_2, OutroFlying);
+                            SendLightOverride(LIGHT_SOULSTORM, 10000);
+                            SendWeather(WEATHER_STATE_BLACKSNOW);
                             break;
                         case EVENT_OUTRO_TALK_7:
                             Talk(SAY_LK_OUTRO_7);
@@ -1343,6 +1383,7 @@ class boss_the_lich_king : public CreatureScript
             std::list<uint64 >  _harvestGUID;
             bool special;
             bool isFirstActivation;
+            bool transition;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1744,8 +1785,8 @@ class npc_valkyr_shadowguard : public CreatureScript
                 stuStarted = false;
                 HadGrab = false;
                 me->SetReactState(REACT_PASSIVE);
-                // DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
-                //me->SetSpeed(MOVE_FLIGHT, 0.642857f, true);
+                DoCast(me, SPELL_WINGS_OF_THE_DAMNED, false);
+                me->SetSpeed(MOVE_FLIGHT, 0.342857f, true);
                 //	me->SetSpeed(MOVE_FLIGHT, 0.242857f, true);
                 //me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
@@ -1804,6 +1845,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 if (type != POINT_MOTION_TYPE)
                     return;
+
                 switch (id)
                 {
                     case POINT_DROP_PLAYER:
@@ -1869,6 +1911,8 @@ class npc_valkyr_shadowguard : public CreatureScript
 
                 _events.Update(diff);
 
+
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -1926,8 +1970,10 @@ class npc_valkyr_shadowguard : public CreatureScript
                             }
                             break;
                         case EVENT_MOVE_TO_DROP_POS:
-			  //                            me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
-                            me->GetMotionMaster()->MoveFollow(_trig, 0.0f, 0.0f);
+                            if (!me->HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_ROOT) && !me->isMoving())
+                                me->GetMotionMaster()->MovePoint(POINT_DROP_PLAYER, _dropPoint);
+                            _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 100);
+                            // me->GetMotionMaster()->MoveFollow(_trig, 0.0f, 0.0f);
                             break;
                         case EVENT_LIFE_SIPHON:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
@@ -2359,6 +2405,7 @@ class npc_broken_frostmourne : public CreatureScript
             {
                 _events.SetPhase(PHASE_OUTRO);
                 _events.ScheduleEvent(EVENT_OUTRO_KNOCK_BACK, 3000, 0, PHASE_OUTRO);
+                me->CastSpell(me, SPELL_BROKEN_FROSTMOURNE, true);
             }
 
             void DoAction(int32 const action)
@@ -2523,6 +2570,12 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
                         targets.remove(*itr);
                         itr = targets.begin();
                     }
+                    else if ((*itr)->GetTypeId() == TYPEID_UNIT &&
+                             (*itr)->GetEntry() != 37695 && (*itr)->GetEntry() != 37698)
+                    {
+                        targets.remove(*itr);
+                        itr = targets.begin();
+                    }
                 }
 
                 if (targets.size() < 2)
@@ -2669,10 +2722,15 @@ class spell_the_lich_king_shadow_trap_periodic : public SpellScriptLoader
 
             void CheckTargetCount(std::list<Unit*>& targets)
             {
+                if (!GetCaster())
+                    return;
+
                 if (targets.empty())
                     return;
 
                 GetCaster()->CastSpell((Unit*)NULL, SPELL_SHADOW_TRAP_KNOCKBACK, true);
+                if (Creature *caster = GetCaster()->ToCreature())
+                    caster->DespawnOrUnsummon(100);
             }
 
             void Register()

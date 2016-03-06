@@ -314,10 +314,6 @@ class boss_professor_putricide : public CreatureScript
                 _JustDied();
                 Talk(SAY_DEATH);
                 DoCast(SPELL_MUTATED_PLAGUE_CLEAR);
-                instance->DoRemoveAurasDueToSpellOnPlayers(70911);
-                instance->DoRemoveAurasDueToSpellOnPlayers(72854);
-                instance->DoRemoveAurasDueToSpellOnPlayers(72855);
-                instance->DoRemoveAurasDueToSpellOnPlayers(72856);
             }
 
             void JustSummoned(Creature* summon)
@@ -349,7 +345,6 @@ class boss_professor_putricide : public CreatureScript
                         summon->SetReactState(REACT_PASSIVE);
                         break;
                     case NPC_CHOKING_GAS_BOMB:
-                        std::cout << "NPC_CHOKING_GAS_BOMB summoned" << std::endl;
                         summon->m_Events.AddEvent(new StartEvent(summon), 3000);
                         return;
                     case NPC_MUTATED_ABOMINATION_10:
@@ -1171,15 +1166,19 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
                 return true;
             }
 
-            void MakeMutatedTick(AuraEffect const* aurEff, bool firstTick)
-            {
-
-            }
-
             void FilterTargets(std::list<Unit*>& targets)
             {
+                if (AuraEffect const* eff = GetCaster()->GetAuraEffect(SPELL_UNBOUND_PLAGUE_SEARCHER, EFFECT_0))
+                {
+                    if (eff->GetTickNumber() < 2)
+                    {
+                        targets.clear();
+                        return;
+                    }
+                }
+
+
                 targets.remove_if(Trinity::UnitAuraCheck(true, sSpellMgr->GetSpellIdForDifficulty(SPELL_UNBOUND_PLAGUE, GetCaster())));
-                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_UNBOUND_PLAGUE_PROTECTION));
                 Trinity::Containers::RandomResizeList(targets, 1);
             }
 
@@ -1204,7 +1203,7 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
                             {
                                 newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
                                 newPlague->SetDuration(oldPlague->GetDuration());
-                                oldPlague->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+                                oldPlague->Remove();
                                 GetCaster()->RemoveAurasDueToSpell(SPELL_UNBOUND_PLAGUE_SEARCHER);
                                 GetCaster()->CastSpell(GetCaster(), SPELL_PLAGUE_SICKNESS, true);
                                 GetCaster()->CastSpell(GetCaster(), SPELL_UNBOUND_PLAGUE_PROTECTION, true);
@@ -1213,13 +1212,6 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
                         }
                     }
                 }
-            }
-
-
-
-            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                MakeMutatedTick(aurEff, true);
             }
 
             void Register()
@@ -1234,58 +1226,6 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
             return new spell_putricide_unbound_plague_SpellScript();
         }
 };
-
-class spell_putricide_unbound_plague_aura : public SpellScriptLoader
-{
-    public:
-        spell_putricide_unbound_plague_aura() : SpellScriptLoader("spell_putricide_unbound_plague_aura") { }
-
-        class spell_putricide_unbound_plague_aura_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_putricide_unbound_plague_aura_AuraScript);
-
-            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                switch (GetTargetApplication()->GetRemoveMode())
-                {
-                    case AURA_REMOVE_BY_ENEMY_SPELL:
-                        return;
-                }
-
-                if (!GetCaster())
-                    return;
-
-                InstanceScript* instance = GetCaster()->GetInstanceScript();
-                if (!instance)
-                    return;
-
-                if (Creature* professor = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                {
-                    if (Aura* oldPlague = aurEff->GetBase())
-                    {
-                        if (Unit* target = professor->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_UNBOUND_PLAGUE_PROTECTION))
-                            if (Aura* newPlague = professor->AddAura(aurEff->GetId(), target))
-                            {
-                                newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
-                                newPlague->SetDuration(oldPlague->GetDuration());
-                                professor->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, true);
-                            }
-                    }
-                }
-            }
-
-            void Register()
-            {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_putricide_unbound_plague_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_putricide_unbound_plague_aura_AuraScript();
-        }
-};
-
 
 class spell_putricide_eat_ooze : public SpellScriptLoader
 {
@@ -1348,8 +1288,9 @@ class spell_putricide_mutated_plague : public SpellScriptLoader
         {
             PrepareAuraScript(spell_putricide_mutated_plague_AuraScript);
 
-            void MakeMutatedTick(AuraEffect const* aurEff, bool firstTick)
+            void HandleTriggerSpell(AuraEffect const* aurEff)
             {
+                PreventDefaultAction();
                 Unit* caster = GetCaster();
                 if (!caster)
                     return;
@@ -1359,37 +1300,20 @@ class spell_putricide_mutated_plague : public SpellScriptLoader
                 spell = sSpellMgr->GetSpellForDifficultyFromSpell(spell, caster);
 
                 int32 damage = spell->Effects[EFFECT_0].CalcValue(caster);
-                float multiplier = 3.0f;
-                uint8 additionalTick = firstTick ? 0 : 1;
-                damage *= int32(pow(multiplier, GetStackAmount() + additionalTick));
-                if (caster->GetMap()->Is25ManRaid())
-                    damage = int32(damage * 1.5f);
+                float multiplier = 2.0f;
+                if (GetTarget()->GetMap()->GetSpawnMode() & 1)
+                    multiplier = 3.0f;
+
+                damage *= int32(pow(multiplier, GetStackAmount()));
+                damage = int32(damage * 1.5f);
 
                 GetTarget()->CastCustomSpell(triggerSpell, SPELLVALUE_BASE_POINT0, damage, GetTarget(), true, NULL, aurEff, GetCasterGUID());
-            }
-
-            void HandleTriggerSpell(AuraEffect const* aurEff)
-            {
-                PreventDefaultAction();
-                MakeMutatedTick(aurEff, false);
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 uint32 healSpell = uint32(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
-                SpellInfo const* healSpellInfo = sSpellMgr->GetSpellInfo(healSpell);
-                healSpellInfo = sSpellMgr->GetSpellForDifficultyFromSpell(healSpellInfo, GetTarget());
-
-                if (!healSpellInfo)
-                    return;
-
-                int32 heal = healSpellInfo->Effects[0].CalcValue() * GetStackAmount();
-                GetTarget()->CastCustomSpell(healSpell, SPELLVALUE_BASE_POINT0, heal, GetTarget(), true, NULL, NULL, GetCasterGUID());
-            }
-
-            void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                MakeMutatedTick(aurEff, true);
+                GetTarget()->CastSpell(GetTarget(), healSpell, true, NULL, NULL, GetCasterGUID());
             }
 
             void Register()
@@ -1778,5 +1702,4 @@ void AddSC_boss_professor_putricide()
     new spell_putricide_regurgitated_ooze();
     new spell_putricide_clear_aura_effect_value();
     new spell_stinky_precious_decimate();
-    new spell_putricide_unbound_plague_aura();
 }

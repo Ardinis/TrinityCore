@@ -365,7 +365,8 @@ class boss_razorscale : public CreatureScript
             {
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance ? instance->GetData64(DATA_RAZORSCALE_CONTROL) : 0))
                     controller->AI()->DoAction(ACTION_REMOVE_HARPOON);
-                summons.DoAction(NPC_MOLE_MACHINE_TRIGGER, ACTION_DESPAWN_ADDS);
+                EntryCheckPredicate pred(NPC_MOLE_MACHINE_TRIGGER);
+                summons.DoAction(ACTION_DESPAWN_ADDS, pred);
                 _Reset();
 /*                me->AddUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); */
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -619,7 +620,7 @@ class boss_razorscale : public CreatureScript
 
             void SummonMoleMachines()
             {
-                // Adds will come in waves from mole machines. One mole can spawn a Dark Rune Watcher with 1-2 Guardians, or a lone Sentinel. 
+                // Adds will come in waves from mole machines. One mole can spawn a Dark Rune Watcher with 1-2 Guardians, or a lone Sentinel.
                 // 10m mode spawns 2 moles, 25m 4
                 uint8 amount = RAID_MODE(urand(1,2), urand(3,4));
                 for (uint8 n = 0; n < amount; n++)
@@ -837,7 +838,7 @@ class npc_mole_machine_trigger : public CreatureScript
             {
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                 me->SetVisible(false);
-            }           
+            }
 
             void Reset()
             {
@@ -862,12 +863,12 @@ class npc_mole_machine_trigger : public CreatureScript
                         case EVENT_SUMMON_GOB:
                             DoCast(SPELL_SUMMON_MOLE_MACHINE);
                             break;
-                        case EVENT_SUMMON_NPC:                     
+                        case EVENT_SUMMON_NPC:
                             switch (RAND(SPELL_SUMMON_IRON_DWARVES, SPELL_SUMMON_IRON_DWARVES_2))
                             {
                                 case SPELL_SUMMON_IRON_DWARVES:
                                     // Emulator for DoCast(SPELL_SUMMON_IRON_DWARVES); -> SpellScript did not work!
-                                    for (uint8 n = 0; n < urand(1, 2); ++n) 
+                                    for (uint8 n = 0; n < urand(1, 2); ++n)
                                         me->CastSpell(me, SPELL_SUMMON_IRON_DWARF_GUARDIAN, false);
                                     me->CastSpell(me, SPELL_SUMMON_IRON_DWARF_WATCHER, false);
                                     break;
@@ -964,7 +965,7 @@ class npc_darkrune_watcher : public CreatureScript
                 }
 
                 events.Update(diff);
-                
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -972,7 +973,7 @@ class npc_darkrune_watcher : public CreatureScript
                 {
                     switch (event)
                     {
-                        case EVENT_CHAIN_LIGHTNING:                            
+                        case EVENT_CHAIN_LIGHTNING:
                             DoCast(me->getVictim(), SPELL_CHAIN_LIGHTNING);
                             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(10000, 15000));
                             return;
@@ -1088,14 +1089,14 @@ class npc_darkrune_sentinel : public CreatureScript
                 }
 
                 events.Update(diff);
-                
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 while (uint32 event = events.ExecuteEvent())
                 {
                     switch (event)
-                    {   
+                    {
                         case EVENT_HEROIC_STRIKE:
                             DoCast(me->getVictim(), SPELL_HEROIC_STRIKE);
                             events.ScheduleEvent(EVENT_HEROIC_STRIKE, urand(4000, 6000));

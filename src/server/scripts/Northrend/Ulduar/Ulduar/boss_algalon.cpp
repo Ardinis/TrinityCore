@@ -166,7 +166,7 @@ enum Actions
 enum Music
 {
     MUSIC_INTRO         = 15878,
-    MUSIC_BATTLE        = 15877 
+    MUSIC_BATTLE        = 15877
 };
 
 enum eItem
@@ -291,7 +291,7 @@ class boss_algalon : public CreatureScript
             }
 
             void Reset()
-            {   
+            {
                 intro = false;
                 fightintro = false;
                 sendreplycode = false;
@@ -320,7 +320,7 @@ class boss_algalon : public CreatureScript
                 events.ScheduleEvent(EVENT_PHASE_PUNCH, 16000);
                 events.ScheduleEvent(EVENT_QUANTUM_STRIKE, urand(4000,8000));
                 events.ScheduleEvent(EVENT_COLLAPSING_STAR, 15000, PHASE_1);
-                events.ScheduleEvent(EVENT_SUMMON_CONSTELLATION, 50000, PHASE_1); 
+                events.ScheduleEvent(EVENT_SUMMON_CONSTELLATION, 50000, PHASE_1);
                 events.CancelEvent(EVENT_REMOVE_FROM_PHASE);
                 events.CancelEvent(EVENT_SUMMON_UNLEASHED_DARK_MATTER);
                 events.CancelEvent(EVENT_RESTART_ATTACKING);
@@ -393,11 +393,12 @@ class boss_algalon : public CreatureScript
 
             void SummonLivingConstellations()
             {
-                summons.DoAction(CREATURE_LIVING_CONSTELLATION, ACTION_ACTIVATE_CONSTELLATION);
+                EntryCheckPredicate pred(CREATURE_LIVING_CONSTELLATION);
+                summons.DoAction(ACTION_ACTIVATE_CONSTELLATION, pred);
             }
 
             void PopulateBlackHoles()
-            {   
+            {
                 Position pos;
                 for (uint8 i = 1; i<= 8; ++i)
                 {
@@ -545,7 +546,7 @@ class boss_algalon : public CreatureScript
 						return true;
 					}
 				}
-				
+
 			}
 
             void HandleTalkingSequences()
@@ -692,7 +693,7 @@ class boss_algalon : public CreatureScript
                     {
                     case 0:
                         me->SetSpeed(MOVE_WALK, 2.0f);
-                        me->GetMotionMaster()->MovePoint(POINT_OUTRO,OutroPos[0], OutroPos[1], OutroPos[2]); 
+                        me->GetMotionMaster()->MovePoint(POINT_OUTRO,OutroPos[0], OutroPos[1], OutroPos[2]);
                         ++uiStep;
                         outro = false; //will be set true once he reaches his outro point.
                         break;
@@ -819,7 +820,7 @@ class boss_algalon : public CreatureScript
                     for (uint8 i = 1; i <= 4; ++i) //Summoning the black Holes.
                     {
                         pos.Relocate(RoomCenter[0], RoomCenter[1], RoomCenter[2]);
-                        pos.m_orientation =  MapManager::NormalizeOrientation(2*M_PI*i/4 + M_PI/3); 
+                        pos.m_orientation =  MapManager::NormalizeOrientation(2*M_PI*i/4 + M_PI/3);
                         pos.m_positionX += 20 * cos(pos.GetOrientation());
                         pos.m_positionY += 20 * sin(pos.GetOrientation());
                         DoSummon(CREATURE_BLACK_HOLE, pos, 0);
@@ -914,9 +915,12 @@ class boss_algalon : public CreatureScript
                         events.RepeatEvent(50000);
                         break;
                     case EVENT_SUMMON_UNLEASHED_DARK_MATTER:
-                        summons.DoAction(CREATURE_BLACK_HOLE, ACTION_BLACKHOLE_SUMMON);
+                    {
+                        EntryCheckPredicate pred(CREATURE_BLACK_HOLE);
+                        summons.DoAction(ACTION_BLACKHOLE_SUMMON, pred);
                         events.RepeatEvent(30000);
                         break;
+                    }
                     default:
                         events.PopEvent();
                         break;
@@ -1110,7 +1114,7 @@ class mob_living_constellation : public CreatureScript
 
                 if (me->getVictim()->GetTypeId() != TYPEID_PLAYER)
                     me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
-                    
+
 
                 if (Creature* BH = me->FindNearestCreature(CREATURE_BLACK_HOLE, 0.1f, true))
                 {
@@ -1200,7 +1204,7 @@ class mob_algalon_asteroid_trigger : public CreatureScript
                     {
                         if (Creature* Stalker = me->FindNearestCreature(CREATURE_ALGALON_ASTEROID_2, 45))
                             Stalker->CastSpell(me,SPELL_COSMIC_SMASH_MISSLE,true);
-                        Event_Timer = 500;  
+                        Event_Timer = 500;
                         ++Event_Phase;
                     }
                     else
@@ -1399,7 +1403,7 @@ class go_celestial_console : public GameObjectScript
 			*/
 			if (player->HasItemCount(item, 1))
 			{
-				if (Creature* Brann = go->SummonCreature(NPC_BRANN_ALGALON, WPs_ulduar[0][0],WPs_ulduar[0][1], WPs_ulduar[0][2])) 
+				if (Creature* Brann = go->SummonCreature(NPC_BRANN_ALGALON, WPs_ulduar[0][0],WPs_ulduar[0][1], WPs_ulduar[0][2]))
 				{
 					go->SetFlag(GAMEOBJECT_FLAGS,  GO_FLAG_NOT_SELECTABLE);
 					Brann->AI()->DoAction(ACTION_BRANN_INTRO);
@@ -1463,7 +1467,7 @@ class spell_algalon_cosmic_smash_initial : public SpellScriptLoader
 				OnEffectHitTarget += SpellEffectFn(spell_algalon_cosmic_smash_initial_SpellScript::HandleForceCast, EFFECT_1, SPELL_EFFECT_FORCE_CAST);
             }
 
-            std::list<Unit*> m_unitList; 
+            std::list<Unit*> m_unitList;
         };
 
         SpellScript* GetSpellScript() const
@@ -1501,7 +1505,7 @@ class spell_algalon_black_hole : public SpellScriptLoader
                 Unit* target = GetTarget();
                 if (target->GetTypeId() != TYPEID_PLAYER)
                 {
-                    PreventDefaultAction(); 
+                    PreventDefaultAction();
                     return;
                 }
 
@@ -1546,7 +1550,7 @@ class spell_algalon_summon_asteroid_stalkers : public SpellScriptLoader
                 Position pos;
                 caster->GetPosition(&pos);
                 if (entry == CREATURE_ALGALON_ASTEROID_2)
-                    pos.m_positionZ -= 40.0f; 
+                    pos.m_positionZ -= 40.0f;
                 TempSummon* summon = caster->GetMap()->SummonCreature(entry, pos, properties, duration, caster);
                 if (!summon)
                     return;

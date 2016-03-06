@@ -3616,6 +3616,10 @@ void SpellMgr::LoadDbcDataCorrections()
             case 53313: // Entangling Roots (Rank 8) -- Nature's Grasp Proc
                 spellInfo->CastingTimeIndex = 1;
                 break;
+            case 70122: // Sindragosa - Icygrip jump
+                spellInfo->EffectImplicitTargetA[0] = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
+                spellInfo->Effect[0] = SPELL_EFFECT_JUMP_DEST;
+                break;
             case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
                 spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
                 break;

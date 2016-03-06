@@ -850,10 +850,14 @@ void Spell::SelectSpellTargets()
             if (speed > 0.0f)
                 m_delayMoment = (uint64)floor(m_targets.GetDist2d() / speed * 1000.0f);
         }
-        else if (m_spellInfo->Speed > 0.0f)
+        else
         {
-            float dist = m_caster->GetDistance(*m_targets.GetDst());
-            m_delayMoment = (uint64) floor(dist / m_spellInfo->Speed * 1000.0f);
+            float speed = m_spellValue->speed ? m_spellValue->speed : m_spellInfo->Speed;
+            if (speed > 0.0f)
+            {
+                float dist = m_caster->GetDistance(*m_targets.GetDst());
+                m_delayMoment = (uint64) floor(dist / speed * 1000.0f);
+            }
         }
     }
 }
@@ -1085,7 +1089,8 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
 
     // Spell have speed - need calculate incoming time
     // Incoming time is zero for self casts. At least I think so.
-    if (m_spellInfo->Speed > 0.0f && m_caster != target/* && m_spellInfo->Speed != 12345*/)
+    float speed = m_spellValue->speed ? m_spellValue->speed : m_spellInfo->Speed;
+    if (speed > 0.0f && m_caster != target/* && m_spellInfo->Speed != 12345*/)
     {
         // calculate spell incoming interval
         // TODO: this is a hack
@@ -1093,7 +1098,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
 
         if (dist < 5.0f)
             dist = 5.0f;
-        targetInfo.timeDelay = (uint64) floor(dist / m_spellInfo->Speed * 1000.0f);
+        targetInfo.timeDelay = (uint64) floor(dist / speed * 1000.0f);
 
         // Calculate minimum incoming time
         if (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay)
@@ -1176,13 +1181,14 @@ void Spell::AddGOTarget(GameObject* go, uint32 effectMask)
     target.processed  = false;                              // Effects not apply on target
 
     // Spell have speed - need calculate incoming time
-    if (m_spellInfo->Speed > 0.0f)
+    float speed = m_spellValue->speed ? m_spellValue->speed : m_spellInfo->Speed;
+    if (speed > 0.0f)
     {
         // calculate spell incoming interval
         float dist = m_caster->GetDistance(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
         if (dist < 5.0f)
             dist = 5.0f;
-        target.timeDelay = uint64(floor(dist / m_spellInfo->Speed * 1000.0f));
+        target.timeDelay = uint64(floor(dist / speed * 1000.0f));
         if (m_delayMoment == 0 || m_delayMoment > target.timeDelay)
             m_delayMoment = target.timeDelay;
     }
@@ -1579,7 +1585,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     if (m_caster != unit)
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
-        if ((m_spellInfo->Speed || m_delayMoment) && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && unit->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
+        float speed = m_spellValue->speed ? m_spellValue->speed : m_spellInfo->Speed;
+        if ((speed > 0.0f || m_delayMoment) && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && unit->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
             return SPELL_MISS_EVADE;
 
         if (m_caster->_IsValidAttackTarget(unit, m_spellInfo))
@@ -7434,6 +7441,9 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_AURA_STACK:
             m_spellValue->AuraStackAmount = uint8(value);
+            break;
+        case SPELLVALUE_SPEED:
+            m_spellValue->speed = (float)value;
             break;
     }
 }

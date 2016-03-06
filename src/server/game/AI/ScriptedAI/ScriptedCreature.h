@@ -31,21 +31,107 @@
 
 class InstanceScript;
 
-class SummonList : public std::list<uint64>
+class SummonList
 {
-    public:
-        explicit SummonList(Creature* creature) : me(creature) {}
-        void Summon(Creature* summon) { push_back(summon->GetGUID()); }
-        void Despawn(Creature* summon) { remove(summon->GetGUID()); }
-        void DespawnEntry(uint32 entry);
-        void DespawnAll();
-        void DoAction(uint32 entry, int32 info);
-        void DoZoneInCombat(uint32 entry = 0);
-        void RemoveNotExisting();
-        bool HasEntry(uint32 entry);
-    private:
-        Creature* me;
+ public:
+    typedef std::list<uint64> StorageType;
+    typedef StorageType::iterator iterator;
+    typedef StorageType::const_iterator const_iterator;
+    typedef StorageType::size_type size_type;
+    typedef StorageType::value_type value_type;
+
+    explicit SummonList(Creature* creature)
+        : me(creature)
+    { }
+
+    // And here we see a problem of original inheritance approach. People started
+    // to exploit presence of std::list members, so I have to provide wrappers
+
+    iterator begin()
+    {
+        return storage_.begin();
+    }
+
+    const_iterator begin() const
+    {
+        return storage_.begin();
+    }
+
+    iterator end()
+    {
+        return storage_.end();
+    }
+
+    const_iterator end() const
+    {
+        return storage_.end();
+    }
+
+    iterator erase(iterator i)
+    {
+        return storage_.erase(i);
+    }
+
+    bool empty() const
+    {
+        return storage_.empty();
+    }
+
+    size_type size() const
+    {
+        return storage_.size();
+    }
+
+    void Summon(Creature const* summon) { storage_.push_back(summon->GetGUID()); }
+    void Despawn(Creature const* summon) { storage_.remove(summon->GetGUID()); }
+    void DespawnEntry(uint32 entry);
+    void DespawnAll();
+    template <typename T>
+        void DespawnIf(T const &predicate)
+    {
+        storage_.remove_if(predicate);
+    }
+
+    template <class Predicate>
+        void DoAction(int32 info, Predicate& predicate, uint16 max = 0)
+    {
+        // We need to use a copy of SummonList here, otherwise original SummonList would be modified
+        StorageType listCopy = storage_;
+        Trinity::Containers::RandomResizeList<uint64, Predicate>(listCopy, predicate, max);
+        for (StorageType::iterator i = listCopy.begin(); i != listCopy.end(); )
+        {
+            Creature* summon = ObjectAccessor::GetCreature(*me, *i++);
+            if (summon && summon->IsAIEnabled)
+                summon->AI()->DoAction(info);
+        }
+    }
+
+    void DoZoneInCombat(uint32 entry = 0);
+    void RemoveNotExisting();
+    bool HasEntry(uint32 entry);
+
+ private:
+    Creature* me;
+    StorageType storage_;
 };
+
+
+class EntryCheckPredicate
+{
+ public:
+ EntryCheckPredicate(uint32 entry) : _entry(entry) { }
+    bool operator()(uint64 guid) { return GUID_ENPART(guid) == _entry; }
+
+ private:
+    uint32 _entry;
+};
+
+class DummyEntryCheckPredicate
+{
+ public:
+    bool operator()(uint64) { return true; }
+};
+
 
 struct ScriptedAI : public CreatureAI
 {

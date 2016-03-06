@@ -125,7 +125,7 @@ public:
                 DoScriptText(SAY_CONSUME, me);
                 DoCast(SPELL_CONSUME);
 				DoCast(me,DUNGEON_MODE(SPELL_CONSUME_AURA, H_SPELL_CONSUME_AURA));
-				
+
                 uiConsumeTimer = 15*IN_MILLISECONDS;
             } else uiConsumeTimer -= diff;
 
@@ -189,8 +189,8 @@ public:
 					}
 				}
 			}
-		}		
-		
+		}
+
         uint32 GetData(uint32 type)
         {
             if (type == DATA_CONSUMPTION_JUNCTION)
@@ -208,7 +208,7 @@ public:
 
         void JustSummoned(Creature* summon)
         {
-            lSummons.push_back(summon->GetGUID());
+            lSummons.Summon(summon);
             if (summon->AI())
                 summon->AI()->AttackStart(me);
         }

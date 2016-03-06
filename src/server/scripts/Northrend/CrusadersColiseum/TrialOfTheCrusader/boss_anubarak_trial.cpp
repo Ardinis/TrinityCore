@@ -284,7 +284,8 @@ public:
             if (m_instance)
                 m_instance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
             //Despawn Scarab Swarms neutral
-            Summons.DoAction(NPC_SCARAB, ACTION_SCARAB_SUBMERGE);
+            EntryCheckPredicate pred(NPC_SCARAB);
+            Summons.DoAction(ACTION_SCARAB_SUBMERGE, pred);
             //Spawn Burrow
             for (int i=0; i < 4; i++)
                 me->SummonCreature(NPC_BURROW, AnubarakLoc[i+2]);

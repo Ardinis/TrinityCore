@@ -161,9 +161,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 FrozenThroneEdgeGUID = 0;
                 FrozenThroneWindGUID = 0;
                 FrozenThroneWarningGUID = 0;
-                FrostwyrmCount = 0;
-                SpinestalkerTrashCount = 0;
-                RimefangTrashCount = 0;
                 IsBonedEligible = true;
                 IsOozeDanceEligible = true;
                 IsNauseaEligible = true;
@@ -460,6 +457,43 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (Creature* crok = instance->GetCreature(CrokScourgebaneGUID))
                             crok->AI()->SetGUID(creature->GetGUID(), ACTION_VRYKUL_DEATH);
                         break;
+                    case NPC_FROSTWING_WHELP:
+                        if (FrostwyrmGUIDs.empty())
+                            return;
+
+                        if (creature->AI()->GetData(1/*DATA_FROSTWYRM_OWNER*/) == DATA_SPINESTALKER)
+                        {
+                            SpinestalkerTrash.erase(creature->GetDBTableGUIDLow());
+                            if (SpinestalkerTrash.empty())
+                                if (Creature* spinestalk = instance->GetCreature(SpinestalkerGUID))
+                                    spinestalk->AI()->DoAction(ACTION_START_FROSTWYRM);
+                        }
+                        else
+                        {
+                            RimefangTrash.erase(creature->GetDBTableGUIDLow());
+                            if (RimefangTrash.empty())
+                                if (Creature* spinestalk = instance->GetCreature(RimefangGUID))
+                                    spinestalk->AI()->DoAction(ACTION_START_FROSTWYRM);
+                        }
+                        break;
+                    case NPC_RIMEFANG:
+                    case NPC_SPINESTALKER:
+                    {
+                        if (instance->IsHeroic() && !HeroicAttempts)
+                            return;
+
+                        if (GetBossState(DATA_SINDRAGOSA) == DONE)
+                            return;
+
+                        FrostwyrmGUIDs.erase(creature->GetDBTableGUIDLow());
+                        if (FrostwyrmGUIDs.empty())
+                        {
+                            instance->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
+                            if (Creature* boss = instance->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
+                                boss->AI()->DoAction(ACTION_START_FROSTWYRM);
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -676,11 +710,11 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_SINDRAGOSA_FROSTWYRMS:
-                        return FrostwyrmCount;
+                        return FrostwyrmGUIDs.size();
                     case DATA_SPINESTALKER:
-                        return SpinestalkerTrashCount;
+                        return SpinestalkerTrash.size();
                     case DATA_RIMEFANG:
-                        return RimefangTrashCount;
+                        return RimefangTrash.size();
                     case DATA_COLDFLAME_JETS:
                         return ColdflameJetsState;
                     case DATA_TEAM_IN_INSTANCE:
@@ -689,10 +723,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return BloodQuickeningState;
                     case DATA_HEROIC_ATTEMPTS:
                         return HeroicAttempts;
-		case DATA_TEMPETE:
-		  return tempete;
-		case DATA_BUFF:
-		  return _buffSelect;
+                    case DATA_TEMPETE:
+                        return tempete;
+                    case DATA_BUFF:
+                         return _buffSelect;
                     default:
                         break;
                 }
@@ -1003,89 +1037,14 @@ class instance_icecrown_citadel : public InstanceMapScript
                         IsOrbWhispererEligible = data ? true : false;
                         break;
                     case DATA_SINDRAGOSA_FROSTWYRMS:
-                    {
-                        if (FrostwyrmCount == 255)
-                            return;
-
-                        if (instance->IsHeroic() && !HeroicAttempts)
-                            return;
-
-                        if (GetBossState(DATA_SINDRAGOSA) == DONE)
-                            return;
-
-                        switch (data)
-                        {
-                            case 0:
-                                if (FrostwyrmCount)
-                                {
-                                    --FrostwyrmCount;
-                                    if (!FrostwyrmCount)
-                                    {
-                                        /*                                        instance->LoadGrid(SindragosaSpawnPos.GetPositionX(), SindragosaSpawnPos.GetPositionY());
-                                                                                  if (Creature* boss = instance->SummonCreature(NPC_SINDRAGOSA, SindragosaSpawnPos))
-                                                                                  boss->AI()->DoAction(ACTION_START_FROSTWYRM);*/
-                                    }
-                                }
-                                break;
-                            case 1:
-                                ++FrostwyrmCount;
-                                break;
-                            default:
-                                FrostwyrmCount = data;
-                                break;
-                        }
+                        FrostwyrmGUIDs.insert(data);
                         break;
-                    }
                     case DATA_SPINESTALKER:
-                    {
-                        if (SpinestalkerTrashCount == 255)
-                            return;
-
-                        switch (data)
-                        {
-                            case 0:
-                                if (SpinestalkerTrashCount)
-                                {
-                                    --SpinestalkerTrashCount;
-                                    if (!SpinestalkerTrashCount)
-                                        if (Creature* spinestalk = instance->GetCreature(SpinestalkerGUID))
-                                            spinestalk->AI()->DoAction(ACTION_START_FROSTWYRM);
-                                }
-                                break;
-                            case 1:
-                                ++SpinestalkerTrashCount;
-                                break;
-                            default:
-                                SpinestalkerTrashCount = data;
-                                break;
-                        }
+                        SpinestalkerTrash.insert(data);
                         break;
-                    }
                     case DATA_RIMEFANG:
-                    {
-                        if (RimefangTrashCount == 255)
-                            return;
-
-                        switch (data)
-                        {
-                            case 0:
-                                if (RimefangTrashCount)
-                                {
-                                    --RimefangTrashCount;
-                                    if (!RimefangTrashCount)
-                                        if (Creature* rime = instance->GetCreature(RimefangGUID))
-                                            rime->AI()->DoAction(ACTION_START_FROSTWYRM);
-                                }
-                                break;
-                            case 1:
-                                ++RimefangTrashCount;
-                                break;
-                            default:
-                                RimefangTrashCount = data;
-                                break;
-                        }
+                        RimefangTrash.insert(data);
                         break;
-                    }
                     case DATA_COLDFLAME_JETS:
                         ColdflameJetsState = data;
                         if (ColdflameJetsState == DONE)
@@ -1804,9 +1763,10 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 PillarsUnchainedGUID;
             uint32 TeamInInstance;
             uint32 ColdflameJetsState;
-            uint32 FrostwyrmCount;
-            uint32 SpinestalkerTrashCount;
-            uint32 RimefangTrashCount;
+            std::set<uint32> FrostwyrmGUIDs;
+            std::set<uint32> SpinestalkerTrash;
+            std::set<uint32> RimefangTrash;
+
             uint32 BloodQuickeningState;
             uint32 HeroicAttempts;
             uint16 BloodQuickeningMinutes;

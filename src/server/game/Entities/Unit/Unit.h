@@ -136,6 +136,7 @@ enum SpellValueMod
     SPELLVALUE_RADIUS_MOD,
     SPELLVALUE_MAX_TARGETS,
     SPELLVALUE_AURA_STACK,
+    SPELLVALUE_SPEED
 };
 
 typedef std::pair<SpellValueMod, int32>     CustomSpellValueMod;

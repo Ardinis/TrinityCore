@@ -67,6 +67,7 @@ enum Events
 
     EVENT_COLDFLAME_TRIGGER     = 9,
     EVENT_FAIL_BONED            = 10,
+    EVENT_BONE_STORM_COLDFLAME  = 11,
 
     EVENT_GROUP_SPECIAL         = 1,
 };
@@ -266,6 +267,8 @@ class boss_lord_marrowgar : public CreatureScript
                             DoCast(me, SPELL_BERSERK, true);
                             Talk(SAY_BERSERK);
                             break;
+                        case EVENT_BONE_STORM_COLDFLAME:
+                            break;
                     }
                 }
 
@@ -290,7 +293,11 @@ class boss_lord_marrowgar : public CreatureScript
 
                 if (id == POINT_TARGET_BONESTORM_PLAYER)
                     if (me->HasAura(SPELL_BONE_STORM))
+                    {
+                        _coldflameLastPos.Relocate(me);
+                        _coldflameTarget = 0LL;
                         DoCast(me, SPELL_COLDFLAME_BONE_STORM);
+                    }
             }
 
             Position const* GetLastColdflamePosition() const
@@ -344,7 +351,7 @@ class npc_coldflame : public CreatureScript
         {
             npc_coldflameAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
-                poss = 0;
+
             }
 
             void IsSummonedBy(Unit* owner)
@@ -352,19 +359,17 @@ class npc_coldflame : public CreatureScript
                 if (owner->GetTypeId() != TYPEID_UNIT)
                     return;
 
-                Creature* creOwner = owner->ToCreature();
                 Position pos;
-                // random target case
+                if (MarrowgarAI* marrowgarAI = CAST_AI(MarrowgarAI, owner->GetAI()))
+                    pos.Relocate(marrowgarAI->GetLastColdflamePosition());
+                else
+                    pos.Relocate(owner);
+
                 if (owner->HasAura(SPELL_BONE_STORM))
                 {
-                    if (MarrowgarAI* marrowgarAI = CAST_AI(MarrowgarAI, creOwner->AI()))
-                    {
-                        Position const* ownerPos = marrowgarAI->GetLastColdflamePosition();
-                        float ang = me->GetAngle(ownerPos) - static_cast<float>(M_PI);
-                        MapManager::NormalizeOrientation(ang);
-                        me->SetOrientation(ang);
-                        owner->GetNearPosition(pos, 2.5f, 0.0f);
-                    }
+                    float ang = MapManager::NormalizeOrientation(pos.GetAngle(me));
+                    me->SetOrientation(ang);
+                    owner->GetNearPoint2D(pos.m_positionX, pos.m_positionY, 5.0f - owner->GetObjectSize(), ang);
                 }
                 else
                 {
@@ -375,12 +380,14 @@ class npc_coldflame : public CreatureScript
                         return;
                     }
 
-                    me->SetOrientation(owner->GetAngle(target));
-                    owner->GetNearPosition(pos, owner->GetObjectSize() / 20.0f, 0.0f);
+                    float ang = MapManager::NormalizeOrientation(pos.GetAngle(target));
+                    me->SetOrientation(ang);
+                    owner->GetNearPoint2D(pos.m_positionX, pos.m_positionY, 15.0f - owner->GetObjectSize(), ang);
                 }
 
                 me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 450);
+                DoCast(SPELL_COLDFLAME_SUMMON);
+                _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 1000);
             }
 
             void UpdateAI(uint32 const diff)
@@ -392,17 +399,12 @@ class npc_coldflame : public CreatureScript
                     Position newPos;
                     me->GetNearPosition(newPos, 5.0f, 0.0f);
                     me->NearTeleportTo(newPos.GetPositionX(), newPos.GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                    poss++;
-                    if (_instance->GetData(DATA_TEMPETE) == IN_PROGRESS)
-                        poss = 3;
-                    if (poss >= 3)
-                        DoCast(SPELL_COLDFLAME_SUMMON);
-                    _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 900);
+                    DoCast(SPELL_COLDFLAME_SUMMON);
+                    _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 1000);
                 }
             }
 
         private:
-            uint32 poss;
             EventMap _events;
             InstanceScript* _instance;
         };
@@ -454,20 +456,20 @@ class npc_bone_spike : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-	      if (ui_des <= diff)
-		{
-		  if (_instance->GetBossState(DATA_LORD_MARROWGAR) != IN_PROGRESS)
-		    {
-		      if (_hasTrappedUnit)
-			if (TempSummon* summ = me->ToTempSummon())
-			  if (Unit* trapped = summ->GetSummoner())
-			    trapped->RemoveAurasDueToSpell(SPELL_IMPALED);
-		      me->DespawnOrUnsummon();
-		    }
-		  ui_des = 1000;
-		}
-	      else
-		ui_des -= diff;
+                if (ui_des <= diff)
+                {
+                    if (_instance->GetBossState(DATA_LORD_MARROWGAR) != IN_PROGRESS)
+                    {
+                        if (_hasTrappedUnit)
+                            if (TempSummon* summ = me->ToTempSummon())
+                                if (Unit* trapped = summ->GetSummoner())
+                                    trapped->RemoveAurasDueToSpell(SPELL_IMPALED);
+                        me->DespawnOrUnsummon();
+                    }
+                    ui_des = 1000;
+                }
+                else
+                    ui_des -= diff;
 
                 if (!_hasTrappedUnit)
                     return;
@@ -482,8 +484,8 @@ class npc_bone_spike : public CreatureScript
         private:
             EventMap _events;
             bool _hasTrappedUnit;
-	  uint32 ui_des;
-	  InstanceScript* _instance;
+            uint32 ui_des;
+            InstanceScript* _instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const

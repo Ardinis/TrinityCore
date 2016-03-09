@@ -14458,7 +14458,6 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     int32 slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
     if (slow)
     {
-        std::cout << "original speed detected " << speed << std::endl;
         float saveSpeed = speed;
         AddPctN(speed, slow);
         if (int32 minSpeedMod = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MINIMUM_SPEED))
@@ -14482,10 +14481,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                         break;
                 }
                 startSpeed *=  minSpeedMod / 100.0f;
-                std::cout << "speed detected " << speed << std::endl;
                 if (speed < startSpeed)
                     speed = startSpeed;
-                std::cout << "speed detected 2 = " << speed << std::endl;
             }
             else
             {

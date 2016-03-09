@@ -3617,7 +3617,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->CastingTimeIndex = 1;
                 break;
             case 70122: // Sindragosa - Icygrip jump
-                spellInfo->EffectImplicitTargetA[0] = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
+                spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_TARGET_ANY;
                 spellInfo->Effect[0] = SPELL_EFFECT_JUMP_DEST;
                 break;
             case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with

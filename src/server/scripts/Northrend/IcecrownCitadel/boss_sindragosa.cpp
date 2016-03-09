@@ -262,8 +262,11 @@ public:
 
         void MoveInLineOfSight(Unit* who)
         {
-            if (who->ToPlayer() && !me->isInCombat())
-                AttackStart(who);
+            if (who->ToPlayer() && !me->isInCombat() && me->IsWithinDistInMap(who, 20.0f))
+            {
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->SetInCombatWithZone();
+            }
         }
 
         void JustDied(Unit* /* killer */)
@@ -1373,7 +1376,7 @@ public:
                     if (TempSummon* summon = caster->SummonCreature(NPC_ICE_TOMB, pos))
                     {
                         summon->AI()->SetGUID(GetTarget()->GetGUID(), DATA_TRAPPED_PLAYER);
-                        GetTarget()->CastSpell(GetTarget(), SPELL_ICE_TOMB_UNTARGETABLE);
+                        //                        GetTarget()->CastWithDelay(3000, GetTarget(), SPELL_ICE_TOMB_UNTARGETABLE, true, false);
                         if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
                         {
                             go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
@@ -1553,16 +1556,30 @@ public:
 
         void HandleTriggerMissile(SpellEffIndex effIndex)
         {
-            PreventHitDefaultEffect(effIndex);
-            if (Position const* pos = GetHitDest())
+            if (Position const* pos = GetTargetDest())
                 if (TempSummon* summon = GetCaster()->SummonCreature(NPC_ICY_BLAST, *pos, TEMPSUMMON_TIMED_DESPAWN, 40000))
+                {
                     summon->CastSpell(summon, SPELL_ICY_BLAST_AREA, true);
+                    if (Creature* trigger = summon->FindNearestCreature(NPC_TRIGGER, 5.0f))
+                        trigger->DespawnOrUnsummon();
+                }
+        }
+
+        void MarkIcyBlastSpot()
+        {
+            if (Position const* pos = GetTargetDest())
+                if (TempSummon* summon = GetCaster()->SummonCreature(NPC_TRIGGER, *pos, TEMPSUMMON_TIMED_DESPAWN, 40000))
+                {
+                    summon->CastSpell(summon, 65686, true); //Just visual aura
+                }
         }
 
         void Register()
         {
+            BeforeHit += SpellHitFn(spell_rimefang_icy_blast_SpellScript::MarkIcyBlastSpot);
             OnEffectHit += SpellEffectFn(spell_rimefang_icy_blast_SpellScript::HandleTriggerMissile, EFFECT_1, SPELL_EFFECT_TRIGGER_MISSILE);
         }
+
     };
 
     SpellScript* GetSpellScript() const
@@ -1744,6 +1761,115 @@ public:
     }
 };
 
+class spell_sindragose_tail_slash : public SpellScriptLoader
+{
+public :
+    spell_sindragose_tail_slash() : SpellScriptLoader("spell_sindragose_tail_slash") {}
+
+    class spell_sindragose_tail_slash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sindragose_tail_slash_SpellScript);
+
+        bool Load()
+        {
+            return true;
+        }
+
+        void FilterTargets(std::list<Unit*>& unitList)
+        {
+            unitList.clear();
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+            Map *map = caster->GetMap();
+            if (!map)
+                return;
+            Map::PlayerList const &PlayerList = map->GetPlayers();
+            if (PlayerList.isEmpty())
+                return;
+            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                if (Player *player = i->getSource())
+                    if (player->isAlive())
+                        if (caster->isInBackInMap(player, 15.0f, static_cast<float>(M_PI / 6)))
+                            unitList.push_back(player);
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragose_tail_slash_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_sindragose_tail_slash_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_sindragose_tail_slash_SpellScript();
+    }
+};
+
+class spell_ice_tomb_damage : public SpellScriptLoader
+{
+public:
+    spell_ice_tomb_damage() : SpellScriptLoader("spell_ice_tomb_damage") { }
+
+    class spell_ice_tomb_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_ice_tomb_damage_SpellScript);
+
+    public:
+        spell_ice_tomb_damage_SpellScript() : SpellScript() { }
+
+        bool Validate(SpellInfo const* spell)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_DAMAGE))
+                return false;
+            return true;
+        }
+
+        void TargetFilter(std::list<Unit*>& targets)
+        {
+            if (!GetCaster())
+                return;
+
+            targets.clear();
+            Map *map = GetCaster()->GetMap();
+            std::list<Player*> playerList;
+            Map::PlayerList const& Players = map->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = Players.begin(); itr != Players.end(); ++itr)
+            {
+                if (Player* player = itr->getSource())
+                {
+                    if (player->isDead() || player->isGameMaster())
+                        continue;
+
+                    float Distance = player->GetExactDist2d(GetCaster());
+                    if (Distance > 11.0f)
+                        continue;
+
+                    targets.push_back(player);
+                }
+            }
+
+            for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
+            {
+                std::cout << (*itr)->GetName() << std::endl;
+            }
+
+        }
+
+        void Register()
+        {
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ice_tomb_damage_SpellScript::TargetFilter, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_ice_tomb_damage_SpellScript();
+    }
+};
+
 void AddSC_boss_sindragosa()
 {
     new boss_sindragosa();
@@ -1767,4 +1893,6 @@ void AddSC_boss_sindragosa()
     //    new spell_trigger_spell_from_caster("spell_sindragosa_ice_tomb_dummy", SPELL_FROST_BEACON);
     new at_sindragosa_lair();
     new achievement_all_you_can_eat();
+    new spell_sindragose_tail_slash();
+    new spell_ice_tomb_damage();
 }

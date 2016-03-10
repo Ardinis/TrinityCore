@@ -1198,6 +1198,7 @@ public:
         return new spell_sindragosa_s_fury_SpellScript();
     }
 };
+
 class UnchainedMagicTargetSelector
 {
 public:
@@ -1256,7 +1257,7 @@ public:
                     itr = unitList.begin();
                 }
             }
-            Trinity::Containers::RandomResizeList(unitList, maxSize);
+            Trinity::Containers::RandomResizeList(healList, maxSize);
             uint32 bonusSize = 0;
             if (GetCaster()->GetMap()->GetSpawnMode() & 1 && unitList.size() < 2)
                 bonusSize = 2 - unitList.size();

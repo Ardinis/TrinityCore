@@ -1160,7 +1160,7 @@ public:
 
     bool operator()(Unit const* target) const
     {
-        return !target->HasAura(SPELL_UNBOUND_PLAGUE_PROTECTION) && target->GetGUID() != _excludeGUID;
+      return !target->HasAura(SPELL_UNBOUND_PLAGUE_PROTECTION) && target->GetGUID() != _excludeGUID && !target->GetVehicle();
     }
 
     uint64 _excludeGUID;
@@ -1170,6 +1170,19 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
 {
     public:
         spell_putricide_unbound_plague() : SpellScriptLoader("spell_putricide_unbound_plague") { }
+
+
+      class VehicleTargetSelector
+      {
+        public:
+	  VehicleTargetSelector() { }
+
+	bool operator()(Unit* unit)
+	{
+	  unit->GetVehicle();
+	}
+      };
+
 
         class spell_putricide_unbound_plague_SpellScript : public SpellScript
         {
@@ -1193,6 +1206,7 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
             {
                 targets.remove_if(Trinity::UnitAuraCheck(true, sSpellMgr->GetSpellIdForDifficulty(SPELL_UNBOUND_PLAGUE, GetCaster())));
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_UNBOUND_PLAGUE_PROTECTION));
+                targets.remove_if(VehicleTargetSelector());
                 Trinity::Containers::RandomResizeList(targets, 1);
             }
 

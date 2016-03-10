@@ -377,7 +377,7 @@ public:
                 me->SetSpeed(MOVE_FLIGHT, 2.5f);
 
                 // Sindragosa enters combat as soon as she lands
-                if (SelectTarget(SELECT_TARGET_NEAREST, 0, 20.0f, true))
+                if (me->FindNearestPlayer(20))
                 {
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetInCombatWithZone();

@@ -302,9 +302,11 @@ public:
         {
             BossAI::JustReachedHome();
             instance->SetBossState(DATA_SINDRAGOSA, FAIL);
+            instance->SetData64(DATA_SINDRAGOSA, 0);
             me->SetFlying(false);
             me->SetDisableGravity(false);
             me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
+            me->DespawnOrUnsummon();
         }
 
         void KilledUnit(Unit* victim)
@@ -343,8 +345,8 @@ public:
             {
                 if (_isThirdPhase)
                 {
-                    EntryCheckPredicate pred(NPC_ICE_TOMB);
-                    summons.DoAction(ACTION_TRIGGER_ASPHYXIATION, pred);
+                    /*                    EntryCheckPredicate pred(NPC_ICE_TOMB);
+                                          summons.DoAction(ACTION_TRIGGER_ASPHYXIATION, pred);*/
                 }
             }
         }
@@ -376,7 +378,15 @@ public:
 
                 // Sindragosa enters combat as soon as she lands
                 if (SelectTarget(SELECT_TARGET_NEAREST, 0, 20.0f, true))
-                    DoZoneInCombat();
+                {
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetInCombatWithZone();
+                }
+                else
+                {
+                    instance->SetData64(DATA_SINDRAGOSA, 0);
+                    me->DespawnOrUnsummon();
+                }
                 break;
             case POINT_TAKEOFF:
                 if (type != EFFECT_MOTION_TYPE)
@@ -1191,12 +1201,31 @@ public:
 class UnchainedMagicTargetSelector
 {
 public:
-    UnchainedMagicTargetSelector() { }
+    UnchainedMagicTargetSelector()
+    {
+    }
 
     bool operator()(Unit* object) const
     {
         if (Unit* unit = object->ToUnit())
-            return unit->getPowerType() != POWER_MANA;
+        {
+            switch (unit->getClass())
+            {
+                case CLASS_DEATH_KNIGHT:
+                case CLASS_ROGUE:
+                case CLASS_WARRIOR:
+                case CLASS_HUNTER:
+                    return true;
+                case CLASS_PRIEST:
+                case CLASS_PALADIN:
+                case CLASS_MAGE:
+                case CLASS_WARLOCK:
+                case CLASS_SHAMAN:
+                    return false;
+                case CLASS_DRUID:
+                    return unit->getPowerType() != POWER_MANA;
+            }
+        }
         return true;
     }
 };
@@ -1213,9 +1242,33 @@ public:
         void FilterTargets(std::list<Unit*>& unitList)
         {
             unitList.remove_if(UnchainedMagicTargetSelector());
-            uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 6 : 2);
+            std::list<Unit*> healList;
+            uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 2 : 1);
+            for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
+            {
+                if (((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_PRIEST && !(*itr)->ToPlayer()->HasAura(15473)) ||
+                    ((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_DRUID && (*itr)->ToPlayer()->HasAura(33891)) ||
+                    ((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_SHAMAN && (*itr)->ToPlayer()->HasSpell(61300)))
+                {
+                    std::cout << "heal detected : " << (*itr)->GetName() << std::endl;
+                    healList.push_back(*itr);
+                    unitList.remove(*itr);
+                    itr = unitList.begin();
+                }
+            }
+            Trinity::Containers::RandomResizeList(unitList, maxSize);
+            uint32 bonusSize = 0;
+            if (GetCaster()->GetMap()->GetSpawnMode() & 1 && unitList.size() < 2)
+                bonusSize = 2 - unitList.size();
+            else if (unitList.size() < 1)
+                bonusSize = 1;
+            maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 4 : 1) + bonusSize;
             if (unitList.size() > maxSize)
                 Trinity::Containers::RandomResizeList(unitList, maxSize);
+            for (std::list<Unit*>::iterator itr = healList.begin(); itr != healList.end(); itr++)
+            {
+                unitList.push_back(*itr);
+            }
         }
 
         void Register()
@@ -1332,6 +1385,8 @@ public:
                 caster->CastSpell(GetTarget(), SPELL_ICE_TOMB_DAMAGE, true);
         }
 
+
+
         void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_sindragosa_frost_beacon_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
@@ -1376,7 +1431,7 @@ public:
                     if (TempSummon* summon = caster->SummonCreature(NPC_ICE_TOMB, pos))
                     {
                         summon->AI()->SetGUID(GetTarget()->GetGUID(), DATA_TRAPPED_PLAYER);
-                        //                        GetTarget()->CastWithDelay(3000, GetTarget(), SPELL_ICE_TOMB_UNTARGETABLE, true, false);
+                        GetTarget()->CastSpell(GetTarget(), SPELL_ICE_TOMB_UNTARGETABLE, true);
                         if (GameObject* go = summon->SummonGameObject(GO_ICE_BLOCK, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0))
                         {
                             go->SetSpellId(SPELL_ICE_TOMB_DAMAGE);
@@ -1821,45 +1876,33 @@ public:
 
         bool Validate(SpellInfo const* spell)
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_ICE_TOMB_DAMAGE))
-                return false;
+            multiplicator = 0;
             return true;
         }
 
         void TargetFilter(std::list<Unit*>& targets)
         {
-            if (!GetCaster())
-                return;
-
-            targets.clear();
-            Map *map = GetCaster()->GetMap();
-            std::list<Player*> playerList;
-            Map::PlayerList const& Players = map->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = Players.begin(); itr != Players.end(); ++itr)
-            {
-                if (Player* player = itr->getSource())
-                {
-                    if (player->isDead() || player->isGameMaster())
-                        continue;
-
-                    float Distance = player->GetExactDist2d(GetCaster());
-                    if (Distance > 11.0f)
-                        continue;
-
-                    targets.push_back(player);
-                }
-            }
-
+            multiplicator = 0;
             for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
             {
-                std::cout << (*itr)->GetName() << std::endl;
+                if ((*itr)->HasAura(SPELL_FROST_BEACON))
+                    multiplicator++;
             }
-
+            if (multiplicator <= 0)
+                multiplicator = 1;
         }
+
+        void HandleDamage(SpellEffIndex /*effIndex*/)
+        {
+            SetHitDamage(GetHitDamage() * multiplicator);
+        }
+
+        int32 multiplicator;
 
         void Register()
         {
-            OnUnitTargetSelect += SpellUnitTargetFn(spell_ice_tomb_damage_SpellScript::TargetFilter, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnUnitTargetSelect += SpellUnitTargetFn(spell_ice_tomb_damage_SpellScript::TargetFilter, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_ice_tomb_damage_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
 
     };

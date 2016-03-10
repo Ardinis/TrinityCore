@@ -913,8 +913,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_PROFESSOR_PUTRICIDE:
                         HandleGameObject(PlagueSigilGUID, state != DONE);
-			if (state == DONE)
-			  CheckLichKingAvailability();
+                        if (state == DONE)
+                            CheckLichKingAvailability();
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -929,15 +929,15 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
                         HandleGameObject(BloodwingSigilGUID, state != DONE);
-			if (state == DONE)
-			  CheckLichKingAvailability();
-			if(GameObject *go = instance->GetGameObject(BloodwingSigilGUID))
-			  {
-			    if (state != DONE)
-			      go->EnableCollision(true);
-			    else
-			      go->EnableCollision(false);
-			  }
+                        if (state == DONE)
+                            CheckLichKingAvailability();
+                        if(GameObject *go = instance->GetGameObject(BloodwingSigilGUID))
+                        {
+                            if (state != DONE)
+                                go->EnableCollision(true);
+                            else
+                                go->EnableCollision(false);
+                        }
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -958,8 +958,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case DATA_SINDRAGOSA:
                         HandleGameObject(FrostwingSigilGUID, state != DONE);
-			if (state == DONE)
-			  CheckLichKingAvailability();
+                        if (state == DONE)
+                            CheckLichKingAvailability();
                         if (instance->IsHeroic())
                         {
                             if (state == FAIL && HeroicAttempts)
@@ -1015,6 +1015,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 if (data == DATA_ADD_TARGET)
                     addtargetGUID = data;
+                if (type == DATA_SINDRAGOSA)
+                    SindragosaGUID = data;
             }
 
             void SetData(uint32 type, uint32 data)

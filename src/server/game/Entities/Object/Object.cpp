@@ -1371,10 +1371,8 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     if (!IsInMap(obj))
         return false;
 
-
     if (obj->GetTypeId() == TYPEID_UNIT)
     {
-
         switch (obj->GetEntry())
         {
             case 36980:
@@ -1383,7 +1381,10 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
             case 38322:
                 return true;
         }
+    }
 
+    if (GetTypeId() == TYPEID_UNIT)
+    {
         switch (GetEntry())
         {
             case 36980:
@@ -1397,21 +1398,24 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
     //    return (IsWithinLOS(ox, oy, oz) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
-        return IsWithinLOS(ox, oy, oz);
+    return IsWithinLOS(ox, oy, oz, true);
 }
 
-bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
+bool WorldObject::IsWithinLOS(float ox, float oy, float oz, bool special/* = false*/) const
 {
+    if (!IsInWorld())
+        return true;
     /*float x, y, z;
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
-  if (GetMapId()==616) return true; //hack for Eye of Eternity
-    if (IsInWorld())
-      return (GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask()) /*&& GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz)*/);
 
+    if (GetMapId()==616) return true; //hack for Eye of Eternity
 
-    return true;
+    if (!special && GetAreaId() == 4889)
+        return true;
+
+    return (GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask()) /*&& GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz)*/);
 }
 
 bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const

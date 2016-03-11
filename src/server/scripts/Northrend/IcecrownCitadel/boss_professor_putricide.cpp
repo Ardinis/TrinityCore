@@ -1160,7 +1160,7 @@ public:
 
     bool operator()(Unit const* target) const
     {
-      return !target->HasAura(SPELL_UNBOUND_PLAGUE_PROTECTION) && target->GetGUID() != _excludeGUID && !target->GetVehicle();
+        return !target->HasAura(SPELL_UNBOUND_PLAGUE_PROTECTION) && target->GetGUID() != _excludeGUID && !target->GetVehicle() && target->GetTypeId() == TYPEID_PLAYER;
     }
 
     uint64 _excludeGUID;
@@ -1284,21 +1284,22 @@ class spell_putricide_unbound_plague_aura : public SpellScriptLoader
                 if (!instance)
                     return;
 
-                if (Creature* professor = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                {
-                    bool isInFight = professor->isInCombat();
-                    if (Aura* oldPlague = aurEff->GetBase())
-                    {
-                        if (Unit* target = professor->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, UnboundPlagueTargetSelector(GetCaster()->GetGUID())))
-                            if (Aura* newPlague = professor->AddAura(aurEff->GetId(), target))
+                if (instance->GetBossState(DATA_PROFESSOR_PUTRICIDE) == IN_PROGRESS)
+                    if (Creature* professor = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                        if (professor->isAlive() && professor->isInCombat())
+                        {
+                            if (Aura* oldPlague = aurEff->GetBase())
                                 if (oldPlague->GetDuration() > 0)
                                 {
-                                    newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
-                                    newPlague->SetDuration(oldPlague->GetDuration());
-                                    professor->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, true);
+                                    if (Unit* target = professor->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, UnboundPlagueTargetSelector(GetCaster()->GetGUID())))
+                                        if (Aura* newPlague = professor->AddAura(aurEff->GetId(), target))
+                                        {
+                                            newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
+                                            newPlague->SetDuration(oldPlague->GetDuration());
+                                            professor->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, true);
+                                        }
                                 }
-                    }
-                }
+                        }
             }
 
             void Register()

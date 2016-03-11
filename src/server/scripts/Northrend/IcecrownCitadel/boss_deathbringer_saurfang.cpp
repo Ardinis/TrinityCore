@@ -720,20 +720,20 @@ class npc_blood_beast : public CreatureScript
 				me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
             }
 
-	  void Reset()
-	  {
-	      mui_freeze = 3000;
-	      defreeze = false;
-	      me->SetReactState(REACT_PASSIVE);
-	      mui_freeze2 = 2000;
-	      targetGUID = 0;
-	  }
+            void Reset()
+            {
+                mui_freeze = 3000;
+                defreeze = false;
+                me->SetReactState(REACT_PASSIVE);
+                mui_freeze2 = 2000;
+                targetGUID = 0;
+            }
 
-	  void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
-	  {
-	    //place for fix blood beast damage
+            void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/)
+            {
+                //place for fix blood beast damage
 
-	  }
+            }
 
             void IsSummonedBy(Unit* summoner)
             {
@@ -762,11 +762,11 @@ class npc_blood_beast : public CreatureScript
                 if (newListTarget.size() > 0)
                 {
                     std::list<Unit*>::iterator itr = newListTarget.begin();
-		    if (!newListTarget.empty())
-		      {
-			std::advance(itr, urand(0, newListTarget.size() - 1));
-			return *itr;
-		      }
+                    if (!newListTarget.empty())
+                    {
+                        std::advance(itr, urand(0, newListTarget.size() - 1));
+                        return *itr;
+                    }
                 }
                 return SelectTarget(SELECT_TARGET_RANDOM);
             }
@@ -779,17 +779,17 @@ class npc_blood_beast : public CreatureScript
                     {
                         me->SetReactState(REACT_AGGRESSIVE);
                         Unit *target = SelectEnemyCaster();
-			if (target != NULL)
-			  {
-			    targetGUID = target->GetGUID();
-			    me->DeleteThreatList();
-			    me->SetInCombatWith(target);
-			    target->SetInCombatWith(me);
-			    //		    DoStartMovement(target);
-			    me->AI()->AttackStart(target);
-			    me->AddThreat(target, 100000000.0f * 9.0f);
-			    mui_freeze2 = 2000;
-			  }
+                        if (target != NULL)
+                        {
+                            targetGUID = target->GetGUID();
+                            me->DeleteThreatList();
+                            me->SetInCombatWith(target);
+                            target->SetInCombatWith(me);
+                            //		    DoStartMovement(target);
+                            me->AI()->AttackStart(target);
+                            me->AddThreat(target, 100000000.0f * 9.0f);
+                            mui_freeze2 = 2000;
+                        }
                         defreeze = true;
                     }
                     else
@@ -801,24 +801,24 @@ class npc_blood_beast : public CreatureScript
                     {
                         mui_freeze2 -= diff;
                         me->DeleteThreatList();
-			if (Unit *target = Unit::GetUnit(*me, targetGUID))
-			  {
-			    me->SetInCombatWith(target);
-			    target->SetInCombatWith(me);
-			    me->AI()->AttackStart(target);
-			    //  DoStartMovement(target);
-			    me->AddThreat(target, 100000000.0f * 9.0f);
-			  }
+                        if (Unit *target = Unit::GetUnit(*me, targetGUID))
+                        {
+                            me->SetInCombatWith(target);
+                            target->SetInCombatWith(me);
+                            me->AI()->AttackStart(target);
+                            //  DoStartMovement(target);
+                            me->AddThreat(target, 100000000.0f * 9.0f);
+                        }
                     }
                 }
                 DoMeleeAttackIfReady();
             }
 
         private :
-	  uint64 targetGUID;
-	  uint32 mui_freeze;
-	  uint32 mui_freeze2;
-	  bool defreeze;
+            uint64 targetGUID;
+            uint32 mui_freeze;
+            uint32 mui_freeze2;
+            bool defreeze;
         };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -1162,7 +1162,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
 
                     sMapMgr->m_Transports.insert(t);
                     sMapMgr->m_TransportsByInstanceIdMap[tMap->GetInstanceId()].insert(t); // FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU. Vnr quoi.
-                    
+
                     t->Update(1);
                     return t;
             }

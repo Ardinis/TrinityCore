@@ -1802,6 +1802,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_PACIFY, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 mui_check = 3000;
                 mui_check2 = 3000;
             }
@@ -1903,6 +1904,7 @@ class npc_valkyr_shadowguard : public CreatureScript
 
             void SetGUID(uint64 guid, int32 /* = 0*/)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 _grabbedPlayer = guid;
                 if (Player *player = Unit::GetPlayer(*me, guid))
                     DoTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
@@ -1954,6 +1956,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                                 me->DespawnOrUnsummon(1000);
                             else
                             {
+                                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                                 me->GetMotionMaster()->MoveTargetedHome();
                                 me->ClearUnitState(UNIT_STATE_EVADE);
                             }

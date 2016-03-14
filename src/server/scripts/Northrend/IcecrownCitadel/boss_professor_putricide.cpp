@@ -1277,7 +1277,7 @@ class spell_putricide_unbound_plague_aura : public SpellScriptLoader
                         return;
                 }
 
-                if (!GetCaster())
+                if (!GetCaster() || !GetTarget())
                     return;
 
                 InstanceScript* instance = GetCaster()->GetInstanceScript();
@@ -1291,13 +1291,16 @@ class spell_putricide_unbound_plague_aura : public SpellScriptLoader
                             if (Aura* oldPlague = aurEff->GetBase())
                                 if (oldPlague->GetDuration() > 0)
                                 {
-                                    if (Unit* target = professor->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, UnboundPlagueTargetSelector(GetCaster()->GetGUID())))
-                                        if (Aura* newPlague = professor->AddAura(aurEff->GetId(), target))
-                                        {
-                                            newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
-                                            newPlague->SetDuration(oldPlague->GetDuration());
-                                            professor->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, true);
-                                        }
+				  GetTarget()->RemoveAurasDueToSpell(SPELL_UNBOUND_PLAGUE_SEARCHER);
+				  GetTarget()->CastSpell(GetTarget(), SPELL_PLAGUE_SICKNESS, true);
+				  GetTarget()->CastSpell(GetTarget(), SPELL_UNBOUND_PLAGUE_PROTECTION, true);
+				  if (Unit* target = professor->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, UnboundPlagueTargetSelector(GetCaster()->GetGUID())))
+				    if (Aura* newPlague = professor->AddAura(aurEff->GetId(), target))
+				      {					  
+					newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
+					newPlague->SetDuration(oldPlague->GetDuration());
+					professor->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, true);
+				      }
                                 }
                         }
             }

@@ -30,8 +30,9 @@ public:
             { "dev",                SEC_ADMINISTRATOR,      false,  &HandleDevCommand,          "", NULL },
             { "wintrade",           SEC_ADMINISTRATOR,      false,  &HandleWintradeCommand,     "", NULL },
             { "xp",                 SEC_PLAYER,             false,  &HandleXPRateCommand,       "", NULL },
-            { "listcombat",      SEC_ADMINISTRATOR,  false, &HandleListCombatCommand,                  "", NULL },
-            { "togglefaction",      SEC_ADMINISTRATOR,  false, &HandleToggleFactionCommand,                  "", NULL },
+            { "copy",               SEC_PLAYER,             false,  &HandleCopyCharacterCommand,       "", NULL },
+            { "listcombat",         SEC_ADMINISTRATOR,      false, &HandleListCombatCommand,                  "", NULL },
+            { "togglefaction",      SEC_ADMINISTRATOR,      false, &HandleToggleFactionCommand,                  "", NULL },
             { NULL,                 0,                      false,  NULL,                       "", NULL }
         };
         return commandTable;
@@ -49,7 +50,7 @@ public:
         }
         if (unit->ToPlayer()) {
             Player *player = unit->ToPlayer();
-            if (player->isCrossFaction()) {   
+            if (player->isCrossFaction()) {
                 player->SetCrossFaction(false);
                 handler->PSendSysMessage("Le joueur est maintenant dans sa faction d'origine.");
             } else {
@@ -61,7 +62,7 @@ public:
             player->SendUpdateToPlayer(player);
             player->SendUpdateToPlayer(handler->GetSession()->GetPlayer());
             */
-              
+
             return true;
         }
     }
@@ -88,14 +89,14 @@ public:
                 if (tm) {
                     Unit *hater = tm->getOwner();
                     if (hater) {
-                    
+
                         handler->PSendSysMessage("Joueur hai par la creature: %s (GUID %u)", hater->GetName(), hater->GetGUID());
                     } else handler->PSendSysMessage("Joueur hai par une creature inconnue (ThreatManager::getOwner() == NULL, ceci ne devrait pas se produire)");
-                } 
+                }
             }
             handler->PSendSysMessage("CombatTimer actuel du joueur: %u millisecondes", player->GetCombatTimer());
 	} else if (unit->ToCreature()) {
-	
+
 	    Creature *creature = unit->ToCreature();
 	    if (creature->CanHaveThreatList()) {
 	        Unit *target = creature->getThreatManager().getHostilTarget();
@@ -111,7 +112,7 @@ public:
 	    sLog->outError("listcombat: ni creature ni joueur ?? (ne devrait pas arriver!)");
 	    return false;
 	}
-	
+
     }
 
     static bool HandleDevCommand(ChatHandler* handler, char const* args)
@@ -212,6 +213,18 @@ public:
         handler->PSendSysMessage(mess.c_str());
         return true;
     }
+
+    static bool HandleCopyCharacterCommand(ChatHandler* handler, char const* args)
+    {
+        Player *player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
+        player->SaveToCATADB(true);
+        std::string mess = "Votre personnage à �té migrévous pouvez des à présent le retrouver sur notre royaume catalysm. ";
+        handler->PSendSysMessage(mess.c_str());
+        return true;
+    }
+
 
 };
 

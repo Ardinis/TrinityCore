@@ -51,12 +51,12 @@ extern int m_ServiceStatus;
 
 #define CRASH_MAX 3
 #define CRASH_RECOVERY_INTERVAL 300000
-#define ANTICRASH_LOGFILE getenv("ANTICRASH_LOGFILE") 
+#define ANTICRASH_LOGFILE getenv("ANTICRASH_LOGFILE")
 #define ANTICRASH_HANDLER getenv("ANTICRASH_HANDLER")
-#define COREDUMP_HANDLER getenv("COREDUMP_HANDLER") 
-  
+#define COREDUMP_HANDLER getenv("COREDUMP_HANDLER")
+
 /*
- * Thread-local variables to store anticrash-related info. TODO move to something like sAntiCrashMgr  
+ * Thread-local variables to store anticrash-related info. TODO move to something like sAntiCrashMgr
  */
 #ifndef _WIN32
 #include <setjmp.h>
@@ -104,7 +104,7 @@ void generate_coredump() {
                                 sigaddset(&sigset, SIGFPE);
                                 sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 
-                                /* Launch the anti-crash shellscript handler. It will sort/record the stack trace in the anti-crash history, and possibly dump the 
+                                /* Launch the anti-crash shellscript handler. It will sort/record the stack trace in the anti-crash history, and possibly dump the
                                  * core of the child process. Argument1 is PID of child process (for coredump generating), argument2 is current Map-ID
                                  * (the Map-ID corresponding to the InstanceMap::Update() in which the signal was received */
                                 char tmp[256];
@@ -114,7 +114,7 @@ void generate_coredump() {
                                 raise(SIGKILL);
     } else {
                                 /* Parent process : Restore signals blocked before fork(), and "recover" from the crash by jumpng to the point before the InstanceMap::Update()
-                                 * The code before InstanceMap::Update() will detect the crash recovery, and flag the instance map for cleanup. 
+                                 * The code before InstanceMap::Update() will detect the crash recovery, and flag the instance map for cleanup.
                                  */
                                 sigprocmask(SIG_SETMASK, &oldsigset, NULL);
     }
@@ -146,12 +146,12 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                     World::StopNow(SHUTDOWN_EXIT_CODE);
                     break;
                 case SIGCHLD:
-                        while (waitpid(-1, NULL, WNOHANG) > 0) { 
+                        while (waitpid(-1, NULL, WNOHANG) > 0) {
                                 sLog->outError("A child process has terminated.");
                         }
                         break;
                 case SIGSEGV:
-                case SIGILL: 
+                case SIGILL:
                 case SIGABRT:
                 case SIGBUS:
                 case SIGFPE:
@@ -163,7 +163,7 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                     /* we want any crash in the handler to be handled as an unrecoverable error */
                     sigemptyset(&sigset);
                     sigaddset(&sigset, SIGSEGV);
-                    sigaddset(&sigset, SIGILL); 
+                    sigaddset(&sigset, SIGILL);
                     sigaddset(&sigset, SIGABRT);
                     sigaddset(&sigset, SIGBUS);
                     sigaddset(&sigset, SIGFPE);
@@ -178,9 +178,9 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                     lastSigTime = getMSTime();
                     too_many_crash = (crash_num >= CRASH_MAX);
 
-                    /* crash_recovery is set if signal was received while doing InstanceMap::Update(). We do not handle other cases yet. 
-                     * Crash recovery can be disabled globally by setting env var. ANTICRASH_DISABLE. 
-                     */ 
+                    /* crash_recovery is set if signal was received while doing InstanceMap::Update(). We do not handle other cases yet.
+                     * Crash recovery can be disabled globally by setting env var. ANTICRASH_DISABLE.
+                     */
                     if (crash_recovery && !too_many_crash && getenv("ANTICRASH_ENABLE")) {
 						char buf[512];
 						snprintf(buf, 512, "ANTICRASH map %u", currently_updated);
@@ -201,7 +201,7 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                         /* We fork() to enable the core-dumping of the child process without freezing the main worldserver process *
                          * We block all signals before the fork() so we are sure nothing but our code will be executed in the child process
                          * (extra paranoia, but justified, since any code using the DB in the child process can lead to DB corruption) */
-                         
+
                         sigfillset(&sigset);
                         sigprocmask(SIG_BLOCK, &sigset, &oldsigset);
                         int r = fork();
@@ -210,32 +210,32 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                         }
 
                         if (r == 0) {
-                                /* Child process : Receiving any of these signals while blocked, will lead to undetermined behavior, so we must unblock them and 
+                                /* Child process : Receiving any of these signals while blocked, will lead to undetermined behavior, so we must unblock them and
                                  * make sure that the child process will crash immediately if they are received */
                                 signal(SIGSEGV, SIG_DFL);
-                                signal(SIGILL, SIG_DFL); 
+                                signal(SIGILL, SIG_DFL);
                                 signal(SIGABRT, SIG_DFL);
                                 signal(SIGBUS, SIG_DFL);
                                 signal(SIGFPE, SIG_DFL);
                                 sigemptyset(&sigset);
                                 sigaddset(&sigset, SIGSEGV);
-                                sigaddset(&sigset, SIGILL); 
+                                sigaddset(&sigset, SIGILL);
                                 sigaddset(&sigset, SIGABRT);
                                 sigaddset(&sigset, SIGBUS);
                                 sigaddset(&sigset, SIGFPE);
                                 sigprocmask(SIG_UNBLOCK, &sigset, NULL);
-                                
-                                /* Launch the anti-crash shellscript handler. It will sort/record the stack trace in the anti-crash history, and possibly dump the 
+
+                                /* Launch the anti-crash shellscript handler. It will sort/record the stack trace in the anti-crash history, and possibly dump the
                                  * core of the child process. Argument1 is PID of child process (for coredump generating), argument2 is current Map-ID
                                  * (the Map-ID corresponding to the InstanceMap::Update() in which the signal was received */
                                 char tmp[256];
                                 tmp[255] = 0;
                                 snprintf(tmp, 254, "%s %u %u", ANTICRASH_HANDLER, getpid(), currently_updated);
-                                system(tmp);   
+                                system(tmp);
                                 raise(SIGKILL);
                         } else {
                                 /* Parent process : Restore signals blocked before fork(), and "recover" from the crash by jumpng to the point before the InstanceMap::Update()
-                                 * The code before InstanceMap::Update() will detect the crash recovery, and flag the instance map for cleanup. 
+                                 * The code before InstanceMap::Update() will detect the crash recovery, and flag the instance map for cleanup.
                                  */
                                 sigprocmask(SIG_SETMASK, &oldsigset, NULL);
                                 siglongjmp(*crash_recovery, 1);
@@ -606,6 +606,33 @@ bool Master::_StartDB()
         sLog->outError("Cannot connect to Character database %s", dbstring.c_str());
         return false;
     }
+
+
+    ///- Get character database info from configuration file
+    dbstring = ConfigMgr::GetStringDefault("CataCharacterDatabaseInfo", "");
+    if (dbstring.empty())
+    {
+        sLog->outError("Character database not specified in configuration file");
+        return false;
+    }
+
+    async_threads = ConfigMgr::GetIntDefault("CataCharacterDatabase.WorkerThreads", 1);
+    if (async_threads < 1 || async_threads > 32)
+    {
+        sLog->outError("Character database: invalid number of worker threads specified. "
+            "Please pick a value between 1 and 32.");
+        return false;
+    }
+
+    synch_threads = ConfigMgr::GetIntDefault("CataCharacterDatabase.SynchThreads", 2);
+
+    ///- Initialise the Character database
+    if (!CataCharacterDatabase.Open(dbstring, async_threads, synch_threads))
+    {
+        sLog->outError("Cannot connect to Character database %s", dbstring.c_str());
+        return false;
+    }
+
 
     ///- Get login database info from configuration file
     dbstring = ConfigMgr::GetStringDefault("LoginDatabaseInfo", "");

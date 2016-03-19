@@ -36,12 +36,14 @@
 
 #include "Implementation/LoginDatabase.h"
 #include "Implementation/CharacterDatabase.h"
+#include "Implementation/CataCharacterDatabase.h"
 #include "Implementation/WorldDatabase.h"
 #include "Implementation/WebDatabase.h"
 #include "Implementation/StoreDatabase.h"
 
 extern WorldDatabaseWorkerPool WorldDatabase;
 extern CharacterDatabaseWorkerPool CharacterDatabase;
+extern CataCharacterDatabaseWorkerPool CataCharacterDatabase;
 extern LoginDatabaseWorkerPool LoginDatabase;
 extern WebDatabaseWorkerPool WebDatabase;
 extern StoreDatabaseWorkerPool StoreDatabase;

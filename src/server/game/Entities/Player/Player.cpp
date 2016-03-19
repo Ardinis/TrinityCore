@@ -19423,6 +19423,160 @@ void Player::SaveToDB(bool create /*=false*/)
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
+void Player::SaveToCATADB(bool create /*=false*/)
+{
+    // knownCurrencies
+    sLog->outDebug(LOG_FILTER_UNITS, "The value of player %s at save: ", m_name.c_str());
+    outDebugValues();
+
+    PreparedStatement* stmt = NULL;
+    uint16 index = 0;
+    std::cout << "SaveToCATADB " << std::endl;
+    if (create)
+    {
+    std::cout << "SaveToCATADB " << std::endl;
+        QueryResult result = CataCharacterDatabase.Query("SELECT MAX(guid) FROM characters");
+        if (!result)
+            return;
+        uint32 guid = (*result)[0].GetUInt32()+1;
+        std::cout << "SaveToCATADB " << guid << std::endl;
+        //! Insert query
+        //! TO DO: Filter out more redundant fields that can take their default value at player create
+        stmt = CataCharacterDatabase.GetPreparedStatement(CHAR_INS_CATACHARACTER);
+        stmt->setUInt32(index++, guid);
+        stmt->setUInt32(index++, GetSession()->GetAccountId());
+        stmt->setString(index++, GetName());
+        stmt->setUInt8(index++, getRace());
+        stmt->setUInt8(index++, getClass());
+        stmt->setUInt8(index++, getGender());
+        stmt->setUInt8(index++, getLevel());
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_XP));
+        stmt->setUInt32(index++, GetMoney());
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_BYTES));
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_BYTES_2));
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FLAGS));
+        stmt->setUInt16(index++, (uint16)GetMapId());
+        stmt->setUInt32(index++, (uint32)0);
+        stmt->setUInt8(index++, (uint8(GetDungeonDifficulty()) | uint8(GetRaidDifficulty()) << 4));
+        stmt->setFloat(index++, finiteAlways(GetPositionX()));
+        stmt->setFloat(index++, finiteAlways(GetPositionY()));
+        stmt->setFloat(index++, finiteAlways(GetPositionZ()));
+        stmt->setFloat(index++, finiteAlways(GetOrientation()));
+
+        std::ostringstream ss;
+        ss << m_taxi;
+        stmt->setString(index++, ss.str());
+        stmt->setUInt8(index++, m_cinematic);
+        stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_TOTAL]);
+        stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_LEVEL]);
+        stmt->setFloat(index++, finiteAlways(m_rest_bonus));
+        stmt->setUInt32(index++, uint32(time(NULL)));
+        stmt->setUInt8(index++,  (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0));
+        //save, far from tavern/city
+        //save, but in tavern/city
+        stmt->setUInt32(index++, m_resetTalentsCost);
+        stmt->setUInt32(index++, m_resetTalentsTime);
+        stmt->setUInt16(index++, (uint16)m_ExtraFlags);
+        stmt->setUInt8(index++,  m_stableSlots);
+        stmt->setUInt16(index++, (uint16)m_atLoginFlags);
+        stmt->setUInt16(index++, GetZoneId());
+        stmt->setUInt32(index++, m_deathExpireTime);
+
+        ss.str("");
+        ss << m_taxi.SaveTaxiDestinationsToString();
+
+        stmt->setString(index++, ss.str());
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
+        stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_KILLS, 0));
+        stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_KILLS, 1));
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_CHOSEN_TITLE));
+        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
+        stmt->setUInt16(index++, (uint16)(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE));
+        stmt->setUInt32(index++, GetHealth());
+
+        stmt->setUInt32(index++, GetSession()->GetLatency());
+
+        stmt->setUInt8(index++, m_specsCount);
+        stmt->setUInt8(index++, m_activeSpec);
+
+        ss.str("");
+        for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
+            ss << GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + i) << ' ';
+        stmt->setString(index++, ss.str());
+
+        ss.str("");
+        // cache equipment...
+        for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)
+            ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << ' ';
+
+        // ...and bags for enum opcode
+        for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
+            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                ss << item->GetEntry();
+            else
+                ss << '0';
+            ss << " 0 ";
+        }
+
+        stmt->setString(index++, ss.str());
+
+        ss.str("");
+        for (uint32 i = 0; i < KNOWN_TITLES_SIZE*2; ++i)
+            ss << GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES + i) << ' ';
+
+        stmt->setString(index++, ss.str());
+        stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
+        stmt->setUInt32(index++, m_grantableLevels);
+        stmt->setUInt32(index++, GetAchievementPoints());
+    }
+
+    if (stmt)
+    {
+
+        std::cout << "Execute statement" << std::endl;
+        /*    if (m_mailsUpdated)                                     //save mails only when needed
+              _SaveMail(trans);
+
+              _SaveBGData(trans);
+              _SaveInventory(trans);
+              _SaveQuestStatus(trans);
+              _SaveDailyQuestStatus(trans);
+              _SaveWeeklyQuestStatus(trans);
+              _SaveSeasonalQuestStatus(trans);
+              _SaveTalents(trans);
+              _SaveSpells(trans);
+              _SaveSpellCooldowns(trans);
+              _SaveActions(trans);
+              _SaveAuras(trans);
+              _SaveSkills(trans);
+              m_achievementMgr.SaveToDB(trans);
+              m_reputationMgr.SaveToDB(trans);
+              _SaveEquipmentSets(trans);
+              GetSession()->SaveTutorialsData(trans);                 // changed only while character in game
+              _SaveGlyphs(trans);
+              _SaveInstanceTimeRestrictions(trans);
+
+              // check if stats should only be saved on logout
+              // save stats can be out of transaction
+              if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
+              _SaveStats(trans);
+        */
+
+        CataCharacterDatabase.Execute(stmt);
+    }
+
+    // we save the data here to prevent spamming
+    //    sAnticheatMgr->SavePlayerData(this);
+
+    // in this way we prevent to spam the db by each report made!
+    // sAnticheatMgr->SavePlayerData(this);
+
+    // save pet (hunter pet level and experience and all type pets health/mana).
+    //    if (Pet* pet = GetPet())
+    //    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+}
+
 // fast save function for item/money cheating preventing - save only inventory and money state
 void Player::SaveInventoryAndGoldToDB(SQLTransaction& trans)
 {

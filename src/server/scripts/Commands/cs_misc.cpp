@@ -216,13 +216,23 @@ public:
 
     static bool HandleCopyCharacterCommand(ChatHandler* handler, char const* args)
     {
-        Player *player = handler->GetSession()->GetPlayer();
-        if (!player)
+        if (!*args)
             return false;
-        player->SaveToCATADB(true);
-        std::string mess = "Votre personnage à �té migrévous pouvez des à présent le retrouver sur notre royaume catalysm. ";
-        handler->PSendSysMessage(mess.c_str());
-        return true;
+
+        std::string argstr = (char*)args;
+
+        if (argstr == "cataclysm")
+        {
+            Player *player = handler->GetSession()->GetPlayer();
+            if (!player)
+                return false;
+            if (!player->CanMigrateToCata())
+                return false;
+            player->SaveToCATADB(true);
+            handler->PSendSysMessage("Felicitation ! votre personnage a bien ete copie sur l'extension Cataclysm.");
+            return true;
+        }
+        return false;
     }
 
 

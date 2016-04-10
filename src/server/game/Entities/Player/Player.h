@@ -1116,6 +1116,8 @@ class Player : public Unit, public GridObject<Player>
         void AddToWorld();
         void RemoveFromWorld();
 
+        bool CanMigrateToCata();
+
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
         void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
 
@@ -2674,6 +2676,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_regenTimerCount;
         float m_powerFraction[MAX_POWERS];
         uint32 m_contestedPvPTimer;
+
+        uint32 _cataGUID;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

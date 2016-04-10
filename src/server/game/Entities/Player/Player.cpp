@@ -648,6 +648,7 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
 #pragma warning(default:4355)
 #endif
 
+    _cataGUID       = 0;
     m_XPRate        = 3;
     m_jail_guid     = 0;
     m_jail_char     = "";
@@ -17788,7 +17789,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadCustomTransmoPack(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADCUSTOMTRANSMO));
 
     m_XPRate = fields[67].GetUInt8();
-
+    _cataGUID = fields[68].GetUInt32();
     return true;
 }
 
@@ -19438,12 +19439,12 @@ void Player::SaveToCATADB(bool create /*=false*/)
         QueryResult result = CataCharacterDatabase.Query("SELECT MAX(guid) FROM characters");
         if (!result)
             return;
-        uint32 guid = (*result)[0].GetUInt32()+1;
-        std::cout << "SaveToCATADB " << guid << std::endl;
+        _cataGUID = (*result)[0].GetUInt32()+1;
+        std::cout << "SaveToCATADB " << _cataGUID << std::endl;
         //! Insert query
         //! TO DO: Filter out more redundant fields that can take their default value at player create
         stmt = CataCharacterDatabase.GetPreparedStatement(CHAR_INS_CATACHARACTER);
-        stmt->setUInt32(index++, guid);
+        stmt->setUInt32(index++, _cataGUID);
         stmt->setUInt32(index++, GetSession()->GetAccountId());
         stmt->setString(index++, GetName());
         stmt->setUInt8(index++, getRace());
@@ -19478,7 +19479,7 @@ void Player::SaveToCATADB(bool create /*=false*/)
         stmt->setUInt32(index++, m_resetTalentsTime);
         stmt->setUInt16(index++, (uint16)m_ExtraFlags);
         stmt->setUInt8(index++,  m_stableSlots);
-        stmt->setUInt16(index++, (uint16)m_atLoginFlags);
+        stmt->setUInt16(index++, AT_LOGIN_RENAME);
         stmt->setUInt16(index++, GetZoneId());
         stmt->setUInt32(index++, m_deathExpireTime);
 
@@ -19496,8 +19497,8 @@ void Player::SaveToCATADB(bool create /*=false*/)
 
         stmt->setUInt32(index++, GetSession()->GetLatency());
 
-        stmt->setUInt8(index++, m_specsCount);
-        stmt->setUInt8(index++, m_activeSpec);
+        stmt->setUInt8(index++, 1);
+        stmt->setUInt8(index++, 0);
 
         ss.str("");
         for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
@@ -19566,6 +19567,8 @@ void Player::SaveToCATADB(bool create /*=false*/)
         CataCharacterDatabase.Execute(stmt);
     }
 
+    CharacterDatabase.DirectPExecute("UPDATE characters SET cataGUID = %u where guid = %u", _cataGUID, GetGUIDLow());
+    CataCharacterDatabase.DirectPExecute("UPDATE characters SET WotlkGUID = %u, NeedSynchronisation = 1 where guid = %u", GetGUIDLow(),_cataGUID);
     // we save the data here to prevent spamming
     //    sAnticheatMgr->SavePlayerData(this);
 
@@ -26402,6 +26405,7 @@ void Player::SetCrossFaction(bool val) {
     SetPhaseMask(65536, true);
     SetPhaseMask(orig, true);
 }
+
 uint8 Player::getSwitchedRace() const {
     uint8 switched_race = getRace();
                         switch(switched_race) {
@@ -26439,4 +26443,29 @@ uint8 Player::getSwitchedRace() const {
                                 break;
                         }
                 return switched_race;
+}
+
+bool Player::CanMigrateToCata()
+{
+    if (getLevel() < 70)
+    {
+        ChatHandler(this).PSendSysMessage("Migration impossible, vous devez atteindre le niveau 70 avant de pouvoir migrer votre personnage vers l'extension superieure.");
+        return false;
+    }
+    if (_cataGUID)
+    {
+        ChatHandler(this).PSendSysMessage("Migration impossible, votre personnage a deja ete copie sur l'extension Cataclysm.");
+        return false;
+    }
+    uint32 accountId = GetSession()->GetAccountId();
+    QueryResult result = CataCharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters where account = %u", accountId);
+    if (!result)
+        return false;
+    uint32 totalCount = (*result)[0].GetUInt32();
+    if (totalCount >= 10)
+    {
+        ChatHandler(this).PSendSysMessage("Migration impossible, vous avez atteint la limitte de personnages sur votre compte sur l'extension Cataclysm.");
+        return false;
+    }
+    return true;
 }

@@ -1,5 +1,4 @@
 /*
-
  * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -983,8 +982,11 @@ class boss_the_lich_king : public CreatureScript
                 {
                     if (mui_sumVile <= diff)
                     {
-                        SummonAnotherSpirit();
-                        mui_sumVile = 3000;
+                        for (int i = 1; i < 20; i++)
+                            SummonAnotherSpirit(i * 2000);
+                        /*                        if (Is25ManRaid())
+                            SummonAnotherSpirit();
+                        mui_sumVile = 3000;*/
                     }
                     else mui_sumVile -= diff;
                 }
@@ -1209,8 +1211,8 @@ class boss_the_lich_king : public CreatureScript
                                 {
                                     triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, true));
                                     Unit* spawner = triggers.front();
-                                    if (Is25ManRaid())
-                                        spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
+
+                                    spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_1, true);  // summons bombs randomly
                                     spawner->CastSpell(spawner, SPELL_SUMMON_SPIRIT_BOMB_2, true);  // summons bombs on players
 
                                     Creature* spawnerBack = triggers.back();
@@ -1331,16 +1333,20 @@ class boss_the_lich_king : public CreatureScript
             }
 
 
-            void SummonAnotherSpirit()
+            void SummonAnotherSpirit(uint32 timer)
             {
+                Position pos = { 495.7080f, -2523.760f, 1075.000f, 0.0f };
+                pos.m_positionX += ((rand() % 15) * (rand() % 2 ? 1 : -1));
+                pos.m_positionY += ((rand() % 15) * (rand() % 2 ? 1 : -1));
                 //37799
                 if (IsHeroic())
-                    if (TempSummon* summon = me->GetMap()->SummonCreature(NPC_WICKED_SPIRIT, TerenasSpawnHeroicZ, NULL, 50000))
+                    if (TempSummon* summon = me->GetMap()->SummonCreature(NPC_WICKED_SPIRIT, pos, NULL, 50000))
                     {
                         summon->SetReactState(REACT_PASSIVE);
                         summon->SetSpeed(MOVE_FLIGHT, 0.5f);
+                        summon->GetMotionMaster()->MoveRandom(10);
                         summon->m_Events.KillAllEvents(true);
-                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(1000));
+                        summon->m_Events.AddEvent(new VileSpiritActivateEvent(summon), summon->m_Events.CalculateTime(timer));
                     }
             }
 
@@ -2048,7 +2054,11 @@ class npc_strangulate_vehicle : public CreatureScript
 
                 if (TempSummon* summ = me->ToTempSummon())
                     if (Unit* summoner = summ->GetSummoner())
-                        DoCast(summoner, SPELL_HARVEST_SOUL_TELEPORT_BACK);
+                    {
+                        DoCast(summoner, SPELL_HARVEST_SOUL_TELEPORT_BACK, true);
+                        if (Player *player = summoner->ToPlayer())
+                            player->ResummonPetTemporaryUnSummonedIfAny();
+                    }
 
                 if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
                     lichKing->AI()->SummonedCreatureDespawn(me);
@@ -2079,6 +2089,8 @@ class npc_strangulate_vehicle : public CreatureScript
                                 {
                                     summoner->CastSpell((Unit*)NULL, SPELL_HARVEST_SOUL_VISUAL, true);
                                     summoner->ExitVehicle(summoner);
+                                    if (Player *player = summoner->ToPlayer())
+                                        player->UnsummonPetTemporaryIfAny();
                                     if (!IsHeroic())
                                         summoner->CastSpell(summoner, SPELL_HARVEST_SOUL_TELEPORT, true);
                                     else

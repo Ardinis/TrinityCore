@@ -1247,11 +1247,11 @@ public:
             uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 2 : 1);
             for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); itr++)
             {
-                if (((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_PRIEST && !(*itr)->ToPlayer()->HasAura(15473)) ||
+                if (((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_PRIEST && (*itr)->ToPlayer()->HasAura(15012)) ||
                     ((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_DRUID && (*itr)->ToPlayer()->HasAura(33891)) ||
-                    ((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_SHAMAN && (*itr)->ToPlayer()->HasSpell(61300)))
+                    ((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_SHAMAN && (*itr)->ToPlayer()->HasSpell(29202)) ||
+                    ((*itr)->ToPlayer() && (*itr)->getClass() == CLASS_PALADIN && (*itr)->ToPlayer()->HasSpell(31841)))
                 {
-                    std::cout << "heal detected : " << (*itr)->GetName() << std::endl;
                     healList.push_back(*itr);
                     unitList.remove(*itr);
                     itr = unitList.begin();

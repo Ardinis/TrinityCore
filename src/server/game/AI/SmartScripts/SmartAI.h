@@ -25,6 +25,7 @@
 #include "ConditionMgr.h"
 #include "CreatureTextMgr.h"
 #include "Spell.h"
+#include "ScriptedCreature.h"
 
 #include "SmartScript.h"
 #include "SmartScriptMgr.h"
@@ -107,7 +108,7 @@ class SmartAI : public CreatureAI
 
         // Called at any Damage from any attacker (before damage apply)
         void DamageTaken(Unit* doneBy, uint32& damage);
-	void DamageTaken(Unit* doneBy, uint32& damage, SpellInfo const* spellInfo);
+        void DamageTaken(Unit* doneBy, uint32& damage, SpellInfo const* spellInfo);
 
         // Called when the creature receives heal
         void HealReceived(Unit* doneBy, uint32& addhealth);
@@ -198,6 +199,8 @@ class SmartAI : public CreatureAI
         void StartDespawn() { mDespawnState = 2; }
 
         void RemoveAuras();
+
+        SummonList summons;
 
     private:
         uint32 mFollowCreditType;

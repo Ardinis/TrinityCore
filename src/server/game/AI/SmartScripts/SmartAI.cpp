@@ -31,7 +31,7 @@
 #include "SmartAI.h"
 #include "ScriptPCH.h"
 
-SmartAI::SmartAI(Creature* c) : CreatureAI(c)
+SmartAI::SmartAI(Creature* c) : CreatureAI(c), summons(c)
 {
     // copy script to local (protection for table reload)
 
@@ -601,6 +601,7 @@ int SmartAI::Permissible(const Creature* creature)
 void SmartAI::JustReachedHome()
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_REACHED_HOME);
+    summons.DespawnAll();
 }
 
 void SmartAI::EnterCombat(Unit* enemy)
@@ -615,6 +616,7 @@ void SmartAI::JustDied(Unit* killer)
     GetScript()->ProcessEventsFor(SMART_EVENT_DEATH, killer);
     if (HasEscortState(SMART_ESCORT_ESCORTING))
         EndPath(true);
+    summons.DespawnAll();
 }
 
 void SmartAI::KilledUnit(Unit* victim)
@@ -624,6 +626,7 @@ void SmartAI::KilledUnit(Unit* victim)
 
 void SmartAI::JustSummoned(Creature* creature)
 {
+    summons.Summon(creature);
     GetScript()->ProcessEventsFor(SMART_EVENT_SUMMONED_UNIT, creature);
 }
 
@@ -687,6 +690,7 @@ void SmartAI::DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*damag
 void SmartAI::SummonedCreatureDespawn(Creature* unit)
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_SUMMON_DESPAWNED, unit);
+    summons.Despawn(unit);
 }
 
 void SmartAI::UpdateAIWhileCharmed(const uint32 /*diff*/)

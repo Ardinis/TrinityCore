@@ -17,6 +17,9 @@
 
 #include "ScriptPCH.h"
 #include "Chat.h"
+#include "Group.h"
+
+#define MENU_ID 123
 
 class misc_commandscript : public CommandScript
 {
@@ -33,6 +36,7 @@ public:
             { "copy",               SEC_PLAYER,             false,  &HandleCopyCharacterCommand,       "", NULL },
             { "listcombat",         SEC_ADMINISTRATOR,      false, &HandleListCombatCommand,                  "", NULL },
             { "togglefaction",      SEC_ADMINISTRATOR,      false, &HandleToggleFactionCommand,                  "", NULL },
+            { "guildRanked",        SEC_PLAYER,      false, &HandleGuildRankedCharacterCommand,                  "", NULL },
             { NULL,                 0,                      false,  NULL,                       "", NULL }
         };
         return commandTable;
@@ -235,10 +239,108 @@ public:
         return false;
     }
 
+    static bool HandleGuildRankedCharacterCommand(ChatHandler* handler, char const* args)
+    {
+        Player *player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
+        player->PlayerTalkClass->ClearMenus();
+        player->CLOSE_GOSSIP_MENU();
+        player->ADD_GOSSIP_ITEM(0, "[Passif] - M. Popularite La reputation gagnee avec des quetes ou en tuant des monstres est augmentee de 5%", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        player->ADD_GOSSIP_ITEM(0, "[Passif] - Tresorerie  A chaque fois que lon ramasse de l argent sur un ennemi, 5% supplementaire est genere et mis dans la banque de guilde.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+        player->ADD_GOSSIP_ITEM(0, "[Passif] - TrÃ©soreriA chaque fois que l on ramasse de l argent sur un ennemi, 10% supplÃ©mentaire est gÃ©nÃ©rÃ© et mis dans la banque de guilde.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+3);
+        player->ADD_GOSSIP_ITEM(0, "[Passif] - G du courrier  Le courrier en jeu envoyÃ© par un membre de la guilde arrive instantanÃ©ment.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+4);
+        player->ADD_GOSSIP_ITEM(0, "[Passif] - Mention honorable  Augmente les points d honneur gagnÃ©s de 10%.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+5);
+        player->ADD_GOSSIP_ITEM(0, "Banque mobile", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+6);
+        player->ADD_GOSSIP_ITEM(0, "Groupe de voyage", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
+        player->ADD_GOSSIP_ITEM(0, "RÃ©surrection de masse", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+8);
+        // SetMenuId must be after clear menu and before send menu!!
+        player->PlayerTalkClass->GetGossipMenu().SetMenuId(MENU_ID);        // Sets menu ID so we can identify our menu in Select hook. Needs unique number for the menu
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, player->GetGUID());
+        return true;
+    }
+
+
+};
+
+#define CUSTOM_PACK_SPELL_SUMMON_RAID 2000002
+#define CUSTOM_PACK_SPELL_REZ_RAID 2000003
+
+class example_PlayerGossip : public PlayerScript
+{
+    public:
+    example_PlayerGossip() : PlayerScript("example_PlayerGossip") {}
+
+    void OnGossipSelect(Player* player, uint32 menu_id, uint32 /*sender*/, uint32 action) override
+    {
+        if (menu_id != MENU_ID) // Not the menu coded here? stop.
+            return;
+
+        player->PlayerTalkClass->ClearMenus();
+
+        switch(action)
+        {
+        case GOSSIP_ACTION_INFO_DEF+6:
+            player->GetSession()->SendShowBank(player->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF+7:
+            if (player->HasSpellCooldown(CUSTOM_PACK_SPELL_SUMMON_RAID))
+                break;
+            if (Group *group = player->GetGroup())
+            {
+                SummonPlayerRaid(player);
+                player->GetSession()->SendAreaTriggerMessage("Your raid has been invited to teleport at your location.");
+                player->AddSpellCooldown(CUSTOM_PACK_SPELL_SUMMON_RAID, 0, time(NULL) + 3600);
+            }
+            else
+                ChatHandler(player).SendSysMessage("You are not grouped");
+            break;
+        case GOSSIP_ACTION_INFO_DEF+8:
+            if (player->HasSpellCooldown(CUSTOM_PACK_SPELL_REZ_RAID))
+                break;
+            if (Group *group = player->GetGroup())
+            {
+                player->CastSpell(player, CUSTOM_PACK_SPELL_REZ_RAID, true);
+                player->AddSpellCooldown(CUSTOM_PACK_SPELL_REZ_RAID, 0, time(NULL) + 1800);
+            }
+            else
+                ChatHandler(player).SendSysMessage("You are not grouped");
+            break;
+        }
+        player->CLOSE_GOSSIP_MENU();
+    }
+
+    void SummonPlayerRaid(Player *player)
+    {
+        if (Group *group = player->GetGroup())
+        {
+            const Group::MemberSlotList members = group->GetMemberSlots();
+            for (Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+                if (itr->guid != player->GetGUID())
+                    if (Player* target = ObjectAccessor::FindPlayer(itr->guid))
+                    {
+                        // Evil Twin (ignore player summon, but hide this for summoner)
+                        if (target->HasAura(23445))
+                            return;
+
+                        float x, y, z;
+                        player->GetPosition(x, y, z);
+
+                        target->SetSummonPoint(player->GetMapId(), x, y, z);
+
+                        WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
+                        data << uint64(player->GetGUID());                    // summoner guid
+                        data << uint32(player->GetZoneId());                  // summoner zone
+                        data << uint32(MAX_PLAYER_SUMMON_DELAY*IN_MILLISECONDS); // auto decline after msecs
+                        target->GetSession()->SendPacket(&data);
+                    }
+        }
+    }
 
 };
 
 void AddSC_misc_commandscript()
 {
+    new example_PlayerGossip();
     new misc_commandscript();
 }

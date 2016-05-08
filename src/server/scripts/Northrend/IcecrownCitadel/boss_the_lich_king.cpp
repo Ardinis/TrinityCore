@@ -1983,7 +1983,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                             // me->GetMotionMaster()->MoveFollow(_trig, 0.0f, 0.0f);
                             break;
                         case EVENT_LIFE_SIPHON:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_LIFE_SIPHON);
                             _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2500);
                             break;

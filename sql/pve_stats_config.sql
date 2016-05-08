@@ -16,126 +16,126 @@ CREATE TABLE `pvestats_config` (
 INSERT INTO pvestats_config VALUES
 -- caveau archavon
 -- archavon
-(31125, 0, 0, 0),
+(31125, 1, 4603, 0),
 -- emalon
-(33993, 0, 0, 0),
+(33993, 1, 4603, 0),
 -- Koralon
-(35013, 0, 0, 0),
+(35013, 1, 4603, 0),
 -- Toravon
-(38433, 0, 0, 0),
+(38433, 1, 4603, 0),
 
 -- Naxxramas
 -- Anub'Rekhan
-(15956, 0, 0, 0),
+(15956, 1, 3456, 0),
 -- Grande veuve Faerlina
-(15953, 0, 0, 0),
+(15953, 1, 3456, 0),
 -- Maexxna
-(15952, 0, 0, 0),
+(15952, 1, 3456, 0),
 -- noth-le-porte-peste
-(15954, 0, 0, 0),
+(15954, 1, 3456, 0),
 -- Heigan l'Impur
-(15936, 0, 0, 0),
+(15936, 1, 3456, 0),
 -- horreb
-(16011, 0, 0, 0),
+(16011, 1, 3456, 0),
 -- instructeur-razuvious
-(16061, 0, 0, 0),
+(16061, 1, 3456, 0),
 -- gothik-le-moissonneur
-(16060, 0, 0, 0),
+(16060, 1, 3456, 0),
 -- le-recousu
-(16028, 0, 0, 0),
+(16028, 1, 3456, 0),
 -- grobbulus
-(15931, 0, 0, 0),
+(15931, 1, 3456, 0),
 -- gluth
-(15932, 0, 0, 0),
+(15932, 1, 3456, 0),
 -- thaddius
-(15928, 0, 0, 0),
+(15928, 1, 3456, 0),
 -- saphiron
-(15989, 0, 0, 0),
+(15989, 1, 3456, 0),
 -- kelthuzad
-(15990, 0, 0, 0),
+(15990, 1, 3456, 0),
 
 
 -- le-sanctum-obsidien
 -- Sartharion <Le gardien d'Onyx>
-(28860, 0, 0, 0),
+(28860, 1, 4493, 0),
 
 -- L’Œil de l’éternité
 -- malygos
-(28859, 0, 0, 0),
+(28859, 1, 4500, 0),
 
 -- ulduar
 -- leviathan-des-flammes
-(33113, 0, 0, 0),
+(33113, 2, 4273, 0),
 -- ignis-le-maitre-de-la-fournaise
-(33118, 0, 0, 0),
+(33118, 2, 4273, 0),
 -- tranchecaille
-(33186, 0, 0, 0),
+(33186, 2, 4273, 0),
 -- deconstructeur-xt-002
-(33293, 0, 0, 0),
+(33293, 2, 4273, 0),
 -- mande-foudre-brundir
-(32857, 0, 0, 0),
+(32857, 2, 4273, 0),
 -- kologarn
-(32930, 0, 0, 0),
+(32930, 2, 4273, 0),
 -- auriaya
-(33515, 0, 0, 0),
+(33515, 2, 4273, 0),
 -- freya
-(32906, 0, 0, 0),
+(32906, 2, 4273, 0),
 -- hodir
-(32845, 0, 0, 0),
+(32845, 2, 4273, 0),
 -- mimiron
-(33350, 0, 0, 0),
+(33350, 2, 4273, 0),
 -- thorim
-(32865, 0, 0, 0),
+(32865, 2, 4273, 0),
 -- general-vezax
-(33271, 0, 0, 0),
+(33271, 2, 4273, 0),
 -- yogg-saron
-(33288, 0, 0, 0),
+(33288, 2, 4273, 0),
 -- algalon-lobservateur
-(32871, 0, 0, 0),
+(32871, 2, 4273, 0),
 
 -- repaire-d-onyxia
 -- onyxia
-(10184, 0, 0, 0),
+(10184, 1, 2159, 0),
 
 -- l-epreuve-du-croise
 -- glace-hurlante
-(34797, 0, 0, 0),
+(34797, 2, 4722, 0),
 -- seigneur-jaraxxus
-(34780, 0, 0, 0),
+(34780, 2, 4722, 0),
 -- fjola-plaie-lumineuse
-(34497, 0, 0, 0),
+(34497, 2, 4722, 0),
 -- eydis-plaie-sombre
-(34496, 0, 0, 0),
+(34496, 2, 4722, 0),
 -- anubarak
-(34564, 0, 0, 0),
+(34564, 3, 4722, 0),
 
 -- citadelle-de-la-couronne-de-glace
 -- seigneur-gargamoelle
-(36612, 0, 0, 0),
+(36612, 3, 4812, 0),
 -- dame-murmemort
-(36855, 0, 0, 0),
+(36855, 3, 4812, 0),
 -- porte-mort-saurcroc
-(37813, 0, 0, 0),
+(37813, 3, 4812, 0),
 -- pulentraille
-(36626, 0, 0, 0),
+(36626, 3, 4812, 0),
 -- trognepus
-(36627, 0, 0, 0),
+(36627, 3, 4812, 0),
 -- professeur-putricide
-(36678, 0, 0, 0),
+(36678, 3, 4812, 0),
 -- prince-valanar
-(37970, 0, 0, 0),
+(37970, 3, 4812, 0),
 -- reine-de-sang-lanathel
-(37955, 0, 0, 0),
+(37955, 3, 4812, 0),
 -- valithria-marchereve
 -- (36789, 0, 0, 0),
 -- sindragosa
-(36853, 0, 0, 0),
+(36853, 3, 4812, 0),
 -- le-roi-liche
-(36597, 1, 0, 0),
+(36597, 4, 4812, 0),
 
 -- le-sanctum-rubis
 -- halion
-(39863, 0, 0, 0);
+(39863, 4, 4987, 0);
 
 
 DROP TABLE IF EXISTS `pvestats_guild`;

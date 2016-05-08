@@ -2572,7 +2572,7 @@ class spell_the_lich_king_necrotic_plague_jump : public SpellScriptLoader
                 targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
                 for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); itr++)
                 {
-                    if ((*itr)->HasAura(72846))
+                    if ((*itr)->HasAura(72846) || (*itr)->isTotem())
                     {
                         targets.remove(*itr);
                         itr = targets.begin();

@@ -978,7 +978,7 @@ class boss_the_lich_king : public CreatureScript
 
                 events.Update(diff);
 
-                if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE)
+                if (events.GetPhaseMask() & PHASE_MASK_FROSTMOURNE && mui_sumVile > 0)
                 {
                     if (mui_sumVile <= diff)
                     {
@@ -987,6 +987,7 @@ class boss_the_lich_king : public CreatureScript
                         /*                        if (Is25ManRaid())
                             SummonAnotherSpirit();
                         mui_sumVile = 3000;*/
+                        mui_sumVile = 0;
                     }
                     else mui_sumVile -= diff;
                 }

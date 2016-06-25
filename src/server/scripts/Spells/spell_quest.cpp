@@ -1080,15 +1080,15 @@ public:
   class spell_q12987_read_pronouncement_AuraScript : public AuraScript
   {
     PrepareAuraScript(spell_q12987_read_pronouncement_AuraScript);
-    
+
     void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
       // player must cast kill credit and do emote text, according to sniff
       if (Player* target = GetTarget()->ToPlayer())
 	{
 	  target->MonsterWhisper(SAY_1, target->GetGUID(), true);
-	  target->KilledMonsterCredit(NPC_KILLCREDIT, 0);    
-	  target->MonsterWhisper(SAY_2, target->GetGUID(), true);	    
+	  target->KilledMonsterCredit(NPC_KILLCREDIT, 0);
+	  target->MonsterWhisper(SAY_2, target->GetGUID(), true);
 	}
     }
 
@@ -1276,6 +1276,36 @@ public:
   }
 };
 
+class spell_quest_testing_the_vessel : public SpellScriptLoader
+{
+public:
+    spell_quest_testing_the_vessel() : SpellScriptLoader("spell_quest_testing_the_vessel") { }
+
+
+    class spell_quest_testing_the_vessel_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_quest_testing_the_vessel_SpellScript);
+
+    public:
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Creature* creatureTarget = GetHitCreature())
+                creatureTarget->DespawnOrUnsummon();
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_quest_testing_the_vessel_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_quest_testing_the_vessel_SpellScript();
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -1306,4 +1336,5 @@ void AddSC_quest_spell_scripts()
     new spell_q12277_wintergarde_mine_explosion();
     new spell_q12066_bunny_kill_credit();
     new spell_q12735_song_of_cleansing();
+    new spell_quest_testing_the_vessel();
 }

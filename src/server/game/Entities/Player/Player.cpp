@@ -8819,7 +8819,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
 
             if (spellInfo->Id == 57965 && e_slot == TEMP_ENCHANTMENT_SLOT)
             {
-                if (this->HasAura(14117)) //rank 5
+                /*                if (this->HasAura(14117)) //rank 5
                     chance += 50;
                 else if (this->HasAura(14116)) // rank 4
                     chance += 40;
@@ -8828,7 +8828,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 else if (this->HasAura(14114)) // rank 2
                     chance += 20;
                 else if (this->HasAura(14113)) // rank 1
-                    chance += 10;
+                chance += 10;*/
             }
 
             if (roll_chance_f(chance))

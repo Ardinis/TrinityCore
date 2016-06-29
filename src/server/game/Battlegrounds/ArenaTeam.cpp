@@ -46,7 +46,7 @@ ArenaTeam::~ArenaTeam()
 {
 }
 
-bool ArenaTeam::Create(uint64 captainGuid, uint8 type, std::string teamName, uint32 backgroundColor, uint8 emblemStyle, uint32 emblemColor, uint8 borderStyle, uint32 borderColor)
+bool ArenaTeam::Create(uint64 captainGuid, uint8 type, std::string teamName, uint32 backgroundColor, uint8 emblemStyle, uint32 emblemColor, uint8 borderStyle, uint32 borderColor, bool isSoloTeam)
 {
     // Check if captain is present
     if (!ObjectAccessor::FindPlayer(captainGuid))
@@ -69,6 +69,7 @@ bool ArenaTeam::Create(uint64 captainGuid, uint8 type, std::string teamName, uin
     EmblemColor = emblemColor;
     BorderStyle = borderStyle;
     BorderColor = borderColor;
+    isSoloQueueTeam = isSoloTeam;
 	uint32 captainLowGuid = GUID_LOPART(captainGuid);
 
 	// Save arena team to db
@@ -83,6 +84,7 @@ bool ArenaTeam::Create(uint64 captainGuid, uint8 type, std::string teamName, uin
     stmt->setUInt32(7, EmblemColor);
     stmt->setUInt8(8, BorderStyle);
     stmt->setUInt32(9, BorderColor);
+    stmt->setBool(10, isSoloTeam);
     CharacterDatabase.Execute(stmt);
 
     // Add captain as member
@@ -212,6 +214,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult result)
     Stats.SeasonGames = fields[12].GetUInt16();
     Stats.SeasonWins  = fields[13].GetUInt16();
     Stats.Rank        = fields[14].GetUInt32();
+    isSoloQueueTeam   = fields[15].GetBool();
 
     return true;
 }
@@ -397,6 +400,7 @@ void ArenaTeam::Roster(WorldSession* session)
         }
     }
 
+
     session->SendPacket(&data);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_ARENA_TEAM_ROSTER");
 }
@@ -405,7 +409,7 @@ void ArenaTeam::Query(WorldSession* session)
 {
     WorldPacket data(SMSG_ARENA_TEAM_QUERY_RESPONSE, 4*7+GetName().size()+1);
     data << uint32(GetId());                                // team id
-    data << GetName();                                      // team name
+    data << (isSoloQueueTeam ? "SoloQueue" : GetName());    // team name
     data << uint32(GetType());                              // arena team type (2=2x2, 3=3x3 or 5=5x5)
     data << uint32(BackgroundColor);                      // background color
     data << uint32(EmblemStyle);                          // emblem style
@@ -708,6 +712,14 @@ int32 ArenaTeam::WonAgainst(uint32 Own_MMRating, uint32 Opponent_MMRating, int32
     // Change in Team Rating
     rating_change = GetRatingMod(Stats.Rating, Opponent_MMRating, true);
 
+    if (isSoloQueueTeam && rating_change < -18)
+    {
+        if (Stats.Rating < 1500)
+            rating_change = -10;
+        else
+            rating_change = -18;
+    }
+
     // Modify the team stats accordingly
     FinishGame(rating_change);
 
@@ -745,6 +757,15 @@ void ArenaTeam::MemberLost(Player* plr, uint32 againstMatchmakerRating, int32 Ma
             // Update personal rating
             int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, false);
             itr->ModifyPersonalRating(plr, mod, GetSlot());
+
+            // Limit solo queue games to max -18 points
+            if (isSoloQueueTeam && mod < -18)
+            {
+                if (itr->PersonalRating < 1500)
+                    mod = -10;
+                else
+                    mod = -18;
+            }
 
             // Update matchmaker rating
             itr->ModifyMatchmakerRating(MatchmakerRatingChange, GetSlot());

@@ -3042,3 +3042,8 @@ OutdoorPvP.Wintergrasp.Antifarm.Def = 5
 
 #
 ###################################################################################################
+
+
+Arena.Soloqueue.Enable = 0
+Arena.Soloqueue.DoubleRangeMelee.Enable = 0
+Arena.Soloqueue.ClassStacking.Enable = 1

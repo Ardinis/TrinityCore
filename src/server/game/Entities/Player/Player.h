@@ -122,6 +122,40 @@ struct PlayerTalent
     uint8 spec             : 8;
 };
 
+enum TalentTree // talent tabs
+{
+    TALENT_TREE_WARRIOR_ARMS            = 161,
+    TALENT_TREE_WARRIOR_FURY            = 164,
+    TALENT_TREE_WARRIOR_PROTECTION      = 163,
+    TALENT_TREE_PALADIN_HOLY            = 382,
+    TALENT_TREE_PALADIN_PROTECTION      = 383,
+    TALENT_TREE_PALADIN_RETRIBUTION     = 381,
+    TALENT_TREE_HUNTER_BEAST_MASTERY    = 361,
+    TALENT_TREE_HUNTER_MARKSMANSHIP     = 363,
+    TALENT_TREE_HUNTER_SURVIVAL         = 362,
+    TALENT_TREE_ROGUE_ASSASSINATION     = 182,
+    TALENT_TREE_ROGUE_COMBAT            = 181,
+    TALENT_TREE_ROGUE_SUBTLETY          = 183,
+    TALENT_TREE_PRIEST_DISCIPLINE       = 201,
+    TALENT_TREE_PRIEST_HOLY             = 202,
+    TALENT_TREE_PRIEST_SHADOW           = 203,
+    TALENT_TREE_DEATH_KNIGHT_BLOOD      = 398,
+    TALENT_TREE_DEATH_KNIGHT_FROST      = 399,
+    TALENT_TREE_DEATH_KNIGHT_UNHOLY     = 400,
+    TALENT_TREE_SHAMAN_ELEMENTAL        = 261,
+    TALENT_TREE_SHAMAN_ENHANCEMENT      = 263,
+    TALENT_TREE_SHAMAN_RESTORATION      = 262,
+    TALENT_TREE_MAGE_ARCANE             = 81,
+    TALENT_TREE_MAGE_FIRE               = 41,
+    TALENT_TREE_MAGE_FROST              = 61,
+    TALENT_TREE_WARLOCK_AFFLICTION      = 302,
+    TALENT_TREE_WARLOCK_DEMONOLOGY      = 303,
+    TALENT_TREE_WARLOCK_DESTRUCTION     = 301,
+    TALENT_TREE_DRUID_BALANCE           = 283,
+    TALENT_TREE_DRUID_FERAL_COMBAT      = 281,
+    TALENT_TREE_DRUID_RESTORATION       = 282
+};
+
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -1217,6 +1251,7 @@ class Player : public Unit, public GridObject<Player>
         Unit* getSpectateFrom() { return spectateFrom; }
         bool isSpectator() const { return spectatorFlag; }
         void SetSpectate(bool on);
+        uint32 GetMMR(uint8 slot);
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);
@@ -1757,6 +1792,13 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetSpecsCount() { return m_specsCount; }
         void SetSpecsCount(uint8 count) { m_specsCount = count; }
         void ActivateSpec(uint8 spec);
+        uint32 GetSpec(int8 spec = -1);
+        uint8 soloQueueSpec;
+
+        bool HasTankSpec();
+        bool HasMeleeSpec(bool soloQueueRules = false);
+        bool HasCasterSpec(bool soloQueueRules = false);
+        bool HasHealSpec();
         void RemoveAurasOnActivateSpec();
         void RemoveOwnedAuraOnTarget(uint32 spell);
 
@@ -2138,6 +2180,7 @@ class Player : public Unit, public GridObject<Player>
         void SetHonorPoints(uint32 value);
         void SetArenaPoints(uint32 value);
         void UpdateKnownTitles();
+        uint32 soloQueueJoinTime;
 
         //End of PvP System
 

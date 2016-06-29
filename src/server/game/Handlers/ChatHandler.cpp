@@ -40,6 +40,7 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
+#include "Battleground.h"
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 {
@@ -142,14 +143,14 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                     case CHAT_MSG_BATTLEGROUND:
                     case CHAT_MSG_BATTLEGROUND_LEADER:
                         // allow two side chat at group channel if two side group allowed
-                        // Always allow player in same groups to chat, because 
+                        // Always allow player in same groups to chat, because
                         //if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) || sender->GetBattleground)
                             lang = LANG_UNIVERSAL;
                         break;
                     case CHAT_MSG_GUILD:
                     case CHAT_MSG_OFFICER:
                         // allow two side chat at guild channel if two side guild allowed
-                        if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD))
+                        if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) || sWorld->getBoolConfig(CONFIG_ARENA_SOLO_QUEUE_ENABLED))
                             lang = LANG_UNIVERSAL;
                         break;
                 }
@@ -304,8 +305,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         case CHAT_MSG_PARTY:
         case CHAT_MSG_PARTY_LEADER:
         {
+            bool isSoloQueueArena = false;
+            if (Battleground* bg = GetPlayer()->GetBattleground())
+                isSoloQueueArena = bg->isSoloQueueArena();
+
             // if player is in battleground, he cannot say to battleground members by /p
-            Group* group = GetPlayer()->GetOriginalGroup();
+            Group* group = isSoloQueueArena ? GetPlayer()->GetGroup() : GetPlayer()->GetOriginalGroup();
             if (!group)
             {
                 group = _player->GetGroup();

@@ -182,6 +182,8 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_2v2      = 8,
     BATTLEGROUND_QUEUE_3v3      = 9,
     BATTLEGROUND_QUEUE_5v5      = 10,
+    BATTLEGROUND_QUEUE_3v3_SOLO     = 11,
+    BATTLEGROUND_QUEUE_1v1_SOLO     = 12,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -215,8 +217,10 @@ enum ScoreType
 
 enum ArenaType
 {
+    ARENA_TYPE_1v1_SOLO     = 1,
     ARENA_TYPE_2v2          = 2,
     ARENA_TYPE_3v3          = 3,
+    ARENA_TYPE_3v3_SOLO     = 4,
     ARENA_TYPE_5v5          = 5
 };
 
@@ -236,7 +240,8 @@ enum BattlegroundWinner
 enum BattlegroundTeamId
 {
     BG_TEAM_ALLIANCE        = 0,
-    BG_TEAM_HORDE           = 1
+    BG_TEAM_HORDE           = 1,
+    BG_TEAM_NEUTRAL         = 2
 };
 #define BG_TEAMS_COUNT  2
 
@@ -309,6 +314,7 @@ enum BGHonorMode
 
 #define BG_AWARD_ARENA_POINTS_MIN_LEVEL 71
 #define ARENA_TIMELIMIT_POINTS_LOSS    -16
+#define ARENA_GAME_INTERRUPTED_POINTS   0
 
 /*
 This class is used to:
@@ -388,6 +394,7 @@ class Battleground
         void SetRated(bool state)           { m_IsRated = state; }
         void SetArenaType(uint8 type)       { m_ArenaType = type; }
         void SetArenaorBGType(bool _isArena) { m_IsArena = _isArena; }
+        void SetIsSoloQueueArena(bool isSolo) { m_IsSoloQueueArena = isSolo; }
         void SetWinner(uint8 winner)        { m_Winner = winner; }
         void SetScriptId(uint32 scriptId)   { ScriptId = scriptId; }
 
@@ -417,6 +424,7 @@ class Battleground
         bool isArena() const        { return m_IsArena; }
         bool isBattleground() const { return !m_IsArena; }
         bool isRated() const        { return m_IsRated; }
+        bool isSoloQueueArena() const { return m_IsSoloQueueArena; }
 
         typedef std::map<uint64, BattlegroundPlayer> BattlegroundPlayerMap;
         BattlegroundPlayerMap const& GetPlayers() const { return m_Players; }
@@ -475,6 +483,7 @@ class Battleground
         void UpdateWorldState(uint32 Field, uint32 Value);
         void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source);
         void EndBattleground(uint32 winner);
+        void EndSoloQueueArena(uint32 winner);
         void BlockMovement(Player* player);
 
         void SendWarningToAll(int32 entry, ...);
@@ -503,6 +512,7 @@ class Battleground
         }
 
         // used for rated arena battles
+
         void SetArenaTeamIdForTeam(uint32 Team, uint32 ArenaTeamId) { m_ArenaTeamIds[GetTeamIndexByTeamId(Team)] = ArenaTeamId; }
         uint32 GetArenaTeamIdForTeam(uint32 Team) const             { return m_ArenaTeamIds[GetTeamIndexByTeamId(Team)]; }
         uint32 GetArenaTeamIdByIndex(uint32 index) const { return m_ArenaTeamIds[index]; }
@@ -638,6 +648,7 @@ class Battleground
         bool   m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattlegroundMgr.BGFreeSlotQueue[bgTypeId] deque
         bool   m_SetDeleteThis;                             // used for safe deletion of the bg after end / all players leave
         bool   m_IsArena;
+        bool   m_IsSoloQueueArena;
         uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
         int32  m_StartDelayTime;
         bool   m_IsRated;                                   // is this battle rated?

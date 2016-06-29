@@ -84,6 +84,8 @@
 #include "RecupMgrAuto.h"
 #include "ProfilingMgr.h"
 #include "DynConfigMgr.h"
+#include "SoloQueue.h"
+
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 volatile uint32 World::m_worldLoopCounter = 0;
@@ -1067,6 +1069,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ARENA_START_MATCHMAKER_RATING]              = ConfigMgr::GetIntDefault ("Arena.ArenaStartMatchmakerRating", 1500);
     m_bool_configs[CONFIG_ARENA_SEASON_IN_PROGRESS]                  = ConfigMgr::GetBoolDefault("Arena.ArenaSeason.InProgress", true);
     m_bool_configs[CONFIG_ARENA_LOG_EXTENDED_INFO]                   = ConfigMgr::GetBoolDefault("ArenaLog.ExtendedInfo", false);
+    m_bool_configs[CONFIG_ARENA_SOLO_QUEUE_ENABLED]                  = ConfigMgr::GetBoolDefault("Arena.Soloqueue.Enable", false);
+    m_bool_configs[CONFIG_ARENA_SOLO_QUEUE_ALLOW_MMH_AND_RRH]        = ConfigMgr::GetBoolDefault("Arena.Soloqueue.DoubleRangeMelee.Enable", false);
+    m_bool_configs[CONFIG_ARENA_SOLO_QUEUE_ALLOW_CLASS_STACKING]     = ConfigMgr::GetBoolDefault("Arena.Soloqueue.ClassStacking.Enable", true);
 
     m_bool_configs[CONFIG_OFFHAND_CHECK_AT_SPELL_UNLEARN]            = ConfigMgr::GetBoolDefault("OffhandCheckAtSpellUnlearn", true);
 
@@ -2179,6 +2184,10 @@ void World::Update(uint32 diff, uint32 jitter)
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();
     RecordTimeDiff("ProcessQueryCallbacks");
+
+    // Solo queue update
+    sSoloQueueMgr->Update(diff);
+    RecordTimeDiff("UpdateSoloQueueMgr");
 
     ///- Erase corpses once every 20 minutes
     if (m_timers[WUPDATE_CORPSES].Passed())

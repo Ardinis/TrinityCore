@@ -23,6 +23,7 @@
 #include "DBCEnums.h"
 #include "Battleground.h"
 #include "EventProcessor.h"
+#include "SoloQueue.h"
 
 //this container can't be deque, because deque doesn't like removing the last element - if you remove it, it invalidates next iterator and crash appears
 typedef std::list<Battleground*> BGFreeSlotQueueType;
@@ -55,6 +56,7 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  ratingRangeIncreaseCounter;                     // for rated arena matches
     bool xfaction;					    // group flagged as crossfaction
     bool xfaction_allowed;				    // all players in the group accepts crossfaction
+    bool    isSoloQueueGroup = false;                       // needed for RemovePlayer() handling
 };
 
 enum BattlegroundQueueGroupTypes
@@ -81,6 +83,7 @@ class BattlegroundQueue
         bool CheckNormalMatch(Battleground* bg_template, BattlegroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         bool CheckSkirmishForSameFaction(BattlegroundBracketId bracket_id, uint32 minPlayersPerTeam);
         GroupQueueInfo* AddGroup(Player* leader, Group* group, BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*  bracketEntry, uint8 ArenaType, bool isRated, bool isPremade, uint32 ArenaRating, uint32 MatchmakerRating, uint32 ArenaTeamId = 0);
+        GroupQueueInfo* AddSoloQueueGroup(std::list<SoloQueueInfo*> playerList, BattlegroundBracketId bracketId, uint32 team);
         void RemovePlayer(uint64 guid, bool decreaseInvitedCount);
         bool IsPlayerInvited(uint64 pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
         bool GetPlayerGroupInfoData(uint64 guid, GroupQueueInfo* ginfo);
@@ -88,6 +91,7 @@ class BattlegroundQueue
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattlegroundBracketId bracket_id) const;
         void IncreaseTeamMMrRange(GroupQueueInfo* ginfo);
         int SelectGroups(BattlegroundBracketId bracket_id, int current_balance, int32 a2_min, int32 h2_min, int32 a2_max, int32 h2_max);
+        uint32 GetQueuedGroups() const;
 
         typedef std::map<uint64, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers;

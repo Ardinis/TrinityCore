@@ -27,7 +27,7 @@
 #include "LFGScripts.h"
 #include "LFGGroupData.h"
 #include "LFGPlayerData.h"
-
+#include "SoloQueue.h"
 #include "Group.h"
 #include "Player.h"
 
@@ -284,7 +284,7 @@ bool LFGMgr::IsSeasonalDungeon(uint32 dungeonId)
 
 bool LFGMgr::isHolidayHaveSeasonalDungeon(HolidayIds id)
 {
-	for (std::map<uint32, uint32>::const_iterator itr = m_SeasonalsDungeonHoliday.begin(); 
+	for (std::map<uint32, uint32>::const_iterator itr = m_SeasonalsDungeonHoliday.begin();
 		itr != m_SeasonalsDungeonHoliday.end(); itr++)
 	{
 		if (HolidayIds(itr->second) == id)
@@ -644,7 +644,7 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
     }
 
     // Check player or group member restrictions
-    if (player->InBattleground() || player->InArena() || player->InBattlegroundQueue())
+    if (player->InBattleground() || player->InArena() || player->InBattlegroundQueue() || sSoloQueueMgr->IsPlayerInSoloQueue(player))
         joinData.result = LFG_JOIN_USING_BG_SYSTEM;
     else if (player->HasAura(LFG_SPELL_DUNGEON_DESERTER))
         joinData.result = LFG_JOIN_DESERTER;
@@ -667,7 +667,7 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
                         joinData.result = LFG_JOIN_PARTY_DESERTER;
                     else if (plrg->HasAura(LFG_SPELL_DUNGEON_COOLDOWN))
                         joinData.result = LFG_JOIN_PARTY_RANDOM_COOLDOWN;
-                    else if (plrg->InBattleground() || plrg->InArena() || plrg->InBattlegroundQueue())
+                    else if (plrg->InBattleground() || plrg->InArena() || plrg->InBattlegroundQueue() || sSoloQueueMgr->IsPlayerInSoloQueue(player))
                         joinData.result = LFG_JOIN_USING_BG_SYSTEM;
                     ++memberCount;
                     players.insert(plrg);

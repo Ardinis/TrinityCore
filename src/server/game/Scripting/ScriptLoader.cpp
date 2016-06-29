@@ -26,6 +26,7 @@ void AddSC_example_misc();
 void AddSC_example_commandscript();
 
 //custom
+void AddSC_npc_soloqueue();
 void AddSC_telenpc();
 void AddSC_player_event();
 void AddSC_npc_transmo();
@@ -1303,6 +1304,7 @@ void AddBattlegroundScripts()
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
+  AddSC_npc_soloqueue();
   AddSC_telenpc();
   AddSC_player_event();
   AddSC_npc_transmo();

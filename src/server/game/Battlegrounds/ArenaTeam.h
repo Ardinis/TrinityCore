@@ -119,7 +119,7 @@ class ArenaTeam
         ArenaTeam();
         ~ArenaTeam();
 
-        bool Create(uint64 captainGuid, uint8 type, std::string teamName, uint32 backgroundColor, uint8 emblemStyle, uint32 emblemColor, uint8 borderStyle, uint32 borderColor);
+        bool Create(uint64 captainGuid, uint8 type, std::string teamName, uint32 backgroundColor, uint8 emblemStyle, uint32 emblemColor, uint8 borderStyle, uint32 borderColor, bool isSoloTeam = false);
         void Disband(WorldSession* session);
 
         typedef std::list<ArenaTeamMember> MemberList;
@@ -152,6 +152,7 @@ class ArenaTeam
         ArenaTeamMember* GetMember(const std::string& name);
 
         bool IsFighting() const;
+        bool IsSoloQueueTeam() { return isSoloQueueTeam; };
 
         bool LoadArenaTeamFromDB(QueryResult arenaTeamDataResult);
         bool LoadMembersFromDB(QueryResult arenaTeamMembersResult);
@@ -185,6 +186,7 @@ class ArenaTeam
 
         void FinishWeek();
         void FinishGame(int32 mod);
+        MemberList     Members;
 
     protected:
 
@@ -198,8 +200,8 @@ class ArenaTeam
         uint32 EmblemColor;     // ARGB format
         uint8  BorderStyle;     // border image id
         uint32 BorderColor;     // ARGB format
+        bool isSoloQueueTeam;
 
-        MemberList     Members;
         ArenaTeamStats Stats;
 };
 #endif

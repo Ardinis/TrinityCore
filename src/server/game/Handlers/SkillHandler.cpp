@@ -25,6 +25,7 @@
 #include "WorldSession.h"
 #include "ObjectAccessor.h"
 #include "UpdateMask.h"
+#include "SoloQueue.h"
 
 void WorldSession::HandleLearnTalentOpcode(WorldPacket & recv_data)
 {
@@ -67,6 +68,9 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket & recv_data)
         return;
     }
 
+    if (sSoloQueueMgr->IsPlayerInSoloQueue(_player))
+        return;
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
@@ -90,4 +94,3 @@ void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data)
     recv_data >> skill_id;
     GetPlayer()->SetSkill(skill_id, 0, 0, 0);
 }
-

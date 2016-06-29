@@ -462,14 +462,25 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
             // if player leaves rated arena match before match start, it is counted as he played but he lost
             if (ginfo.IsRated && ginfo.IsInvitedToBGInstanceGUID)
             {
-                ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(ginfo.Team);
+                uint32 teamId = ginfo.isSoloQueueGroup ? Player::GetArenaTeamIdFromDB(_player->GetGUID(), ARENA_TEAM_5v5) : ginfo.Team;
+                ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(teamId);
                 if (at)
                 {
                     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "UPDATING memberLost's personal arena rating for %u by opponents rating: %u, because he has left queue!", GUID_LOPART(_player->GetGUID()), ginfo.OpponentsTeamRating);
                     at->MemberLost(_player, ginfo.OpponentsMatchmakerRating);
+                    if (ginfo.isSoloQueueGroup)
+                    {
+                        int32 dummy = 0;
+                        at->LostAgainst(ginfo.ArenaMatchmakerRating, ginfo.OpponentsMatchmakerRating, dummy);
+                    }
                     at->SaveToDB();
+                    at->NotifyStatsChanged();
                 }
+
+                if (ginfo.isSoloQueueGroup)
+                    _player->CastCustomSpell(26013, SPELLVALUE_BASE_POINT0, 1, _player, true);
             }
+
             _player->RemoveBattlegroundQueueId(bgQueueTypeId);  // must be called this way, because if you move this call to queue->removeplayer, it causes bugs
             sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_NONE, 0, 0, 0);
             bgQueue.RemovePlayer(_player->GetGUID(), true);

@@ -134,7 +134,7 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket & recvData)
         return;
     }
 
-    if (arenaTeam->GetMembersSize() >= arenaTeam->GetType() * 2)
+    if (arenaTeam->GetMembersSize() >= arenaTeam->GetType() * 2 || arenaTeam->IsSoloQueueTeam())
     {
         SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, arenaTeam->GetName(), "", ERR_ARENA_TEAM_TOO_MANY_MEMBERS_S);
         return;
@@ -245,7 +245,7 @@ void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recvData)
     if (ArenaTeam* arenaTeam = sArenaTeamMgr->GetArenaTeamById(arenaTeamId))
     {
         // Only captain can disband the team
-        if (arenaTeam->GetCaptain() != _player->GetGUID())
+        if (arenaTeam->GetCaptain() != _player->GetGUID() || arenaTeam->IsSoloQueueTeam())
             return;
 
         // Teams cannot be disbanded during fights
@@ -273,7 +273,7 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket & recvData)
         return;
 
     // Only captain can remove members
-    if (arenaTeam->GetCaptain() != _player->GetGUID())
+    if (arenaTeam->GetCaptain() != _player->GetGUID() || arenaTeam->IsSoloQueueTeam())
     {
         SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, "", "", ERR_ARENA_TEAM_PERMISSIONS);
         return;

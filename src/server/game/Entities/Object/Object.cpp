@@ -43,6 +43,7 @@
 #include "SpellAuraEffects.h"
 
 #include "TemporarySummon.h"
+#include "Group.h"
 #include "Totem.h"
 #include "OutdoorPvPMgr.h"
 #include "MovementPacketBuilder.h"
@@ -639,9 +640,9 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                         if (!target->isAllowedToLoot(creature))
                             dynamicFlags &= ~UNIT_DYNFLAG_LOOTABLE;
                     }
-		    if(dynamicFlags & UNIT_DYNFLAG_TRACK_UNIT)
-		      if (Unit const* unit = ToUnit())
-                          if (!unit->HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetGUID()))
+                    if(dynamicFlags & UNIT_DYNFLAG_TRACK_UNIT)
+                        if (Unit const* unit = ToUnit())
+                            if (!unit->HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetGUID()))
                                 dynamicFlags &= ~UNIT_DYNFLAG_TRACK_UNIT;
                     *data << dynamicFlags;
                 } else if (index == UNIT_FIELD_BYTES_0) {
@@ -674,8 +675,14 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask*
                         value = uint32(unit->getCrossFaction());
                     }
 
+                    bool isCrossFactionException = false;
+                    if (const Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        if (const Group* group = player->GetGroup())
+                            isCrossFactionException = (group->isBGGroup() && sWorld->getBoolConfig(CONFIG_ARENA_SOLO_QUEUE_ENABLED));
+
                     // value == valeur du champ apres avoir pris en compte la faction temporaire
-                    if (unit->IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && unit->IsInRaidWith(target)) {
+                    if (unit->IsControlledByPlayer() && target != this && (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) || isCrossFactionException) && unit->IsInRaidWith(target))
+                    {
                         //groupe interfaction
                         FactionTemplateEntry const* ft1 = unit->getFactionTemplateEntry(true);
                         FactionTemplateEntry const* ft2 = target->getFactionTemplateEntry(true);

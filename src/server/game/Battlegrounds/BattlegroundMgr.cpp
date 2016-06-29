@@ -135,7 +135,7 @@ void BattlegroundMgr::Update(uint32 diff)
             // update BG queues (arena is processed later)
             if ((qtype >= BATTLEGROUND_QUEUE_AV) && (qtype <= BATTLEGROUND_QUEUE_RB)) {
                 BattlegroundTypeId bgTypeId = BGTemplateId(BattlegroundQueueTypeId(qtype));
-                
+
                 // update for all brackets, function will return immediately if bracket is empty
                 for (uint32 bracket_id = 0; bracket_id < MAX_BATTLEGROUND_BRACKETS; bracket_id++)
                     m_BattlegroundQueues[qtype].BattlegroundQueueUpdate(diff /* unused */, bgTypeId, BattlegroundBracketId(bracket_id), 0, false, 0);
@@ -170,7 +170,7 @@ void BattlegroundMgr::Update(uint32 diff)
         {
             // forced update for rated arenas (scan all, but skipped non rated)
             sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BattlegroundMgr: UPDATING ARENA QUEUES");
-            for (int qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
+            for (int qtype = BATTLEGROUND_QUEUE_2v2; qtype <= BATTLEGROUND_QUEUE_1v1_SOLO; ++qtype)
                 for (int bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
                     m_BattlegroundQueues[qtype].BattlegroundQueueUpdate(diff,
                         BATTLEGROUND_AA, BattlegroundBracketId(bracket),
@@ -209,6 +209,10 @@ void BattlegroundMgr::BuildBattlegroundStatusPacket(WorldPacket* data, Battlegro
         *data << uint64(0);
         return;
     }
+
+    // Solo Queue Addon fix
+    if ((StatusID == STATUS_WAIT_QUEUE || StatusID == STATUS_IN_PROGRESS) && arenatype == ARENA_TYPE_3v3_SOLO)
+        arenatype = ARENA_TYPE_3v3;
 
     data->Initialize(SMSG_BATTLEFIELD_STATUS, (4+8+1+1+4+1+4+4+4));
     *data << uint32(QueueSlot);                             // queue id (0...1) - player can be in 2 queues in time
@@ -579,7 +583,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
             Battleground *tpl = GetBattlegroundTemplate(it->first);
             if (!tpl || (tpl->GetMinPlayersPerTeam() > playersPerTeam))
                 continue;
-                
+
             Weight += it->second;
             if (selectedWeight < Weight)
             {
@@ -926,7 +930,7 @@ void BattlegroundMgr::SendToBattleground(Player* player, uint32 instanceId, Batt
 
         sLog->outDetail("BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", player->GetName(), mapid, x, y, z, O);
         player->TeleportTo(mapid, x, y, z, O);
-        //BG interfaction 
+        //BG interfaction
         if (player->GetSession()) {
             player->GetSession()->SendNameQueryOpcode(player->GetGUID(), player);
         }
@@ -993,10 +997,14 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
         case BATTLEGROUND_RV:
             switch (arenaType)
             {
+                case ARENA_TYPE_1v1_SOLO:
+                    return BATTLEGROUND_QUEUE_1v1_SOLO;
                 case ARENA_TYPE_2v2:
                     return BATTLEGROUND_QUEUE_2v2;
                 case ARENA_TYPE_3v3:
                     return BATTLEGROUND_QUEUE_3v3;
+                case ARENA_TYPE_3v3_SOLO:
+                    return BATTLEGROUND_QUEUE_3v3_SOLO;
                 case ARENA_TYPE_5v5:
                     return BATTLEGROUND_QUEUE_5v5;
                 default:
@@ -1025,8 +1033,10 @@ BattlegroundTypeId BattlegroundMgr::BGTemplateId(BattlegroundQueueTypeId bgQueue
             return BATTLEGROUND_IC;
         case BATTLEGROUND_QUEUE_RB:
             return BATTLEGROUND_RB;
+        case BATTLEGROUND_QUEUE_1v1_SOLO:
         case BATTLEGROUND_QUEUE_2v2:
         case BATTLEGROUND_QUEUE_3v3:
+        case BATTLEGROUND_QUEUE_3v3_SOLO:
         case BATTLEGROUND_QUEUE_5v5:
             return BATTLEGROUND_AA;
         default:
@@ -1038,10 +1048,14 @@ uint8 BattlegroundMgr::BGArenaType(BattlegroundQueueTypeId bgQueueTypeId)
 {
     switch (bgQueueTypeId)
     {
+        case BATTLEGROUND_QUEUE_1v1_SOLO:
+            return ARENA_TYPE_1v1_SOLO;
         case BATTLEGROUND_QUEUE_2v2:
             return ARENA_TYPE_2v2;
         case BATTLEGROUND_QUEUE_3v3:
             return ARENA_TYPE_3v3;
+        case BATTLEGROUND_QUEUE_3v3_SOLO:
+            return ARENA_TYPE_3v3_SOLO;
         case BATTLEGROUND_QUEUE_5v5:
             return ARENA_TYPE_5v5;
         default:

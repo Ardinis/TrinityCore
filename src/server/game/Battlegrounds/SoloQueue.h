@@ -55,6 +55,10 @@ class SoloQueue
         bool IsPlayerInSoloQueue(Player* player);
         bool CheckRequirements(Player* player);
         static SoloQueue* instance();
+        void fetchQueueList();
+
+        uint32 cache3v3Queue[4];
+        uint32 lastFetchQueueList;
 
     private:
         void IncreasePlayerMMrRange(SoloQueueInfo* playerInfo);

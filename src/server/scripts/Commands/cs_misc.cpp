@@ -19,8 +19,6 @@
 #include "Chat.h"
 #include "Group.h"
 
-#define MENU_ID 123
-
 class misc_commandscript : public CommandScript
 {
 public:
@@ -36,7 +34,8 @@ public:
             { "copy",               SEC_PLAYER,             false,  &HandleCopyCharacterCommand,       "", NULL },
             { "listcombat",         SEC_ADMINISTRATOR,      false, &HandleListCombatCommand,                  "", NULL },
             { "togglefaction",      SEC_ADMINISTRATOR,      false, &HandleToggleFactionCommand,                  "", NULL },
-            { "guildRanked",        SEC_PLAYER,      false, &HandleGuildRankedCharacterCommand,                  "", NULL },
+            { "guildRanked",        SEC_PLAYER,             false, &HandleGuildRankedCharacterCommand,                  "", NULL },
+            { "solo",               SEC_PLAYER,             false, &HandleSoloQueueCommand,                  "", NULL },
             { NULL,                 0,                      false,  NULL,                       "", NULL }
         };
         return commandTable;
@@ -255,12 +254,19 @@ public:
         player->ADD_GOSSIP_ITEM(0, "Groupe de voyage", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+7);
         player->ADD_GOSSIP_ITEM(0, "RÃ©surrection de masse", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+8);
         // SetMenuId must be after clear menu and before send menu!!
-        player->PlayerTalkClass->GetGossipMenu().SetMenuId(MENU_ID);        // Sets menu ID so we can identify our menu in Select hook. Needs unique number for the menu
+        player->PlayerTalkClass->GetGossipMenu().SetMenuId(MENU_ID_PVE_SEASONS);        // Sets menu ID so we can identify our menu in Select hook. Needs unique number for the menu
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, player->GetGUID());
         return true;
     }
 
-
+    static bool HandleSoloQueueCommand(ChatHandler* handler, char const* args)
+    {
+        Player *player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
+        player->PlayerTalkClass->ClearMenus();
+        return player->SendSoloQueueGossip(NULL);
+    }
 };
 
 #define CUSTOM_PACK_SPELL_SUMMON_RAID 2000002
@@ -273,7 +279,7 @@ class example_PlayerGossip : public PlayerScript
 
     void OnGossipSelect(Player* player, uint32 menu_id, uint32 /*sender*/, uint32 action) override
     {
-        if (menu_id != MENU_ID) // Not the menu coded here? stop.
+        if (menu_id != MENU_ID_PVE_SEASONS) // Not the menu coded here? stop.
             return;
 
         player->PlayerTalkClass->ClearMenus();

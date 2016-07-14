@@ -33,6 +33,8 @@ SoloQueue::SoloQueue()
     queuedRanges.clear();
     allPlayersInQueue.clear();
     updateTimer.SetInterval(1000);
+    memset(cache3v3Queue, 0, sizeof(cache3v3Queue));
+    lastFetchQueueList = 0;
 }
 
 SoloQueue::~SoloQueue()
@@ -135,6 +137,7 @@ bool SoloQueue::RemovePlayer(uint64 playerGuid)
 void SoloQueue::Update(uint32 diff)
 {
     updateTimer.Update(diff);
+
     if (!updateTimer.Passed())
         return;
 
@@ -209,6 +212,21 @@ void SoloQueue::Update(uint32 diff)
             }
         }
     }
+    fetchQueueList();
+}
+
+void SoloQueue::fetchQueueList()
+{
+    if (GetMSTimeDiffToNow(lastFetchQueueList) < 1000)
+        return;
+
+    lastFetchQueueList = getMSTime();
+    cache3v3Queue[TALENT_CAT_MELEE] = sSoloQueueMgr->GetPlayerCountInQueue(TALENT_CAT_MELEE);
+    cache3v3Queue[TALENT_CAT_RANGE] = sSoloQueueMgr->GetPlayerCountInQueue(TALENT_CAT_RANGE);
+    cache3v3Queue[TALENT_CAT_HEALER] = sSoloQueueMgr->GetPlayerCountInQueue(TALENT_CAT_HEALER);
+    BattlegroundQueue const& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(BATTLEGROUND_QUEUE_3v3_SOLO);
+    cache3v3Queue[TALENT_CAT_UNKNOWN] = bgQueue.GetQueuedGroups();
+    cache3v3Queue[4] = sSoloQueueMgr->GetAverageSoloQueueWaitTime();
 }
 
 uint32 SoloQueue::GetPlayerCountInQueue(SoloQueueTalentCategory talentCategory, bool allPlayers)

@@ -1129,6 +1129,17 @@ private:
     bool _isPvP;
 };
 
+enum PlayersMenuIds
+{
+    MENU_ID_PVE_SEASONS = 42,
+    MENU_ID_SOLO_QUEUE = 43
+};
+
+enum PlayersGossipTextIds
+{
+    TEXT_SOLO_QUEUE = 60015
+};
+
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
@@ -1252,6 +1263,10 @@ class Player : public Unit, public GridObject<Player>
         bool isSpectator() const { return spectatorFlag; }
         void SetSpectate(bool on);
         uint32 GetMMR(uint8 slot);
+
+        bool SendSoloQueueGossip(Creature *creature);
+        bool OnSoloQueueGossip(Creature* creature, uint32 action);
+        void Join1v1Queue();
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);

@@ -26642,3 +26642,224 @@ uint32 Player::GetMMR(uint8 slot)
     }
     return 1500;
 }
+
+bool Player::SendSoloQueueGossip(Creature *creature)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ARENA_SOLO_QUEUE_ENABLED))
+    {
+        ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "La Solo queue est actuellement desactiee!", GOSSIP_SENDER_MAIN, 0);
+        SEND_GOSSIP_MENU(TEXT_SOLO_QUEUE, creature != NULL ? creature->GetGUID() : GetGUID());
+        return true;
+    }
+
+    std::stringstream infoQueue;
+    infoQueue << "Statistiques de Solo queue:\n\n";
+    if (sSoloQueueMgr->cache3v3Queue[4] > 0)
+    {
+        if ((sSoloQueueMgr->cache3v3Queue[4] / 1000) < 60)
+            infoQueue << "Temps d'attente moyen: " << sSoloQueueMgr->cache3v3Queue[4] / 1000 << " secondes. \n";
+        else
+            infoQueue << "Temps d'attente moyen: " << ceil(sSoloQueueMgr->cache3v3Queue[4] / 1000 / 60) << " minutes(s). \n";
+    }
+    else
+        infoQueue <<  "Temps d'attente moyen: indisponible. \n";
+    infoQueue << "Groupe de Solo Queue dans la file d'attente: " << sSoloQueueMgr->cache3v3Queue[TALENT_CAT_UNKNOWN] << "\n";
+    infoQueue << "\n";
+    if (sWorld->getBoolConfig(CONFIG_ARENA_SOLO_QUEUE_ALLOW_MMH_AND_RRH))
+        infoQueue << "Classes melee et caster dans la file d'attente: " << sSoloQueueMgr->cache3v3Queue[TALENT_CAT_MELEE] + sSoloQueueMgr->cache3v3Queue[TALENT_CAT_RANGE] << "\n";
+    else
+    {
+        infoQueue << "Classes melee dans la file d'attente: " << sSoloQueueMgr->cache3v3Queue[TALENT_CAT_MELEE] << "\n";
+        infoQueue << "Classes caster dans la file d'attente: " << sSoloQueueMgr->cache3v3Queue[TALENT_CAT_RANGE] << "\n";
+    }
+    infoQueue << "Classes heal dans la file d'attente: " << sSoloQueueMgr->cache3v3Queue[TALENT_CAT_HEALER] << "\n";
+
+    if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    {
+        ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, infoQueue.str(), GOSSIP_SENDER_MAIN, 0);
+        SEND_GOSSIP_MENU(TEXT_SOLO_QUEUE, creature != NULL ? creature->GetGUID() : GetGUID());
+        return true;
+    }
+
+    if (sSoloQueueMgr->IsPlayerInSoloQueue(this))
+        ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Quitter la file de Solo Queue", GOSSIP_SENDER_MAIN, 3, "Etes-vous sur de vouloir quitter la file d'attente en solo?", 0, false);
+
+    if (!GetArenaTeamId(ArenaTeam::GetSlotByType(ARENA_TEAM_5v5)))
+        ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Creer un nouvelle equipe d'arene Solo", GOSSIP_SENDER_MAIN, 1);
+    else
+    {
+        if (ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamId(ArenaTeam::GetSlotByType(ARENA_TEAM_5v5))))
+        {
+            if (at->IsSoloQueueTeam())
+            {
+                if (!InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_2v2) &&
+                    !InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_3v3) &&
+                    !InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5) &&
+                    !sSoloQueueMgr->IsPlayerInSoloQueue(this))
+                {
+                    ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "File d'attente pour Skirmish 1vs1 \n", GOSSIP_SENDER_MAIN, 20);
+                    ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "File d'attente pour Arena 3vs3 \n", GOSSIP_SENDER_MAIN, 2);
+                }
+            }
+            else
+                ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Votre equipe 5vs5 est pas une equipe de file d'attente solo \ nLeave l' equipe 5vs5 ! Et de creer une equipe de file d'attente en solo!\n", GOSSIP_SENDER_MAIN, 21);
+        }
+    }
+
+    ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, infoQueue.str(), GOSSIP_SENDER_MAIN, 0);
+    if (creature == NULL)
+    {
+        PlayerTalkClass->GetGossipMenu().SetMenuId(MENU_ID_SOLO_QUEUE);
+    }
+
+    SEND_GOSSIP_MENU(TEXT_SOLO_QUEUE, creature != NULL ? creature->GetGUID() : GetGUID());
+    return true;
+}
+
+bool Player::OnSoloQueueGossip(Creature* creature, uint32 action)
+{
+    PlayerTalkClass->ClearMenus();
+
+    switch (action)
+    {
+        case 1: // Create new solo queue team
+        {
+            uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
+
+            if (GetArenaTeamId(slot))
+            {
+                GetSession()->SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, GetName(), "", ERR_ALREADY_IN_ARENA_TEAM);
+                CLOSE_GOSSIP_MENU();
+                return true;
+            }
+
+            // Teamname = playername
+            // if team name exist, we have to choose another name (playername + number)
+            int i = 1;
+            std::stringstream teamName;
+            teamName << GetName();
+            do
+            {
+                if (sArenaTeamMgr->GetArenaTeamByName(teamName.str())) // teamname exist, so choose another name
+                {
+                    teamName.str(std::string());
+                    teamName << GetName() << i++;
+                }
+                else
+                    break;
+            } while (i < 100);
+
+            // Create arena team
+            ArenaTeam* arenaTeam = new ArenaTeam();
+            if (!arenaTeam->Create(GetGUID(), ARENA_TEAM_5v5, teamName.str(), 0xFF4588D2, 58, 0xFF47FFE2, 4, 0xFF94EEFF, true))
+            {
+                delete arenaTeam;
+                CLOSE_GOSSIP_MENU();
+                return true;
+            }
+            sArenaTeamMgr->AddArenaTeam(arenaTeam);
+            arenaTeam->AddMember(GetGUID());
+            break;
+        }
+        case 2: // Join 3 v 3 solo queue
+        {
+            sSoloQueueMgr->AddPlayer(this);
+            break;
+        }
+        case 3: // Leave Queue
+        {
+            if (sSoloQueueMgr->RemovePlayer(GetGUID()))
+            {
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    WorldPacket data;
+                    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, GetBattlegroundQueueIndex(BATTLEGROUND_QUEUE_3v3_SOLO), STATUS_NONE, 0, 0, 0, 0);
+                    GetSession()->SendPacket(&data);
+                }
+                RemoveBattlegroundQueueId(BATTLEGROUND_QUEUE_3v3_SOLO);
+            }
+            else if (InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_1v1_SOLO))
+            {
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    WorldPacket data;
+                    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, GetBattlegroundQueueIndex(BATTLEGROUND_QUEUE_1v1_SOLO), STATUS_NONE, 0, 0, 0, 0);
+                    GetSession()->SendPacket(&data);
+                }
+
+                BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(BATTLEGROUND_QUEUE_1v1_SOLO);
+                queue.RemovePlayer(GetGUID(), true);
+                RemoveBattlegroundQueueId(BATTLEGROUND_QUEUE_1v1_SOLO);
+            }
+            else if (InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_3v3_SOLO))
+            {
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    WorldPacket data;
+                    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, GetBattlegroundQueueIndex(BATTLEGROUND_QUEUE_3v3_SOLO), STATUS_NONE, 0, 0, 0, 0);
+                    GetSession()->SendPacket(&data);
+                }
+
+                BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(BATTLEGROUND_QUEUE_3v3_SOLO);
+                queue.RemovePlayer(GetGUID(), true);
+                RemoveBattlegroundQueueId(BATTLEGROUND_QUEUE_3v3_SOLO);
+            }
+            ChatHandler(GetSession()).SendSysMessage("Vous n'etes pas inscrit a la file d'attente en solo!");
+            break;
+        }
+        case 20:
+        {
+            if (sSoloQueueMgr->CheckRequirements(this))
+                Join1v1Queue();
+            break;
+        }
+        case 21:
+        {
+            CLOSE_GOSSIP_MENU();
+            return true;
+        }
+    }
+    return true;
+}
+
+void Player::Join1v1Queue()
+{
+    // ignore if we already in BG or BG queue
+    if (InBattleground() || InBattlegroundQueue())
+        return;
+
+    uint64 guid = GetGUID();
+    uint8 arenaslot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
+    uint32 matchmakerRating = GetMMR(arenaslot);
+
+    if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+    {
+        BattlegroundTypeId bgTypeId = bg->GetTypeID();
+        BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, ARENA_TYPE_1v1_SOLO);
+        PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bg->GetMapId(), getLevel());
+        if (!bracketEntry)
+            return;
+
+        // check if already in queue
+        if (GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
+            return;
+
+        // check if has free queue slots
+        if (!HasFreeBattlegroundQueueId())
+            return;
+
+        uint32 ateamId = 0;
+        BattlegroundQueue &bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
+        bg->SetRated(false);
+
+        GroupQueueInfo* ginfo = bgQueue.AddGroup(this, NULL, bgTypeId, bracketEntry, ARENA_TYPE_1v1_SOLO, false, false, 0, matchmakerRating, ateamId);
+        uint32 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
+        uint32 queueSlot = AddBattlegroundQueueId(bgQueueTypeId);
+
+        WorldPacket data;
+        // send status packet (in queue)
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_WAIT_QUEUE, avgTime, ginfo->JoinTime, ARENA_TYPE_1v1_SOLO, 0);
+        GetSession()->SendPacket(&data);
+        sBattlegroundMgr->ScheduleQueueUpdate(0, ARENA_TYPE_1v1_SOLO, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+    }
+}

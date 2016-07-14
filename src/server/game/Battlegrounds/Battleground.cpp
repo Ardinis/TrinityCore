@@ -519,7 +519,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                 for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                     if (Player* player = ObjectAccessor::FindPlayer(itr->first))
                         ChatHandler(player->GetSession()).PSendSysMessage("The fight was interrupted! Not all players have entered the arena...");
-                EndSoloQueueArena(BG_TEAM_NEUTRAL);
+                EndBattleground(BG_TEAM_NEUTRAL);
                 return;
             }
 

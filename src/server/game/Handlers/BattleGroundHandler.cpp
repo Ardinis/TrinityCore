@@ -367,7 +367,48 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
     GroupQueueInfo ginfo;
     if (!bgQueue.GetPlayerGroupInfoData(_player->GetGUID(), &ginfo))
     {
-        sLog->outError("BattlegroundHandler: itrplayerstatus not found.");
+        Player *player = _player;
+        if (sSoloQueueMgr->IsPlayerInSoloQueue(player))
+        {
+            if (sSoloQueueMgr->RemovePlayer(player->GetGUID()))
+            {
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    WorldPacket data;
+                    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, player->GetBattlegroundQueueIndex(BATTLEGROUND_QUEUE_3v3_SOLO), STATUS_NONE, 0, 0, 0, 0);
+                    player->GetSession()->SendPacket(&data);
+                }
+                player->RemoveBattlegroundQueueId(BATTLEGROUND_QUEUE_3v3_SOLO);
+            }
+            else if (player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_1v1_SOLO))
+            {
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    WorldPacket data;
+                    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, player->GetBattlegroundQueueIndex(BATTLEGROUND_QUEUE_1v1_SOLO), STATUS_NONE, 0, 0, 0, 0);
+                    player->GetSession()->SendPacket(&data);
+                }
+
+                BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(BATTLEGROUND_QUEUE_1v1_SOLO);
+                queue.RemovePlayer(player->GetGUID(), true);
+                player->RemoveBattlegroundQueueId(BATTLEGROUND_QUEUE_1v1_SOLO);
+            }
+            else if (player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_3v3_SOLO))
+            {
+                if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
+                {
+                    WorldPacket data;
+                    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, player->GetBattlegroundQueueIndex(BATTLEGROUND_QUEUE_3v3_SOLO), STATUS_NONE, 0, 0, 0, 0);
+                    player->GetSession()->SendPacket(&data);
+                }
+
+                BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(BATTLEGROUND_QUEUE_3v3_SOLO);
+                queue.RemovePlayer(player->GetGUID(), true);
+                player->RemoveBattlegroundQueueId(BATTLEGROUND_QUEUE_3v3_SOLO);
+            }
+        }
+        else
+            sLog->outError("BattlegroundHandler: itrplayerstatus not found.");
         return;
     }
     // if action == 1, then instanceId is required

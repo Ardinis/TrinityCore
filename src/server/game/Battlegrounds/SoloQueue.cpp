@@ -149,8 +149,10 @@ void SoloQueue::Update(uint32 diff)
     }
 
     uint32 maxRatingDiff = sBattlegroundMgr->GetMaxRatingDifference();
-    for (std::multimap<uint32, SoloQueueInfo*>::iterator itr = queuedHealers.begin(); itr != queuedHealers.end();)
+    for (std::multimap<uint32, SoloQueueInfo*>::iterator itr3 = queuedHealers.begin(); itr3 != queuedHealers.end();)
     {
+        std::multimap<uint32, SoloQueueInfo*>::iterator itr = itr3;
+        itr3++;
         std::list<SoloQueueInfo*> playerList;
         uint32 completeRange = maxRatingDiff + itr->second->ratingRange;
         uint32 minMMRHeal = std::max(0, int32(itr->second->ArenaMatchmakerRating - completeRange));
@@ -178,7 +180,7 @@ void SoloQueue::Update(uint32 diff)
 
         playerList.push_back(itr->second);
 
-        if (playerList.size() == 3)
+        if (playerList.size() == 3 || sBattlegroundMgr->isArenaTesting())
         {
             if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
             {
@@ -203,12 +205,9 @@ void SoloQueue::Update(uint32 diff)
                     allPlayersInQueue.erase(itr->second->playerGuid);
                     delete itr->second;
                     queuedHealers.erase(itr);
-                    itr = queuedHealers.begin();
-                    continue;
                 }
             }
         }
-        itr++;
     }
 }
 

@@ -38,7 +38,7 @@ public:
         lastFetchQueueList = 0;
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) override
+    bool OnGossipHello(Player* player, Creature* creature)
     {
         if (!sWorld->getBoolConfig(CONFIG_ARENA_SOLO_QUEUE_ENABLED))
         {
@@ -107,7 +107,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
 

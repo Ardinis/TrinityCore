@@ -415,84 +415,81 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recv_data)
         }
     }
     uint32 queueSlot = _player->GetBattlegroundQueueIndex(bgQueueTypeId);
+    std::cout << action << std::endl;
     WorldPacket data;
-    switch (action)
+    if (action)
     {
-        case 1:                                         // port to battleground
-            if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
-                return;                                 // cheating?
+        if (!_player->IsInvitedForBattlegroundQueueType(bgQueueTypeId))
+            return;                                 // cheating?
 
-            if (!_player->InBattleground())
-                _player->SetBattlegroundEntryPoint();
+        if (!_player->InBattleground())
+            _player->SetBattlegroundEntryPoint();
 
-            // resurrect the player
-            if (!_player->isAlive())
+        // resurrect the player
+        if (!_player->isAlive())
+        {
+            _player->ResurrectPlayer(1.0f);
+            _player->SpawnCorpseBones();
+        }
+        // stop taxi flight at port
+        if (_player->isInFlight())
+        {
+            _player->GetMotionMaster()->MovementExpired();
+            _player->CleanupAfterTaxiFlight();
+        }
+
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime(), bg->GetArenaType());
+        _player->GetSession()->SendPacket(&data);
+        // remove battleground queue status from BGmgr
+        bgQueue.RemovePlayer(_player->GetGUID(), false);
+        // this is still needed here if battleground "jumping" shouldn't add deserter debuff
+        // also this is required to prevent stuck at old battleground after SetBattlegroundId set to new
+        if (Battleground* currentBg = _player->GetBattleground())
+            currentBg->RemovePlayerAtLeave(_player->GetGUID(), false, true);
+
+        // set the destination instance id
+        _player->SetBattlegroundId(bg->GetInstanceID(), bgTypeId);
+        // set the destination team
+        _player->SetCrossFaction(ginfo.xfaction);
+        _player->SetBGTeam(ginfo.Team);
+        // bg->HandleBeforeTeleportToBattleground(_player);
+        sBattlegroundMgr->SendToBattleground(_player, ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
+        // add only in HandleMoveWorldPortAck()
+        // bg->AddPlayer(_player, team);
+        sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: player %s (%u) joined battle for bg %u, bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetInstanceID(), bg->GetTypeID(), bgQueueTypeId);
+    }
+    else
+    {
+        // if player leaves rated arena match before match start, it is counted as he played but he lost
+        if (ginfo.IsRated && ginfo.IsInvitedToBGInstanceGUID)
+        {
+            uint32 teamId = ginfo.isSoloQueueGroup ? Player::GetArenaTeamIdFromDB(_player->GetGUID(), ARENA_TEAM_5v5) : ginfo.Team;
+            ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(teamId);
+            if (at)
             {
-                _player->ResurrectPlayer(1.0f);
-                _player->SpawnCorpseBones();
-            }
-            // stop taxi flight at port
-            if (_player->isInFlight())
-            {
-                _player->GetMotionMaster()->MovementExpired();
-                _player->CleanupAfterTaxiFlight();
-            }
-
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime(), bg->GetArenaType());
-            _player->GetSession()->SendPacket(&data);
-            // remove battleground queue status from BGmgr
-            bgQueue.RemovePlayer(_player->GetGUID(), false);
-            // this is still needed here if battleground "jumping" shouldn't add deserter debuff
-            // also this is required to prevent stuck at old battleground after SetBattlegroundId set to new
-            if (Battleground* currentBg = _player->GetBattleground())
-                currentBg->RemovePlayerAtLeave(_player->GetGUID(), false, true);
-
-            // set the destination instance id
-            _player->SetBattlegroundId(bg->GetInstanceID(), bgTypeId);
-            // set the destination team
-            _player->SetCrossFaction(ginfo.xfaction);
-            _player->SetBGTeam(ginfo.Team);
-            // bg->HandleBeforeTeleportToBattleground(_player);
-            sBattlegroundMgr->SendToBattleground(_player, ginfo.IsInvitedToBGInstanceGUID, bgTypeId);
-            // add only in HandleMoveWorldPortAck()
-            // bg->AddPlayer(_player, team);
-            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: player %s (%u) joined battle for bg %u, bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetInstanceID(), bg->GetTypeID(), bgQueueTypeId);
-            break;
-        case 0:                                         // leave queue
-            // if player leaves rated arena match before match start, it is counted as he played but he lost
-            if (ginfo.IsRated && ginfo.IsInvitedToBGInstanceGUID)
-            {
-                uint32 teamId = ginfo.isSoloQueueGroup ? Player::GetArenaTeamIdFromDB(_player->GetGUID(), ARENA_TEAM_5v5) : ginfo.Team;
-                ArenaTeam* at = sArenaTeamMgr->GetArenaTeamById(teamId);
-                if (at)
-                {
-                    sLog->outDebug(LOG_FILTER_BATTLEGROUND, "UPDATING memberLost's personal arena rating for %u by opponents rating: %u, because he has left queue!", GUID_LOPART(_player->GetGUID()), ginfo.OpponentsTeamRating);
-                    at->MemberLost(_player, ginfo.OpponentsMatchmakerRating);
-                    if (ginfo.isSoloQueueGroup)
-                    {
-                        int32 dummy = 0;
-                        at->LostAgainst(ginfo.ArenaMatchmakerRating, ginfo.OpponentsMatchmakerRating, dummy);
-                    }
-                    at->SaveToDB();
-                    at->NotifyStatsChanged();
-                }
-
+                sLog->outDebug(LOG_FILTER_BATTLEGROUND, "UPDATING memberLost's personal arena rating for %u by opponents rating: %u, because he has left queue!", GUID_LOPART(_player->GetGUID()), ginfo.OpponentsTeamRating);
+                at->MemberLost(_player, ginfo.OpponentsMatchmakerRating);
                 if (ginfo.isSoloQueueGroup)
-                    _player->CastCustomSpell(26013, SPELLVALUE_BASE_POINT0, 1, _player, true);
+                {
+                    int32 dummy = 0;
+                    at->LostAgainst(ginfo.ArenaMatchmakerRating, ginfo.OpponentsMatchmakerRating, dummy);
+                }
+                at->SaveToDB();
+                at->NotifyStatsChanged();
             }
 
-            _player->RemoveBattlegroundQueueId(bgQueueTypeId);  // must be called this way, because if you move this call to queue->removeplayer, it causes bugs
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_NONE, 0, 0, 0);
-            bgQueue.RemovePlayer(_player->GetGUID(), true);
-            // player left queue, we should update it - do not update Arena Queue
-            if (!ginfo.ArenaType)
-                sBattlegroundMgr->ScheduleQueueUpdate(ginfo.ArenaMatchmakerRating, ginfo.ArenaType, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
-            SendPacket(&data);
-            sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: player %s (%u) left queue for bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetTypeID(), bgQueueTypeId);
-            break;
-        default:
-            sLog->outError("Battleground port: unknown action %u", action);
-            break;
+            if (ginfo.isSoloQueueGroup)
+                _player->CastCustomSpell(26013, SPELLVALUE_BASE_POINT0, 1, _player, true);
+        }
+
+        _player->RemoveBattlegroundQueueId(bgQueueTypeId);  // must be called this way, because if you move this call to queue->removeplayer, it causes bugs
+        sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, queueSlot, STATUS_NONE, 0, 0, 0);
+        bgQueue.RemovePlayer(_player->GetGUID(), true);
+        // player left queue, we should update it - do not update Arena Queue
+        if (!ginfo.ArenaType)
+            sBattlegroundMgr->ScheduleQueueUpdate(ginfo.ArenaMatchmakerRating, ginfo.ArenaType, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
+        SendPacket(&data);
+        sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Battleground: player %s (%u) left queue for bgtype %u, queue type %u.", _player->GetName(), _player->GetGUIDLow(), bg->GetTypeID(), bgQueueTypeId);
     }
 }
 

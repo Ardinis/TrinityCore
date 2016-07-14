@@ -260,6 +260,10 @@ GroupQueueInfo* BattlegroundQueue::AddSoloQueueGroup(std::list<SoloQueueInfo*> p
     ginfo->Team = team;
     ginfo->isSoloQueueGroup = true;
     ginfo->Players.clear();
+    ginfo->ratingRange               = 0;
+    ginfo->ratingRangeIncreaseCounter= 0;
+    ginfo->xfaction		     = false;
+    ginfo->xfaction_allowed	     = true;
 
     uint32 index = 0;
     if (ginfo->Team == HORDE)
@@ -280,6 +284,7 @@ GroupQueueInfo* BattlegroundQueue::AddSoloQueueGroup(std::list<SoloQueueInfo*> p
     }
 
     sLog->outDebug(LOG_FILTER_BATTLEGROUND, "Adding Solo Queue Group to BattlegroundQueue bgTypeId : 6, bracket_id : %u, index : %u", bracketId, index);
+    sLog->outError("Adding Solo Queue Group to BattlegroundQueue bgTypeId : 6, bracket_id : %u, index : %u", bracketId, index);
 
     //add GroupInfo to m_QueuedGroups
     {

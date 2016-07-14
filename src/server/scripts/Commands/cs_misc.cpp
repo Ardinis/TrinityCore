@@ -279,6 +279,8 @@ class example_PlayerGossip : public PlayerScript
 
     void OnGossipSelect(Player* player, uint32 menu_id, uint32 /*sender*/, uint32 action) override
     {
+        return; // disabled for now
+
         if (menu_id != MENU_ID_PVE_SEASONS) // Not the menu coded here? stop.
             return;
 

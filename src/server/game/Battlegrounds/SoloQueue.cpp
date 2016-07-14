@@ -86,6 +86,7 @@ void SoloQueue::AddPlayer(Player* player, bool reQueue)
                     break;
             }
 
+            fetchQueueList();
             if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA))
             {
                 bg->SetRated(true);
@@ -113,6 +114,7 @@ bool SoloQueue::RemovePlayer(uint64 playerGuid)
         {
             delete itr->second;
             queuedRanges.erase(itr);
+            fetchQueueList();
             return true;
         }
 
@@ -121,6 +123,7 @@ bool SoloQueue::RemovePlayer(uint64 playerGuid)
         {
             delete itr->second;
             queuedHealers.erase(itr);
+            fetchQueueList();
             return true;
         }
 
@@ -129,6 +132,7 @@ bool SoloQueue::RemovePlayer(uint64 playerGuid)
         {
             delete itr->second;
             queuedMelees.erase(itr);
+            fetchQueueList();
             return true;
         }
     return false;

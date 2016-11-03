@@ -17,8 +17,6 @@ RUN mkdir -p /src/_build
 WORKDIR /src/_build
 
 RUN cmake .. -Wno-dev -DPREFIX=/tc \
-#    -DCMAKE_C_COMPILER=/usr/bin/gcc-4.8 \
-#    -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.8 \
     -DOPENSSL_SSL_LIBRARIES=/usr/lib/x86_64-linux-gnu/libssl.so \
     -DOPENSSL_CRYPTO_LIBRARIES=/usr/lib/x86_64-linux-gnu/libcrypto.so \
     -DREADLINE_LIBRARY=/lib/x86_64-linux-gnu/libreadline.so.5 \

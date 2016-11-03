@@ -30,8 +30,8 @@ RUN cmake .. -Wno-dev -DPREFIX=/tc \
     -DSCRIPTS=1 \
     -DNOJEM=0 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS="-std=c++11 -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -msse3 -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing -frename-registers -march=native" \
-    -DCMAKE_C_FLAGS="-m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -msse3 -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing -frename-registers -march=native"
+    -DCMAKE_CXX_FLAGS="-std=c++11 -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -pipe -fno-strict-aliasing" \
+    -DCMAKE_C_FLAGS="-m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -pipe -fno-strict-aliasing"
 RUN make && make install && mkdir -p /tc/logs
 
 WORKDIR /

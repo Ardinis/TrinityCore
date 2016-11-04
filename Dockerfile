@@ -47,4 +47,4 @@ RUN apt-get install -y libmysqlclient18 libssl1.0.0 libreadline5 zlib1g \
 WORKDIR /tc
 ENTRYPOINT ["/tc/bin/worldserver"]
 
-EXPOSE 8085
+EXPOSE 8085 7878

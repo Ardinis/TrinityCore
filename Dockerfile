@@ -32,7 +32,7 @@ RUN cmake .. -Wno-dev -DPREFIX=/tc \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_FLAGS="-std=c++11 -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -pipe -fno-strict-aliasing" \
     -DCMAKE_C_FLAGS="-m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -pipe -fno-strict-aliasing"
-RUN make && make install && mkdir -p /tc/logs
+RUN make install
 
 WORKDIR /
 RUN rm -rf /src; \
@@ -43,6 +43,9 @@ RUN rm -rf /src; \
 
 RUN apt-get install -y libmysqlclient18 libssl1.0.0 libreadline5 zlib1g \
     libncurses5 libbz2-1.0 libpthread-workqueue0 libace-6.2.8
+
+RUN mkdir -p /tc/logs && mkdir -p /tc/coredumps
+RUN echo kernel.core_pattern=/tc/coredumps/%u.%e.%t.bin > /etc/sysctl.d/10-core_pattern.conf
 
 WORKDIR /tc
 ENTRYPOINT ["/tc/bin/worldserver"]

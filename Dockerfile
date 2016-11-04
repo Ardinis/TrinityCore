@@ -36,6 +36,8 @@ RUN make install
 
 WORKDIR /
 RUN rm -rf /src; \
+    rm -f /tc/etc/*; \
+    rm -f /tc/bin/authserver*; \
     apt-get remove -fy --purge git-core build-essential gcc g++ \
     pkg-config libssl-dev libreadline-gplv2-dev zlib1g-dev libncurses5-dev \
     libbz2-dev libpthread-workqueue-dev libace-dev wget libace-dev; \
@@ -44,8 +46,7 @@ RUN rm -rf /src; \
 RUN apt-get install -y libmysqlclient18 libssl1.0.0 libreadline5 zlib1g \
     libncurses5 libbz2-1.0 libpthread-workqueue0 libace-6.2.8
 
-RUN mkdir -p /tc/logs && mkdir -p /tc/coredumps
-RUN echo kernel.core_pattern=/tc/coredumps/%u.%e.%t.bin > /etc/sysctl.d/10-core_pattern.conf
+RUN mkdir -p /tc/logs && mkdir -p /tc/data && mkdir -p /var/core
 
 WORKDIR /tc
 ENTRYPOINT ["/tc/bin/worldserver"]

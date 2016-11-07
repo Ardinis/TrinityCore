@@ -6,11 +6,17 @@ RUN apt-get update; \
     apt-get dist-upgrade -y; \
     apt-get install -y cmake make git-core gcc g++ pkg-config \
     libmysqlclient-dev libssl-dev libreadline-gplv2-dev zlib1g-dev \
-    libncurses5-dev libbz2-dev libpthread-workqueue-dev wget libace-dev \
-    libace-6.2.8
+    libncurses5-dev libbz2-dev libpthread-workqueue-dev lbzip2 wget
 
 RUN ln -s /lib/x86_64-linux-gnu/ /usr/lib64; \
     ln -s /lib/x86_64-linux-gnu/librt.so.1 /lib64/
+
+RUN wget http://download.dre.vanderbilt.edu/previous_versions/ACE-6.0.3.tar.bz2
+RUN tar -xf ACE-6.0.3.tar.bz2 && mkdir /ACE_wrappers/_build
+
+WORKDIR /ACE_wrappers/_build
+RUN ../configure --enable-ssl=no
+RUN make install
 
 RUN mkdir -p /src/_build
 
@@ -36,15 +42,16 @@ RUN make install
 
 WORKDIR /
 RUN rm -rf /src; \
+    rm -rf /ACE_wrappers; \
     rm -f /tc/etc/*; \
     rm -f /tc/bin/authserver*; \
     apt-get remove -fy --purge git-core build-essential gcc g++ \
     pkg-config libssl-dev libreadline-gplv2-dev zlib1g-dev libncurses5-dev \
-    libbz2-dev libpthread-workqueue-dev libace-dev wget libace-dev; \
-    apt-get autoremove -fy --purge
+    libbz2-dev libpthread-workqueue-dev libace-dev lbzip2 wget; \
+    apt-get autoremove -y --purge
 
 RUN apt-get install -y libmysqlclient18 libssl1.0.0 libreadline5 zlib1g \
-    libncurses5 libbz2-1.0 libpthread-workqueue0 libace-6.2.8
+    libncurses5 libbz2-1.0 libpthread-workqueue0
 
 RUN mkdir -p /tc/logs && mkdir -p /tc/data && mkdir -p /var/core
 

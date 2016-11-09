@@ -16,7 +16,7 @@ RUN tar -xf ACE-6.0.3.tar.bz2 && mkdir /ACE_wrappers/_build
 
 WORKDIR /ACE_wrappers/_build
 RUN ../configure --enable-ssl=no
-RUN make -j8 && make install
+RUN make && make install
 RUN rm -rf /ACE_wrappers
 
 RUN mkdir -p /src/_build
@@ -41,7 +41,7 @@ RUN cmake .. -Wno-dev -DPREFIX=/tc \
     -DCMAKE_CXX_FLAGS="-std=c++11 -g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing" \
     -DCMAKE_C_FLAGS="-g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing"
 
-RUN make -j8 && make install
+RUN make && make install
 
 WORKDIR /
 RUN rm -rf /src; \

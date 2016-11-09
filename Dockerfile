@@ -16,7 +16,8 @@ RUN tar -xf ACE-6.0.3.tar.bz2 && mkdir /ACE_wrappers/_build
 
 WORKDIR /ACE_wrappers/_build
 RUN ../configure --enable-ssl=no
-RUN make install
+RUN make -j8 && make install
+RUN rm -rf /ACE_wrappers
 
 RUN mkdir -p /src/_build
 
@@ -32,17 +33,18 @@ RUN cmake .. -Wno-dev -DPREFIX=/tc \
     -DWITH_COREDEBUG=0 \
     -DUSE_COREPCH=1 \
     -DUSE_SCRIPTPCH=1 \
+    -DNOJEM=1 \
     -DTOOLS=0 \
     -DSCRIPTS=1 \
     -DNOJEM=0 \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS="-std=c++11 -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -pipe -fno-strict-aliasing" \
-    -DCMAKE_C_FLAGS="-m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -pipe -fno-strict-aliasing"
-RUN make install
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_CXX_FLAGS="-std=c++11 -g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing" \
+    -DCMAKE_C_FLAGS="-g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing"
+
+RUN make -j8 && make install
 
 WORKDIR /
 RUN rm -rf /src; \
-    rm -rf /ACE_wrappers; \
     rm -f /tc/etc/*; \
     rm -f /tc/bin/authserver*; \
     apt-get remove -fy --purge git-core build-essential gcc g++ \

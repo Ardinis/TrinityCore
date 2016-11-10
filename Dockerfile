@@ -36,14 +36,14 @@ RUN apt-get update \
         -DCMAKE_CXX_FLAGS="-std=c++11 -g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing" \
         -DCMAKE_C_FLAGS="-g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing" \
     && make && make install \
-    && cd /
+    && cd / \
     && rm -rf /src \
     && rm -f /tc/etc/* \
     && rm -f /tc/bin/authserver* \
     && apt-get remove -fy --purge git-core build-essential gcc g++ \
         pkg-config libssl-dev libreadline-gplv2-dev zlib1g-dev libncurses5-dev \
-        libbz2-dev libpthread-workqueue-dev libace-dev lbzip2 wget; \
-        apt-get autoremove -y --purge
+        libbz2-dev libpthread-workqueue-dev libace-dev lbzip2 wget \
+    && apt-get autoremove -y --purge
 
 RUN apt-get install -y libmysqlclient18 libssl1.0.0 libreadline5 zlib1g \
     libncurses5 libbz2-1.0 libpthread-workqueue0
@@ -53,5 +53,5 @@ RUN mkdir -p /tc/logs && mkdir -p /tc/data && mkdir -p /var/core
 WORKDIR /tc/bin
 
 EXPOSE 8085 7878
-VOLUME ["/tc/logs", "/tc/data", "/var/core"]
+VOLUME ["/tc/logs", "/tc/data", "/tc/etc"]
 CMD ["/tc/bin/worldserver"]

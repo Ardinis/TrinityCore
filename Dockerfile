@@ -4,7 +4,7 @@ COPY . /src/
 
 RUN apt-get update \
     && apt-get dist-upgrade -y \
-    && apt-get install -y cmake make git-core gcc g++ pkg-config \
+    && apt-get install -y cmake make gcc g++ pkg-config \
         libmysqlclient-dev libssl-dev libreadline-gplv2-dev zlib1g-dev \
         libncurses5-dev libbz2-dev libpthread-workqueue-dev lbzip2 wget \
     && ln -s /lib/x86_64-linux-gnu/ /usr/lib64 \
@@ -38,11 +38,11 @@ RUN apt-get update \
     && make && make install \
     && cd / \
     && rm -rf /src \
-    && rm -f /tc/etc/* \
-    && rm -f /tc/bin/authserver* \
-    && apt-get remove -fy --purge git-core build-essential gcc g++ \
-        pkg-config libssl-dev libreadline-gplv2-dev zlib1g-dev libncurses5-dev \
-        libbz2-dev libpthread-workqueue-dev libace-dev lbzip2 wget \
+    && rm -rf /tc/etc/* \
+    && rm -rf /tc/bin/authserver* \
+    && apt-get remove -y --purge cmake make gcc g++ pkg-config libssl-dev \
+        libmysqlclient-dev libreadline-gplv2-dev zlib1g-dev libncurses5-dev \
+        libbz2-dev libpthread-workqueue-dev lbzip2 wget \
     && apt-get autoremove -y --purge
 
 RUN apt-get install -y libmysqlclient18 libssl1.0.0 libreadline5 zlib1g \

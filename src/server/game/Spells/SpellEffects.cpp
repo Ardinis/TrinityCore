@@ -5710,6 +5710,13 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     unitTarget->CastSpell(unitTarget, spellTarget[urand(0, 4)], true);
                     break;
                 }
+                case 57099: // Landmine Knockback Achievement Aura
+                {
+                    if (Aura* chargesAura = unitTarget->GetAura(57099))
+                        if (chargesAura->GetStackAmount() == 10)
+                            m_caster->CastSpell(unitTarget, 57064, true);
+                    break;
+                }
                 case 64142:                                 // Upper Deck - Create Foam Sword
                     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;

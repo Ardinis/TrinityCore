@@ -26295,13 +26295,40 @@ bool Player::CanTransmo(Item *oldItem, Item *newItem)
         return false;
       if (oldItem->GetTemplate()->SubClass != newItem->GetTemplate()->SubClass)
       {
-	if ((oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
-	     oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
-	     oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN) &&
-	    (newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
-	     newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
-	     newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN))
-	  return true;
+        // Can transmogrify ranged weapons
+        if ((oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN) &&
+            (newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_BOW ||
+             newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW ||
+             newItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_GUN))
+          return true;
+        // Can transmogrify melee weapons
+        if ((oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_AXE ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_MACE ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_SWORD ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_STAFF ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_EXOTIC ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_EXOTIC2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_FIST ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER) &&
+            (oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_AXE ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_MACE ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_SWORD ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_STAFF ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_EXOTIC ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_EXOTIC2 ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_FIST ||
+             oldItem->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
+          return true;
         return false;
       }
     }

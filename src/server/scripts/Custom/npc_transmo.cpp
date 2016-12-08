@@ -40,7 +40,7 @@ public:
     }
 
     player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Tout reinitaliser", GOSSIP_SENDER_TRANSMO+1, 0, "Etes-vous sure de vouloir annuler la transmogrification de tous vos items ?", 0, false);
-    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Aurevoir", GOSSIP_SENDER_TRANSMO+2, 0);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Au revoir", GOSSIP_SENDER_TRANSMO+2, 0);
     player->SEND_GOSSIP_MENU(GOSSIP_MAIN_MENU, creature->GetGUID());
     return true;
   }
@@ -70,7 +70,7 @@ public:
 	  {
 	    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Reinitialiser au skin original", GOSSIP_SENDER_TRANSMO+3, guidlow, "Etes-vous sure de vouloir retirer la transmogrification de cet item ?", 0, false);
 	    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Menu", GOSSIP_SENDER_TRANSMO+4, 0);
-	    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Aurevoir", GOSSIP_SENDER_TRANSMO+2, 0);
+	    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Au revoir", GOSSIP_SENDER_TRANSMO+2, 0);
 	    SendRemoveTransmoNpcText(player, newSkinItem->GetTemplate());
 	    player->SEND_GOSSIP_MENU(GOSSIP_REMOVE_TRANSMO, creature->GetGUID());
 	    return true;
@@ -134,7 +134,7 @@ public:
 	}
 
 	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<- Menu", GOSSIP_SENDER_TRANSMO+4, 0);
-	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Aurevoir", GOSSIP_SENDER_TRANSMO+2, 0);
+	player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Au revoir", GOSSIP_SENDER_TRANSMO+2, 0);
 	if (itemcount == 0)
 	{
 	  player->SEND_GOSSIP_MENU(GOSSIP_NO_ITEM_TO_TRANSMO, creature->GetGUID());

@@ -346,6 +346,7 @@ enum EncounterActions
     ACTION_SUMMON_TERENAS       = 6,
     ACTION_FINISH_OUTRO         = 7,
     ACTION_TELEPORT_BACK        = 8,
+    ACTION_HARVESTED_SOUL       = 202,
 };
 
 enum MiscData
@@ -553,7 +554,8 @@ class boss_the_lich_king : public CreatureScript
                 _vileSpiritExplosions = 0;
                 SetEquipmentSlots(true);
                 mui_dead = 30000;
-                mui_sumVile = 10000;
+                mui_sumVile = 0;
+                _fmDeath = 0;
                 _harvestGUID.clear();
                 special = false;
                 transition = false;
@@ -671,6 +673,16 @@ class boss_the_lich_king : public CreatureScript
                         summons.DoAction(ACTION_TELEPORT_BACK, pred);
                         if (!IsHeroic())
                             Talk(SAY_LK_FROSTMOURNE_ESCAPE);
+                        for (int i = 0; i < _fmDeath; i++)
+                        {
+                            me->AddAura(SPELL_HARVESTED_SOUL, me);
+                        }
+                        _fmDeath = 0;
+                        break;
+                    }
+                    case ACTION_HARVESTED_SOUL:
+                    {
+                        _fmDeath++;
                         break;
                     }
                     default:
@@ -851,8 +863,11 @@ class boss_the_lich_king : public CreatureScript
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
             {
+
                 if (spell->Id == SPELL_HARVESTED_SOUL && me->isInCombat() && !IsHeroic())
+                {
                     Talk(SAY_LK_FROSTMOURNE_KILL);
+                }
             }
 
             void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
@@ -1205,6 +1220,7 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_FROSTMOURNE_HEROIC:
                             if (TempSummon* terenas = me->GetMap()->SummonCreature(NPC_TERENAS_MENETHIL_FROSTMOURNE_H, TerenasSpawnHeroic, NULL, 50000))
                             {
+                                mui_sumVile = 5000;
                                 terenas->AI()->DoAction(ACTION_FROSTMOURNE_INTRO);
                                 std::list<Creature*> triggers;
                                 GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
@@ -1389,6 +1405,7 @@ class boss_the_lich_king : public CreatureScript
 
             uint32 _necroticPlagueStack;
             uint32 _vileSpiritExplosions;
+            uint32 _fmDeath;
             uint32 mui_dead;
             uint32 mui_sumVile;
             std::list<uint64 >  _harvestGUID;
@@ -3335,7 +3352,11 @@ class spell_the_lich_king_harvest_soul : public SpellScriptLoader
             {
                 // m_originalCaster to allow stacking from different casters, meh
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
-                    GetTarget()->CastSpell((Unit*)NULL, SPELL_HARVESTED_SOUL, true, NULL, NULL, GetTarget()->GetInstanceScript()->GetData64(DATA_THE_LICH_KING));
+                {
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*GetCaster(), GetTarget()->GetInstanceScript()->GetData64(DATA_THE_LICH_KING)))
+                        lichKing->AI()->DoAction(ACTION_HARVESTED_SOUL);
+                    //                    GetTarget()->CastSpell((Unit*)NULL, SPELL_HARVESTED_SOUL, true, NULL, NULL, GetTarget()->GetInstanceScript()->GetData64(DATA_THE_LICH_KING));
+                }
             }
 
             void Register()
@@ -3478,7 +3499,11 @@ class spell_the_lich_king_in_frostmourne_room : public SpellScriptLoader
             {
                 // m_originalCaster to allow stacking from different casters, meh
                 if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
-                    GetTarget()->CastSpell((Unit*)NULL, SPELL_HARVESTED_SOUL, true, NULL, NULL, GetTarget()->GetInstanceScript()->GetData64(DATA_THE_LICH_KING));
+                {
+                    if (Creature* lichKing = ObjectAccessor::GetCreature(*GetCaster(), GetTarget()->GetInstanceScript()->GetData64(DATA_THE_LICH_KING)))
+                        lichKing->AI()->DoAction(ACTION_HARVESTED_SOUL);
+                    //                    GetTarget()->CastSpell((Unit*)NULL, SPELL_HARVESTED_SOUL, true, NULL, NULL, GetTarget()->GetInstanceScript()->GetData64(DATA_THE_LICH_KING));
+                }
             }
 
             void Register()

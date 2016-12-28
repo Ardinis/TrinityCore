@@ -784,7 +784,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     ChatHandler chH = ChatHandler(pCurrChar);
 
     // "GetAccountId() == db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
-    if (!pCurrChar->LoadFromDB(GUID_LOPART(playerGuid), holder))
+    if (!pCurrChar->LoadFromDB(GUID_LOPART(playerGuid), holder) || !pCurrChar->FindMap())
     {
         SetPlayer(NULL);
         KickPlayer();                                       // disconnect client, player no set to session and it will not deleted or saved at kick
@@ -913,7 +913,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
+    if (!pCurrChar->FindMap() || !pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
     {
         AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)

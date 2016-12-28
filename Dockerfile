@@ -35,7 +35,7 @@ RUN apt-get update \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_CXX_FLAGS="-std=c++11 -g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing" \
         -DCMAKE_C_FLAGS="-g -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -pipe -fno-strength-reduce -fno-delete-null-pointer-checks -fno-strict-aliasing" \
-    && make && make install \
+    && make -j8 && make install \
     && cd / \
     && rm -rf /src \
     && rm -rf /tc/etc/* \

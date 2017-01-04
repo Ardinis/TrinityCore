@@ -376,6 +376,9 @@ class boss_lady_deathwhisper : public CreatureScript
                         if (Creature* temp = ObjectAccessor::GetCreature(*me, *itr))
                             if (temp->AI())
                                 temp->AI()->DoAction(ACTION_PHASE_2);
+
+                    DoResetThreat();
+
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(6000, 9000), 0, PHASE_TWO);
@@ -403,7 +406,8 @@ class boss_lady_deathwhisper : public CreatureScript
                     target = ObjectAccessor::GetUnit(*me, _nextVengefulShadeTargetGUID);   // Vengeful Shade
                     _nextVengefulShadeTargetGUID = 0;
                 }
-                else
+
+                if (target == NULL || !target->isAlive())
                     target = SelectTarget(SELECT_TARGET_RANDOM);                        // Wave adds
 
                 summon->AI()->AttackStart(target);                                      // CAN be NULL

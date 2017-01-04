@@ -34,7 +34,7 @@
 
 enum TitleDistribution
 {
-    CURRENT_SEASON = 2,
+    CURRENT_SEASON = 3,
 
     RANK_ONE_CUTOFF          = 1,
     V2_GLADIATOR_CUTOFF      = 4,

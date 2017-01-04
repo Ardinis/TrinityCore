@@ -358,14 +358,14 @@ int Master::Run()
     Handler.register_handler(SIGTERM, &SignalTERM);
 
 #ifndef _WIN32
-    Handler.register_handler(SIGSEGV, &SignalSEGV);
-    Handler.register_handler(SIGILL, &SignalILL);
-    Handler.register_handler(SIGABRT, &SignalABRT);
-    Handler.register_handler(SIGBUS, &SignalBUS);
-    Handler.register_handler(SIGFPE, &SignalFPE);
-    Handler.register_handler(SIGUSR1, &SignalUSR1);
+    //    Handler.register_handler(SIGSEGV, &SignalSEGV);
+    //  Handler.register_handler(SIGILL, &SignalILL);
+    //    Handler.register_handler(SIGABRT, &SignalABRT);
+    //  Handler.register_handler(SIGBUS, &SignalBUS);
+    // Handler.register_handler(SIGFPE, &SignalFPE);
+    // Handler.register_handler(SIGUSR1, &SignalUSR1);
 
-    Handler.register_handler(SIGCHLD, &SignalCHLD);
+    //    Handler.register_handler(SIGCHLD, &SignalCHLD);
 #endif
 
 

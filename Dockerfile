@@ -13,7 +13,7 @@ RUN apt-get update \
     && tar -xf ACE-6.0.3.tar.bz2 && mkdir /ACE_wrappers/_build \
     && cd /ACE_wrappers/_build \
     && ../configure --enable-ssl=no \
-    && make && make install \
+    && make -j4 && make install \
     && cd / && rm -rf /ACE_wrappers \
     && rm -f ACE-6.0.3.tar.bz2 \
     && mkdir -p /src/_build \

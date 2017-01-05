@@ -6509,11 +6509,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
                 case 72854: // Unbound Plague
                 case 72855: // Unbound Plague
                 case 72856: // Unbound Plague
-                    damage *= uint32(pow(1.25f, int32(m_tickNumber)));
-                    if (target->HasAura(70953))
-                        damage *= 2.5;
-                    if (target->HasAura(73117))
-                        damage *= 2.5;
+                	damage = uint32(damage * pow(1.25f, int32(m_tickNumber)));
                     break;
                 default:
                     break;

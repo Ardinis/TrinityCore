@@ -210,7 +210,7 @@ void WorldSession::HandleLootOpcode(WorldPacket & recv_data)
     recv_data >> guid;
 
     // Check possible cheat
-    if (!_player->isAlive())
+    if (!GetPlayer()->isAlive() || !IS_CRE_OR_VEH_GUID(guid))
         return;
 
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
@@ -447,6 +447,12 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket & recv_data)
 
     if (_player->GetLootGUID() != lootguid)
         return;
+
+    if (!_player->IsInRaidWith(target) || !_player->IsInMap(target))
+    {
+        sLog->outDebug(LOG_FILTER_LOOT, "MasterLootItem: Player %s tried to give an item to ineligible player %s !", GetPlayer()->GetName(), target->GetName());
+        return;
+    }
 
     Loot* pLoot = NULL;
 
